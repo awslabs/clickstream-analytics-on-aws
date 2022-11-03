@@ -8,6 +8,9 @@
 /.github/workflows/pull-request-lint.yml linguist-generated
 /.github/workflows/upgrade.yml linguist-generated
 /.gitignore linguist-generated
+/.gitlab-ci.yml linguist-generated
+/.gitlab/ci-templates/build.yml linguist-generated
+/.gitlab/ci-templates/prlint.yml linguist-generated
 /.mergify.yml linguist-generated
 /.npmignore linguist-generated
 /.projen/** linguist-generated

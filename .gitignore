@@ -50,3 +50,6 @@ junit.xml
 /cdk.out/
 .cdk.staging/
 .parcel-cache/
+!/.gitlab-ci.yml
+!/.gitlab/ci-templates/build.yml
+!/.gitlab/ci-templates/prlint.yml
