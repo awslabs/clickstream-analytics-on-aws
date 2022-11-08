@@ -7,9 +7,18 @@ default:
 include:
   - local: .gitlab/ci-templates/build.yml
   - local: .gitlab/ci-templates/prlint.yml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: always
+    - when: never
 stages:
   - .pre
   - build
 main:
   stage: .pre
-  script: echo Start PR Validation
+  script:
+    - echo Start PR Validation
+    - env

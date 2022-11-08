@@ -12,6 +12,21 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
+    workflow: {
+      rules: [
+        {
+          if: '$CI_PIPELINE_SOURCE == "merge_request_event"',
+          when: 'always',
+        },
+        {
+          if: '$CI_COMMIT_REF_NAME == "main"',
+          when: 'always',
+        },
+        {
+          when: 'never',
+        },
+      ],
+    },
     default: {
       image: 'public.ecr.aws/docker/library/node:16-bullseye',
       tags: [
@@ -21,7 +36,10 @@ const gitlabMain = new gitlab.GitlabConfiguration(project,
     jobs: {
       main: {
         stage: '.pre',
-        script: 'echo Start PR Validation',
+        script: [
+          'echo Start PR Validation',
+          'env',
+        ],
       },
     },
   });
@@ -51,16 +69,13 @@ gitlabMain.createNestedTemplates({
     stages: [
       '.pre',
     ],
-    workflow: {
-      // name: 'Lint title of Merge Request',
-      rules: [
-        {
-          if: '\'$CI_PIPELINE_SOURCE == "merge_request_event"\'',
-        },
-      ],
-    },
     jobs: {
       lint: {
+        rules: [
+          {
+            if: '$CI_PIPELINE_SOURCE == "merge_request_event"',
+          },
+        ],
         stage: '.pre',
         script: [
           '[[ "$CI_MERGE_REQUEST_TITLE" =~ ^(feat|fix|chore|docs|tests|ci) ]] || (echo "no commit type is specified in merge request title" && exit 1)',
