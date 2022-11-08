@@ -56,12 +56,32 @@ gitlabMain.createNestedTemplates({
     jobs: {
       build: {
         stage: 'build',
-        script: [
-          'yarn install --check-files',
-          'npx projen build',
-          'git add .',
-          'git diff --staged --patch --exit-code > .repo.patch || (echo "::error::Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch." && exit 1)',
+        variables: {
+          AWS_CREDS_TARGET_ROLE: '$AWS_CREDS_TARGET_ROLE',
+          AWS_DEFAULT_REGION: 'us-east-1',
+          BUCKET_NAME: '$BUCKET_NAME',
+        },
+        before_script: [
+          'apt update',
+          'apt install -y zip',
+          'zip /tmp/source-$CI_JOB_ID.zip -r9 ./',
+          'npm install typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts',
+          'mkdir -p output/',
         ],
+        script: [
+          'npx ts-node scripts/build.ts source-$CI_JOB_ID.zip',
+          'mkdir -p build/',
+          'unzip output/build_result.zip -d build/',
+          'unzip output/test_result.zip -d build/',
+        ],
+        artifacts: {
+          reports: {
+            junit: 'build/junit.xml',
+          },
+          paths: [
+            'build/cdk.out/',
+          ],
+        },
       },
     },
   },
