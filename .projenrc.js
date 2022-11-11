@@ -87,7 +87,7 @@ gitlabMain.createNestedTemplates({
   },
   prlint: {
     stages: [
-      '.pre',
+      'build',
     ],
     jobs: {
       lint: {
