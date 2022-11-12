@@ -4,7 +4,9 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   defaultReleaseBranch: 'main',
   name: 'clickstream-analytics-on-aws',
 
-  // deps: [],                /* Runtime dependencies of this module. */
+  deps: [
+    'cdk-nag@^2.20.6',
+  ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
