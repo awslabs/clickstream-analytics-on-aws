@@ -30,6 +30,12 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
+.idea/
+.vscode/
+cdk.context.json
+.DS_Store
+docs/site/
+frontend/amplify
 !/.projenrc.js
 /test-reports/
 junit.xml

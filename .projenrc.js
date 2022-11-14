@@ -3,6 +3,14 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
   defaultReleaseBranch: 'main',
   name: 'clickstream-analytics-on-aws',
+  gitignore: [
+    '.idea/',
+    '.vscode/',
+    'cdk.context.json',
+    '.DS_Store',
+    'docs/site/',
+    'frontend/amplify',
+  ] /* Additional entries to .gitignore. */,
 
   deps: [
     'cdk-nag@^2.20.6',

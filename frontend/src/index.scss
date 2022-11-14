@@ -1,0 +1,285 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-bottom: 44px;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+[data-amplify-authenticator] [data-amplify-container] {
+  margin-top: 100px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.white {
+  color: var(--color-text-interactive-default-eg5fsa, #414d5c) !important;
+}
+
+.pt-10 {
+  padding-top: 10px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-10 {
+  margin-bottom: 20px;
+}
+
+.pb-30 {
+  padding-bottom: 30px;
+}
+
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+@use "~@cloudscape-design/design-tokens" as cs;
+
+body {
+  background: #ffffff;
+  background: var(--color-background-layout-main-sfhm4y, #ffffff);
+  position: relative;
+}
+#h {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 0;
+  background-color: #0f1b2a;
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
+}
+#b {
+  padding-top: 56px;
+}
+ul.menu-list {
+  height: 40px;
+  font-size: 14px;
+  padding: 0 20px;
+}
+ul.menu-list,
+ul.menu-list ul {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  list-style: none;
+}
+ul.menu-list ul,
+ul.menu-list li {
+  padding: 0;
+}
+ul.menu-list li {
+  margin: 0;
+  padding: 0 20px;
+  border-right: 2px solid #e9ebed;
+}
+ul.menu-list li:last-child {
+  border-right: none;
+}
+ul.menu-list li li {
+  border-right: 1px solid #7d8998;
+  border-right: 1px solid var(--color-border-control-default-m3lmsh, #7d8998);
+}
+ul.menu-list li li:first-child {
+  padding-left: 0;
+}
+ul.menu-list li li:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+ul.menu-list li > a {
+  padding: 0 6px;
+}
+ul.menu-list li.title {
+  margin-right: auto;
+  border-right: none;
+}
+ul.menu-list li a,
+ul.menu-list li div,
+ul.menu-list li button,
+ul.menu-list li input,
+ul.menu-list li label {
+  float: left;
+  color: #414d5c;
+  color: var(--color-text-interactive-default-eg5fsa, #414d5c);
+  line-height: 16px;
+}
+ul.menu-list li #visual-refresh-toggle {
+  margin-right: 5px;
+  margin-top: 1px;
+}
+ul.menu-list li a,
+ul.menu-list li a:hover {
+  cursor: pointer;
+  text-decoration: none;
+}
+ul.menu-list li.title {
+  font-weight: bold;
+}
+ul.menu-list li.selected > a,
+ul.menu-list li.selected > button {
+  font-weight: bold;
+  color: #0972d3;
+  color: var(--color-text-accent-s1eqko, #0972d3);
+}
+ul.menu-list > li {
+  padding: 0 20px;
+}
+ul.menu-list button,
+ul.menu-list button:focus {
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+}
+ul.menu-list li.checkbox-item {
+  margin-right: 0;
+}
+
+#f {
+  align-items: center;
+  background-color: #0f1b2a;
+  bottom: 0;
+  display: flex;
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
+  font-size: 14px;
+  gap: 10px;
+  justify-content: space-between;
+  left: 0;
+  margin: 0;
+  min-height: 40px;
+  padding: 10px 40px;
+  position: absolute;
+  right: 0;
+  z-index: 2000;
+}
+@media only screen and (max-width: 493px) {
+  #f {
+    padding: 10px 20px;
+  }
+}
+@media only screen and (max-width: 688px) {
+  #f {
+    flex-wrap: wrap;
+  }
+}
+@media only screen and (min-width: 1182px) {
+  #f {
+    padding: 2px 40px;
+  }
+}
+#f ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+#f ul li,
+#f ul a {
+  color: #d1d5db;
+  color: var(--color-text-home-header-secondary-qfyemi, #d1d5db);
+  text-decoration: none;
+}
+#f ul li .external-link,
+#f ul a .external-link {
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  width: 16px;
+}
+#f ul li .external-link svg,
+#f ul a .external-link svg {
+  display: inline-block;
+  fill: none;
+  height: 16px;
+  stroke-width: 2px;
+  stroke: currentColor;
+  width: 16px;
+}
+#f ul li .external-link svg .stroke-linecap-square,
+#f ul a .external-link svg .stroke-linecap-square {
+  stroke-linecap: square;
+}
+#f ul li .external-link svg .stroke-linejoin-round,
+#f ul a .external-link svg .stroke-linejoin-round {
+  stroke-linejoin: round;
+}
+#f ul a {
+  cursor: pointer;
+}
+#f li:not(:last-child) a {
+  border-right: 1px solid #7d8998;
+  border-right: 1px solid var(--color-border-control-default-m3lmsh, #7d8998);
+  padding-right: 10px;
+}
+#f .made-with-love {
+  color: #d1d5db;
+  color: var(--color-text-home-header-secondary-qfyemi, #d1d5db);
+  min-width: 164px;
+  text-align: right;
+}
+@media only screen and (max-width: 688px) {
+  #f .made-with-love {
+    text-align: left;
+  }
+}
+#f .made-with-love img {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 4px;
+  width: 34px;
+  margin-top: 4px;
+}
+.density-switch-window {
+  stroke: #000716;
+  stroke: var(--color-background-home-header-mpq08f, #000716);
+  fill: #ffffff;
+  fill: var(--color-background-container-content-i8i4a0, #ffffff);
+}
+.density-switch-top-navigation {
+  fill: #e9ebed;
+  fill: var(--color-background-button-primary-disabled-eon7km, #e9ebed);
+}
+.density-switch-header {
+  fill: #ffffff;
+  fill: var(--color-background-layout-main-sfhm4y, #ffffff);
+}
+.density-switch-default {
+  fill: #000716;
+  fill: var(--color-text-body-default-ajf1h5, #000716);
+}
+.density-switch-primary {
+  fill: #0972d3;
+  fill: var(--color-background-button-primary-default-pwn1g1, #0972d3);
+}
+.density-switch-disabled {
+  fill: #d1d5db;
+  fill: var(--color-background-control-disabled-zplipy, #d1d5db);
+}
+.density-switch-secondary {
+  fill: #414d5c;
+  fill: var(--color-text-body-secondary-fdstdf, #414d5c);
+}
+.density-switch-separator {
+  stroke: #e9ebed;
+  stroke: var(--color-border-button-primary-disabled-6gwabt, #e9ebed);
+}
