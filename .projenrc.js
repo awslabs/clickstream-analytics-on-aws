@@ -106,7 +106,7 @@ gitlabMain.createNestedTemplates({
             if: '$CI_PIPELINE_SOURCE == "merge_request_event"',
           },
         ],
-        stage: '.pre',
+        stage: 'build',
         script: [
           '[[ "$CI_MERGE_REQUEST_TITLE" =~ ^(feat|fix|chore|docs|tests|ci) ]] || (echo "no commit type is specified in merge request title" && exit 1)',
         ],
