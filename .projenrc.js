@@ -83,15 +83,22 @@ gitlabMain.createNestedTemplates({
           'mkdir -p build/',
           'unzip output/build_result.zip -d build/',
           'unzip output/test_result.zip -d build/',
+          'unzip output/coverage_result.zip -d build/',
+          'zcat output/logs.gz',
         ],
         artifacts: {
           reports: {
             junit: 'build/junit.xml',
+            coverage_report: {
+              coverage_format: 'cobertura',
+              path: 'build/coverage/cobertura-coverage.xml',
+            },
           },
           paths: [
             'build/cdk.out/',
           ],
         },
+        coverage: '/All files[^|]*\\|[^|]*\\s+([\\d\\.]+)/',
       },
     },
   },

@@ -44,6 +44,7 @@ const build = async() => {
           for(const artifact of build.secondaryArtifacts!) {
             await downloadArtifact(artifact);
           }
+          await downloadLog(build?.logs?.s3LogsArn);
           break loop;
         default:
           break;
@@ -73,6 +74,27 @@ const downloadArtifact = async(artifact?: BuildArtifacts) => {
           return console.error(err);
       }
       console.log(`Artifact ${artifact.location} was downloaded as ${output}`);
+    });
+  }
+}
+
+const downloadLog = async(location?: string) => {
+  if (location) {
+    console.log(`Downloading build log from ${location}`);
+    const s3Path = location.split(':::')[1];
+    const [bucket, ...path] = s3Path.split('/');
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: path.join('/'),
+    });
+    const obj = await s3.send(command);
+    const buffer = await obj.Body!.transformToByteArray();
+    const output = `output/logs.gz`;
+    writeFile(output, buffer, function(err) {
+      if (err) {
+          return console.error(err);
+      }
+      console.log(`Build log ${location} was downloaded as ${output}`);
     });
   }
 }
