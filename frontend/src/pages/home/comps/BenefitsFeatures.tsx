@@ -5,39 +5,28 @@ import {
   Header,
 } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const BenefitsFeatures: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <Container header={<Header variant="h2">Benefits and features</Header>}>
+    <Container header={<Header variant="h2">{t('home:benefits.name')}</Header>}>
       <ColumnLayout columns={2} variant="text-grid">
         <div>
-          <Box variant="awsui-key-label">Easy to use</Box>
-          <div>
-            With a few clicks on a web-base console, you can create an
-            end-to-end analytic platform and start analyzing your data.
-          </div>
+          <Box variant="awsui-key-label">{t('home:benefits.benefit1')}</Box>
+          <div>{t('home:benefits.benefit1Desc')}</div>
         </div>
         <div>
-          <Box variant="awsui-key-label">A single pane of glass view</Box>
-          <div>
-            Manage all resources in a single place, provides built-in monitors
-            and alarms that gives you full visibility into your data pipelines
-            and underlining AWS resources.
-          </div>
+          <Box variant="awsui-key-label">{t('home:benefits.benefit2')}</Box>
+          <div>{t('home:benefits.benefit2Desc')}</div>
         </div>
         <div>
-          <Box variant="awsui-key-label">Flexible</Box>
-          <div>
-            Modularized components with rich customization options for you to
-            assessemble a data pipeline that tailored to your needs.
-          </div>
+          <Box variant="awsui-key-label">{t('home:benefits.benefit3')}</Box>
+          <div>{t('home:benefits.benefit3Desc')}</div>
         </div>
         <div>
-          <Box variant="awsui-key-label">Well-architected</Box>
-          <div>
-            The solution is built based on AWS best practices, providing you
-            production-level scalability and cost-effitiveness.
-          </div>
+          <Box variant="awsui-key-label">{t('home:benefits.benefit4')}</Box>
+          <div>{t('home:benefits.benefit4Desc')}</div>
         </div>
       </ColumnLayout>
     </Container>

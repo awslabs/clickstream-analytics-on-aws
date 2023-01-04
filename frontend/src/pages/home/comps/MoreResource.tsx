@@ -1,14 +1,18 @@
 import { Box, Container, Header, Link } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-const MoreResource = () => {
+const MoreResource: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <Container header={<Header variant="h2">More resource</Header>}>
+    <Container
+      header={<Header variant="h2">{t('home:moreResource.name')}</Header>}
+    >
       <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">FAQ</Link>
+        <Link href="#">{t('home:moreResource.faq')}</Link>
       </Box>
       <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">Submit Issue</Link>
+        <Link href="#">{t('home:moreResource.submitIssue')}</Link>
       </Box>
     </Container>
   );

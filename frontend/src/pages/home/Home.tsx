@@ -1,39 +1,16 @@
-import {
-  AppLayout,
-  BreadcrumbGroup,
-  ContentLayout,
-  Grid,
-} from '@cloudscape-design/components';
+import { AppLayout, ContentLayout, Grid } from '@cloudscape-design/components';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import HomeHeader from 'pages/home/comps/HomeHeader';
-import React, { useRef } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import BenefitsFeatures from './comps/BenefitsFeatures';
 import GetStarted from './comps/GetStarted';
 import HowItWorks from './comps/HowItWorks';
 import MoreResource from './comps/MoreResource';
 import UseCases from './comps/UseCases';
 
-function Breadcrumbs() {
-  const breadcrumbItems = [
-    {
-      text: 'Clickstream Analytics',
-      href: '/',
-    },
-    {
-      text: 'Home',
-      href: '/',
-    },
-  ];
-  return (
-    <BreadcrumbGroup
-      items={breadcrumbItems}
-      expandAriaLabel="Show path"
-      ariaLabel="Breadcrumbs"
-    />
-  );
-}
-
-function Content(props: any) {
+const Content: React.FC = () => {
   return (
     <div className="pb-30">
       <Grid
@@ -53,20 +30,29 @@ function Content(props: any) {
       </Grid>
     </div>
   );
-}
+};
 
 const Home: React.FC = () => {
-  const appLayout: any = useRef();
+  const { t } = useTranslation();
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.name'),
+      href: '/',
+    },
+    {
+      text: t('breadCrumb.home'),
+      href: '/',
+    },
+  ];
   return (
     <AppLayout
-      ref={appLayout}
       content={
         <ContentLayout header={<HomeHeader />}>
           <Content />
         </ContentLayout>
       }
       headerSelector="#header"
-      breadcrumbs={<Breadcrumbs />}
+      breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref="/" />}
     />
   );

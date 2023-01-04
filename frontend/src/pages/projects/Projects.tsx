@@ -1,178 +1,99 @@
 import {
   AppLayout,
-  BreadcrumbGroup,
   Cards,
-  CollectionPreferences,
   Link,
   Pagination,
   StatusIndicator,
   TextFilter,
 } from '@cloudscape-design/components';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { PROJECT_LIST, ProjectType } from 'ts/const';
 import ProjectsHeader from './comps/ProjectsHeader';
 import SplitPanelContent from './comps/SplitPanel';
 
-export interface ProjectType {
-  name: string;
-  id: string;
-  platform: string;
-  status: string;
-}
+const Content: React.FC = () => {
+  const { t } = useTranslation();
+  const CARD_DEFINITIONS = {
+    header: (item: ProjectType) => (
+      <div>
+        <Link fontSize="heading-m" href={`/project/detail/${item.id}`}>
+          {item.id}
+        </Link>
+      </div>
+    ),
+    sections: [
+      {
+        id: 'projectName',
+        header: t('project:list.name'),
+        content: (item: ProjectType) => item.name,
+      },
+      {
+        id: 'projectId',
+        header: t('project:list.id'),
+        content: (item: ProjectType) => item.id,
+      },
+      {
+        id: 'projectPlatform',
+        header: t('project:list.platform'),
+        content: (item: ProjectType) => item.platform,
+      },
 
-const PROJECT_LIST: ProjectType[] = [
-  {
-    name: 'Project A',
-    id: 'Project-01',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-02',
-    platform: 'iOS',
-    status: 'Deactivated',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-03',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-04',
-    platform: 'Android',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-05',
-    platform: 'iOS',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-06',
-    platform: 'Web',
-    status: 'Deactivated',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-07',
-    platform: 'Android',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-08',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-09',
-    platform: 'Web',
-    status: 'Active',
-  },
-];
-
-function Breadcrumbs() {
-  const breadcrumbItems = [
-    {
-      text: 'Clickstream Analytics',
-      href: '/',
-    },
-    {
-      text: 'Projects',
-      href: '/',
-    },
-  ];
-  return (
-    <BreadcrumbGroup
-      items={breadcrumbItems}
-      expandAriaLabel="Show path"
-      ariaLabel="Breadcrumbs"
-    />
-  );
-}
-
-export const CARD_DEFINITIONS = {
-  header: (item: ProjectType) => (
-    <div>
-      <Link fontSize="heading-m" href="#">
-        {item.id}
-      </Link>
-    </div>
-  ),
-  sections: [
-    {
-      id: 'projectName',
-      header: 'Project Name',
-      content: (item: ProjectType) => item.name,
-    },
-    {
-      id: 'projectId',
-      header: 'Project ID',
-      content: (item: ProjectType) => item.id,
-    },
-    {
-      id: 'projectPlatform',
-      header: 'Project Platform',
-      content: (item: ProjectType) => item.platform,
-    },
-
-    {
-      id: 'status',
-      header: 'Status',
-      content: (item: ProjectType) => (
-        <StatusIndicator
-          type={item.status === 'Deactivated' ? 'error' : 'success'}
-        >
-          {item.status}
-        </StatusIndicator>
-      ),
-    },
-  ],
-};
-
-function Content(props: any) {
+      {
+        id: 'status',
+        header: t('project:list.status'),
+        content: (item: ProjectType) => (
+          <StatusIndicator
+            type={item.status === 'Deactivated' ? 'error' : 'success'}
+          >
+            {item.status}
+          </StatusIndicator>
+        ),
+      },
+    ],
+  };
   return (
     <div className="pb-30">
       <Cards
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
-        loadingText="Loading distributions"
+        loadingText={t('project:list.loading') || ''}
         items={PROJECT_LIST}
-        selectionType="multi"
+        selectionType="single"
         variant="full-page"
         header={<ProjectsHeader />}
         filter={
           <TextFilter
-            filteringAriaLabel="Filter distributions"
-            filteringPlaceholder="Find distributions"
+            filteringAriaLabel={t('project:list.filter') || ''}
+            filteringPlaceholder={t('project:list.find') || ''}
             filteringText=""
           />
         }
         pagination={<Pagination currentPageIndex={1} pagesCount={5} />}
-        preferences={
-          <CollectionPreferences
-            title="Preferences"
-            confirmLabel="Confirm"
-            cancelLabel="Cancel"
-          />
-        }
       />
     </div>
   );
-}
+};
 
 const Projects: React.FC = () => {
+  const { t } = useTranslation();
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.name'),
+      href: '/',
+    },
+    {
+      text: t('breadCrumb.projects'),
+      href: '/',
+    },
+  ];
   return (
     <AppLayout
       content={<Content />}
       headerSelector="#header"
-      breadcrumbs={<Breadcrumbs />}
+      breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref="/projects" />}
       splitPanel={<SplitPanelContent />}
     />

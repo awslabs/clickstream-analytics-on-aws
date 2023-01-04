@@ -1,0 +1,48 @@
+{
+  "header": {
+    "desc": "Build a robust, cost-efffecitve, and flexible analytics platform to collect and analyze clickstream data from your websites and mobile apps, providing 100% ownership and control over data that enables you to unlock full potentials of your business. "
+  },
+  "benefits": {
+    "name": "Benefits and features",
+    "benefit1": "Easy to use",
+    "benefit1Desc": " With a few clicks on a web-base console, you can create an end-to-end analytic platform and start analyzing your data.",
+    "benefit2": "A single pane of glass view",
+    "benefit2Desc": "Manage all resources in a single place, provides built-in monitors and alarms that gives you full visibility into your data pipelines and underlining AWS resources.",
+    "benefit3": "Flexible",
+    "benefit3Desc": "Modularized components with rich customization options for you to assessemble a data pipeline that tailored to your needs.",
+    "benefit4": "Well-architected",
+    "benefit4Desc": "The solution is built based on AWS best practices, providing you production-level scalability and cost-effitiveness."
+  },
+  "getStarted": {
+    "name": "Getting started",
+    "link1": "Amazon EC2 Fleet Functionality",
+    "link2": "Hands-on Workshop",
+    "link3": "Pipeline configuration",
+    "link4": "Use third-party SDK",
+    "link5": "Documentation"
+  },
+  "howItWorks": {
+    "name": "How it works",
+    "step1": "Step 1.",
+    "step1SubTitle": "Create a project",
+    "step1Desc": "A project is a container for your Apple, Android, and Web apps. Apps in the project will share the same data.",
+    "step2": "Step 2.",
+    "step2SubTitle": "Create a pipeline",
+    "step2Desc": "A pipeline is a set of data processing modules that collect and transform your clickstream data into your desired format",
+    "step3": "Step 3.",
+    "step3SubTitle": "Register apps",
+    "step3Desc": "Add apps to your project, and follow the guidance to integrate SDK into your apps"
+  },
+  "moreResource": {
+    "name": "More resource",
+    "faq": "FAQ",
+    "submitIssue": "Submit Issue"
+  },
+  "useCase": {
+    "name": "Use cases",
+    "useCase1": "User Behavior Analytics",
+    "useCase1Desc": "Collecting, tracking, reviewing and reporting data to measure user activities on the websites or mobile apps, generating metrics and dashboard to improve website and app performance.",
+    "useCase2": "Customer Data Platform",
+    "useCase2Desc": "Collect event data generated from all customers across the internet, then clean, enrich and transform data tp load into Customer Data Lake for joining with other data sources for further analytics."
+  }
+}

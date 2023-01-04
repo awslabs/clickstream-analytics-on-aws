@@ -1,18 +1,19 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <footer id="f">
       <ul>
         <li>
-          <a href="/about/about-cloudscape/">About</a>
+          <a href="/about/about-cloudscape/">{t('footer.about')}</a>
         </li>
         <li>
-          <a href="/about/connect/">Connect</a>
+          <a href="/about/connect/">{t('footer.connect')}</a>
         </li>
         <li>
-          © {new Date().getFullYear()}, Amazon Web Services, Inc. or its
-          affiliates. All rights reserved.
+          © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>
     </footer>

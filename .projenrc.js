@@ -100,6 +100,23 @@ gitlabMain.createNestedTemplates({
         },
         coverage: '/All files[^|]*\\|[^|]*\\s+([\\d\\.]+)/',
       },
+      buildFrontend: {
+        stage: 'build',
+        variables: {},
+        before_script: [
+          'cd $CI_PROJECT_DIR/frontend',
+        ],
+        script: [
+          'npm install',
+          'npm run test',
+          'npm run build',
+        ],
+        artifacts: {
+          paths: [
+            '$CI_PROJECT_DIR/frontend/build/',
+          ],
+        },
+      },
     },
   },
   prlint: {
@@ -121,4 +138,5 @@ gitlabMain.createNestedTemplates({
     },
   },
 });
+
 project.synth();

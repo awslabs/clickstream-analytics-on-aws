@@ -19,12 +19,20 @@ code {
   text-align: center;
 }
 
+.text-right {
+  text-align: right;
+}
+
 .white {
   color: var(--color-text-interactive-default-eg5fsa, #414d5c) !important;
 }
 
 .pt-10 {
   padding-top: 10px;
+}
+
+.mt-10 {
+  margin-top: 10px;
 }
 
 .mt-20 {
@@ -41,6 +49,37 @@ code {
 
 .pb-30 {
   padding-bottom: 30px;
+}
+
+.pd-20 {
+  padding: 20px;
+}
+
+.plr-20 {
+  padding: 0 20px;
+}
+
+.more-settings {
+  border-top: 1px solid #ccc;
+  padding: 15px 0 0;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.project-name-suffix {
+  font-size: 16px;
+  display: inline-block;
+  padding: 5px 0 0;
+  margin-left: -10px;
+}
+
+.project-id {
+  display: inline-block;
+  padding: 6px 18px;
+  background-color: #e9ebed;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

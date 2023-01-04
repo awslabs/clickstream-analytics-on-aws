@@ -5,34 +5,35 @@ import {
   Header,
 } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const HowItWorks: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <Container header={<Header variant="h2">How it works</Header>}>
+    <Container
+      header={<Header variant="h2">{t('home:howItWorks.name')}</Header>}
+    >
       <ColumnLayout columns={3} variant="text-grid">
         <div>
-          <Box variant="awsui-key-label">Step 1.</Box>
-          <Box variant="awsui-key-label">Create a project</Box>
-          <div>
-            A project is a container for your Apple, Android, and Web apps. Apps
-            in the project will share the same data \n .
-          </div>
+          <Box variant="awsui-key-label">{t('home:howItWorks.step1')}</Box>
+          <Box variant="awsui-key-label">
+            {t('home:howItWorks.step1SubTitle')}
+          </Box>
+          <div>{t('home:howItWorks.step1Desc')}</div>
         </div>
         <div>
-          <Box variant="awsui-key-label">Step 2.</Box>
-          <Box variant="awsui-key-label">Create a pipeline</Box>
-          <div>
-            A pipeline is a set of data processing modules that collect and
-            transform your clickstream data into your desired format
-          </div>
+          <Box variant="awsui-key-label">{t('home:howItWorks.step2')}</Box>
+          <Box variant="awsui-key-label">
+            {t('home:howItWorks.step2SubTitle')}
+          </Box>
+          <div>{t('home:howItWorks.step2Desc')}</div>
         </div>
         <div>
-          <Box variant="awsui-key-label">Step 3.</Box>
-          <Box variant="awsui-key-label">Register apps</Box>
-          <div>
-            Add apps to your project, and follow the guidance to integrate SDK
-            into your apps
-          </div>
+          <Box variant="awsui-key-label">{t('home:howItWorks.step3')}</Box>
+          <Box variant="awsui-key-label">
+            {t('home:howItWorks.step3SubTitle')}
+          </Box>
+          <div>{t('home:howItWorks.step3Desc')}</div>
         </div>
       </ColumnLayout>
     </Container>

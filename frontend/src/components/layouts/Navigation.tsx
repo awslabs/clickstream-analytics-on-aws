@@ -1,57 +1,63 @@
-import { Badge, SideNavigation } from '@cloudscape-design/components';
+import {
+  Badge,
+  SideNavigation,
+  SideNavigationProps,
+} from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-interface NavigationProps {
+interface INavigationProps {
   activeHref: string;
 }
 
-const Navigation: React.FC<NavigationProps> = (props: NavigationProps) => {
+const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
-  const navHeader = { text: 'Clickstream Analytics on AWS', href: '#/' };
-  const navItems: any = [
-    { type: 'link', text: 'Home', href: '/' },
-    { type: 'link', text: 'Projects', href: '/projects' },
-    { type: 'link', text: 'Pipelines', href: '#/pipelines' },
-    { type: 'link', text: 'Analytics', href: '#/analytics' },
+  const { t } = useTranslation();
+  const navHeader = { text: t('name'), href: '#/' };
+  const navItems: SideNavigationProps.Item[] = [
+    { type: 'link', text: t('nav.home'), href: '/' },
+    { type: 'link', text: t('nav.projects'), href: '/projects' },
+    { type: 'link', text: t('nav.pipelines'), href: '/pipelines' },
+    { type: 'link', text: t('nav.analytics'), href: '#/analytics' },
     {
-      text: 'Pipeline modules',
+      text: t('nav.pipelineModules'),
       type: 'section',
       defaultExpanded: true,
       items: [
-        { type: 'link', text: 'Ingestions', href: '#/ingestions' },
-        { type: 'link', text: 'Streaming', href: '#/streaming' },
-        { type: 'link', text: 'Enrichment', href: '#/enrichment' },
-        { type: 'link', text: 'Reporting', href: '#/reporting' },
+        { type: 'link', text: t('nav.ingestions'), href: '#/ingestions' },
+        { type: 'link', text: t('nav.streaming'), href: '#/streaming' },
+        { type: 'link', text: t('nav.enrichment'), href: '#/enrichment' },
+        { type: 'link', text: t('nav.reporting'), href: '#/reporting' },
       ],
     },
     {
-      text: 'Operation',
+      text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
       items: [
-        { type: 'link', text: 'Dashboard', href: '#/dashboard' },
-        { type: 'link', text: 'Monitors & Alerts', href: '#/monitors' },
+        { type: 'link', text: t('nav.dashboard'), href: '#/dashboard' },
+        { type: 'link', text: t('nav.monitorAlerts'), href: '#/monitors' },
       ],
     },
     {
-      text: 'Tools',
+      text: t('nav.tools'),
       type: 'section',
       defaultExpanded: true,
       items: [
-        { type: 'link', text: 'Simulation testing', href: '#/simulation' },
-        { type: 'link', text: 'SKD integration', href: '#/skd' },
+        { type: 'link', text: t('nav.simuTest'), href: '#/simulation' },
+        { type: 'link', text: t('nav.sdkIntegration'), href: '#/skd' },
       ],
     },
     { type: 'divider' },
     {
       type: 'link',
-      text: 'Notifications',
+      text: t('nav.notifications'),
       href: '#/notifications',
       info: <Badge color="red">23</Badge>,
     },
     {
       type: 'link',
-      text: 'Documentation',
+      text: t('nav.doc'),
       href: 'https://example.com',
       external: true,
     },
