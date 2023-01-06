@@ -215,6 +215,14 @@
           "method"
         ]
       }
+    ],
+    "import/no-namespace": [
+      "error",
+      {
+        "ignore": [
+          "*.ext"
+        ]
+      }
     ]
   },
   "overrides": [

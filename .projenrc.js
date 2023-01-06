@@ -20,6 +20,12 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   // packageName: undefined,  /* The "name" in package.json. */
 });
 
+project.eslint?.addRules({
+  'import/no-namespace': [
+    'error', { ignore: ['*.ext'] },
+  ],
+});
+
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
     workflow: {
