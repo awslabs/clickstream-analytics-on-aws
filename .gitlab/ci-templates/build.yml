@@ -32,7 +32,7 @@ build:
     paths:
       - build/cdk.out/
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
-build_frontend:
+buildFrontend:
   stage: build
   variables: {}
   before_script:
