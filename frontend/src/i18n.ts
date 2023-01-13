@@ -16,7 +16,7 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    ns: ['common', 'info', 'home', 'project', 'pipeline'],
+    ns: ['common', 'info', 'home', 'project', 'pipeline', 'application'],
     defaultNS: 'common',
     fallbackLng: 'en',
     debug: true,

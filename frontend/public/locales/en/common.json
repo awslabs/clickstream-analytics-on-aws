@@ -213,7 +213,9 @@
     "create": "Create",
     "save": "Save",
     "addPipeline": "Add pipeline",
-    "addApplication": "Add Application"
+    "addApplication": "Add Application",
+    "complete": "Complete",
+    "downloadJSON": "Download the config json file"
   },
   "item": "item",
   "items": "items",

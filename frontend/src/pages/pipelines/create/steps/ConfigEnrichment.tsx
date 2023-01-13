@@ -162,7 +162,7 @@ const ConfigEnrichment: React.FC = () => {
                     <div>
                       <CodePage />
                     </div>
-                    <div className="text-right">
+                    <div className="text-right button-actions">
                       <Button variant="link">{t('button.cancel')}</Button>
                       <Button variant="link">{t('button.validate')}</Button>
                       <Button>{t('button.submit')}</Button>

@@ -13,10 +13,17 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectPipeline: React.FC = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = React.useState<any>([]);
+
+  const goToCreateApplication = () => {
+    navigate('/project/projectId/application/create');
+  };
+
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container
@@ -117,7 +124,14 @@ const ProjectPipeline: React.FC = () => {
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
               {t('project:pipeline.noAppDisplay')}
             </Box>
-            <Button iconName="add-plus">{t('button.addApplication')}</Button>
+            <Button
+              iconName="add-plus"
+              onClick={() => {
+                goToCreateApplication();
+              }}
+            >
+              {t('button.addApplication')}
+            </Button>
           </Box>
         }
         filter={
@@ -136,7 +150,13 @@ const ProjectPipeline: React.FC = () => {
               <SpaceBetween direction="horizontal" size="xs">
                 <Button disabled>{t('button.viewDetails')}</Button>
                 <Button disabled>{t('button.delete')}</Button>
-                <Button variant="primary" iconName="add-plus">
+                <Button
+                  variant="primary"
+                  iconName="add-plus"
+                  onClick={() => {
+                    goToCreateApplication();
+                  }}
+                >
                   {t('button.addApplication')}
                 </Button>
               </SpaceBetween>

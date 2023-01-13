@@ -27,6 +27,11 @@ code {
   color: var(--color-text-interactive-default-eg5fsa, #414d5c) !important;
 }
 
+.ptb-5 {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 .pt-10 {
   padding-top: 10px;
 }
@@ -80,6 +85,12 @@ code {
   background-color: #e9ebed;
   border-radius: 10px;
   cursor: pointer;
+}
+
+.button-actions {
+  button {
+    margin-left: 10px;
+  }
 }
 
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

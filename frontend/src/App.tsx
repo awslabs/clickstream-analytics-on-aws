@@ -1,5 +1,6 @@
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
+import CreateApplication from 'pages/application/create/CreateApplication';
 import PipelineList from 'pages/pipelines/PipelineList';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
@@ -35,6 +36,10 @@ const App: React.FC = () => {
                   element={<PipelineDetail />}
                 />
                 <Route path="/pipelines/create" element={<CreatePipeline />} />
+                <Route
+                  path="/project/:id/application/create"
+                  element={<CreateApplication />}
+                />
               </Routes>
             </div>
           </Suspense>
