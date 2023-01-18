@@ -10,6 +10,7 @@
 /.gitignore linguist-generated
 /.gitlab-ci.yml linguist-generated
 /.gitlab/ci-templates/build.yml linguist-generated
+/.gitlab/ci-templates/cfn-nag.yml linguist-generated
 /.gitlab/ci-templates/prlint.yml linguist-generated
 /.mergify.yml linguist-generated
 /.npmignore linguist-generated

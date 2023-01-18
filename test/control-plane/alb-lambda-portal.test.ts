@@ -16,17 +16,18 @@ limitations under the License.
 
 import { assert } from 'console';
 import {
-  Duration,
+  Duration, App,
 } from 'aws-cdk-lib';
 import {
   Template,
   Match,
   // Capture,
 } from 'aws-cdk-lib/assertions';
+import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol, IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function, Runtime, InlineCode } from 'aws-cdk-lib/aws-lambda';
-import { TestEnv } from './test-utils';
+import { TestEnv, TestStack } from './test-utils';
 
 function findResources(template: Template, type: string) {
   const resources: any[] = [];
@@ -41,6 +42,26 @@ function findResources(template: Template, type: string) {
 }
 
 describe('ApplicationLoadBalancerLambdaPortal', () => {
+
+  test('Invalid subnet selection', () => {
+    const stack = new TestStack(new App(), 'testStack');
+    expect(() => {
+      TestEnv.newStackWithPortalProps({
+        applicationLoadBalancerProps: {
+          internetFacing: false,
+          protocol: ApplicationProtocol.HTTP,
+          logProps: {
+            enableAccessLog: true,
+          },
+        },
+        networkProps: {
+          vpc: stack.vpc,
+          subnets: { subnetType: SubnetType.PUBLIC },
+        },
+      });
+    }).toThrowError(/Make sure the given private subnets for your load balancer./);
+
+  }); //end test case
 
   test('Internet facing', () => {
     const testElements = TestEnv.newStackWithDefaultPortal();
@@ -85,7 +106,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     const testElements = TestEnv.newStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 1);
+    template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       SecurityGroupIngress: [
         {
@@ -97,9 +118,10 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       ],
       SecurityGroupEgress: [
         {
-          CidrIp: '0.0.0.0/0',
-          Description: 'Allow all outbound traffic by default',
-          IpProtocol: '-1',
+          CidrIp: '255.255.255.255/32',
+          FromPort: 252,
+          IpProtocol: 'icmp',
+          ToPort: 86,
         },
       ],
     });
@@ -192,14 +214,101 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
   }),
 
-  test('ALB Lambda function', () => {
+  test('ALB Lambda function is created with expected properties', () => {
     const testElements = TestEnv.newStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::Lambda::Function', 1);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',
+      ReservedConcurrentExecutions: 3,
+      VpcConfig: Match.objectLike({
+        SubnetIds: Match.anyValue(),
+        SecurityGroupIds: Match.anyValue(),
+      }),
     });
+    template.hasResource('AWS::Lambda::Function', { // create dependencies on executation role with sufficient policy to create ENI
+      DependsOn: [
+        'frontendfunceni3AD2BF09',
+        'testportalportalfnrole5B2099BA',
+      ],
+    });
+  }),
+
+  test('IAM policies are created for Lambda functions', () => {
+    const testElements = TestEnv.newStackWithDefaultPortal();
+    const template = Template.fromStack(testElements.stack);
+
+    template.resourceCountIs('AWS::IAM::Policy', 2);
+    // create eni for running inside vpc
+    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      Roles: [
+        {
+          Ref: 'testportalportalfnrole5B2099BA',
+        },
+      ],
+    }),
+    );
+
+    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':logs:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':log-group:aws/lambda/',
+                  { Ref: 'testportalportalfn1F095E03' },
+                  ':*',
+                ],
+              ],
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      Roles: [
+        {
+          Ref: 'testportalportalfnrole5B2099BA',
+        },
+      ],
+    }),
+    );
   }),
 
   test('HTTP with custom domain', () => {
@@ -287,6 +396,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
       ],
       Protocol: 'HTTPS',
+      SslPolicy: 'ELBSecurityPolicy-TLS-1-2-Ext-2018-06',
       Certificates: [
         {
           CertificateArn: {
@@ -390,13 +500,14 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
+    template.resourceCountIs('AWS::EC2::SecurityGroup', 3);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       SecurityGroupEgress: [
         {
-          CidrIp: '0.0.0.0/0',
-          Description: 'Allow all outbound traffic by default',
-          IpProtocol: '-1',
+          CidrIp: '255.255.255.255/32',
+          FromPort: 252,
+          IpProtocol: 'icmp',
+          ToPort: 86,
         },
       ],
     });
@@ -420,7 +531,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
+    template.resourceCountIs('AWS::EC2::SecurityGroup', 3);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       GroupDescription: Match.stringLikeRegexp('portal_source_sg'),
     });

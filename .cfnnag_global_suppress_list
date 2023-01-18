@@ -1,0 +1,4 @@
+---
+RulesToSuppress:
+  - id: W58
+    reason: False alarm on the Lambda function, which uses a custom role instead of having the ability to write CloudWatch logs.

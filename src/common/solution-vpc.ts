@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { CfnOutput, RemovalPolicy, CfnResource } from 'aws-cdk-lib';
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
 import {
   FlowLogDestination,
   FlowLogTrafficType,
@@ -25,6 +25,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { LogGroup, RetentionDays, CfnLogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from './cfn-nag';
 
 export interface VpcProps {
   /**
@@ -40,20 +41,6 @@ export interface VpcProps {
    * @default - None.
    */
   vpc?: IVpc;
-}
-
-interface CfnNagSuppressRule {
-  readonly id: string;
-  readonly reason: string;
-}
-
-export function addCfnNagSuppressRules(
-  resource: CfnResource,
-  rules: CfnNagSuppressRule[],
-) {
-  resource.addMetadata('cfn_nag', {
-    rules_to_suppress: rules,
-  });
 }
 
 /**

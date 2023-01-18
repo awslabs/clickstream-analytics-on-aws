@@ -17,9 +17,7 @@ limitations under the License.
 import {
   Duration,
   IgnoreMode,
-  Arn,
   Aws,
-  ArnFormat,
   CfnMapping,
   Fn,
 } from 'aws-cdk-lib';
@@ -32,6 +30,8 @@ import {
   Port,
   SubnetSelection,
   Connections,
+  SubnetType,
+  CfnSecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import {
@@ -43,14 +43,13 @@ import {
   ListenerAction,
   IApplicationLoadBalancerTarget,
   HealthCheck,
+  CfnListener,
+  SslPolicy,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import {
-  PolicyStatement,
   ServicePrincipal,
   Role,
-  Effect,
-  Policy,
   AccountPrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
@@ -58,7 +57,9 @@ import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { Constants } from '../common/constants';
+import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { LogBucket } from '../common/log-bucket';
 
 export interface RouteProps {
@@ -79,6 +80,12 @@ export interface FixedResponseProps {
 export interface FrontendProps {
   readonly directory: string;
   readonly dockerfile: string;
+  /**
+   * The maximum of concurrent executations you want to reserve for the Frontend function
+   *
+   * @default - 5
+   */
+  readonly reservedConcurrentExecutions?: number;
 }
 
 export interface NetworkProps {
@@ -130,6 +137,11 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
   constructor(scope: Construct, id: string, props: ApplicationLoadBalancerLambdaPortalProps) {
     super(scope, id);
 
+    const selectedVPCs = props.networkProps.vpc.selectSubnets(props.networkProps.subnets);
+    if (props.applicationLoadBalancerProps.internetFacing != selectedVPCs.hasPublic) {
+      throw new Error(`Make sure the given ${props.applicationLoadBalancerProps.internetFacing ? 'public' : 'private'} subnets for your load balancer.`);
+    }
+
     this.node.addValidation({
       validate: () => {
         const messages: string[] = [];
@@ -151,44 +163,58 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
 
+    const frontendLambdaSG = new SecurityGroup(this, 'frontend_function_sg', {
+      vpc: props.networkProps.vpc,
+      allowAllOutbound: false,
+    });
+    addCfnNagSuppressRules(
+      frontendLambdaSG.node.defaultChild as CfnSecurityGroup,
+      [
+        {
+          id: 'W29',
+          reason:
+              'Disallow all egress traffic',
+        },
+      ],
+    );
     const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
       description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
       code: DockerImageCode.fromEcr(image.repository, {
         tagOrDigest: image.imageTag,
       }),
       role: fnRole,
+      reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,
+      vpc: props.networkProps.vpc,
+      vpcSubnets: props.applicationLoadBalancerProps.internetFacing ? { subnetType: SubnetType.PRIVATE_WITH_EGRESS } : props.networkProps.subnets,
+      securityGroups: [frontendLambdaSG],
     });
 
-    const logGroupArn = Arn.format({
-      region: Aws.REGION,
-      account: Aws.ACCOUNT_ID,
-      partition: Aws.PARTITION,
-      resource: 'log-group',
-      service: 'logs',
-      resourceName: 'aws/lambda/${lambdaFn.functionName}:*',
-      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-    });
-
-    const statement = new PolicyStatement({
-      actions: [
-        'logs:CreateLogStream',
-        'logs:PutLogEvents',
-        'logs:CreateLogGroup',
-      ],
-      resources: [logGroupArn],
-      effect: Effect.ALLOW,
-    });
-
-    if (lambdaFn.role !== undefined) {
-      const lambdaPolicy = new Policy(this, 'lambda_policy', {
-        statements: [statement],
-      });
-      lambdaPolicy.attachToRole(fnRole);
-    }
+    createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));
 
     this.securityGroup = new SecurityGroup(this, 'portal_sg', {
       vpc: props.networkProps.vpc,
+      allowAllOutbound: false,
     });
+    addCfnNagSuppressRules(
+      this.securityGroup.node.defaultChild as CfnSecurityGroup,
+      [
+        {
+          id: 'W29',
+          reason:
+              'Disallow all egress traffic',
+        },
+        {
+          id: 'W9',
+          reason:
+              'The open world ingress rule is by design',
+        },
+        {
+          id: 'W2',
+          reason:
+              'The SG is used by ELB to receive internet traffic',
+        },
+      ],
+    );
 
     let port = props.networkProps.port;
     if ( port === undefined) {
@@ -208,6 +234,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     } else {
       const sourceSg = new SecurityGroup(this, 'portal_source_sg', {
         vpc: props.networkProps.vpc,
+        allowAllOutbound: false,
       });
       this.sourceSecurityGroupId = sourceSg.securityGroupId;
 
@@ -226,7 +253,10 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       this,
       'LoadBalancerSecurityGroupImmutable',
       this.securityGroup.securityGroupId,
-      { mutable: false },
+      {
+        mutable: false,
+        allowAllOutbound: false,
+      },
     );
 
     this.applicationLoadBalancer = new ApplicationLoadBalancer(this, 'ALB', {
@@ -283,12 +313,23 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
         protocol: ApplicationProtocol.HTTPS,
         port: this.port,
         certificates: [certificate],
+        sslPolicy: SslPolicy.TLS12_EXT,
       });
     } else {
       this.listener = this.applicationLoadBalancer.addListener('Listener', {
         protocol: ApplicationProtocol.HTTP,
         port: this.port,
       });
+      addCfnNagSuppressRules(
+        this.listener.node.defaultChild as CfnListener,
+        [
+          {
+            id: 'W56',
+            reason:
+              'Using HTTP listener is by design',
+          },
+        ],
+      );
     }
 
     this.listener.addAction('DefaultAction', {
@@ -310,6 +351,16 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
           port: this.port.toString(),
         }),
       });
+      addCfnNagSuppressRules(
+        httpListener.node.defaultChild as CfnListener,
+        [
+          {
+            id: 'W56',
+            reason:
+              'Using HTTP listener is by design',
+          },
+        ],
+      );
     }
 
     const targets = [new LambdaTarget(lambdaFn)];

@@ -205,6 +205,12 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     template.resourceCountIs('AWS::S3::Bucket', 1);
 
+    template.resourceCountIs('AWS::Lambda::Function', 1);
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      PackageType: 'Image',
+      ReservedConcurrentExecutions: 5,
+    });
+
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
     template.hasOutput('SourceSecurityGroup', {});

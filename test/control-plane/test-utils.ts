@@ -43,10 +43,6 @@ export const vpcFromAttr = (
   return Vpc.fromVpcAttributes(scope, 'testVpc', vpcAttributes);
 };
 
-export interface TestStackProps {
-  existVpc: boolean;
-}
-
 export class TestStack extends Stack {
   public readonly vpc: IVpc;
 
@@ -74,9 +70,10 @@ export interface ApplicationLoadBalancerLambdaPortalTestProps {
   readonly port?: number;
   readonly externalBucket?: boolean;
   readonly prefix?: string;
+  readonly stack?: TestStack;
 }
 
-export interface StackElemetns {
+export interface StackElements {
   stack: TestStack;
   portal: ApplicationLoadBalancerLambdaPortal;
 }
@@ -87,7 +84,7 @@ export class TestEnv {
     return new TestStack(new App(), 'testStack');
   }
 
-  public static newStackWithDefaultPortal() : StackElemetns {
+  public static newStackWithDefaultPortal() : StackElements {
 
     const stack = new TestStack(new App(), 'testStack');
 
@@ -106,6 +103,7 @@ export class TestEnv {
       frontendProps: {
         directory: './',
         dockerfile: 'src/control-plane/frontend/Dockerfile',
+        reservedConcurrentExecutions: 3,
       },
     });
 
@@ -114,7 +112,7 @@ export class TestEnv {
 
   public static newStackWithPortalProps( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
 
-    const stack = new TestStack(new App(), 'testStack');
+    const stack = props?.stack ?? new TestStack(new App(), 'testStack');
 
     const bucket = props?.externalBucket ? new LogBucket(stack, 'LogBucket').bucket : undefined;
     const prefix = props?.prefix ?? undefined;
@@ -147,7 +145,7 @@ export class TestEnv {
 
     const networkProps = props?.networkProps ?? {
       vpc: stack.vpc,
-      subnets: { subnetType: SubnetType.PUBLIC },
+      subnets: { subnetType: props?.applicationLoadBalancerProps?.internetFacing == false ? SubnetType.PRIVATE_WITH_EGRESS : SubnetType.PUBLIC },
       port: props?.port,
     };
     const frontendProps = props?.frontendProps ?? {

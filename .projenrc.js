@@ -60,7 +60,7 @@ const gitlabMain = new gitlab.GitlabConfiguration(project,
     },
   });
 gitlabMain.createNestedTemplates({
-  build: {
+  'build': {
     stages: [
       'build',
     ],
@@ -125,7 +125,7 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
-  prlint: {
+  'prlint': {
     stages: [
       'build',
     ],
@@ -139,6 +139,29 @@ gitlabMain.createNestedTemplates({
         stage: 'build',
         script: [
           '[[ "$CI_MERGE_REQUEST_TITLE" =~ ^(feat|fix|chore|docs|tests|ci) ]] || (echo "no commit type is specified in merge request title" && exit 1)',
+        ],
+      },
+    },
+  },
+  'cfn-nag': {
+    stages: [
+      'qa',
+    ],
+    needs: [
+      'build',
+    ],
+    jobs: {
+      'cfn-nag': {
+        image: {
+          name: 'stelligent/cfn_nag',
+          entrypoint: [
+            '/bin/sh',
+            '-c',
+          ],
+        },
+        stage: 'qa',
+        script: [
+          'set -x; cfn_nag -f -b .cfnnag_global_suppress_list build/cdk.out/*.template.json',
         ],
       },
     },

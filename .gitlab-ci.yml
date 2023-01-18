@@ -7,6 +7,7 @@ default:
 include:
   - local: .gitlab/ci-templates/build.yml
   - local: .gitlab/ci-templates/prlint.yml
+  - local: .gitlab/ci-templates/cfn-nag.yml
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -17,6 +18,7 @@ workflow:
 stages:
   - .pre
   - build
+  - qa
 main:
   stage: .pre
   script:
