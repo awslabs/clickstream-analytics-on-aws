@@ -152,6 +152,9 @@ gitlabMain.createNestedTemplates({
     ],
     jobs: {
       'cfn-nag': {
+        tags: [
+          'arch:amd64',
+        ],
         image: {
           name: 'stelligent/cfn_nag',
           entrypoint: [
