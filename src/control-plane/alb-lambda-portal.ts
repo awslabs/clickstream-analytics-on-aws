@@ -17,8 +17,6 @@ limitations under the License.
 import {
   Duration,
   IgnoreMode,
-  Aws,
-  CfnMapping,
   Fn,
 } from 'aws-cdk-lib';
 import { Certificate, ICertificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
@@ -50,15 +48,14 @@ import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import {
   ServicePrincipal,
   Role,
-  AccountPrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { Constants } from '../common/constants';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { LogBucket } from '../common/log-bucket';
 
@@ -99,12 +96,6 @@ export interface DomainProps {
   readonly hostZoneName: string;
   readonly hostZone: IHostedZone;
   readonly certificate?:	ICertificate;
-}
-
-export interface LogProps {
-  readonly enableAccessLog: boolean;
-  readonly bucket?: IBucket;
-  readonly prefix?: string;
 }
 
 export interface ApplicationLoadBalancerProps {
@@ -283,19 +274,12 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       } else {
         albLogBucket = props.applicationLoadBalancerProps.logProps.bucket;
       }
-
-      const albLogServiceAccountMapping = new CfnMapping(this, 'ALBServiceAccountMapping', Constants.ALBLogServiceAccountMapping);
-
       const albLogPrefix = props.applicationLoadBalancerProps.logProps?.prefix ?? 'console-alb-access-logs';
-      albLogBucket.grantPut(new AccountPrincipal(albLogServiceAccountMapping.findInMap(Aws.REGION, 'account')),
-        `${albLogPrefix}/AWSLogs/${Aws.ACCOUNT_ID}/*`);
-
-      albLogBucket.grantPut(new ServicePrincipal('logdelivery.elasticloadbalancing.amazonaws.com'),
-        `${albLogPrefix}/AWSLogs/${Aws.ACCOUNT_ID}/*`);
-
-      this.applicationLoadBalancer.setAttribute('access_logs.s3.enabled', 'true');
-      this.applicationLoadBalancer.setAttribute('access_logs.s3.bucket', albLogBucket.bucketName);
-      this.applicationLoadBalancer.setAttribute('access_logs.s3.prefix', albLogPrefix);
+      setAccessLogForApplicationLoadBalancer(scope, {
+        alb: this.applicationLoadBalancer,
+        albLogBucket: albLogBucket,
+        albLogPrefix: albLogPrefix,
+      });
     }
 
     if (props.domainProsps !== undefined) {

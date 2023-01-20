@@ -36,6 +36,7 @@ cdk.context.json
 .DS_Store
 docs/site/
 frontend/amplify
+test-deploy-server.sh
 !/.projenrc.js
 /test-reports/
 junit.xml

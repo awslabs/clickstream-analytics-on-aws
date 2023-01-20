@@ -1,0 +1,135 @@
+/*
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import { Duration } from 'aws-cdk-lib';
+import {
+  AutoScalingGroup,
+  BlockDeviceVolume,
+  HealthCheck,
+} from 'aws-cdk-lib/aws-autoscaling';
+import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
+import {
+  Cluster,
+  Ec2Service,
+  TaskDefinition,
+  AsgCapacityProvider,
+  EcsOptimizedImage,
+  AmiHardwareType,
+} from 'aws-cdk-lib/aws-ecs';
+import { Construct } from 'constructs';
+import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
+import { createProxyAndWorkerECRImages } from './ecr';
+
+import { crateECSService } from './ecs-service';
+import { addPoliciesToAsgRole } from './iam';
+
+export interface ECSClusterProps extends IngestionServerProps {
+  ecsSecurityGroup: SecurityGroup;
+}
+
+export interface EcsServiceResult {
+  ecsService: Ec2Service;
+  taskDefinition: TaskDefinition;
+  httpContainerName: string;
+}
+export interface EcsClusterResult extends EcsServiceResult {
+  ecsCluster: Cluster;
+  autoScalingGroup: AutoScalingGroup;
+}
+
+export function createECSClusterAndService(
+  scope: Construct,
+  props: ECSClusterProps,
+): EcsClusterResult {
+  const vpc = props.vpc;
+
+  const ecsCluster = new Cluster(scope, `${RESOURCE_ID_PREFIX}ecs-cluster`, {
+    vpc,
+    containerInsights: true,
+  });
+
+  const ecsAsgSetting = props.fleetProps;
+  const isArm = ecsAsgSetting.isArm;
+
+  const ecsConfig = {
+    instanceType: ecsAsgSetting.instanceType,
+    machineImage: EcsOptimizedImage.amazonLinux2(
+      isArm ? AmiHardwareType.ARM : AmiHardwareType.STANDARD,
+    ),
+    platform: isArm ? Platform.LINUX_ARM64 : Platform.LINUX_AMD64,
+  };
+
+  let notifications = {};
+
+  if (props.notificationsTopic) {
+    notifications = { notifications: [{ topic: props.notificationsTopic }] };
+  }
+
+  const autoScalingGroup = new AutoScalingGroup(scope, `${RESOURCE_ID_PREFIX}ecs-asg`, {
+    vpc,
+    vpcSubnets: props.vpcSubnets,
+    associatePublicIpAddress: props.vpcSubnets.subnetType == SubnetType.PUBLIC,
+    instanceType: ecsConfig.instanceType,
+    machineImage: ecsConfig.machineImage,
+    maxCapacity: ecsAsgSetting.serverMax,
+    minCapacity: ecsAsgSetting.serverMin,
+    healthCheck: HealthCheck.ec2({
+      grace: Duration.seconds(60),
+    }),
+    securityGroup: props.ecsSecurityGroup,
+    ...notifications,
+    blockDevices: [
+      {
+        deviceName: '/dev/xvda',
+        volume: BlockDeviceVolume.ebs(30),
+      },
+    ],
+  });
+
+  if (ecsAsgSetting.warmPoolSize && ecsAsgSetting.warmPoolSize > 0) {
+    autoScalingGroup.addWarmPool({
+      minSize: ecsAsgSetting.warmPoolSize,
+    });
+  }
+  addPoliciesToAsgRole(autoScalingGroup.role);
+
+  const capacityProvider = new AsgCapacityProvider(
+    scope,
+    `${RESOURCE_ID_PREFIX}ecs-capacity-provider`,
+    {
+      autoScalingGroup,
+      enableManagedTerminationProtection: false,
+    },
+  );
+
+  capacityProvider.node.addDependency(autoScalingGroup);
+  ecsCluster.addAsgCapacityProvider(capacityProvider);
+
+  const { proxyImage, workerImage } = createProxyAndWorkerECRImages(
+    scope,
+    ecsConfig.platform,
+  );
+  const ecsServiceInfo = crateECSService(scope, {
+    ...props,
+    ecsCluster,
+    proxyImage,
+    workerImage,
+    capacityProvider,
+    autoScalingGroup,
+  });
+  return { ...ecsServiceInfo, autoScalingGroup, ecsCluster };
+}

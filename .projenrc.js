@@ -10,6 +10,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '.DS_Store',
     'docs/site/',
     'frontend/amplify',
+    'test-deploy-server.sh',
   ] /* Additional entries to .gitignore. */,
 
   deps: [

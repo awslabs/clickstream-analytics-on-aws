@@ -1,0 +1,14 @@
+# https://vector.dev/docs/about/under-the-hood/architecture/buffering-model/
+
+[sinks.msk_sink]
+type = "kafka"
+inputs =  ["json_parser"]   
+bootstrap_servers = "%%AWS_MSK_BROKERS%%"
+#key_field = "ip"
+topic = "%%AWS_MSK_TOPIC%%"
+compression = "none"
+batch.max_events = 1000
+batch.timeout_secs = 3
+acknowledgements.enabled = false
+  [sinks.msk_sink.encoding]
+  codec = "json"
