@@ -31,7 +31,6 @@ import {
   SubnetType,
   CfnSecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
-import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   ApplicationLoadBalancer,
   IpAddressType,
@@ -144,12 +143,6 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     });
 
     const dockerFile = props.frontendProps.dockerfile ?? 'Dockerfile';
-    const image = new DockerImageAsset(this, 'dockerimage', {
-      directory: props.frontendProps.directory,
-      file: dockerFile,
-      ignoreMode: IgnoreMode.DOCKER,
-    });
-
     const fnRole = new Role(this, 'portal_fn_role', {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
@@ -170,8 +163,9 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     );
     const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
       description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
-      code: DockerImageCode.fromEcr(image.repository, {
-        tagOrDigest: image.imageTag,
+      code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
+        file: dockerFile,
+        ignoreMode: IgnoreMode.DOCKER,
       }),
       role: fnRole,
       reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import { App, Aspects, Stack } from 'aws-cdk-lib';
+import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 
@@ -29,6 +30,7 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: false,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -40,6 +42,7 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: true,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -51,6 +54,7 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: false,
     useCustomDomain: false,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -61,6 +65,7 @@ stackSuppressions([
     existingVpc: false,
     internetFacing: true,
     useCustomDomain: false,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -72,6 +77,7 @@ stackSuppressions([
     existingVpc: false,
     internetFacing: true,
     useCustomDomain: true,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -83,10 +89,18 @@ stackSuppressions([
     existingVpc: false,
     internetFacing: false,
     useCustomDomain: false,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
 ]);
 
-
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
+
+if (process.env.USE_BSS) {
+  Aspects.of(app).add(new CompositeECRRepositoryAspect());
+}
+
+function synthesizer() {
+  return process.env.USE_BSS ? new BootstraplessStackSynthesizer(): undefined;
+}

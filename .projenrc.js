@@ -15,6 +15,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 
   deps: [
     'cdk-nag@^2.20.6',
+    'cdk-bootstrapless-synthesizer@^2.2.7',
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */

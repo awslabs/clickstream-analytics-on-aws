@@ -1,0 +1,10 @@
+# Use of opensource-codeofconduct email for amazon is expected
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+.github/
+cdk.out/
+node_modules/
+coverage/
+.*/package-lock.json
+

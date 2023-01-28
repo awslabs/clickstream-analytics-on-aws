@@ -3,3 +3,4 @@ test*
 **/node_modules/
 script
 coverage
+deployment/

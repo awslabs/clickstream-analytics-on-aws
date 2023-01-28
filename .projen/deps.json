@@ -85,6 +85,11 @@
       "type": "runtime"
     },
     {
+      "name": "cdk-bootstrapless-synthesizer",
+      "version": "^2.2.7",
+      "type": "runtime"
+    },
+    {
       "name": "cdk-nag",
       "version": "^2.20.6",
       "type": "runtime"

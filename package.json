@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "aws-cdk-lib": "^2.1.0",
+    "cdk-bootstrapless-synthesizer": "^2.2.7",
     "cdk-nag": "^2.20.6",
     "constructs": "^10.0.5"
   },
