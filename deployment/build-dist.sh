@@ -25,6 +25,8 @@ export BUCKET_NAME=$1
 export SOLUTION_NAME=$2
 export BUILD_VERSION=$3
 export GLOBAL_S3_ASSETS_PATH="${__dir}/global-s3-assets"
+# assign solution version in template output
+export SOLUTION_VERSION=$BUILD_VERSION
 
 title "init env"
 
