@@ -35,7 +35,8 @@ TBA
 
 #### Deploy it
 ```shell
-npx cdk deploy
+# deploy the control plane of the solution within a newly created VPC
+npx cdk deploy public-new-vpc-control-plane-stack
 ```
 
 ## How to test

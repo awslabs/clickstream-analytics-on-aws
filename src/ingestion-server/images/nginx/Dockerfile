@@ -1,5 +1,5 @@
 ARG PLATFORM_ARG
-FROM --platform=$PLATFORM_ARG public.ecr.aws/docker/library/nginx:1.22-alpine
+FROM --platform=$PLATFORM_ARG public.ecr.aws/docker/library/nginx:1.22
 
 # default nginx path
 ENV SERVER_ENDPOINT_PATH='/collect'
