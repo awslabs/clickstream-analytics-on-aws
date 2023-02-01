@@ -17,16 +17,17 @@ phases:
     commands:
       - |-
         set -euxo pipefail
+        FEATURE_NAME="${FEATURE_NAME:-''}"
         export BSS_IMAGE_ASSET_REPOSITORY_NAME=$(echo "$SOLUTION_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         BUILD_VERSION=$(git -c pager.tag=false tag --points-at $(git rev-parse --short HEAD) | tail -1)
         if [ "$BUILD_VERSION" == '' ]; then
-          if [ "$BranchName" == '' ]; then
-            BUILD_VERSION=latest
-          else
-            BUILD_VERSION=$BRANCH_NAME
-          fi
+          BUILD_VERSION=latest
         fi
-        export BUILD_VERSION=$BUILD_VERSION-$(/bin/date +"%Y%m%d%H%M")-$(git rev-parse --short HEAD)
+        if [ "$FEATURE_NAME" != '' ]; then
+          BUILD_VERSION=$BUILD_VERSION-$FEATURE_NAME
+        fi
+
+        export BUILD_VERSION=${BUILD_VERSION}-$(/bin/date +"%Y%m%d%H%M")-$(git rev-parse --short HEAD)
         export GLOBAL_ASSETS='default/'
   build:
     commands:
