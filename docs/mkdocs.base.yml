@@ -1,0 +1,19 @@
+site_name: Clickstream Analytics on AWS
+repo_url: https://github.com/awslabs/clickstream-analytics-on-aws/
+
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+
+extra:
+  generator: false
+  copyright: Copyright &copy; 2023 Amazon Web Services
+
+plugins:
+  - search
+  - include-markdown
+  - macros

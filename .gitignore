@@ -60,4 +60,5 @@ junit.xml
 !/.gitlab-ci.yml
 !/.gitlab/ci-templates/build.yml
 !/.gitlab/ci-templates/prlint.yml
+!/.gitlab/ci-templates/docs.yml
 !/.gitlab/ci-templates/cfn-nag.yml

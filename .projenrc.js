@@ -145,6 +145,26 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
+  'docs': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      mkdocs: {
+        stage: 'build',
+        image: {
+          name: 'python:3.9',
+        },
+        before_script: [
+          'python3 -m pip install \'mkdocs<1.5\' \'mkdocs-material<10\' \'mkdocs-material-extensions<1.2\' \'mkdocs-include-markdown-plugin<5\' \'mkdocs-macros-plugin<1\'',
+        ],
+        script: [
+          'mkdocs build -f ./docs/mkdocs.en.yml -s',
+          'mkdocs build -f ./docs/mkdocs.zh.yml -s',
+        ],
+      },
+    },
+  },
   'cfn-nag': {
     stages: [
       'qa',

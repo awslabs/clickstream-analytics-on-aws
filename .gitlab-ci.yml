@@ -7,6 +7,7 @@ default:
 include:
   - local: .gitlab/ci-templates/build.yml
   - local: .gitlab/ci-templates/prlint.yml
+  - local: .gitlab/ci-templates/docs.yml
   - local: .gitlab/ci-templates/cfn-nag.yml
 workflow:
   rules:
