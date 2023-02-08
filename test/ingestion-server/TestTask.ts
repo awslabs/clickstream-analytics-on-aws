@@ -14,7 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import {
+  CfnOutput,
+  CfnParameter,
+  RemovalPolicy,
+  Stack,
+  StackProps,
+} from 'aws-cdk-lib';
 import {
   FlowLogDestination,
   GatewayVpcEndpointAwsService,
@@ -30,8 +36,8 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { PublicHostedZone } from 'aws-cdk-lib/aws-route53';
 import {
   BlockPublicAccess,
-  Bucket, BucketEncryption,
-
+  Bucket,
+  BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
@@ -99,7 +105,11 @@ export function createS3Bucket(scope: Construct) {
 }
 
 export function importS3Bucket(scope: Construct) {
-  return Bucket.fromBucketName(scope, 'from-bucket', 'clickstream-infra-s3sink4dfdadf4-10ewmceey09vp');
+  return Bucket.fromBucketName(
+    scope,
+    'from-bucket',
+    'clickstream-infra-s3sink4dfdadf4-10ewmceey09vp',
+  );
 }
 
 export function createSns(scope: Construct): Topic {
@@ -139,6 +149,9 @@ export interface TestStackProps extends StackProps {
   withDomainZone?: boolean;
   withMskConfig?: boolean;
   serverEndpointPath?: string;
+  serverCorsOrigin?: string;
+  warmPoolSize?: number;
+  withWarmPoolSizeParameter?: boolean;
 }
 
 export class TestStack extends Stack {
@@ -149,6 +162,9 @@ export class TestStack extends Stack {
       withDomainZone: false,
       withMskConfig: false,
       withAlbAccessLog: false,
+      serverCorsOrigin: '*',
+      warmPoolSize: 0,
+      withWarmPoolSizeParameter: false,
     },
   ) {
     super(scope, id, props);
@@ -203,22 +219,40 @@ export class TestStack extends Stack {
       };
     }
 
+    let fleetProps = {
+      ...getDefaultFleetPropsByTier(TierType.SMALL),
+      warmPoolSize: props.warmPoolSize,
+    };
+
+    if (props.withWarmPoolSizeParameter) {
+      const warmPoolSizeParam = new CfnParameter(this, 'WarmPoolSizeParam', {
+        type: 'Number',
+        default: '0',
+        minValue: 0,
+      });
+      fleetProps = {
+        ...getDefaultFleetPropsByTier(TierType.SMALL),
+        warmPoolSize: warmPoolSizeParam.valueAsNumber,
+      };
+    }
+
     const serverProps: IngestionServerProps = {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      fleetProps: getDefaultFleetPropsByTier(TierType.SMALL),
+      fleetProps,
       serverEndpointPath: props.serverEndpointPath
         ? props.serverEndpointPath
         : '/collect',
-      serverCorsOrigin: '*',
+      serverCorsOrigin: props.serverCorsOrigin || '*',
       notificationsTopic,
       protocol,
       ...mskSink,
       ...accessLogConfig,
       ...domainZoneConfig,
     };
+
     const ingestionServer = new IngestionServer(
       this,
       'IngestionServer',

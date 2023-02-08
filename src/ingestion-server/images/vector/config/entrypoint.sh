@@ -37,12 +37,10 @@ then
 fi 
 
 
-echo "/usr/local/bin/vector validate ${toml_files}"
-/usr/local/bin/vector validate ${toml_files}
+echo "vector validate ${toml_files}"
+vector validate ${toml_files}
 
 configs=$(echo $toml_files | sed "s#/etc/#--config /etc/#g")
 
-echo "/usr/local/bin/vector ${configs} --require-healthy $VECTOR_REQUIRE_HEALTHY ${VECTOR_THREADS_OPT}"
-/usr/local/bin/vector ${configs} --require-healthy $VECTOR_REQUIRE_HEALTHY ${VECTOR_THREADS_OPT}
-
-
+echo "vector ${configs} --require-healthy $VECTOR_REQUIRE_HEALTHY ${VECTOR_THREADS_OPT}"
+vector ${configs} --require-healthy $VECTOR_REQUIRE_HEALTHY ${VECTOR_THREADS_OPT}

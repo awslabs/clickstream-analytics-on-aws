@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Duration, Stack } from 'aws-cdk-lib';
+import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Ec2Service } from 'aws-cdk-lib/aws-ecs';
 import {
@@ -27,9 +27,12 @@ import {
   ListenerCondition,
   ListenerAction,
   IpAddressType,
+  SslPolicy,
+  CfnListener,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../../common/alb';
+import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 export const PROXY_PORT = 8088;
@@ -129,6 +132,17 @@ export function createApplicationLoadBalancer(
       alb,
       albLogPrefix: props.albLogProps.prefix || Stack.of(scope).stackName,
     });
+  } else {
+    addCfnNagSuppressRules(
+      alb.node.defaultChild as CfnResource,
+      [
+        {
+          id: 'W52',
+          reason:
+            'The product design enables the access log to be enabled or disabled by customer input',
+        },
+      ],
+    );
   }
 
   let albUrl = '';
@@ -137,6 +151,7 @@ export function createApplicationLoadBalancer(
     const httpsListener = alb.addListener('HTTPSListener', {
       protocol: ApplicationProtocol.HTTPS,
       port: httpsPort,
+      sslPolicy: SslPolicy.TLS12,
     });
     httpsListener.addCertificates('Certificate', [
       ListenerCertificate.fromArn(props.certificateArn),
@@ -161,6 +176,17 @@ export function createApplicationLoadBalancer(
         port: `${httpsPort}`,
       }),
     });
+
+    addCfnNagSuppressRules(
+      HttpRedirectListener.node.defaultChild as CfnListener,
+      [
+        {
+          id: 'W56',
+          reason:
+            'Using HTTP listener is by design',
+        },
+      ],
+    );
   } else {
     const httpListener = alb.addListener('Listener', {
       protocol: ApplicationProtocol.HTTP,
@@ -171,6 +197,17 @@ export function createApplicationLoadBalancer(
       httpListener,
       endpointPath,
       httpContainerName,
+    );
+
+    addCfnNagSuppressRules(
+      httpListener.node.defaultChild as CfnListener,
+      [
+        {
+          id: 'W56',
+          reason:
+            'Using HTTP listener is by design',
+        },
+      ],
     );
 
     albUrl = getAlbUrl(alb, 'http', httpPort, endpointPath);

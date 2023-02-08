@@ -18,6 +18,7 @@ import { App, Aspects, Stack } from 'aws-cdk-lib';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
+import { IngestionServerStack } from './ingestion-server-stack';
 
 const app = new App();
 
@@ -95,8 +96,11 @@ stackSuppressions([
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
 ]);
 
-Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
+new IngestionServerStack(app, 'ingestion-server-stack', {
+  synthesizer: synthesizer(),
+});
 
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {
   Aspects.of(app).add(new CompositeECRRepositoryAspect());
 }

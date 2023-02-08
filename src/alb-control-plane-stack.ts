@@ -27,11 +27,13 @@ import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
+import { DOMAIN_NAME_PATTERN } from './common/constant';
 import { LogBucket } from './common/log-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
 
+const domainNamePattern = DOMAIN_NAME_PATTERN;
 
 export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProps {
   /**
@@ -120,7 +122,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       const hostZoneName = new CfnParameter(this, 'hostZoneName', {
         description: 'Hosted zone name in Route 53',
         type: 'String',
-        allowedPattern: '^(?:[a-zA-Z0-9!"#\\$%&\'\\(\\)\\*\\+,/:;<=>\\?@\\[\\]\\^_`{\\|}~\\\\]+(?:\-*[a-zA-Z0-9!"#\\$%&\'\\(\\)\\*\\+,/:;<=>\\?@\\[\\]\\^_`{\\|}~\\\\])*\\.)+[a-zA-Z0-9]{2,63}$',
+        allowedPattern: `^${domainNamePattern}$`,
+        constraintDescription: `hostZoneName must match pattern ${domainNamePattern}`,
       });
 
       const hostZone = HostedZone.fromHostedZoneAttributes(this, 'hostZone', {

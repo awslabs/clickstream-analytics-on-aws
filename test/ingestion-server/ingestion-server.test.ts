@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import { App } from 'aws-cdk-lib';
-import { Match, Template } from 'aws-cdk-lib/assertions';
+import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { TestStack } from './TestTask';
 
 function findFirstResource(template: Template, type: string) {
@@ -76,6 +76,76 @@ test('Has one ECS Service', () => {
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::ECS::Service', 1);
 });
+
+test('WarmPool is created as expected', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    warmPoolSize: 1,
+  });
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::AutoScaling::WarmPool', {
+    MinSize: 1,
+  });
+});
+
+test('WarmPool is not created when warmPoolSize=0', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    warmPoolSize: 0,
+  });
+  const template = Template.fromStack(stack);
+  template.resourceCountIs('AWS::AutoScaling::WarmPool', 0);
+});
+
+
+test('WarmPool is created when using CfnParameter', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    withWarmPoolSizeParameter: true,
+  });
+  const paramCapture = new Capture();
+  const template = Template.fromStack(stack);
+  template.resourceCountIs('AWS::AutoScaling::WarmPool', 1);
+  template.hasResourceProperties('AWS::AutoScaling::WarmPool', {
+    MinSize: {
+      Ref: paramCapture,
+    },
+  });
+  expect(paramCapture.asString()).toEqual('WarmPoolSizeParam');
+});
+
+
+test('ECS task has log Configuration', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+  const template = Template.fromStack(stack);
+
+  const taskDef = findFirstResource(template, 'AWS::ECS::TaskDefinition');
+  const containerDefinitions = taskDef.Properties.ContainerDefinitions;
+
+  for (const def of containerDefinitions ) {
+    expect(def.LogConfiguration.LogDriver).toEqual('awslogs');
+    expect(def.LogConfiguration.Options['awslogs-stream-prefix']).toMatch(new RegExp('proxy|worker'));
+  }
+});
+
+
+test('LogGroup has config RetentionInDays', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+  const template = Template.fromStack(stack);
+  template.allResourcesProperties('AWS::Logs::LogGroup', {
+    RetentionInDays: Match.anyValue(),
+  });
+});
+
 
 test('ECS service has load balancer', () => {
   const app = new App();
@@ -146,6 +216,7 @@ test('ALB has certification and protocol https', () => {
     Certificates: Match.anyValue(),
     Port: 443,
     Protocol: 'HTTPS',
+    SslPolicy: 'ELBSecurityPolicy-TLS-1-2-2017-01',
   });
 });
 
@@ -515,3 +586,39 @@ test('S3 bucket policy is configured to allow ALB to write files when Alb access
   expect(hasAccountRoot).toBeTruthy();
 });
 
+
+test('server EndpointPath and CorsOrigin can be configured', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    serverEndpointPath: '/abc/test',
+    serverCorsOrigin: 'a.test.com,b.test.net',
+  });
+  const template = Template.fromStack(stack);
+  const taskDefinition = findFirstResource(template, 'AWS::ECS::TaskDefinition');
+  const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
+  const proxy = containerDefinitions.filter((c: any) => c.Name == 'proxy')[0];
+
+  const env1 = {
+    Name: 'SERVER_ENDPOINT_PATH',
+    Value: '/abc/test',
+  };
+
+  const env2 = {
+    Name: 'SERVER_CORS_ORIGIN',
+    Value: 'a.test.com,b.test.net',
+  };
+
+  const hasPath =
+  proxy.Environment.filter(
+    (e: any) => e.Name == env1.Name && e.Value == env1.Value,
+  ).length == 1;
+
+  const hasCorsOrigin =
+  proxy.Environment.filter(
+    (e: any) => e.Name == env2.Name && e.Value == env2.Value,
+  ).length == 1;
+
+  expect(hasPath).toBeTruthy();
+  expect(hasCorsOrigin).toBeTruthy();
+});

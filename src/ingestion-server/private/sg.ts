@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { CfnResource } from 'aws-cdk-lib';
 import {
   IVpc,
   Peer,
@@ -21,6 +22,7 @@ import {
   SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 export function createALBSecurityGroup(
@@ -40,6 +42,18 @@ export function createALBSecurityGroup(
   albSg.addIngressRule(Peer.anyIpv4(), Port.tcp(port.http));
   albSg.addIngressRule(Peer.anyIpv6(), Port.tcp(port.https));
   albSg.addIngressRule(Peer.anyIpv6(), Port.tcp(port.http));
+
+  addCfnNagSuppressRules(albSg.node.defaultChild as CfnResource, [
+    {
+      id: 'W9',
+      reason: 'Design intent: Security Groups found with ingress cidr that is not /32',
+    },
+    {
+      id: 'W2',
+      reason: 'Design intent: Security Groups found with cidr open to world on ingress',
+    },
+  ]);
+
   return albSg;
 }
 
@@ -52,7 +66,18 @@ export function createECSSecurityGroup(
     vpc,
     allowAllOutbound: true,
   });
-  ec2Sg.addIngressRule(ec2Sg, Port.allTcp());
+
+  addCfnNagSuppressRules(ec2Sg.node.defaultChild as CfnResource, [
+    {
+      id: 'W40',
+      reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
+    },
+    {
+      id: 'W5',
+      reason: 'Design intent: Security Groups found with cidr open to world on egress',
+    },
+  ]);
+
   return ec2Sg;
 }
 

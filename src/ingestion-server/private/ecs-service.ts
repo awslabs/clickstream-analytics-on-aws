@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Duration, Stack } from 'aws-cdk-lib';
+import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
   Cluster,
@@ -26,7 +26,9 @@ import {
   Ec2Service,
   PropagatedTagSource,
 } from 'aws-cdk-lib/aws-ecs';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
@@ -53,6 +55,24 @@ export function crateECSService(
     workerConnections = props.fleetProps.proxyMaxConnections;
   }
 
+  const proxyLogGroup = new LogGroup(scope, 'proxy-log', {
+    retention: RetentionDays.ONE_MONTH,
+  });
+
+  const workerLogGroup = new LogGroup(scope, 'worker-log', {
+    retention: RetentionDays.ONE_MONTH,
+  });
+
+  addCfnNagSuppressRules(proxyLogGroup.node.defaultChild as CfnResource, [{
+    id: 'W84',
+    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
+  }]);
+
+  addCfnNagSuppressRules(workerLogGroup.node.defaultChild as CfnResource, [{
+    id: 'W84',
+    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
+  }]);
+
   const proxyContainer = taskDefinition.addContainer('proxy', {
     image: props.proxyImage,
     memoryReservationMiB:
@@ -70,6 +90,7 @@ export function crateECSService(
     },
     logging: LogDriver.awsLogs({
       streamPrefix: 'proxy',
+      logGroup: proxyLogGroup,
     }),
   });
 
@@ -82,6 +103,7 @@ export function crateECSService(
     environment: getVectorEnvs(scope, props),
     logging: LogDriver.awsLogs({
       streamPrefix: 'worker',
+      logGroup: workerLogGroup,
     }),
   });
 
@@ -160,4 +182,3 @@ function addScalingPolicy(
     scaleOutCooldown: Duration.minutes(1),
   });
 }
-

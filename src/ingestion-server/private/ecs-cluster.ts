@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Duration } from 'aws-cdk-lib';
+import { Aspects, Duration, IAspect, Token } from 'aws-cdk-lib';
 import {
   AutoScalingGroup,
   BlockDeviceVolume,
+  CfnWarmPool,
   HealthCheck,
 } from 'aws-cdk-lib/aws-autoscaling';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
@@ -29,8 +30,9 @@ import {
   AsgCapacityProvider,
   EcsOptimizedImage,
   AmiHardwareType,
+  CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
-import { Construct } from 'constructs';
+import { Construct, IConstruct } from 'constructs';
 import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 import { createProxyAndWorkerECRImages } from './ecr';
 
@@ -100,11 +102,22 @@ export function createECSClusterAndService(
     ],
   });
 
-  if (ecsAsgSetting.warmPoolSize && ecsAsgSetting.warmPoolSize > 0) {
-    autoScalingGroup.addWarmPool({
+
+  if (Token.isUnresolved(ecsAsgSetting.warmPoolSize)) {
+    // warmPoolSize is passed by CfnParameter
+    new CfnWarmPool(scope, 'warmPool', {
+      autoScalingGroupName: autoScalingGroup.autoScalingGroupName,
       minSize: ecsAsgSetting.warmPoolSize,
     });
+  } else {
+    // warmPoolSize is passed by normal variable
+    if (ecsAsgSetting.warmPoolSize && ecsAsgSetting.warmPoolSize > 0) {
+      autoScalingGroup.addWarmPool({
+        minSize: ecsAsgSetting.warmPoolSize,
+      });
+    }
   }
+
   addPoliciesToAsgRole(autoScalingGroup.role);
 
   const capacityProvider = new AsgCapacityProvider(
@@ -116,7 +129,6 @@ export function createECSClusterAndService(
     },
   );
 
-  capacityProvider.node.addDependency(autoScalingGroup);
   ecsCluster.addAsgCapacityProvider(capacityProvider);
 
   const { proxyImage, workerImage } = createProxyAndWorkerECRImages(
@@ -131,5 +143,26 @@ export function createECSClusterAndService(
     capacityProvider,
     autoScalingGroup,
   });
+  Aspects.of(scope).add(new AddDefaultCapacityProviderStrategyAspect(capacityProvider));
   return { ...ecsServiceInfo, autoScalingGroup, ecsCluster };
+}
+
+
+class AddDefaultCapacityProviderStrategyAspect implements IAspect {
+  capacityProvider: AsgCapacityProvider;
+
+  constructor(capacityProvider: AsgCapacityProvider ) {
+    this.capacityProvider = capacityProvider;
+  }
+  public visit(node: IConstruct): void {
+    if (node instanceof CfnClusterCapacityProviderAssociations) {
+      node.addPropertyOverride('DefaultCapacityProviderStrategy', [
+        {
+          Base: 0,
+          Weight: 1,
+          CapacityProvider: this.capacityProvider.capacityProviderName,
+        },
+      ]);
+    }
+  }
 }
