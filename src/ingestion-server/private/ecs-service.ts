@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
+import { Aspects, CfnResource, CustomResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
   Cluster,
@@ -25,11 +25,13 @@ import {
   NetworkMode,
   Ec2Service,
   PropagatedTagSource,
+  CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Construct } from 'constructs';
+import { Construct, IConstruct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
+import { createDeleteECSClusterCustomResource } from './custom-resource';
 
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 
@@ -126,6 +128,14 @@ export function crateECSService(
   });
   addScalingPolicy(ecsService, ecsAsgSetting);
 
+  const cr = createDeleteECSClusterCustomResource(scope, {
+    custerName: props.ecsCluster.clusterName,
+    serviceName: ecsService.serviceName,
+    asgName: props.autoScalingGroup.autoScalingGroupName,
+  });
+
+  Aspects.of(scope).add(new AddDependency(cr));
+
   return {
     ecsService,
     taskDefinition,
@@ -181,4 +191,19 @@ function addScalingPolicy(
     scaleInCooldown: Duration.minutes(45),
     scaleOutCooldown: Duration.minutes(1),
   });
+}
+
+// add dependency
+// make sure run customResource firstly, then delete ClusterCapacityProviderAssociations while deleting the stack
+class AddDependency implements IAspect {
+  customResource: CustomResource;
+
+  constructor(customResource: CustomResource ) {
+    this.customResource = customResource;
+  }
+  public visit(node: IConstruct): void {
+    if (node instanceof CfnClusterCapacityProviderAssociations) {
+      this.customResource.node.addDependency(node);
+    }
+  }
 }

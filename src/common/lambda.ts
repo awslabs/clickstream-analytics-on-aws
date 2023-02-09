@@ -15,54 +15,38 @@ limitations under the License.
 */
 
 import { Arn, ArnFormat } from 'aws-cdk-lib';
-import { Policy, PolicyStatement, Effect, CfnPolicy } from 'aws-cdk-lib/aws-iam';
+import {
+  Policy,
+  PolicyStatement,
+  Effect,
+  CfnPolicy,
+  Role,
+  ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { IConstruct } from 'constructs';
 import { addCfnNagSuppressRules } from './cfn-nag';
 
-export function cloudWatchSendLogs(
-  id: string,
-  func: IFunction,
-) : IFunction {
+export function cloudWatchSendLogs(id: string, func: IFunction): IFunction {
   if (func.role !== undefined) {
-    const logGroupArn = Arn.format({
-      resource: 'log-group',
-      service: 'logs',
-      resourceName: `aws/lambda/${func.functionName}:*`,
-      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-    }, func.stack);
+    const logGroupArn = getLambdaLogGroupArn(func);
     const lambdaPolicy = new Policy(func.stack, id, {
-      statements: [
-        new PolicyStatement({
-          actions: [
-            'logs:CreateLogStream',
-            'logs:PutLogEvents',
-            'logs:CreateLogGroup',
-          ],
-          resources: [logGroupArn],
-          effect: Effect.ALLOW,
-        }),
-      ],
+      statements: getLambdaBasicPolicyStatements(logGroupArn),
     });
     lambdaPolicy.attachToRole(func.role);
 
-    addCfnNagSuppressRules(
-      lambdaPolicy.node.defaultChild as CfnPolicy,
-      [
-        {
-          id: 'W12',
-          reason:
-              'The lambda service writes to undetermined logs stream by design',
-        },
-      ],
-    );
+    addCfnNagSuppressRules(lambdaPolicy.node.defaultChild as CfnPolicy, [
+      {
+        id: 'W12',
+        reason:
+          'The lambda service writes to undetermined logs stream by design',
+      },
+    ]);
   }
   return func;
 }
 
-export function createENI(
-  id: string,
-  func: IFunction,
-) : IFunction {
+export function createENI(id: string, func: IFunction): IFunction {
   if (func.role !== undefined) {
     const lambdaPolicy = new Policy(func.stack, id, {
       statements: [
@@ -82,16 +66,51 @@ export function createENI(
     lambdaPolicy.attachToRole(func.role);
     func.node.addDependency(lambdaPolicy);
 
-    addCfnNagSuppressRules(
-      lambdaPolicy.node.defaultChild as CfnPolicy,
-      [
-        {
-          id: 'W12',
-          reason:
-              'The lambda service creates undetermined eni by design',
-        },
-      ],
-    );
+    addCfnNagSuppressRules(lambdaPolicy.node.defaultChild as CfnPolicy, [
+      {
+        id: 'W12',
+        reason: 'The lambda service creates undetermined eni by design',
+      },
+    ]);
   }
   return func;
+}
+
+function getLambdaBasicPolicyStatements(logGroupArn: string = '*') {
+  const statements = [
+    new PolicyStatement({
+      actions: [
+        'logs:CreateLogStream',
+        'logs:PutLogEvents',
+        'logs:CreateLogGroup',
+      ],
+      resources: [logGroupArn],
+    }),
+  ];
+  return statements;
+}
+
+function getLambdaLogGroupArn(func: IFunction) {
+  return Arn.format(
+    {
+      resource: 'log-group',
+      service: 'logs',
+      resourceName: `aws/lambda/${func.functionName}:*`,
+      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+    },
+    func.stack,
+  );
+}
+
+export function createLambdaRole(
+  scope: IConstruct,
+  id: string,
+  extraPolicyStatements: PolicyStatement[],
+): Role {
+  const role = new Role(scope, id, {
+    assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+  });
+  getLambdaBasicPolicyStatements().forEach((ps) => role.addToPolicy(ps));
+  extraPolicyStatements.forEach((ps) => role.addToPolicy(ps));
+  return role;
 }

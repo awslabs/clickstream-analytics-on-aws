@@ -24,7 +24,6 @@ import {
   Stack,
   StackProps,
   ICfnConditionExpression,
-  Aspects,
 } from 'aws-cdk-lib';
 import {
   InstanceType,
@@ -46,7 +45,7 @@ import {
   IngestionServerProps,
 } from './ingestion-server/ingestion-server';
 import { createStackParameters } from './ingestion-server/parameter';
-import { AddCfnNag } from './ingestion-server/private/cfn-nag';
+import { addCfnNagToIngestionServer } from './ingestion-server/private/cfn-nag';
 
 export function addCdkNagToStack(stack: Stack) {
   NagSuppressions.addStackSuppressions(stack, [
@@ -95,6 +94,12 @@ export function addCdkNagToStack(stack: Stack) {
       id: 'AwsSolutions-SNS3',
       reason:
         'The SNS Topic is set by cfnParameter, not created in this stack',
+    },
+    {
+      id: 'AwsSolutions-L1',
+      // The non-container Lambda function is not configured to use the latest runtime version
+      reason:
+        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
     },
   ]);
 }
@@ -389,8 +394,7 @@ function createNestStackWithCondition(
   (ingestionServer.nestedStackResource as CfnStack).cfnOptions.condition =
     condition;
 
-  addCdkNagToStack(ingestionServer);
-  Aspects.of(ingestionServer).add(new AddCfnNag());
+  addCfnNagToIngestionServer(ingestionServer);
 
   const outputUrl = new CfnOutput(scope, id + 'ingestionServerUrl', {
     value: ingestionServer.serverUrl,

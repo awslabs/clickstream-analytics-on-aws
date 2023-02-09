@@ -29,6 +29,17 @@ function findFirstResource(template: Template, type: string) {
   return;
 }
 
+function findFirstResourceKey(template: Template, type: string) {
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const resource = allResources[key];
+    if (resource.Type == type) {
+      return { key, resource };
+    }
+  }
+  return { key: undefined, resource: undefined };
+}
+
 function findResources(template: Template, type: string) {
   const resources: any[] = [];
   const allResources = template.toJSON().Resources;
@@ -622,3 +633,40 @@ test('server EndpointPath and CorsOrigin can be configured', () => {
   expect(hasPath).toBeTruthy();
   expect(hasCorsOrigin).toBeTruthy();
 });
+
+
+test('ECS::ClusterCapacityProviderAssociations has DefaultCapacityProviderStrategy', ()=> {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::ECS::ClusterCapacityProviderAssociations', {
+    CapacityProviders: Match.anyValue(),
+    DefaultCapacityProviderStrategy: Match.anyValue(),
+  });
+
+});
+
+test('DeleteECSClusterCustomResource depends on the ECS::ClusterCapacityProviderAssociations', ()=> {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+  const template = Template.fromStack(stack);
+  const { key: associationsKey } = findFirstResourceKey(template, 'AWS::ECS::ClusterCapacityProviderAssociations');
+  const dependsOnCapture = new Capture();
+  template.hasResource('AWS::CloudFormation::CustomResource', {
+    Properties: {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('IngestionServerDeleteECSClusterCustomResourceProviderframeworkonEvent.*'),
+          'Arn',
+        ],
+      },
+    },
+    DependsOn: dependsOnCapture,
+  });
+  expect(dependsOnCapture.asArray().includes(associationsKey)).toBeTruthy();
+});
+
