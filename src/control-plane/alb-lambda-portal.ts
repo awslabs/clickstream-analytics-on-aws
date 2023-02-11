@@ -48,7 +48,11 @@ import {
   ServicePrincipal,
   Role,
 } from 'aws-cdk-lib/aws-iam';
-import { DockerImageFunction, DockerImageCode } from 'aws-cdk-lib/aws-lambda';
+import {
+  DockerImageFunction,
+  DockerImageCode,
+  Architecture,
+} from 'aws-cdk-lib/aws-lambda';
 import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -57,6 +61,7 @@ import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb'
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { LogBucket } from '../common/log-bucket';
+import { Constant } from './private/constant';
 
 export interface RouteProps {
   readonly routePath: string;
@@ -136,7 +141,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       validate: () => {
         const messages: string[] = [];
         if (props.domainProsps !== undefined && props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTP) {
-          messages.push('Please use the HTTPS protocol when using custom domain name');
+          messages.push(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
         }
         return messages;
       },
@@ -161,6 +166,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
         },
       ],
     );
+
     const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
       description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
       code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
@@ -172,6 +178,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       vpc: props.networkProps.vpc,
       vpcSubnets: props.applicationLoadBalancerProps.internetFacing ? { subnetType: SubnetType.PRIVATE_WITH_EGRESS } : props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
+      architecture: Architecture.ARM_64,
     });
 
     createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));

@@ -72,21 +72,24 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         type: 'AWS::EC2::VPC::Id',
       });
 
-      const publicSubnets = new CfnParameter(this, 'publicSubnets', {
-        description: 'Select public subnets',
-        type: 'List<AWS::EC2::Subnet::Id>',
-      });
+      let publicSubnets: CfnParameter | undefined = undefined;
+      if ( props.internetFacing ) {
+        publicSubnets = new CfnParameter(this, 'publicSubnets', {
+          description: 'Select public subnets',
+          type: 'List<AWS::EC2::Subnet::Id>',
+        });
+      }
 
       const privateSubnets = new CfnParameter(this, 'privateSubnets', {
         description:
-          'Select private subnets',
+            'Select private subnets',
         type: 'List<AWS::EC2::Subnet::Id>',
       });
 
       vpc = Vpc.fromVpcAttributes(this, 'PortalVPC', {
         vpcId: vpcId.valueAsString,
         availabilityZones: Fn.getAzs(),
-        publicSubnetIds: publicSubnets.valueAsList,
+        publicSubnetIds: publicSubnets?.valueAsList,
         privateSubnetIds: privateSubnets.valueAsList,
       });
     }
@@ -114,16 +117,18 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         description: 'The route53 hostzone id.',
         type: 'AWS::Route53::HostedZone::Id',
       });
-      const recordName = new CfnParameter(this, 'recordName', {
-        description: 'Record name(the name of the domain or subdomain)',
-        type: 'String',
-        allowedPattern: '[a-zA-Z0-9]{1,63}',
-      });
+
       const hostZoneName = new CfnParameter(this, 'hostZoneName', {
         description: 'Hosted zone name in Route 53',
         type: 'String',
         allowedPattern: `^${domainNamePattern}$`,
         constraintDescription: `hostZoneName must match pattern ${domainNamePattern}`,
+      });
+
+      const recordName = new CfnParameter(this, 'recordName', {
+        description: 'Record name(the name of the domain or subdomain)',
+        type: 'String',
+        allowedPattern: '[a-zA-Z0-9]{1,63}',
       });
 
       const hostZone = HostedZone.fromHostedZoneAttributes(this, 'hostZone', {

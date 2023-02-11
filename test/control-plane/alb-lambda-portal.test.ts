@@ -14,20 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { assert } from 'console';
 import {
   Duration, App,
 } from 'aws-cdk-lib';
 import {
   Template,
   Match,
-  // Capture,
 } from 'aws-cdk-lib/assertions';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol, IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function, Runtime, InlineCode } from 'aws-cdk-lib/aws-lambda';
+import { Constant } from '../../src/control-plane/private/constant';
 import { TestEnv, TestStack } from './test-utils';
+
 
 function findResources(template: Template, type: string) {
   const resources: any[] = [];
@@ -46,7 +46,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   test('Invalid subnet selection', () => {
     const stack = new TestStack(new App(), 'testStack');
     expect(() => {
-      TestEnv.newStackWithPortalProps({
+      TestEnv.newAlbStackWithPortalProps({
         applicationLoadBalancerProps: {
           internetFacing: false,
           protocol: ApplicationProtocol.HTTP,
@@ -64,7 +64,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('Internet facing', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::ElasticLoadBalancingV2::LoadBalancer', 1);
@@ -76,7 +76,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('Log bucket', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::S3::Bucket', 1);
@@ -103,7 +103,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('SecurityGroup', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
@@ -128,7 +128,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('ALB access log', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
@@ -152,7 +152,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('ALB listener', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 1);
@@ -173,7 +173,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('ALB targetGroup', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::ElasticLoadBalancingV2::TargetGroup', 1);
@@ -195,7 +195,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('ALB listenerRule', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 1);
@@ -215,7 +215,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('ALB Lambda function is created with expected properties', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::Lambda::Function', 1);
@@ -236,7 +236,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }),
 
   test('IAM policies are created for Lambda functions', () => {
-    const testElements = TestEnv.newStackWithDefaultPortal();
+    const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
     template.resourceCountIs('AWS::IAM::Policy', 2);
@@ -311,8 +311,8 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     );
   }),
 
-  test('HTTP with custom domain', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+  test('ALB custom domian', () => {
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -322,15 +322,18 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
 
+    let errorMsg = '';
     try {
       Template.fromStack(testStack);
     } catch (error) {
-      assert((error as Error).message.includes('Please use the HTTPS protocol when using custom domain name'));
+      errorMsg = (error as Error).message;
     }
+
+    expect(errorMsg).toContain(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
   }),
 
   test('Certificate - no cetificate', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       hasCert: false,
       applicationLoadBalancerProps: {
         internetFacing: true,
@@ -351,7 +354,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   });
 
   test('Certificate', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       hasCert: true,
       applicationLoadBalancerProps: {
         internetFacing: true,
@@ -372,7 +375,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   });
 
   test('HTTPS protocol', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTPS,
@@ -408,7 +411,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('HTTP redirect', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTPS,
@@ -438,7 +441,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('Custom https port', () => {
-    const testStack = TestEnv.newStackWithPortalPropsAndCusdomain({
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       hasCert: true,
       port: 9443,
       applicationLoadBalancerProps: {
@@ -475,7 +478,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('http - custom port', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       port: 8888,
     });
     const template = Template.fromStack(testStack);
@@ -490,7 +493,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('security group for internal ALB', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: false,
         protocol: ApplicationProtocol.HTTP,
@@ -521,7 +524,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
 
   test('source security group for internal ALB', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: false,
         protocol: ApplicationProtocol.HTTP,
@@ -539,7 +542,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('DUAL Load balancer', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -577,7 +580,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('More application load balancer options', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -618,7 +621,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
 
   test('External log bucket for alb access log', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -654,7 +657,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('External log bucket for alb access log with custom prefix', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -680,7 +683,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('Disable alb access log', () => {
-    const testStack = TestEnv.newStackWithPortalProps({
+    const testStack = TestEnv.newAlbStackWithPortalProps({
       applicationLoadBalancerProps: {
         internetFacing: true,
         protocol: ApplicationProtocol.HTTP,
@@ -712,7 +715,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
 
   test('Public method addRoute', () => {
-    const stackElements = TestEnv.newStackWithDefaultPortal();
+    const stackElements = TestEnv.newAlbStackWithDefaultPortal();
     const testFn = new Function(stackElements.stack, 'testFunction', {
       runtime: Runtime.NODEJS_16_X,
       handler: 'index.handler',
@@ -762,7 +765,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   }); //end test case
 
   test('Public method addFixedResponse', () => {
-    const stackElements = TestEnv.newStackWithDefaultPortal();
+    const stackElements = TestEnv.newAlbStackWithDefaultPortal();
 
     stackElements.portal.addFixedResponse('testFixResponse', {
       routePath: '/config',

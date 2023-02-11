@@ -18,6 +18,7 @@ import { App, Aspects, Stack } from 'aws-cdk-lib';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
+import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
 
 const app = new App();
@@ -95,6 +96,39 @@ stackSuppressions([
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
 ]);
+
+stackSuppressions([
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
+    targetToCNRegions: true,
+    useCustomDomainName: true,
+  }),
+], [
+  { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
+  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+]);
+
+stackSuppressions([
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global'),
+], [
+  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+]);
+
+
+stackSuppressions([
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
+    useCustomDomainName: true,
+  }),
+], [
+  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
+]);
+
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 new IngestionServerStack(app, 'ingestion-server-stack', {
   synthesizer: synthesizer(),

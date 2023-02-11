@@ -192,8 +192,9 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     const template = Template.fromStack(portalStack);
 
     template.hasParameter('vpcId', {});
-    template.hasParameter('publicSubnets', {});
     template.hasParameter('privateSubnets', {});
+    const publicSubnets = template.findParameters('PublicSubnets', {});
+    expect(publicSubnets).toEqual({});
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       Scheme: 'internal',

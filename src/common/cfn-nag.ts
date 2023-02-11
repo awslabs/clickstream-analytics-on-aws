@@ -34,6 +34,10 @@ export function addCfnNagSuppressRules(
   });
 }
 
+export interface CfnNagMetadata {
+  readonly rules_to_suppress: CfnNagSuppressRule[];
+}
+
 export interface AddCfnNagItem {
   readonly paths_endswith: string[];
   readonly rules_to_suppress: CfnNagSuppressRule[];
@@ -65,4 +69,3 @@ class AddCfnNagForCdkPath implements IAspect {
     }
   }
 }
-

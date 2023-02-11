@@ -84,7 +84,7 @@ export class TestEnv {
     return new TestStack(new App(), 'testStack');
   }
 
-  public static newStackWithDefaultPortal() : StackElements {
+  public static newAlbStackWithDefaultPortal() : StackElements {
 
     const stack = new TestStack(new App(), 'testStack');
 
@@ -110,7 +110,7 @@ export class TestEnv {
     return { stack, portal };
   }
 
-  public static newStackWithPortalProps( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
+  public static newAlbStackWithPortalProps( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
 
     const stack = props?.stack ?? new TestStack(new App(), 'testStack');
 
@@ -162,7 +162,7 @@ export class TestEnv {
     return stack;
   }
 
-  public static newStackWithPortalPropsAndCusdomain( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
+  public static newAlbStackWithPortalPropsAndCusdomain( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
 
     const stack = new TestStack(new App(), 'testStack');
 
