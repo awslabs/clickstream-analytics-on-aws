@@ -23,10 +23,6 @@ import { IngestionServerStack } from './ingestion-server-stack';
 
 const app = new App();
 
-const commonStackProps = {
-  synthesizer: synthesizer(),
-};
-
 function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) {
   stacks.forEach(s => NagSuppressions.addStackSuppressions(s, suppressions, true));
 }
@@ -36,25 +32,25 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: false,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
   new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domian-control-plane-stack', {
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: true,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
   new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-control-plane-stack', {
     existingVpc: false,
     internetFacing: true,
     useCustomDomain: false,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
   new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-custom-domain-control-plane-stack', {
     existingVpc: false,
     internetFacing: true,
     useCustomDomain: true,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -67,13 +63,13 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: false,
     useCustomDomain: false,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
   new ApplicationLoadBalancerControlPlaneStack(app, 'private-new-vpc-control-plane-stack', {
     existingVpc: false,
     internetFacing: false,
     useCustomDomain: false,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
@@ -88,7 +84,7 @@ stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
     targetToCNRegions: true,
     useCustomDomainName: true,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
 ], [
   ...commonSuppresionRulesForCloudFrontS3Pattern,
@@ -102,14 +98,14 @@ const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
 ], commonSuppresionRulesForCloudFrontS3PatternInGloabl);
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
     useCustomDomainName: true,
-    ...commonStackProps,
+    synthesizer: synthesizer(),
   }),
 ], [
   ...commonSuppresionRulesForCloudFrontS3PatternInGloabl,
@@ -119,7 +115,7 @@ stackSuppressions([
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 new IngestionServerStack(app, 'ingestion-server-stack', {
-  ...commonStackProps,
+  synthesizer: synthesizer(),
 });
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
