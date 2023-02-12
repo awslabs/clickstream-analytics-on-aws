@@ -23,6 +23,10 @@ import { IngestionServerStack } from './ingestion-server-stack';
 
 const app = new App();
 
+const commonStackProps = {
+  synthesizer: synthesizer(),
+};
+
 function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) {
   stacks.forEach(s => NagSuppressions.addStackSuppressions(s, suppressions, true));
 }
@@ -32,106 +36,90 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: false,
-    synthesizer: synthesizer(),
+    ...commonStackProps,
+  }),
+  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domian-control-plane-stack', {
+    existingVpc: true,
+    internetFacing: true,
+    useCustomDomain: true,
+    ...commonStackProps,
+  }),
+  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-control-plane-stack', {
+    existingVpc: false,
+    internetFacing: true,
+    useCustomDomain: false,
+    ...commonStackProps,
+  }),
+  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-custom-domain-control-plane-stack', {
+    existingVpc: false,
+    internetFacing: true,
+    useCustomDomain: true,
+    ...commonStackProps,
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
   { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
 ]);
 
-stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domian-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: true,
-    useCustomDomain: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
-]);
 
 stackSuppressions([
   new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-control-plane-stack', {
     existingVpc: true,
     internetFacing: false,
     useCustomDomain: false,
-    synthesizer: synthesizer(),
+    ...commonStackProps,
   }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-]);
-
-stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-control-plane-stack', {
-    existingVpc: false,
-    internetFacing: true,
-    useCustomDomain: false,
-    synthesizer: synthesizer(),
-  }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
-]);
-
-stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-custom-codmain-control-plane-stack', {
-    existingVpc: false,
-    internetFacing: true,
-    useCustomDomain: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
-]);
-
-stackSuppressions([
   new ApplicationLoadBalancerControlPlaneStack(app, 'private-new-vpc-control-plane-stack', {
     existingVpc: false,
     internetFacing: false,
     useCustomDomain: false,
-    synthesizer: synthesizer(),
+    ...commonStackProps,
   }),
 ], [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
 ]);
+
+const commonSuppresionRulesForCloudFrontS3Pattern = [
+  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+];
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
     targetToCNRegions: true,
     useCustomDomainName: true,
+    ...commonStackProps,
   }),
 ], [
+  ...commonSuppresionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
-  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
 ]);
+
+const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [
+  ...commonSuppresionRulesForCloudFrontS3Pattern,
+  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+];
 
 stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global'),
-], [
-  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
-  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-]);
-
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+    ...commonStackProps,
+  }),
+], commonSuppresionRulesForCloudFrontS3PatternInGloabl);
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
     useCustomDomainName: true,
+    ...commonStackProps,
   }),
 ], [
-  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
-  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+  ...commonSuppresionRulesForCloudFrontS3PatternInGloabl,
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
 ]);
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 new IngestionServerStack(app, 'ingestion-server-stack', {
-  synthesizer: synthesizer(),
+  ...commonStackProps,
 });
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
