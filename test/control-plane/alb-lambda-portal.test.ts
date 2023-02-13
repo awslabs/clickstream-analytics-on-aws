@@ -226,6 +226,9 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         SubnetIds: Match.anyValue(),
         SecurityGroupIds: Match.anyValue(),
       }),
+      Architectures: [
+        'x86_64',
+      ],
     });
     template.hasResource('AWS::Lambda::Function', { // create dependencies on executation role with sufficient policy to create ENI
       DependsOn: [

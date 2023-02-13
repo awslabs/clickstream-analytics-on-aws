@@ -34,7 +34,7 @@ stackSuppressions([
     useCustomDomain: false,
     synthesizer: synthesizer(),
   }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domian-control-plane-stack', {
+  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: true,

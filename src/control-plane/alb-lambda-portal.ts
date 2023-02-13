@@ -31,6 +31,7 @@ import {
   SubnetType,
   CfnSecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   ApplicationLoadBalancer,
   IpAddressType,
@@ -172,13 +173,14 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
         file: dockerFile,
         ignoreMode: IgnoreMode.DOCKER,
+        platform: Platform.LINUX_AMD64,
       }),
       role: fnRole,
       reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,
       vpc: props.networkProps.vpc,
       vpcSubnets: props.applicationLoadBalancerProps.internetFacing ? { subnetType: SubnetType.PRIVATE_WITH_EGRESS } : props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
-      architecture: Architecture.ARM_64,
+      architecture: Architecture.X86_64,
     });
 
     createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));

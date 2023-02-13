@@ -315,7 +315,8 @@ export class CloudFrontS3Portal extends Construct {
       sources: [
         Source.asset(path.join(__dirname, props.assetPath), {
           bundling: {
-            image: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16_SLIM),
+            image: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+            user: '0', // For arm64 dev env, we need mitigate the error '/.npm/ is owned by root'
             command: [
               'bash', '-c',
               'npm install && npm run build && cp -r ./build/* /asset-output/',

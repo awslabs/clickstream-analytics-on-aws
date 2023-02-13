@@ -16,7 +16,7 @@ limitations under the License.
 
 export class Constant {
 
-  public static readonly NODE_IMAGE_V16_SLIM = 'public.ecr.aws/docker/library/node:16-slim';
+  public static readonly NODE_IMAGE_V16 = 'public.ecr.aws/docker/library/node:16';
 
   public static readonly ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS = 'Please use the HTTPS protocol when using custom domain name';
 
