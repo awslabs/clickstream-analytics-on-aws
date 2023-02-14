@@ -53,7 +53,7 @@ const build = async() => {
       const getCallerCommand = new GetCallerIdentityCommand({});
       const stsResp = await sts.send(getCallerCommand);
       throw new Error(`Build ${buildId} is ${build.buildStatus}. \n
-      See https://${config.region}.console.aws.amazon.com/codesuite/codebuild/${stsResp.Account}/projects/${process.env.PROJECT_NAME}/build/${process.env.PROJECT_NAME}%3A${buildId}/`);
+      See https://${config.region}.console.aws.amazon.com/codesuite/codebuild/${stsResp.Account}/projects/${process.env.PROJECT_NAME}/build/${buildId}/`);
     } while(true);
 }
 
