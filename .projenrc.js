@@ -17,8 +17,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.7',
     '@types/aws-lambda@^8.10.110',
-    '@aws-sdk/client-auto-scaling@^3.259.0',
-    '@aws-sdk/client-ecs@^3.259.0',
     '@aws-lambda-powertools/logger@^1.5.1',
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */

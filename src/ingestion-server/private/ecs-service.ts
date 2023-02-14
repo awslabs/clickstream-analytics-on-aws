@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Aspects, CfnResource, CustomResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
+import { Aspects, CfnResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
   Cluster,
@@ -31,7 +31,6 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
-import { createDeleteECSClusterCustomResource } from './custom-resource';
 
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 
@@ -128,13 +127,7 @@ export function crateECSService(
   });
   addScalingPolicy(ecsService, ecsAsgSetting);
 
-  const cr = createDeleteECSClusterCustomResource(scope, {
-    custerName: props.ecsCluster.clusterName,
-    serviceName: ecsService.serviceName,
-    asgName: props.autoScalingGroup.autoScalingGroupName,
-  });
-
-  Aspects.of(scope).add(new AddDependency(cr));
+  Aspects.of(scope).add(new HotfixCapacityProviderDependencies());
 
   return {
     ecsService,
@@ -193,17 +186,16 @@ function addScalingPolicy(
   });
 }
 
-// add dependency
-// make sure run customResource firstly, then delete ClusterCapacityProviderAssociations while deleting the stack
-class AddDependency implements IAspect {
-  customResource: CustomResource;
-
-  constructor(customResource: CustomResource ) {
-    this.customResource = customResource;
-  }
+class HotfixCapacityProviderDependencies implements IAspect {
   public visit(node: IConstruct): void {
-    if (node instanceof CfnClusterCapacityProviderAssociations) {
-      this.customResource.node.addDependency(node);
+    if (node instanceof Ec2Service) {
+      const children = node.cluster.node.findAll();
+      for (const child of children) {
+        if (child instanceof CfnClusterCapacityProviderAssociations) {
+          child.node.addDependency(node.cluster);
+          node.node.addDependency(child);
+        }
+      }
     }
   }
 }

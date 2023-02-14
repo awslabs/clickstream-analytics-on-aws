@@ -21,9 +21,7 @@ import {
   Policy,
   PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
-import { Construct, IConstruct } from 'constructs';
-import { createLambdaRole } from '../../common/lambda';
-import { DeleteECSClusterCustomResourceProps } from './custom-resource';
+import { Construct } from 'constructs';
 
 export function addPoliciesToAsgRole(role: IRole): IRole {
   role.addManagedPolicy(
@@ -101,85 +99,4 @@ export function addAccessMskPolicies(
       actions: ['kafka-cluster:AlterGroup', 'kafka-cluster:DescribeGroup'],
     }),
   );
-}
-
-
-export function createRoleForDeleteECSClusterCustomResourceEventHandler(
-  scope: IConstruct,
-  props: DeleteECSClusterCustomResourceProps,
-) {
-  const policyStatements = [
-    new PolicyStatement({ actions: ['ecs:List*'], resources: ['*'] }),
-    new PolicyStatement({
-      actions: [
-        'ecs:UpdateService',
-        'ecs:DeleteService',
-        'ecs:DeleteCluster',
-        'ecs:StopTask',
-        'ecs:DescribeServices',
-        'ecs:ListContainerInstances',
-        'ecs:DeregisterContainerInstance',
-      ],
-      resources: [
-        //`arn:aws:ecs:*:*:container-instance/${props.custerName}/*`,
-        Arn.format(
-          {
-            resource: `container-instance/${props.custerName}/*`,
-            service: 'ecs',
-            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-          },
-          Stack.of(scope),
-        ),
-
-        // `arn:aws:ecs:*:*:task/${props.custerName}/*`,
-        Arn.format(
-          {
-            resource: `task/${props.custerName}/*`,
-            service: 'ecs',
-            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-          },
-          Stack.of(scope),
-        ),
-
-        // `arn:aws:ecs:*:*:cluster/${props.custerName}`,
-        Arn.format(
-          {
-            resource: `cluster/${props.custerName}`,
-            service: 'ecs',
-            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-          },
-          Stack.of(scope),
-        ),
-
-        // `arn:aws:ecs:*:*:service/${props.custerName}/${props.serviceName}`,
-        Arn.format(
-          {
-            resource: `service/${props.custerName}/${props.serviceName}`,
-            service: 'ecs',
-            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-          },
-          Stack.of(scope),
-        ),
-      ],
-    }),
-    new PolicyStatement({
-      resources: [
-        //`arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/${props.asgName}`,
-        Arn.format(
-          {
-            resource: `autoScalingGroup:*:autoScalingGroupName/${props.asgName}`,
-            service: 'autoscaling',
-            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-          },
-          Stack.of(scope),
-        ),
-      ],
-      actions: ['autoscaling:DeleteAutoScalingGroup'],
-    }),
-    new PolicyStatement({
-      resources: ['*'],
-      actions: ['autoscaling:DescribeAutoScalingGroups'],
-    }),
-  ];
-  return createLambdaRole(scope, 'DeleteECSClusterCustomResourceEventHandlerRole', policyStatements);
 }

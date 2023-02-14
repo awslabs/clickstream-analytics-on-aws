@@ -45,8 +45,6 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.5.1",
-    "@aws-sdk/client-auto-scaling": "^3.259.0",
-    "@aws-sdk/client-ecs": "^3.259.0",
     "@types/aws-lambda": "^8.10.110",
     "aws-cdk-lib": "^2.1.0",
     "cdk-bootstrapless-synthesizer": "^2.2.7",

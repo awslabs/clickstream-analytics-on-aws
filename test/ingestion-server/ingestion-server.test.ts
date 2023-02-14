@@ -23,21 +23,10 @@ function findFirstResource(template: Template, type: string) {
   for (const key of Object.keys(allResources)) {
     const resource = allResources[key];
     if (resource.Type == type) {
-      return resource;
+      return { resource, key };
     }
   }
-  return;
-}
-
-function findFirstResourceKey(template: Template, type: string) {
-  const allResources = template.toJSON().Resources;
-  for (const key of Object.keys(allResources)) {
-    const resource = allResources[key];
-    if (resource.Type == type) {
-      return { key, resource };
-    }
-  }
-  return { key: undefined, resource: undefined };
+  return { resource: undefined, key: undefined };
 }
 
 function findResources(template: Template, type: string) {
@@ -110,7 +99,6 @@ test('WarmPool is not created when warmPoolSize=0', () => {
   template.resourceCountIs('AWS::AutoScaling::WarmPool', 0);
 });
 
-
 test('WarmPool is created when using CfnParameter', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -128,7 +116,6 @@ test('WarmPool is created when using CfnParameter', () => {
   expect(paramCapture.asString()).toEqual('WarmPoolSizeParam');
 });
 
-
 test('ECS task has log Configuration', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -136,15 +123,19 @@ test('ECS task has log Configuration', () => {
   });
   const template = Template.fromStack(stack);
 
-  const taskDef = findFirstResource(template, 'AWS::ECS::TaskDefinition');
+  const taskDef = findFirstResource(
+    template,
+    'AWS::ECS::TaskDefinition',
+  )?.resource;
   const containerDefinitions = taskDef.Properties.ContainerDefinitions;
 
-  for (const def of containerDefinitions ) {
+  for (const def of containerDefinitions) {
     expect(def.LogConfiguration.LogDriver).toEqual('awslogs');
-    expect(def.LogConfiguration.Options['awslogs-stream-prefix']).toMatch(new RegExp('proxy|worker'));
+    expect(def.LogConfiguration.Options['awslogs-stream-prefix']).toMatch(
+      new RegExp('proxy|worker'),
+    );
   }
 });
-
 
 test('LogGroup has config RetentionInDays', () => {
   const app = new App();
@@ -157,14 +148,13 @@ test('LogGroup has config RetentionInDays', () => {
   });
 });
 
-
 test('ECS service has load balancer', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
   });
   const template = Template.fromStack(stack);
-  const ecsService = findFirstResource(template, 'AWS::ECS::Service');
+  const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
 
   expect(ecsService.Properties.LoadBalancers.length == 1).toBeTruthy();
 });
@@ -175,7 +165,7 @@ test('ECS service has HealthCheck grace time configured', () => {
     withMskConfig: true,
   });
   const template = Template.fromStack(stack);
-  const ecsService = findFirstResource(template, 'AWS::ECS::Service');
+  const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
   expect(ecsService.Properties.HealthCheckGracePeriodSeconds > 0).toBeTruthy();
 });
 
@@ -185,7 +175,7 @@ test('ECS service is in two subnets of VPC', () => {
     withMskConfig: true,
   });
   const template = Template.fromStack(stack);
-  const ecsService = findFirstResource(template, 'AWS::ECS::Service');
+  const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
   expect(
     (ecsService.Properties.NetworkConfiguration.AwsvpcConfiguration.Subnets.length = 2),
   ).toBeTruthy();
@@ -210,7 +200,7 @@ test('ALB default protocol is http', () => {
   const listener = findFirstResource(
     template,
     'AWS::ElasticLoadBalancingV2::Listener',
-  );
+  )?.resource;
   const properties = listener.Properties;
   expect(properties.Port == 80).toBeTruthy();
   expect(properties.Protocol == 'HTTP').toBeTruthy();
@@ -240,7 +230,7 @@ test('The ECS service has one task which has two containers', () => {
   const taskDefinition = findFirstResource(
     template,
     'AWS::ECS::TaskDefinition',
-  );
+  )?.resource;
   expect(
     taskDefinition.Properties.ContainerDefinitions.length == 2,
   ).toBeTruthy();
@@ -255,7 +245,7 @@ test('Sink to Msk container - vector environments', () => {
   const taskDefinition = findFirstResource(
     template,
     'AWS::ECS::TaskDefinition',
-  );
+  )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const vector = containerDefinitions.filter((c: any) => c.Name == 'worker')[0];
 
@@ -291,7 +281,7 @@ test('Sink to Msk - vector configure as ACK', () => {
   const taskDefinition = findFirstResource(
     template,
     'AWS::ECS::TaskDefinition',
-  );
+  )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const vector = containerDefinitions.filter((c: any) => c.Name == 'worker')[0];
   const env1 = {
@@ -314,7 +304,7 @@ test('Sink to Msk container - nginx environments', () => {
   const taskDefinition = findFirstResource(
     template,
     'AWS::ECS::TaskDefinition',
-  );
+  )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const nginx = containerDefinitions.filter((c: any) => c.Name == 'proxy')[0];
   const env1 = {
@@ -357,7 +347,7 @@ test('A Certificate is created if hosted zone is set', () => {
   const certificate = findFirstResource(
     template,
     'AWS::CertificateManager::Certificate',
-  );
+  )?.resource;
   expect(
     certificate.Properties.DomainName == 'test.cs.test-example.com',
   ).toBeTruthy();
@@ -445,7 +435,7 @@ test('Server endpoint path can be configured in nginx task', () => {
   const taskDefinition = findFirstResource(
     template,
     'AWS::ECS::TaskDefinition',
-  );
+  )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const nginx = containerDefinitions.filter((c: any) => c.Name == 'proxy')[0];
   const env1 = {
@@ -470,7 +460,7 @@ test('Server endpoint path can be configured in ALB', () => {
   const listenerRule = findFirstResource(
     template,
     'AWS::ElasticLoadBalancingV2::ListenerRule',
-  );
+  )?.resource;
   expect(
     listenerRule.Properties.Conditions[0].PathPatternConfig.Values[0].startsWith(
       '/test_end_point',
@@ -520,21 +510,17 @@ test('SecurityGroupIngress is added to ECS cluster SecurityGroup to allow access
   expect(findSgIngress).toBeTruthy();
 });
 
-
 test('Alb is internet-facing and ipv4 by default', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
   });
   const template = Template.fromStack(stack);
-  template.hasResourceProperties(
-    'AWS::ElasticLoadBalancingV2::LoadBalancer',
-    {
-      //IpAddressType: 'dualstack',
-      IpAddressType: 'ipv4',
-      Scheme: 'internet-facing',
-    },
-  );
+  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+    //IpAddressType: 'dualstack',
+    IpAddressType: 'ipv4',
+    Scheme: 'internet-facing',
+  });
 });
 
 test('enable Alb access log is configured', () => {
@@ -547,7 +533,7 @@ test('enable Alb access log is configured', () => {
   const alb = findFirstResource(
     template,
     'AWS::ElasticLoadBalancingV2::LoadBalancer',
-  );
+  )?.resource;
   const albAttrs = alb.Properties.LoadBalancerAttributes;
 
   let access_logs_s3_bucket = false;
@@ -597,7 +583,6 @@ test('S3 bucket policy is configured to allow ALB to write files when Alb access
   expect(hasAccountRoot).toBeTruthy();
 });
 
-
 test('server EndpointPath and CorsOrigin can be configured', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -606,7 +591,10 @@ test('server EndpointPath and CorsOrigin can be configured', () => {
     serverCorsOrigin: 'a.test.com,b.test.net',
   });
   const template = Template.fromStack(stack);
-  const taskDefinition = findFirstResource(template, 'AWS::ECS::TaskDefinition');
+  const taskDefinition = findFirstResource(
+    template,
+    'AWS::ECS::TaskDefinition',
+  )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const proxy = containerDefinitions.filter((c: any) => c.Name == 'proxy')[0];
 
@@ -621,52 +609,60 @@ test('server EndpointPath and CorsOrigin can be configured', () => {
   };
 
   const hasPath =
-  proxy.Environment.filter(
-    (e: any) => e.Name == env1.Name && e.Value == env1.Value,
-  ).length == 1;
+    proxy.Environment.filter(
+      (e: any) => e.Name == env1.Name && e.Value == env1.Value,
+    ).length == 1;
 
   const hasCorsOrigin =
-  proxy.Environment.filter(
-    (e: any) => e.Name == env2.Name && e.Value == env2.Value,
-  ).length == 1;
+    proxy.Environment.filter(
+      (e: any) => e.Name == env2.Name && e.Value == env2.Value,
+    ).length == 1;
 
   expect(hasPath).toBeTruthy();
   expect(hasCorsOrigin).toBeTruthy();
 });
 
-
-test('ECS::ClusterCapacityProviderAssociations has DefaultCapacityProviderStrategy', ()=> {
+test('ECS::ClusterCapacityProviderAssociations has DefaultCapacityProviderStrategy', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
   });
   const template = Template.fromStack(stack);
-  template.hasResourceProperties('AWS::ECS::ClusterCapacityProviderAssociations', {
-    CapacityProviders: Match.anyValue(),
-    DefaultCapacityProviderStrategy: Match.anyValue(),
-  });
-
-});
-
-test('DeleteECSClusterCustomResource depends on the ECS::ClusterCapacityProviderAssociations', ()=> {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withMskConfig: true,
-  });
-  const template = Template.fromStack(stack);
-  const { key: associationsKey } = findFirstResourceKey(template, 'AWS::ECS::ClusterCapacityProviderAssociations');
-  const dependsOnCapture = new Capture();
-  template.hasResource('AWS::CloudFormation::CustomResource', {
-    Properties: {
-      ServiceToken: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('IngestionServerDeleteECSClusterCustomResourceProviderframeworkonEvent.*'),
-          'Arn',
-        ],
-      },
+  template.hasResourceProperties(
+    'AWS::ECS::ClusterCapacityProviderAssociations',
+    {
+      CapacityProviders: Match.anyValue(),
+      DefaultCapacityProviderStrategy: Match.anyValue(),
     },
-    DependsOn: dependsOnCapture,
-  });
-  expect(dependsOnCapture.asArray().includes(associationsKey)).toBeTruthy();
+  );
 });
 
+test('Dependencies for ECS::ClusterCapacityProviderAssociations are set correctly', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+
+  const template = Template.fromStack(stack);
+  const { key: clusterCapacityProviderAssociationsKey } = findFirstResource(
+    template,
+    'AWS::ECS::ClusterCapacityProviderAssociations',
+  );
+  const { key: ecsClusterKey } = findFirstResource(
+    template,
+    'AWS::ECS::Cluster',
+  );
+
+  template.hasResource('AWS::ECS::ClusterCapacityProviderAssociations', {
+    DependsOn: [
+      ecsClusterKey,
+    ],
+  });
+
+  const ecsServiceDependsOnCapture = new Capture();
+
+  template.hasResource('AWS::ECS::Service', {
+    DependsOn: ecsServiceDependsOnCapture,
+  });
+  expect(ecsServiceDependsOnCapture.asArray()).toContain(clusterCapacityProviderAssociationsKey);
+});
