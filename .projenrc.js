@@ -38,6 +38,21 @@ project.eslint?.addRules({
     'error', { ignore: ['*.ext'] },
   ],
 });
+project.eslint?.addRules({
+  'import/order': [
+    'error',
+    {
+      groups: [
+        'builtin',
+        'external',
+      ],
+      alphabetize: {
+        order: 'asc',
+        caseInsensitive: true,
+      },
+    },
+  ],
+});
 
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
