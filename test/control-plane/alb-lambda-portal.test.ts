@@ -25,8 +25,8 @@ import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol, IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function, Runtime, InlineCode } from 'aws-cdk-lib/aws-lambda';
-import { Constant } from '../../src/control-plane/private/constant';
 import { TestEnv, TestStack } from './test-utils';
+import { Constant } from '../../src/control-plane/private/constant';
 
 
 function findResources(template: Template, type: string) {

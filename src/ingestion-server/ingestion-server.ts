@@ -28,13 +28,13 @@ import {
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ITopic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
-import { LogProps } from '../common/alb';
 import { createCertificate } from './private/acm';
 import { createApplicationLoadBalancer, PROXY_PORT } from './private/alb';
 import { createECSClusterAndService } from './private/ecs-cluster';
 import { grantMskReadWrite } from './private/iam';
 import { createRecordInRoute53 } from './private/route53';
 import { createALBSecurityGroup, createECSSecurityGroup } from './private/sg';
+import { LogProps } from '../common/alb';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
 

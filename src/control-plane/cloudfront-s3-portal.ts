@@ -61,9 +61,9 @@ import {
 } from 'aws-cdk-lib/aws-s3-deployment';
 
 import { Construct } from 'constructs';
+import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { Constant } from './private/constant';
 
 export interface DistributionProps {
   readonly enableIpv6?: boolean;

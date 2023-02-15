@@ -301,11 +301,61 @@ test('Has Parameter KafkaTopic', () => {
   });
 });
 
+
+test('KafkaTopic pattern', () => {
+  const param = getParameter(template, 'KafkaTopic');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    'test1',
+    'test-abc.ab_ab',
+    '',
+  ];
+
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
+
+  const invalidValues = [
+    'abc%',
+    'a#',
+    'a,b',
+  ];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
+});
+
 test('Has Parameter MskSecurityGroupId', () => {
   template.hasParameter('MskSecurityGroupId', {
     Type: 'String',
     Default: '',
   });
+});
+
+
+test('MskSecurityGroupId pattern', () => {
+  const param = getParameter(template, 'MskSecurityGroupId');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    'sg-124434ab',
+    'sg-ffffff',
+    'sg-00000',
+    '',
+  ];
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
+
+  const invalidValues = [
+    'sg-test1',
+    'abc',
+    'mysg-12323',
+  ];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Parameter MskClusterName', () => {

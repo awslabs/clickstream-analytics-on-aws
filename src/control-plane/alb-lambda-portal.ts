@@ -58,11 +58,11 @@ import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { LogBucket } from '../common/log-bucket';
-import { Constant } from './private/constant';
 
 export interface RouteProps {
   readonly routePath: string;

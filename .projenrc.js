@@ -1,4 +1,10 @@
 const { awscdk, gitlab } = require('projen');
+
+const awsSDKDeps = [
+  '@aws-sdk/client-kafkaconnect',
+  '@aws-sdk/client-s3',
+].map(dep => `${dep}@^3.267.0`);
+
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
   defaultReleaseBranch: 'main',
@@ -11,6 +17,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'docs/site/',
     'frontend/amplify',
     'test-deploy-server.sh',
+    'test-deploy-connector.sh',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -18,11 +25,13 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-bootstrapless-synthesizer@^2.2.7',
     '@types/aws-lambda@^8.10.110',
     '@aws-lambda-powertools/logger@^1.5.1',
+    ...awsSDKDeps,
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
 });
+
 
 project.eslint?.addRules({
   'import/no-namespace': [

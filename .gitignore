@@ -37,6 +37,7 @@ cdk.context.json
 docs/site/
 frontend/amplify
 test-deploy-server.sh
+test-deploy-connector.sh
 !/.projenrc.js
 /test-reports/
 junit.xml

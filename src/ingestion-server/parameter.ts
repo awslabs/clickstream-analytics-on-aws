@@ -16,11 +16,11 @@ limitations under the License.
 
 import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { DOMAIN_NAME_PATTERN, IP_PATTERN, SUBNETS_PATTERN } from '../common/constant';
+import { DOMAIN_NAME_PATTERN, SUBNETS_PATTERN } from '../common/constant';
+import { createKafkaBrokersParameter, createKafkaTopicParameter, createMskClusterNameParameter, createMskSecurityGroupIdParameter } from '../common/parameter';
 
 const subnetsPattern = SUBNETS_PATTERN;
 const domainNamePattern = DOMAIN_NAME_PATTERN;
-const ipPattern = IP_PATTERN;
 
 export function createStackParameters(scope: Construct) {
   // CfnParameter
@@ -131,43 +131,10 @@ export function createStackParameters(scope: Construct) {
     default: 'Yes',
   });
 
-  const kafkaBrokersParam = new CfnParameter(scope, 'KafkaBrokers', {
-    description: 'Kafka brokers string',
-    type: 'String',
-    default: '',
-    allowedPattern: `^(((${domainNamePattern}|${ipPattern})(:[0-9]+){0,1},?)){0,3}$`,
-    constraintDescription: `KafkaBrokers must match pattern ((${domainNamePattern}(:[0-9]+){0,1},?)){0,3}`,
-  });
-
-  const kafkaTopicParam = new CfnParameter(scope, 'KafkaTopic', {
-    description: 'Kafka topic',
-    type: 'String',
-    default: '',
-    allowedPattern: '([a-zA-Z0-9_\\-\\.]+)?',
-    constraintDescription:
-      'KafkaTopic must match pattern ([a-zA-Z0-9_\\-\\.]+)?',
-  });
-
-  const mskSecurityGroupIdParam = new CfnParameter(
-    scope,
-    'MskSecurityGroupId',
-    {
-      description:
-        'Amazon managed streaming for apache kafka (Amazon MSK) security group id (optional)',
-      type: 'String',
-      default: '',
-      allowedPattern: '(sg-[a-f0-9]+)?',
-      constraintDescription:
-        'MskSecurityGroupId must match pattern (sg-[a-f0-9]+)?',
-    },
-  );
-
-  const mskClusterNameParam = new CfnParameter(scope, 'MskClusterName', {
-    description:
-      'Amazon managed streaming for apache kafka (Amazon MSK) cluster name (optional)',
-    type: 'String',
-    default: '',
-  });
+  const kafkaBrokersParam = createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
+  const kafkaTopicParam = createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
+  const mskClusterNameParam = createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
+  const mskSecurityGroupIdParam = createMskSecurityGroupIdParameter(scope, 'MskSecurityGroupId', true, { default: '' });
 
   const domainPrefixParam = new CfnParameter(scope, 'DomainPrefix', {
     description: 'Domain prefix',

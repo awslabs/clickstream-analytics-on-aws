@@ -20,6 +20,7 @@ import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
+import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 
 const app = new App();
 
@@ -115,6 +116,10 @@ stackSuppressions([
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 new IngestionServerStack(app, 'ingestion-server-stack', {
+  synthesizer: synthesizer(),
+});
+
+new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', {
   synthesizer: synthesizer(),
 });
 
