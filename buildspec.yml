@@ -29,6 +29,7 @@ phases:
 
         export BUILD_VERSION=${BUILD_VERSION}-$(/bin/date +"%Y%m%d%H%M")-$(git rev-parse --short HEAD)
         export GLOBAL_ASSETS='default/'
+        export CN_ASSETS='cn/'
   build:
     commands:
       - ${CODEBUILD_SRC_DIR}/deployment/build-dist.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${BUILD_VERSION}
