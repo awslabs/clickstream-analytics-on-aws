@@ -16,47 +16,26 @@ limitations under the License.
 
 import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { DOMAIN_NAME_PATTERN, SUBNETS_PATTERN } from '../common/constant';
-import { createKafkaBrokersParameter, createKafkaTopicParameter, createMskClusterNameParameter, createMskSecurityGroupIdParameter } from '../common/parameter';
+import {
+  DOMAIN_NAME_PATTERN,
+  PARAMETER_GROUP_LABEL_DOMAIN,
+  PARAMETER_GROUP_LABEL_VPC,
+  PARAMETER_LABEL_HOST_ZONE_ID,
+  PARAMETER_LABEL_HOST_ZONE_NAME,
+  PARAMETER_LABEL_PRIVATE_SUBNETS,
+  PARAMETER_LABEL_PUBLIC_SUBNETS,
+  PARAMETER_LABEL_RECORD_NAME,
+  PARAMETER_LABEL_VPCID,
+} from '../common/constant';
 
-const subnetsPattern = SUBNETS_PATTERN;
+import { Parameters, SubnetParameterType } from '../common/parameters';
+
 const domainNamePattern = DOMAIN_NAME_PATTERN;
 
 export function createStackParameters(scope: Construct) {
   // CfnParameter
-
-  const vpcIdParam = new CfnParameter(scope, 'VpcId', {
-    description: 'Vpc id',
-    type: 'AWS::EC2::VPC::Id',
-  });
-
-  const publicSubnetIdsParam = new CfnParameter(scope, 'PublicSubnetIds', {
-    description: 'Public subnet ids',
-    // CommaDelimitedList and List<AWS::EC2::Subnet::Id> not work here
-    type: 'String',
-    allowedPattern: `^${subnetsPattern}$`,
-    constraintDescription: `PublicSubnetIds must have at least 2 subnets and match pattern ${subnetsPattern}`,
-  });
-
-  const privateSubnetIdsParam = new CfnParameter(scope, 'PrivateSubnetIds', {
-    description: 'Private subnet ids',
-    // CommaDelimitedList and List<AWS::EC2::Subnet::Id> not work here
-    type: 'String',
-    allowedPattern: `^${subnetsPattern}$`,
-    constraintDescription: `PrivateSubnetIds must have at least 2 subnets and match pattern ${subnetsPattern}`,
-  });
-
-  const hostedZoneIdParam = new CfnParameter(scope, 'HostedZoneId', {
-    description: 'Hosted zone id',
-    type: 'AWS::Route53::HostedZone::Id',
-  });
-
-  const zoneNameParam = new CfnParameter(scope, 'ZoneName', {
-    description: 'Hosted zone name',
-    type: 'String',
-    allowedPattern: `^${domainNamePattern}$`,
-    constraintDescription: `ZoneName must match pattern ${domainNamePattern}`,
-  });
+  const netWorkProps = Parameters.createNetworkParameters(scope, true, SubnetParameterType.String);
+  const domainProps = Parameters.createDomainParameters(scope);
 
   const serverEndpointPathParam = new CfnParameter(
     scope,
@@ -131,18 +110,10 @@ export function createStackParameters(scope: Construct) {
     default: 'Yes',
   });
 
-  const kafkaBrokersParam = createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
-  const kafkaTopicParam = createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
-  const mskClusterNameParam = createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
-  const mskSecurityGroupIdParam = createMskSecurityGroupIdParameter(scope, 'MskSecurityGroupId', true, { default: '' });
-
-  const domainPrefixParam = new CfnParameter(scope, 'DomainPrefix', {
-    description: 'Domain prefix',
-    type: 'String',
-    allowedPattern: '([a-zA-Z0-9_\\-]{1,63})',
-    constraintDescription:
-      'DomainPrefix must match pattern ([a-zA-Z0-9_\\-]{1,63})?',
-  });
+  const kafkaBrokersParam = Parameters.createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
+  const kafkaTopicParam = Parameters.createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
+  const mskClusterNameParam = Parameters.createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
+  const mskSecurityGroupIdParam = Parameters.createMskSecurityGroupIdParameter(scope, 'MskSecurityGroupId', true, { default: '' });
 
   const serverMinParam = new CfnParameter(scope, 'ServerMin', {
     description: 'Server size min number',
@@ -229,20 +200,20 @@ export function createStackParameters(scope: Construct) {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
         {
-          Label: { default: 'VpcId and Subnets' },
+          Label: { default: PARAMETER_GROUP_LABEL_VPC },
           Parameters: [
-            vpcIdParam.logicalId,
-            publicSubnetIdsParam.logicalId,
-            privateSubnetIdsParam.logicalId,
+            netWorkProps.vpcId.logicalId,
+            netWorkProps.publicSubnets!.logicalId,
+            netWorkProps.privateSubnets.logicalId,
           ],
         },
 
         {
-          Label: { default: 'Domain' },
+          Label: { default: PARAMETER_GROUP_LABEL_DOMAIN },
           Parameters: [
-            hostedZoneIdParam.logicalId,
-            zoneNameParam.logicalId,
-            domainPrefixParam.logicalId,
+            domainProps.hostedZoneId.logicalId,
+            domainProps.hostedZoneName.logicalId,
+            domainProps.recordName.logicalId,
           ],
         },
 
@@ -283,24 +254,28 @@ export function createStackParameters(scope: Construct) {
       ],
 
       ParameterLabels: {
-        [vpcIdParam.logicalId]: {
-          default: 'Vpc id',
+        [netWorkProps.vpcId.logicalId]: {
+          default: PARAMETER_LABEL_VPCID,
         },
 
-        [publicSubnetIdsParam.logicalId]: {
-          default: 'Public subnet ids',
+        [netWorkProps.publicSubnets!.logicalId]: {
+          default: PARAMETER_LABEL_PUBLIC_SUBNETS,
         },
 
-        [privateSubnetIdsParam.logicalId]: {
-          default: 'Private subnet ids',
+        [netWorkProps.privateSubnets.logicalId]: {
+          default: PARAMETER_LABEL_PRIVATE_SUBNETS,
         },
 
-        [hostedZoneIdParam.logicalId]: {
-          default: 'Hosted zone id',
+        [domainProps.hostedZoneId.logicalId]: {
+          default: PARAMETER_LABEL_HOST_ZONE_ID,
         },
 
-        [zoneNameParam.logicalId]: {
-          default: 'Hosted zone name',
+        [domainProps.hostedZoneName.logicalId]: {
+          default: PARAMETER_LABEL_HOST_ZONE_NAME,
+        },
+
+        [domainProps.recordName.logicalId]: {
+          default: PARAMETER_LABEL_RECORD_NAME,
         },
 
         [serverEndpointPathParam.logicalId]: {
@@ -351,10 +326,6 @@ export function createStackParameters(scope: Construct) {
           default: 'Amazon managed streaming for apache kafka (Amazon MSK) cluster name',
         },
 
-        [domainPrefixParam.logicalId]: {
-          default: 'Domain prefix',
-        },
-
         [serverMinParam.logicalId]: {
           default: 'Server size min number',
         },
@@ -377,11 +348,11 @@ export function createStackParameters(scope: Construct) {
   return {
     metadata,
     params: {
-      vpcIdParam,
-      publicSubnetIdsParam,
-      privateSubnetIdsParam,
-      hostedZoneIdParam,
-      zoneNameParam,
+      vpcIdParam: netWorkProps.vpcId,
+      publicSubnetIdsParam: netWorkProps.publicSubnets,
+      privateSubnetIdsParam: netWorkProps.privateSubnets,
+      hostedZoneIdParam: domainProps.hostedZoneId,
+      zoneNameParam: domainProps.hostedZoneName,
       serverEndpointPathParam,
       serverCorsOriginParam,
       protocolParam,
@@ -394,7 +365,7 @@ export function createStackParameters(scope: Construct) {
       kafkaTopicParam,
       mskSecurityGroupIdParam,
       mskClusterNameParam,
-      domainPrefixParam,
+      domainPrefixParam: domainProps.recordName,
       serverMinParam,
       serverMaxParam,
       warmPoolSizeParam,

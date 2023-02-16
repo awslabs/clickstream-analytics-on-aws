@@ -78,7 +78,6 @@ export interface DomainProps {
 }
 
 export interface CNCloudFrontS3PortalProps {
-  readonly iamCertificateId: string;
   readonly domainName: string;
 }
 
@@ -161,7 +160,7 @@ export class CloudFrontS3Portal extends Construct {
         enableIpV6: false,
         priceClass: PriceClass.PRICE_CLASS_ALL,
         defaultRootObject: 'index.html',
-        viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
+        viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
         viewerCertificate: ViewerCertificate.fromCloudFrontDefaultCertificate(props.cnCloudFrontS3PortalProps.domainName),
         originConfigs: [
           {
@@ -319,7 +318,7 @@ export class CloudFrontS3Portal extends Construct {
             user: '0', // For arm64 dev env, we need mitigate the error '/.npm/ is owned by root'
             command: [
               'bash', '-c',
-              'npm install && npm run build && cp -r ./build/* /asset-output/',
+              'npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
             ],
             outputType: BundlingOutput.NOT_ARCHIVED,
           },

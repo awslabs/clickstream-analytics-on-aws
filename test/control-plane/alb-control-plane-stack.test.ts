@@ -21,6 +21,10 @@ import {
 import { Template } from 'aws-cdk-lib/assertions';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
 
+function getParameter(template: Template, param: string) {
+  return template.toJSON().Parameters[param];
+}
+
 describe('ALBLambdaPotalStack', () => {
 
   test('ALBPotalStack - existvpc - public - custom domain', () => {
@@ -39,13 +43,12 @@ describe('ALBLambdaPotalStack', () => {
 
     const template = Template.fromStack(portalStack);
 
-    template.hasParameter('vpcId', {});
-    template.hasParameter('publicSubnets', {});
-    template.hasParameter('privateSubnets', {});
+    template.hasParameter('VpcId', {});
+    template.hasParameter('PublicSubnets', {});
 
-    template.hasParameter('hostZoneId', {});
-    template.hasParameter('hostZoneName', {});
-    template.hasParameter('recordName', {});
+    template.hasParameter('HostedZoneId', {});
+    template.hasParameter('HostedZoneName', {});
+    template.hasParameter('RecordName', {});
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       Scheme: 'internet-facing',
@@ -87,9 +90,8 @@ describe('ALBLambdaPotalStack', () => {
       Protocol: 'HTTP',
     });
 
-    template.hasParameter('vpcId', {});
-    template.hasParameter('publicSubnets', {});
-    template.hasParameter('privateSubnets', {});
+    template.hasParameter('VpcId', {});
+    template.hasParameter('PublicSubnets', {});
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     template.resourceCountIs('AWS::S3::Bucket', 1);
@@ -149,9 +151,9 @@ describe('ALBLambdaPotalStack', () => {
 
     const template = Template.fromStack(portalStack);
 
-    template.hasParameter('hostZoneId', {});
-    template.hasParameter('hostZoneName', {});
-    template.hasParameter('recordName', {});
+    template.hasParameter('HostedZoneId', {});
+    template.hasParameter('HostedZoneName', {});
+    template.hasParameter('RecordName', {});
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       Scheme: 'internet-facing',
@@ -190,9 +192,8 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     });
 
     const template = Template.fromStack(portalStack);
-
-    template.hasParameter('vpcId', {});
-    template.hasParameter('privateSubnets', {});
+    template.hasParameter('VpcId', {});
+    template.hasParameter('PrivateSubnets', {});
     const publicSubnets = template.findParameters('PublicSubnets', {});
     expect(publicSubnets).toEqual({});
 
@@ -252,5 +253,123 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
   });
 
+
+});
+
+
+describe('CloudFormation parameter check', () => {
+
+  const app = new App();
+
+  const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPrivateConstrolplaneTestStack01', {
+    env: {
+      region: Aws.REGION,
+      account: Aws.ACCOUNT_ID,
+    },
+    existingVpc: true,
+    internetFacing: true,
+    useCustomDomain: true,
+  });
+
+  const template = Template.fromStack(portalStack);
+
+  test('VpcId pattern', () => {
+    const param = getParameter(template, 'VpcId');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'vpc-ab1234c',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'vpc-g1234567',
+      'abc-f1234',
+      'vpca12345',
+      'vpc-ab1234c, vpc-b1234e',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('HostedZoneId pattern', () => {
+    const param = getParameter(template, 'HostedZoneId');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'ZERTYUGDDDDZRHJ',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'AERTYUGDDDDZRHJ',
+      'ZERTYUGDDDDabcdef',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('HostedZoneName pattern', () => {
+    const param = getParameter(template, 'HostedZoneName');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'abc.com',
+      'test.abc.com',
+      '123.test.abc.com',
+      '123.test-v1.abc.com',
+      'test_v1.abc.com',
+      'a123#~&%.test-2.a_bc.com',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      '',
+      'a',
+      'abc.example_test',
+      'abc.c',
+      'abc^.com',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('RecordName pattern', () => {
+    const param = getParameter(template, 'RecordName');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'abc',
+      'def-',
+      'bce_',
+      '124',
+      'ABC123',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      '',
+      'abc@',
+      'abc.example',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
 
 });

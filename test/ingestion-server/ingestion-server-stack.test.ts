@@ -111,15 +111,15 @@ test('Has Parameter HostedZoneId', () => {
   });
 });
 
-test('Has Parameter ZoneName', () => {
-  template.hasParameter('ZoneName', {
+test('Has Parameter HostedZoneName', () => {
+  template.hasParameter('HostedZoneName', {
     Type: 'String',
   });
 });
 
 
-test('ZoneName pattern', () => {
-  const param = getParameter(template, 'ZoneName');
+test('HostedZoneName pattern', () => {
+  const param = getParameter(template, 'HostedZoneName');
   const pattern = param.AllowedPattern;
   const regex = new RegExp(`${pattern}`);
   const validValues = [
@@ -365,8 +365,8 @@ test('Has Parameter MskClusterName', () => {
   });
 });
 
-test('Has Parameter DomainPrefix', () => {
-  template.hasParameter('DomainPrefix', {
+test('Has Parameter RecordName', () => {
+  template.hasParameter('RecordName', {
     Type: 'String',
   });
 });
@@ -419,8 +419,8 @@ test('Has Nest Stack with all parameters', () => {
     'KafkaTopic',
     'MskClusterName',
     'VpcId',
-    'DomainPrefix',
-    'ZoneName',
+    'RecordName',
+    'HostedZoneName',
     'HostedZoneId',
     'LogS3Bucket',
     'LogS3Prefix',
@@ -464,8 +464,8 @@ test('Has Nest Stack with minimum parameters', () => {
     'KafkaBrokers',
     'KafkaTopic',
     'VpcId',
-    'DomainPrefix',
-    'ZoneName',
+    'RecordName',
+    'HostedZoneName',
     'HostedZoneId',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',

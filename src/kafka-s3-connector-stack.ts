@@ -22,7 +22,7 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { addCfnNagToStack } from './common/cfn-nag';
 import { DOMAIN_NAME_PATTERN } from './common/constant';
-import { createKafkaBrokersParameter, createKafkaTopicParameter, createMskClusterNameParameter, createMskSecurityGroupIdParameter } from './common/parameter';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import {
   KafkaS3SinkConnector,
@@ -89,10 +89,10 @@ export class KafkaS3SinkConnectorStack extends Stack {
       type: 'List<AWS::EC2::Subnet::Id>',
     });
 
-    const kafkaBrokersParam = createKafkaBrokersParameter(this, 'KafkaBrokers');
-    const kafkaTopicParam = createKafkaTopicParameter(this, 'KafkaTopic');
-    const mskClusterNameParam = createMskClusterNameParameter(this, 'MskClusterName');
-    const securityGroupIdParam = createMskSecurityGroupIdParameter(this, 'SecurityGroupId');
+    const kafkaBrokersParam = Parameters.createKafkaBrokersParameter(this, 'KafkaBrokers');
+    const kafkaTopicParam = Parameters.createKafkaTopicParameter(this, 'KafkaTopic');
+    const mskClusterNameParam = Parameters.createMskClusterNameParameter(this, 'MskClusterName');
+    const securityGroupIdParam = Parameters.createMskSecurityGroupIdParameter(this, 'SecurityGroupId');
     const capacityDocLink = 'https://docs.aws.amazon.com/msk/latest/developerguide/msk-connect-connectors.html#msk-connect-capacity';
 
     const maxWorkerCountParam = new CfnParameter(this, 'MaxWorkerCount', {

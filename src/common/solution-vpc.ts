@@ -41,6 +41,8 @@ export interface VpcProps {
    * @default - None.
    */
   vpc?: IVpc;
+
+
 }
 
 /**
@@ -48,14 +50,12 @@ export interface VpcProps {
  */
 export class SolutionVpc extends Construct {
   readonly vpc: IVpc;
-  readonly subnetIds: string[];
 
   constructor(scope: Construct, id: string, props?: VpcProps) {
     super(scope, id);
 
     if (props?.vpc) {
       this.vpc = props.vpc;
-      this.subnetIds = [];
     } else {
       const vpcLogGroup = new LogGroup(this, 'VPCLogGroup', {
         retention: RetentionDays.TWO_WEEKS,
@@ -101,8 +101,6 @@ export class SolutionVpc extends Construct {
           },
         },
       });
-
-      this.subnetIds = this.vpc.privateSubnets.map((subnet) => subnet.subnetId);
 
       this.vpc.publicSubnets.forEach((subnet) => {
         const cfnSubnet = subnet.node.defaultChild as CfnSubnet;

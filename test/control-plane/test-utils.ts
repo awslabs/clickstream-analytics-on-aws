@@ -196,16 +196,16 @@ export class TestEnv {
       });
 
       domainProps = {
-        hostZoneName: 'example.com',
+        hostedZoneName: 'example.com',
         recordName: 'test011',
-        hostZone: testHostedZone,
+        hostedZone: testHostedZone,
         certificate: certificate,
       };
     } else {
       domainProps = {
-        hostZoneName: 'example.com',
+        hostedZoneName: 'example.com',
         recordName: 'test011',
-        hostZone: testHostedZone,
+        hostedZone: testHostedZone,
       };
     }
 

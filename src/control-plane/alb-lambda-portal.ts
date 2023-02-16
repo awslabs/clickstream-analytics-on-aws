@@ -28,7 +28,6 @@ import {
   Port,
   SubnetSelection,
   Connections,
-  SubnetType,
   CfnSecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
@@ -98,8 +97,8 @@ export interface NetworkProps {
 
 export interface DomainProps {
   readonly recordName: string;
-  readonly hostZoneName: string;
-  readonly hostZone: IHostedZone;
+  readonly hostedZoneName: string;
+  readonly hostedZone: IHostedZone;
   readonly certificate?:	ICertificate;
 }
 
@@ -178,7 +177,8 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       role: fnRole,
       reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,
       vpc: props.networkProps.vpc,
-      vpcSubnets: props.applicationLoadBalancerProps.internetFacing ? { subnetType: SubnetType.PRIVATE_WITH_EGRESS } : props.networkProps.subnets,
+      allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
+      vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
       architecture: Architecture.X86_64,
     });
@@ -264,7 +264,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     });
 
     if (props.domainProsps !== undefined) {
-      const customDomainName = Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostZoneName]);
+      const customDomainName = Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostedZoneName]);
       this.controlPlaneUrl = 'https://' + customDomainName + ':' + this.port;
     } else {
       this.controlPlaneUrl = 'http://' + this.applicationLoadBalancer.loadBalancerDnsName + ':' + this.port;
@@ -289,8 +289,8 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       let certificate: ICertificate;
       if (props.domainProsps?.certificate === undefined) {
         certificate = new Certificate(this, 'Certificate', {
-          domainName: Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostZoneName]),
-          validation: CertificateValidation.fromDns(props.domainProsps?.hostZone),
+          domainName: Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostedZoneName]),
+          validation: CertificateValidation.fromDns(props.domainProsps?.hostedZone),
         });
       } else {
         certificate = props.domainProsps.certificate;
@@ -368,7 +368,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     if (props.domainProsps !== undefined) {
       new ARecord(this, 'aliasRecord', {
         recordName: props.domainProsps.recordName,
-        zone: props.domainProsps.hostZone,
+        zone: props.domainProsps.hostedZone,
         target: RecordTarget.fromAlias(new LoadBalancerTarget(this.applicationLoadBalancer)),
       });
     }

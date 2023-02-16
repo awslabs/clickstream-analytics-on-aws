@@ -16,7 +16,6 @@ limitations under the License.
 
 import path from 'path';
 import {
-  CfnParameter,
   Stack,
   StackProps,
   Fn,
@@ -27,13 +26,11 @@ import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
-import { DOMAIN_NAME_PATTERN } from './common/constant';
 import { LogBucket } from './common/log-bucket';
+import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
-
-const domainNamePattern = DOMAIN_NAME_PATTERN;
 
 export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProps {
   /**
@@ -59,38 +56,26 @@ export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProp
 
 export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
+  private paramGroups: any[] = [];
+  private paramLabels: any = {};
+
   constructor(scope: Construct, id: string, props: ApplicationLoadBalancerControlPlaneStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
+    // this.addTransform('AWS::LanguageExtensions');
 
     let vpc:IVpc|undefined = undefined;
 
     if (props.existingVpc) {
-      const vpcId = new CfnParameter(this, 'vpcId', {
-        description: 'The VPC id which will deploy rsource in. e.g. vpc-bef13dc7',
-        type: 'AWS::EC2::VPC::Id',
-      });
-
-      let publicSubnets: CfnParameter | undefined = undefined;
-      if ( props.internetFacing ) {
-        publicSubnets = new CfnParameter(this, 'publicSubnets', {
-          description: 'Select public subnets',
-          type: 'List<AWS::EC2::Subnet::Id>',
-        });
-      }
-
-      const privateSubnets = new CfnParameter(this, 'privateSubnets', {
-        description:
-            'Select private subnets',
-        type: 'List<AWS::EC2::Subnet::Id>',
-      });
+      const networkParameters = Parameters.createNetworkParameters(this, props.internetFacing,
+        SubnetParameterType.List, this.paramGroups, this.paramLabels);
 
       vpc = Vpc.fromVpcAttributes(this, 'PortalVPC', {
-        vpcId: vpcId.valueAsString,
+        vpcId: networkParameters.vpcId.valueAsString,
         availabilityZones: Fn.getAzs(),
-        publicSubnetIds: publicSubnets?.valueAsList,
-        privateSubnetIds: privateSubnets.valueAsList,
+        publicSubnetIds: networkParameters.publicSubnets?.valueAsList,
+        privateSubnetIds: networkParameters.privateSubnets.valueAsList,
       });
     }
 
@@ -113,38 +98,23 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     if (props.useCustomDomain) {
       port = 443;
       protocol = ApplicationProtocol.HTTPS;
-      const hostZoneId = new CfnParameter(this, 'hostZoneId', {
-        description: 'The route53 hostzone id.',
-        type: 'AWS::Route53::HostedZone::Id',
+
+      const domainParameters = Parameters.createDomainParameters(this, this.paramGroups, this.paramLabels);
+
+      const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'hostedZoneId', {
+        hostedZoneId: domainParameters.hostedZoneId.valueAsString,
+        zoneName: domainParameters.hostedZoneName.valueAsString,
       });
 
-      const hostZoneName = new CfnParameter(this, 'hostZoneName', {
-        description: 'Hosted zone name in Route 53',
-        type: 'String',
-        allowedPattern: `^${domainNamePattern}$`,
-        constraintDescription: `hostZoneName must match pattern ${domainNamePattern}`,
-      });
-
-      const recordName = new CfnParameter(this, 'recordName', {
-        description: 'Record name(the name of the domain or subdomain)',
-        type: 'String',
-        allowedPattern: '[a-zA-Z0-9]{1,63}',
-      });
-
-      const hostZone = HostedZone.fromHostedZoneAttributes(this, 'hostZone', {
-        hostedZoneId: hostZoneId.valueAsString,
-        zoneName: hostZoneName.valueAsString,
-      });
-
-      const certificate = new Certificate(this, 'Certificate', {
-        domainName: Fn.join('.', [recordName.valueAsString, hostZoneName.valueAsString]),
-        validation: CertificateValidation.fromDns(hostZone),
+      const certificate = new Certificate(this, 'certificate', {
+        domainName: Fn.join('.', [domainParameters.recordName.valueAsString, domainParameters.hostedZoneName.valueAsString]),
+        validation: CertificateValidation.fromDns(hostedZone),
       });
 
       domainProsps = {
-        recordName: recordName.valueAsString,
-        hostZoneName: hostZoneName.valueAsString,
-        hostZone: hostZone,
+        recordName: domainParameters.recordName.valueAsString,
+        hostedZoneName: domainParameters.hostedZoneName.valueAsString,
+        hostedZone: hostedZone,
         certificate: certificate,
       };
     }
@@ -170,6 +140,13 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
     });
 
+    this.templateOptions.metadata = {
+      'AWS::CloudFormation::Interface': {
+        ParameterGroups: this.paramGroups,
+        ParameterLabels: this.paramLabels,
+      },
+    };
+
     new CfnOutput(this, 'ControlPlaneUrl', {
       description: 'The url of the controlPlane UI',
       value: controlPlane.controlPlaneUrl,
@@ -184,5 +161,3 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
   }
 }
-
-
