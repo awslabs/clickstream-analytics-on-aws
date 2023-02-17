@@ -33,11 +33,11 @@ import {
   CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
 import { Construct, IConstruct } from 'constructs';
+import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 import { createProxyAndWorkerECRImages } from './ecr';
 
 import { crateECSService } from './ecs-service';
 import { addPoliciesToAsgRole } from './iam';
-import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 export interface ECSClusterProps extends IngestionServerProps {
   ecsSecurityGroup: SecurityGroup;

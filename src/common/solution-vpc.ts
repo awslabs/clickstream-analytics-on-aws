@@ -22,6 +22,7 @@ import {
   Vpc,
   IVpc,
   IpAddresses,
+  GatewayVpcEndpointAwsService,
 } from 'aws-cdk-lib/aws-ec2';
 import { LogGroup, RetentionDays, CfnLogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -110,6 +111,11 @@ export class SolutionVpc extends Construct {
             reason: 'Default for public subnets',
           },
         ]);
+      });
+
+      this.vpc.addGatewayEndpoint('DynamoDbEndpoint', {
+        service: GatewayVpcEndpointAwsService.DYNAMODB,
+        subnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
       });
 
       new CfnOutput(this, 'PublicSubnets', {

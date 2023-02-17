@@ -1,0 +1,36 @@
+GET http://localhost:8080/api/app?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f&pageNumber=2
+Accept: application/json
+
+###
+
+POST http://localhost:8080/api/app
+Content-Type: application/json
+X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869019999
+
+{
+  "projectId": "571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "name": "App-01",
+  "description": "Description of App-01",
+  "platform": "Web",
+  "sdk": "Clickstream SDK"
+}
+###
+
+GET http://localhost:8080/api/app/c5214f85-5c9b-4f59-aeea-8f9720f07eaf?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f
+Accept: application/json
+
+###
+
+PUT http://localhost:8080/api/app/c5214f85-5c9b-4f59-aeea-8f9720f07eaf
+Content-Type: application/json
+
+{
+  "appId": "c5214f85-5c9b-4f59-aeea-8f9720f07eaf",
+  "projectId": "571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "description": "Update Description of App-01"
+}
+
+###
+
+DELETE http://localhost:8080/api/app/7cc06044-279c-4619-b587-8c627c5d7b84?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f
+Accept: application/json

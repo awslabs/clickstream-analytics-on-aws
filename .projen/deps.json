@@ -85,12 +85,32 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-dynamodb",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-kafkaconnect",
       "version": "^3.267.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-s3",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-sfn",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/lib-dynamodb",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/types",
       "version": "^3.267.0",
       "type": "runtime"
     },
@@ -117,6 +137,21 @@
     {
       "name": "constructs",
       "version": "^10.0.5",
+      "type": "runtime"
+    },
+    {
+      "name": "express-validator",
+      "version": "^6.14.3",
+      "type": "runtime"
+    },
+    {
+      "name": "express",
+      "version": "^4.18.2",
+      "type": "runtime"
+    },
+    {
+      "name": "uuid",
+      "version": "^9.0.0",
       "type": "runtime"
     }
   ],

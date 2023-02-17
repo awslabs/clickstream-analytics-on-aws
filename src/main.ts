@@ -25,7 +25,9 @@ import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 const app = new App();
 
 function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) {
-  stacks.forEach(s => NagSuppressions.addStackSuppressions(s, suppressions, true));
+  stacks.forEach(s => {
+    NagSuppressions.addStackSuppressions(s, suppressions, true);
+  });
 }
 
 stackSuppressions([

@@ -16,6 +16,7 @@ limitations under the License.
 
 import path from 'path';
 import {
+  Duration,
   Stack,
   StackProps,
   Fn,
@@ -24,6 +25,7 @@ import {
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 import { LogBucket } from './common/log-bucket';
@@ -31,6 +33,7 @@ import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
+import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 
 export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProps {
   /**
@@ -146,6 +149,29 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         ParameterLabels: this.paramLabels,
       },
     };
+
+    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
+      dictionaryItems: [],
+      existingVpc: props.existingVpc,
+      networkProps: {
+        vpc: vpcStack.vpc,
+        subnets: subnets,
+        port: port,
+      },
+      ALBSecurityGroup: controlPlane.securityGroup,
+    });
+
+    controlPlane.addRoute('api-targets', {
+      routePath: '/api/*',
+      priority: controlPlane.rootPathPriority - 1,
+      target: [new LambdaTarget(clickStreamApi.clickStreamApiFunction)],
+      healthCheck: {
+        enabled: true,
+        interval: Duration.seconds(60),
+      },
+      methods: ['POST', 'GET', 'PUT', 'DELETE'],
+    });
+
 
     new CfnOutput(this, 'ControlPlaneUrl', {
       description: 'The url of the controlPlane UI',

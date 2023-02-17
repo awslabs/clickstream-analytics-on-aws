@@ -61,9 +61,9 @@ import {
 } from 'aws-cdk-lib/aws-s3-deployment';
 
 import { Construct } from 'constructs';
-import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
+import { Constant } from './private/constant';
 
 export interface DistributionProps {
   readonly enableIpv6?: boolean;
@@ -318,7 +318,7 @@ export class CloudFrontS3Portal extends Construct {
             user: '0', // For arm64 dev env, we need mitigate the error '/.npm/ is owned by root'
             command: [
               'bash', '-c',
-              'npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
+              'mkdir /app && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` /app && cd /app && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
             ],
             outputType: BundlingOutput.NOT_ARCHIVED,
           },

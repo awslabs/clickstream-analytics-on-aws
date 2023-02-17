@@ -25,21 +25,8 @@ import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol, IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function, Runtime, InlineCode } from 'aws-cdk-lib/aws-lambda';
-import { TestEnv, TestStack } from './test-utils';
 import { Constant } from '../../src/control-plane/private/constant';
-
-
-function findResources(template: Template, type: string) {
-  const resources: any[] = [];
-  const allResources = template.toJSON().Resources;
-  for (const key of Object.keys(allResources)) {
-    const r = allResources[key];
-    if (r.Type == type) {
-      resources.push(r);
-    }
-  }
-  return resources;
-}
+import { TestEnv, TestStack, findResourcesName, findResources } from './test-utils';
 
 describe('ApplicationLoadBalancerLambdaPortal', () => {
 
@@ -67,19 +54,22 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::LoadBalancer', 1);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::LoadBalancer')).toEqual(['testportalALB7CB15A19']);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       IpAddressType: 'ipv4',
       Scheme: 'internet-facing',
       Type: 'application',
     });
-  }),
+  });
 
   test('Log bucket', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'testportallogbucketLogBucketD755C4BB',
+      ]);
     template.hasResourceProperties('AWS::S3::Bucket', {
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [
@@ -100,13 +90,18 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         RestrictPublicBuckets: true,
       },
     });
-  }),
+  });
 
   test('SecurityGroup', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
+    expect(findResourcesName(template, 'AWS::EC2::SecurityGroup'))
+      .toEqual([
+        'testsg872EB48A',
+        'testportalfrontendfunctionsgC8D5E34D',
+        'testportalportalsg53A8AF19',
+      ]);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       SecurityGroupIngress: [
         {
@@ -125,7 +120,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
       ],
     });
-  }),
+  });
 
   test('ALB access log', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
@@ -149,13 +144,16 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
       ]),
     });
-  }),
+  });
 
   test('ALB listener', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 1);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       DefaultActions: [
         {
@@ -170,13 +168,16 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       Certificates: Match.absent(),
       Port: 80,
     });
-  }),
+  });
 
   test('ALB targetGroup', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::TargetGroup', 1);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::TargetGroup'))
+      .toEqual([
+        'testportalALBListenercontrolplanetargetsGroupD1FDA581',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
       HealthCheckEnabled: true,
       HealthCheckIntervalSeconds: 60,
@@ -192,13 +193,16 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       ],
       TargetType: 'lambda',
     });
-  }),
+  });
 
   test('ALB listenerRule', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 1);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::ListenerRule'))
+      .toEqual([
+        'testportalALBListenercontrolplanetargetsRule15A7225D',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
       Conditions: [
         {
@@ -212,13 +216,16 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       ],
       Priority: 50,
     });
-  }),
+  });
 
   test('ALB Lambda function is created with expected properties', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::Lambda::Function', 1);
+    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+      .toEqual([
+        'testportalportalfn1F095E03',
+      ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',
       ReservedConcurrentExecutions: 3,
@@ -236,13 +243,17 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         'testportalportalfnrole5B2099BA',
       ],
     });
-  }),
+  });
 
   test('IAM policies are created for Lambda functions', () => {
     const testElements = TestEnv.newAlbStackWithDefaultPortal();
     const template = Template.fromStack(testElements.stack);
 
-    template.resourceCountIs('AWS::IAM::Policy', 2);
+    expect(findResourcesName(template, 'AWS::IAM::Policy'))
+      .toEqual([
+        'frontendfunclogsB07272B7',
+        'frontendfunceni3AD2BF09',
+      ]);
     // create eni for running inside vpc
     template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
       PolicyDocument: {
@@ -295,7 +306,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':log-group:aws/lambda/',
+                  ':log-group:/aws/lambda/',
                   { Ref: 'testportalportalfn1F095E03' },
                   ':*',
                 ],
@@ -312,7 +323,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       ],
     }),
     );
-  }),
+  });
 
   test('ALB custom domian', () => {
     const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
@@ -333,7 +344,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     }
 
     expect(errorMsg).toContain(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
-  }),
+  });
 
   test('Certificate - no cetificate', () => {
     const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
@@ -348,8 +359,14 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     const template = Template.fromStack(testStack);
 
-    template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 1);
+    expect(findResourcesName(template, 'AWS::CertificateManager::Certificate'))
+      .toEqual([
+        'testportalCertificateA9F68FC7',
+      ]);
+    expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
+      .toEqual([
+        'testportalaliasRecordF838F55A',
+      ]);
     template.hasResourceProperties('AWS::Route53::RecordSet', {
       Type: 'A',
     });
@@ -369,8 +386,14 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     const template = Template.fromStack(testStack);
 
-    template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 1);
+    expect(findResourcesName(template, 'AWS::CertificateManager::Certificate'))
+      .toEqual([
+        'Certificate4E7ABB08',
+      ]);
+    expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
+      .toEqual([
+        'testportalaliasRecordF838F55A',
+      ]);
     template.hasResourceProperties('AWS::Route53::RecordSet', {
       Type: 'A',
     });
@@ -390,7 +413,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     const template = Template.fromStack(testStack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 2);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+        'testportalALBHttpListener721DD53E',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       DefaultActions: [
         {
@@ -426,7 +453,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     const template = Template.fromStack(testStack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 2);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+        'testportalALBHttpListener721DD53E',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       DefaultActions: [
         {
@@ -456,7 +487,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 2);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+        'testportalALBHttpListener721DD53E',
+      ]);
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       Port: 9443,
@@ -486,7 +521,10 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     const template = Template.fromStack(testStack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::Listener', 1);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+      ]);
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       Protocol: 'HTTP',
@@ -506,7 +544,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 3);
+
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::Listener'))
+      .toEqual([
+        'testportalALBListener1405B7D9',
+      ]);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       SecurityGroupEgress: [
         {
@@ -537,7 +579,13 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       },
     });
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::EC2::SecurityGroup', 3);
+    expect(findResourcesName(template, 'AWS::EC2::SecurityGroup'))
+      .toEqual([
+        'testsg872EB48A',
+        'testportalfrontendfunctionsgC8D5E34D',
+        'testportalportalsg53A8AF19',
+        'testportalportalsourcesg8A7E3728',
+      ]);
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
       GroupDescription: Match.stringLikeRegexp('portal_source_sg'),
     });
@@ -636,7 +684,10 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
 
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'LogBucketA5517498',
+      ]);
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       LoadBalancerAttributes: Match.arrayWith([
@@ -673,7 +724,10 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
 
     const template = Template.fromStack(testStack);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'LogBucketA5517498',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       LoadBalancerAttributes: Match.arrayWith([
         {
@@ -740,7 +794,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
     const template = Template.fromStack(stackElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 2);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::ListenerRule'))
+      .toEqual([
+        'testportalALBListenercontrolplanetargetsRule15A7225D',
+        'testportalALBListenertestRouteRuleFB76470F',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
       Actions: [
         {
@@ -779,7 +837,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
     const template = Template.fromStack(stackElements.stack);
 
-    template.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 2);
+    expect(findResourcesName(template, 'AWS::ElasticLoadBalancingV2::ListenerRule'))
+      .toEqual([
+        'testportalALBListenercontrolplanetargetsRule15A7225D',
+        'testportalALBListenertestFixResponseRule3068CA4A',
+      ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
       Actions: [
         {

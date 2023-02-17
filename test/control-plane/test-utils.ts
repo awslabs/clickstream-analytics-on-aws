@@ -15,8 +15,9 @@ limitations under the License.
 */
 
 import { App, Stack } from 'aws-cdk-lib';
+import { Template } from 'aws-cdk-lib/assertions';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
-import { Vpc, IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, IVpc, SubnetType, SecurityGroup, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
@@ -28,6 +29,7 @@ import {
   FrontendProps,
   NetworkProps,
 } from '../../src/control-plane/alb-lambda-portal';
+import { ClickStreamApiConstruct, DicItem } from '../../src/control-plane/backend/click-stream-api';
 
 export interface VPCAttributes {
   vpcId: string;
@@ -44,7 +46,9 @@ export const vpcFromAttr = (
 };
 
 export class TestStack extends Stack {
+  public readonly dics: DicItem[];
   public readonly vpc: IVpc;
+  public readonly sg: ISecurityGroup;
 
   constructor(
     scope: Construct,
@@ -52,11 +56,36 @@ export class TestStack extends Stack {
   ) {
     super(scope, id);
 
+
+    this.dics = [
+      {
+        name: 'D0',
+        data: {
+          s: '',
+        },
+      },
+      {
+        name: 'D1',
+        data: 1,
+      },
+      {
+        name: 'D2',
+        data: '2',
+      },
+      {
+        name: 'D3',
+        data: false,
+      },
+    ];
     this.vpc = vpcFromAttr(this, {
       vpcId: 'vpc-11111111111111111',
       availabilityZones: ['test-1a', 'test-1b'],
       publicSubnetIds: ['subnet-11111111111111111', 'subnet-22222222222222222'],
       privateSubnetIds: ['subnet-33333333333333333', 'subnet-44444444444444444'],
+    });
+    this.sg = new SecurityGroup(this, 'test-sg', {
+      vpc: this.vpc,
+      allowAllOutbound: false,
     });
   }
 }
@@ -76,6 +105,11 @@ export interface ApplicationLoadBalancerLambdaPortalTestProps {
 export interface StackElements {
   stack: TestStack;
   portal: ApplicationLoadBalancerLambdaPortal;
+}
+
+export interface ApiStackElements {
+  stack: TestStack;
+  template: Template;
 }
 
 export class TestEnv {
@@ -218,4 +252,48 @@ export class TestEnv {
 
     return stack;
   }
+
+  public static newApiStack(): ApiStackElements {
+
+    const stack = new TestStack(new App(), 'apiTestStack');
+
+    new ClickStreamApiConstruct(stack, 'testClickStreamApi', {
+      dictionaryItems: stack.dics,
+      existingVpc: false,
+      networkProps: {
+        vpc: stack.vpc,
+        subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      },
+      ALBSecurityGroup: stack.sg,
+    });
+
+    const template = Template.fromStack(stack);
+
+    return { stack, template };
+  }
+
+}
+
+export function findResources(template: Template, type: string) {
+  const resources: any[] = [];
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const r = allResources[key];
+    if (r.Type == type) {
+      resources.push(r);
+    }
+  }
+  return resources;
+}
+
+export function findResourcesName(template: Template, type: string) {
+  const resources: any[] = [];
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const r = allResources[key];
+    if (r.Type == type) {
+      resources.push(key);
+    }
+  }
+  return resources;
 }

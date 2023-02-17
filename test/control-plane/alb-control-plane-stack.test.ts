@@ -20,6 +20,7 @@ import {
 } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
+import { findResourcesName } from './test-utils';
 
 function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
@@ -56,10 +57,13 @@ describe('ALBLambdaPotalStack', () => {
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       Protocol: 'HTTPS',
     });
-    template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 1);
 
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::CertificateManager::Certificate'))
+      .toEqual(['certificateEC031123']);
+    expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
+      .toEqual(['albcontrolplanealiasRecord2560DD98']);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual(['logBucketLogBucket8B6A5D6C']);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -94,7 +98,10 @@ describe('ALBLambdaPotalStack', () => {
     template.hasParameter('PublicSubnets', {});
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'logBucketLogBucket8B6A5D6C',
+      ]);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -126,7 +133,10 @@ describe('ALBLambdaPotalStack', () => {
     });
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'logBucketLogBucket8B6A5D6C',
+      ]);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -163,8 +173,14 @@ describe('ALBLambdaPotalStack', () => {
       Protocol: 'HTTPS',
     });
     template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 1);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+    expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
+      .toEqual([
+        'albcontrolplanealiasRecord2560DD98',
+      ]);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'logBucketLogBucket8B6A5D6C',
+      ]);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -205,9 +221,16 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     });
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
 
-    template.resourceCountIs('AWS::Lambda::Function', 1);
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'logBucketLogBucket8B6A5D6C',
+      ]);
+    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+      .toEqual([
+        'albcontrolplaneportalfnC6B1CDAC',
+        'ClickStreamApiClickStreamApiFunction8C843168',
+      ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',
       ReservedConcurrentExecutions: 5,
@@ -243,7 +266,11 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     });
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::S3::Bucket', 1);
+
+    expect(findResourcesName(template, 'AWS::S3::Bucket'))
+      .toEqual([
+        'logBucketLogBucket8B6A5D6C',
+      ]);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -372,4 +399,132 @@ describe('CloudFormation parameter check', () => {
     }
   });
 
+});
+
+
+describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
+
+  test('DynamoDB Endpoint - existvpc - public - custom domain', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPublicConstrolplaneTestStack01', {
+      env: {
+        region: Aws.REGION,
+        account: Aws.ACCOUNT_ID,
+      },
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: true,
+    });
+
+    const template = Template.fromStack(portalStack);
+    template.resourceCountIs('AWS::EC2::VPCEndpoint', 0);
+  });
+
+  test('DynamoDB Endpoint - existvpc - public - no custom domain', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPublicConstrolplaneTestStack02', {
+      env: {
+        region: Aws.REGION,
+        account: Aws.ACCOUNT_ID,
+      },
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: false,
+    });
+
+    const template = Template.fromStack(portalStack);
+    template.resourceCountIs('AWS::EC2::VPCEndpoint', 0);
+
+  });
+
+  test('DynamoDB Endpoint - new VPC - public - no custom domain', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPublicConstrolplaneTestStack03', {
+      env: {
+        region: Aws.REGION,
+        account: Aws.ACCOUNT_ID,
+      },
+      existingVpc: false,
+      internetFacing: true,
+      useCustomDomain: false,
+    });
+
+    const template = Template.fromStack(portalStack);
+    template.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+      ServiceName: {
+        'Fn::Join': [
+          '',
+          [
+            'com.amazonaws.',
+            {
+              Ref: 'AWS::Region',
+            },
+            '.dynamodb',
+          ],
+        ],
+      },
+      VpcId: {
+        Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPC31B28594',
+      },
+      RouteTableIds: [
+        {
+          Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet1RouteTableBD0343AE',
+        },
+        {
+          Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet2RouteTableB93D5F20',
+        },
+      ],
+      VpcEndpointType: 'Gateway',
+    });
+  });
+
+  test('DynamoDB Endpoint - new VPC - public - custom domain', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPublicConstrolplaneTestStack04', {
+      env: {
+        region: Aws.REGION,
+        account: Aws.ACCOUNT_ID,
+      },
+      existingVpc: false,
+      internetFacing: true,
+      useCustomDomain: true,
+    });
+
+    const template = Template.fromStack(portalStack);
+    template.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+      ServiceName: {
+        'Fn::Join': [
+          '',
+          [
+            'com.amazonaws.',
+            {
+              Ref: 'AWS::Region',
+            },
+            '.dynamodb',
+          ],
+        ],
+      },
+      VpcId: {
+        Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPC31B28594',
+      },
+      RouteTableIds: [
+        {
+          Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet1RouteTableBD0343AE',
+        },
+        {
+          Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet2RouteTableB93D5F20',
+        },
+      ],
+      VpcEndpointType: 'Gateway',
+    });
+
+  });
 });

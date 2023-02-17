@@ -95,7 +95,7 @@ function getLambdaLogGroupArn(func: IFunction) {
     {
       resource: 'log-group',
       service: 'logs',
-      resourceName: `aws/lambda/${func.functionName}:*`,
+      resourceName: `/aws/lambda/${func.functionName}:*`,
       arnFormat: ArnFormat.COLON_RESOURCE_NAME,
     },
     func.stack,

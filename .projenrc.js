@@ -1,11 +1,36 @@
-const { awscdk, gitlab } = require('projen');
-
+const { awscdk, gitlab, typescript } = require('projen');
+const version = '1.0.0';
 const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
 ].map(dep => `${dep}@^3.267.0`);
-
+const awsSDKDepsForApiProject = [
+  '@aws-sdk/types',
+  '@aws-sdk/client-s3',
+  '@aws-sdk/client-sfn',
+  '@aws-sdk/client-dynamodb',
+  '@aws-sdk/lib-dynamodb',
+].map(dep => `${dep}@^3.267.0`);
+const depsForApiProject = [
+  '@aws-lambda-powertools/logger@^1.5.1',
+  'express@^4.18.2',
+  'express-validator@^6.14.3',
+  'uuid@^9.0.0',
+  ...awsSDKDepsForApiProject,
+];
+const devDepsForApiProject = [
+  'aws-sdk-client-mock@^2.0.1',
+  'supertest@^6.3.3',
+  'nodemon@^2.0.20',
+  'ts-node@^10.9.1',
+  '@types/node@^18.11.18',
+  '@types/aws-lambda@^8.10.110',
+  '@types/express@^4.17.16',
+  '@types/supertest@^2.0.12',
+  '@types/uuid@^9.0.0',
+];
 const project = new awscdk.AwsCdkTypeScriptApp({
+  version,
   cdkVersion: '2.1.0',
   defaultReleaseBranch: 'main',
   name: 'clickstream-analytics-on-aws',
@@ -23,8 +48,9 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   deps: [
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.7',
-    '@types/aws-lambda@^8.10.110',
     '@aws-lambda-powertools/logger@^1.5.1',
+    '@types/aws-lambda@^8.10.110',
+    ...depsForApiProject,
     ...awsSDKDeps,
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
@@ -53,6 +79,36 @@ project.eslint?.addRules({
     },
   ],
 });
+
+const apiProject = new typescript.TypeScriptProject({
+  deps: [
+    ...depsForApiProject,
+  ],
+  devDeps: [
+    ...devDepsForApiProject,
+  ],
+  gitignore: [
+    'src/aws-exports.js',
+    'build/',
+  ],
+  description: 'Backend api service of control plane.',
+  version,
+  name: 'control-plane-api',
+  license: 'Apache-2.0',
+  licensed: true,
+  outdir: 'src/control-plane/backend/lambda/api/',
+  libdir: 'dist/',
+  readme: undefined,
+  defaultReleaseBranch: 'main',
+  entrypoint: 'index.js',
+  parent: project,
+  sampleCode: false,
+  srcdir: './',
+  testdir: 'test/',
+  eslint: false,
+});
+apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
+apiProject.setScript('start', 'node dist/index.js');
 
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {

@@ -24,8 +24,8 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
+import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 
 export interface S3SinkConnectorCustomResourceProps {
   readonly subnetIds: String;

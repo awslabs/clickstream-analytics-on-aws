@@ -1,0 +1,54 @@
+GET http://localhost:8080/api/project?pageNumber=1&pageSize=30
+Accept: application/json
+
+###
+
+POST http://localhost:8080/api/project
+Content-Type: application/json
+X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869016666
+
+{
+  "name": "Project-01",
+  "tableName": "t1",
+  "description": "Description of Project-01",
+  "emails": "u1@amazon.com,u2@amazon.com,u3@amazon.com",
+  "platform": "Web",
+  "region": "us-east-1",
+  "environment": "Dev"
+}
+
+###
+
+GET http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+Accept: application/json
+
+###
+
+PUT http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+Content-Type: application/json
+
+{
+  "environment": "1Dev",
+  "projectId": "571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "updateAt": 1676261555751,
+  "operator": "",
+  "name": "1Project-01",
+  "deleted": false,
+  "createAt": 1676259929614,
+  "emails": "1update@amazon.com",
+  "platform": "1Web",
+  "tableName": "1t1",
+  "region": "1us-east-1",
+  "description": "1update Description of Project-01",
+  "type": "METADATA#571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "status": "1UNKNOW"
+}
+
+###
+
+DELETE http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+Accept: application/json
+
+###
+GET http://localhost:8080/api/project/verification/t11
+Accept: application/json
