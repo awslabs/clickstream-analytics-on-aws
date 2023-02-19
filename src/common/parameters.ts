@@ -35,6 +35,7 @@ import {
   VPC_ID_PARRERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
+  IAM_CERTIFICATE_ID_PARRERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -93,6 +94,15 @@ export class Parameters {
       type: 'String',
       allowedPattern: `^${DOMAIN_NAME_PATTERN}$`,
       constraintDescription: `Domain name must match pattern ${DOMAIN_NAME_PATTERN}`,
+    });
+  }
+
+  public static createIAMCertificateIdParameter(scope: Construct, id?: string) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'IAMCertificateId', {
+      description: 'The IAM certificate id.',
+      type: 'String',
+      allowedPattern: `^${IAM_CERTIFICATE_ID_PARRERN}$`,
+      constraintDescription: `Certifiate id must match pattern ${IAM_CERTIFICATE_ID_PARRERN}`,
     });
   }
 

@@ -20,6 +20,7 @@ export const IP_PATTERN = '((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[
 export const HOST_ZONE_ID_PATTERN = '^Z[A-Z0-9]+$';
 export const RECORD_NAME_PARRERN = '^[a-zA-Z0-9\\-_]{1,63}$';
 export const VPC_ID_PARRERN = '^vpc-[a-f0-9]+$';
+export const IAM_CERTIFICATE_ID_PARRERN = '^[A-Z0-9]+$';
 
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
 export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';

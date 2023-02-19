@@ -55,20 +55,29 @@ export class CloudFrontControlPlaneStack extends Stack {
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
 
     if (props?.targetToCNRegions) {
+      const iamCertificateId = Parameters.createIAMCertificateIdParameter(this);
+      this.addToParamLabels('IAM Certificate Id', iamCertificateId.logicalId);
 
       const domainName = Parameters.createDomainNameParameter(this);
       this.addToParamLabels('Domain Name', domainName.logicalId);
 
       cnCloudFrontS3PortalProps = {
         domainName: domainName.valueAsString,
+        iamCertificateId: iamCertificateId.valueAsString,
       };
 
       Aspects.of(this).add(new InjectCustomResourceConfig('true'));
 
       this.addToParamGroups(
         'Domain Information',
+        iamCertificateId.logicalId,
         domainName.logicalId,
       );
+
+      new CfnOutput(this, 'CustomDomainName', {
+        description: 'Custom domain name',
+        value: domainName.valueAsString,
+      }).overrideLogicalId('CustomDomainName');
 
     } else {
       if (props?.useCustomDomainName) {

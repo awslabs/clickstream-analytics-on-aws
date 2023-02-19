@@ -41,7 +41,6 @@ import {
   OriginAccessIdentity,
   CloudFrontWebDistribution,
   CloudFrontAllowedMethods,
-  ViewerCertificate,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { PolicyStatement, Effect, ServicePrincipal, CanonicalUserPrincipal } from 'aws-cdk-lib/aws-iam';
@@ -79,6 +78,7 @@ export interface DomainProps {
 
 export interface CNCloudFrontS3PortalProps {
   readonly domainName: string;
+  readonly iamCertificateId: string;
 }
 
 export interface CloudFrontS3PortalProps {
@@ -161,7 +161,6 @@ export class CloudFrontS3Portal extends Construct {
         priceClass: PriceClass.PRICE_CLASS_ALL,
         defaultRootObject: 'index.html',
         viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
-        viewerCertificate: ViewerCertificate.fromCloudFrontDefaultCertificate(props.cnCloudFrontS3PortalProps.domainName),
         originConfigs: [
           {
             s3OriginSource: {
@@ -188,8 +187,22 @@ export class CloudFrontS3Portal extends Construct {
         comment: distributionDescription,
       });
 
+      const portalDist = this.distribution.node.defaultChild as CfnDistribution;
+      portalDist.addPropertyOverride(
+        'DistributionConfig.ViewerCertificate',
+        {
+          IamCertificateId: props.cnCloudFrontS3PortalProps.iamCertificateId,
+          SslSupportMethod: 'sni-only',
+          CloudFrontDefaultCertificate: undefined,
+        },
+      );
+
+      portalDist.addPropertyOverride('DistributionConfig.Aliases', [
+        props.cnCloudFrontS3PortalProps.domainName,
+      ]);
+
       addCfnNagSuppressRules(
-        this.distribution.node.defaultChild as CfnDistribution,
+        portalDist,
         [
           {
             id: 'W70', //Cloudfront should use minimum protocol version TLS 1.2

@@ -80,6 +80,7 @@ describe('CloudFrontS3PotalStack', () => {
     const template = Template.fromStack(portalStack);
 
     template.hasParameter('DomainName', {});
+    template.hasParameter('IAMCertificateId', {});
 
     template.resourceCountIs('AWS::Lambda::Function', 2);
     template.resourceCountIs('AWS::S3::Bucket', 2);

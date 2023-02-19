@@ -172,6 +172,7 @@ describe('CloudFrontS3Portal', () => {
       assetPath: '../../frontend',
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
+        iamCertificateId: 'ASCAU7UKQJBEYXRJCWVFR',
       },
       domainProps: {
         recordName: 'test',
@@ -196,6 +197,7 @@ describe('CloudFrontS3Portal', () => {
       assetPath: '../../frontend',
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
+        iamCertificateId: 'ASCAU7UKQJBEYXRJCWVFR',
       },
     });
 
