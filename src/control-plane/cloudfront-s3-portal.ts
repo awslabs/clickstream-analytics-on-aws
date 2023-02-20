@@ -239,9 +239,10 @@ export class CloudFrontS3Portal extends Construct {
         }
       }
 
+      const shortId = Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', Stack.of(this).stackId))));
       const oac = new CfnOriginAccessControl(this, 'origin_access_control', {
         originAccessControlConfig: {
-          name: Stack.of(this).stackName + '-oac',
+          name: 'clicstream-controlplane-oac-' + shortId,
           originAccessControlOriginType: 's3',
           signingBehavior: 'always',
           signingProtocol: 'sigv4',

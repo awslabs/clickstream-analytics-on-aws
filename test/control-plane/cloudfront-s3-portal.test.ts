@@ -206,4 +206,53 @@ describe('CloudFrontS3Portal', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
   });
 
+  test('Test OAC for global regions', () => {
+    const app = new App();
+
+    const testStack = new Stack(app, 'testStack');
+    new CloudFrontS3Portal(testStack, 'test-portal', {
+      assetPath: '../../frontend',
+    });
+    const template = Template.fromStack(testStack);
+
+    template.hasResourceProperties('AWS::CloudFront::OriginAccessControl', {
+      OriginAccessControlConfig: {
+        Name: {
+          'Fn::Join': [
+            '',
+            [
+              'clicstream-controlplane-oac-',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
+        OriginAccessControlOriginType: 's3',
+        SigningBehavior: 'always',
+        SigningProtocol: 'sigv4',
+      },
+
+    });
+  });
 });
