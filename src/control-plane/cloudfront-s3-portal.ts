@@ -25,6 +25,7 @@ import {
   Aws,
   Stack,
   Duration,
+  AssetHashType,
 } from 'aws-cdk-lib';
 import { ICertificate, DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -70,6 +71,15 @@ export interface DistributionProps {
   readonly logProps?: LogProps;
 }
 
+export interface FrontendProps {
+  readonly assetPath: string;
+  readonly dockerImage: DockerImage;
+  readonly buildCommand: string[];
+  readonly autoInvalidFilePaths?: string[];
+  readonly assetHash?: string;
+  readonly assetHashType?: AssetHashType;
+}
+
 export interface DomainProps {
   readonly recordName: string;
   readonly hostZone: IHostedZone;
@@ -82,7 +92,7 @@ export interface CNCloudFrontS3PortalProps {
 }
 
 export interface CloudFrontS3PortalProps {
-  readonly assetPath: string;
+  readonly frontendProps: FrontendProps;
   readonly distributionProps?: DistributionProps;
   readonly domainProps?: DomainProps;
   readonly cnCloudFrontS3PortalProps?: CNCloudFrontS3PortalProps;
@@ -326,22 +336,21 @@ export class CloudFrontS3Portal extends Construct {
     // upload static web assets
     new BucketDeployment(this, 'portal_deploy', {
       sources: [
-        Source.asset(path.join(__dirname, props.assetPath), {
+        Source.asset(path.join(__dirname, props.frontendProps.assetPath), {
           bundling: {
-            image: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+            image: props.frontendProps.dockerImage,
             user: '0', // For arm64 dev env, we need mitigate the error '/.npm/ is owned by root'
-            command: [
-              'bash', '-c',
-              'mkdir /app && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` /app && cd /app && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
-            ],
+            command: props.frontendProps.buildCommand,
             outputType: BundlingOutput.NOT_ARCHIVED,
           },
+          assetHash: props.frontendProps.assetHash ?? undefined,
+          assetHashType: props.frontendProps.assetHashType ?? AssetHashType.SOURCE,
         }),
       ],
       destinationBucket: portalBucket,
       prune: false,
       distribution: this.distribution,
-      distributionPaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/locales/*'],
+      distributionPaths: props.frontendProps.autoInvalidFilePaths,
     });
   }
 

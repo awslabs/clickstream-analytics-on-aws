@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { CfnDistribution } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
@@ -22,6 +22,7 @@ import { Construct, IConstruct } from 'constructs';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
+import { Constant } from './control-plane/private/constant';
 import {
   CfnNagWhitelistForBucketDeployment,
   CfnNagWhitelistForS3BucketDelete,
@@ -104,7 +105,15 @@ export class CloudFrontControlPlaneStack extends Stack {
     }
 
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'mkdir /app && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` /app && cd /app && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
+        ],
+        autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/locales/*'],
+      },
       cnCloudFrontS3PortalProps,
       domainProps,
       distributionProps: {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Stack, App } from 'aws-cdk-lib';
+import { Stack, App, DockerImage } from 'aws-cdk-lib';
 import {
   Match,
   Template,
@@ -22,6 +22,7 @@ import {
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
+import { Constant } from '../../src/control-plane/private/constant';
 
 describe('CloudFrontS3Portal', () => {
 
@@ -29,7 +30,15 @@ describe('CloudFrontS3Portal', () => {
 
     const testStack = new Stack(new App(), 'testStack');
     new CloudFrontS3Portal(testStack, 'test-portal', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
     });
     const template = Template.fromStack(testStack);
 
@@ -148,7 +157,15 @@ describe('CloudFrontS3Portal', () => {
     });
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
       domainProps: {
         hostZone: testHostedZone,
         recordName: 'test',
@@ -169,7 +186,15 @@ describe('CloudFrontS3Portal', () => {
     });
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
         iamCertificateId: 'ASCAU7UKQJBEYXRJCWVFR',
@@ -194,7 +219,15 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(new App(), 'testStack');
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
         iamCertificateId: 'ASCAU7UKQJBEYXRJCWVFR',
@@ -211,7 +244,15 @@ describe('CloudFrontS3Portal', () => {
 
     const testStack = new Stack(app, 'testStack');
     new CloudFrontS3Portal(testStack, 'test-portal', {
-      assetPath: '../../frontend',
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
     });
     const template = Template.fromStack(testStack);
 
