@@ -13,14 +13,9 @@
     "projects": "Projects",
     "pipelines": "Pipelines",
     "analytics": "Analytics",
-    "pipelineModules": "Pipeline modules",
-    "ingestions": "Ingestions",
-    "streaming": "Streaming",
-    "enrichment": "Enrichment",
-    "reporting": "Reporting",
     "operation": "Operation",
-    "dashboard": "Dashboard",
-    "monitorAlerts": "Monitors & Alerts",
+    "dashboard": "Monitors Dashboard",
+    "monitorAlerts": "Alarms",
     "tools": "Tools",
     "simuTest": "Simulation testing",
     "sdkIntegration": "SKD integration",
@@ -230,5 +225,6 @@
   "step": "Step",
   "steps": "Steps",
   "of": "of",
-  "optional": "optional"
+  "optional": "optional",
+  "noData": "No Data"
 }

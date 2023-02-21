@@ -1,3 +1,16 @@
+export const COMMON_ALERT_TYPE = {
+  Success: 'success',
+  Error: 'error',
+  Warning: 'warning',
+  Info: 'info',
+};
+
+export const PROJECT_STAGE_LIST = [
+  { label: 'Dev', value: 'Dev' },
+  { label: 'Test', value: 'Test' },
+  { label: 'Prod', value: 'Prod' },
+];
+
 export const AWS_REGION_LIST = [
   { label: 'us-east-1(N.Virginia)', value: 'us-east-1' },
   { label: 'us-east-2(Ohio)', value: 'us-east-2' },
@@ -126,70 +139,6 @@ export const PLUGINS_LIST = [
   },
 ];
 
-export interface ProjectType {
-  name: string;
-  id: string;
-  platform: string;
-  status: string;
-}
-
-export const PROJECT_LIST: ProjectType[] = [
-  {
-    name: 'Project A',
-    id: 'Project-01',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-02',
-    platform: 'iOS',
-    status: 'Deactivated',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-03',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-04',
-    platform: 'Android',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-05',
-    platform: 'iOS',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-06',
-    platform: 'Web',
-    status: 'Deactivated',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-07',
-    platform: 'Android',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-08',
-    platform: 'Web',
-    status: 'Active',
-  },
-  {
-    name: 'Project A',
-    id: 'Project-09',
-    platform: 'Web',
-    status: 'Active',
-  },
-];
-
 export enum YES_NO {
   YES = 'Yes',
   NO = 'No',
@@ -199,3 +148,5 @@ export const YES_NO_LIST = [
   { value: YES_NO.YES, label: 'Yes' },
   { value: YES_NO.NO, label: 'No' },
 ];
+
+export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

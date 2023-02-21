@@ -15,6 +15,23 @@ code {
   margin-top: 100px;
 }
 
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.content-loading {
+  text-align: center;
+  margin-top: 80px;
+}
+
 .text-center {
   text-align: center;
 }
@@ -62,6 +79,18 @@ code {
 
 .plr-20 {
   padding: 0 20px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mt-5 {
+  margin-top: 5px;
+}
+
+.w-45p {
+  width: 45%;
 }
 
 .more-settings {

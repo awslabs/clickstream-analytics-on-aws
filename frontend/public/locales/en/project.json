@@ -1,12 +1,18 @@
 {
   "projects": "Projects",
+  "valid": {
+    "nameEmpty": "Please input project name.",
+    "emailEmpty": "please input notification email.",
+    "emailInvalid": "Notification email invalid."
+  },
   "split": {
     "id": "Project ID",
+    "name": "Project Name",
     "platform": "App Platform",
     "created": "Creation Time",
     "notifyEmail": "Notification Email",
     "envType": "Enviroment Type",
-    "projectNo": "Project Number"
+    "tableName": "Table Name"
   },
   "create": {
     "createProject": "Create project (Step 1 of 3)",

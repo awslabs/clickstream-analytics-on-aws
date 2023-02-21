@@ -3,9 +3,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-const NonePipeline: React.FC = () => {
+interface NonePipelineProps {
+  projectId?: string;
+}
+
+const NonePipeline: React.FC<NonePipelineProps> = (
+  props: NonePipelineProps
+) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { projectId } = props;
   return (
     <Container
       header={
@@ -21,7 +28,7 @@ const NonePipeline: React.FC = () => {
         iconName="add-plus"
         variant="primary"
         onClick={() => {
-          navigate('/pipelines/create');
+          navigate(`/project/${projectId}/pipelines/create`);
         }}
       >
         {t('button.addPipeline')}

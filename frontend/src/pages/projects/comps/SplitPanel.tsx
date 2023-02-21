@@ -1,9 +1,31 @@
-import { Box, ColumnLayout, SplitPanel } from '@cloudscape-design/components';
-import React from 'react';
+import {
+  Badge,
+  Box,
+  Button,
+  ColumnLayout,
+  FormField,
+  Input,
+  Select,
+  SelectProps,
+  SpaceBetween,
+  SplitPanel,
+} from '@cloudscape-design/components';
+import { updateProject } from 'apis/project';
+import moment from 'moment';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PROJECT_STAGE_LIST, TIME_FORMAT } from 'ts/const';
+import { validateEmails } from 'ts/utils';
 
-const SplitPanelContent: React.FC = () => {
+interface SplitPanelContentProps {
+  project: IProject;
+}
+
+const SplitPanelContent: React.FC<SplitPanelContentProps> = (
+  props: SplitPanelContentProps
+) => {
   const { t } = useTranslation();
+  const { project } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
     preferencesPositionLabel: t('splitPanel.preferencesPositionLabel'),
@@ -18,24 +40,203 @@ const SplitPanelContent: React.FC = () => {
     openButtonAriaLabel: t('splitPanel.openButtonAriaLabel'),
     resizeHandleAriaLabel: t('splitPanel.resizeHandleAriaLabel'),
   };
+
+  const [newProject, setNewProject] = useState(project);
+  const [prevEmail, setPrevEmail] = useState(project.emails);
+  const [prevEnvOption, setPrevEnvOption] = useState<SelectProps.Option>(
+    PROJECT_STAGE_LIST.find(
+      (element) => element.value === project.environment
+    ) || PROJECT_STAGE_LIST[0]
+  );
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isEditingEvn, setIsEditingEvn] = useState(false);
+  const [loadingUpdateEmail, setLoadingUpdateEmail] = useState(false);
+  const [loadingUpdateEnv, setLoadingUpdateEnv] = useState(false);
+  const [emailsEmptyError, setEmailsEmptyError] = useState(false);
+  const [emailsInvalidError, setEmailsInvalidError] = useState(false);
+  const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option>(
+    PROJECT_STAGE_LIST.find(
+      (element) => element.value === project.environment
+    ) || PROJECT_STAGE_LIST[0]
+  );
+
+  const updateProjectInfo = async (type: 'email' | 'env') => {
+    if (type === 'email') {
+      if (!newProject.emails) {
+        setEmailsEmptyError(true);
+        return false;
+      }
+      if (!validateEmails(newProject.emails)) {
+        setEmailsInvalidError(true);
+        return false;
+      }
+      setLoadingUpdateEmail(true);
+    }
+
+    if (type === 'env') {
+      setLoadingUpdateEnv(true);
+    }
+
+    const { success }: ApiResponse<null> = await updateProject(newProject);
+    if (success) {
+      if (type === 'email') {
+        setPrevEmail(newProject.emails);
+        setIsEditingEmail(false);
+      }
+      if (type === 'env') {
+        setPrevEnvOption(
+          PROJECT_STAGE_LIST.find(
+            (element) => element.value === newProject.environment
+          ) || PROJECT_STAGE_LIST[0]
+        );
+        setIsEditingEvn(false);
+      }
+    }
+    setLoadingUpdateEmail(false);
+    setLoadingUpdateEnv(false);
+  };
+
   return (
-    <SplitPanel header="Project-01" i18nStrings={SPLIT_PANEL_I18NSTRINGS}>
+    <SplitPanel header={project.name} i18nStrings={SPLIT_PANEL_I18NSTRINGS}>
       <ColumnLayout columns={2} variant="text-grid">
         <div>
           <Box variant="awsui-key-label">{t('project:split.id')}</Box>
-          <div className="mb-10">Project-01</div>
-          <Box variant="awsui-key-label">{t('project:split.platform')}</Box>
-          <div className="mb-10">Web</div>
+          <div className="mb-10">{project.projectId}</div>
+          <Box variant="awsui-key-label">{t('project:split.name')}</Box>
+          <div className="mb-10">{project.name}</div>
           <Box variant="awsui-key-label">{t('project:split.created')}</Box>
-          <div className="mb-10">2022-11-11 18:23:44</div>
+          <div className="mb-10">
+            {moment(project.createAt).format(TIME_FORMAT)}
+          </div>
           <Box variant="awsui-key-label">{t('project:split.notifyEmail')}</Box>
-          <div className="mb-10">example@example.com</div>
+          <div className="mb-10">
+            {!isEditingEmail && (
+              <div className="flex align-center">
+                <div>{newProject.emails}</div>
+                <Button
+                  onClick={() => {
+                    setIsEditingEmail(true);
+                  }}
+                  variant="icon"
+                  iconName="edit"
+                />
+              </div>
+            )}
+            {isEditingEmail && (
+              <div>
+                <FormField
+                  errorText={
+                    emailsEmptyError
+                      ? t('project:valid.emailEmpty')
+                      : emailsInvalidError
+                      ? t('project:valid.emailInvalid')
+                      : ''
+                  }
+                >
+                  <Input
+                    value={newProject.emails}
+                    onChange={(e) => {
+                      setEmailsEmptyError(false);
+                      setEmailsInvalidError(false);
+                      setNewProject((prev) => {
+                        return {
+                          ...prev,
+                          emails: e.detail.value,
+                        };
+                      });
+                    }}
+                  />
+                </FormField>
+                <div className="mt-5">
+                  <SpaceBetween direction="horizontal" size="xs">
+                    <Button
+                      onClick={() => {
+                        setNewProject((prev) => {
+                          return {
+                            ...prev,
+                            emails: prevEmail,
+                          };
+                        });
+                        setIsEditingEmail(false);
+                      }}
+                    >
+                      {t('button.cancel')}
+                    </Button>
+                    <Button
+                      loading={loadingUpdateEmail}
+                      variant="primary"
+                      onClick={() => {
+                        updateProjectInfo('email');
+                      }}
+                    >
+                      {t('button.save')}
+                    </Button>
+                  </SpaceBetween>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div>
           <Box variant="awsui-key-label">{t('project:split.envType')}</Box>
-          <div className="mb-10">Production</div>
-          <Box variant="awsui-key-label">{t('project:split.projectNo')}</Box>
-          <div className="mb-10">12345678901</div>
+          <div className="mb-10">
+            {!isEditingEvn && (
+              <div className="flex align-center">
+                <Badge>{prevEnvOption.label}</Badge>
+                <Button
+                  onClick={() => {
+                    setIsEditingEvn(true);
+                  }}
+                  variant="icon"
+                  iconName="edit"
+                />
+              </div>
+            )}
+            {isEditingEvn && (
+              <div className="flex">
+                <div className="w-45p mr-5">
+                  <Select
+                    selectedOption={selectedEnv}
+                    onChange={(e) => {
+                      setSelectedEnv(e.detail.selectedOption);
+                      setNewProject((prev) => {
+                        return {
+                          ...prev,
+                          environment: e.detail.selectedOption.value || '',
+                        };
+                      });
+                    }}
+                    options={PROJECT_STAGE_LIST}
+                  />
+                </div>
+                <div>
+                  <SpaceBetween direction="horizontal" size="xs">
+                    <Button
+                      onClick={() => {
+                        setPrevEnvOption(prevEnvOption);
+                        setIsEditingEvn(false);
+                      }}
+                    >
+                      {t('button.cancel')}
+                    </Button>
+                    <Button
+                      loading={loadingUpdateEnv}
+                      variant="primary"
+                      onClick={() => {
+                        updateProjectInfo('env');
+                      }}
+                    >
+                      {t('button.save')}
+                    </Button>
+                  </SpaceBetween>
+                </div>
+              </div>
+            )}
+          </div>
+          <Box variant="awsui-key-label">{t('project:split.tableName')}</Box>
+          <div className="mb-10">{project.tableName}</div>
+          <Box variant="awsui-key-label">{t('project:split.platform')}</Box>
+          <div className="mb-10">{project.platform || '-'} </div>
         </div>
       </ColumnLayout>
     </SplitPanel>

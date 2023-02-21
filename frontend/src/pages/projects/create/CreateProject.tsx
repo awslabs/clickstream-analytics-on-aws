@@ -7,11 +7,16 @@ import {
   Input,
   Modal,
   Select,
+  SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { createProject } from 'apis/project';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { PROJECT_STAGE_LIST } from 'ts/const';
+import { INIT_PROJECT_DATA } from 'ts/init';
+import { generateStr, validateEmails } from 'ts/utils';
 
 interface CreateProjectProps {
   openModel: boolean;
@@ -23,10 +28,19 @@ const CreateProject: React.FC<CreateProjectProps> = (
 ) => {
   const { t } = useTranslation();
   const { openModel, closeModel } = props;
+  const [loadingCreate, setLoadingCreate] = useState(false);
   const [visible, setVisible] = useState(openModel);
   const [curStep, setCurStep] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<any>();
+  const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option>(
+    PROJECT_STAGE_LIST[0]
+  );
   const [editing, setEditing] = useState(false);
+  const [curProject, setCurProject] = useState<IProject>(INIT_PROJECT_DATA);
+
+  const [projectNameRequiredError, setProjectNameRequiredError] =
+    useState(false);
+  const [emailsEmptyError, setEmailsEmptyError] = useState(false);
+  const [emailsInvalidError, setEmailsInvalidError] = useState(false);
 
   const STEP_TITLE = [
     t('project:create.createProject'),
@@ -36,9 +50,28 @@ const CreateProject: React.FC<CreateProjectProps> = (
 
   const navigate = useNavigate();
   useEffect(() => {
+    setProjectNameRequiredError(false);
+    setEmailsEmptyError(false);
+    setEmailsInvalidError(false);
+    setCurProject(INIT_PROJECT_DATA);
     setCurStep(0);
     setVisible(openModel);
   }, [openModel]);
+
+  const confirmCreateProject = async () => {
+    setLoadingCreate(true);
+    try {
+      curProject.environment = selectedEnv.value || '';
+      const { success, data }: ApiResponse<ResponseCreate> =
+        await createProject(curProject);
+      if (success && data.id) {
+        navigate(`/project/detail/${data.id}`);
+      }
+      setLoadingCreate(false);
+    } catch (error) {
+      setLoadingCreate(false);
+    }
+  };
 
   return (
     <div>
@@ -74,6 +107,18 @@ const CreateProject: React.FC<CreateProjectProps> = (
                 <Button
                   variant="primary"
                   onClick={() => {
+                    if (curStep === 0 && !curProject.name.trim()) {
+                      setProjectNameRequiredError(true);
+                      return false;
+                    }
+                    if (curStep === 1 && !curProject.emails) {
+                      setEmailsEmptyError(true);
+                      return false;
+                    }
+                    if (curStep === 1 && !validateEmails(curProject.emails)) {
+                      setEmailsInvalidError(true);
+                      return false;
+                    }
                     setCurStep((prev) => {
                       return prev + 1;
                     });
@@ -83,10 +128,10 @@ const CreateProject: React.FC<CreateProjectProps> = (
                 </Button>
               ) : (
                 <Button
+                  loading={loadingCreate}
                   variant="primary"
                   onClick={() => {
-                    closeModel();
-                    navigate('/project/detail/new');
+                    confirmCreateProject();
                   }}
                 >
                   {t('button.create')}
@@ -98,14 +143,33 @@ const CreateProject: React.FC<CreateProjectProps> = (
         header={STEP_TITLE[curStep]}
       >
         {curStep === 0 && (
-          <FormField label={t('project:create.inputName')}>
-            <SpaceBetween direction="vertical" size="s">
-              <Input
-                placeholder={t('project:create.inputNamePlaceholder') || ''}
-                value=""
-              />
-            </SpaceBetween>
-
+          <>
+            <FormField
+              label={t('project:create.inputName')}
+              errorText={
+                projectNameRequiredError ? t('project:valid.nameEmpty') : ''
+              }
+            >
+              <SpaceBetween direction="vertical" size="s">
+                <Input
+                  placeholder={t('project:create.inputNamePlaceholder') || ''}
+                  value={curProject.name}
+                  onChange={(e) => {
+                    setProjectNameRequiredError(false);
+                    setCurProject((prev) => {
+                      return {
+                        ...prev,
+                        name: e.detail.value,
+                        tableName: `${e.detail.value.replace(
+                          /\s+/g,
+                          '-'
+                        )}-${generateStr(8)}`,
+                      };
+                    });
+                  }}
+                />
+              </SpaceBetween>
+            </FormField>
             {!editing && (
               <div
                 onClick={() => {
@@ -113,7 +177,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
                 }}
                 className="project-id mt-10"
               >
-                my-project-asdffa <Icon name="edit" />
+                {curProject.tableName} <Icon name="edit" />
               </div>
             )}
 
@@ -122,10 +186,12 @@ const CreateProject: React.FC<CreateProjectProps> = (
                 <div className="mt-10">
                   <SpaceBetween direction="horizontal" size="s">
                     <Input
-                      placeholder={
-                        t('project:create.inputNamePlaceholder') || ''
-                      }
-                      value="my-project-asdffa"
+                      value={curProject.tableName}
+                      onChange={(e) => {
+                        setCurProject((prev) => {
+                          return { ...prev, tableName: e.detail.value };
+                        });
+                      }}
                     />
                     <Button
                       onClick={() => {
@@ -141,35 +207,56 @@ const CreateProject: React.FC<CreateProjectProps> = (
                 </div>
               </>
             )}
-          </FormField>
+          </>
         )}
 
         {curStep === 1 && (
-          <FormField label={t('project:create.inputEmail')} stretch>
-            <SpaceBetween direction="vertical" size="xs">
+          <SpaceBetween direction="vertical" size="xs">
+            <FormField
+              label={t('project:create.inputEmail')}
+              stretch
+              errorText={
+                emailsEmptyError
+                  ? t('project:valid.emailEmpty')
+                  : emailsInvalidError
+                  ? t('project:valid.emailInvalid')
+                  : ''
+              }
+            >
               <Input
                 placeholder={t('project:create.inputEmailPlaceholder') || ''}
-                value=""
+                value={curProject.emails}
+                onChange={(e) => {
+                  setEmailsEmptyError(false);
+                  setEmailsInvalidError(false);
+                  setCurProject((prev) => {
+                    return {
+                      ...prev,
+                      emails: e.detail.value,
+                    };
+                  });
+                }}
               />
-              <Alert>{t('project:create.inputEmailAlert')}</Alert>
-            </SpaceBetween>
-          </FormField>
+            </FormField>
+            <Alert>{t('project:create.inputEmailAlert')}</Alert>
+          </SpaceBetween>
         )}
 
         {curStep === 2 && (
           <FormField label={t('project:create.inputEnv')}>
             <SpaceBetween direction="vertical" size="xs">
               <Select
-                selectedOption={selectedOption}
-                onChange={({ detail }) =>
-                  setSelectedOption(detail.selectedOption)
-                }
-                options={[
-                  { label: 'Dev', value: 'dev' },
-                  { label: 'Test', value: 'test' },
-                  { label: 'Prod', value: 'prod' },
-                ]}
-                selectedAriaLabel="Selected"
+                selectedOption={selectedEnv}
+                onChange={(e) => {
+                  setSelectedEnv(e.detail.selectedOption);
+                  setCurProject((prev) => {
+                    return {
+                      ...prev,
+                      environment: e.detail.selectedOption.value || '',
+                    };
+                  });
+                }}
+                options={PROJECT_STAGE_LIST}
               />
               <Alert>{t('project:create.inputEnvAlert')}</Alert>
             </SpaceBetween>

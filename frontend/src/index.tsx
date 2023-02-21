@@ -4,7 +4,6 @@ import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import '@cloudscape-design/global-styles/index.css';
-import '@aws-amplify/ui-react/styles.css';
 import './i18n';
 
 const root = ReactDOM.createRoot(

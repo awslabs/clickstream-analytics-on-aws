@@ -1,3 +1,4 @@
+import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
 import CreateApplication from 'pages/application/create/CreateApplication';
@@ -35,6 +36,10 @@ const App: React.FC = () => {
                   path="/pipeline/detail/:id"
                   element={<PipelineDetail />}
                 />
+                <Route
+                  path="/project/:projectId/pipelines/create"
+                  element={<CreatePipeline />}
+                />
                 <Route path="/pipelines/create" element={<CreatePipeline />} />
                 <Route
                   path="/project/:id/application/create"
@@ -44,6 +49,7 @@ const App: React.FC = () => {
             </div>
           </Suspense>
         </div>
+        <CommonAlert />
         <Footer />
       </Router>
     );

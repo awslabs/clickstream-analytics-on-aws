@@ -20,17 +20,6 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     { type: 'link', text: t('nav.pipelines'), href: '/pipelines' },
     { type: 'link', text: t('nav.analytics'), href: '#/analytics' },
     {
-      text: t('nav.pipelineModules'),
-      type: 'section',
-      defaultExpanded: true,
-      items: [
-        { type: 'link', text: t('nav.ingestions'), href: '#/ingestions' },
-        { type: 'link', text: t('nav.streaming'), href: '#/streaming' },
-        { type: 'link', text: t('nav.enrichment'), href: '#/enrichment' },
-        { type: 'link', text: t('nav.reporting'), href: '#/reporting' },
-      ],
-    },
-    {
       text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
