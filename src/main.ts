@@ -117,7 +117,7 @@ stackSuppressions([
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
-new IngestionServerStack(app, 'igs-test-cfn', {
+new IngestionServerStack(app, 'ingestion-server-stack', {
   synthesizer: synthesizer(),
 });
 
