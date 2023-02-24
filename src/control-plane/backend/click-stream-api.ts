@@ -26,10 +26,10 @@ import {
   Stack,
 } from 'aws-cdk-lib';
 import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import { CfnSecurityGroup, Connections, ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Connections, ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from '../../common/cfn-nag';
+import { addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { NetworkProps } from '../alb-lambda-portal';
 
@@ -89,28 +89,9 @@ export class ClickStreamApiConstruct extends Construct {
       Port.allTcp(),
       'allow all traffic from application load balancer',
     );
-    addCfnNagSuppressRules(
-      apiLambdaSG.node.defaultChild as CfnSecurityGroup,
-      [
-        {
-          id: 'W29',
-          reason: 'Disallow all egress traffic',
-        },
-        {
-          id: 'W27',
-          reason: 'Allow all traffic from application load balancer',
-        },
-        {
-          id: 'W40',
-          reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
-        },
-        {
-          id: 'W5',
-          reason: 'Design intent: Security Groups found with cidr open to world on egress',
-        },
 
-      ],
-    );
+    addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
+
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),

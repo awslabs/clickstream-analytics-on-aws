@@ -18,7 +18,6 @@ import { Arn, ArnFormat } from 'aws-cdk-lib';
 import {
   Policy,
   PolicyStatement,
-  Effect,
   CfnPolicy,
   Role,
   ServicePrincipal,
@@ -31,7 +30,7 @@ export function cloudWatchSendLogs(id: string, func: IFunction): IFunction {
   if (func.role !== undefined) {
     const logGroupArn = getLambdaLogGroupArn(func);
     const lambdaPolicy = new Policy(func.stack, id, {
-      statements: getLambdaBasicPolicyStatements(logGroupArn),
+      statements: getLambdaBasicPolicyStatements(false, logGroupArn),
     });
     lambdaPolicy.attachToRole(func.role);
 
@@ -50,17 +49,7 @@ export function createENI(id: string, func: IFunction): IFunction {
   if (func.role !== undefined) {
     const lambdaPolicy = new Policy(func.stack, id, {
       statements: [
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          resources: ['*'],
-          actions: [
-            'ec2:CreateNetworkInterface',
-            'ec2:DescribeNetworkInterfaces',
-            'ec2:DeleteNetworkInterface',
-            'ec2:AssignPrivateIpAddresses',
-            'ec2:UnassignPrivateIpAddresses',
-          ],
-        }),
+        getLambdaInVpcRolePolicyStatement(),
       ],
     });
     lambdaPolicy.attachToRole(func.role);
@@ -76,7 +65,7 @@ export function createENI(id: string, func: IFunction): IFunction {
   return func;
 }
 
-function getLambdaBasicPolicyStatements(logGroupArn: string = '*') {
+function getLambdaBasicPolicyStatements(inVpc: boolean, logGroupArn: string = '*') {
   const statements = [
     new PolicyStatement({
       actions: [
@@ -87,7 +76,24 @@ function getLambdaBasicPolicyStatements(logGroupArn: string = '*') {
       resources: [logGroupArn],
     }),
   ];
+
+  if (inVpc) {
+    statements.push(getLambdaInVpcRolePolicyStatement());
+  }
   return statements;
+}
+
+function getLambdaInVpcRolePolicyStatement(): PolicyStatement {
+  return new PolicyStatement({
+    actions: [
+      'ec2:CreateNetworkInterface',
+      'ec2:DescribeNetworkInterfaces',
+      'ec2:DeleteNetworkInterface',
+      'ec2:AssignPrivateIpAddresses',
+      'ec2:UnassignPrivateIpAddresses',
+    ],
+    resources: ['*'],
+  });
 }
 
 function getLambdaLogGroupArn(func: IFunction) {
@@ -105,12 +111,13 @@ function getLambdaLogGroupArn(func: IFunction) {
 export function createLambdaRole(
   scope: IConstruct,
   id: string,
+  inVpc: boolean,
   extraPolicyStatements: PolicyStatement[],
 ): Role {
   const role = new Role(scope, id, {
     assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
   });
-  getLambdaBasicPolicyStatements().forEach((ps) => role.addToPolicy(ps));
+  getLambdaBasicPolicyStatements(inVpc).forEach((ps) => role.addToPolicy(ps));
   extraPolicyStatements.forEach((ps) => role.addToPolicy(ps));
   return role;
 }

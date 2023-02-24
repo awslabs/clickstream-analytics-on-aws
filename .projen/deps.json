@@ -10,6 +10,11 @@
       "type": "build"
     },
     {
+      "name": "@types/uuid",
+      "version": "^9.0.0",
+      "type": "build"
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "version": "^5",
       "type": "build"

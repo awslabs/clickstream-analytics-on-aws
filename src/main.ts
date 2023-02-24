@@ -117,13 +117,14 @@ stackSuppressions([
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
-new IngestionServerStack(app, 'ingestion-server-stack', {
+new IngestionServerStack(app, 'igs-test-cfn', {
   synthesizer: synthesizer(),
 });
 
 new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', {
   synthesizer: synthesizer(),
 });
+
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {

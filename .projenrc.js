@@ -1,9 +1,21 @@
 const { awscdk, gitlab, typescript } = require('projen');
 const version = '1.0.0';
+
+const commonDeps = [
+  'uuid@^9.0.0',
+  '@types/aws-lambda@^8.10.110',
+  '@aws-lambda-powertools/logger@^1.5.1',
+];
+
+const commonDevDeps = [
+  '@types/uuid@^9.0.0',
+];
+
 const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
 ].map(dep => `${dep}@^3.267.0`);
+
 const awsSDKDepsForApiProject = [
   '@aws-sdk/types',
   '@aws-sdk/client-s3',
@@ -11,23 +23,23 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/lib-dynamodb',
 ].map(dep => `${dep}@^3.267.0`);
+
 const depsForApiProject = [
-  '@aws-lambda-powertools/logger@^1.5.1',
+  ...commonDeps,
   'express@^4.18.2',
   'express-validator@^6.14.3',
-  'uuid@^9.0.0',
   ...awsSDKDepsForApiProject,
 ];
+
 const devDepsForApiProject = [
+  ...commonDevDeps,
   'aws-sdk-client-mock@^2.0.1',
   'supertest@^6.3.3',
   'nodemon@^2.0.20',
   'ts-node@^10.9.1',
   '@types/node@^18.11.18',
-  '@types/aws-lambda@^8.10.110',
   '@types/express@^4.17.16',
   '@types/supertest@^2.0.12',
-  '@types/uuid@^9.0.0',
 ];
 const project = new awscdk.AwsCdkTypeScriptApp({
   version,
@@ -41,21 +53,23 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '.DS_Store',
     'docs/site/',
     'frontend/amplify',
-    'test-deploy-server.sh',
-    'test-deploy-connector.sh',
+    'test-deploy*.sh',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
+    ...commonDeps,
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.7',
-    '@aws-lambda-powertools/logger@^1.5.1',
-    '@types/aws-lambda@^8.10.110',
     ...depsForApiProject,
     ...awsSDKDeps,
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
+
+  devDeps: [
+    ...commonDevDeps,
+  ],
 });
 
 

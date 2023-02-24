@@ -1,0 +1,14 @@
+
+[sinks.kinesis_sink]
+type = "aws_kinesis_streams"
+inputs =  ["json_parser"]   
+partition_key_field = "timestamp"
+compression = "none"
+region = "%%AWS_REGION%%"
+stream_name = "%%AWS_KINESIS_STREAM_NAME%%"
+# Each PutRecords request can support up to 500 records. Each record in the request can be as large as 1 MiB, up to a limit of 5 MiB for the entire request,
+batch.max_events = 500
+batch.timeout_secs = 3
+acknowledgements.enabled = false
+  [sinks.kinesis_sink.encoding]
+  codec = "json"

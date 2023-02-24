@@ -32,20 +32,23 @@ import {
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { SolutionInfo } from './common/solution-info';
-import { createStackConditions, getServerPropsByCondition } from './ingestion-server/condition';
+import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
+import { createStackConditions, getServerPropsByCondition } from './ingestion-server/server/condition';
 import {
   FleetProps,
   IngestionServer,
   IngestionServerProps,
-} from './ingestion-server/ingestion-server';
-import { createStackParameters } from './ingestion-server/parameter';
-import { addCfnNagToIngestionServer } from './ingestion-server/private/cfn-nag';
+  KinesisSinkConfig,
+} from './ingestion-server/server/ingestion-server';
+import { createStackParameters } from './ingestion-server/server/parameter';
+import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
 
 export function addCdkNagToStack(stack: Stack) {
   NagSuppressions.addStackSuppressions(stack, [
@@ -131,9 +134,10 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly enableApplicationLoadBalancerAccessLog?: string;
   readonly logBucketName?: string;
   readonly logPrefix?: string;
+  readonly kinesisDataStreamArn?: string;
 }
 
-export class IngestionServerNestStack extends NestedStack {
+export class IngestionServerNestedStack extends NestedStack {
   public serverUrl: string;
   constructor(
     scope: Construct,
@@ -201,6 +205,13 @@ export class IngestionServerNestStack extends NestedStack {
       };
     }
 
+    let kinesisSinkConfig: KinesisSinkConfig | undefined;
+    if (props.kinesisDataStreamArn) {
+      kinesisSinkConfig = {
+        kinesisDataStream: Stream.fromStreamArn(this, 'from-kinesis-arn', props.kinesisDataStreamArn),
+      };
+    }
+
     let protocol = ApplicationProtocol.HTTP;
     if (props.protocol == 'HTTPS') {
       protocol = ApplicationProtocol.HTTPS;
@@ -252,6 +263,7 @@ export class IngestionServerNestStack extends NestedStack {
       domainZone,
       notificationsTopic,
       kafkaSinkConfig,
+      kinesisSinkConfig,
     };
 
     const ingestionServer = new IngestionServer(
@@ -271,6 +283,11 @@ export class IngestionServerNestStack extends NestedStack {
 export interface IngestionServerStackProps extends StackProps {}
 
 export class IngestionServerStack extends Stack {
+  public kinesisNestedStacks: {
+    provisionedStack: NestedStack;
+    onDemandStack: NestedStack;
+  };
+
   constructor(
     scope: Construct,
     id: string,
@@ -306,10 +323,36 @@ export class IngestionServerStack extends Stack {
         serverMaxParam,
         warmPoolSizeParam,
         scaleOnCpuUtilizationPercentParam,
+        sinkToKinesisParam,
+        kinesisDataS3BucketParam,
+        kinesisDataS3PrefixParam,
+        kinesisStreamModeParam,
+        kinesisShardCountParam,
+        kinesisDataRetentionHoursParam,
+        kinesisBatchSizeParam,
+        kinesisMaxBatchingWindowSecondsParam,
+
       },
     } = createStackParameters(this);
 
     this.templateOptions.metadata = metadata;
+
+    const kinesisStackInfo = createKinesisNestStack( this,
+      {
+        vpcIdParam,
+        privateSubnetIdsParam,
+        sinkToKinesisParam,
+        kinesisDataS3BucketParam,
+        kinesisDataS3PrefixParam,
+        kinesisStreamModeParam,
+        kinesisShardCountParam,
+        kinesisDataRetentionHoursParam,
+        kinesisBatchSizeParam,
+        kinesisMaxBatchingWindowSecondsParam,
+      },
+    );
+
+    this.kinesisNestedStacks = kinesisStackInfo;
 
     const nestStackFullProps: IngestionServerNestStackProps = {
       vpcId: vpcIdParam.valueAsString,
@@ -340,8 +383,9 @@ export class IngestionServerStack extends Stack {
       },
     };
 
-    const { mskConditions, conditionServerPopsConfig } = createStackConditions(
+    const { allConditions, conditionServerPopsConfig } = createStackConditions(
       this,
+      kinesisStackInfo,
       {
         enableApplicationLoadBalancerAccessLogParam,
         logS3BucketParam,
@@ -352,35 +396,36 @@ export class IngestionServerStack extends Stack {
         kafkaBrokersParam,
         kafkaTopicParam,
         mskClusterNameParam,
-      },
-    );
+        sinkToKinesisParam,
+      });
 
     let count = 0;
-    for (let mskCondition of mskConditions) {
+    for (let c of allConditions) {
       count++;
       const serverPropsCondition = getServerPropsByCondition(
-        mskCondition.conditions,
+        c.conditions,
         conditionServerPopsConfig,
       );
 
-      const conditionExpression = Fn.conditionAnd(...mskCondition.conditions);
+      const conditionExpression = Fn.conditionAnd(...c.conditions);
       const serverNestStackProps = {
         ...nestStackFullProps,
         ...serverPropsCondition,
       };
 
-      createNestStackWithCondition(
+      createNestedStackWithCondition(
         this,
-        `IngestionServer-${count}B${mskCondition.binStr}`,
+        `IngestionServer${c.name}`,
         serverNestStackProps,
         conditionExpression,
       );
     }
+    console.log('IngestionServer Nested Stack count:' + count);
     addCdkNagToStack(this);
   }
 }
 
-function createNestStackWithCondition(
+function createNestedStackWithCondition(
   scope: Construct,
   id: string,
   props: IngestionServerNestStackProps,
@@ -390,7 +435,7 @@ function createNestStackWithCondition(
     expression: conditionExpression,
   });
 
-  const ingestionServer = new IngestionServerNestStack(scope, id, props);
+  const ingestionServer = new IngestionServerNestedStack(scope, id, props);
   (ingestionServer.nestedStackResource as CfnStack).cfnOptions.condition =
     condition;
 

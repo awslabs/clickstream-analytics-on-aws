@@ -1,0 +1,12 @@
+
+[sinks.kinesis_sink]
+type = "aws_kinesis_streams"
+inputs =  ["json_parser"]   
+partition_key_field = "timestamp"
+compression = "none"
+region = "%%AWS_REGION%%"
+stream_name = "%%AWS_KINESIS_STREAM_NAME%%"
+
+acknowledgements.enabled = true
+  [sinks.kinesis_sink.encoding]
+  codec = "json"
