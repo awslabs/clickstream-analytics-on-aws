@@ -150,15 +150,18 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
     };
 
+    if (!controlPlane.applicationLoadBalancer.vpc) {
+      throw new Error('Application Load Balancer VPC create error.');
+    }
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
+      fronting: 'alb',
       dictionaryItems: [],
-      existingVpc: props.existingVpc,
-      networkProps: {
-        vpc: vpcStack.vpc,
-        subnets: subnets,
-        port: port,
+      applicationLoadBalancer: {
+        vpc: controlPlane.applicationLoadBalancer.vpc,
+        subnets,
+        internetFacing: props.internetFacing,
+        securityGroup: controlPlane.securityGroup,
       },
-      ALBSecurityGroup: controlPlane.securityGroup,
     });
 
     controlPlane.addRoute('api-targets', {

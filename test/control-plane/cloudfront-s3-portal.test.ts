@@ -20,6 +20,7 @@ import {
   Template,
 } from 'aws-cdk-lib/assertions';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
@@ -294,6 +295,222 @@ describe('CloudFrontS3Portal', () => {
         SigningProtocol: 'sigv4',
       },
 
+    });
+  });
+
+  test('Control Plane add origin - default', () => {
+
+    const testStack = new Stack(new App(), 'testStack');
+    const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
+    });
+    controlPlane.addHttpOrigin(
+      '/test/*',
+      'test.com.cn',
+      {
+        protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+        originPath: '/prod',
+      },
+    );
+    const template = Template.fromStack(testStack);
+    //Distribution
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        Comment: Match.stringLikeRegexp('^CloudFront distribution for'),
+        CacheBehaviors: [
+          {
+            AllowedMethods: [
+              'GET',
+              'HEAD',
+              'OPTIONS',
+              'PUT',
+              'PATCH',
+              'POST',
+              'DELETE',
+            ],
+            CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad',
+            Compress: true,
+            PathPattern: '/test/*',
+            TargetOriginId: 'testStacktestportalPortalDistributionOrigin2B11D5A7C',
+            ViewerProtocolPolicy: 'redirect-to-https',
+          },
+        ],
+        DefaultCacheBehavior: {
+          AllowedMethods: [
+            'GET',
+            'HEAD',
+          ],
+          CachedMethods: [
+            'GET',
+            'HEAD',
+          ],
+          Compress: true,
+          ViewerProtocolPolicy: 'redirect-to-https',
+        },
+        DefaultRootObject: 'index.html',
+        Enabled: true,
+        HttpVersion: 'http2',
+        IPV6Enabled: false,
+        Origins: [
+          {
+            S3OriginConfig: {
+              OriginAccessIdentity: '',
+            },
+            OriginAccessControlId: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Id',
+              ],
+            },
+          },
+          {
+            CustomOriginConfig: {
+              OriginProtocolPolicy: 'https-only',
+              OriginSSLProtocols: [
+                'TLSv1.2',
+              ],
+            },
+            DomainName: 'test.com.cn',
+            Id: 'testStacktestportalPortalDistributionOrigin2B11D5A7C',
+            OriginPath: '/prod',
+          },
+        ],
+        PriceClass: 'PriceClass_All',
+      },
+    });
+  });
+
+  test('Control Plane add origin - China region', () => {
+
+    const testStack = new Stack(new App(), 'testStack');
+    const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
+      frontendProps: {
+        assetPath: '../../frontend',
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        buildCommand: [
+          'bash', '-c',
+          'echo test > /asset-output/test',
+        ],
+        autoInvalidFilePaths: ['/index.html'],
+      },
+      cnCloudFrontS3PortalProps: {
+        domainName: 'test.example.com',
+        iamCertificateId: 'ASCAU7UKQJBEYXRJCWVFR',
+      },
+    });
+    controlPlane.addHttpOrigin(
+      '/test/*',
+      'test.com.cn',
+      {
+        protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+        originPath: '/prod',
+      },
+    );
+    const template = Template.fromStack(testStack);
+    //Distribution
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        Aliases: [
+          'test.example.com',
+        ],
+        CacheBehaviors: [
+          {
+            PathPattern: '/test/*',
+            TargetOriginId: 'origin2',
+            AllowedMethods: [
+              'GET',
+              'HEAD',
+              'OPTIONS',
+              'PUT',
+              'PATCH',
+              'POST',
+              'DELETE',
+            ],
+            CachedMethods: [
+              'GET',
+              'HEAD',
+            ],
+            Compress: true,
+            ViewerProtocolPolicy: 'redirect-to-https',
+            ForwardedValues: {
+              QueryString: false,
+            },
+          },
+        ],
+        DefaultCacheBehavior: {
+          AllowedMethods: [
+            'GET',
+            'HEAD',
+          ],
+          CachedMethods: [
+            'GET',
+            'HEAD',
+          ],
+          Compress: true,
+          DefaultTTL: 604800,
+          ForwardedValues: {
+            QueryString: false,
+          },
+          MaxTTL: 2592000,
+          TargetOriginId: 'origin1',
+          ViewerProtocolPolicy: 'https-only',
+        },
+        DefaultRootObject: 'index.html',
+        Enabled: true,
+        HttpVersion: 'http2',
+        IPV6Enabled: false,
+        Origins: [
+          {
+            Id: 'origin1',
+            DomainName: {
+              'Fn::GetAtt': [
+                'testportalportalbucket29E0AA0E',
+                'RegionalDomainName',
+              ],
+            },
+            S3OriginConfig: {
+              OriginAccessIdentity: {
+                'Fn::Join': [
+                  '',
+                  [
+                    'origin-access-identity/cloudfront/',
+                    {
+                      Ref: 'testportaloriginaccessidentity3D34530E',
+                    },
+                  ],
+                ],
+              },
+            },
+            ConnectionAttempts: 3,
+            ConnectionTimeout: 10,
+          },
+          {
+            ConnectionAttempts: 3,
+            ConnectionTimeout: 10,
+            CustomOriginConfig: {
+              HTTPPort: 80,
+              HTTPSPort: 443,
+              OriginKeepaliveTimeout: 5,
+              OriginProtocolPolicy: 'https-only',
+              OriginReadTimeout: 30,
+              OriginSSLProtocols: [
+                'TLSv1.2',
+              ],
+            },
+            DomainName: 'test.com.cn',
+            Id: 'origin2',
+            OriginPath: '/prod',
+          },
+        ],
+      },
     });
   });
 });

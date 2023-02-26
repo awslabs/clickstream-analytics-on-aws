@@ -16,11 +16,13 @@ limitations under the License.
 
 import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { CfnDistribution } from 'aws-cdk-lib/aws-cloudfront';
+import { CfnDistribution, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct, IConstruct } from 'constructs';
+import { addCfnNagToStack } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
+import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
 import {
@@ -104,6 +106,13 @@ export class CloudFrontControlPlaneStack extends Stack {
       }
     }
 
+    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
+      fronting: 'cloudfront',
+      apiGateway: {
+        stageName: 'api',
+      },
+    });
+
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
         assetPath: '../../frontend',
@@ -122,6 +131,18 @@ export class CloudFrontControlPlaneStack extends Stack {
         },
       },
     });
+
+    if (!clickStreamApi.lambdaRestApi) {
+      throw new Error('Backend api create error.');
+    }
+    controlPlane.addHttpOrigin(
+      `/${clickStreamApi.lambdaRestApi.deploymentStage.stageName}/*`,
+      Fn.select(2, Fn.split('/', clickStreamApi.lambdaRestApi.url)),
+      {
+        protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+        originPath: `/${clickStreamApi.lambdaRestApi.deploymentStage.stageName}`,
+      },
+    );
 
     const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;
 
@@ -162,6 +183,9 @@ export class CloudFrontControlPlaneStack extends Stack {
       description: 'Bucket to store access log',
       value: controlPlane.logBucket.bucketName,
     }).overrideLogicalId('LogBucket');
+
+    // nag
+    addCfnNag(this);
   }
 
   private addToParamGroups(label: string, ...param: string[]) {
@@ -189,6 +213,36 @@ class InjectCustomResourceConfig implements IAspect {
       node.addPropertyOverride('InstallLatestAwsSdk', this.isInstallLatestAwsSdk);
     }
   }
+}
+
+function addCfnNag(stack: Stack) {
+  const cfnNagList = [
+    {
+      paths_endswith: [
+        'ClickStreamApi/ClickStreamApi/Default/{proxy+}/ANY/Resource',
+        'ClickStreamApi/ClickStreamApi/Default/ANY/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W59',
+          reason: 'TODO authorization will be added later',
+        },
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiGatewayAccessLogs/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W84',
+          reason:
+            'By default CloudWatchLogs LogGroups data is encrypted using the CloudWatch server-side encryption keys (AWS Managed Keys)',
+        },
+      ],
+    },
+  ];
+  addCfnNagToStack(stack, cfnNagList);
 }
 
 

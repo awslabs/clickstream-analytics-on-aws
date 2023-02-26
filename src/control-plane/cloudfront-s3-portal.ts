@@ -25,7 +25,7 @@ import {
   Aws,
   Stack,
   Duration,
-  AssetHashType,
+  AssetHashType, IResolvable,
 } from 'aws-cdk-lib';
 import { ICertificate, DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -42,8 +42,11 @@ import {
   OriginAccessIdentity,
   CloudFrontWebDistribution,
   CloudFrontAllowedMethods,
+  OriginSslPolicy,
+  OriginProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
-import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { HttpOrigin, HttpOriginProps, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { PolicyStatement, Effect, ServicePrincipal, CanonicalUserPrincipal } from 'aws-cdk-lib/aws-iam';
 
 import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -63,6 +66,7 @@ import {
 import { Construct } from 'constructs';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
+import { capitalizePropertyNames, isEmpty } from '../common/utils';
 import { Constant } from './private/constant';
 
 export interface DistributionProps {
@@ -104,9 +108,13 @@ export class CloudFrontS3Portal extends Construct {
   public readonly bucket: IBucket;
   public readonly logBucket: IBucket;
   public readonly controlPlaneUrl: string;
+  private origins: Array<CfnDistribution.OriginProperty | IResolvable> | IResolvable;
+  private cacheBehaviors: Array<CfnDistribution.CacheBehaviorProperty | IResolvable> | IResolvable;
 
   constructor(scope: Construct, id: string, props: CloudFrontS3PortalProps) {
     super(scope, id);
+    this.origins = new Array<CfnDistribution.OriginProperty | IResolvable>();
+    this.cacheBehaviors = new Array<CfnDistribution.CacheBehaviorProperty | IResolvable>();
 
     this.node.addValidation({
       validate: () => {
@@ -187,7 +195,6 @@ export class CloudFrontS3Portal extends Construct {
               allowedMethods: CloudFrontAllowedMethods.GET_HEAD,
               compress: true,
             }],
-
           },
         ],
         loggingConfig: {
@@ -275,7 +282,6 @@ export class CloudFrontS3Portal extends Construct {
             maxTtl: Duration.days(30),
           }),
         },
-
         defaultRootObject: 'index.html',
         priceClass: PriceClass.PRICE_CLASS_ALL,
         enableIpv6: props.distributionProps?.enableIpv6 ?? false,
@@ -354,4 +360,63 @@ export class CloudFrontS3Portal extends Construct {
     });
   }
 
+  public addHttpOrigin(pathPattern: string, domainName: string, props: HttpOriginProps, behaviorOptions?: AddBehaviorOptions) {
+    if (pathPattern === '*') {
+      throw new Error('Only the default behavior can have a path pattern of \'*\'');
+    }
+    if (this.distribution instanceof Distribution) {
+      this.distribution.addBehavior(
+        pathPattern,
+        new HttpOrigin(domainName, props),
+        {
+          viewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: behaviorOptions?.cachePolicy ?? CachePolicy.CACHING_DISABLED,
+          allowedMethods: behaviorOptions?.allowedMethods ?? AllowedMethods.ALLOW_ALL,
+        },
+      );
+    } else {
+      const cfnDistribution = this.distribution.node.defaultChild as CfnDistribution;
+      // get current origins and cacheBehaviors
+      if (isEmpty(this.origins)) {
+        this.origins = (cfnDistribution.distributionConfig as CfnDistribution.DistributionConfigProperty).origins ?? [];
+      }
+      if (isEmpty(this.cacheBehaviors)) {
+        this.cacheBehaviors = (cfnDistribution.distributionConfig as CfnDistribution.DistributionConfigProperty).cacheBehaviors ?? [];
+      }
+
+      const originsNum = (this.origins as Array<CfnDistribution.OriginProperty>).length;
+      // Assemble new origin and behavior according to parameters
+      const origin: CfnDistribution.OriginProperty = {
+        connectionAttempts: props.connectionAttempts ?? 3,
+        connectionTimeout: props.connectionTimeout?.toSeconds() ?? 10,
+        customOriginConfig: {
+          httpPort: props.httpPort ?? 80,
+          httpsPort: props.httpsPort ?? 443,
+          originKeepaliveTimeout: props.keepaliveTimeout?.toSeconds() ?? 5,
+          originProtocolPolicy: props.protocolPolicy ?? OriginProtocolPolicy.HTTPS_ONLY,
+          originReadTimeout: props.readTimeout?.toSeconds() ?? 30,
+          originSslProtocols: props.originSslProtocols?? [OriginSslPolicy.TLS_V1_2],
+        },
+        domainName: domainName,
+        id: `origin${originsNum + 1}`,
+        originPath: props.originPath,
+      };
+      const behavior: CfnDistribution.CacheBehaviorProperty = {
+        pathPattern: pathPattern,
+        targetOriginId: `origin${originsNum + 1}`,
+        allowedMethods: behaviorOptions?.allowedMethods?.methods ?? AllowedMethods.ALLOW_ALL.methods,
+        cachedMethods: behaviorOptions?.cachedMethods?.methods ?? AllowedMethods.ALLOW_GET_HEAD.methods,
+        compress: behaviorOptions?.compress ?? true,
+        viewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        forwardedValues: {
+          queryString: false,
+        },
+      };
+
+      (this.origins as Array<CfnDistribution.OriginProperty>).push(origin);
+      (this.cacheBehaviors as Array<CfnDistribution.CacheBehaviorProperty>).push(behavior);
+      cfnDistribution.addPropertyOverride('DistributionConfig.Origins', capitalizePropertyNames(this, this.origins));
+      cfnDistribution.addPropertyOverride('DistributionConfig.CacheBehaviors', capitalizePropertyNames(this, this.cacheBehaviors));
+    }
+  }
 }

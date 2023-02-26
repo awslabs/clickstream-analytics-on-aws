@@ -18,35 +18,60 @@ import path from 'path';
 import {
   aws_dynamodb,
   aws_iam as iam,
-  aws_lambda,
   CfnResource,
   Duration,
   IgnoreMode,
   RemovalPolicy,
-  Stack,
 } from 'aws-cdk-lib';
+import {
+  EndpointType,
+  RestApi,
+  LambdaRestApi,
+  MethodLoggingLevel,
+  LogGroupLogDestination,
+} from 'aws-cdk-lib/aws-apigateway';
 import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import { Connections, ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import {
+  Connections,
+  ISecurityGroup,
+  Port,
+  SecurityGroup,
+  SubnetSelection,
+  IVpc,
+} from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
-import { addCfnNagToSecurityGroup } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
-import { NetworkProps } from '../alb-lambda-portal';
+import { createLogGroupWithKmsKey } from '../../common/logs';
+import { Constant } from '../private/constant';
 
 export interface DicItem {
   readonly name: string;
   readonly data: any;
 }
 
+export interface ApplicationLoadBalancerProps {
+  readonly vpc: IVpc;
+  readonly subnets: SubnetSelection;
+  readonly internetFacing: boolean;
+  readonly securityGroup: ISecurityGroup;
+}
+
+export interface ApiGatewayProps {
+  readonly stageName: string;
+}
+
 export interface ClickStreamApiProps {
-  readonly dictionaryItems: DicItem[];
-  readonly existingVpc: boolean | undefined;
-  readonly networkProps: NetworkProps;
-  readonly ALBSecurityGroup: ISecurityGroup;
+  readonly fronting: 'alb' | 'cloudfront';
+  readonly dictionaryItems?: DicItem[];
+  readonly applicationLoadBalancer?: ApplicationLoadBalancerProps;
+  readonly apiGateway?: ApiGatewayProps;
 }
 
 export class ClickStreamApiConstruct extends Construct {
   public readonly clickStreamApiFunction: DockerImageFunction;
+  public readonly lambdaRestApi?: RestApi;
 
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
@@ -78,19 +103,31 @@ export class ClickStreamApiConstruct extends Construct {
       timeToLiveAttribute: 'ttl',
     });
 
-    const apiLambdaSG = new SecurityGroup(this, 'ClickStreamApiFunctionSG', {
-      vpc: props.networkProps.vpc,
-      allowAllOutbound: true,
-    });
-    apiLambdaSG.connections.allowFrom(
-      new Connections({
-        securityGroups: [props.ALBSecurityGroup],
-      }),
-      Port.allTcp(),
-      'allow all traffic from application load balancer',
-    );
+    let apiFunctionProps = {};
+    if (props.fronting === 'alb') {
+      if (!props.applicationLoadBalancer) {
+        throw new Error('Application Load Balancer fronting backend api must be have applicationLoadBalancer parameters.');
+      }
+      const apiLambdaSG = new SecurityGroup(this, 'ClickStreamApiFunctionSG', {
+        vpc: props.applicationLoadBalancer.vpc,
+        allowAllOutbound: true,
+      });
+      apiLambdaSG.connections.allowFrom(
+        new Connections({
+          securityGroups: [props.applicationLoadBalancer.securityGroup],
+        }),
+        Port.allTcp(),
+        'allow all traffic from application load balancer',
+      );
+      addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
 
-    addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
+      apiFunctionProps = {
+        vpc: props.applicationLoadBalancer.vpc,
+        vpcSubnets: props.applicationLoadBalancer.subnets,
+        allowPublicSubnet: props.applicationLoadBalancer.internetFacing,
+        securityGroups: [apiLambdaSG],
+      };
+    }
 
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
@@ -106,36 +143,62 @@ export class ClickStreamApiConstruct extends Construct {
       environment: {
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
-        AWS_ACCOUNT_ID: Stack.of(this).account,
-        POWERTOOLS_SERVICE_NAME: 'click-stream',
-        POWERTOOLS_LOGGER_LOG_LEVEL: 'WARN',
-        POWERTOOLS_LOGGER_SAMPLE_RATE: '0.01',
-        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-        POWERTOOLS_METRICS_NAMESPACE: 'click-stream',
       },
-      vpc: props.networkProps.vpc,
-      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
-      securityGroups: [apiLambdaSG],
-      reservedConcurrentExecutions: 3,
-      tracing: aws_lambda.Tracing.ACTIVE,
-      role: clickStreamApiFunctionRole,
       architecture: Architecture.X86_64,
       timeout: Duration.seconds(30),
+      reservedConcurrentExecutions: 3,
       memorySize: 512,
+      role: clickStreamApiFunctionRole,
+      ...apiFunctionProps,
     });
 
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
-    (clickStreamApiFunctionRole.node.findChild('DefaultPolicy')
-      .node.defaultChild as CfnResource).addMetadata('cfn_nag', {
-      rules_to_suppress: [
-        {
-          id: 'W12',
-          reason: 'wildcard in policy is used for x-ray and logs',
+
+    if (props.fronting === 'cloudfront') {
+      if (!props.apiGateway) {
+        throw new Error('Cloudfront fronting backend api must be have Api Gateway parameters.');
+      }
+      const apiGatewayAccessLogGroup = createLogGroupWithKmsKey(this, {});
+
+      this.lambdaRestApi = new LambdaRestApi(this, 'ClickStreamApi', {
+        handler: this.clickStreamApiFunction,
+        proxy: true,
+        endpointConfiguration: {
+          types: [EndpointType.REGIONAL],
         },
-      ],
-    });
+        deployOptions: {
+          stageName: props.apiGateway.stageName,
+          tracingEnabled: true,
+          dataTraceEnabled: false,
+          loggingLevel: MethodLoggingLevel.ERROR,
+          accessLogDestination: new LogGroupLogDestination(apiGatewayAccessLogGroup),
+          metricsEnabled: true,
+        },
+      });
+      // Configure Usage Plan
+      this.lambdaRestApi.addUsagePlan('ClickStreamApiUsagePlan', {
+        apiStages: [{
+          api: this.lambdaRestApi,
+          stage: this.lambdaRestApi.deploymentStage,
+        }],
+        throttle: {
+          rateLimit: 50,
+          burstLimit: 100,
+        },
+      });
+
+      addCfnNagSuppressRules(
+        this.clickStreamApiFunction.node.defaultChild as CfnResource,
+        [
+          {
+            id: 'W89', //Lambda functions should be deployed inside a VPC
+            reason: Constant.NAG_REASON_CDK_BUCKETDEPLOYMENT_MANAGED_FUN,
+          },
+        ],
+      );
+    }
   }
 }

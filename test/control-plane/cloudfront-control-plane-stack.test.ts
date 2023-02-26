@@ -34,7 +34,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
-    template.resourceCountIs('AWS::Lambda::Function', 2);
+    template.resourceCountIs('AWS::Lambda::Function', 3);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('PortalBucket', {});
@@ -55,7 +55,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('HostedZoneName', {});
     template.hasParameter('RecordName', {});
 
-    template.resourceCountIs('AWS::Lambda::Function', 3);
+    template.resourceCountIs('AWS::Lambda::Function', 4);
     template.resourceCountIs('AWS::CloudFormation::CustomResource', 1);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
@@ -82,7 +82,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('DomainName', {});
     template.hasParameter('IAMCertificateId', {});
 
-    template.resourceCountIs('AWS::Lambda::Function', 2);
+    template.resourceCountIs('AWS::Lambda::Function', 3);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);

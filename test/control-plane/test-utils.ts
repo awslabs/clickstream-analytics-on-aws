@@ -253,18 +253,36 @@ export class TestEnv {
     return stack;
   }
 
-  public static newApiStack(): ApiStackElements {
+  public static newALBApiStack(): ApiStackElements {
 
     const stack = new TestStack(new App(), 'apiTestStack');
 
-    new ClickStreamApiConstruct(stack, 'testClickStreamApi', {
+    new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
       dictionaryItems: stack.dics,
-      existingVpc: false,
-      networkProps: {
+      fronting: 'alb',
+      applicationLoadBalancer: {
         vpc: stack.vpc,
         subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+        internetFacing: true,
+        securityGroup: stack.sg,
       },
-      ALBSecurityGroup: stack.sg,
+    });
+
+    const template = Template.fromStack(stack);
+
+    return { stack, template };
+  }
+
+  public static newCloudfrontApiStack(): ApiStackElements {
+
+    const stack = new TestStack(new App(), 'apiTestStack');
+
+    new ClickStreamApiConstruct(stack, 'testClickStreamCloudfrontApi', {
+      dictionaryItems: stack.dics,
+      fronting: 'cloudfront',
+      apiGateway: {
+        stageName: 'api',
+      },
     });
 
     const template = Template.fromStack(stack);
