@@ -228,6 +228,26 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
+  'git-secrets-scan': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      'secrets-scan': {
+        stage: 'build',
+        image: {
+          name: 'public.ecr.aws/docker/library/debian:bullseye',
+        },
+        before_script: [
+          'apt update',
+          'apt install -y git git-secrets',
+        ],
+        script: [
+          'git secrets --scan',
+        ],
+      },
+    },
+  },
   'prlint': {
     stages: [
       'build',
@@ -254,7 +274,7 @@ gitlabMain.createNestedTemplates({
       mkdocs: {
         stage: 'build',
         image: {
-          name: 'python:3.9',
+          name: 'public.ecr.aws/docker/library/python:3.9',
         },
         before_script: [
           'python3 -m pip install \'mkdocs<1.5\' \'mkdocs-material<10\' \'mkdocs-material-extensions<1.2\' \'mkdocs-include-markdown-plugin<5\' \'mkdocs-macros-plugin<1\'',

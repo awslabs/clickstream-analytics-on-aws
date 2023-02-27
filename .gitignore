@@ -59,6 +59,7 @@ junit.xml
 .parcel-cache/
 !/.gitlab-ci.yml
 !/.gitlab/ci-templates/build.yml
+!/.gitlab/ci-templates/git-secrets-scan.yml
 !/.gitlab/ci-templates/prlint.yml
 !/.gitlab/ci-templates/docs.yml
 !/.gitlab/ci-templates/cfn-nag.yml
