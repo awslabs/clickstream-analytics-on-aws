@@ -115,7 +115,6 @@ export class SolutionVpc extends Construct {
 
       this.vpc.addGatewayEndpoint('DynamoDbEndpoint', {
         service: GatewayVpcEndpointAwsService.DYNAMODB,
-        subnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
       });
 
       new CfnOutput(this, 'PublicSubnets', {

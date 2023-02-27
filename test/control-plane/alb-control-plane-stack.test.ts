@@ -479,6 +479,10 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
         {
           Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet2RouteTableB93D5F20',
         },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCpublicSubnet1RouteTable354E1075' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCpublicSubnet2RouteTableBCCB9C3C' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCisolatedSubnet1RouteTable8028ED41' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCisolatedSubnet2RouteTable4C8052B7' },
       ],
       VpcEndpointType: 'Gateway',
     });
@@ -522,6 +526,10 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
         {
           Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCprivateSubnet2RouteTableB93D5F20',
         },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCpublicSubnet1RouteTable354E1075' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCpublicSubnet2RouteTableBCCB9C3C' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCisolatedSubnet1RouteTable8028ED41' },
+        { Ref: 'ClickstreamAnalyticsonAWSVpcDefaultVPCisolatedSubnet2RouteTable4C8052B7' },
       ],
       VpcEndpointType: 'Gateway',
     });
