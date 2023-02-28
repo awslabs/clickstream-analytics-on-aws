@@ -1,9 +1,9 @@
-GET http://localhost:8080/api/project?pageNumber=1&pageSize=30
+GET {{HOST}}/api/project?pageNumber=1&pageSize=30
 Accept: application/json
 
 ###
 
-POST http://localhost:8080/api/project
+POST {{HOST}}/api/project
 Content-Type: application/json
 X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869016666
 
@@ -19,12 +19,12 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869016666
 
 ###
 
-GET http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+GET {{HOST}}/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
 Accept: application/json
 
 ###
 
-PUT http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+PUT {{HOST}}/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
 Content-Type: application/json
 
 {
@@ -46,9 +46,9 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:8080/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+DELETE {{HOST}}/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
 Accept: application/json
 
 ###
-GET http://localhost:8080/api/project/verification/t11
+GET {{HOST}}/api/project/verification/t11
 Accept: application/json

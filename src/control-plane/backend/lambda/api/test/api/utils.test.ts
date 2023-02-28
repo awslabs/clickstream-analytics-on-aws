@@ -1,4 +1,4 @@
-import { isEmpty } from '../..//common/utils';
+import { isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 

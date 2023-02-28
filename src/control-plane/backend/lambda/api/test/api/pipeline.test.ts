@@ -24,8 +24,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { app, server } from '../../';
-import { clickStreamTableName } from '../..//common/constants';
+import { clickStreamTableName } from '../../common/constants';
+import { app, server } from '../../index';
 import {
   MOCK_PIPELINE_ID,
   MOCK_PROJECT_ID,
@@ -58,6 +58,7 @@ describe('Pipeline test', () => {
         etl: {},
         dataModel: {},
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
@@ -80,6 +81,7 @@ describe('Pipeline test', () => {
         etl: {},
         dataModel: {},
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -92,36 +94,12 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     const res = await request(app)
       .post('/api/pipeline');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
       message: 'Parameter verification failed.',
       error: [
-        {
-          msg: 'Invalid value',
-          param: 'base',
-          location: 'body',
-        },
-        {
-          msg: 'Invalid value',
-          param: 'runtime',
-          location: 'body',
-        },
-        {
-          msg: 'Invalid value',
-          param: 'ingestion',
-          location: 'body',
-        },
-        {
-          msg: 'Invalid value',
-          param: 'etl',
-          location: 'body',
-        },
-        {
-          msg: 'Invalid value',
-          param: 'dataModel',
-          location: 'body',
-        },
         {
           value: {},
           msg: 'Value is empty.',
@@ -157,6 +135,7 @@ describe('Pipeline test', () => {
         etl: {},
         dataModel: {},
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -187,6 +166,7 @@ describe('Pipeline test', () => {
         etl: {},
         dataModel: {},
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -217,6 +197,7 @@ describe('Pipeline test', () => {
     });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -246,6 +227,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand, detailInput).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -258,6 +240,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({});
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -276,6 +259,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -295,6 +279,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, false);
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
@@ -315,6 +300,7 @@ describe('Pipeline test', () => {
     });
     let res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -335,6 +321,7 @@ describe('Pipeline test', () => {
     ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -356,6 +343,7 @@ describe('Pipeline test', () => {
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}&pageNumber=2&pageSize=2`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -375,6 +363,7 @@ describe('Pipeline test', () => {
     ddbMock.on(ScanCommand).resolves({});
     const res = await request(app)
       .get('/api/pipeline');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -419,8 +408,10 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290400',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
+      data: null,
       success: true,
       message: 'Pipeline updated.',
     });
@@ -435,6 +426,7 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290400',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -453,6 +445,7 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290401',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -472,6 +465,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -512,6 +506,7 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290401',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -537,6 +532,7 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290401',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
@@ -576,6 +572,7 @@ describe('Pipeline test', () => {
         description: 'Update Description of Pipeline-01',
         version: '1674988290401',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -594,8 +591,10 @@ describe('Pipeline test', () => {
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
+      data: null,
       success: true,
       message: 'Pipeline deleted.',
     });
@@ -604,6 +603,7 @@ describe('Pipeline test', () => {
     ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -616,6 +616,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -640,6 +641,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -659,6 +661,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, false);
     const res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,

@@ -14,20 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import request from 'supertest';
-import { app, server } from '../../index';
+import { S3Client, ListBucketsCommand, Bucket } from '@aws-sdk/client-s3';
 
-describe('App test', () => {
+export interface ClickStreamBucket {
+  readonly name: string | undefined;
+}
 
-  it('healthcheck', async () => {
-    let res = await request(app)
-      .get('/');
-    expect(res.statusCode).toBe(200);
-    expect(res.text).toEqual('OK!');
-  });
-  afterAll((done) => {
-    server.close();
-    done();
-  });
-
-});
+export const listBuckets = async () => {
+  const s3Client = new S3Client({});
+  const params: ListBucketsCommand = new ListBucketsCommand({});
+  const result = await s3Client.send(params);
+  let buckets: ClickStreamBucket[] = [];
+  if (result.Buckets) {
+    for (let index in result.Buckets as Bucket[]) {
+      buckets.push({
+        name: result.Buckets[index].Name,
+      });
+    }
+  }
+  return buckets;
+};

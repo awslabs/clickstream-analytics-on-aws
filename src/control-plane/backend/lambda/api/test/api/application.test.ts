@@ -22,8 +22,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { app, server } from '../../';
 import { clickStreamTableName } from '../../common/constants';
+import { app, server } from '../../index';
 import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -47,6 +47,7 @@ describe('Application test', () => {
         platform: 'Web',
         sdk: 'Clickstream SDK',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Application created.');
     expect(res.body.success).toEqual(true);
@@ -66,6 +67,7 @@ describe('Application test', () => {
         platform: 'Web',
         sdk: 'Clickstream SDK',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -79,6 +81,7 @@ describe('Application test', () => {
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -116,6 +119,7 @@ describe('Application test', () => {
         platform: 'Web',
         sdk: 'Clickstream SDK',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -144,6 +148,7 @@ describe('Application test', () => {
         platform: 'Web',
         sdk: 'Clickstream SDK',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -177,6 +182,7 @@ describe('Application test', () => {
     });
     let res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -210,6 +216,7 @@ describe('Application test', () => {
     ddbMock.on(GetCommand, input).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -221,6 +228,7 @@ describe('Application test', () => {
     projectExistedMock(ddbMock, true);
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -239,6 +247,7 @@ describe('Application test', () => {
     appExistedMock(ddbMock, false);
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
@@ -258,6 +267,7 @@ describe('Application test', () => {
     });
     let res = await request(app)
       .get(`/api/app?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -278,6 +288,7 @@ describe('Application test', () => {
     ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/app?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -298,6 +309,7 @@ describe('Application test', () => {
     });
     const res = await request(app)
       .get(`/api/app?pid=${MOCK_PROJECT_ID}&pageNumber=2&pageSize=2`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -316,6 +328,7 @@ describe('Application test', () => {
     ddbMock.on(ScanCommand).resolves({});
     const res = await request(app)
       .get('/api/app');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -340,8 +353,10 @@ describe('Application test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
+      data: null,
       success: true,
       message: 'Application updated.',
     });
@@ -355,6 +370,7 @@ describe('Application test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -372,6 +388,7 @@ describe('Application test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -391,6 +408,7 @@ describe('Application test', () => {
     appExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/app/${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -424,6 +442,7 @@ describe('Application test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
       });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -444,8 +463,10 @@ describe('Application test', () => {
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
+      data: null,
       success: true,
       message: 'Application deleted.',
     });
@@ -454,6 +475,7 @@ describe('Application test', () => {
     ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -466,6 +488,7 @@ describe('Application test', () => {
     appExistedMock(ddbMock, true);
     const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
@@ -490,6 +513,7 @@ describe('Application test', () => {
     appExistedMock(ddbMock, false);
     const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,

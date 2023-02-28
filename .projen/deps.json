@@ -90,12 +90,37 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-account",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-dynamodb",
       "version": "^3.267.0",
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-ec2",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-kafka",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-kafkaconnect",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-quicksight",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-redshift",
       "version": "^3.267.0",
       "type": "runtime"
     },
@@ -116,6 +141,11 @@
     },
     {
       "name": "@aws-sdk/types",
+      "version": "^3.267.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/util-dynamodb",
       "version": "^3.267.0",
       "type": "runtime"
     },

@@ -18,6 +18,7 @@ import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+import { awsRegion } from './constants';
 import { isEmpty } from './utils';
 
 const store: ClickStreamStore = new DynamoDbStore();
@@ -33,13 +34,11 @@ export class ApiResponse {
 }
 
 export class ApiSuccess extends ApiResponse {
-  public data?: any;
+  public data?: any | never[];
 
-  constructor(data: any, message?: string) {
+  constructor(data: any | never[], message?: string) {
     super(true, message);
-    if (!isEmpty(data)) {
-      this.data = data;
-    }
+    this.data = data;
   }
 }
 
@@ -85,6 +84,29 @@ export const defaultPageValueValid: CustomValidator = (value, { req }) => {
     const { pageNumber, pageSize } = value;
     req.query.pageNumber = isEmpty(pageNumber)? 1 : Number(pageNumber);
     req.query.pageSize = isEmpty(pageSize)? 10 : Number(pageSize);
+  }
+  return true;
+};
+
+export const defaultRegionValueValid: CustomValidator = (value, { req }) => {
+  if (req.query) {
+    const { region } = value;
+    req.query.region = isEmpty(region)? awsRegion : region;
+  }
+  return true;
+};
+
+export const defaultSubnetTypeValid: CustomValidator = (value, { req }) => {
+  if (req.query) {
+    const { subnetType } = value;
+    if (isEmpty(subnetType)) {
+      req.query.subnetType = 'all';
+    } else {
+      const validType = ['public', 'private', 'isolated', 'all'];
+      if (!validType.includes(subnetType)) {
+        throw new Error('subnetType in query must be: \'public\', \'private\', \'isolated\' or \'all\'.');
+      }
+    }
   }
   return true;
 };

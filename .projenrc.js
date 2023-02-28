@@ -18,10 +18,16 @@ const awsSDKDeps = [
 
 const awsSDKDepsForApiProject = [
   '@aws-sdk/types',
+  '@aws-sdk/client-ec2',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-sfn',
+  '@aws-sdk/client-kafka',
+  '@aws-sdk/client-redshift',
+  '@aws-sdk/client-quicksight',
+  '@aws-sdk/client-account',
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/lib-dynamodb',
+  '@aws-sdk/util-dynamodb',
 ].map(dep => `${dep}@^3.267.0`);
 
 const depsForApiProject = [

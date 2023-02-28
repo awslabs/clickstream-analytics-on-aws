@@ -22,6 +22,7 @@ import {
   Duration,
   IgnoreMode,
   RemovalPolicy,
+  Stack,
 } from 'aws-cdk-lib';
 import {
   EndpointType,
@@ -37,7 +38,7 @@ import {
   Port,
   SecurityGroup,
   SubnetSelection,
-  IVpc,
+  IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
@@ -123,8 +124,7 @@ export class ClickStreamApiConstruct extends Construct {
 
       apiFunctionProps = {
         vpc: props.applicationLoadBalancer.vpc,
-        vpcSubnets: props.applicationLoadBalancer.subnets,
-        allowPublicSubnet: props.applicationLoadBalancer.internetFacing,
+        vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
         securityGroups: [apiLambdaSG],
       };
     }
@@ -133,6 +133,34 @@ export class ClickStreamApiConstruct extends Construct {
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
+    const awsSdkPolicy = new iam.Policy(this, 'ClickStreamApiAWSSdkPolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: ['*'],
+          actions: [
+            'kafka:ListClustersV2',
+            'kafka:ListClusters',
+            's3:ListAllMyBuckets',
+            'ec2:DescribeVpcs',
+            'redshift:DescribeClusters',
+            'account:ListRegions',
+            's3:ListBucket',
+            'quicksight:ListUsers',
+            'ec2:DescribeSubnets',
+            's3:GetBucketLocation',
+          ],
+        }),
+      ],
+    });
+    awsSdkPolicy.attachToRole(clickStreamApiFunctionRole);
+    addCfnNagSuppressRules(awsSdkPolicy.node.defaultChild as iam.CfnPolicy, [
+      {
+        id: 'W12',
+        reason:
+          'The lambda need to be queried all resources under the current account by design',
+      },
+    ]);
 
     this.clickStreamApiFunction = new DockerImageFunction(this, 'ClickStreamApiFunction', {
       description: 'Lambda function for api of solution Click Stream Analytics on AWS',
@@ -143,6 +171,8 @@ export class ClickStreamApiConstruct extends Construct {
       environment: {
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
+        AWS_ACCOUNT_ID: Stack.of(this).account,
+        LOG_LEVEL: 'ERROR',
       },
       architecture: Architecture.X86_64,
       timeout: Duration.seconds(30),

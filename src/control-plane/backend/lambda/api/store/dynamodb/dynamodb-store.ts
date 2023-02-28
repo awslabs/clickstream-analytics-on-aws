@@ -22,15 +22,19 @@ import {
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
+import { getPaginatedResults } from '../../common/paginator';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
-import { Pipeline, pipelineDeserializer, PipelineList, pipelineSerializer } from '../../model/pipeline';
+import {
+  Pipeline,
+  PipelineList,
+} from '../../model/pipeline';
 import { Project, ProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
-import { getPaginatedResults } from './paginator';
 
 interface KeyVal<T> {
   [key: string]: T;
@@ -365,7 +369,6 @@ export class DynamoDbStore implements ClickStreamStore {
 
 
   public async addPipeline(pipeline: Pipeline): Promise<string> {
-    pipeline = pipelineSerializer(pipeline);
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -374,11 +377,12 @@ export class DynamoDbStore implements ClickStreamStore {
         pipelineId: pipeline.pipelineId,
         name: pipeline.name,
         description: pipeline.description,
-        base: pipeline.base,
-        ingestion: pipeline.ingestion,
+        region: pipeline.region,
+        dataCollectionSDK: pipeline.dataCollectionSDK,
+        tags: pipeline.tags,
+        ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataModel: pipeline.dataModel,
-        runtime: pipeline.runtime,
         version: pipeline.version ? pipeline.version : Date.now().toString(),
         createAt: pipeline.createAt ? pipeline.createAt : Date.now(),
         updateAt: Date.now(),
@@ -404,14 +408,22 @@ export class DynamoDbStore implements ClickStreamStore {
       return undefined;
     }
     const pipeline: Pipeline = result.Item as Pipeline;
-    return !pipeline.deleted ? pipelineDeserializer(pipeline) : undefined;
+    return !pipeline.deleted ? pipeline : undefined;
   };
 
 
   public async updatePipeline(pipeline: Pipeline, curPipeline: Pipeline): Promise<void> {
-    pipeline = pipelineSerializer(pipeline);
-    curPipeline = pipelineSerializer(curPipeline);
     // Update new pipeline && Backup the current pipeline
+    const marshallCurPipeline = marshall(curPipeline, {
+      convertEmptyValues: true,
+      removeUndefinedValues: true,
+      convertClassInstanceToMap: true,
+    });
+    const marshallPipeline = marshall(pipeline, {
+      convertEmptyValues: true,
+      removeUndefinedValues: true,
+      convertClassInstanceToMap: true,
+    });
     const params: TransactWriteItemsCommand = new TransactWriteItemsCommand({
       TransactItems: [
         {
@@ -427,11 +439,15 @@ export class DynamoDbStore implements ClickStreamStore {
               pipelineId: { S: curPipeline.pipelineId },
               name: { S: curPipeline.name },
               description: { S: curPipeline.description },
-              base: { S: curPipeline.base },
-              ingestion: { S: curPipeline.ingestion },
-              etl: { S: curPipeline.etl },
-              dataModel: { S: curPipeline.dataModel },
-              runtime: { S: curPipeline.runtime },
+              region: { S: curPipeline.region },
+              dataCollectionSDK: { S: curPipeline.dataCollectionSDK },
+              tags: marshallCurPipeline.tags,
+              ingestionServer: marshallCurPipeline.ingestionServer,
+              etl: marshallCurPipeline.etl,
+              dataModel: marshallCurPipeline.dataModel,
+              ingestionServerRuntime: marshallCurPipeline.ingestionServerRuntime ?? { M: {} },
+              etlRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
+              dataModelRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
               version: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
@@ -452,28 +468,37 @@ export class DynamoDbStore implements ClickStreamStore {
             UpdateExpression: 'SET ' +
               '#pipelineName = :name, ' +
               'description = :description, ' +
-              '#pipelineBase = :base, ' +
-              'ingestion = :ingestion, ' +
+              '#region = :region, ' +
+              'dataCollectionSDK = :dataCollectionSDK, ' +
+              '#tags = :tags, ' +
+              'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
               'dataModel = :dataModel, ' +
-              'runtime = :runtime, ' +
+              'ingestionServerRuntime = :ingestionServerRuntime, ' +
+              'etlRuntime = :etlRuntime, ' +
+              'dataModelRuntime = :dataModelRuntime, ' +
               'version = :version, ' +
               'updateAt = :updateAt, ' +
               '#pipelineOperator = :operator ',
             ExpressionAttributeNames: {
               '#pipelineName': 'name',
-              '#pipelineBase': 'base',
+              '#region': 'region',
+              '#tags': 'tags',
               '#pipelineOperator': 'operator',
               '#ConditionVersion': 'version',
             },
             ExpressionAttributeValues: {
               ':name': { S: pipeline.name },
               ':description': { S: pipeline.description },
-              ':base': { S: pipeline.base },
-              ':ingestion': { S: pipeline.ingestion },
-              ':etl': { S: pipeline.etl },
-              ':dataModel': { S: pipeline.dataModel },
-              ':runtime': { S: pipeline.runtime },
+              ':region': { S: pipeline.region },
+              ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
+              ':tags': marshallPipeline.tags,
+              ':ingestionServer': marshallPipeline.ingestionServer,
+              ':etl': marshallPipeline.etl,
+              ':dataModel': marshallPipeline.dataModel,
+              ':ingestionServerRuntime': marshallPipeline.ingestionServerRuntime ?? { M: {} },
+              ':etlRuntime': marshallPipeline.etlRuntime ?? { M: {} },
+              ':dataModelRuntime': marshallPipeline.dataModelRuntime ?? { M: {} },
               ':ConditionVersionValue': { S: pipeline.version },
               ':version': { S: Date.now().toString() },
               ':updateAt': { N: Date.now().toString() },

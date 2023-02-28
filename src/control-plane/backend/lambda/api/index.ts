@@ -24,10 +24,11 @@ import {
   isValidEmpty,
   validate,
   validMatchParamId,
-  ApiFail,
+  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid,
 } from './common/request-valid';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
+import { EnvironmentServ } from './service/environment';
 import { PipelineServ } from './service/pipeline';
 import { ProjectServ } from './service/project';
 
@@ -38,6 +39,8 @@ const dictionaryServ: DictionaryServ = new DictionaryServ();
 const projectServ: ProjectServ = new ProjectServ();
 const appServ: ApplicationServ = new ApplicationServ();
 const pipelineServ: PipelineServ = new PipelineServ();
+const environmentServ: EnvironmentServ = new EnvironmentServ();
+
 
 app.use(express.json());
 
@@ -60,6 +63,62 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
 app.get('/', async (_req: express.Request, res: express.Response) => {
   res.send('OK!');
 });
+
+app.get(
+  '/api/env/regions',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listRegions(req, res, next);
+  });
+
+app.get(
+  '/api/env/vpc',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeVpcs(req, res, next);
+  });
+
+app.get(
+  '/api/env/vpc/subnet',
+  validate([
+    query('vpcId').custom(isValidEmpty),
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' }))
+      .custom((value, { req }) => defaultSubnetTypeValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeSubnets(req, res, next);
+  });
+
+app.get(
+  '/api/env/s3/buckets',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listBuckets(req, res, next);
+  });
+
+app.get(
+  '/api/env/msk/clusters',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listMSKCluster(req, res, next);
+  });
+
+app.get(
+  '/api/env/redshift/clusters',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeRedshiftClusters(req, res, next);
+  });
+
+app.get(
+  '/api/env/quicksight/users',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listQuickSightUsers(req, res, next);
+  });
 
 app.get('/api/dictionary', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return dictionaryServ.list(req, res, next);
@@ -176,11 +235,6 @@ app.post(
   '/api/pipeline',
   validate([
     body().custom(isValidEmpty),
-    body('base').not().isEmpty(),
-    body('runtime').not().isEmpty(),
-    body('ingestion').not().isEmpty(),
-    body('etl').not().isEmpty(),
-    body('dataModel').not().isEmpty(),
     body('projectId').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),

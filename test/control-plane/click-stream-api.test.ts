@@ -97,6 +97,10 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           DICTIONARY_TABLE_NAME: {
             Ref: 'testClickStreamALBApiClickstreamDictionary0A1156B6',
           },
+          AWS_ACCOUNT_ID: {
+            Ref: 'AWS::AccountId',
+          },
+          LOG_LEVEL: 'ERROR',
         },
       },
       MemorySize: 512,
@@ -208,6 +212,37 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
         Version: '2012-10-17',
       },
+    }));
+
+    // Check lambda api policy for aws sdk
+    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'kafka:ListClustersV2',
+              'kafka:ListClusters',
+              's3:ListAllMyBuckets',
+              'ec2:DescribeVpcs',
+              'redshift:DescribeClusters',
+              'account:ListRegions',
+              's3:ListBucket',
+              'quicksight:ListUsers',
+              'ec2:DescribeSubnets',
+              's3:GetBucketLocation',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        },
+      ],
     }));
 
   });

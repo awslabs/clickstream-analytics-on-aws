@@ -17,7 +17,7 @@ limitations under the License.
 import { DynamoDBDocumentClient, GetCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { app, server } from '../../';
+import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 
@@ -37,6 +37,7 @@ describe('Dictionary test', () => {
     });
     let res = await request(app)
       .get('/api/dictionary');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -58,6 +59,7 @@ describe('Dictionary test', () => {
     ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get('/api/dictionary');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -71,6 +73,7 @@ describe('Dictionary test', () => {
     });
     let res = await request(app)
       .get('/api/dictionary/D1');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -82,6 +85,7 @@ describe('Dictionary test', () => {
     ddbMock.on(GetCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get('/api/dictionary/D1');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
       success: false,
@@ -93,6 +97,7 @@ describe('Dictionary test', () => {
     ddbMock.on(GetCommand).resolves({});
     const res = await request(app)
       .get('/api/dictionary/Dx');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,

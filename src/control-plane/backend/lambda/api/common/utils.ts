@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { Tag } from '@aws-sdk/client-ec2';
+
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
   if (a === 'null') return true; //Verify null string
@@ -32,7 +34,19 @@ function tryToJson(s: string): any {
   }
 }
 
+function getValueFromTags(tag: string, tags: Tag[]): string {
+  if (!isEmpty(tags)) {
+    for (let index in tags as Tag[]) {
+      if (tags[index].Key === tag) {
+        return tags[index].Value ?? '';
+      }
+    }
+  }
+  return '';
+}
+
 export {
   isEmpty,
   tryToJson,
+  getValueFromTags,
 };
