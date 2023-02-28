@@ -9,6 +9,7 @@ include:
   - local: .gitlab/ci-templates/git-secrets-scan.yml
   - local: .gitlab/ci-templates/prlint.yml
   - local: .gitlab/ci-templates/docs.yml
+  - local: .gitlab/ci-templates/semgrep.yml
   - local: .gitlab/ci-templates/cfn-nag.yml
 workflow:
   rules:

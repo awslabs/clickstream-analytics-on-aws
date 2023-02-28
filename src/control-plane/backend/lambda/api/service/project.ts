@@ -37,7 +37,7 @@ export class ProjectServ {
     try {
       let project: Project = req.body;
       const id = await store.createProject(project);
-      return res.status(201).send(new ApiSuccess({ id }, 'Project created.'));
+      return res.status(201).json(new ApiSuccess({ id }, 'Project created.'));
     } catch (error) {
       next(error);
     }
@@ -49,7 +49,7 @@ export class ProjectServ {
       const result = await store.getProject(id);
       if (!result) {
         logger.warn(`No Project with ID ${id} found in the databases while trying to retrieve a Project`);
-        return res.status(404).send(new ApiFail('Project not found'));
+        return res.status(404).json(new ApiFail('Project not found'));
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -61,7 +61,7 @@ export class ProjectServ {
     try {
       const project: Project = req.body as Project;
       await store.updateProject(project);
-      return res.status(201).send(new ApiSuccess(null, 'Project updated.'));
+      return res.status(201).json(new ApiSuccess(null, 'Project updated.'));
     } catch (error) {
       next(error);
     }

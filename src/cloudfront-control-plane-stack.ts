@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { join } from 'path';
 import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { CfnDistribution, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
@@ -115,7 +116,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',

@@ -505,7 +505,7 @@ async function downloadPluginZipFileToS3(event: ResourceEvent) {
   const { pluginS3Bucket, pluginUrl } = props;
   const { fileName, fileS3Key } = getResourceName(event);
 
-  const filePath = path.join('/tmp', fileName);
+  const filePath = path.join('/tmp', fileName.replace(/^(\.\.(\/|\\|$))+/, ''));
   logger.info('start download ' + pluginUrl);
   await download(pluginUrl, filePath);
   logger.info('download file to ' + filePath);

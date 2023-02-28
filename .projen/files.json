@@ -13,6 +13,7 @@
     ".gitlab/ci-templates/docs.yml",
     ".gitlab/ci-templates/git-secrets-scan.yml",
     ".gitlab/ci-templates/prlint.yml",
+    ".gitlab/ci-templates/semgrep.yml",
     ".mergify.yml",
     ".npmignore",
     ".projen/deps.json",

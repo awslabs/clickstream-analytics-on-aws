@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { join } from 'path';
 import { Stack, App, DockerImage } from 'aws-cdk-lib';
 import {
   Match,
@@ -32,7 +33,7 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(new App(), 'testStack');
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -159,7 +160,7 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -188,7 +189,7 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -221,7 +222,7 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -246,7 +247,7 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(app, 'testStack');
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -303,7 +304,7 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(new App(), 'testStack');
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
@@ -393,7 +394,7 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(new App(), 'testStack');
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
-        assetPath: '../../frontend',
+        assetPath: join(__dirname, '../../frontend'),
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',

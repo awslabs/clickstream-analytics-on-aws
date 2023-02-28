@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import path from 'path';
 import {
   RemovalPolicy,
   Fn,
@@ -343,7 +342,7 @@ export class CloudFrontS3Portal extends Construct {
     // upload static web assets
     new BucketDeployment(this, 'portal_deploy', {
       sources: [
-        Source.asset(path.join(__dirname, props.frontendProps.assetPath), {
+        Source.asset(props.frontendProps.assetPath, {
           bundling: {
             image: props.frontendProps.dockerImage,
             command: props.frontendProps.buildCommand,

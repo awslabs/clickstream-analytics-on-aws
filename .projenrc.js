@@ -286,6 +286,42 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
+  'semgrep': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      semgrep: {
+        tags: [
+          'arch:amd64',
+        ],
+        stage: 'build',
+        image: {
+          name: 'returntocorp/semgrep',
+        },
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        variables: {
+          SEMGREP_RULES: 'p/default',
+          SEMGREP_GITLAB_JSON: '1',
+        },
+        script: [
+          'semgrep ci --gitlab-sast > gl-sast-report.json || true',
+        ],
+        artifacts: {
+          reports: {
+            sast: 'gl-sast-report.json',
+          },
+        },
+      },
+    },
+  },
   'cfn-nag': {
     stages: [
       'qa',

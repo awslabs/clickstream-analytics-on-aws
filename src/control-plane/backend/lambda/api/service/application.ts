@@ -37,7 +37,7 @@ export class ApplicationServ {
     try {
       let app: Application = req.body;
       const id = await store.addApplication(app);
-      return res.status(201).send(new ApiSuccess({ id }, 'Application created.'));
+      return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
     }
@@ -50,7 +50,7 @@ export class ApplicationServ {
       const result = await store.getApplication(pid, id);
       if (!result) {
         logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
-        return res.status(404).send(new ApiFail('Application not found'));
+        return res.status(404).json(new ApiFail('Application not found'));
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -62,7 +62,7 @@ export class ApplicationServ {
     try {
       let app: Application = req.body as Application;
       await store.updateApplication(app);
-      return res.status(201).send(new ApiSuccess(null, 'Application updated.'));
+      return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
     } catch (error) {
       next(error);
     }
@@ -73,7 +73,7 @@ export class ApplicationServ {
       const { id } = req.params;
       const { pid } = req.query;
       await store.deleteApplication(pid, id);
-      return res.status(200).send(new ApiSuccess(null, 'Application deleted.'));
+      return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);
     }
