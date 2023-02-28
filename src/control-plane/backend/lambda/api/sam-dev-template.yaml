@@ -50,6 +50,7 @@ Resources:
     Properties:
       PackageType: Image
       MemorySize: 1024
+      Tracing: Active
       Architectures:
         - x86_64
       Policies:

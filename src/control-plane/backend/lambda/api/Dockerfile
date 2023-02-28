@@ -1,14 +1,17 @@
 FROM public.ecr.aws/docker/library/node:16.14-stretch-slim AS builder
-WORKDIR /app
+RUN mkdir -p /home/node/app
+WORKDIR /home/node/app
 COPY . .
-RUN yarn install
-RUN yarn build
+RUN yarn install && yarn build
+
 
 FROM public.ecr.aws/docker/library/node:16.14-stretch-slim AS server
+RUN mkdir -p /home/node/app
+WORKDIR /home/node/app
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.6.1 /lambda-adapter /opt/extensions/lambda-adapter
-WORKDIR /app
 COPY . .
 RUN yarn install
-COPY --from=builder ./app/dist ./dist
+COPY --from=builder /home/node/app/dist ./dist
 EXPOSE 8080
+USER node
 CMD ["npm", "start"]
