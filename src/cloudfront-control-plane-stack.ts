@@ -119,7 +119,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
-          'mkdir /app && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` /app && cd /app && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
+          'export APP_PATH=/tmp/app && mkdir $APP_PATH && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` $APP_PATH && cd $APP_PATH && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
         ],
         autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/locales/*'],
       },
