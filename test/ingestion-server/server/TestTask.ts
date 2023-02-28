@@ -42,6 +42,7 @@ import {
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
+import { getDefaultFleetPropsByTier } from './tier-setting';
 import {
   IngestionServer,
   IngestionServerProps,
@@ -49,7 +50,6 @@ import {
   TierType,
 } from '../../../src/ingestion-server/server/ingestion-server';
 
-import { getDefaultFleetPropsByTier } from './tier-setting';
 
 export interface VPCPros {
   readonly cidr: string;

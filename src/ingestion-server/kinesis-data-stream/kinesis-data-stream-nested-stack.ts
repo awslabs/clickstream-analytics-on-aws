@@ -29,9 +29,9 @@ import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { KinesisDataStreamToS3 } from './kinesis-to-s3';
 import { addCfnNagFoLogRetention, addCfnNagForCustomResource, addCfnNagToStack, lambdaInVpcRolePolicyRulesToSuppress } from '../../common/cfn-nag';
 import { SolutionInfo } from '../../common/solution-info';
-import { KinesisDataStreamToS3 } from './kinesis-to-s3';
 
 export interface CreateKinesisNestStackProps {
   vpcIdParam: CfnParameter;

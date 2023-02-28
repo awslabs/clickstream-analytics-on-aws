@@ -16,10 +16,10 @@ limitations under the License.
 
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
-import { ClickStreamStore } from '../store/click-stream-store';
-import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 import { awsRegion } from './constants';
 import { isEmpty } from './utils';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 

@@ -17,8 +17,8 @@ limitations under the License.
 import { CfnResource, IAspect } from 'aws-cdk-lib';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { IConstruct } from 'constructs';
-import { CfnNagMetadata } from '../../common/cfn-nag';
 import { Constant } from './constant';
+import { CfnNagMetadata } from '../../common/cfn-nag';
 
 export class CfnNagWhitelistForS3BucketDelete implements IAspect {
   public visit(construct: IConstruct): void {

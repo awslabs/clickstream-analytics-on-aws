@@ -19,8 +19,8 @@ import {
   Aws,
 } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
 import { findResourcesName } from './test-utils';
+import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
 
 function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];

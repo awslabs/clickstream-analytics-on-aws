@@ -24,8 +24,6 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { clickStreamTableName } from '../../common/constants';
-import { app, server } from '../../index';
 import {
   MOCK_PIPELINE_ID,
   MOCK_PROJECT_ID,
@@ -34,6 +32,8 @@ import {
   projectExistedMock,
   tokenMock,
 } from './ddb-mock';
+import { clickStreamTableName } from '../../common/constants';
+import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 

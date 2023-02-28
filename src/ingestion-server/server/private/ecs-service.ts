@@ -29,9 +29,9 @@ import {
 } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
+import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
-import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 
 
 export interface ServiceProps extends ECSClusterProps {

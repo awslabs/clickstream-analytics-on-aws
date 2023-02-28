@@ -45,8 +45,8 @@ import {
   OriginSslPolicy,
   OriginProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
-import { HttpOrigin, HttpOriginProps, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
+import { HttpOrigin, HttpOriginProps, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { PolicyStatement, Effect, ServicePrincipal, CanonicalUserPrincipal } from 'aws-cdk-lib/aws-iam';
 
 import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -64,10 +64,10 @@ import {
 } from 'aws-cdk-lib/aws-s3-deployment';
 
 import { Construct } from 'constructs';
+import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { capitalizePropertyNames, isEmpty } from '../common/utils';
-import { Constant } from './private/constant';
 
 export interface DistributionProps {
   readonly enableIpv6?: boolean;

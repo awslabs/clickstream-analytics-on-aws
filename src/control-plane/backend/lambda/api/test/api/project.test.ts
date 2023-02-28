@@ -23,8 +23,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { app, server } from '../../index';
 import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 

@@ -43,7 +43,6 @@ const devDepsForApiProject = [
   'supertest@^6.3.3',
   'nodemon@^2.0.20',
   'ts-node@^10.9.1',
-  '@types/node@^18.11.18',
   '@types/express@^4.17.16',
   '@types/supertest@^2.0.12',
 ];
@@ -76,6 +75,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   devDeps: [
     ...commonDevDeps,
   ],
+  minNodeVersion: '16.18.0',
 });
 
 
@@ -126,6 +126,7 @@ const apiProject = new typescript.TypeScriptProject({
   srcdir: './',
   testdir: 'test/',
   eslint: false,
+  minNodeVersion: '16.18.0',
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
@@ -169,9 +170,7 @@ gitlabMain.createNestedTemplates({
       'build',
     ],
     variables: {
-      variables: {
-        CI: 'true',
-      },
+      CI: 'true',
     },
     jobs: {
       build: {
@@ -242,7 +241,7 @@ gitlabMain.createNestedTemplates({
         ],
         stage: 'build',
         script: [
-          '[[ "$CI_MERGE_REQUEST_TITLE" =~ ^(feat|fix|chore|docs|tests|ci) ]] || (echo "no commit type is specified in merge request title" && exit 1)',
+          '[[ "$CI_MERGE_REQUEST_TITLE" =~ ^(feat|fix|chore|docs|tests|ci): ]] || (echo "no commit type is specified in merge request title" && exit 1)',
         ],
       },
     },

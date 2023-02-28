@@ -22,9 +22,9 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { createKinesisToS3LambdaRole } from './iam';
 import { createKinesisToS3LambdaSecurityGroup } from './sg';
+import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 
 export interface KinesisToS3Lambda {
   vpc: IVpc;
