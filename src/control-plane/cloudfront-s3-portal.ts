@@ -79,6 +79,7 @@ export interface FrontendProps {
   readonly assetPath: string;
   readonly dockerImage: DockerImage;
   readonly buildCommand: string[];
+  readonly user?: string;
   readonly autoInvalidFilePaths?: string[];
   readonly assetHash?: string;
   readonly assetHashType?: AssetHashType;
@@ -346,6 +347,7 @@ export class CloudFrontS3Portal extends Construct {
           bundling: {
             image: props.frontendProps.dockerImage,
             command: props.frontendProps.buildCommand,
+            user: props.frontendProps.user,
             outputType: BundlingOutput.NOT_ARCHIVED,
           },
           assetHash: props.frontendProps.assetHash ?? undefined,
