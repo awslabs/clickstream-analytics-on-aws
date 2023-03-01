@@ -72,4 +72,4 @@ IFS=',' read -r -a prefixes <<< "$GLOBAL_ASSETS"
 mkdir -p ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
 
 export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${prefixes[0]}"
-run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]} -q
+run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
