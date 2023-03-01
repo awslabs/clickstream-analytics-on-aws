@@ -1,16 +1,15 @@
-import { TagEditor } from '@cloudscape-design/components';
+import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const Tags: React.FC = () => {
+interface TagsProps {
+  tags: TagEditorProps.Tag[];
+  changeTags: (tags: TagEditorProps.Tag[]) => void;
+}
+
+const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
-  const [tags, setTags] = React.useState<any>([
-    {
-      key: 'some-custom-key-1',
-      value: 'some-value-1',
-      existing: false,
-    },
-  ]);
+  const { tags, changeTags } = props;
   return (
     <TagEditor
       i18nStrings={{
@@ -60,11 +59,7 @@ const Tags: React.FC = () => {
         enteredValueLabel: (value) => t('tag.tagLimit.use') + value + '"',
       }}
       tags={tags}
-      onChange={({ detail }) => setTags(detail.tags)}
-      keysRequest={() => Promise.resolve(['some-existing-key-3'])}
-      valuesRequest={(key, value) =>
-        key ? Promise.resolve(['value 1']) : Promise.reject()
-      }
+      onChange={({ detail }) => changeTags(detail.tags as any)}
     />
   );
 };

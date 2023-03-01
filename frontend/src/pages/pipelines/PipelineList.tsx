@@ -11,43 +11,44 @@ import {
   Table,
   TextFilter,
 } from '@cloudscape-design/components';
+import { getPipelineList } from 'apis/pipeline';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import React from 'react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { TIME_FORMAT } from 'ts/const';
 import PipelineHeader from './comps/PipelineHeader';
-
-const PIPELINE_LIST = [
-  {
-    name: 'my-pipeline-1',
-    id: '809e1238-6f2e-11ed-a1eb-0242ac120002',
-    region: 'us-east-1',
-    status: 'Healthy',
-    created: 'Nov 26, 2022, 18:00PM UTC +8:00',
-  },
-  {
-    name: 'my-pipeline-2',
-    id: '809e1238-6f2e-11ed-a1eb-0242ac120002',
-    region: 'us-west-2',
-    status: 'Disabled',
-    created: 'Nov 26, 2022, 18:00PM UTC +8:00',
-  },
-  {
-    name: 'my-pipeline-3',
-    id: '809e1238-6f2e-11ed-a1eb-0242ac120002',
-    region: 'us-east-1',
-    status: 'Pending',
-    created: 'Nov 26, 2022, 18:00PM UTC +8:00',
-  },
-];
 
 const Content: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [selectedItems, setSelectedItems] = React.useState<any>([
-    { name: 'Item 2' },
-  ]);
+  const [selectedItems, setSelectedItems] = useState<IPipeline[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
+  const [pageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pipelineList, setPipelineList] = useState<IPipeline[]>([]);
+
+  const listPipelines = async () => {
+    setLoadingData(true);
+    const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
+      await getPipelineList({
+        pageNumber: currentPage,
+        pageSize: pageSize,
+      });
+    if (success) {
+      setPipelineList(data.items);
+      setTotalCount(data.totalCount);
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    listPipelines();
+  }, [currentPage]);
+
   return (
     <div>
       <Table
@@ -69,12 +70,15 @@ const Content: React.FC = () => {
             )}`;
           },
         }}
+        loading={loadingData}
         columnDefinitions={[
           {
             id: 'id',
             header: t('pipeline:list.id'),
             cell: (e) => {
-              return <Link href={`/pipeline/detail/${e.name}`}>{e.id}</Link>;
+              return (
+                <Link href={`/pipeline/detail/${e.name}`}>{e.pipelineId}</Link>
+              );
             },
             sortingField: 'alt',
           },
@@ -95,7 +99,7 @@ const Content: React.FC = () => {
             cell: (e) => {
               return (
                 <StatusIndicator
-                  type={e.status === 'Healthy' ? 'success' : 'stopped'}
+                  type={e.status === '1' ? 'success' : 'stopped'}
                 >
                   {e.status}
                 </StatusIndicator>
@@ -105,10 +109,12 @@ const Content: React.FC = () => {
           {
             id: 'created',
             header: t('pipeline:list.created'),
-            cell: (e) => e.created,
+            cell: (e) => {
+              return moment(e.createAt).format(TIME_FORMAT) || '-';
+            },
           },
         ]}
-        items={PIPELINE_LIST}
+        items={pipelineList}
         loadingText={t('pipeline:list.loading') || 'Loading'}
         selectionType="single"
         trackBy="name"
@@ -163,8 +169,11 @@ const Content: React.FC = () => {
         }
         pagination={
           <Pagination
-            currentPageIndex={1}
-            pagesCount={2}
+            currentPageIndex={currentPage}
+            pagesCount={Math.ceil(totalCount / pageSize)}
+            onChange={(e) => {
+              setCurrentPage(e.detail.currentPageIndex);
+            }}
             ariaLabels={{
               nextPageLabel: t('nextPage') || '',
               previousPageLabel: t('prePage') || '',

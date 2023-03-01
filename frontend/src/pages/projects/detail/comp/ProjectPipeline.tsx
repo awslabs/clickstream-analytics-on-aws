@@ -15,13 +15,20 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-const ProjectPipeline: React.FC = () => {
+interface ProjectPipelineProps {
+  pipelineInfo: IPipeline;
+}
+
+const ProjectPipeline: React.FC<ProjectPipelineProps> = (
+  props: ProjectPipelineProps
+) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { pipelineInfo } = props;
   const [selectedItems, setSelectedItems] = React.useState<any>([]);
 
   const goToCreateApplication = () => {
-    navigate('/project/projectId/application/create');
+    navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
 
   return (
@@ -33,7 +40,7 @@ const ProjectPipeline: React.FC = () => {
             description={t('project:pipeline.healthDesc')}
             actions={
               <Button
-                href="/pipeline/detail/id"
+                href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                 iconAlign="right"
                 iconName="external"
                 target="_blank"
@@ -56,9 +63,9 @@ const ProjectPipeline: React.FC = () => {
                 <Link
                   external
                   externalIconAriaLabel="Opens in a new tab"
-                  href="/pipeline/detail/id"
+                  href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                 >
-                  us-east-1-demo-pipe-dtg756
+                  {pipelineInfo.name}
                 </Link>
               </div>
             </div>
@@ -80,7 +87,7 @@ const ProjectPipeline: React.FC = () => {
               <Box variant="awsui-key-label">
                 {t('project:pipeline.region')}
               </Box>
-              <div>us-east-1</div>
+              <div>{pipelineInfo.region}</div>
             </div>
           </SpaceBetween>
         </ColumnLayout>

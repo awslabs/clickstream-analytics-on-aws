@@ -7,20 +7,22 @@ import {
 import { getPipelineByProject } from 'apis/pipeline';
 import { getProjectDetail } from 'apis/project';
 import InfoLink from 'components/common/InfoLink';
+import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import Loading from 'pages/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import NonePipeline from './comp/NonePipeline';
 import ProjectPipeline from './comp/ProjectPipeline';
 
-function Content(props: any) {
+const ProjectDetail: React.FC = () => {
+  const { t } = useTranslation();
+
   const { id } = useParams();
 
   const [loadingData, setLoadingData] = useState(true);
-  const [projectPipeline, setProjectPipeline] = useState<IPipeline[]>([]);
+  const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
   const [projectInfo, setProjectInfo] = useState<IProject>();
 
   const getPipelineByProjectId = async (projectId: string) => {
@@ -30,7 +32,9 @@ function Content(props: any) {
         pid: projectId,
       });
     if (success) {
-      setProjectPipeline(data.items);
+      if (data.items.length > 0) {
+        setProjectPipeline(data.items[0]);
+      }
       setLoadingData(false);
     }
   };
@@ -46,38 +50,6 @@ function Content(props: any) {
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      getPipelineByProjectId(id);
-      getProjectDetailById(id);
-    }
-  }, [id]);
-
-  return (
-    <ContentLayout
-      header={
-        <SpaceBetween size="m">
-          <Header variant="h1" info={<InfoLink />}>
-            {projectInfo?.name}
-          </Header>
-        </SpaceBetween>
-      }
-    >
-      {/* <NonePipeline />
-      <ProjectPipeline /> */}
-      {loadingData ? (
-        <Loading />
-      ) : projectPipeline.length <= 0 ? (
-        <NonePipeline projectId={id?.toString()} />
-      ) : (
-        <ProjectPipeline />
-      )}
-    </ContentLayout>
-  );
-}
-
-const ProjectDetail: React.FC = () => {
-  const { t } = useTranslation();
   const breadcrumbItems = [
     {
       text: t('breadCrumb.name'),
@@ -88,13 +60,41 @@ const ProjectDetail: React.FC = () => {
       href: '/projects',
     },
     {
-      text: 'Project-demo',
+      text: projectInfo?.name || '',
       href: '/',
     },
   ];
+
+  useEffect(() => {
+    if (id) {
+      getPipelineByProjectId(id);
+      getProjectDetailById(id);
+    }
+  }, [id]);
+
   return (
     <AppLayout
-      content={<Content />}
+      content={
+        <ContentLayout
+          header={
+            <SpaceBetween size="m">
+              <Header variant="h1" info={<InfoLink />}>
+                {projectInfo?.name}
+              </Header>
+            </SpaceBetween>
+          }
+        >
+          {/* <NonePipeline />
+        <ProjectPipeline /> */}
+          {loadingData ? (
+            <Loading />
+          ) : !projectPipeline?.projectId ? (
+            <NonePipeline projectId={id?.toString()} />
+          ) : (
+            <ProjectPipeline pipelineInfo={projectPipeline} />
+          )}
+        </ContentLayout>
+      }
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref="/projects" />}

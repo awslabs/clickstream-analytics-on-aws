@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YES_NO, YES_NO_LIST } from 'ts/const';
 
-const SinkKDS: React.FC = () => {
+const BufferKDS: React.FC = () => {
   const { t } = useTranslation();
   const [enableAS, setEnableAS] = useState<any>({
     value: YES_NO.YES,
@@ -54,4 +54,4 @@ const SinkKDS: React.FC = () => {
   );
 };
 
-export default SinkKDS;
+export default BufferKDS;

@@ -61,15 +61,15 @@
     "preferencesModalDarkThemes": "Dark themes"
   },
   "s3": {
-    "inContextInputPlaceholder": "s3://bucket/prefix/object",
+    "inContextInputPlaceholder": "s3://bucket/",
     "inContextSelectPlaceholder": "Choose a version",
     "inContextBrowseButton": "Browse S3",
     "inContextViewButton": "View",
     "inContextViewButtonAriaLabel": "View (opens in a new tab)",
     "inContextLoadingText": "Loading resource",
-    "inContextUriLabel": "In Context Uri Label",
+    "inContextUriLabel": "",
     "inContextVersionSelectLabel": "Object version",
-    "modalTitle": "Choose an archive in S3",
+    "modalTitle": "Choose an Amazon S3 Bucket",
     "modalCancelButton": "Cancel",
     "modalSubmitButton": "Choose",
     "modalBreadcrumbRootItem": "S3 buckets",
@@ -226,5 +226,7 @@
   "steps": "Steps",
   "of": "of",
   "optional": "optional",
-  "noData": "No Data"
+  "noData": "No Data",
+  "remove": "Remove",
+  "use": "Use"
 }

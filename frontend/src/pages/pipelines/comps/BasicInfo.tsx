@@ -7,11 +7,18 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { TIME_FORMAT } from 'ts/const';
 
-const BasicInfo: React.FC = () => {
+interface BasicInfoProps {
+  pipelineInfo?: IPipeline;
+}
+
+const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
+  const { pipelineInfo } = props;
   return (
     <Container
       header={
@@ -24,22 +31,15 @@ const BasicInfo: React.FC = () => {
         <SpaceBetween direction="vertical" size="l">
           <div>
             <Box variant="awsui-key-label">{t('pipeline:name')}</Box>
-            <div>my-first-pipeline</div>
+            <div>{pipelineInfo?.name}</div>
           </div>
           <div>
             <Box variant="awsui-key-label">{t('pipeline:desc')}</Box>
-            <div>
-              A data pipeline to collect and process data for all the games in
-              US region.{' '}
-            </div>
-          </div>
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:creationMethod')}</Box>
-            <div>Pipeline wizard</div>
+            <div>{pipelineInfo?.description}</div>
           </div>
           <div>
             <Box variant="awsui-key-label">{t('pipeline:lastEditDate')}</Box>
-            <div>Nov 26, 2022, 18:00PM UTC +8:00</div>
+            <div>{moment(pipelineInfo?.updateAt).format(TIME_FORMAT)}</div>
           </div>
         </SpaceBetween>
         <div>
@@ -58,24 +58,7 @@ const BasicInfo: React.FC = () => {
                   cell: (item) => item.value || '-',
                 },
               ]}
-              items={[
-                {
-                  key: 'owner',
-                  value: 'luorobin@',
-                },
-                {
-                  key: 'project',
-                  value: 'clickstream',
-                },
-                {
-                  key: 'cost center',
-                  value: '089999',
-                },
-                {
-                  key: 'project-dev',
-                  value: 'clickstream-dev',
-                },
-              ]}
+              items={pipelineInfo?.tags || []}
               sortingDisabled
               empty={''}
             />

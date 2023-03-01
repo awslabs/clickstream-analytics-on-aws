@@ -1,3 +1,7 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+@use "~@cloudscape-design/design-tokens" as cs;
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
@@ -5,6 +9,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: 44px;
+  background: #ffffff;
+  background: var(--color-background-layout-main-sfhm4y, #ffffff);
+  position: relative;
 }
 
 code {
@@ -122,15 +129,6 @@ code {
   }
 }
 
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-@use "~@cloudscape-design/design-tokens" as cs;
-
-body {
-  background: #ffffff;
-  background: var(--color-background-layout-main-sfhm4y, #ffffff);
-  position: relative;
-}
 #h {
   display: block;
   position: fixed;

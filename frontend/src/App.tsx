@@ -33,7 +33,7 @@ const App: React.FC = () => {
                 <Route path="/project/detail/:id" element={<ProjectDetail />} />
                 <Route path="/pipelines" element={<PipelineList />} />
                 <Route
-                  path="/pipeline/detail/:id"
+                  path="/project/:pid/pipeline/:id"
                   element={<PipelineDetail />}
                 />
                 <Route

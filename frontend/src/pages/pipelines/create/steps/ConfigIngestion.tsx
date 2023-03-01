@@ -1,60 +1,145 @@
 import {
   Button,
+  Checkbox,
   ColumnLayout,
   Container,
-  ExpandableSection,
   FormField,
+  Grid,
   Header,
   Input,
   Multiselect,
-  RadioGroup,
   Select,
+  SelectProps,
   SpaceBetween,
   Tiles,
-  Toggle,
 } from '@cloudscape-design/components';
-import React, { useState } from 'react';
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { getHostedZoneList, getSubnetList } from 'apis/resource';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ECS_CLUSTER_SIZE_LIST } from 'ts/const';
-import SinkKDS from './sinks/SinkKDS';
-import SinkMSK from './sinks/SinkMSK';
-import SinkS3 from './sinks/SinkS3';
+import { ProtocalType, SinkType } from 'ts/const';
+import BufferKDS from './buffer/BufferKDS';
+import BufferMSK from './buffer/BufferMSK';
+import BufferS3 from './buffer/BufferS3';
 
-enum DeploymentMode {
-  SERVER_BASE = 'ServerBase',
-  SERVERLESS = 'Serverless',
+interface ConfigIngestionProps {
+  pipelineInfo: IExtPipeline;
+  changePublicSubnets: (subnets: OptionDefinition[]) => void;
+  changePrivateSubnets: (subnets: OptionDefinition[]) => void;
+  changeServerMin: (min: string) => void;
+  changeServerMax: (max: string) => void;
+  changeWarmSize: (size: string) => void;
+  changeEnableEdp: (enable: boolean) => void;
+  changeRecordName: (name: string) => void;
+  changeProtocal: (protocal: string) => void;
+  changeServerEdp: (endpoint: string) => void;
+  changeHostedZone: (zone: SelectProps.Option) => void;
+  changeBufferType: (type: string) => void;
+  changeBufferS3Bucket: (s3: string) => void;
+  changeBufferS3Prefix: (prefix: string) => void;
+  changeS3BufferSize: (size: string) => void;
+  changeBufferInterval: (interval: string) => void;
+
+  publicSubnetError: boolean;
+  privateSubnetError: boolean;
+  domainNameEmptyError: boolean;
+  hostedZoneEmptyError: boolean;
+  bufferS3BucketEmptyError: boolean;
 }
 
-enum SinkType {
-  S3 = 'S3',
-  MSK = 'MSK',
-  KDS = 'KDS',
-}
-
-const ConfigIngestion: React.FC = () => {
+const ConfigIngestion: React.FC<ConfigIngestionProps> = (
+  props: ConfigIngestionProps
+) => {
   const { t } = useTranslation();
-  const [deployMode, setDeployMode] = useState<string>(
-    DeploymentMode.SERVER_BASE
-  );
-  const [isHttps, setIsHttps] = useState(true);
-  const [subnets, setSubnets] = useState<any>([
-    {
-      label: 'subnet-0cc4f589548a658a0',
-      value: 'subnet-0cc4f589548a658a0',
-      description: 'AZL us-east-1a',
-    },
-    {
-      label: 'subnet-0cc4f589548a658ad',
-      value: 'subnet-0cc4f589548a658ad',
-      description: 'AZ: us-east-1f',
-    },
-    {
-      label: 'subnet-0cc4f5812128a658d',
-      value: 'subnet-0cc4f5812128a658d',
-      description: 'AZ: us-east-2a',
-    },
-  ]);
-  const [sinkType, setSinkType] = useState<string>(SinkType.S3);
+  const {
+    pipelineInfo,
+    changePublicSubnets,
+    changePrivateSubnets,
+    changeServerMin,
+    changeServerMax,
+    changeWarmSize,
+    changeEnableEdp,
+    changeRecordName,
+    changeProtocal,
+    changeServerEdp,
+    changeHostedZone,
+    changeBufferType,
+    changeBufferS3Bucket,
+    changeBufferS3Prefix,
+    changeS3BufferSize,
+    changeBufferInterval,
+    publicSubnetError,
+    privateSubnetError,
+    domainNameEmptyError,
+    hostedZoneEmptyError,
+    bufferS3BucketEmptyError,
+  } = props;
+  const [loadingSubnet, setLoadingSubnet] = useState(false);
+  const [loadingHostedZone, setLoadingHostedZone] = useState(false);
+  const [publicSubnetOptionList, setPublicSubnetOptionList] =
+    useState<SelectProps.Options>([]);
+  const [privateSubnetOptionList, setPrivateSubnetOptionList] =
+    useState<SelectProps.Options>([]);
+  const [hostedZoneOptionList, setHostedZoneOptionList] =
+    useState<SelectProps.Options>([]);
+
+  // get subnet list
+  const getSubnetListByRegionAndVPC = async (region: string, vpcId: string) => {
+    setLoadingSubnet(true);
+    const { success, data }: ApiResponse<SubnetResponse[]> =
+      await getSubnetList({
+        region: region,
+        vpcId: vpcId,
+      });
+    if (success) {
+      const publicSubnets = data.filter((element) => element.type === 'public');
+      const privateSubnets = data.filter(
+        (element) => element.type === 'private'
+      );
+      const publicSubnetOptions = publicSubnets.map((element) => ({
+        label: `${element.name}(${element.id})`,
+        value: element.id,
+        description: `${element.availabilityZone}:${element.cidr}`,
+      }));
+      const privateSubnetOptions = privateSubnets.map((element) => ({
+        label: `${element.name}(${element.id})`,
+        value: element.id,
+        description: `${element.availabilityZone}:${element.cidr}`,
+      }));
+      setPublicSubnetOptionList(publicSubnetOptions);
+      setPrivateSubnetOptionList(privateSubnetOptions);
+      setLoadingSubnet(false);
+    }
+  };
+
+  // get hosted zone list
+  const getAllHostedZoneList = async () => {
+    setLoadingHostedZone(true);
+    const { success, data }: ApiResponse<HostedZoneResponse[]> =
+      await getHostedZoneList();
+    if (success) {
+      const hostedZoneOptions: SelectProps.Options = data.map((element) => ({
+        label: element.name,
+        value: element.id,
+      }));
+      setHostedZoneOptionList(hostedZoneOptions);
+      setLoadingHostedZone(false);
+    }
+  };
+
+  useEffect(() => {
+    if (pipelineInfo.selectedRegion && pipelineInfo.selectedVPC) {
+      getSubnetListByRegionAndVPC(
+        pipelineInfo.selectedRegion.value || '',
+        pipelineInfo.selectedVPC.value || ''
+      );
+    }
+  }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
+
+  useEffect(() => {
+    getAllHostedZoneList();
+  }, []);
+
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container
@@ -69,151 +154,182 @@ const ConfigIngestion: React.FC = () => {
       >
         <SpaceBetween direction="vertical" size="l">
           <FormField
+            label="Public Subnets"
+            description="Plase select public subnets"
             stretch
-            label={t('pipeline:create.deployMode')}
-            description={t('pipeline:create.deployModeDesc')}
+            errorText={
+              publicSubnetError ? t('pipeline:valid.publicSubnetEmpty') : ''
+            }
           >
-            <Tiles
-              onChange={({ detail }) => setDeployMode(detail.value)}
-              value={deployMode}
-              items={[
-                {
-                  label: t('pipeline:create.serverBase'),
-                  description: t('pipeline:create.serverBaseDesc'),
-                  value: DeploymentMode.SERVER_BASE,
-                },
-                {
-                  label: t('pipeline:create.serverless'),
-                  description: t('pipeline:create.serverlessDesc'),
-                  value: DeploymentMode.SERVERLESS,
-                },
-              ]}
+            <Multiselect
+              selectedOptions={pipelineInfo.selectedPublicSubnet}
+              tokenLimit={2}
+              deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
+              options={publicSubnetOptionList}
+              placeholder={t('pipeline:create.subnetPlaceholder') || ''}
+              selectedAriaLabel="Selected"
+              statusType={loadingSubnet ? 'loading' : 'finished'}
+              onChange={(e) => {
+                changePublicSubnets(e.detail.selectedOptions as any);
+              }}
             />
           </FormField>
 
           <FormField
-            label={t('pipeline:create.ecsSize')}
-            description={t('pipeline:create.ecsSizeDesc')}
+            label="Private Subnets"
+            description="Plase select private subnets"
+            stretch
+            errorText={
+              privateSubnetError ? t('pipeline:valid.privateSubnetEmpty') : ''
+            }
           >
-            <RadioGroup value={'Medium'} items={ECS_CLUSTER_SIZE_LIST} />
+            <Multiselect
+              selectedOptions={pipelineInfo.selectedPrivateSubnet}
+              tokenLimit={2}
+              deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
+              options={privateSubnetOptionList}
+              placeholder={t('pipeline:create.subnetPlaceholder') || ''}
+              selectedAriaLabel="Selected"
+              statusType={loadingSubnet ? 'loading' : 'finished'}
+              onChange={(e) => {
+                changePrivateSubnets(e.detail.selectedOptions as any);
+              }}
+            />
+          </FormField>
+
+          <FormField
+            label={t('pipeline:create.ingestionCapacity')}
+            description={t('pipeline:create.ingestionCapacityDesc')}
+            stretch
+          >
+            <ColumnLayout columns={3}>
+              <div>
+                <div>{t('pipeline:create.minSize')}</div>
+                <Input
+                  type="number"
+                  value={pipelineInfo.ingestionServer.size.serverMin}
+                  onChange={(e) => {
+                    changeServerMin(e.detail.value);
+                  }}
+                />
+              </div>
+              <div>
+                <div>{t('pipeline:create.maxSize')}</div>
+                <Input
+                  type="number"
+                  value={pipelineInfo.ingestionServer.size.serverMax}
+                  onChange={(e) => {
+                    changeServerMax(e.detail.value);
+                  }}
+                />
+              </div>
+              <div>
+                <div>{t('pipeline:create.warmPool')}</div>
+                <Input
+                  type="number"
+                  value={pipelineInfo.ingestionServer.size.warmPoolSize}
+                  onChange={(e) => {
+                    changeWarmSize(e.detail.value);
+                  }}
+                />
+              </div>
+            </ColumnLayout>
           </FormField>
 
           <FormField>
-            <Toggle
-              onChange={({ detail }) => setIsHttps(detail.checked)}
-              checked={isHttps}
+            <Checkbox
+              onChange={({ detail }) => changeEnableEdp(detail.checked)}
+              checked={pipelineInfo.enableEdp}
+              description={t('pipeline:create.enableEdpDesc')}
             >
-              <b>{t('pipeline:create.enableHttps')}</b>
-            </Toggle>
+              <b>{t('pipeline:create.enableEdp')}</b>
+            </Checkbox>
           </FormField>
 
-          {isHttps && (
-            <>
-              <FormField
-                label={t('pipeline:create.domainName')}
-                description={t('pipeline:create.domainNameDesc')}
-                secondaryControl={<Button iconName="refresh" />}
-              >
-                <ColumnLayout columns={3}>
+          {pipelineInfo.enableEdp && (
+            <Grid
+              gridDefinition={[{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }]}
+            >
+              <div>
+                <FormField
+                  label={t('pipeline:create.domainName')}
+                  errorText={
+                    domainNameEmptyError
+                      ? t('pipeline:valid.domainNameEmpty')
+                      : ''
+                  }
+                >
                   <Input
-                    placeholder={
-                      t('pipeline:create.domainNamePlaceholder') || ''
-                    }
-                    controlId="input-1"
-                    value=""
+                    placeholder="subdomain"
+                    value={pipelineInfo.ingestionServer.domain.recordName}
+                    onChange={(e) => {
+                      changeRecordName(e.detail.value);
+                    }}
                   />
+                </FormField>
+              </div>
+              <div>
+                <FormField
+                  label={t('pipeline:create.hostedZone')}
+                  errorText={
+                    hostedZoneEmptyError
+                      ? t('pipeline:valid.hostedZoneEmpty')
+                      : ''
+                  }
+                >
                   <Select
+                    statusType={loadingHostedZone ? 'loading' : 'finished'}
                     placeholder={
                       t('pipeline:create.domainNameR53Placeholder') || ''
                     }
-                    selectedOption={null}
-                    options={[]}
+                    selectedOption={pipelineInfo.selectedHostedZone}
+                    options={hostedZoneOptionList}
+                    onChange={(e) => {
+                      changeHostedZone(e.detail.selectedOption);
+                    }}
                   />
-                </ColumnLayout>
-              </FormField>
-
-              <FormField
-                label={t('pipeline:create.sslName')}
-                description={t('pipeline:create.sslNameDesc')}
-                secondaryControl={<Button iconName="refresh" />}
+                </FormField>
+              </div>
+              <div
+                style={{
+                  paddingTop: 25,
+                }}
               >
-                <Select
-                  placeholder={t('pipeline:create.chooseCertPlaceholder') || ''}
-                  selectedOption={null}
-                  options={[]}
-                />
-              </FormField>
-
-              <FormField
-                label={t('pipeline:create.requestPath')}
-                description={t('pipeline:create.requestPathDesc')}
-              >
-                <Input
-                  placeholder={t('pipeline:create.requestPlaceholder') || ''}
-                  value=""
-                />
-              </FormField>
-
-              <ExpandableSection header={t('addtionalSettings')}>
-                <SpaceBetween direction="vertical" size="l">
-                  <FormField
-                    label={t('pipeline:create.asName')}
-                    description={t('pipeline:create.asNameDesc')}
-                    stretch
-                  >
-                    <ColumnLayout columns={3}>
-                      <div>
-                        <div>{t('pipeline:create.minSize')}</div>
-                        <Input controlId="input-1" value="2" />
-                      </div>
-                      <div>
-                        <div>{t('pipeline:create.maxSize')}</div>
-                        <Input controlId="input-2" value="4" />
-                      </div>
-                      <div>
-                        <div>{t('pipeline:create.warmPool')}</div>
-                        <Input controlId="input-3" value="2" />
-                      </div>
-                    </ColumnLayout>
-                  </FormField>
-
-                  <FormField
-                    label={t('pipeline:create.subnet')}
-                    description={t('pipeline:create.subnetDesc')}
-                    stretch
-                  >
-                    <Multiselect
-                      selectedOptions={subnets}
-                      onChange={({ detail }) =>
-                        setSubnets(detail.selectedOptions)
-                      }
-                      tokenLimit={2}
-                      deselectAriaLabel={(e) => `Remove ${e.label}`}
-                      options={[
-                        {
-                          label: 'subnet-0cc4f589548a658a0',
-                          value: 'subnet-0cc4f589548a658a0',
-                          description: 'AZL us-east-1a',
-                        },
-                        {
-                          label: 'subnet-0cc4f589548a658ad',
-                          value: 'subnet-0cc4f589548a658ad',
-                          description: 'AZ: us-east-1f',
-                        },
-                        {
-                          label: 'subnet-0cc4f5812128a658d',
-                          value: 'subnet-0cc4f5812128a658d',
-                          description: 'AZ: us-east-2a',
-                        },
-                      ]}
-                      placeholder={t('pipeline:create.subnetPlaceholder') || ''}
-                      selectedAriaLabel="Selected"
-                    />
-                  </FormField>
-                </SpaceBetween>
-              </ExpandableSection>
-            </>
+                <Button iconName="refresh" />
+              </div>
+            </Grid>
           )}
+
+          <FormField>
+            <Checkbox
+              onChange={({ detail }) =>
+                changeProtocal(
+                  detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP
+                )
+              }
+              checked={
+                pipelineInfo.ingestionServer.loadBalancer.protocol ===
+                ProtocalType.HTTPS
+              }
+            >
+              <b>{t('pipeline:create.enableHttps')}</b>
+            </Checkbox>
+          </FormField>
+
+          <FormField
+            label={t('pipeline:create.requestPath')}
+            description={t('pipeline:create.requestPathDesc')}
+          >
+            <Input
+              placeholder={t('pipeline:create.requestPlaceholder') || ''}
+              value={
+                pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath
+              }
+              onChange={(e) => {
+                changeServerEdp(e.detail.value);
+              }}
+            />
+          </FormField>
         </SpaceBetween>
       </Container>
       <Container
@@ -225,37 +341,58 @@ const ConfigIngestion: React.FC = () => {
       >
         <SpaceBetween direction="vertical" size="l">
           <FormField
-            label={t('pipeline:create.sinkType')}
-            description={t('pipeline:create.sinkTypeDesc')}
+            label={t('pipeline:create.bufferType')}
+            description={t('pipeline:create.bufferTypeDesc')}
             stretch
           >
             <Tiles
-              onChange={({ detail }) => setSinkType(detail.value)}
-              value={sinkType}
+              onChange={({ detail }) => changeBufferType(detail.value)}
+              value={pipelineInfo.ingestionServer.sinkType}
               columns={1}
               items={[
                 {
-                  label: t('pipeline:create.sinkS3'),
-                  description: t('pipeline:create.sinkS3Desc'),
+                  label: t('pipeline:create.bufferS3'),
+                  description: t('pipeline:create.bufferS3Desc'),
                   value: SinkType.S3,
                 },
                 {
-                  label: t('pipeline:create.sinkMSK'),
-                  description: t('pipeline:create.sinkMSKDesc'),
+                  label: t('pipeline:create.bufferMSK'),
+                  description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
                 },
                 {
-                  label: t('pipeline:create.sinkKDS'),
-                  description: t('pipeline:create.sinkKDSDesc'),
+                  label: t('pipeline:create.bufferKDS'),
+                  description: t('pipeline:create.bufferKDSDesc'),
                   value: SinkType.KDS,
                 },
               ]}
             />
           </FormField>
 
-          {sinkType === SinkType.S3 && <SinkS3 />}
-          {sinkType === SinkType.MSK && <SinkMSK />}
-          {sinkType === SinkType.KDS && <SinkKDS />}
+          {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
+            <BufferS3
+              pipelineInfo={pipelineInfo}
+              bufferS3BucketEmptyError={bufferS3BucketEmptyError}
+              changeS3Bucket={(bucket) => {
+                changeBufferS3Bucket(bucket);
+              }}
+              changeS3Prefix={(prefix) => {
+                changeBufferS3Prefix(prefix);
+              }}
+              changeS3BufferSize={(size) => {
+                changeS3BufferSize(size);
+              }}
+              changeBufferInterval={(interval) => {
+                changeBufferInterval(interval);
+              }}
+            />
+          )}
+          {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
+            <BufferMSK />
+          )}
+          {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (
+            <BufferKDS />
+          )}
         </SpaceBetween>
       </Container>
     </SpaceBetween>
