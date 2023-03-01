@@ -434,9 +434,7 @@ export class IngestionServerStack extends Stack {
     const allConditions = stackConditionsAndProps.conditions;
     const conditionServerPopsConfig = stackConditionsAndProps.serverPropsConfig;
 
-    let count = 0;
     for (let c of allConditions) {
-      count++;
       const serverPropsCondition = getServerPropsByCondition(
         c.conditions,
         conditionServerPopsConfig,
@@ -458,7 +456,6 @@ export class IngestionServerStack extends Stack {
       this.nestedStacks.push(nestedStack);
     }
 
-    console.log(`IngestionServer Nested Stack count: ${count}, props: ${JSON.stringify(props)}`);
     addCdkNagToStack(this);
   }
 }
