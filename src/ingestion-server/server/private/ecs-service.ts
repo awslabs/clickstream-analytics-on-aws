@@ -129,6 +129,10 @@ export function crateECSService(
 
   Aspects.of(scope).add(new HotfixCapacityProviderDependencies());
 
+  if (props.s3SinkConfig) {
+    props.s3SinkConfig?.s3Bucket.grantReadWrite(taskDefinition.taskRole);
+  }
+
   if (props.kinesisSinkConfig) {
     props.kinesisSinkConfig.kinesisDataStream.grantReadWrite(taskDefinition.taskRole);
   }
@@ -155,6 +159,10 @@ function getVectorEnvs(scope: Construct, props: ECSClusterProps) {
     AWS_REGION: Stack.of(scope).region,
     AWS_MSK_BROKERS: props.kafkaSinkConfig?.kafkaBrokers || '__NOT_SET__',
     AWS_MSK_TOPIC: props.kafkaSinkConfig?.kafkaTopic || '__NOT_SET__',
+    AWS_S3_BUCKET: props.s3SinkConfig?.s3Bucket.bucketName || '__NOT_SET__',
+    AWS_S3_PREFIX: props.s3SinkConfig?.s3Prefix || '__NOT_SET__',
+    S3_BATCH_MAX_BYTES: props.s3SinkConfig?.batchMaxBytes? props.s3SinkConfig?.batchMaxBytes + '' : '__NOT_SET__',
+    S3_BATCH_TIMEOUT_SECS: props.s3SinkConfig?.batchTimeoutSecs? props.s3SinkConfig?.batchTimeoutSecs + '' : '__NOT_SET__',
     AWS_KINESIS_STREAM_NAME: props.kinesisSinkConfig?.kinesisDataStream.streamName || '__NOT_SET__',
     STREAM_ACK_ENABLE: `${streamAckEnable}`,
     WORKER_THREADS_NUM: `${workerThreads}`,

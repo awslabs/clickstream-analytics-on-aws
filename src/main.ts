@@ -123,11 +123,30 @@ stackSuppressions([
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
-new IngestionServerStack(app, 'ingestion-server-stack', {
+new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
   synthesizer: synthesizer(),
+  deliverToKafka: true,
+  deliverToKinesis: false,
+  deliverToS3: false,
 });
 
-new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', {
+
+new IngestionServerStack(app, 'ingestion-server-kinesis-stack', { //To Kinesis
+  synthesizer: synthesizer(),
+  deliverToKafka: false,
+  deliverToKinesis: true,
+  deliverToS3: false,
+});
+
+
+new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
+  synthesizer: synthesizer(),
+  deliverToKafka: false,
+  deliverToKinesis: false,
+  deliverToS3: true,
+});
+
+new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', { // Kafka S3 sink connector
   synthesizer: synthesizer(),
 });
 

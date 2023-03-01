@@ -32,7 +32,7 @@ import { Parameters, SubnetParameterType } from '../../common/parameters';
 
 const domainNamePattern = DOMAIN_NAME_PATTERN;
 
-export function createStackParameters(scope: Construct) {
+export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
   // CfnParameter
   const netWorkProps = Parameters.createNetworkParameters(scope, true, SubnetParameterType.String);
   const domainProps = Parameters.createDomainParameters(scope);
@@ -99,18 +99,6 @@ export function createStackParameters(scope: Construct) {
     },
   );
 
-  const sinkToKafkaParam = new CfnParameter(scope, 'SinkToKafka', {
-    description: 'Sink to kafka',
-    type: 'String',
-    allowedValues: ['Yes', 'No'],
-    default: 'Yes',
-  });
-
-  const kafkaBrokersParam = Parameters.createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
-  const kafkaTopicParam = Parameters.createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
-  const mskClusterNameParam = Parameters.createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
-  const mskSecurityGroupIdParam = Parameters.createMskSecurityGroupIdParameter(scope, 'MskSecurityGroupId', true, { default: '' });
-
   const serverMinParam = new CfnParameter(scope, 'ServerMin', {
     description: 'Server size min number',
     type: 'Number',
@@ -144,98 +132,6 @@ export function createStackParameters(scope: Construct) {
     },
   );
 
-  const sinkToKinesisParam = new CfnParameter(scope, 'SinkToKinesis', {
-    description: 'Sink to Kinesis Data Stream',
-    type: 'String',
-    allowedValues: ['Yes', 'No'],
-    default: 'No',
-  });
-
-  const kinesisDataS3BucketParam = Parameters.createS3BucketParameter(scope, 'KinesisDataS3Bucket', {
-    description: 'S3 bucket name to save data from Kinesis Data Stream',
-  });
-
-  const kinesisDataS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'KinesisDataS3Prefix', {
-    description: 'S3 object prefix to save data from Kinesis Data Stream',
-    default: 'kinesis-data',
-  });
-
-  const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {
-    description: 'Kinesis Data Stream mode',
-    type: 'String',
-    allowedValues: ['ON_DEMAND', 'PROVISIONED'],
-    default: 'ON_DEMAND',
-  });
-
-  const kinesisShardCountParam = new CfnParameter(scope, 'KinesisShardCount', {
-    description:
-      'Number of Kinesis Data Stream shards, only apply for Provisioned mode',
-    type: 'Number',
-    default: '3',
-    minValue: 1,
-  });
-
-  const kinesisDataRetentionHoursParam = new CfnParameter(
-    scope,
-    'KinesisDataRetentionHours',
-    {
-      description: 'Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)',
-      type: 'Number',
-      default: '24',
-      minValue: 24,
-      maxValue: 8760,
-    },
-  );
-
-  const kinesisBatchSizeParam = new CfnParameter(
-    scope,
-    'KinesisBatchSize',
-    {
-      description: 'Batch size for Lambda function to read data from Kinesis Data Stream',
-      type: 'Number',
-      default: '10000',
-      minValue: 1,
-      maxValue: 10000,
-    },
-  );
-
-  const kinesisMaxBatchingWindowSecondsParam = new CfnParameter(
-    scope,
-    'KinesisMaxBatchingWindowSeconds',
-    {
-      description: 'Max batching window in seconds for Lambda function to read data from Kinesis Data Stream',
-      type: 'Number',
-      default: '300',
-      minValue: 0,
-      maxValue: 300,
-    },
-  );
-
-
-  // CfnRule
-
-  new CfnRule(scope, 'sinkToKafkaAndKafkaBrokersAndKafkaTopic', {
-    assertions: [
-      {
-        assert: Fn.conditionOr(
-          Fn.conditionAnd(
-            Fn.conditionEquals(sinkToKafkaParam.valueAsString, 'Yes'),
-            Fn.conditionNot(
-              Fn.conditionEquals(kafkaTopicParam.valueAsString, ''),
-            ),
-            Fn.conditionNot(
-              Fn.conditionEquals(kafkaBrokersParam.valueAsString, ''),
-            ),
-          ),
-
-          Fn.conditionEquals(sinkToKafkaParam.valueAsString, 'No'),
-        ),
-        assertDescription:
-          'kafkaTopic and kafkaBrokers cannot be empty when sinkToKafka=true',
-      },
-    ],
-  });
-
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
       {
@@ -248,6 +144,10 @@ export function createStackParameters(scope: Construct) {
             Fn.conditionNot(
               Fn.conditionEquals(logS3BucketParam.valueAsString, ''),
             ),
+
+            Fn.conditionNot(
+              Fn.conditionEquals(logS3PrefixParam.valueAsString, ''),
+            ),
           ),
           Fn.conditionEquals(
             enableApplicationLoadBalancerAccessLogParam.valueAsString,
@@ -255,39 +155,298 @@ export function createStackParameters(scope: Construct) {
           ),
         ),
         assertDescription:
-          'logS3Bucket cannot be empty when enableApplicationLoadBalancerAccessLog=Yes',
+          'logS3Bucket and logS3Prefix cannot be empty when enableApplicationLoadBalancerAccessLog=Yes',
       },
     ],
   });
 
-  new CfnRule(scope, 'sinkToKinesisRule', {
-    assertions: [
-      {
-        assert: Fn.conditionOr(
-          Fn.conditionAnd(
-            Fn.conditionEquals(
-              sinkToKinesisParam.valueAsString,
-              'Yes',
+  let kafkaKinesisS3ParamsGroup = [];
+  let kafkaKinesisS3ParamsLabels= {};
+
+  // Kafka
+
+  let kafkaParams;
+  if (props.deliverToKafka) {
+    const kafkaBrokersParam = Parameters.createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
+    const kafkaTopicParam = Parameters.createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
+    const mskClusterNameParam = Parameters.createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
+    const mskSecurityGroupIdParam = Parameters.createMskSecurityGroupIdParameter(scope, 'MskSecurityGroupId', true, { default: '' });
+
+    kafkaParams = {
+      kafkaBrokersParam,
+      kafkaTopicParam,
+      mskSecurityGroupIdParam,
+      mskClusterNameParam,
+    },
+
+    kafkaKinesisS3ParamsGroup.push({
+      Label: { default: 'Kafka Cluster' },
+      Parameters: [
+        kafkaBrokersParam.logicalId,
+        kafkaTopicParam.logicalId,
+        mskClusterNameParam.logicalId,
+        mskSecurityGroupIdParam.logicalId,
+      ],
+    }),
+
+    kafkaKinesisS3ParamsLabels = {
+      ... kafkaKinesisS3ParamsLabels,
+      [kafkaBrokersParam.logicalId]: {
+        default: 'Kafka brokers string',
+      },
+
+      [kafkaTopicParam.logicalId]: {
+        default: 'Kafka topic',
+      },
+
+      [mskSecurityGroupIdParam.logicalId]: {
+        default: 'Amazon managed streaming for apache kafka (Amazon MSK) security group id',
+      },
+
+      [mskClusterNameParam.logicalId]: {
+        default: 'Amazon managed streaming for apache kafka (Amazon MSK) cluster name',
+      },
+    };
+
+    new CfnRule(scope, 'sinkToKafkaAndKafkaBrokersAndKafkaTopic', {
+      assertions: [
+        {
+          assert: Fn.conditionAnd(
+            Fn.conditionNot(
+              Fn.conditionEquals(kafkaTopicParam.valueAsString, ''),
             ),
+            Fn.conditionNot(
+              Fn.conditionEquals(kafkaBrokersParam.valueAsString, ''),
+            ),
+          ),
+          assertDescription:
+          'kafkaTopic and kafkaBrokers cannot be empty',
+        },
+      ],
+    });
+
+  }
+
+  // S3
+  let s3Params;
+  if (props.deliverToS3) {
+
+    const s3DataBucketParam = new CfnParameter(scope, 'S3DataBucket', {
+      description: 'S3 data bucket name',
+      type: 'String',
+      default: '',
+    });
+
+    const s3DataPrefixParam = Parameters.createS3PrefixParameter(scope, 'S3DataPrefix', {
+      description: 'S3 data object prefix',
+      default: 's3-data',
+    });
+
+
+    const s3BatchMaxBytesParam = new CfnParameter(scope, 'S3BatchMaxBytes', {
+      description: 'Batch max bytes',
+      type: 'Number',
+      default: '30000000',
+      maxValue: 50000000,
+      minValue: 1000000,
+    });
+
+    const s3BatchTimeoutParam = new CfnParameter(scope, 'S3BatchTimeout', {
+      description: 'Batch timeout seconds',
+      type: 'Number',
+      default: '300',
+      minValue: 30,
+    });
+    s3Params = {
+      s3DataBucketParam,
+      s3DataPrefixParam,
+      s3BatchMaxBytesParam,
+      s3BatchTimeoutParam,
+    },
+    kafkaKinesisS3ParamsGroup.push( {
+      Label: { default: 'S3 Bucket' },
+      Parameters: [
+        s3DataBucketParam.logicalId,
+        s3DataPrefixParam.logicalId,
+        s3BatchMaxBytesParam.logicalId,
+        s3BatchTimeoutParam.logicalId,
+      ],
+    }),
+
+    kafkaKinesisS3ParamsLabels = {
+      ... kafkaKinesisS3ParamsLabels,
+      [s3DataBucketParam.logicalId]: {
+        default: 'S3 bucket name',
+      },
+
+      [s3DataPrefixParam.logicalId]: {
+        default: 'S3 object prefix',
+      },
+
+      [s3BatchMaxBytesParam.logicalId]: {
+        default: 'Batch max bytes',
+      },
+
+      [s3BatchTimeoutParam.logicalId]: {
+        default: 'Batch timeout seconds',
+      },
+
+    },
+
+    new CfnRule(scope, 'sinkToS3Rule', {
+      assertions: [
+        {
+          assert:
+            Fn.conditionAnd(
+              Fn.conditionNot(
+                Fn.conditionEquals(s3DataBucketParam.valueAsString, ''),
+              ),
+              Fn.conditionNot(
+                Fn.conditionEquals(s3DataPrefixParam.valueAsString, ''),
+              ),
+            ),
+          assertDescription:
+            's3DataBucket and s3DataPrefix cannot be empty when sinkToS3Param=Yes',
+        },
+      ],
+    });
+  }
+
+  // Kinesis
+  let kinesisParams;
+  if (props.deliverToKinesis) {
+
+    const kinesisDataS3BucketParam = Parameters.createS3BucketParameter(scope, 'KinesisDataS3Bucket', {
+      description: 'S3 bucket name to save data from Kinesis Data Stream',
+    });
+
+    const kinesisDataS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'KinesisDataS3Prefix', {
+      description: 'S3 object prefix to save data from Kinesis Data Stream',
+      default: 'kinesis-data',
+    });
+
+    const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {
+      description: 'Kinesis Data Stream mode',
+      type: 'String',
+      allowedValues: ['ON_DEMAND', 'PROVISIONED'],
+      default: 'ON_DEMAND',
+    });
+
+    const kinesisShardCountParam = new CfnParameter(scope, 'KinesisShardCount', {
+      description:
+      'Number of Kinesis Data Stream shards, only apply for Provisioned mode',
+      type: 'Number',
+      default: '3',
+      minValue: 1,
+    });
+
+    const kinesisDataRetentionHoursParam = new CfnParameter(
+      scope,
+      'KinesisDataRetentionHours',
+      {
+        description: 'Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)',
+        type: 'Number',
+        default: '24',
+        minValue: 24,
+        maxValue: 8760,
+      },
+    );
+
+    const kinesisBatchSizeParam = new CfnParameter(
+      scope,
+      'KinesisBatchSize',
+      {
+        description: 'Batch size for Lambda function to read data from Kinesis Data Stream',
+        type: 'Number',
+        default: '10000',
+        minValue: 1,
+        maxValue: 10000,
+      },
+    );
+
+    const kinesisMaxBatchingWindowSecondsParam = new CfnParameter(
+      scope,
+      'KinesisMaxBatchingWindowSeconds',
+      {
+        description: 'Max batching window in seconds for Lambda function to read data from Kinesis Data Stream',
+        type: 'Number',
+        default: '300',
+        minValue: 0,
+        maxValue: 300,
+      },
+    );
+    kinesisParams = {
+      kinesisDataS3BucketParam,
+      kinesisDataS3PrefixParam,
+      kinesisStreamModeParam,
+      kinesisShardCountParam,
+      kinesisDataRetentionHoursParam,
+      kinesisBatchSizeParam,
+      kinesisMaxBatchingWindowSecondsParam,
+    },
+
+    kafkaKinesisS3ParamsGroup.push({
+      Label: { default: 'Kinesis Data Stream' },
+      Parameters: [
+        kinesisDataS3BucketParam.logicalId,,
+        kinesisDataS3PrefixParam.logicalId,,
+        kinesisStreamModeParam.logicalId,,
+        kinesisShardCountParam.logicalId,,
+        kinesisDataRetentionHoursParam.logicalId,,
+        kinesisBatchSizeParam.logicalId,,
+        kinesisMaxBatchingWindowSecondsParam.logicalId,
+      ],
+    }),
+
+    kafkaKinesisS3ParamsLabels = {
+      ... kafkaKinesisS3ParamsLabels,
+      [ kinesisDataS3BucketParam.logicalId]: {
+        default: 'Data S3 bucket',
+      },
+
+      [ kinesisDataS3PrefixParam.logicalId]: {
+        default: 'Data S3 object prefix',
+      },
+
+      [ kinesisStreamModeParam.logicalId]: {
+        default: 'Stream mode',
+      },
+
+      [ kinesisShardCountParam.logicalId]: {
+        default: 'Shards number',
+      },
+
+      [ kinesisDataRetentionHoursParam.logicalId]: {
+        default: 'Data retention hours',
+      },
+
+      [ kinesisBatchSizeParam.logicalId]: {
+        default: 'Batch size for Lambda function',
+      },
+
+      [ kinesisMaxBatchingWindowSecondsParam.logicalId]: {
+        default: 'Max batching window for Lambda function',
+      },
+    };
+
+    new CfnRule(scope, 'sinkToKinesisRule', {
+      assertions: [
+        {
+          assert:
+          Fn.conditionAnd(
             Fn.conditionNot(
               Fn.conditionEquals(kinesisDataS3BucketParam.valueAsString, ''),
             ),
-
             Fn.conditionNot(
               Fn.conditionEquals(kinesisDataS3PrefixParam.valueAsString, ''),
             ),
-
           ),
-          Fn.conditionEquals(
-            sinkToKinesisParam.valueAsString,
-            'No',
-          ),
-        ),
-        assertDescription:
+          assertDescription:
           'kinesisDataS3Bucket and kinesisDataS3Prefix cannot be empty when sinkToKinesis=Yes',
-      },
-    ],
-  });
+        },
+      ],
+    });
+  }
 
 
   const metadata = {
@@ -324,32 +483,7 @@ export function createStackParameters(scope: Construct) {
             notificationsTopicArnParam.logicalId,
           ],
         },
-
-        {
-          Label: { default: 'Kafka Cluster' },
-          Parameters: [
-            sinkToKafkaParam.logicalId,
-            kafkaBrokersParam.logicalId,
-            kafkaTopicParam.logicalId,
-            mskClusterNameParam.logicalId,
-            mskSecurityGroupIdParam.logicalId,
-          ],
-        },
-
-        {
-          Label: { default: 'Kinesis Data Stream' },
-          Parameters: [
-            sinkToKinesisParam.logicalId,
-            kinesisDataS3BucketParam.logicalId,,
-            kinesisDataS3PrefixParam.logicalId,,
-            kinesisStreamModeParam.logicalId,,
-            kinesisShardCountParam.logicalId,,
-            kinesisDataRetentionHoursParam.logicalId,,
-            kinesisBatchSizeParam.logicalId,,
-            kinesisMaxBatchingWindowSecondsParam.logicalId,
-          ],
-        },
-
+        ... kafkaKinesisS3ParamsGroup,
         {
           Label: { default: 'Logs' },
           Parameters: [
@@ -360,7 +494,6 @@ export function createStackParameters(scope: Construct) {
           ],
         },
       ],
-
       ParameterLabels: {
         [netWorkProps.vpcId.logicalId]: {
           default: PARAMETER_LABEL_VPCID,
@@ -414,26 +547,6 @@ export function createStackParameters(scope: Construct) {
           default: 'AutoScaling group notifications SNS topic arn',
         },
 
-        [sinkToKafkaParam.logicalId]: {
-          default: 'Sink to kafka',
-        },
-
-        [kafkaBrokersParam.logicalId]: {
-          default: 'Kafka brokers string',
-        },
-
-        [kafkaTopicParam.logicalId]: {
-          default: 'Kafka topic',
-        },
-
-        [mskSecurityGroupIdParam.logicalId]: {
-          default: 'Amazon managed streaming for apache kafka (Amazon MSK) security group id',
-        },
-
-        [mskClusterNameParam.logicalId]: {
-          default: 'Amazon managed streaming for apache kafka (Amazon MSK) cluster name',
-        },
-
         [serverMinParam.logicalId]: {
           default: 'Server size min number',
         },
@@ -449,38 +562,8 @@ export function createStackParameters(scope: Construct) {
         [scaleOnCpuUtilizationPercentParam.logicalId]: {
           default: 'Autoscaling on CPU utilization percent',
         },
+        ... kafkaKinesisS3ParamsLabels,
 
-        [ sinkToKinesisParam.logicalId]: {
-          default: 'Sink to Kinesis',
-        },
-
-        [ kinesisDataS3BucketParam.logicalId]: {
-          default: 'Data S3 bucket',
-        },
-
-        [ kinesisDataS3PrefixParam.logicalId]: {
-          default: 'Data S3 object prefix',
-        },
-
-        [ kinesisStreamModeParam.logicalId]: {
-          default: 'Stream mode',
-        },
-
-        [ kinesisShardCountParam.logicalId]: {
-          default: 'Shards number',
-        },
-
-        [ kinesisDataRetentionHoursParam.logicalId]: {
-          default: 'Data retention hours',
-        },
-
-        [ kinesisBatchSizeParam.logicalId]: {
-          default: 'Batch size for Lambda function',
-        },
-
-        [ kinesisMaxBatchingWindowSecondsParam.logicalId]: {
-          default: 'Max batching window for Lambda function',
-        },
       },
     },
   };
@@ -500,24 +583,14 @@ export function createStackParameters(scope: Construct) {
       logS3BucketParam,
       logS3PrefixParam,
       notificationsTopicArnParam,
-      sinkToKafkaParam,
-      kafkaBrokersParam,
-      kafkaTopicParam,
-      mskSecurityGroupIdParam,
-      mskClusterNameParam,
       domainPrefixParam: domainProps.recordName,
       serverMinParam,
       serverMaxParam,
       warmPoolSizeParam,
       scaleOnCpuUtilizationPercentParam,
-      sinkToKinesisParam,
-      kinesisDataS3BucketParam,
-      kinesisDataS3PrefixParam,
-      kinesisStreamModeParam,
-      kinesisShardCountParam,
-      kinesisDataRetentionHoursParam,
-      kinesisBatchSizeParam,
-      kinesisMaxBatchingWindowSecondsParam,
+      kafkaParams,
+      s3Params,
+      kinesisParams,
     },
   };
 }

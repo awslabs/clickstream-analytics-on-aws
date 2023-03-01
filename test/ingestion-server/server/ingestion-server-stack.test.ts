@@ -32,249 +32,269 @@ function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
 }
 
-function getParameterNamesFromParameterObject(paramObj: any) : string[] {
+function getParameterNamesFromParameterObject(paramObj: any): string[] {
   const allParams: string[] = [];
-  for ( const k of Object.keys(paramObj) ) {
-    allParams.push( paramObj[k].Ref );
+  for (const k of Object.keys(paramObj)) {
+    allParams.push(paramObj[k].Ref);
   }
   return allParams;
 }
 
 const app = new App();
-const stack = new IngestionServerStack(app, 'test-stack');
-const template = Template.fromStack(stack);
+
+const kafkaStack = new IngestionServerStack(app, 'test-kafka-stack', {
+  deliverToKafka: true,
+  deliverToKinesis: false,
+  deliverToS3: false,
+});
+
+const kinesisStack = new IngestionServerStack(app, 'test-kinesis-stack', {
+  deliverToKafka: false,
+  deliverToKinesis: true,
+  deliverToS3: false,
+});
+
+const s3Stack = new IngestionServerStack(app, 'test-s3-stack', {
+  deliverToKafka: false,
+  deliverToKinesis: false,
+  deliverToS3: true,
+});
+
+const kafkaTemplate = Template.fromStack(kafkaStack);
+const kinesisTemplate = Template.fromStack(kinesisStack);
+const s3Template = Template.fromStack(s3Stack);
+
+const templates = [kafkaTemplate, kinesisTemplate, s3Template];
 
 test('Has Parameter VpcId', () => {
-  template.hasParameter('VpcId', {
-    Type: 'AWS::EC2::VPC::Id',
-  });
+  templates.forEach((template) =>
+    template.hasParameter('VpcId', {
+      Type: 'AWS::EC2::VPC::Id',
+    }),
+  );
 });
 
 test('Has Parameter PublicSubnetIds', () => {
-  template.hasParameter('PublicSubnetIds', {
-    Type: 'String',
-  });
+  templates.forEach((template) =>
+    template.hasParameter('PublicSubnetIds', {
+      Type: 'String',
+    }),
+  );
 });
 
 test('PublicSubnetIds pattern', () => {
-  const param = getParameter(template, 'PublicSubnetIds');
-  const pattern = param.AllowedPattern;
-  const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    'subnet-a1234,subnet-b1234',
-    'subnet-fffff1,subnet-fffff2,subnet-fffff3',
-  ];
+  templates.forEach((template) => {
+    const param = getParameter(template, 'PublicSubnetIds');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'subnet-a1234,subnet-b1234',
+      'subnet-fffff1,subnet-fffff2,subnet-fffff3',
+    ];
 
-  for (const v of validValues) {
-    expect(v).toMatch(regex);
-  }
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
 
-  const invalidValues = [
-    'subnet-a1234',
-    'net-a1234,net-b1234',
-    'subnet-g1234,subnet-g1234',
-    'subnet-a1234, subnet-b1234',
-  ];
-  for (const v of invalidValues) {
-    expect(v).not.toMatch(regex);
-  }
-});
-
-
-test('Has Parameter PrivateSubnetIds', () => {
-  template.hasParameter('PrivateSubnetIds', {
-    Type: 'String',
+    const invalidValues = [
+      'subnet-a1234',
+      'net-a1234,net-b1234',
+      'subnet-g1234,subnet-g1234',
+      'subnet-a1234, subnet-b1234',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
   });
 });
 
-
-test('PrivateSubnetIds pattern', () => {
-  const param = getParameter(template, 'PrivateSubnetIds');
-  const pattern = param.AllowedPattern;
-  const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    'subnet-a1234,subnet-b1234',
-    'subnet-fffff1,subnet-fffff2,subnet-fffff3',
-  ];
-
-  for (const v of validValues) {
-    expect(v).toMatch(regex);
-  }
-
-  const invalidValues = [
-    'subnet-a1234',
-    'net-a1234,net-b1234',
-    'subnet-g1234,subnet-g1234',
-    'subnet-a1234, subnet-b1234',
-  ];
-  for (const v of invalidValues) {
-    expect(v).not.toMatch(regex);
-  }
+test('Has Parameter PrivateSubnetIds', () => {
+  templates.forEach((template) => {
+    template.hasParameter('PrivateSubnetIds', {
+      Type: 'String',
+    });
+  });
 });
 
+test('PrivateSubnetIds pattern', () => {
+  templates.forEach((template) => {
+    const param = getParameter(template, 'PrivateSubnetIds');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'subnet-a1234,subnet-b1234',
+      'subnet-fffff1,subnet-fffff2,subnet-fffff3',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'subnet-a1234',
+      'net-a1234,net-b1234',
+      'subnet-g1234,subnet-g1234',
+      'subnet-a1234, subnet-b1234',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+});
 
 test('Has Parameter HostedZoneId', () => {
-  template.hasParameter('HostedZoneId', {
-    Type: 'AWS::Route53::HostedZone::Id',
+  templates.forEach((template) => {
+    template.hasParameter('HostedZoneId', {
+      Type: 'AWS::Route53::HostedZone::Id',
+    });
   });
 });
 
 test('Has Parameter HostedZoneName', () => {
-  template.hasParameter('HostedZoneName', {
-    Type: 'String',
+  templates.forEach((template) => {
+    template.hasParameter('HostedZoneName', {
+      Type: 'String',
+    });
   });
 });
-
 
 test('HostedZoneName pattern', () => {
-  const param = getParameter(template, 'HostedZoneName');
-  const pattern = param.AllowedPattern;
-  const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    'abc.com',
-    'test.abc.com',
-    '123.test.abc.com',
-    'a123#~&%.test-2.a_bc.com',
-  ];
+  templates.forEach((template) => {
+    const param = getParameter(template, 'HostedZoneName');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'abc.com',
+      'test.abc.com',
+      '123.test.abc.com',
+      'a123#~&%.test-2.a_bc.com',
+    ];
 
-  for (const v of validValues) {
-    expect(v).toMatch(regex);
-  }
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
 
-  const invalidValues = [
-    '',
-    'a',
-    'abc.example_test',
-    'abc.c',
-    'abc^.com',
-  ];
-  for (const v of invalidValues) {
-    expect(v).not.toMatch(regex);
-  }
-});
-
-
-test('Has Parameter ServerEndpointPath', () => {
-  template.hasParameter('ServerEndpointPath', {
-    Type: 'String',
-    Default: '/collect',
+    const invalidValues = ['', 'a', 'abc.example_test', 'abc.c', 'abc^.com'];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
   });
 });
 
+test('Has Parameter ServerEndpointPath', () => {
+  templates.forEach((template) => {
+    template.hasParameter('ServerEndpointPath', {
+      Type: 'String',
+      Default: '/collect',
+    });
+  });
+});
 
 test('ServerEndpointPath pattern', () => {
-  const param = getParameter(template, 'ServerEndpointPath');
-  const pattern = param.AllowedPattern;
-  const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    '/a',
-    '/a_b',
-    '/a1',
-    '/123',
-    '/a/ab#',
-    '/a/ab&',
-  ];
+  templates.forEach((template) => {
+    const param = getParameter(template, 'ServerEndpointPath');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = ['/a', '/a_b', '/a1', '/123', '/a/ab#', '/a/ab&'];
 
-  for (const v of validValues) {
-    expect(v).toMatch(regex);
-  }
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
 
-  const invalidValues = [
-    'a/b',
-    '*',
-    'a',
-    'collect',
-  ];
-  for (const v of invalidValues) {
-    expect(v).not.toMatch(regex);
-  }
+    const invalidValues = ['a/b', '*', 'a', 'collect'];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
 });
 
 test('Has Parameter serverCorsOrigin', () => {
-  template.hasParameter('ServerCorsOrigin', {
-    Type: 'String',
-    Default: '*',
+  templates.forEach((template) => {
+    template.hasParameter('ServerCorsOrigin', {
+      Type: 'String',
+      Default: '*',
+    });
   });
 });
 
-
 test('ServerCorsOrigin pattern', () => {
-  const param = getParameter(template, 'ServerCorsOrigin');
-  const pattern = param.AllowedPattern;
-  const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    '*',
-    '*.test.com',
-    'abc.test.com',
-    'abc1.test.com, abc2.test.com, abc3.test.com',
-    'abc1.test.com,abc2.test.com',
-  ];
+  templates.forEach((template) => {
+    const param = getParameter(template, 'ServerCorsOrigin');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      '*',
+      '*.test.com',
+      'abc.test.com',
+      'abc1.test.com, abc2.test.com, abc3.test.com',
+      'abc1.test.com,abc2.test.com',
+    ];
 
-  for (const v of validValues) {
-    expect(v).toMatch(regex);
-  }
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
 
-  const invalidValues = [
-    'a',
-    'abc1.test.com; abc2.test.com',
-  ];
-  for (const v of invalidValues) {
-    expect(v).not.toMatch(regex);
-  }
+    const invalidValues = ['a', 'abc1.test.com; abc2.test.com'];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
 });
 
 test('Has Parameter Protocol', () => {
-  template.hasParameter('Protocol', {
-    Type: 'String',
-    Default: 'HTTP',
+  templates.forEach((template) => {
+    template.hasParameter('Protocol', {
+      Type: 'String',
+      Default: 'HTTP',
+    });
   });
 });
 
 test('Has Parameter EnableApplicationLoadBalancerAccessLog', () => {
-  template.hasParameter('EnableApplicationLoadBalancerAccessLog', {
-    Type: 'String',
-    Default: 'No',
+  templates.forEach((template) => {
+    template.hasParameter('EnableApplicationLoadBalancerAccessLog', {
+      Type: 'String',
+      Default: 'No',
+    });
   });
 });
 
 test('Has Parameter LogS3Bucket', () => {
-  template.hasParameter('LogS3Bucket', {
-    Type: 'String',
-    Default: '',
+  templates.forEach((template) => {
+    template.hasParameter('LogS3Bucket', {
+      Type: 'String',
+      Default: '',
+    });
   });
 });
 
 test('Has Parameter LogS3Prefix', () => {
-  template.hasParameter('LogS3Prefix', {
-    Type: 'String',
-    Default: 'ingestion-server-log',
+  templates.forEach((template) => {
+    template.hasParameter('LogS3Prefix', {
+      Type: 'String',
+      Default: 'ingestion-server-log',
+    });
   });
 });
 
 test('Has Parameter NotificationsTopicArn', () => {
-  template.hasParameter('NotificationsTopicArn', {
-    Type: 'String',
-    Default: '',
-  });
-});
-
-test('Has Parameter SinkToKafka', () => {
-  template.hasParameter('SinkToKafka', {
-    Type: 'String',
-    Default: 'Yes',
+  templates.forEach((template) => {
+    template.hasParameter('NotificationsTopicArn', {
+      Type: 'String',
+      Default: '',
+    });
   });
 });
 
 test('Has Parameter KafkaBrokers', () => {
-  template.hasParameter('KafkaBrokers', {
+  kafkaTemplate.hasParameter('KafkaBrokers', {
     Type: 'String',
     Default: '',
   });
 });
 
-
 test('KafkaBrokers pattern', () => {
-  const param = getParameter(template, 'KafkaBrokers');
+  const param = getParameter(kafkaTemplate, 'KafkaBrokers');
   const pattern = param.AllowedPattern;
   const regex = new RegExp(`${pattern}`);
   const validValues = [
@@ -292,162 +312,138 @@ test('KafkaBrokers pattern', () => {
     expect(v).toMatch(regex);
   }
 
-  const invalidValues = [
-    'a',
-    'b1.test.com:abc',
-  ];
+  const invalidValues = ['a', 'b1.test.com:abc'];
   for (const v of invalidValues) {
     expect(v).not.toMatch(regex);
   }
 });
 
-
 test('Has Parameter KafkaTopic', () => {
-  template.hasParameter('KafkaTopic', {
+  kafkaTemplate.hasParameter('KafkaTopic', {
     Type: 'String',
     Default: '',
   });
 });
 
-
 test('KafkaTopic pattern', () => {
-  const param = getParameter(template, 'KafkaTopic');
+  const param = getParameter(kafkaTemplate, 'KafkaTopic');
   const pattern = param.AllowedPattern;
   const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    'test1',
-    'test-abc.ab_ab',
-    '',
-  ];
+  const validValues = ['test1', 'test-abc.ab_ab', ''];
 
   for (const v of validValues) {
     expect(v).toMatch(regex);
   }
 
-  const invalidValues = [
-    'abc%',
-    'a#',
-    'a,b',
-  ];
+  const invalidValues = ['abc%', 'a#', 'a,b'];
   for (const v of invalidValues) {
     expect(v).not.toMatch(regex);
   }
 });
 
 test('Has Parameter MskSecurityGroupId', () => {
-  template.hasParameter('MskSecurityGroupId', {
+  kafkaTemplate.hasParameter('MskSecurityGroupId', {
     Type: 'String',
     Default: '',
   });
 });
 
-
 test('MskSecurityGroupId pattern', () => {
-  const param = getParameter(template, 'MskSecurityGroupId');
+  const param = getParameter(kafkaTemplate, 'MskSecurityGroupId');
   const pattern = param.AllowedPattern;
   const regex = new RegExp(`${pattern}`);
-  const validValues = [
-    'sg-124434ab',
-    'sg-ffffff',
-    'sg-00000',
-    '',
-  ];
+  const validValues = ['sg-124434ab', 'sg-ffffff', 'sg-00000', ''];
   for (const v of validValues) {
     expect(v).toMatch(regex);
   }
 
-  const invalidValues = [
-    'sg-test1',
-    'abc',
-    'mysg-12323',
-  ];
+  const invalidValues = ['sg-test1', 'abc', 'mysg-12323'];
   for (const v of invalidValues) {
     expect(v).not.toMatch(regex);
   }
 });
 
 test('Has Parameter MskClusterName', () => {
-  template.hasParameter('MskClusterName', {
+  kafkaTemplate.hasParameter('MskClusterName', {
     Type: 'String',
     Default: '',
   });
 });
 
 test('Has Parameter RecordName', () => {
-  template.hasParameter('RecordName', {
-    Type: 'String',
+  templates.forEach((template) => {
+    template.hasParameter('RecordName', {
+      Type: 'String',
+    });
   });
 });
 
 test('Has Parameter ServerMin', () => {
-  template.hasParameter('ServerMin', {
-    Type: 'Number',
-    Default: '2',
+  templates.forEach((template) => {
+    template.hasParameter('ServerMin', {
+      Type: 'Number',
+      Default: '2',
+    });
   });
 });
 
 test('Has Parameter ServerMax', () => {
-  template.hasParameter('ServerMax', {
-    Type: 'Number',
-    Default: '2',
+  templates.forEach((template) => {
+    template.hasParameter('ServerMax', {
+      Type: 'Number',
+      Default: '2',
+    });
   });
 });
 
 test('Has Parameter WarmPoolSize', () => {
-  template.hasParameter('WarmPoolSize', {
-    Type: 'Number',
-    Default: '0',
+  templates.forEach((template) => {
+    template.hasParameter('WarmPoolSize', {
+      Type: 'Number',
+      Default: '0',
+    });
   });
 });
 
 test('Has Parameter ScaleOnCpuUtilizationPercent', () => {
-  template.hasParameter('ScaleOnCpuUtilizationPercent', {
-    Type: 'Number',
-    Default: '50',
-  });
-});
-
-
-test('Has Parameter SinkToKinesis', () => {
-  template.hasParameter('SinkToKinesis', {
-    Type: 'String',
-    Default: 'No',
+  templates.forEach((template) => {
+    template.hasParameter('ScaleOnCpuUtilizationPercent', {
+      Type: 'Number',
+      Default: '50',
+    });
   });
 });
 
 test('Has Parameter KinesisDataS3Bucket', () => {
-  template.hasParameter('KinesisDataS3Bucket', {
+  kinesisTemplate.hasParameter('KinesisDataS3Bucket', {
     Type: 'String',
     Default: '',
   });
 });
 
-
 test('Has Parameter KinesisDataS3Prefix', () => {
-  template.hasParameter('KinesisDataS3Prefix', {
+  kinesisTemplate.hasParameter('KinesisDataS3Prefix', {
     Type: 'String',
     Default: 'kinesis-data',
   });
 });
 
 test('Has Parameter KinesisStreamMode', () => {
-  template.hasParameter('KinesisStreamMode', {
+  kinesisTemplate.hasParameter('KinesisStreamMode', {
     Type: 'String',
     Default: 'ON_DEMAND',
   });
 });
 
-
 test('Has Parameter KinesisShardCount', () => {
-  template.hasParameter('KinesisShardCount', {
+  kinesisTemplate.hasParameter('KinesisShardCount', {
     Type: 'Number',
     Default: '3',
   });
 });
 
-
 test('Has Parameter KinesisDataRetentionHours', () => {
-  template.hasParameter('KinesisDataRetentionHours', {
+  kinesisTemplate.hasParameter('KinesisDataRetentionHours', {
     Type: 'Number',
     Default: '24',
     MinValue: 24,
@@ -455,9 +451,8 @@ test('Has Parameter KinesisDataRetentionHours', () => {
   });
 });
 
-
 test('Has Parameter KinesisBatchSize', () => {
-  template.hasParameter('KinesisBatchSize', {
+  kinesisTemplate.hasParameter('KinesisBatchSize', {
     Type: 'Number',
     Default: '10000',
     MinValue: 1,
@@ -465,9 +460,8 @@ test('Has Parameter KinesisBatchSize', () => {
   });
 });
 
-
 test('Has Parameter KinesisMaxBatchingWindowSeconds', () => {
-  template.hasParameter('KinesisMaxBatchingWindowSeconds', {
+  kinesisTemplate.hasParameter('KinesisMaxBatchingWindowSeconds', {
     Type: 'Number',
     Default: '300',
     MinValue: 0,
@@ -475,11 +469,49 @@ test('Has Parameter KinesisMaxBatchingWindowSeconds', () => {
   });
 });
 
+test('Has Parameter S3DataBucket', () => {
+  s3Template.hasParameter('S3DataBucket', {
+    Type: 'String',
+    Default: '',
+  });
+});
 
-test('Has Nest Stack with all parameters', () => {
+test('Has Parameter S3DataPrefix', () => {
+  s3Template.hasParameter('S3DataPrefix', {
+    Type: 'String',
+    Default: 's3-data',
+  });
+});
+
+test('Has Parameter S3BatchMaxBytes', () => {
+  s3Template.hasParameter('S3BatchMaxBytes', {
+    Type: 'Number',
+    Default: '30000000',
+    MaxValue: 50000000,
+    MinValue: 1000000,
+  });
+});
+
+test('Has Parameter S3BatchTimeout', () => {
+  s3Template.hasParameter('S3BatchTimeout', {
+    Type: 'Number',
+    Default: '300',
+    MinValue: 30,
+  });
+});
+
+test('Has ParameterGroups', () => {
+  templates.forEach((template) => {
+    const cfnInterface =
+      template.toJSON().Metadata['AWS::CloudFormation::Interface'];
+    expect(cfnInterface.ParameterGroups).toBeDefined();
+  });
+});
+
+test('Check parameters for Kafka nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
-    template,
-    'IngestionServerM1211111Condition',
+    kafkaTemplate,
+    'IngestionServerM11C111Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -504,6 +536,81 @@ test('Has Nest Stack with all parameters', () => {
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
   ];
+  const templateParams = Object.keys(nestStack.Properties.Parameters).map(
+    (pk) => {
+      if (nestStack.Properties.Parameters[pk].Ref) {
+        return nestStack.Properties.Parameters[pk].Ref;
+      }
+    },
+  );
+
+  for (const ep of exceptedParams) {
+    expect(templateParams.includes(ep)).toBeTruthy();
+  }
+  expect(templateParams.length).toEqual(exceptedParams.length);
+});
+
+test('Check parameters for Kafka nested stack - has minimum parameters', () => {
+  const nestStack = findResourceByCondition(
+    kafkaTemplate,
+    'IngestionServerM00C000Condition',
+  );
+  expect(nestStack).toBeDefined();
+
+  const exceptedParams = [
+    'ServerMax',
+    'ServerMin',
+    'WarmPoolSize',
+    'PrivateSubnetIds',
+    'ServerEndpointPath',
+    'ServerCorsOrigin',
+    'VpcId',
+    'RecordName',
+    'HostedZoneName',
+    'HostedZoneId',
+    'PublicSubnetIds',
+    'ScaleOnCpuUtilizationPercent',
+    'KafkaBrokers',
+    'KafkaTopic',
+  ];
+
+  const templateParams = Object.keys(nestStack.Properties.Parameters).map(
+    (pk) => {
+      if (nestStack.Properties.Parameters[pk].Ref) {
+        return nestStack.Properties.Parameters[pk].Ref;
+      }
+    },
+  );
+  for (const ep of exceptedParams) {
+    expect(templateParams.includes(ep)).toBeTruthy();
+  }
+  expect(templateParams.length).toEqual(exceptedParams.length);
+});
+
+test('Check parameters for Kinesis nested stack - has all parameters', () => {
+  const nestStack = findResourceByCondition(
+    kinesisTemplate,
+    'IngestionServerK1C111Condition',
+  );
+  expect(nestStack).toBeDefined();
+
+  const exceptedParams = [
+    'ServerMax',
+    'ServerMin',
+    'WarmPoolSize',
+    'NotificationsTopicArn',
+    'PrivateSubnetIds',
+    'ServerEndpointPath',
+    'ServerCorsOrigin',
+    'VpcId',
+    'RecordName',
+    'HostedZoneName',
+    'HostedZoneId',
+    'LogS3Bucket',
+    'LogS3Prefix',
+    'PublicSubnetIds',
+    'ScaleOnCpuUtilizationPercent',
+  ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -516,22 +623,12 @@ test('Has Nest Stack with all parameters', () => {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
   expect(templateParams.length).toEqual(exceptedParams.length + 1);
-
 });
 
-test('Has ParameterGroups', () => {
-  const cfnInterface = template.toJSON().Metadata['AWS::CloudFormation::Interface'];
-  expect(cfnInterface.ParameterGroups).toBeDefined();
-
-  const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-  expect(paramCount).toEqual(30);
-});
-
-
-test('Has Nest Stack with minimum parameters', () => {
+test('Check parameters for Kinesis nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
-    template,
-    'IngestionServerM1000000Condition',
+    kinesisTemplate,
+    'IngestionServerK2C000Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -542,8 +639,6 @@ test('Has Nest Stack with minimum parameters', () => {
     'PrivateSubnetIds',
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'KafkaBrokers',
-    'KafkaTopic',
     'VpcId',
     'RecordName',
     'HostedZoneName',
@@ -554,149 +649,202 @@ test('Has Nest Stack with minimum parameters', () => {
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
-      return nestStack.Properties.Parameters[pk].Ref;
+      if (nestStack.Properties.Parameters[pk].Ref) {
+        return nestStack.Properties.Parameters[pk].Ref;
+      }
     },
   );
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
+  expect(templateParams.length).toEqual(exceptedParams.length + 1);
+});
+
+test('Check parameters for S3 nested stack - has all parameters', () => {
+  const nestStack = findResourceByCondition(
+    s3Template,
+    'IngestionServerC111Condition',
+  );
+  expect(nestStack).toBeDefined();
+  const exceptedParams = [
+    'ServerMax',
+    'ServerMin',
+    'WarmPoolSize',
+    'NotificationsTopicArn',
+    'PrivateSubnetIds',
+    'ServerEndpointPath',
+    'ServerCorsOrigin',
+    'VpcId',
+    'RecordName',
+    'HostedZoneName',
+    'HostedZoneId',
+    'LogS3Bucket',
+    'LogS3Prefix',
+    'PublicSubnetIds',
+    'ScaleOnCpuUtilizationPercent',
+    'S3DataBucket',
+    'S3DataPrefix',
+    'S3BatchMaxBytes',
+    'S3BatchTimeout',
+  ];
+
+  const templateParams = Object.keys(nestStack.Properties.Parameters).map(
+    (pk) => {
+      if (nestStack.Properties.Parameters[pk].Ref) {
+        return nestStack.Properties.Parameters[pk].Ref;
+      }
+    },
+  );
+  for (const ep of exceptedParams) {
+    expect(templateParams.includes(ep)).toBeTruthy();
+  }
+  expect(templateParams.length).toEqual(exceptedParams.length);
+});
+
+test('Check parameters for S3 nested stack - has minimum parameters', () => {
+  const nestStack = findResourceByCondition(
+    s3Template,
+    'IngestionServerC000Condition',
+  );
+  expect(nestStack).toBeDefined();
+  const exceptedParams = [
+    'ServerMax',
+    'ServerMin',
+    'WarmPoolSize',
+    'PrivateSubnetIds',
+    'ServerEndpointPath',
+    'ServerCorsOrigin',
+    'VpcId',
+    'RecordName',
+    'HostedZoneName',
+    'HostedZoneId',
+    'PublicSubnetIds',
+    'ScaleOnCpuUtilizationPercent',
+    'S3DataBucket',
+    'S3DataPrefix',
+    'S3BatchMaxBytes',
+    'S3BatchTimeout',
+  ];
+
+  const templateParams = Object.keys(nestStack.Properties.Parameters).map(
+    (pk) => {
+      if (nestStack.Properties.Parameters[pk].Ref) {
+        return nestStack.Properties.Parameters[pk].Ref;
+      }
+    },
+  );
+  for (const ep of exceptedParams) {
+    expect(templateParams.includes(ep)).toBeTruthy();
+  }
+  expect(templateParams.length).toEqual(exceptedParams.length);
 });
 
 test('Conditions are created as expected', () => {
-  const conditionObj = template.toJSON().Conditions;
-  const allConditions = Object.keys(conditionObj)
-    .filter((ck) => ck.startsWith('IngestionServer'))
-    .map((ck) => {
-      return {
-        cItems: (conditionObj[ck]['Fn::And'] as any[]).map(
-          (it) => it.Condition,
-        ),
-        cKey: ck,
-      };
-    });
+  templates.forEach((template) => {
+    const conditionObj = template.toJSON().Conditions;
+    const allConditions = Object.keys(conditionObj)
+      .filter((ck) => ck.startsWith('IngestionServer'))
+      .map((ck) => {
+        return {
+          cItems: (conditionObj[ck]['Fn::And'] as any[]).map(
+            (it) => it.Condition,
+          ),
+          cKey: ck,
+        };
+      });
 
-  for (const c of allConditions) {
-    const binStr = c.cItems
-      .map(it => {
-        if ((it as string).endsWith('Neg') ) {
-          return 0;
-        } else if ((it as string) === 'onDemandStackCondition') {
-          return 2;
-        } else {
-          return 1;
-        }
-      })
-      .join('');
-
-    expect(c.cKey.indexOf(`${binStr}Condition`) > 0).toBeTruthy();
-  }
-});
-
-test('Has all neg condition', () => {
-  const conditionObj = template.toJSON().Conditions;
-  const conds = (
-    conditionObj.IngestionServerM1000000Condition['Fn::And'] as any[]
-  ).map((c) => c.Condition);
-  const expectedConds = [
-    'sinkToKafkaCondition',
-    'sinkToKinesisConditionNeg',
-    'enableAccessLogConditionNeg',
-    'protocolHttpsConditionNeg',
-    'notificationsTopicArnConditionNeg',
-    'mskSecurityGroupIdConditionNeg',
-    'mskClusterNameConditionNeg',
-  ];
-  expect(conds).toEqual(expectedConds);
-});
-
-test('Has all pos condition provisionedStackCondition', () => {
-  const conditionObj = template.toJSON().Conditions;
-  const conds = (
-    conditionObj.IngestionServerM1111111Condition['Fn::And'] as any[]
-  ).map((c) => c.Condition);
-  const expectedConds = [
-    'sinkToKafkaCondition',
-    'provisionedStackCondition',
-    'enableAccessLogCondition',
-    'protocolHttpsCondition',
-    'notificationsTopicArnCondition',
-    'mskSecurityGroupIdCondition',
-    'mskClusterNameCondition',
-  ];
-  expect(conds).toEqual(expectedConds);
-});
-
-test('Has all pos condition - onDemandStackCondition', () => {
-  const conditionObj = template.toJSON().Conditions;
-  const conds = (
-    conditionObj.IngestionServerM1211111Condition['Fn::And'] as any[]
-  ).map((c) => c.Condition);
-  const expectedConds = [
-    'sinkToKafkaCondition',
-    'onDemandStackCondition',
-    'enableAccessLogCondition',
-    'protocolHttpsCondition',
-    'notificationsTopicArnCondition',
-    'mskSecurityGroupIdCondition',
-    'mskClusterNameCondition',
-  ];
-  expect(conds).toEqual(expectedConds);
+    for (const c of allConditions) {
+      const binStr = c.cItems
+        .map((it) => {
+          if ((it as string) === 'onDemandStackCondition') {
+            return 1;
+          }
+          if ((it as string) === 'provisionedStackCondition') {
+            return 2;
+          }
+          if ((it as string).endsWith('Neg')) {
+            return 0;
+          } else {
+            return 1;
+          }
+        })
+        .join('');
+      // IngestionServerK1C100Condition => 1100
+      const expectedBinStr = c.cKey.replace(new RegExp(/[^\d]/g), '');
+      expect(binStr).toEqual(expectedBinStr);
+    }
+  });
 });
 
 test('Rule logS3BucketAndEnableLogRule', () => {
-  const assert = template.toJSON().Rules.logS3BucketAndEnableLogRule.Assertions[0].Assert;
+  templates.forEach((template) => {
+    const assert =
+      template.toJSON().Rules.logS3BucketAndEnableLogRule.Assertions[0].Assert;
 
-  let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
-  assertStr = assertStr.replace(/Fn::And/g, 'and');
-  assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
-  assertStr = assertStr.replace(/Fn::Not/g, 'not');
+    let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
+    assertStr = assertStr.replace(/Fn::And/g, 'and');
+    assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
+    assertStr = assertStr.replace(/Fn::Not/g, 'not');
 
-  const expectedAssert = {
-    or: [
-      {
-        and: [
-          {
-            eq: [
-              {
-                Ref: 'EnableApplicationLoadBalancerAccessLog',
-              },
-              'Yes',
-            ],
-          },
+    const expectedAssert = {
+      or: [
+        {
+          and: [
+            {
+              eq: [
+                {
+                  Ref: 'EnableApplicationLoadBalancerAccessLog',
+                },
+                'Yes',
+              ],
+            },
 
-          {
-            not: [
-              {
-                eq: [
-                  {
-                    Ref: 'LogS3Bucket',
-                  },
-                  '',
-                ],
-              },
-            ],
-          },
-        ],
-      },
+            {
+              not: [
+                {
+                  eq: [
+                    {
+                      Ref: 'LogS3Bucket',
+                    },
+                    '',
+                  ],
+                },
+              ],
+            },
 
-      {
-        eq: [
-          {
-            Ref: 'EnableApplicationLoadBalancerAccessLog',
-          },
-          'No',
-        ],
-      },
-    ],
-  };
+            {
+              not: [
+                {
+                  eq: [
+                    {
+                      Ref: 'LogS3Prefix',
+                    },
+                    '',
+                  ],
+                },
+              ],
+            },
+          ],
+        },
 
-  expect(JSON.parse(assertStr)).toEqual(expectedAssert);
+        {
+          eq: [
+            {
+              Ref: 'EnableApplicationLoadBalancerAccessLog',
+            },
+            'No',
+          ],
+        },
+      ],
+    };
 
+    expect(JSON.parse(assertStr)).toEqual(expectedAssert);
+  });
 });
-
 
 test('Rule sinkToKinesisRule', () => {
-  const assert = template.toJSON().Rules.sinkToKinesisRule.Assertions[0].Assert;
+  const assert =
+    kinesisTemplate.toJSON().Rules.sinkToKinesisRule.Assertions[0].Assert;
 
   let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
   assertStr = assertStr.replace(/Fn::And/g, 'and');
@@ -704,63 +852,40 @@ test('Rule sinkToKinesisRule', () => {
   assertStr = assertStr.replace(/Fn::Not/g, 'not');
 
   const expectedAssert = {
-    or: [
+    and: [
       {
-        and: [
+        not: [
           {
             eq: [
               {
-                Ref: 'SinkToKinesis',
+                Ref: 'KinesisDataS3Bucket',
               },
-              'Yes',
-            ],
-          },
-
-          {
-            not: [
-              {
-                eq: [
-                  {
-                    Ref: 'KinesisDataS3Bucket',
-                  },
-                  '',
-                ],
-              },
-            ],
-          },
-
-          {
-            not: [
-              {
-                eq: [
-                  {
-                    Ref: 'KinesisDataS3Prefix',
-                  },
-                  '',
-                ],
-              },
+              '',
             ],
           },
         ],
       },
 
       {
-        eq: [
+        not: [
           {
-            Ref: 'SinkToKinesis',
+            eq: [
+              {
+                Ref: 'KinesisDataS3Prefix',
+              },
+              '',
+            ],
           },
-          'No',
         ],
       },
     ],
   };
   expect(JSON.parse(assertStr)).toEqual(expectedAssert);
 });
-
 
 test('Parameters of onDemand Kinesis nested stack ', () => {
   const paramCapture = new Capture();
-  template.hasResource('AWS::CloudFormation::Stack', {
+  kinesisTemplate.hasResource('AWS::CloudFormation::Stack', {
     Condition: 'onDemandStackCondition',
     Properties: {
       Parameters: paramCapture,
@@ -769,14 +894,19 @@ test('Parameters of onDemand Kinesis nested stack ', () => {
   const paramObj = paramCapture.asObject();
   const params = getParameterNamesFromParameterObject(paramObj);
   expect(params).toEqual([
-    'KinesisDataRetentionHours', 'VpcId', 'KinesisDataS3Bucket', 'KinesisDataS3Prefix', 'PrivateSubnetIds', 'KinesisBatchSize', 'KinesisMaxBatchingWindowSeconds',
+    'KinesisDataRetentionHours',
+    'VpcId',
+    'KinesisDataS3Bucket',
+    'KinesisDataS3Prefix',
+    'PrivateSubnetIds',
+    'KinesisBatchSize',
+    'KinesisMaxBatchingWindowSeconds',
   ]);
 });
 
-
 test('Parameters of provisioned Kinesis nested stack ', () => {
   const paramCapture = new Capture();
-  template.hasResource('AWS::CloudFormation::Stack', {
+  kinesisTemplate.hasResource('AWS::CloudFormation::Stack', {
     Condition: 'provisionedStackCondition',
     Properties: {
       Parameters: paramCapture,
@@ -785,53 +915,74 @@ test('Parameters of provisioned Kinesis nested stack ', () => {
   const paramObj = paramCapture.asObject();
   const params = getParameterNamesFromParameterObject(paramObj);
   expect(params).toEqual([
-    'KinesisDataRetentionHours', 'KinesisShardCount', 'VpcId', 'KinesisDataS3Bucket', 'KinesisDataS3Prefix', 'PrivateSubnetIds', 'KinesisBatchSize', 'KinesisMaxBatchingWindowSeconds',
+    'KinesisDataRetentionHours',
+    'KinesisShardCount',
+    'VpcId',
+    'KinesisDataS3Bucket',
+    'KinesisDataS3Prefix',
+    'PrivateSubnetIds',
+    'KinesisBatchSize',
+    'KinesisMaxBatchingWindowSeconds',
   ]);
 });
 
-
 test('Environment variables name are as expected for Lambda::Function in kinesis nested stack', () => {
-
-  [Template.fromStack(stack.kinesisNestedStacks.onDemandStack),
-    Template.fromStack(stack.kinesisNestedStacks.provisionedStack)].forEach(
-    t => {
-      t.hasResourceProperties('AWS::Lambda::Function', {
-        Environment: {
-          Variables: {
-            S3_BUCKET: {
-              Ref: Match.anyValue(),
-            },
-            S3_PREFIX: {
-              Ref: Match.anyValue(),
+  expect(kinesisStack.kinesisNestedStacks).toBeDefined();
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResourceProperties('AWS::Lambda::Function', {
+          Environment: {
+            Variables: {
+              S3_BUCKET: {
+                Ref: Match.anyValue(),
+              },
+              S3_PREFIX: {
+                Ref: Match.anyValue(),
+              },
             },
           },
-        },
-
+        });
       });
-    });
+  }
 });
 
-test('Each of kinesis nested templates has EventSourceMapping', ()=> {
-  [Template.fromStack(stack.kinesisNestedStacks.onDemandStack),
-    Template.fromStack(stack.kinesisNestedStacks.provisionedStack)].forEach(
-    t => {
-      t.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
-        BatchSize: {
-          Ref: Match.anyValue(),
-        },
-        Enabled: true,
-        MaximumBatchingWindowInSeconds: {
-          Ref: Match.anyValue(),
-        },
+test('Each of kinesis nested templates has EventSourceMapping', () => {
+  expect(kinesisStack.kinesisNestedStacks).toBeDefined();
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
+          BatchSize: {
+            Ref: Match.anyValue(),
+          },
+          Enabled: true,
+          MaximumBatchingWindowInSeconds: {
+            Ref: Match.anyValue(),
+          },
+        });
       });
-    });
+  }
 });
 
-
-test('Each of kinesis nested templates has Kinesis::Stream', ()=> {
-  [Template.fromStack(stack.kinesisNestedStacks.onDemandStack),
-    Template.fromStack(stack.kinesisNestedStacks.provisionedStack)].forEach( t => {
-    t.resourceCountIs('AWS::Kinesis::Stream', 1);
-  } );
+test('Each of kinesis nested templates has Kinesis::Stream', () => {
+  expect(kinesisStack.kinesisNestedStacks).toBeDefined();
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.resourceCountIs('AWS::Kinesis::Stream', 1);
+      });
+  }
 });
-

@@ -27,6 +27,7 @@ import {
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IStream } from 'aws-cdk-lib/aws-kinesis';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { ITopic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { createCertificate } from './private/acm';
@@ -65,6 +66,14 @@ export interface KafkaSinkConfig {
   readonly mskClusterName?: string;
 }
 
+export interface S3SinkConfig {
+  readonly s3Bucket: IBucket;
+  readonly s3Prefix: string;
+  readonly batchMaxBytes: number;
+  readonly batchTimeoutSecs: number;
+}
+
+
 export interface KinesisSinkConfig {
   readonly kinesisDataStream: IStream;
 }
@@ -100,6 +109,7 @@ export interface IngestionServerProps {
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
   readonly kafkaSinkConfig?: KafkaSinkConfig;
+  readonly s3SinkConfig?: S3SinkConfig;
   readonly kinesisSinkConfig?: KinesisSinkConfig;
   readonly domainZone?: IHostedZone;
   readonly protocol?: ApplicationProtocol;

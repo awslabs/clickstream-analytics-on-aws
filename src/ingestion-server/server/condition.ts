@@ -15,33 +15,22 @@ limitations under the License.
 */
 
 import { CfnCondition, CfnParameter, Fn } from 'aws-cdk-lib';
-import { IStream } from 'aws-cdk-lib/aws-kinesis';
+import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
 
 interface ConditionConfigItem {
   condition: CfnCondition;
-  serverPops: object;
+  serverProps: object;
 }
 
-export function createStackConditions(
+export function createCommonConditions(
   scope: Construct,
-  kinesisStackInfo: {
-    provisionedStackStream: IStream;
-    onDemandStackStream: IStream;
-    provisionedStackCondition: CfnCondition;
-    onDemandStackCondition: CfnCondition;
-  },
   props: {
     enableApplicationLoadBalancerAccessLogParam: CfnParameter;
     logS3BucketParam: CfnParameter;
+    logS3PrefixParam: CfnParameter;
     notificationsTopicArnParam: CfnParameter;
-    mskSecurityGroupIdParam: CfnParameter;
     protocolParam: CfnParameter;
-    sinkToKafkaParam: CfnParameter;
-    kafkaBrokersParam: CfnParameter;
-    kafkaTopicParam: CfnParameter;
-    mskClusterNameParam: CfnParameter;
-    sinkToKinesisParam: CfnParameter;
   },
 ) {
   // ALB enableAccessLogCondition
@@ -67,22 +56,6 @@ export function createStackConditions(
     },
   );
 
-  // mskSecurityGroupIdCondition
-  const mskSecurityGroupIdCondition = new CfnCondition(
-    scope,
-    'mskSecurityGroupIdCondition',
-    {
-      expression: Fn.conditionNot(
-        Fn.conditionEquals(props.mskSecurityGroupIdParam.valueAsString, ''),
-      ),
-    },
-  );
-
-  // sinkToKafkaCondition
-  const sinkToKafkaCondition = new CfnCondition(scope, 'sinkToKafkaCondition', {
-    expression: Fn.conditionEquals(props.sinkToKafkaParam.valueAsString, 'Yes'),
-  });
-
   // protocolHttpsCondition
   const protocolHttpsCondition = new CfnCondition(
     scope,
@@ -95,27 +68,10 @@ export function createStackConditions(
     },
   );
 
-  // mskClusterNameCondition
-  const mskClusterNameCondition = new CfnCondition(
+  const protocolHttpsConditionNeg = createNegCondition(
     scope,
-    'mskClusterNameCondition',
-    {
-      expression: Fn.conditionNot(
-        Fn.conditionEquals(props.mskClusterNameParam.valueAsString, ''),
-      ),
-    },
-  );
-
-  // sinkToKinesisCondition
-  const sinkToKinesisCondition = new CfnCondition(
-    scope,
-    'sinkToKinesisCondition',
-    {
-      expression: Fn.conditionEquals(
-        props.sinkToKinesisParam.valueAsString,
-        'Yes',
-      ),
-    },
+    'protocolHttpsConditionNeg',
+    protocolHttpsCondition,
   );
 
   const enableAccessLogConditionNeg = createNegCondition(
@@ -129,21 +85,99 @@ export function createStackConditions(
     'notificationsTopicArnConditionNeg',
     notificationsTopicArnCondition,
   );
-  const mskSecurityGroupIdConditionNeg = createNegCondition(
+
+  const conditionServerPopsConfig: ConditionConfigItem[] = [
+    {
+      condition: protocolHttpsCondition,
+      serverProps: {
+        protocol: 'HTTPS',
+      },
+    },
+
+    {
+      condition: protocolHttpsConditionNeg,
+      serverProps: {
+        protocol: 'HTTP',
+      },
+    },
+
+    {
+      condition: enableAccessLogCondition,
+      serverProps: {
+        enableApplicationLoadBalancerAccessLog: 'Yes',
+        logBucketName: props.logS3BucketParam.valueAsString,
+        logPrefix: props.logS3PrefixParam.valueAsString,
+      },
+    },
+
+    {
+      condition: enableAccessLogConditionNeg,
+      serverProps: {
+        enableApplicationLoadBalancerAccessLog: 'No',
+        logBucketName: undefined,
+        logPrefix: undefined,
+      },
+    },
+
+    {
+      condition: notificationsTopicArnCondition,
+      serverProps: {
+        notificationsTopicArn: props.notificationsTopicArnParam.valueAsString,
+      },
+    },
+
+    {
+      condition: notificationsTopicArnConditionNeg,
+      serverProps: {
+        notificationsTopicArn: undefined,
+      },
+    },
+  ];
+
+  const conditionBits = [
+    { 1: enableAccessLogCondition, 0: enableAccessLogConditionNeg },
+    { 1: protocolHttpsCondition, 0: protocolHttpsConditionNeg },
+    {
+      1: notificationsTopicArnCondition,
+      0: notificationsTopicArnConditionNeg,
+    },
+  ];
+
+  const commonConditions = genAllConditions('C', conditionBits);
+
+  return {
+    serverPropsConfig: conditionServerPopsConfig,
+    conditions: commonConditions,
+  };
+}
+
+export function createMskConditions(
+  scope: Construct,
+  props: {
+    mskClusterNameParam: CfnParameter;
+    mskSecurityGroupIdParam: CfnParameter;
+    kafkaBrokersParam: CfnParameter;
+    kafkaTopicParam: CfnParameter;
+  },
+) {
+  const mskClusterNameCondition = new CfnCondition(
     scope,
-    'mskSecurityGroupIdConditionNeg',
-    mskSecurityGroupIdCondition,
+    'mskClusterNameCondition',
+    {
+      expression: Fn.conditionNot(
+        Fn.conditionEquals(props.mskClusterNameParam.valueAsString, ''),
+      ),
+    },
   );
 
-  const sinkToKafkaConditionNeg = createNegCondition(
+  const mskSecurityGroupIdCondition = new CfnCondition(
     scope,
-    'sinkToKafkaConditionNeg',
-    sinkToKafkaCondition,
-  );
-  const protocolHttpsConditionNeg = createNegCondition(
-    scope,
-    'protocolHttpsConditionNeg',
-    protocolHttpsCondition,
+    'mskSecurityGroupIdCondition',
+    {
+      expression: Fn.conditionNot(
+        Fn.conditionEquals(props.mskSecurityGroupIdParam.valueAsString, ''),
+      ),
+    },
   );
   const mskClusterNameConditionNeg = createNegCondition(
     scope,
@@ -151,173 +185,129 @@ export function createStackConditions(
     mskClusterNameCondition,
   );
 
-  const sinkToKinesisConditionNeg = createNegCondition(
+  const mskSecurityGroupIdConditionNeg = createNegCondition(
     scope,
-    'sinkToKinesisConditionNeg',
-    sinkToKinesisCondition,
+    'mskSecurityGroupIdConditionNeg',
+    mskSecurityGroupIdCondition,
   );
 
-  const kinesisOnDemandStackCondition = kinesisStackInfo.onDemandStackCondition;
-  const kinesisProvisionedStackCondition =
-    kinesisStackInfo.provisionedStackCondition;
-
-
-  const conditionServerPopsConfig: ConditionConfigItem[] = [
-    {
-      condition: protocolHttpsCondition,
-      serverPops: {
-        protocol: 'HTTPS',
-      },
-    },
-
-    {
-      condition: protocolHttpsConditionNeg,
-      serverPops: {
-        protocol: 'HTTP',
-      },
-    },
-
-    {
-      condition: enableAccessLogCondition,
-      serverPops: {
-        enableApplicationLoadBalancerAccessLog: 'Yes',
-        logBucketName: props.logS3BucketParam.valueAsString,
-      },
-    },
-
-    {
-      condition: enableAccessLogConditionNeg,
-      serverPops: {
-        enableApplicationLoadBalancerAccessLog: 'No',
-        logBucketName: undefined,
-      },
-    },
-
-    {
-      condition: notificationsTopicArnCondition,
-      serverPops: {
-        notificationsTopicArn: props.notificationsTopicArnParam.valueAsString,
-      },
-    },
-
-    {
-      condition: notificationsTopicArnConditionNeg,
-      serverPops: {
-        notificationsTopicArn: undefined,
-      },
-    },
-
+  const mskConditionServerPopsConfig = [
     {
       condition: mskSecurityGroupIdCondition,
-      serverPops: {
-        kafkaSinkConfig: {
-          mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
-        },
+      serverProps: {
+
+        mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
+
       },
     },
 
     {
       condition: mskSecurityGroupIdConditionNeg,
-      serverPops: {
-        kafkaSinkConfig: {
-          mskSecurityGroupId: undefined,
-        },
+      serverProps: {
+
+        mskSecurityGroupId: undefined,
+
       },
     },
 
     {
       condition: mskClusterNameCondition,
-      serverPops: {
-        kafkaSinkConfig: {
-          mskClusterName: props.mskClusterNameParam.valueAsString,
-        },
+      serverProps: {
+
+        mskClusterName: props.mskClusterNameParam.valueAsString,
+
       },
     },
 
     {
       condition: mskClusterNameConditionNeg,
-      serverPops: {
-        kafkaSinkConfig: {
-          mskClusterName: undefined,
-        },
-      },
-    },
+      serverProps: {
 
-    {
-      condition: sinkToKafkaCondition,
-      serverPops: {
-        kafkaSinkConfig: {
-          kafkaBrokers: props.kafkaBrokersParam.valueAsString,
-          kafkaTopic: props.kafkaTopicParam.valueAsString,
-        },
-      },
-    },
+        mskClusterName: undefined,
 
-    {
-      condition: sinkToKafkaConditionNeg,
-      serverPops: {
-        kafkaSinkConfig: undefined,
-      },
-    },
-
-    {
-      condition: kinesisProvisionedStackCondition,
-      serverPops: {
-        kinesisDataStreamArn: kinesisStackInfo.provisionedStackStream.streamArn,
-      },
-    },
-
-    {
-      condition: kinesisOnDemandStackCondition,
-      serverPops: {
-        kinesisDataStreamArn: kinesisStackInfo.onDemandStackStream.streamArn,
-      },
-    },
-
-    {
-      condition: sinkToKinesisConditionNeg,
-      serverPops: {
-        kinesisDataStreamArn: undefined,
       },
     },
   ];
 
   const conditionBits = [
-    { 1: sinkToKafkaCondition, 0: sinkToKafkaConditionNeg },
-    {
-      1: kinesisProvisionedStackCondition,
-      2: kinesisOnDemandStackCondition,
-      0: sinkToKinesisConditionNeg,
-    },
-
-    { 1: enableAccessLogCondition, 0: enableAccessLogConditionNeg },
-
-    { 1: protocolHttpsCondition, 0: protocolHttpsConditionNeg },
-
-    {
-      1: notificationsTopicArnCondition,
-      0: notificationsTopicArnConditionNeg,
-    },
-  ];
-
-  const mskConditionBits = [
-    ...conditionBits,
-    { 1: mskSecurityGroupIdCondition, 0: mskSecurityGroupIdConditionNeg },
     { 1: mskClusterNameCondition, 0: mskClusterNameConditionNeg },
+    { 1: mskSecurityGroupIdCondition, 0: mskSecurityGroupIdConditionNeg },
   ];
 
-  const mskConditions = genAllConditions('M', mskConditionBits).filter(
-    (c) => c.binStr.charAt(0) == '1',
-  );
-  const kinesisConditions = genAllConditions('K', conditionBits).filter(
-    (c) => c.binStr.charAt(0) == '0' && c.binStr.charAt(1) != '0',
-  );
-
-  const allConditions = [...kinesisConditions, ...mskConditions];
+  const mskConditions = genAllConditions('M', conditionBits);
 
   return {
-    conditionServerPopsConfig,
-    allConditions,
+    serverPropsConfig: mskConditionServerPopsConfig,
+    conditions: mskConditions,
+  };
+}
+
+export function createKinesisConditions(props: {
+  provisionedStackStream: Stream;
+  onDemandStackStream: Stream;
+  provisionedStackCondition: CfnCondition;
+  onDemandStackCondition: CfnCondition;
+}) {
+  const kinesisConditionServerPopsConfig = [
+    {
+      condition: props.onDemandStackCondition,
+      serverProps: {
+        kinesisDataStreamArn: props.onDemandStackStream.streamArn,
+      },
+    },
+
+    {
+      condition: props.provisionedStackCondition,
+      serverProps: {
+        kinesisDataStreamArn: props.provisionedStackStream.streamArn,
+      },
+    },
+  ];
+
+  const kinesisConditions: GenAllConditionsRetValueItem[] = [
+    {
+      conditions: [props.onDemandStackCondition],
+      binStr: '1',
+      name: 'K1',
+    },
+    {
+      conditions: [props.provisionedStackCondition],
+      binStr: '2',
+      name: 'K2',
+    },
+  ];
+  return {
+    serverPropsConfig: kinesisConditionServerPopsConfig,
+    conditions: kinesisConditions,
+  };
+}
+
+interface ConditionsAndServerPropsConfig {
+  serverPropsConfig: { condition: CfnCondition; serverProps: any }[];
+  conditions: GenAllConditionsRetValueItem[];
+}
+
+export function mergeConditionsAndServerPropsConfig(
+  specific: ConditionsAndServerPropsConfig,
+  common: ConditionsAndServerPropsConfig,
+): ConditionsAndServerPropsConfig {
+  const serverPropsConfig = [
+    ...specific.serverPropsConfig,
+    ...common.serverPropsConfig,
+  ];
+  const allConditions: GenAllConditionsRetValueItem[] = [];
+  for (const sc of specific.conditions) {
+    for (const cc of common.conditions) {
+      allConditions.push({
+        conditions: [... sc.conditions, ... cc.conditions],
+        binStr: sc.binStr + cc.binStr,
+        name: sc.name + cc.name,
+      });
+    }
+  }
+  return {
+    serverPropsConfig,
+    conditions: allConditions,
   };
 }
 
@@ -328,11 +318,11 @@ export function getServerPropsByCondition(
   let conditionsProps: object = {};
   for (const c of conditions) {
     const cConfig = conditionConfigs.filter((cc) => cc.condition == c)[0];
-    const serverPops = cConfig.serverPops;
-    type ObjectKey = keyof typeof serverPops;
-    for (const k of Object.keys(serverPops)) {
+    const serverProps = cConfig.serverProps;
+    type ObjectKey = keyof typeof serverProps;
+    for (const k of Object.keys(serverProps)) {
       const objK = k as ObjectKey;
-      const objV = serverPops[objK];
+      const objV = serverProps[objK];
       if (typeof objV == 'string') {
         conditionsProps = {
           ...conditionsProps,
@@ -420,7 +410,9 @@ function genAllConditions(
       if (conditions[j][bi]) {
         conditionsForBinStr.push(conditions[j][bi] as CfnCondition);
       } else {
-        throw new Error(`Cannot find condition in the input conditions[${j}][${bi}]`);
+        throw new Error(
+          `Cannot find condition in the input conditions[${j}][${bi}]`,
+        );
       }
     }
     retConditions.push({

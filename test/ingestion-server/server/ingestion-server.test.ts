@@ -668,6 +668,25 @@ test('Dependencies for ECS::ClusterCapacityProviderAssociations are set correctl
 });
 
 
+test('Sink to S3 container - vector environments', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', { withS3SinkConfig: true });
+
+  const template = Template.fromStack(stack);
+  const taskDefinition = findFirstResource(
+    template,
+    'AWS::ECS::TaskDefinition',
+  )?.resource;
+  const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
+  const vector = containerDefinitions.filter((c: any) => c.Name == 'worker')[0];
+
+  const bucketValue = vector.Environment.filter((e: any) => e.Name == 'AWS_S3_BUCKET')[0].Value;
+  expect(bucketValue).not.toEqual('__NOT_SET__');
+  const prefixValue = vector.Environment.filter((e: any) => e.Name == 'AWS_S3_PREFIX')[0].Value;
+  expect(prefixValue).toEqual('test-s3-data');
+
+});
+
 test('Sink to Kinesis container - vector environments', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -680,18 +699,17 @@ test('Sink to Kinesis container - vector environments', () => {
   )?.resource;
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const vector = containerDefinitions.filter((c: any) => c.Name == 'worker')[0];
-
   const streamValue = vector.Environment.filter((e: any) => e.Name == 'AWS_KINESIS_STREAM_NAME')[0].Value;
   expect(streamValue).not.toEqual('__NOT_SET__');
 
 });
 
-
-test('Sink both to MSK and Kinesis container - vector environments', () => {
+test('Sink both to MSK and Kinesis and S3 container - vector environments', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
     withKinesisSinkConfig: true,
+    withS3SinkConfig: true,
   });
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
@@ -704,6 +722,11 @@ test('Sink both to MSK and Kinesis container - vector environments', () => {
   const mskBrokersValue = vector.Environment.filter((e: any) => e.Name == 'AWS_MSK_BROKERS')[0].Value;
   expect(mskBrokersValue).not.toEqual('__NOT_SET__');
 
+  const bucketValue = vector.Environment.filter((e: any) => e.Name == 'AWS_S3_BUCKET')[0].Value;
+  expect(bucketValue).not.toEqual('__NOT_SET__');
+
+  const prefixValue = vector.Environment.filter((e: any) => e.Name == 'AWS_S3_PREFIX')[0].Value;
+  expect(prefixValue).toEqual('test-s3-data');
   const streamValue = vector.Environment.filter((e: any) => e.Name == 'AWS_KINESIS_STREAM_NAME')[0].Value;
   expect(streamValue).not.toEqual('__NOT_SET__');
 

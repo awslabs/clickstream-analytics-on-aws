@@ -36,14 +36,15 @@ import { SolutionInfo } from '../../common/solution-info';
 export interface CreateKinesisNestStackProps {
   vpcIdParam: CfnParameter;
   privateSubnetIdsParam: CfnParameter;
-  sinkToKinesisParam: CfnParameter;
-  kinesisDataS3BucketParam: CfnParameter;
-  kinesisDataS3PrefixParam: CfnParameter;
-  kinesisStreamModeParam: CfnParameter;
-  kinesisShardCountParam: CfnParameter;
-  kinesisDataRetentionHoursParam: CfnParameter;
-  kinesisBatchSizeParam: CfnParameter;
-  kinesisMaxBatchingWindowSecondsParam: CfnParameter;
+  kinesisParams: {
+    kinesisDataS3BucketParam: CfnParameter;
+    kinesisDataS3PrefixParam: CfnParameter;
+    kinesisStreamModeParam: CfnParameter;
+    kinesisShardCountParam: CfnParameter;
+    kinesisDataRetentionHoursParam: CfnParameter;
+    kinesisBatchSizeParam: CfnParameter;
+    kinesisMaxBatchingWindowSecondsParam: CfnParameter;
+  };
 }
 
 export function createKinesisNestStack(
@@ -60,19 +61,18 @@ export function createKinesisNestStack(
   const dataS3Bucket = Bucket.fromBucketName(
     scope,
     'from-kinesis-dataS3Bucket',
-    props.kinesisDataS3BucketParam.valueAsString,
+    props.kinesisParams.kinesisDataS3BucketParam.valueAsString,
   );
 
-  const streamModeStr = props.kinesisStreamModeParam.valueAsString;
+  const streamModeStr = props.kinesisParams.kinesisStreamModeParam.valueAsString;
 
   const onDemandStackCondition = new CfnCondition(
     scope,
     'onDemandStackCondition',
     {
-      expression: Fn.conditionAnd(
-        Fn.conditionEquals(props.sinkToKinesisParam.valueAsString, 'Yes'),
+      expression:
         Fn.conditionEquals(streamModeStr, 'ON_DEMAND'),
-      ),
+
     },
   );
 
@@ -80,17 +80,16 @@ export function createKinesisNestStack(
     scope,
     'provisionedStackCondition',
     {
-      expression: Fn.conditionAnd(
-        Fn.conditionEquals(props.sinkToKinesisParam.valueAsString, 'Yes'),
+      expression:
         Fn.conditionEquals(streamModeStr, 'PROVISIONED'),
-      ),
+
     },
   );
 
-  const batchSize = props.kinesisBatchSizeParam.valueAsNumber;
+  const batchSize = props.kinesisParams.kinesisBatchSizeParam.valueAsNumber;
   const maxBatchingWindowSeconds =
-    props.kinesisMaxBatchingWindowSecondsParam.valueAsNumber;
-  const shardCount = props.kinesisShardCountParam.valueAsNumber;
+    props.kinesisParams.kinesisMaxBatchingWindowSecondsParam.valueAsNumber;
+  const shardCount = props.kinesisParams.kinesisShardCountParam.valueAsNumber;
 
   const subnetSelection: SubnetSelection = {
     subnets: [
@@ -102,9 +101,9 @@ export function createKinesisNestStack(
   const p = {
     vpc,
     subnetSelection,
-    dataRetentionHours: props.kinesisDataRetentionHoursParam.valueAsNumber,
+    dataRetentionHours: props.kinesisParams.kinesisDataRetentionHoursParam.valueAsNumber,
     s3DataBucket: dataS3Bucket,
-    s3DataPrefix: props.kinesisDataS3PrefixParam.valueAsString,
+    s3DataPrefix: props.kinesisParams.kinesisDataS3PrefixParam.valueAsString,
     batchSize,
     maxBatchingWindowSeconds,
     startingPosition: StartingPosition.LATEST,

@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 import {
   CfnCondition,
   CfnOutput,
@@ -40,12 +39,20 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { SolutionInfo } from './common/solution-info';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
-import { createStackConditions, getServerPropsByCondition } from './ingestion-server/server/condition';
+import {
+  createCommonConditions,
+  createKinesisConditions,
+  createMskConditions,
+  getServerPropsByCondition,
+  mergeConditionsAndServerPropsConfig,
+} from './ingestion-server/server/condition';
 import {
   FleetProps,
   IngestionServer,
   IngestionServerProps,
+  KafkaSinkConfig,
   KinesisSinkConfig,
+  S3SinkConfig,
 } from './ingestion-server/server/ingestion-server';
 import { createStackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
@@ -90,13 +97,11 @@ export function addCdkNagToStack(stack: Stack) {
 
     {
       id: 'AwsSolutions-SNS2',
-      reason:
-        'The SNS Topic is set by cfnParameter, not created in this stack',
+      reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
     },
     {
       id: 'AwsSolutions-SNS3',
-      reason:
-        'The SNS Topic is set by cfnParameter, not created in this stack',
+      reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
     },
     {
       id: 'AwsSolutions-L1',
@@ -107,12 +112,7 @@ export function addCdkNagToStack(stack: Stack) {
   ]);
 }
 
-interface KafkaSinkConfigPlainText {
-  readonly kafkaBrokers: string;
-  readonly kafkaTopic: string;
-  readonly mskSecurityGroupId?: string;
-  readonly mskClusterName?: string;
-}
+
 interface IngestionServerNestStackProps extends StackProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string;
@@ -125,7 +125,6 @@ interface IngestionServerNestStackProps extends StackProps {
 
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
-  readonly kafkaSinkConfig?: KafkaSinkConfigPlainText;
   readonly hostedZoneId?: string;
   readonly hostedZoneName?: string;
   readonly protocol?: string;
@@ -134,7 +133,22 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly enableApplicationLoadBalancerAccessLog?: string;
   readonly logBucketName?: string;
   readonly logPrefix?: string;
+
+  // Kafka parameters
+  readonly kafkaBrokers?: string;
+  readonly kafkaTopic?: string;
+  readonly mskSecurityGroupId?: string;
+  readonly mskClusterName?: string;
+
+  // Kinesis parameters
   readonly kinesisDataStreamArn?: string;
+
+  // S3 parameters
+  readonly s3BucketName?: string;
+  readonly s3Prefix?: string;
+  readonly batchTimeout?: number;
+  readonly batchMaxBytes?: number;
+
 }
 
 export class IngestionServerNestedStack extends NestedStack {
@@ -186,29 +200,34 @@ export class IngestionServerNestedStack extends NestedStack {
       );
     }
 
-    let mskSecurityGroup;
-    if (props.kafkaSinkConfig?.mskSecurityGroupId) {
-      mskSecurityGroup = SecurityGroup.fromSecurityGroupId(
-        this,
-        'from-mskSecurityGroupId',
-        props.kafkaSinkConfig?.mskSecurityGroupId,
-      );
-    }
 
-    let kafkaSinkConfig;
-    if (props.kafkaSinkConfig) {
+    let kafkaSinkConfig: KafkaSinkConfig | undefined;
+    if (props.kafkaBrokers && props.kafkaTopic) {
+      let mskSecurityGroup;
+      if (props.mskSecurityGroupId) {
+        mskSecurityGroup = SecurityGroup.fromSecurityGroupId(
+          this,
+          'from-mskSecurityGroupId',
+          props.mskSecurityGroupId,
+        );
+      }
+
       kafkaSinkConfig = {
-        kafkaBrokers: props.kafkaSinkConfig?.kafkaBrokers,
-        kafkaTopic: props.kafkaSinkConfig?.kafkaTopic,
-        mskClusterName: props.kafkaSinkConfig?.mskClusterName,
+        kafkaBrokers: props.kafkaBrokers,
+        kafkaTopic: props.kafkaTopic,
+        mskClusterName: props.mskClusterName,
         mskSecurityGroup,
       };
     }
 
-    let kinesisSinkConfig: KinesisSinkConfig | undefined;
+    let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
     if (props.kinesisDataStreamArn) {
       kinesisSinkConfig = {
-        kinesisDataStream: Stream.fromStreamArn(this, 'from-kinesis-arn', props.kinesisDataStreamArn),
+        kinesisDataStream: Stream.fromStreamArn(
+          this,
+          'from-kinesis-arn',
+          props.kinesisDataStreamArn,
+        ),
       };
     }
 
@@ -217,9 +236,28 @@ export class IngestionServerNestedStack extends NestedStack {
       protocol = ApplicationProtocol.HTTPS;
     }
 
-    let enableApplicationLoadBalancerAccessLog = false;
+    let loadBalancerLogProps;
     if (props.enableApplicationLoadBalancerAccessLog == 'Yes') {
-      enableApplicationLoadBalancerAccessLog = true;
+      loadBalancerLogProps = {
+        enableAccessLog: true,
+        bucket: logBucket,
+        prefix: props.logPrefix,
+      };
+    }
+
+    let s3SinkConfig: S3SinkConfig | undefined = undefined;
+    if (props.s3BucketName && props.s3Prefix && props.batchMaxBytes && props.batchTimeout) {
+      const s3Bucket = Bucket.fromBucketName(
+        this,
+        'from-s3Bucket',
+        props.s3BucketName,
+      );
+      s3SinkConfig = {
+        s3Bucket,
+        s3Prefix: props.s3Prefix,
+        batchMaxBytes: props.batchMaxBytes,
+        batchTimeoutSecs: props.batchTimeout,
+      };
     }
 
     const fleetCommonProps = {
@@ -253,16 +291,13 @@ export class IngestionServerNestedStack extends NestedStack {
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
-      loadBalancerLogProps: {
-        enableAccessLog: enableApplicationLoadBalancerAccessLog,
-        bucket: logBucket,
-        prefix: props.logPrefix,
-      },
+      loadBalancerLogProps,
       domainPrefix: props.domainPrefix,
       protocol,
       domainZone,
       notificationsTopic,
       kafkaSinkConfig,
+      s3SinkConfig,
       kinesisSinkConfig,
     };
 
@@ -280,19 +315,25 @@ export class IngestionServerNestedStack extends NestedStack {
   }
 }
 
-export interface IngestionServerStackProps extends StackProps {}
+export interface IngestionServerStackProps extends StackProps {
+  deliverToS3: boolean;
+  deliverToKinesis: boolean;
+  deliverToKafka: boolean;
+}
 
 export class IngestionServerStack extends Stack {
-  public kinesisNestedStacks: {
+  public kinesisNestedStacks:{
     provisionedStack: NestedStack;
     onDemandStack: NestedStack;
-  };
+    provisionedStackStream: Stream;
+    onDemandStackStream: Stream;
+    provisionedStackCondition: CfnCondition;
+    onDemandStackCondition: CfnCondition;
+  } | undefined;
 
-  constructor(
-    scope: Construct,
-    id: string,
-    props: IngestionServerStackProps = {},
-  ) {
+  public nestedStacks: NestedStack[] = [];
+
+  constructor(scope: Construct, id: string, props: IngestionServerStackProps) {
     super(scope, id, props);
 
     const featureName = 'IngestionServer';
@@ -300,7 +341,8 @@ export class IngestionServerStack extends Stack {
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
     const {
-      metadata, params: {
+      metadata,
+      params: {
         vpcIdParam,
         publicSubnetIdsParam,
         privateSubnetIdsParam,
@@ -313,91 +355,84 @@ export class IngestionServerStack extends Stack {
         logS3BucketParam,
         logS3PrefixParam,
         notificationsTopicArnParam,
-        sinkToKafkaParam,
-        kafkaBrokersParam,
-        kafkaTopicParam,
-        mskSecurityGroupIdParam,
-        mskClusterNameParam,
         domainPrefixParam,
         serverMinParam,
         serverMaxParam,
         warmPoolSizeParam,
         scaleOnCpuUtilizationPercentParam,
-        sinkToKinesisParam,
-        kinesisDataS3BucketParam,
-        kinesisDataS3PrefixParam,
-        kinesisStreamModeParam,
-        kinesisShardCountParam,
-        kinesisDataRetentionHoursParam,
-        kinesisBatchSizeParam,
-        kinesisMaxBatchingWindowSecondsParam,
-
+        kafkaParams,
+        s3Params,
+        kinesisParams,
       },
-    } = createStackParameters(this);
+    } = createStackParameters(this, props);
 
     this.templateOptions.metadata = metadata;
 
-    const kinesisStackInfo = createKinesisNestStack( this,
-      {
+    if (kinesisParams) {
+      this.kinesisNestedStacks = createKinesisNestStack(this, {
         vpcIdParam,
         privateSubnetIdsParam,
-        sinkToKinesisParam,
-        kinesisDataS3BucketParam,
-        kinesisDataS3PrefixParam,
-        kinesisStreamModeParam,
-        kinesisShardCountParam,
-        kinesisDataRetentionHoursParam,
-        kinesisBatchSizeParam,
-        kinesisMaxBatchingWindowSecondsParam,
-      },
-    );
+        kinesisParams,
+      });
+    }
 
-    this.kinesisNestedStacks = kinesisStackInfo;
-
-    const nestStackFullProps: IngestionServerNestStackProps = {
+    const nestStackCommonProps: IngestionServerNestStackProps = {
       vpcId: vpcIdParam.valueAsString,
       privateSubnetIds: privateSubnetIdsParam.valueAsString,
       publicSubnetIds: publicSubnetIdsParam!.valueAsString,
       serverMin: serverMinParam.valueAsNumber,
       serverMax: serverMaxParam.valueAsNumber,
       warmPoolSize: warmPoolSizeParam.valueAsNumber,
-      scaleOnCpuUtilizationPercent: scaleOnCpuUtilizationPercentParam.valueAsNumber,
-
+      scaleOnCpuUtilizationPercent:
+      scaleOnCpuUtilizationPercentParam.valueAsNumber,
       serverEndpointPath: serverEndpointPathParam.valueAsString,
       serverCorsOrigin: serverCorsOriginParam.valueAsString,
-
-      protocol: 'HTTPS',
-      enableApplicationLoadBalancerAccessLog: 'Yes',
-
       domainPrefix: domainPrefixParam.valueAsString,
-      notificationsTopicArn: notificationsTopicArnParam.valueAsString,
-      logBucketName: logS3BucketParam.valueAsString,
-      logPrefix: logS3PrefixParam.valueAsString,
       hostedZoneId: hostedZoneIdParam.valueAsString,
       hostedZoneName: zoneNameParam.valueAsString,
-      kafkaSinkConfig: {
-        kafkaBrokers: kafkaBrokersParam.valueAsString,
-        kafkaTopic: kafkaTopicParam.valueAsString,
-        mskClusterName: mskClusterNameParam.valueAsString,
-        mskSecurityGroupId: mskSecurityGroupIdParam.valueAsString,
-      },
     };
 
-    const { allConditions, conditionServerPopsConfig } = createStackConditions(
-      this,
-      kinesisStackInfo,
-      {
-        enableApplicationLoadBalancerAccessLogParam,
-        logS3BucketParam,
-        notificationsTopicArnParam,
-        mskSecurityGroupIdParam,
-        protocolParam,
-        sinkToKafkaParam,
-        kafkaBrokersParam,
-        kafkaTopicParam,
-        mskClusterNameParam,
-        sinkToKinesisParam,
-      });
+    let nestStackProps = { ... nestStackCommonProps };
+
+    if (props.deliverToS3 && s3Params) {
+      nestStackProps = {
+        ...nestStackProps,
+        s3BucketName: s3Params.s3DataBucketParam.valueAsString,
+        s3Prefix: s3Params.s3DataPrefixParam.valueAsString,
+        batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,
+        batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
+
+      };
+    }
+
+    const commonConditionsAndProps = createCommonConditions(this, {
+      enableApplicationLoadBalancerAccessLogParam,
+      logS3BucketParam,
+      logS3PrefixParam,
+      notificationsTopicArnParam,
+      protocolParam,
+    });
+    let stackConditionsAndProps = commonConditionsAndProps;
+
+    if (props.deliverToKinesis && this.kinesisNestedStacks) {
+      const kinesisConditionsAndProps = createKinesisConditions(this.kinesisNestedStacks);
+      stackConditionsAndProps = mergeConditionsAndServerPropsConfig(kinesisConditionsAndProps, commonConditionsAndProps);
+    }
+
+    if (props.deliverToKafka && kafkaParams) {
+      nestStackProps = {
+        ...nestStackProps,
+        kafkaBrokers: kafkaParams.kafkaBrokersParam.valueAsString,
+        kafkaTopic: kafkaParams.kafkaTopicParam.valueAsString,
+
+      };
+
+      const mskConditionsAndProps = createMskConditions(this, kafkaParams);
+      stackConditionsAndProps = mergeConditionsAndServerPropsConfig(mskConditionsAndProps, commonConditionsAndProps);
+    }
+
+    const allConditions = stackConditionsAndProps.conditions;
+    const conditionServerPopsConfig = stackConditionsAndProps.serverPropsConfig;
 
     let count = 0;
     for (let c of allConditions) {
@@ -409,18 +444,21 @@ export class IngestionServerStack extends Stack {
 
       const conditionExpression = Fn.conditionAnd(...c.conditions);
       const serverNestStackProps = {
-        ...nestStackFullProps,
+        ...nestStackProps,
         ...serverPropsCondition,
       };
 
-      createNestedStackWithCondition(
+      const nestedId = `IngestionServer${c.name}`;
+      const nestedStack = createNestedStackWithCondition(
         this,
-        `IngestionServer${c.name}`,
+        nestedId,
         serverNestStackProps,
         conditionExpression,
       );
+      this.nestedStacks.push(nestedStack);
     }
-    console.log('IngestionServer Nested Stack count:' + count);
+
+    console.log(`IngestionServer Nested Stack count: ${count}, props: ${JSON.stringify(props)}`);
     addCdkNagToStack(this);
   }
 }
@@ -446,4 +484,5 @@ function createNestedStackWithCondition(
     description: 'Server Url',
   });
   outputUrl.condition = condition;
+  return ingestionServer;
 }

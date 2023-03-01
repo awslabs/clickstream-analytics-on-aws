@@ -46,6 +46,7 @@ import { getDefaultFleetPropsByTier } from './tier-setting';
 import {
   IngestionServer,
   IngestionServerProps,
+  S3SinkConfig,
   KinesisSinkConfig,
   TierType,
 } from '../../../src/ingestion-server/server/ingestion-server';
@@ -151,6 +152,7 @@ export interface TestStackProps extends StackProps {
   withAlbAccessLog?: boolean;
   withDomainZone?: boolean;
   withMskConfig?: boolean;
+  withS3SinkConfig?: boolean;
   withKinesisSinkConfig?: boolean;
   serverEndpointPath?: string;
   serverCorsOrigin?: string;
@@ -165,6 +167,7 @@ export class TestStack extends Stack {
     props: TestStackProps = {
       withDomainZone: false,
       withMskConfig: false,
+      withS3SinkConfig: false,
       withKinesisSinkConfig: false,
       withAlbAccessLog: false,
       serverCorsOrigin: '*',
@@ -224,6 +227,16 @@ export class TestStack extends Stack {
       };
     }
 
+    let s3SinkConfig: S3SinkConfig | undefined = undefined;
+    if (props.withS3SinkConfig) {
+      s3SinkConfig = {
+        s3Bucket: logS3Bucket,
+        s3Prefix: 'test-s3-data',
+        batchMaxBytes: 200000,
+        batchTimeoutSecs: 1,
+      };
+    }
+
     let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
     if (props.withKinesisSinkConfig) {
       kinesisSinkConfig = {
@@ -263,6 +276,7 @@ export class TestStack extends Stack {
       ...mskSink,
       ...accessLogConfig,
       ...domainZoneConfig,
+      s3SinkConfig,
       kinesisSinkConfig,
     };
 
