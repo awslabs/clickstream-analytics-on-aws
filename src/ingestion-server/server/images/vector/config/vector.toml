@@ -18,4 +18,5 @@ source = '''
 .rid = del(.X_Request_ID)
 .method = del(.X_Method)
 .data = del(.message)
+.ingest_time = to_unix_timestamp(now()) * 1000
 '''
