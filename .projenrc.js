@@ -9,6 +9,7 @@ const commonDeps = [
 
 const commonDevDeps = [
   '@types/uuid@^9.0.0',
+  'aws-sdk-client-mock@^2.0.1',
 ];
 
 const awsSDKDeps = [
@@ -26,6 +27,8 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-account',
   '@aws-sdk/client-dynamodb',
+  '@aws-sdk/client-cloudformation',
+  '@aws-sdk/client-route-53',
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
 ].map(dep => `${dep}@^3.267.0`);
@@ -39,7 +42,6 @@ const depsForApiProject = [
 
 const devDepsForApiProject = [
   ...commonDevDeps,
-  'aws-sdk-client-mock@^2.0.1',
   'supertest@^6.3.3',
   'nodemon@^2.0.20',
   'ts-node@^10.9.1',

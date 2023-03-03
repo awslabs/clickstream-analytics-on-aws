@@ -15,18 +15,22 @@ limitations under the License.
 */
 
 import { v4 as uuidv4 } from 'uuid';
+import { clickStreamTableName } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
-import { Pipeline } from '../model/pipeline';
+import { StackManager } from '../common/sfn';
+import { tryToJson } from '../common/utils';
+import { getIngestionStackParameters, Pipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
+const stackManager: StackManager = new StackManager();
 
 export class PipelineServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { pid, pageNumber, pageSize } = req.query;
-      const result = await store.listPipeline(pid, true, pageSize, pageNumber);
+      const { pid, version, pageNumber, pageSize } = req.query;
+      const result = await store.listPipeline(pid, version, true, pageSize, pageNumber);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -38,6 +42,30 @@ export class PipelineServ {
       // create stack
       let pipeline: Pipeline = req.body;
       pipeline.pipelineId = uuidv4();
+      // Get TemplateURL from dictionary
+      const templates = await store.getDictionary('Templates');
+      if (!templates || !templates.data) {
+        return res.status(404).json(new ApiFail('Add Pipeline Error, templates not found in dictionary.'));
+      }
+      templates.data = tryToJson(templates.data);
+      if (!templates.data.ingestion) {
+        return res.status(404).json(new ApiFail('Add Pipeline Error, ingestion template url not found in dictionary.'));
+      }
+      // Create stack
+      await stackManager.execute({
+        Input: {
+          Action: 'Create',
+          StackName: `clickstream-pipeline-${pipeline.pipelineId}`,
+          TemplateURL: templates.data.ingestion,
+          Parameters: getIngestionStackParameters(pipeline),
+        },
+        Callback: {
+          TableName: clickStreamTableName ?? '',
+          ProjectId: pipeline.projectId,
+          Type: `PIPELINE#${pipeline.pipelineId}#latest`,
+          AttributeName: 'ingestionRuntime',
+        },
+      });
       const id = await store.addPipeline(pipeline);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
     } catch (error) {

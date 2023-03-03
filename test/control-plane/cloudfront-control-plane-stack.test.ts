@@ -18,6 +18,7 @@ import {
   App,
 } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
 
 describe('CloudFrontS3PotalStack', () => {
@@ -34,7 +35,13 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
-    template.resourceCountIs('AWS::Lambda::Function', 3);
+    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+      .toEqual([
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiClickStreamApiFunction8C843168',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
+      ]);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('PortalBucket', {});
@@ -55,7 +62,14 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('HostedZoneName', {});
     template.hasParameter('RecordName', {});
 
-    template.resourceCountIs('AWS::Lambda::Function', 4);
+    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+      .toEqual([
+        'certificateCertificateRequestorFunction5D4BA95F',
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiClickStreamApiFunction8C843168',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
+      ]);
     template.resourceCountIs('AWS::CloudFormation::CustomResource', 1);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
@@ -82,7 +96,13 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('DomainName', {});
     template.hasParameter('IAMCertificateId', {});
 
-    template.resourceCountIs('AWS::Lambda::Function', 3);
+    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+      .toEqual([
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiClickStreamApiFunction8C843168',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
+      ]);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);

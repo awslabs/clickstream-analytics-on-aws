@@ -41,7 +41,7 @@ export const listQuickSightUsers = async () => {
       results: queryResponse.UserList,
     };
   });
-  let users: ClickStreamQuickSightUser[] = [];
+  const users: ClickStreamQuickSightUser[] = [];
   for (let index in records as User[]) {
     users.push({
       userName: records[index].UserName,

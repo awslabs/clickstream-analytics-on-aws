@@ -177,7 +177,6 @@ export function addCfnNagToSecurityGroup(securityGroup: ISecurityGroup, wIds: st
       id: 'W5',
       reason: 'Design intent: Security Groups found with cidr open to world on egress',
     },
-
   ];
   addCfnNagSuppressRules(securityGroup.node.defaultChild as CfnResource, wIdsAllForSecurityGroup.filter(it => wIds.includes(it.id)));
 }

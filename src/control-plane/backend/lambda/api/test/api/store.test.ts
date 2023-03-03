@@ -86,7 +86,7 @@ describe('App test', () => {
     expect(listProjects).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
     const listApplication = await store.listApplication('666', false, 1, 10);
     expect(listApplication).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
-    const listPipeline = await store.listPipeline('666', false, 1, 10);
+    const listPipeline = await store.listPipeline('666', '', false, 1, 10);
     expect(listPipeline).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
 
   });

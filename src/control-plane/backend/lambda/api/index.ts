@@ -20,11 +20,11 @@ import { logger } from './common/powertools';
 import {
   defaultPageValueValid,
   isApplicationExisted, isPipelineExisted, isRequestIdExisted,
-  isProjectExisted,
+  isProjectEmptyAndExisted,
   isValidEmpty,
   validate,
   validMatchParamId,
-  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid,
+  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted,
 } from './common/request-valid';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
@@ -99,6 +99,7 @@ app.get(
 app.get(
   '/api/env/msk/clusters',
   validate([
+    query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -108,6 +109,7 @@ app.get(
 app.get(
   '/api/env/redshift/clusters',
   validate([
+    query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -118,6 +120,12 @@ app.get(
   '/api/env/quicksight/users',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listQuickSightUsers(req, res, next);
+  });
+
+app.get(
+  '/api/env/route53/hostedzones',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listHostedZones(req, res, next);
   });
 
 app.get('/api/dictionary', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -160,7 +168,7 @@ app.put(
   validate([
     body().custom(isValidEmpty),
     body('projectId')
-      .custom(isProjectExisted)
+      .custom(isProjectEmptyAndExisted)
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -170,7 +178,7 @@ app.put(
 app.delete(
   '/api/project/:id',
   validate([
-    param('id').custom(isProjectExisted),
+    param('id').custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.delete(req, res, next);
@@ -179,7 +187,7 @@ app.delete(
 app.get(
   '/api/app',
   validate([
-    query('pid').custom(isProjectExisted),
+    query('pid').custom(isProjectEmptyAndExisted),
     query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -191,7 +199,7 @@ app.post(
   validate([
     body().custom(isValidEmpty),
     body('projectId')
-      .custom(isProjectExisted),
+      .custom(isProjectEmptyAndExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -201,7 +209,7 @@ app.post(
 app.get(
   '/api/app/:id',
   validate([
-    query('pid').custom(isProjectExisted),
+    query('pid').custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.details(req, res, next);
@@ -214,7 +222,7 @@ app.put(
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' }))
       .custom((value, { req }) => isApplicationExisted(value, { req, location: 'body', path: 'projectId' })),
     body('projectId')
-      .custom(isProjectExisted),
+      .custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.update(req, res, next);
@@ -225,7 +233,7 @@ app.delete(
   validate([
     param('id').custom((value, { req }) => isApplicationExisted(value, { req, location: 'query', path: 'pid' })),
     query('pid')
-      .custom(isProjectExisted),
+      .custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.delete(req, res, next);
@@ -235,7 +243,7 @@ app.post(
   '/api/pipeline',
   validate([
     body().custom(isValidEmpty),
-    body('projectId').custom(isProjectExisted),
+    body('projectId').custom(isProjectEmptyAndExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -255,7 +263,7 @@ app.get(
 app.get(
   '/api/pipeline/:id',
   validate([
-    query('pid').custom(isProjectExisted),
+    query('pid').custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.details(req, res, next);
@@ -267,7 +275,7 @@ app.put(
     body('pipelineId').custom(isValidEmpty)
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
     body('projectId')
-      .custom(isProjectExisted),
+      .custom(isProjectEmptyAndExisted),
     body('version').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -279,7 +287,7 @@ app.delete(
   validate([
     param('id').custom((value, { req }) => isPipelineExisted(value, { req, location: 'query', path: 'pid' })),
     query('pid')
-      .custom(isProjectExisted),
+      .custom(isProjectEmptyAndExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.delete(req, res, next);

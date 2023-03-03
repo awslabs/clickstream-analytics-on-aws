@@ -229,6 +229,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     expect(findResourcesName(template, 'AWS::Lambda::Function'))
       .toEqual([
         'albcontrolplaneportalfnC6B1CDAC',
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {

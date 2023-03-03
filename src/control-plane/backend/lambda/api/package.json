@@ -39,11 +39,13 @@
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.5.1",
     "@aws-sdk/client-account": "^3.267.0",
+    "@aws-sdk/client-cloudformation": "^3.267.0",
     "@aws-sdk/client-dynamodb": "^3.267.0",
     "@aws-sdk/client-ec2": "^3.267.0",
     "@aws-sdk/client-kafka": "^3.267.0",
     "@aws-sdk/client-quicksight": "^3.267.0",
     "@aws-sdk/client-redshift": "^3.267.0",
+    "@aws-sdk/client-route-53": "^3.267.0",
     "@aws-sdk/client-s3": "^3.267.0",
     "@aws-sdk/client-sfn": "^3.267.0",
     "@aws-sdk/lib-dynamodb": "^3.267.0",

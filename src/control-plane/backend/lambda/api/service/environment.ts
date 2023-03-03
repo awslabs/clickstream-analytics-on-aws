@@ -20,6 +20,7 @@ import { describeVpcs, describeSubnets } from '../store/aws/ec2';
 import { listMSKCluster } from '../store/aws/kafka';
 import { listQuickSightUsers } from '../store/aws/quicksight';
 import { describeRedshiftClusters } from '../store/aws/redshift';
+import { listHostedZones } from '../store/aws/route53';
 import { listBuckets } from '../store/aws/s3';
 
 export class EnvironmentServ {
@@ -60,8 +61,8 @@ export class EnvironmentServ {
   }
   public async listMSKCluster(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await listMSKCluster(region);
+      const { region, vpcId } = req.query;
+      const result = await listMSKCluster(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -69,8 +70,8 @@ export class EnvironmentServ {
   }
   public async describeRedshiftClusters(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await describeRedshiftClusters(region);
+      const { region, vpcId } = req.query;
+      const result = await describeRedshiftClusters(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -79,6 +80,14 @@ export class EnvironmentServ {
   public async listQuickSightUsers(_req: any, res: any, next: any) {
     try {
       const result = await listQuickSightUsers();
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listHostedZones(_req: any, res: any, next: any) {
+    try {
+      const result = await listHostedZones();
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

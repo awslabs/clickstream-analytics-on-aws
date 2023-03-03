@@ -159,7 +159,6 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       applicationLoadBalancer: {
         vpc: controlPlane.applicationLoadBalancer.vpc,
         subnets,
-        internetFacing: props.internetFacing,
         securityGroup: controlPlane.securityGroup,
       },
     });

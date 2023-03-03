@@ -22,10 +22,13 @@ import {
   Vpc,
   Filter,
   Subnet,
-  Route, DescribeRouteTablesCommandOutput,
+  Route,
+  DescribeRouteTablesCommandOutput,
+  RouteTable,
 } from '@aws-sdk/client-ec2';
+import { RouteTableAssociation } from '@aws-sdk/client-ec2/dist-types/models/models_2';
 import { getPaginatedResults } from '../../common/paginator';
-import { getValueFromTags } from '../../common/utils';
+import { getValueFromTags, isEmpty } from '../../common/utils';
 
 export interface ClickStreamVpc {
   readonly id: string;
@@ -53,7 +56,7 @@ export const describeVpcs = async (region: string) => {
       results: queryResponse.Vpcs,
     };
   });
-  let vpcs: ClickStreamVpc[] = [];
+  const vpcs: ClickStreamVpc[] = [];
   for (let index in records as Vpc[]) {
     vpcs.push({
       id: records[index].VpcId,
@@ -87,7 +90,7 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
   let subnets: ClickStreamSubnet[] = [];
   for (let index in records as Subnet[]) {
     const subnetId = records[index].SubnetId;
-    const routeTable = await getSubnetRouteTable(region, subnetId);
+    const routeTable = await getSubnetRouteTable(region, vpcId, subnetId);
     let isolated = true;
     const routes = routeTable.Routes;
     for (let route of routes as Route[]) {
@@ -111,16 +114,47 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
   return subnets;
 };
 
-export const getSubnetRouteTable = async (region: string, subnetId: string) => {
+export const getSubnetRouteTable = async (region: string, vpcId: string, subnetId: string) => {
   const ec2Client = new EC2Client({ region });
   // Each subnet in VPC must be associated with a route table.
-  let filters: Filter[] = [{ Name: 'association.subnet-id', Values: [subnetId] }];
+  // If a subnet is not explicitly associated with any route table,
+  // it is implicitly associated with the main route table.
+  let mainRouteTable: RouteTable = {};
+  let subnetRouteTable: RouteTable = {};
+  const filters: Filter[] = [
+    { Name: 'vpc-id', Values: [vpcId] },
+  ];
   const params: DescribeRouteTablesCommand = new DescribeRouteTablesCommand({
     Filters: filters,
   });
   const res: DescribeRouteTablesCommandOutput = await ec2Client.send(params);
-  if (!res.RouteTables || res.RouteTables.length !== 1) {
-    throw new Error('subnet route table error.');
+  for (let routeTable of res.RouteTables as RouteTable[]) {
+    for (let association of routeTable.Associations as RouteTableAssociation[]) {
+      if (association.Main) {
+        mainRouteTable = routeTable;
+      } else if (association.SubnetId === subnetId) {
+        subnetRouteTable = routeTable;
+      }
+    }
   }
-  return res.RouteTables[0];
+  return !isEmpty(subnetRouteTable)? subnetRouteTable: mainRouteTable;
+};
+
+export const getSubnet = async (region: string, subnetId: string) => {
+  const ec2Client = new EC2Client({ region });
+  const records = await getPaginatedResults(async (NextToken: any) => {
+    const params: DescribeSubnetsCommand = new DescribeSubnetsCommand({
+      SubnetIds: [subnetId],
+      NextToken,
+    });
+    const queryResponse = await ec2Client.send(params);
+    return {
+      marker: queryResponse.NextToken,
+      results: queryResponse.Subnets,
+    };
+  });
+  if (records) {
+    return records[0] as Subnet;
+  }
+  return {} as Subnet;
 };

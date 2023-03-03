@@ -27,11 +27,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
+import { isEmpty } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
 import {
   Pipeline,
   PipelineList,
+  PipelineStatus,
 } from '../../model/pipeline';
 import { Project, ProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
@@ -379,11 +381,13 @@ export class DynamoDbStore implements ClickStreamStore {
         description: pipeline.description,
         region: pipeline.region,
         dataCollectionSDK: pipeline.dataCollectionSDK,
-        tags: pipeline.tags,
+        status: pipeline.status ?? PipelineStatus.CREATE_COMPLETE,
+        tags: pipeline.tags ?? [],
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataModel: pipeline.dataModel,
         version: pipeline.version ? pipeline.version : Date.now().toString(),
+        versionTag: 'latest',
         createAt: pipeline.createAt ? pipeline.createAt : Date.now(),
         updateAt: Date.now(),
         operator: pipeline.operator ? pipeline.operator : '',
@@ -441,6 +445,7 @@ export class DynamoDbStore implements ClickStreamStore {
               description: { S: curPipeline.description },
               region: { S: curPipeline.region },
               dataCollectionSDK: { S: curPipeline.dataCollectionSDK },
+              status: { S: curPipeline.status },
               tags: marshallCurPipeline.tags,
               ingestionServer: marshallCurPipeline.ingestionServer,
               etl: marshallCurPipeline.etl,
@@ -449,6 +454,7 @@ export class DynamoDbStore implements ClickStreamStore {
               etlRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
               dataModelRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
               version: { S: curPipeline.version },
+              versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
               operator: { S: pipeline.operator },
@@ -470,6 +476,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'description = :description, ' +
               '#region = :region, ' +
               'dataCollectionSDK = :dataCollectionSDK, ' +
+              '#status = :status' +
               '#tags = :tags, ' +
               'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
@@ -478,11 +485,13 @@ export class DynamoDbStore implements ClickStreamStore {
               'etlRuntime = :etlRuntime, ' +
               'dataModelRuntime = :dataModelRuntime, ' +
               'version = :version, ' +
+              'versionTag = :versionTag, ' +
               'updateAt = :updateAt, ' +
               '#pipelineOperator = :operator ',
             ExpressionAttributeNames: {
               '#pipelineName': 'name',
               '#region': 'region',
+              '#status': 'status',
               '#tags': 'tags',
               '#pipelineOperator': 'operator',
               '#ConditionVersion': 'version',
@@ -492,6 +501,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
+              ':status': { S: pipeline.status },
               ':tags': marshallPipeline.tags,
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
@@ -501,6 +511,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':dataModelRuntime': marshallPipeline.dataModelRuntime ?? { M: {} },
               ':ConditionVersionValue': { S: pipeline.version },
               ':version': { S: Date.now().toString() },
+              ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
               ':operator': { S: '' },
             },
@@ -554,19 +565,27 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listPipeline(
-    projectId: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PipelineList> {
+    projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PipelineList> {
+    let filterExpression = 'begins_with(#type, :t) AND deleted = :d';
+    let expressionAttributeValues = new Map();
+    expressionAttributeValues.set(':t', 'PIPELINE#');
+    expressionAttributeValues.set(':d', false);
+    if (!isEmpty(version)) {
+      filterExpression = `${filterExpression} AND versionTag=:vt`;
+      expressionAttributeValues.set(':vt', version);
+    }
+    if (!isEmpty(projectId)) {
+      filterExpression = `${filterExpression} AND projectId = :p`;
+      expressionAttributeValues.set(':p', projectId);
+    }
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const params: ScanCommand = new ScanCommand({
         TableName: clickStreamTableName,
-        FilterExpression: 'projectId = :p AND begins_with(#type, :t) AND deleted = :d',
+        FilterExpression: filterExpression,
         ExpressionAttributeNames: {
           '#type': 'type',
         },
-        ExpressionAttributeValues: {
-          ':p': projectId,
-          ':t': 'PIPELINE#',
-          ':d': false,
-        },
+        ExpressionAttributeValues: expressionAttributeValues,
         ExclusiveStartKey,
       });
       const queryResponse = await docClient.send(params);

@@ -19,6 +19,7 @@ import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTa
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
+import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -30,6 +31,7 @@ const s3Client = mockClient(S3Client);
 const kafkaClient = mockClient(KafkaClient);
 const redshiftClient = mockClient(RedshiftClient);
 const quickSightClient = mockClient(QuickSightClient);
+const route53Client = mockClient(Route53Client);
 
 describe('Account Env test', () => {
 
@@ -47,9 +49,7 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          cn_name: '美国东部 (弗吉尼亚北部)',
-          name: 'US East (N. Virginia)',
-          value: 'us-east-1',
+          id: 'us-east-1',
         },
       ],
     });
@@ -168,6 +168,9 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
       RouteTables: [
         {
+          Associations: [{
+            Main: true,
+          }],
           Routes: [
             { GatewayId: 'igw-xxxx' },
           ],
@@ -230,6 +233,9 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
       RouteTables: [
         {
+          Associations: [{
+            Main: true,
+          }],
           Routes: [
             { NatGatewayId: 'igw-xxxx' },
           ],
@@ -260,6 +266,52 @@ describe('Account Env test', () => {
       ],
     });
   });
+  it('Get subnet route table', async () => {
+    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
+      Subnets: [
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: true,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+            },
+          ],
+        },
+      ],
+    });
+    ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
+      RouteTables: [
+        {
+          Associations: [{
+            SubnetId: 'subnet-0b9fa05e061084b37',
+          }],
+          Routes: [
+            { NatGatewayId: 'igw-xxxx' },
+          ],
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          id: 'subnet-0b9fa05e061084b37',
+          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+          cidr: '10.255.0.0/24',
+          availabilityZone: 'us-east-1a',
+          type: 'public',
+        },
+      ],
+    });
+  });
   it('Get subnet from type', async () => {
     ec2ClientMock.on(DescribeSubnetsCommand).resolves({
       Subnets: [
@@ -280,6 +332,9 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
       RouteTables: [
         {
+          Associations: [{
+            Main: true,
+          }],
           Routes: [
             { GatewayId: 'igw-xxxx' },
           ],
@@ -323,6 +378,9 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
       RouteTables: [
         {
+          Associations: [{
+            Main: true,
+          }],
           Routes: [
             { GatewayId: 'local' },
           ],
@@ -417,12 +475,118 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Get MSK cluster', async () => {
+  it('Get MSK cluster(Provisioned)', async () => {
     kafkaClient.on(ListClustersV2Command).resolves({
       ClusterInfoList: [
         {
           ClusterName: 'demo-cluster-1',
-          ClusterArn: 'arn:aws:kafka:us-east-1:615633583142:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterType: 'PROVISIONED',
+          Provisioned: {
+            BrokerNodeGroupInfo: {
+              InstanceType: 'kafka.m5.large',
+              SecurityGroups: ['sg-111'],
+              ClientSubnets: ['subnet-111'],
+            },
+            NumberOfBrokerNodes: 1,
+          },
+          State: 'ACTIVE',
+        },
+      ],
+    });
+    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
+      Subnets: [
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          VpcId: 'vpc-111',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: false,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+            },
+          ],
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/msk/clusters?vpcId=vpc-111');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'demo-cluster-1',
+          arn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          type: 'PROVISIONED',
+          state: 'ACTIVE',
+          securityGroupId: 'sg-111',
+        },
+      ],
+    });
+  });
+  it('Get MSK cluster(Serverless)', async () => {
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [
+        {
+          ClusterName: 'demo-cluster-1',
+          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterType: 'SERVERLESS',
+          Serverless: {
+            VpcConfigs: [
+              {
+                SubnetIds: ['subnet-111'],
+                SecurityGroupIds: ['sg-111'],
+              },
+            ],
+          },
+          State: 'ACTIVE',
+        },
+      ],
+    });
+    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
+      Subnets: [
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          VpcId: 'vpc-111',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: false,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+            },
+          ],
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/msk/clusters?vpcId=vpc-111');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'demo-cluster-1',
+          arn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          type: 'SERVERLESS',
+          state: 'ACTIVE',
+          securityGroupId: 'sg-111',
+        },
+      ],
+    });
+  });
+  it('Get MSK cluster no vpc', async () => {
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [
+        {
+          ClusterName: 'demo-cluster-1',
+          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           ClusterType: 'PROVISIONED',
           State: 'ACTIVE',
         },
@@ -430,43 +594,15 @@ describe('Account Env test', () => {
     });
     let res = await request(app).get('/api/env/msk/clusters');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
         {
-          name: 'demo-cluster-1',
-          arn: 'arn:aws:kafka:us-east-1:615633583142:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
-          type: 'PROVISIONED',
-          state: 'ACTIVE',
-        },
-      ],
-    });
-  });
-  it('Get MSK cluster with region', async () => {
-    kafkaClient.on(ListClustersV2Command).resolves({
-      ClusterInfoList: [
-        {
-          ClusterName: 'demo-cluster-1',
-          ClusterArn: 'arn:aws:kafka:us-east-1:615633583142:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
-          ClusterType: 'PROVISIONED',
-          State: 'ACTIVE',
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/msk/clusters?region=us-east-1');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          name: 'demo-cluster-1',
-          arn: 'arn:aws:kafka:us-east-1:615633583142:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
-          type: 'PROVISIONED',
-          state: 'ACTIVE',
+          location: 'query',
+          msg: 'Value is empty.',
+          param: 'vpcId',
         },
       ],
     });
@@ -482,10 +618,21 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           ClusterStatus: 'available',
+          VpcId: 'vpc-111',
+        },
+        {
+          ClusterIdentifier: 'redshift-cluster-1',
+          NodeType: 'dc2.large',
+          Endpoint: {
+            Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
+            Port: 5439,
+          },
+          ClusterStatus: 'available',
+          VpcId: 'vpc-222',
         },
       ],
     });
-    let res = await request(app).get('/api/env/redshift/clusters');
+    let res = await request(app).get('/api/env/redshift/clusters?vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -515,10 +662,11 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           ClusterStatus: 'available',
+          VpcId: 'vpc-111',
         },
       ],
     });
-    let res = await request(app).get('/api/env/redshift/clusters?region=us-east-1');
+    let res = await request(app).get('/api/env/redshift/clusters?region=us-east-1&vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -541,9 +689,9 @@ describe('Account Env test', () => {
     quickSightClient.on(ListUsersCommand).resolves({
       UserList: [
         {
-          UserName: 'Admin/mingfeiq-Isengard',
-          Arn: 'arn:aws:quicksight:us-east-1:615633583142:user/default/Admin/mingfeiq-Isengard',
-          Email: 'mingfeiq@amazon.com',
+          UserName: 'Admin/fake-Isengard',
+          Arn: 'arn:aws:quicksight:us-east-1:012345678912:user/default/Admin/fake-Isengard',
+          Email: 'fake@amazon.com',
           Role: 'ADMIN',
           Active: true,
         },
@@ -557,11 +705,35 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          userName: 'Admin/mingfeiq-Isengard',
-          arn: 'arn:aws:quicksight:us-east-1:615633583142:user/default/Admin/mingfeiq-Isengard',
-          email: 'mingfeiq@amazon.com',
+          userName: 'Admin/fake-Isengard',
+          arn: 'arn:aws:quicksight:us-east-1:012345678912:user/default/Admin/fake-Isengard',
+          email: 'fake@amazon.com',
           role: 'ADMIN',
           active: true,
+        },
+      ],
+    });
+  });
+  it('Get Host Zones', async () => {
+    route53Client.on(ListHostedZonesCommand).resolves({
+      HostedZones: [
+        {
+          Id: '/hostedzone/Z000000000000000000E',
+          Name: 'fake.test.dev.com.',
+          CallerReference: '',
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/route53/hostedzones');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          id: 'Z000000000000000000E',
+          name: 'fake.test.dev.com.',
         },
       ],
     });

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { StackRequestInputParameter } from '../common/sfn';
+
 interface IngestionServerSizeProps {
   /**
    * Server size min number
@@ -52,12 +54,11 @@ interface IngestionServerLoadBalancerProps {
    * Server protocol
    * allowedValues: ['HTTP', 'HTTPS']
    */
-  readonly protocol: string;
+  readonly protocol: 'HTTP' | 'HTTPS';
   /**
    * Enable application load balancer access log
-   * allowedValues: ['Yes', 'No']
    */
-  readonly enableApplicationLoadBalancerAccessLog: string;
+  readonly enableApplicationLoadBalancerAccessLog: boolean;
   /**
    * S3 bucket to save log (optional)
    */
@@ -72,12 +73,7 @@ interface IngestionServerLoadBalancerProps {
   readonly notificationsTopicArn?: string;
 }
 
-interface IngestionServerSinkProps {
-  /**
-   * Sink type
-   * allowedValues: ['s3', 'kafka', 'kinesis']
-   */
-  readonly sinkType: string;
+interface IngestionServerSinkS3Props {
   /**
    * s3 URI
    */
@@ -94,6 +90,13 @@ interface IngestionServerSinkProps {
    * s3 buffer interval
    */
   readonly s3BufferInterval?: number;
+}
+
+interface IngestionServerSinkKafkaProps {
+  /**
+   * Host type
+   */
+  readonly selfHost: boolean;
   /**
    * Kafka brokers string
    */
@@ -107,24 +110,22 @@ interface IngestionServerSinkProps {
    */
   readonly mskClusterName?: string;
   /**
+   * Amazon managed streaming for apache kafka (Amazon MSK) topic
+   */
+  readonly mskTopic?: string;
+  /**
    * Amazon managed streaming for apache kafka (Amazon MSK) security group id
    */
   readonly mskSecurityGroupId?: string;
-  /**
-   * S3 bucket name to save data from Kinesis Data Stream
-   */
-  readonly kinesisDataS3Bucket?: string;
-  /**
-   * S3 object prefix to save data from Kinesis Data Stream
-   * default: 'kinesis-data'
-   */
-  readonly kinesisDataS3Prefix?: string;
+}
+
+interface IngestionServerSinkKinesisProps {
   /**
    * Kinesis Data Stream mode
    * allowedValues: ['ON_DEMAND', 'PROVISIONED']
    * default: 'ON_DEMAND'
    */
-  readonly kinesisStreamMode?: string;
+  readonly kinesisStreamMode: 'ON_DEMAND' | 'PROVISIONED';
   /**
    * Number of Kinesis Data Stream shards, only apply for Provisioned mode
    * default: '3'
@@ -145,6 +146,15 @@ interface IngestionServerSinkProps {
    * default: '300'
    */
   readonly kinesisMaxBatchingWindowSeconds?: number;
+  /**
+   * S3 bucket name to save data from Kinesis Data Stream
+   */
+  readonly kinesisDataS3Bucket?: string;
+  /**
+   * S3 object prefix to save data from Kinesis Data Stream
+   * default: 'kinesis-data'
+   */
+  readonly kinesisDataS3Prefix?: string;
 
 }
 
@@ -169,13 +179,13 @@ interface IngestionServerNetworkProps {
    */
   readonly vpcId: string;
   /**
-   * Comma delimited public subnet ids
+   * public subnet list
    */
-  readonly publicSubnetIds: string;
+  readonly publicSubnetIds: string[];
   /**
-   * Comma delimited private subnet ids.
+   * private subnet ids.
    */
-  readonly privateSubnetIds: string;
+  readonly privateSubnetIds: string[];
 }
 
 interface IngestionServer {
@@ -183,7 +193,10 @@ interface IngestionServer {
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
-  readonly sink: IngestionServerSinkProps;
+  readonly sinkType: string;
+  readonly sinkS3?: IngestionServerSinkS3Props;
+  readonly sinkKafka?: IngestionServerSinkKafkaProps;
+  readonly sinkKinesis?: IngestionServerSinkKinesisProps;
 }
 
 export interface ETL {
@@ -193,8 +206,19 @@ export interface DataModel {
 }
 
 export interface Tag {
-  key?: string;
-  value?: string;
+  [key: string]: string;
+}
+
+export enum PipelineStatus {
+  CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS',
+  CREATE_COMPLETE = 'CREATE_COMPLETE',
+  CREATE_FAILED = 'CREATE_FAILED',
+  UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS',
+  UPDATE_COMPLETE = 'UPDATE_COMPLETE',
+  UPDATE_FAILED = 'UPDATE_FAILED',
+  DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
+  DELETE_COMPLETE = 'DELETE_COMPLETE',
+  DELETE_FAILED = 'DELETE_FAILED',
 }
 
 export interface Pipeline {
@@ -206,6 +230,7 @@ export interface Pipeline {
   description: string;
   region: string;
   dataCollectionSDK: string;
+  status: PipelineStatus | string;
   tags: Tag[];
 
   ingestionServer: IngestionServer;
@@ -216,6 +241,7 @@ export interface Pipeline {
   dataModelRuntime: any;
 
   version: string;
+  versionTag: string;
   createAt: number;
   updateAt: number;
   operator: string;
@@ -225,4 +251,99 @@ export interface Pipeline {
 export interface PipelineList {
   totalCount: number | undefined;
   items: Pipeline[];
+}
+
+export function getIngestionStackParameters(pipeline: Pipeline): StackRequestInputParameter[] {
+  let parameters: StackRequestInputParameter[] = [];
+  // VPC Information
+  parameters.push({
+    ParameterKey: 'VpcId',
+    ParameterValue: pipeline.ingestionServer.network.vpcId,
+  });
+  parameters.push({
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: pipeline.ingestionServer.network.publicSubnetIds.join(','),
+  });
+  parameters.push({
+    ParameterKey: 'PrivateSubnetIds',
+    ParameterValue: pipeline.ingestionServer.network.privateSubnetIds.join(','),
+  });
+  // LB
+  parameters.push({
+    ParameterKey: 'Protocol',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.protocol,
+  });
+  parameters.push({
+    ParameterKey: 'ServerCorsOrigin',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.serverCorsOrigin,
+  });
+  parameters.push({
+    ParameterKey: 'NotificationsTopicArn',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
+  });
+  parameters.push({
+    ParameterKey: 'LogS3Bucket',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'LogS3Prefix',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Prefix ?? '',
+  });
+  // Domain Information
+  parameters.push({
+    ParameterKey: 'HostedZoneId',
+    ParameterValue: pipeline.ingestionServer.domain?.hostedZoneId ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'HostedZoneName',
+    ParameterValue: pipeline.ingestionServer.domain?.hostedZoneName ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'RecordName',
+    ParameterValue: pipeline.ingestionServer.domain?.recordName ?? '',
+  });
+  // Server
+  parameters.push({
+    ParameterKey: 'ServerMax',
+    ParameterValue: pipeline.ingestionServer.size.serverMax.toString(),
+  });
+  parameters.push({
+    ParameterKey: 'ServerMin',
+    ParameterValue: pipeline.ingestionServer.size.serverMin.toString(),
+  });
+  parameters.push({
+    ParameterKey: 'ScaleOnCpuUtilizationPercent',
+    ParameterValue: (pipeline.ingestionServer.size.scaleOnCpuUtilizationPercent ?? 50).toString(),
+  });
+  parameters.push({
+    ParameterKey: 'WarmPoolSize',
+    ParameterValue: (pipeline.ingestionServer.size.warmPoolSize ?? 0).toString(),
+  });
+  // Kafka Cluster
+  // TODO: mock kafka
+  parameters.push({
+    ParameterKey: 'SinkToKafka',
+    ParameterValue: 'Yes',
+  });
+  parameters.push({
+    ParameterKey: 'KafkaBrokers',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaBrokers ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'KafkaTopic',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaTopic ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'MskClusterName',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskClusterName ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'MskSecurityGroupId',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskSecurityGroupId ?? '',
+  });
+  return parameters;
 }

@@ -42,10 +42,12 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
+import {
+  StackActionStateMachine,
+} from './stack-action-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
-import { Constant } from '../private/constant';
 
 export interface DicItem {
   readonly name: string;
@@ -55,7 +57,6 @@ export interface DicItem {
 export interface ApplicationLoadBalancerProps {
   readonly vpc: IVpc;
   readonly subnets: SubnetSelection;
-  readonly internetFacing: boolean;
   readonly securityGroup: ISecurityGroup;
 }
 
@@ -129,10 +130,28 @@ export class ClickStreamApiConstruct extends Construct {
       };
     }
 
+    // Create stack action StateMachine
+    const stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
+      clickStreamTable,
+      lambdaFuncProps: apiFunctionProps,
+    });
+
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
+    const stepFunctionPolicy = new iam.Policy(this, 'ClickStreamApiStepFunctionPolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [stackActionStateMachine.stateMachine.stateMachineArn],
+          actions: [
+            'states:StartExecution',
+          ],
+        }),
+      ],
+    });
+    stepFunctionPolicy.attachToRole(clickStreamApiFunctionRole);
     const awsSdkPolicy = new iam.Policy(this, 'ClickStreamApiAWSSdkPolicy', {
       statements: [
         new iam.PolicyStatement({
@@ -148,7 +167,9 @@ export class ClickStreamApiConstruct extends Construct {
             's3:ListBucket',
             'quicksight:ListUsers',
             'ec2:DescribeSubnets',
+            'ec2:DescribeRouteTables',
             's3:GetBucketLocation',
+            'route53:ListHostedZones',
           ],
         }),
       ],
@@ -171,6 +192,7 @@ export class ClickStreamApiConstruct extends Construct {
       environment: {
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
+        STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         LOG_LEVEL: 'ERROR',
       },
@@ -225,7 +247,16 @@ export class ClickStreamApiConstruct extends Construct {
         [
           {
             id: 'W89', //Lambda functions should be deployed inside a VPC
-            reason: Constant.NAG_REASON_CDK_BUCKETDEPLOYMENT_MANAGED_FUN,
+            reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
+          },
+        ],
+      );
+      addCfnNagSuppressRules(
+        stackActionStateMachine.callbackFunction.node.defaultChild as CfnResource,
+        [
+          {
+            id: 'W89', //Lambda functions should be deployed inside a VPC
+            reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
           },
         ],
       );

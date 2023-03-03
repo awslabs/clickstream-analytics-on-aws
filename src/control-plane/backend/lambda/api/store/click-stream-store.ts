@@ -37,7 +37,7 @@ export interface ClickStreamStore {
   addPipeline: (pipeline: Pipeline) => Promise<string>;
   getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<Pipeline | undefined>;
   updatePipeline: (pipeline: Pipeline, curPipeline: Pipeline) => Promise<void>;
-  listPipeline: (projectId: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
+  listPipeline: (projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
   deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 

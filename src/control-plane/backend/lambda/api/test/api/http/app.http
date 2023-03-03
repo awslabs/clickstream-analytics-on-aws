@@ -1,4 +1,4 @@
-GET http://localhost:8080/api/app?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f&pageNumber=2
+GET http://localhost:8080/api/app?pid=fdd1f346-c34e-41ee-971b-7f96484dad18&pageNumber=2
 Accept: application/json
 
 ###
@@ -8,7 +8,7 @@ Content-Type: application/json
 X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869019999
 
 {
-  "projectId": "571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "projectId": "fdd1f346-c34e-41ee-971b-7f96484dad18",
   "name": "App-01",
   "description": "Description of App-01",
   "platform": "Web",
@@ -16,21 +16,21 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869019999
 }
 ###
 
-GET http://localhost:8080/api/app/c5214f85-5c9b-4f59-aeea-8f9720f07eaf?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f
+GET http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
 Accept: application/json
 
 ###
 
-PUT http://localhost:8080/api/app/c5214f85-5c9b-4f59-aeea-8f9720f07eaf
+PUT http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e
 Content-Type: application/json
 
 {
-  "appId": "c5214f85-5c9b-4f59-aeea-8f9720f07eaf",
-  "projectId": "571f8ab0-7b18-474c-9905-3cc4ddd5179f",
+  "appId": "a7123164-6a63-4f3c-8236-f314acb26a5e",
+  "projectId": "fdd1f346-c34e-41ee-971b-7f96484dad18",
   "description": "Update Description of App-01"
 }
 
 ###
 
-DELETE http://localhost:8080/api/app/7cc06044-279c-4619-b587-8c627c5d7b84?pid=571f8ab0-7b18-474c-9905-3cc4ddd5179f
+DELETE http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
 Accept: application/json

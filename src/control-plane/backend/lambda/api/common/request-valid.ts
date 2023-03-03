@@ -111,7 +111,7 @@ export const defaultSubnetTypeValid: CustomValidator = (value, { req }) => {
   return true;
 };
 
-export const isProjectExisted: CustomValidator = value => {
+export const isProjectEmptyAndExisted: CustomValidator = value => {
   if (isEmpty(value)) {
     return Promise.reject('Value is empty.');
   }
@@ -119,8 +119,20 @@ export const isProjectExisted: CustomValidator = value => {
     if (!existed) {
       return Promise.reject('Project resource does not exist.');
     }
-    return;
+    return true;
   });
+};
+
+export const isProjectExisted: CustomValidator = value => {
+  if (!isEmpty(value)) {
+    return store.isProjectExisted(value).then(existed => {
+      if (!existed) {
+        return Promise.reject('Project resource does not exist.');
+      }
+      return true;
+    });
+  }
+  return true;
 };
 
 export const isApplicationExisted: CustomValidator = (value, { req, location, path }) => {
@@ -134,7 +146,7 @@ export const isApplicationExisted: CustomValidator = (value, { req, location, pa
     if (!existed) {
       return Promise.reject('Application resource does not exist.');
     }
-    return;
+    return true;
   });
 };
 
@@ -149,7 +161,7 @@ export const isPipelineExisted: CustomValidator = (value, { req, location, path 
     if (!existed) {
       return Promise.reject('Pipeline resource does not exist.');
     }
-    return;
+    return true;
   });
 };
 
@@ -161,7 +173,7 @@ export const isRequestIdExisted: CustomValidator = value => {
     if (existed) {
       return Promise.reject('Not Modified.');
     }
-    return;
+    return true;
   });
 };
 

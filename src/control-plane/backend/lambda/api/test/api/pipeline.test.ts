@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
   PutCommand,
@@ -32,10 +33,11 @@ import {
   projectExistedMock,
   tokenMock,
 } from './ddb-mock';
-import { clickStreamTableName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
+const sfnMock = mockClient(SFNClient);
 
 describe('Pipeline test', () => {
   beforeEach(() => {
@@ -44,6 +46,10 @@ describe('Pipeline test', () => {
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand).resolves({
+      Item: { name: 'Templates', data: '{"ingestion": "xxx"}' },
+    });
+    sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/pipeline')
@@ -52,9 +58,49 @@ describe('Pipeline test', () => {
         projectId: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
-        base: {},
-        runtime: {},
-        ingestion: {},
+        region: 'us-east-1',
+        dataCollectionSDK: 'Clickstream SDK',
+        tags: [
+          {
+            key: 'name',
+            value: 'clickstream',
+          },
+        ],
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0000',
+            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
+            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'test.dev.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: 'Pipeline-01-log',
+            logS3Prefix: 'logs',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3Uri: 's3://012345678912-test',
+            sinkType: 's3',
+            s3prefix: 'test',
+            s3BufferSize: 50,
+            s3BufferInterval: 30,
+          },
+        },
         etl: {},
         dataModel: {},
       });
@@ -63,8 +109,152 @@ describe('Pipeline test', () => {
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
   });
+  it('Create pipeline with dictionary 404', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Templates',
+      },
+    }).resolves({
+      Item: undefined,
+    });
+    sfnMock.on(StartExecutionCommand).resolves({});
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: 'Pipeline-01',
+        description: 'Description of Pipeline-01',
+        region: 'us-east-1',
+        dataCollectionSDK: 'Clickstream SDK',
+        tags: [
+          {
+            key: 'name',
+            value: 'clickstream',
+          },
+        ],
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0000',
+            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
+            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'test.dev.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: 'Pipeline-01-log',
+            logS3Prefix: 'logs',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3Uri: 's3://012345678912-test',
+            sinkType: 's3',
+            s3prefix: 'test',
+            s3BufferSize: 50,
+            s3BufferInterval: 30,
+          },
+        },
+        etl: {},
+        dataModel: {},
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ message: 'Add Pipeline Error, templates not found in dictionary.', success: false });
+  });
+  it('Create pipeline with dictionary template 404', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Templates',
+      },
+    }).resolves({
+      Item: { name: 'Templates', data: '{"k":"v"}' },
+    });
+    sfnMock.on(StartExecutionCommand).resolves({});
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: 'Pipeline-01',
+        description: 'Description of Pipeline-01',
+        region: 'us-east-1',
+        dataCollectionSDK: 'Clickstream SDK',
+        tags: [
+          {
+            key: 'name',
+            value: 'clickstream',
+          },
+        ],
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0000',
+            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
+            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'test.dev.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: 'Pipeline-01-log',
+            logS3Prefix: 'logs',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3Uri: 's3://012345678912-test',
+            sinkType: 's3',
+            s3prefix: 'test',
+            s3BufferSize: 50,
+            s3BufferInterval: 30,
+          },
+        },
+        etl: {},
+        dataModel: {},
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({ message: 'Add Pipeline Error, ingestion template url not found in dictionary.', success: false });
+  });
   it('Create pipeline with mock error', async () => {
     projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand).resolves({
+      Item: { name: 'Templates', data: '{"ingestion": "xxx"}' },
+    });
+    sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
       .rejects(new Error('Mock DynamoDB error'));;
@@ -75,9 +265,49 @@ describe('Pipeline test', () => {
         projectId: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
-        base: {},
-        runtime: {},
-        ingestion: {},
+        region: 'us-east-1',
+        dataCollectionSDK: 'Clickstream SDK',
+        tags: [
+          {
+            key: 'name',
+            value: 'clickstream',
+          },
+        ],
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0000',
+            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
+            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'test.dev.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: 'Pipeline-01-log',
+            logS3Prefix: 'logs',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3Uri: 's3://012345678912-test',
+            sinkType: 's3',
+            s3prefix: 'test',
+            s3BufferSize: 50,
+            s3BufferInterval: 30,
+          },
+        },
         etl: {},
         dataModel: {},
       });
@@ -299,7 +529,93 @@ describe('Pipeline test', () => {
       ],
     });
     let res = await request(app)
+      .get('/api/pipeline');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          { name: 'Pipeline-01' },
+          { name: 'Pipeline-02' },
+          { name: 'Pipeline-03' },
+          { name: 'Pipeline-04' },
+          { name: 'Pipeline-05' },
+        ],
+        totalCount: 5,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Get pipeline list with pid', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { name: 'Pipeline-01' },
+        { name: 'Pipeline-02' },
+        { name: 'Pipeline-03' },
+        { name: 'Pipeline-04' },
+        { name: 'Pipeline-05' },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          { name: 'Pipeline-01' },
+          { name: 'Pipeline-02' },
+          { name: 'Pipeline-03' },
+          { name: 'Pipeline-04' },
+          { name: 'Pipeline-05' },
+        ],
+        totalCount: 5,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Get pipeline list with version', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { name: 'Pipeline-01' },
+        { name: 'Pipeline-02' },
+        { name: 'Pipeline-03' },
+        { name: 'Pipeline-04' },
+        { name: 'Pipeline-05' },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}&version=latest`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -355,26 +671,6 @@ describe('Pipeline test', () => {
         ],
         totalCount: 5,
       },
-    });
-  });
-  it('Get pipeline list with no pid', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({});
-    const res = await request(app)
-      .get('/api/pipeline');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'query',
-          msg: 'Value is empty.',
-          param: 'pid',
-        },
-      ],
     });
   });
   it('Update pipeline', async () => {

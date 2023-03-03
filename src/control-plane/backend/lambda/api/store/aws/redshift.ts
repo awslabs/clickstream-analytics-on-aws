@@ -17,14 +17,14 @@ limitations under the License.
 import { RedshiftClient, DescribeClustersCommand, Cluster, Endpoint } from '@aws-sdk/client-redshift';
 import { getPaginatedResults } from '../../common/paginator';
 
-export interface ClickStreamRedshiftCluster {
+export interface RedshiftCluster {
   readonly name: string;
   readonly nodeType: string;
-  readonly endpoint: Endpoint;
+  readonly endpoint?: Endpoint;
   readonly status: string;
 }
 
-export const describeRedshiftClusters = async (region: string) => {
+export const describeRedshiftClusters = async (region: string, vpcId: string) => {
   const redshiftClient = new RedshiftClient({ region });
 
   const records = await getPaginatedResults(async (Marker: any) => {
@@ -37,14 +37,16 @@ export const describeRedshiftClusters = async (region: string) => {
       results: queryResponse.Clusters,
     };
   });
-  let clusters: ClickStreamRedshiftCluster[] = [];
-  for (let index in records as Cluster[]) {
-    clusters.push({
-      name: records[index].ClusterIdentifier,
-      nodeType: records[index].NodeType,
-      endpoint: records[index].Endpoint,
-      status: records[index].ClusterStatus,
-    });
+  const clusters: RedshiftCluster[] = [];
+  for (let cluster of records as Cluster[]) {
+    if (cluster.VpcId === vpcId) {
+      clusters.push({
+        name: cluster.ClusterIdentifier ?? '',
+        nodeType: cluster.NodeType ?? '',
+        endpoint: cluster.Endpoint,
+        status: cluster.ClusterStatus ?? '',
+      });
+    }
   }
   return clusters;
 };

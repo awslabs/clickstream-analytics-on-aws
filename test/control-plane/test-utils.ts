@@ -263,7 +263,6 @@ export class TestEnv {
       applicationLoadBalancer: {
         vpc: stack.vpc,
         subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
-        internetFacing: true,
         securityGroup: stack.sg,
       },
     });

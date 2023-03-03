@@ -24,7 +24,7 @@ export const listBuckets = async () => {
   const s3Client = new S3Client({});
   const params: ListBucketsCommand = new ListBucketsCommand({});
   const result = await s3Client.send(params);
-  let buckets: ClickStreamBucket[] = [];
+  const buckets: ClickStreamBucket[] = [];
   if (result.Buckets) {
     for (let index in result.Buckets as Bucket[]) {
       buckets.push({

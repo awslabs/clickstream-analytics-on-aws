@@ -229,7 +229,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               's3:ListBucket',
               'quicksight:ListUsers',
               'ec2:DescribeSubnets',
+              'ec2:DescribeRouteTables',
               's3:GetBucketLocation',
+              'route53:ListHostedZones',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -265,7 +267,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
       IpProtocol: 'tcp',
       Description: 'allow all traffic from application load balancer',
-      FromPort: 0,
       GroupId: {
         'Fn::GetAtt': [
           'testClickStreamALBApiClickStreamApiFunctionSGC830FA60',
@@ -278,7 +279,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           'GroupId',
         ],
       },
-      ToPort: 65535,
     });
 
 

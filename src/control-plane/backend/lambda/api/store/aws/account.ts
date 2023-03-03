@@ -15,13 +15,10 @@ limitations under the License.
 */
 
 import { AccountClient, ListRegionsCommand, Region, RegionOptStatus } from '@aws-sdk/client-account';
-import { regionMap } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 
 export interface ClickStreamRegion {
-  readonly name: string;
-  readonly cn_name: string;
-  readonly value: string;
+  readonly id: string;
 }
 
 export const listRegions = async () => {
@@ -41,15 +38,13 @@ export const listRegions = async () => {
       results: queryResponse.Regions,
     };
   });
-  let regions: ClickStreamRegion[] = [];
-  for (let index in records as Region[]) {
-    const value = regionMap.get(records[index].RegionName);
-
-    regions.push({
-      name: value? value.name: records[index].RegionName,
-      cn_name: value? value.cn_name: records[index].RegionName,
-      value: records[index].RegionName,
-    });
+  const regions: ClickStreamRegion[] = [];
+  for (let region of records as Region[]) {
+    if (region.RegionName) {
+      regions.push({
+        id: region.RegionName,
+      });
+    }
   }
   return regions;
 };

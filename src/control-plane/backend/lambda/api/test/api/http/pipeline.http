@@ -1,9 +1,9 @@
 POST {{HOST}}/api/pipeline
 Content-Type: application/json
-X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011110
+X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011111
 
 {
-  "projectId": "b66e82de-0f4d-43c3-93d8-d1956d40cc6a",
+  "projectId": "db5e5246-65fe-43ab-b2c5-0e1c17df87ec",
   "name": "Pipeline-01",
   "description": "Description of Pipeline-01",
   "region": "us-east-1",
@@ -17,8 +17,8 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011110
   "ingestionServer": {
     "network": {
       "vpcId": "vpc-0ba32b04ccc029088",
-      "publicSubnetIds": "subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5",
-      "privateSubnetIds": "subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5"
+      "publicSubnetIds": ["subnet-09ae522e85bbee5c5", "subnet-09ae522e85bbee5c5", "subnet-09ae522e85bbee5c5"],
+      "privateSubnetIds": ["subnet-09ae522e85bbee5c5", "subnet-09ae522e85bbee5c5", "subnet-09ae522e85bbee5c5"]
     },
     "size": {
       "serverMin": 2,
@@ -27,22 +27,23 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011110
       "scaleOnCpuUtilizationPercent": 50
     },
     "domain": {
-      "hostedZoneId": "Z08525975JO576HL6S9E",
-      "hostedZoneName": "mingfeiq.people.aws.dev",
+      "hostedZoneId": "Z000000000000000000E",
+      "hostedZoneName": "fake.test.dev.com",
       "recordName": "click"
     },
     "loadBalancer": {
       "serverEndpointPath": "/collect",
       "serverCorsOrigin": "*",
       "protocol": "HTTPS",
-      "enableApplicationLoadBalancerAccessLog": "Yes",
+      "enableApplicationLoadBalancerAccessLog": true,
       "logS3Bucket": "Pipeline-01-log",
       "logS3Prefix": "logs",
-      "notificationsTopicArn": "arn:aws:sns:us-east-1:615633583142:test"
+      "notificationsTopicArn": "arn:aws:sns:us-east-1:012345678912:test"
     },
-    "sink": {
+    "sinkType": "s3",
+    "sinkS3": {
+      "s3Uri": "s3://012345678912-test",
       "sinkType": "s3",
-      "s3Uri": "s3://615633583142-test",
       "s3prefix": "test",
       "s3BufferSize": 50,
       "s3BufferInterval": 30
@@ -53,23 +54,35 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011110
 }
 
 ###
-GET {{HOST}}/api/pipeline/53b4c78e-975e-4deb-b3f9-27fcad2600a3?pid=b66e82de-0f4d-43c3-93d8-d1956d40cc6a
+GET {{HOST}}/api/pipeline
+Accept: application/json
+
+###
+GET {{HOST}}/api/pipeline/8ffa10ad-4643-4de0-bd27-989564eee5eb?pid=b66e82de-0f4d-43c3-93d8-d1956d40cc6a
 Accept: application/json
 
 ###
 
-PUT {{HOST}}/api/pipeline/53b4c78e-975e-4deb-b3f9-27fcad2600a3
+PUT {{HOST}}/api/pipeline/8ffa10ad-4643-4de0-bd27-989564eee5eb
 Content-Type: application/json
 
 {
   "projectId": "b66e82de-0f4d-43c3-93d8-d1956d40cc6a",
-  "version": "1677486028147",
+  "version": "1677557813463",
   "dataCollectionSDK": "Clickstream SDK",
-  "updateAt": 1677486028147,
-  "pipelineId": "53b4c78e-975e-4deb-b3f9-27fcad2600a3",
-  "operator": "",
-  "name": "Pipeline-01",
+  "updateAt": 1677557813463,
+  "pipelineId": "8ffa10ad-4643-4de0-bd27-989564eee5eb",
+  "operator": "111",
+  "name": "Pipeline-01111",
   "ingestionServer": {
+    "sinkType": "s3",
+    "sinkS3": {
+      "s3Uri": "s3://012345678912-test",
+      "sinkType": "s3",
+      "s3prefix": "test",
+      "s3BufferSize": 50,
+      "s3BufferInterval": 30
+    },
     "size": {
       "serverMax": 4,
       "warmPoolSize": 1,
@@ -79,18 +92,11 @@ Content-Type: application/json
     "loadBalancer": {
       "protocol": "HTTPS",
       "enableApplicationLoadBalancerAccessLog": "Yes",
-      "logS3Prefix": "logs",
-      "logS3Bucket": "Pipeline-01-log",
-      "notificationsTopicArn": "arn:aws:sns:us-east-1:615633583142:test",
+      "logS3Prefix": "logs111",
+      "logS3Bucket": "Pipeline-01-log111",
+      "notificationsTopicArn": "arn:aws:sns:us-east-1:012345678912:test",
       "serverCorsOrigin": "*",
       "serverEndpointPath": "/collect"
-    },
-    "sink": {
-      "s3Uri": "s3://615633583142-test",
-      "sinkType": "s3",
-      "s3prefix": "test",
-      "s3BufferSize": 50,
-      "s3BufferInterval": 30
     },
     "network": {
       "publicSubnetIds": "subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5",
@@ -98,13 +104,13 @@ Content-Type: application/json
       "privateSubnetIds": "subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5"
     },
     "domain": {
-      "hostedZoneId": "Z08525975JO576HL6S9E",
-      "hostedZoneName": "mingfeiq.people.aws.dev",
+      "hostedZoneId": "Z000000000000000000E",
+      "hostedZoneName": "fake.test.dev.com",
       "recordName": "click"
     }
   },
   "deleted": false,
-  "createAt": 1677486028147,
+  "createAt": 1677557813463,
   "region": "us-east-1",
   "description": "Description of Pipeline-01",
   "etl": {},

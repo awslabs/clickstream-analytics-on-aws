@@ -207,6 +207,10 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
           reason:
               'The SG is used by ELB to receive internet traffic',
         },
+        {
+          id: 'W40',
+          reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
+        },
       ],
     );
 
