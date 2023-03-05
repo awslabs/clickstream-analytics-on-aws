@@ -18,18 +18,21 @@ import { join } from 'path';
 import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { CfnDistribution, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagToStack } from './common/cfn-nag';
+import { addCfnNagToStack, addCfnNagSuppressRules } from './common/cfn-nag';
+
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
 import {
-  CfnNagWhitelistForBucketDeployment,
-  CfnNagWhitelistForS3BucketDelete,
+  supressWarningsForCloudFrontS3Portal,
 } from './control-plane/private/nag';
+import { SolutionCognito } from './control-plane/private/solution-cognito';
 
 export interface CloudFrontControlPlaneStackProps extends StackProps {
   /**
@@ -43,6 +46,11 @@ export interface CloudFrontControlPlaneStackProps extends StackProps {
    * Whether to use custom domain name
    */
   useCustomDomainName?: boolean;
+
+  /**
+   * user existing OIDC provider or not
+   */
+  useExistingOIDCProvider?: boolean;
 }
 
 export class CloudFrontControlPlaneStack extends Stack {
@@ -60,7 +68,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     if (props?.targetToCNRegions) {
       const iamCertificateId = Parameters.createIAMCertificateIdParameter(this);
-      this.addToParamLabels('IAM Certificate Id', iamCertificateId.logicalId);
+      this.addToParamLabels('Certificate Id', iamCertificateId.logicalId);
 
       const domainName = Parameters.createDomainNameParameter(this);
       this.addToParamLabels('Domain Name', domainName.logicalId);
@@ -134,6 +142,52 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
     });
 
+    let issuer: string;
+    //Create Cognito user pool and client for backend api
+    if (!props?.useExistingOIDCProvider && !props?.targetToCNRegions) {
+      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
+      this.addToParamLabels('Admin User Email', emailParamerter.logicalId);
+      this.addToParamGroups('Authentication Information', emailParamerter.logicalId);
+
+      const cognito = new SolutionCognito(this, 'solution-cognito', {
+        email: emailParamerter.valueAsString,
+        callbackUrls: [controlPlane.controlPlaneUrl],
+      });
+
+      issuer = cognito.oidcProps.issuer;
+
+    } else {
+      const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
+      issuer = oidcParameters.oidcProvider.valueAsString;
+    }
+
+    const authFunction = new NodejsFunction(this, 'AuthorizerFunction', {
+      runtime: props?.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+      handler: 'handler',
+      entry: './src/control-plane/auth/index.ts',
+      environment: {
+        JWKS_URI: issuer + '/.well-known/jwks.json',
+        ISSUER: issuer,
+      },
+      architecture: Architecture.ARM_64,
+      reservedConcurrentExecutions: 100,
+    });
+    addCfnNagSuppressRules(
+      authFunction.node.defaultChild as CfnFunction,
+      [
+        {
+          id: 'W89', //Lambda functions should be deployed inside a VPC
+          reason: Constant.NAG_REASON_NO_VPC_INVOLVED,
+        },
+      ],
+    );
+
+    // keep for future use
+    // new TokenAuthorizer(this, 'JWTAuthorizer', {
+    //   handler: authFunction,
+    //   validationRegex: "^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$"
+    // });
+
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
     }
@@ -168,8 +222,8 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
     };
 
-    Aspects.of(this).add(new CfnNagWhitelistForBucketDeployment());
-    Aspects.of(this).add(new CfnNagWhitelistForS3BucketDelete());
+    //supress nag warnings
+    supressWarningsForCloudFrontS3Portal(this);
 
     new CfnOutput(this, 'ControlPlaneUrl', {
       description: 'The CloudFront distribution domain name',

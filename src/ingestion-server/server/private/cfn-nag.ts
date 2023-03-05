@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import { Stack } from 'aws-cdk-lib';
-import { addCfnNagFoLogRetention, addCfnNagForCustomResource, addCfnNagToStack } from '../../../common/cfn-nag';
+import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceProvider } from '../../../common/cfn-nag';
 
 
 const cfnNagList = [
@@ -67,7 +67,7 @@ const cfnNagList = [
 ];
 
 export function addCfnNagToIngestionServer(stack: Stack) {
-  addCfnNagFoLogRetention(stack);
-  addCfnNagForCustomResource(stack);
+  addCfnNagForLogRetention(stack);
+  addCfnNagForCustomResourceProvider(stack, 'S3SinkConnector', 'S3SinkConnectorCustomResource', '');
   addCfnNagToStack(stack, cfnNagList);
 }

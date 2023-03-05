@@ -36,6 +36,12 @@ import {
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
   IAM_CERTIFICATE_ID_PARRERN,
+  EMAIL_PARRERN,
+  OIDC_ISSUER_PATTERN,
+  OIDC_CLIENT_ID_PATTERN,
+  PARAMETER_LABEL_OIDC_ISSUER,
+  PARAMETER_LABEL_OIDC_CLIENT_ID,
+  PARAMETER_GROUP_LABEL_OIDC,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -56,6 +62,13 @@ export interface NetworkParameters {
   vpcId: CfnParameter;
   publicSubnets?: CfnParameter;
   privateSubnets: CfnParameter;
+  paramLabels: any[];
+  paramGroups: any[];
+}
+
+export interface OIDCParameters {
+  oidcProvider: CfnParameter;
+  oidcClientId?: CfnParameter;
   paramLabels: any[];
   paramGroups: any[];
 }
@@ -158,6 +171,15 @@ export class Parameters {
     }
   }
 
+  public static createCognitoUserEmailParameter(scope: Construct, id?: string) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'Email', {
+      description: 'Email address of admin user ',
+      type: 'String',
+      allowedPattern: `^${EMAIL_PARRERN}$`,
+      constraintDescription: `Email address must match pattern ${EMAIL_PARRERN}`,
+    });
+  }
+
   public static createS3BucketParameter(scope: Construct, id: string, props: {description: string}) : CfnParameter {
     return new CfnParameter(scope, id, {
       type: 'String',
@@ -252,6 +274,44 @@ export class Parameters {
       hostedZoneId,
       hostedZoneName,
       recordName: recordName ?? undefined,
+      paramLabels: labels,
+      paramGroups: groups,
+    };
+  }
+
+  public static createOIDCParameters(scope: Construct, paramGroups?: any[], paramLabels?: any, id?: string) : OIDCParameters {
+
+    const groups: any[] = paramGroups ?? [];
+    const labels: any = paramLabels ?? {};
+
+    const oidcProvider = new CfnParameter(scope, id ? id + '-OIDCProvider' : 'OIDCProvider', {
+      type: 'String',
+      description: 'The OpenID connector issuer, get this value from your OIDC provider',
+      allowedPattern: OIDC_ISSUER_PATTERN,
+      constraintDescription: `Issuer must match pattern ${OIDC_ISSUER_PATTERN}`,
+    });
+    labels[oidcProvider.logicalId] = {
+      default: PARAMETER_LABEL_OIDC_ISSUER,
+    };
+
+    const oidcClientId = new CfnParameter(scope, id ? id + '-OIDCClientId' : 'OIDCClientId', {
+      type: 'String',
+      description: 'The OpenID connector client id, get this value from your OIDC provider',
+      allowedPattern: OIDC_CLIENT_ID_PATTERN,
+      constraintDescription: `Client id must match pattern ${OIDC_CLIENT_ID_PATTERN}`,
+    });
+    labels[oidcClientId.logicalId] = {
+      default: PARAMETER_LABEL_OIDC_CLIENT_ID,
+    };
+
+    groups.push({
+      Label: { default: PARAMETER_GROUP_LABEL_OIDC },
+      Parameters: [oidcProvider.logicalId, oidcClientId.logicalId],
+    });
+
+    return {
+      oidcProvider,
+      oidcClientId,
       paramLabels: labels,
       paramGroups: groups,
     };

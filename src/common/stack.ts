@@ -14,15 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { Fn, Stack } from 'aws-cdk-lib';
 
-import { Stack } from 'aws-cdk-lib';
-import { addCfnNagForCertificateRequest, addCfnNagForS3AutoDelete, addCfnNagForBucketDeployment } from '../../common/cfn-nag';
-
-export function supressWarningsForCloudFrontS3Portal(stack: Stack) {
-
-  addCfnNagForCertificateRequest(stack);
-
-  addCfnNagForS3AutoDelete(stack);
-
-  addCfnNagForBucketDeployment(stack);
+export function getShortIdOfStack(stack: Stack): string {
+  return Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))));
 }

@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Aws, Fn, Stack } from 'aws-cdk-lib';
+import { Aws, Stack } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { getShortIdOfStack } from './stack';
 
 export function createLogGroupWithKmsKey(
   scope: Construct,
@@ -27,7 +28,7 @@ export function createLogGroupWithKmsKey(
     retention?: RetentionDays;
   },
 ) {
-  const shortId = Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', Stack.of(scope).stackId))));
+  const shortId = getShortIdOfStack(Stack.of(scope));
   const logGroupName = `${props.prefix ?? 'clickstream-loggroup'}-${shortId}`;
   const logGroupKmsKey = new Key(scope, 'LogGroupKmsKey', {
     description: 'KMS key for log group encryption',

@@ -30,7 +30,12 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { KinesisDataStreamToS3 } from './kinesis-to-s3';
-import { addCfnNagFoLogRetention, addCfnNagForCustomResource, addCfnNagToStack, lambdaInVpcRolePolicyRulesToSuppress } from '../../common/cfn-nag';
+import {
+  addCfnNagForLogRetention,
+  addCfnNagToStack,
+  ruleRolePolicyWithWildcardResources,
+} from '../../common/cfn-nag';
+
 import { SolutionInfo } from '../../common/solution-info';
 
 export interface CreateKinesisNestStackProps {
@@ -202,15 +207,11 @@ export function addCdkNagToStack(stack: Stack) {
 
 function addCfnNag(stack: Stack) {
   const cfnNagList = [
-    {
-      paths_endswith: [
-        'kinesisDataStreamToS3OnDemand/kinesisToS3LambdaRole/DefaultPolicy/Resource',
-        'kinesisDataStreamToS3Provisioned/kinesisToS3LambdaRole/DefaultPolicy/Resource',
-      ],
-      rules_to_suppress: lambdaInVpcRolePolicyRulesToSuppress(),
-    },
+    ruleRolePolicyWithWildcardResources(
+      'kinesisDataStreamToS3OnDemand/kinesisToS3LambdaRole/DefaultPolicy/Resource', 'KinesisToS3', 'vpc eni'),
+    ruleRolePolicyWithWildcardResources(
+      'kinesisDataStreamToS3Provisioned/kinesisToS3LambdaRole/DefaultPolicy/Resource', 'KinesisToS3', 'vpc eni'),
   ];
-  addCfnNagFoLogRetention(stack);
-  addCfnNagForCustomResource(stack);
+  addCfnNagForLogRetention(stack);
   addCfnNagToStack(stack, cfnNagList);
 }

@@ -16,7 +16,7 @@ limitations under the License.
 
 import { join } from 'path';
 import { LogLevel } from '@aws-sdk/client-sfn';
-import { Aws, aws_lambda, CfnResource, Duration } from 'aws-cdk-lib';
+import { Aws, aws_lambda, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Effect, Policy, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -25,9 +25,10 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { StateMachine, JsonPath, Condition, Choice, WaitTime, Wait, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
+import { addCfnNagToStack, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
-import { Constant } from '../private/constant';
+
 
 export interface StackActionStateMachineFuncProps {
   readonly vpc?: IVpc;
@@ -205,29 +206,23 @@ export class StackActionStateMachine extends Construct {
       timeout: Duration.minutes(30),
     });
 
-    const stateMachineDefaultPolicy = this.stateMachine.role.node.tryFindChild('DefaultPolicy')?.node.defaultChild as CfnResource;
-    stateMachineDefaultPolicy?.addMetadata('cfn_nag', {
-      rules_to_suppress: [
-        {
-          id: 'W76',
-          reason: 'The state machine default policy document create by many CallAwsService.',
-        },
-        {
-          id: 'W12',
-          reason: Constant.NAG_REASON_WILDCARD_REQUIRED_CERT_REQUEST_FUN,
-        },
-      ],
-    });
+    const wildcardResources = ruleRolePolicyWithWildcardResources('StackActionStateMachine/Role/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
+    addCfnNagToStack(Stack.of(this), [
+      {
+        paths_endswith: wildcardResources.paths_endswith,
+        rules_to_suppress: [
+          ...wildcardResources.rules_to_suppress,
+          {
+            id: 'W76',
+            reason: 'The state machine default policy document create by many CallAwsService.',
+          },
+        ],
+      },
+    ]);
+    addCfnNagToStack(Stack.of(this), [
+      ruleRolePolicyWithWildcardResources('CallbackFunctionRole/DefaultPolicy/Resource', 'CallbackFunInStateAction', 'xray'),
+    ]);
 
-    const callbackFuncDefaultPolicy = this.callbackFunction.role?.node.tryFindChild('DefaultPolicy')?.node.defaultChild as CfnResource;
-    callbackFuncDefaultPolicy?.addMetadata('cfn_nag', {
-      rules_to_suppress: [
-        {
-          id: 'W12',
-          reason: Constant.NAG_REASON_WILDCARD_REQUIRED_CERT_REQUEST_FUN,
-        },
-      ],
-    });
 
     // Add pass role policy to sm role
     const cloudformationPolicy = new Policy(this, 'SMCloudformationPolicy', {

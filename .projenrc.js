@@ -67,6 +67,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDeps,
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.7',
+    'jsonwebtoken@^9.0.0',
+    'jwks-rsa@^3.0.1',
     ...depsForApiProject,
     ...awsSDKDeps,
   ], /* Runtime dependencies of this module. */
@@ -79,7 +81,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   ],
   minNodeVersion: '16.18.0',
 });
-
 
 project.eslint?.addRules({
   'import/no-namespace': [

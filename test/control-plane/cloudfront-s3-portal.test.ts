@@ -26,26 +26,27 @@ import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
 
+const commontApp = new App();
+
+const commonTestStack = new Stack(commontApp, 'comTestStack');
+new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
+  frontendProps: {
+    assetPath: 'frontend',
+    dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+    buildCommand: [
+      'bash', '-c',
+      'echo test > /asset-output/test',
+    ],
+    autoInvalidFilePaths: ['/index.html'],
+  },
+});
+const commonTemplate = Template.fromStack(commonTestStack);
+
 describe('CloudFrontS3Portal', () => {
 
   test('default setting', () => {
-
-    const testStack = new Stack(new App(), 'testStack');
-    new CloudFrontS3Portal(testStack, 'test-portal', {
-      frontendProps: {
-        assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
-      },
-    });
-    const template = Template.fromStack(testStack);
-
     //portal bucket
-    template.hasResourceProperties('AWS::S3::Bucket', {
+    commonTemplate.hasResourceProperties('AWS::S3::Bucket', {
       AccessControl: 'LogDeliveryWrite',
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [
@@ -69,7 +70,7 @@ describe('CloudFrontS3Portal', () => {
     });
 
     //log bucket
-    template.hasResourceProperties('AWS::S3::Bucket', {
+    commonTemplate.hasResourceProperties('AWS::S3::Bucket', {
       AccessControl: 'LogDeliveryWrite',
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [
@@ -93,7 +94,7 @@ describe('CloudFrontS3Portal', () => {
     });
 
     //Distribution
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+    commonTemplate.hasResourceProperties('AWS::CloudFront::Distribution', {
       DistributionConfig: {
         Comment: Match.stringLikeRegexp('^CloudFront distribution for'),
         DefaultCacheBehavior: {
@@ -130,15 +131,15 @@ describe('CloudFrontS3Portal', () => {
     });
 
     //Distribution
-    template.hasResourceProperties('AWS::Lambda::LayerVersion', {
+    commonTemplate.hasResourceProperties('AWS::Lambda::LayerVersion', {
       Description: '/opt/awscli/aws',
     });
 
     //Distribution
-    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
     //Lambda function
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Handler: 'index.handler',
       Runtime: 'python3.9',
       Timeout: 900,
@@ -242,23 +243,7 @@ describe('CloudFrontS3Portal', () => {
   });
 
   test('Test OAC for global regions', () => {
-    const app = new App();
-
-    const testStack = new Stack(app, 'testStack');
-    new CloudFrontS3Portal(testStack, 'test-portal', {
-      frontendProps: {
-        assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
-      },
-    });
-    const template = Template.fromStack(testStack);
-
-    template.hasResourceProperties('AWS::CloudFront::OriginAccessControl', {
+    commonTemplate.hasResourceProperties('AWS::CloudFront::OriginAccessControl', {
       OriginAccessControlConfig: {
         Name: {
           'Fn::Join': [

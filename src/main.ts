@@ -98,11 +98,13 @@ stackSuppressions([
 ], [
   ...commonSuppresionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
+  { id: 'AwsSolutions-L1', reason: 'NODEJS_18_X is not supported in China regions' },
 ]);
 
 const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [
   ...commonSuppresionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+  { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
 ];
 
 stackSuppressions([

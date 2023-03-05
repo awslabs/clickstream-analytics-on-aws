@@ -24,16 +24,12 @@ export class Constant {
 
   public static readonly ERROR_RECORD_ZONE_REQUIRED = 'Record name and hostZone are required';
 
-  public static readonly NAG_REASON_CERT_VALIDATION_MANAGED_FUN = 'Lambda Function is managed by CDK for certificate validation';
-
-  public static readonly NAG_REASON_CDK_BUCKETDEPLOYMENT_MANAGED_FUN = 'Lambda Function is managed by CDK BucketDeployment';
-
-  public static readonly NAG_REASON_WILDCARD_REQUIRED_CERT_REQUEST_FUN = 'wildcard resource is used for certificate request Lambda Function';
-
   public static readonly NAG_REASON_TLSV_REQUIRED_CN_REGION = 'TLSv1 is required in China regisons';
 
   public static readonly NAG_REASON_TLSV1_2_DEFAULT_CERT_DOMAIN = 'suppress minium TLSv1.2 warning when using default certificate/domain name of cloudfront';
 
-  public static readonly NAG_REASON_CDK_S3_BUCKET_MANAGED_FUN = 'Lambda Function is managed by CDK S3 Bucket';
+  public static readonly NAG_REASON_NO_VPC_INVOLVED = 'There is no vpc involved in current deploment mode, it is unnecessary to deploy to a vpc.';
+
+  public static readonly NAG_REASON_COGNITO_MANAGED_FUN = 'Lambda Function is managed by Cognito to get service token.';
 
 }

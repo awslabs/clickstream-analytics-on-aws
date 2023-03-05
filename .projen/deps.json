@@ -196,6 +196,16 @@
       "type": "runtime"
     },
     {
+      "name": "jsonwebtoken",
+      "version": "^9.0.0",
+      "type": "runtime"
+    },
+    {
+      "name": "jwks-rsa",
+      "version": "^3.0.1",
+      "type": "runtime"
+    },
+    {
       "name": "uuid",
       "version": "^9.0.0",
       "type": "runtime"

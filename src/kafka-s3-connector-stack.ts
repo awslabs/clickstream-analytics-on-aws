@@ -20,7 +20,7 @@ import { ISecurityGroup, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
-import { addCfnNagFoLogRetention, addCfnNagForCustomResource, addCfnNagToStack } from './common/cfn-nag';
+import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceProvider } from './common/cfn-nag';
 import { DOMAIN_NAME_PATTERN } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
@@ -245,20 +245,14 @@ function addCfnNag(stack: Stack) {
     {
       paths_endswith: [
         's3-kafkaconnect-role/DefaultPolicy/Resource',
+        'S3SinkConnectorCustomResourceLambdaRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: kafkaLambdaRolePolicyRulesToSuppress,
     },
   ];
 
-  addCfnNagFoLogRetention(stack);
-  addCfnNagForCustomResource(stack, [
-    {
-      paths_endswith: [
-        'S3SinkConnectorCustomResourceLambdaRole/DefaultPolicy/Resource',
-      ],
-      rules_to_suppress: kafkaLambdaRolePolicyRulesToSuppress,
-    },
-  ]);
+  addCfnNagForLogRetention(stack);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for MSKS3SinkConnector', 'SinkConnectorCustomResourceProvider', undefined);
 
   addCfnNagToStack(stack, cfnNagList);
 }
