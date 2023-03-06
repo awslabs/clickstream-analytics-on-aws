@@ -63,4 +63,5 @@ junit.xml
 !/.gitlab/ci-templates/prlint.yml
 !/.gitlab/ci-templates/docs.yml
 !/.gitlab/ci-templates/semgrep.yml
+!/.gitlab/ci-templates/license-check.yml
 !/.gitlab/ci-templates/cfn-nag.yml

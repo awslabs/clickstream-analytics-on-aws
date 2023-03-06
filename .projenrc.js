@@ -1,3 +1,16 @@
+/**
+ *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  with the License. A copy of the License is located at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
+ *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
+ *  and limitations under the License.
+ */
+
 const { awscdk, gitlab, typescript } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.67.0';
@@ -333,6 +346,38 @@ gitlabMain.createNestedTemplates({
             sast: 'gl-sast-report.json',
           },
         },
+      },
+    },
+  },
+  'license-check': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      license: {
+        stage: 'build',
+        image: {
+          name: 'public.ecr.aws/amazonlinux/amazonlinux:2',
+        },
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        variables: {
+          LICENSE_FILE: '/tmp/license-check/license-header.txt',
+        },
+        before_script: [
+          'yum install -y tar gzip git',
+          'mkdir -p /tmp/license-check && curl -s https://raw.githubusercontent.com/lluissm/license-header-checker/master/install.sh | bash -s -- -b /tmp/license-check',
+          'sed -n 1,12p .projenrc.js > $LICENSE_FILE && cat $LICENSE_FILE',
+        ],
+        script: [
+          '/tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java && [[ -z `git status -s` ]]',
+        ],
       },
     },
   },
