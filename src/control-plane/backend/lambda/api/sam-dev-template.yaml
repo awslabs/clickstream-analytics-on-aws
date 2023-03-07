@@ -66,6 +66,7 @@ Resources:
           LOG_LEVEL: Debug
           CLICK_STREAM_TABLE_NAME: !Ref LocalSamClickStreamTable
           DICTIONARY_TABLE_NAME: !Ref LocalSamClickStreamDictionaryTable
+          AWS_URL_SUFFIX: !Ref AWS::URLSuffix
       Events:
         Root:
           Type: HttpApi

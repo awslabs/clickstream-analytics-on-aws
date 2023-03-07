@@ -19,7 +19,7 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869016666
 
 ###
 
-GET {{HOST}}/api/project/571f8ab0-7b18-474c-9905-3cc4ddd5179f
+GET {{HOST}}/api/project/b2540521-273a-443a-ab70-80ba49c26caf
 Accept: application/json
 
 ###

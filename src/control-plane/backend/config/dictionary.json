@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Solution",
+    "data": {
+      "name": "__SOLUTION_NAME__",
+      "dist_output_bucket": "__DIST_OUTPUT_BUCKET__",
+      "prefix": "__PREFIX__"
+    }
+  },
+  {
+    "name": "Templates",
+    "data": {
+      "ingestion_s3": "ingestion-server-s3-stack.template.json",
+      "ingestion_kafka": "ingestion-server-kafka-stack.template.json",
+      "ingestion_kinesis": "ingestion-server-kinesis-stack.template.json"
+    }
+  }
+]

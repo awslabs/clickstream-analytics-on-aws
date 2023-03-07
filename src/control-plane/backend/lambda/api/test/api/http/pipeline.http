@@ -1,9 +1,9 @@
 POST {{HOST}}/api/pipeline
 Content-Type: application/json
-X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011111
+X-Click-Stream-Request-Id: 605e367e-3fd8-fhhg-jkyi-dsgrgfdsfsdf
 
 {
-  "projectId": "db5e5246-65fe-43ab-b2c5-0e1c17df87ec",
+  "projectId": "ec74bc97-58e9-43f4-ba7d-a153c10d8e62",
   "name": "Pipeline-01",
   "description": "Description of Pipeline-01",
   "region": "us-east-1",
@@ -42,9 +42,8 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869011111
     },
     "sinkType": "s3",
     "sinkS3": {
-      "s3Uri": "s3://012345678912-test",
-      "sinkType": "s3",
-      "s3prefix": "test",
+      "s3DataBucket": "s3://012345678912-test",
+      "s3DataPrefix": "test",
       "s3BufferSize": 50,
       "s3BufferInterval": 30
     }

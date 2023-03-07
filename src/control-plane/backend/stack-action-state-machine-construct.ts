@@ -25,7 +25,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { StateMachine, JsonPath, Condition, Choice, WaitTime, Wait, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { addCfnNagToStack, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
+import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
 
@@ -39,6 +39,7 @@ export interface StackActionStateMachineFuncProps {
 export interface StackActionStateMachineProps {
   readonly clickStreamTable: Table;
   readonly lambdaFuncProps: StackActionStateMachineFuncProps;
+  readonly targetToCNRegions?: boolean;
 }
 
 export class StackActionStateMachine extends Construct {
@@ -164,16 +165,24 @@ export class StackActionStateMachine extends Construct {
       description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-callback/index.ts'),
       handler: 'handler',
-      runtime: Aws.PARTITION === 'aws-cn' ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+      runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
       role: callbackFunctionRole,
       architecture: Architecture.ARM_64,
-      reservedConcurrentExecutions: 5,
+      environment: {
+        LOG_LEVEL: 'ERROR',
+      },
       ...props.lambdaFuncProps,
     });
     props.clickStreamTable.grantReadWriteData(this.callbackFunction);
     cloudWatchSendLogs('callback-func-logs', this.callbackFunction);
     createENI('callback-func-eni', this.callbackFunction);
+    addCfnNagToStack(Stack.of(this), [
+      ruleForLambdaVPCAndReservedConcurrentExecutions(
+        'StackActionStateMachine/CallbackFunction/Resource',
+        'CallbackFunction',
+      ),
+    ]);
 
     const saveStackRuntimeTask = new LambdaInvoke(this, 'Save Stack Runtime', {
       lambdaFunction: this.callbackFunction,

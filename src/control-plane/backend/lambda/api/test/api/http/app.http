@@ -1,9 +1,9 @@
-GET http://localhost:8080/api/app?pid=fdd1f346-c34e-41ee-971b-7f96484dad18&pageNumber=2
+GET {{HOST}}/api/app?pid=fdd1f346-c34e-41ee-971b-7f96484dad18&pageNumber=2
 Accept: application/json
 
 ###
 
-POST http://localhost:8080/api/app
+POST {{HOST}}/api/app
 Content-Type: application/json
 X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869019999
 
@@ -16,12 +16,12 @@ X-Click-Stream-Request-Id: 605e367e-3fd8-4c59-8be5-e81869019999
 }
 ###
 
-GET http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
+GET {{HOST}}/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
 Accept: application/json
 
 ###
 
-PUT http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e
+PUT {{HOST}}/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e
 Content-Type: application/json
 
 {
@@ -32,5 +32,5 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:8080/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
+DELETE {{HOST}}/api/app/a7123164-6a63-4f3c-8236-f314acb26a5e?pid=fdd1f346-c34e-41ee-971b-7f96484dad18
 Accept: application/json

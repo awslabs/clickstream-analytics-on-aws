@@ -56,6 +56,10 @@ interface IngestionServerLoadBalancerProps {
    */
   readonly protocol: 'HTTP' | 'HTTPS';
   /**
+   * AutoScaling group notifications SNS topic arn (optional)
+   */
+  readonly notificationsTopicArn?: string;
+  /**
    * Enable application load balancer access log
    */
   readonly enableApplicationLoadBalancerAccessLog: boolean;
@@ -67,29 +71,25 @@ interface IngestionServerLoadBalancerProps {
    * S3 object prefix to save log (optional)
    */
   readonly logS3Prefix?: string;
-  /**
-   * AutoScaling group notifications SNS topic arn (optional)
-   */
-  readonly notificationsTopicArn?: string;
 }
 
 interface IngestionServerSinkS3Props {
   /**
-   * s3 URI
+   * S3 bucket name
    */
-  readonly s3Uri?: string;
+  readonly s3DataBucket: string;
   /**
-   * s3 prefix
+   * s3 object prefix
    */
-  readonly s3prefix?: string;
+  readonly s3DataPrefix: string;
   /**
-   * s3 buffer size
+   * s3 Batch max bytes
    */
-  readonly s3BufferSize?: number;
+  readonly s3BatchMaxBytes?: number;
   /**
-   * s3 buffer interval
+   * s3 Batch timeout seconds
    */
-  readonly s3BufferInterval?: number;
+  readonly s3BatchTimeout?: number;
 }
 
 interface IngestionServerSinkKafkaProps {
@@ -253,7 +253,13 @@ export interface PipelineList {
   items: Pipeline[];
 }
 
-export function getIngestionStackParameters(pipeline: Pipeline): StackRequestInputParameter[] {
+export interface StackParameter {
+  readonly result: boolean;
+  readonly message: string;
+  readonly parameters: StackRequestInputParameter[];
+}
+
+export function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
   let parameters: StackRequestInputParameter[] = [];
   // VPC Information
   parameters.push({
@@ -267,31 +273,6 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackRequestInp
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: pipeline.ingestionServer.network.privateSubnetIds.join(','),
-  });
-  // LB
-  parameters.push({
-    ParameterKey: 'Protocol',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.protocol,
-  });
-  parameters.push({
-    ParameterKey: 'ServerCorsOrigin',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.serverCorsOrigin,
-  });
-  parameters.push({
-    ParameterKey: 'NotificationsTopicArn',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
-  });
-  parameters.push({
-    ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
-  });
-  parameters.push({
-    ParameterKey: 'LogS3Bucket',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket ?? '',
-  });
-  parameters.push({
-    ParameterKey: 'LogS3Prefix',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Prefix ?? '',
   });
   // Domain Information
   parameters.push({
@@ -308,6 +289,18 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackRequestInp
   });
   // Server
   parameters.push({
+    ParameterKey: 'Protocol',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.protocol,
+  });
+  parameters.push({
+    ParameterKey: 'ServerEndpointPath',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.serverEndpointPath,
+  });
+  parameters.push({
+    ParameterKey: 'ServerCorsOrigin',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.serverCorsOrigin,
+  });
+  parameters.push({
     ParameterKey: 'ServerMax',
     ParameterValue: pipeline.ingestionServer.size.serverMax.toString(),
   });
@@ -323,27 +316,124 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackRequestInp
     ParameterKey: 'WarmPoolSize',
     ParameterValue: (pipeline.ingestionServer.size.warmPoolSize ?? 0).toString(),
   });
-  // Kafka Cluster
-  // TODO: mock kafka
   parameters.push({
-    ParameterKey: 'SinkToKafka',
-    ParameterValue: 'Yes',
+    ParameterKey: 'NotificationsTopicArn',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+  });
+  // Logs
+  parameters.push({
+    ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
   });
   parameters.push({
-    ParameterKey: 'KafkaBrokers',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaBrokers ?? '',
+    ParameterKey: 'LogS3Bucket',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket ?? '',
   });
   parameters.push({
-    ParameterKey: 'KafkaTopic',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaTopic ?? '',
+    ParameterKey: 'LogS3Prefix',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Prefix ?? '',
   });
-  parameters.push({
-    ParameterKey: 'MskClusterName',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskClusterName ?? '',
-  });
-  parameters.push({
-    ParameterKey: 'MskSecurityGroupId',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskSecurityGroupId ?? '',
-  });
-  return parameters;
+  // S3 sink
+  if (pipeline.ingestionServer.sinkType === 's3') {
+    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket) {
+      return {
+        result: false,
+        message: 'S3 Sink must have s3DataBucket.',
+        parameters,
+      };
+    }
+    if (!pipeline.ingestionServer.sinkS3?.s3DataPrefix) {
+      return {
+        result: false,
+        message: 'S3 Sink must have s3DataPrefix.',
+        parameters,
+      };
+    }
+    parameters.push({
+      ParameterKey: 'S3DataBucket',
+      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket,
+    });
+    parameters.push({
+      ParameterKey: 'S3DataPrefix',
+      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataPrefix,
+    });
+    parameters.push({
+      ParameterKey: 'S3BatchMaxBytes',
+      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes?? 30000000).toString(),
+    });
+    parameters.push({
+      ParameterKey: 'S3BatchTimeout',
+      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchTimeout?? 300).toString(),
+    });
+
+  }
+  // Kafka sink
+  if (pipeline.ingestionServer.sinkType === 'kafka') {
+    parameters.push({
+      ParameterKey: 'KafkaBrokers',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaBrokers ?? '',
+    });
+    parameters.push({
+      ParameterKey: 'KafkaTopic',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaTopic ?? '',
+    });
+    parameters.push({
+      ParameterKey: 'MskClusterName',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.mskClusterName ?? '',
+    });
+    parameters.push({
+      ParameterKey: 'MskSecurityGroupId',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.mskSecurityGroupId ?? '',
+    });
+  }
+  // Kinesis sink
+  if (pipeline.ingestionServer.sinkType === 'kinesis') {
+    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket) {
+      return {
+        result: false,
+        message: 'Kinesis Sink must have kinesisDataS3Bucket.',
+        parameters,
+      };
+    }
+    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Prefix) {
+      return {
+        result: false,
+        message: 'Kinesis Sink must have kinesisDataS3Prefix.',
+        parameters,
+      };
+    }
+    parameters.push({
+      ParameterKey: 'KinesisDataS3Bucket',
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket,
+    });
+    parameters.push({
+      ParameterKey: 'KinesisDataS3Prefix',
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Prefix,
+    });
+    parameters.push({
+      ParameterKey: 'KinesisStreamMode',
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode ?? 'ON_DEMAND',
+    });
+    parameters.push({
+      ParameterKey: 'KinesisShardCount',
+      ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisShardCount ?? 3).toString(),
+    });
+    parameters.push({
+      ParameterKey: 'KinesisDataRetentionHours',
+      ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisDataRetentionHours ?? 24).toString(),
+    });
+    parameters.push({
+      ParameterKey: 'KinesisBatchSize',
+      ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisBatchSize ?? 10000).toString(),
+    });
+    parameters.push({
+      ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+      ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisMaxBatchingWindowSeconds ?? 300).toString(),
+    });
+  }
+  return {
+    result: true,
+    message: '',
+    parameters,
+  };
 }

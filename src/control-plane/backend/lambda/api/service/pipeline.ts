@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import { v4 as uuidv4 } from 'uuid';
-import { clickStreamTableName } from '../common/constants';
+import { awsUrlSuffix, clickStreamTableName } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { StackManager } from '../common/sfn';
 import { tryToJson } from '../common/utils';
@@ -43,21 +43,21 @@ export class PipelineServ {
       let pipeline: Pipeline = req.body;
       pipeline.pipelineId = uuidv4();
       // Get TemplateURL from dictionary
-      const templates = await store.getDictionary('Templates');
-      if (!templates || !templates.data) {
+      const templateURL = await this.getTemplateUrl(pipeline, `ingestion_${pipeline.ingestionServer.sinkType}`);
+      if (!templateURL) {
         return res.status(404).json(new ApiFail('Add Pipeline Error, templates not found in dictionary.'));
       }
-      templates.data = tryToJson(templates.data);
-      if (!templates.data.ingestion) {
-        return res.status(404).json(new ApiFail('Add Pipeline Error, ingestion template url not found in dictionary.'));
-      }
       // Create stack
+      const stackParameters = getIngestionStackParameters(pipeline);
+      if (!stackParameters.result) {
+        return res.status(400).json(new ApiFail(stackParameters.message));
+      }
       await stackManager.execute({
         Input: {
           Action: 'Create',
           StackName: `clickstream-pipeline-${pipeline.pipelineId}`,
-          TemplateURL: templates.data.ingestion,
-          Parameters: getIngestionStackParameters(pipeline),
+          TemplateURL: templateURL,
+          Parameters: stackParameters.parameters,
         },
         Callback: {
           TableName: clickStreamTableName ?? '',
@@ -111,6 +111,19 @@ export class PipelineServ {
     } catch (error) {
       next(error);
     }
+  };
+
+  public async getTemplateUrl(pipeline: Pipeline, name: string) {
+    const solution = await store.getDictionary('Solution');
+    const templates = await store.getDictionary('Templates');
+    if (solution && templates) {
+      solution.data = tryToJson(solution.data);
+      templates.data = tryToJson(templates.data);
+      const s3Host = `https://${solution.data.dist_output_bucket}.s3.${pipeline.region}.${awsUrlSuffix}`;
+      const prefix = solution.data.prefix;
+      return `${s3Host}/${solution.data.name}/${prefix}/${templates.data[name]}`;
+    }
+    return undefined;
   };
 
 }

@@ -21,9 +21,14 @@ import { CfnDistribution, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfron
 import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagToStack, addCfnNagSuppressRules } from './common/cfn-nag';
-
+import {
+  addCfnNagToStack,
+  addCfnNagSuppressRules,
+  addCfnNagForLogRetention,
+  addCfnNagForCustomResourceProvider,
+} from './common/cfn-nag';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
@@ -120,6 +125,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       apiGateway: {
         stageName: 'api',
       },
+      targetToCNRegions: props?.targetToCNRegions,
     });
 
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
@@ -272,6 +278,7 @@ class InjectCustomResourceConfig implements IAspect {
 }
 
 function addCfnNag(stack: Stack) {
+  // TODO: apigateway no authorization
   const cfnNagList = [
     {
       paths_endswith: [
@@ -299,6 +306,21 @@ function addCfnNag(stack: Stack) {
     },
   ];
   addCfnNagToStack(stack, cfnNagList);
+  addCfnNagForLogRetention(stack);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
+  NagSuppressions.addStackSuppressions(stack, [
+    {
+      id: 'AwsSolutions-IAM4',
+      reason:
+        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
+    },
+    {
+      id: 'AwsSolutions-L1',
+      // The non-container Lambda function is not configured to use the latest runtime version
+      reason:
+        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
+    },
+  ]);
 }
 
 

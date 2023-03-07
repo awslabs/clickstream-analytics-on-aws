@@ -1,9 +1,9 @@
-GET http://localhost:8080/api/dictionary
+GET {{HOST}}/api/dictionary
 Accept: application/json
 
 ###
 
-GET http://localhost:8080/api/dictionary/Solution
+GET {{HOST}}/api/dictionary/Solution
 Accept: application/json
 
 ###

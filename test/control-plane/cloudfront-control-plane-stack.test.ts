@@ -299,8 +299,11 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function'))
       .toEqual([
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'AuthorizerFunctionB4DBAA43',
@@ -325,13 +328,21 @@ describe('CloudFrontS3PotalStack', () => {
     expect(findResourcesName(template, 'AWS::Lambda::Function'))
       .toEqual([
         'certificateCertificateRequestorFunction5D4BA95F',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'AuthorizerFunctionB4DBAA43',
       ]);
-    template.resourceCountIs('AWS::CloudFormation::CustomResource', 1);
+    expect(findResourcesName(template, 'AWS::CloudFormation::CustomResource'))
+      .toEqual([
+        'certificateCertificateRequestorResourceFD86DD58',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceB9A4ABDE',
+      ]);
+    template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Route53::RecordSet', 1);
@@ -378,8 +389,11 @@ describe('CloudFrontS3PotalStack', () => {
 
     expect(findResourcesName(template, 'AWS::Lambda::Function'))
       .toEqual([
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'AuthorizerFunctionB4DBAA43',

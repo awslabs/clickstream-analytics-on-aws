@@ -23,6 +23,7 @@ import {
   IgnoreMode,
   RemovalPolicy,
   Stack,
+  Aws,
 } from 'aws-cdk-lib';
 import {
   EndpointType,
@@ -42,6 +43,8 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
+import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
+import dictionary from './config/dictionary.json';
 import {
   StackActionStateMachine,
 } from './stack-action-state-machine-construct';
@@ -69,6 +72,7 @@ export interface ClickStreamApiProps {
   readonly dictionaryItems?: DicItem[];
   readonly applicationLoadBalancer?: ApplicationLoadBalancerProps;
   readonly apiGateway?: ApiGatewayProps;
+  readonly targetToCNRegions?: boolean;
 }
 
 export class ClickStreamApiConstruct extends Construct {
@@ -105,6 +109,13 @@ export class ClickStreamApiConstruct extends Construct {
       timeToLiveAttribute: 'ttl',
     });
 
+    // Dictionary data init
+    new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
+      table: dictionaryTable,
+      items: dictionary,
+      targetToCNRegions: props.targetToCNRegions ?? false,
+    });
+
     let apiFunctionProps = {};
     if (props.fronting === 'alb') {
       if (!props.applicationLoadBalancer) {
@@ -134,6 +145,7 @@ export class ClickStreamApiConstruct extends Construct {
     const stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
       clickStreamTable,
       lambdaFuncProps: apiFunctionProps,
+      targetToCNRegions: props.targetToCNRegions ?? false,
     });
 
     // Create a role for lambda
@@ -194,6 +206,7 @@ export class ClickStreamApiConstruct extends Construct {
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         AWS_ACCOUNT_ID: Stack.of(this).account,
+        AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         LOG_LEVEL: 'ERROR',
       },
       architecture: Architecture.X86_64,

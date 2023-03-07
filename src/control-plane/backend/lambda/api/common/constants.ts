@@ -21,6 +21,7 @@ const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
+const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 
 export {
   clickStreamTableName,
@@ -29,4 +30,5 @@ export {
   serviceName,
   awsRegion,
   awsAccountId,
+  awsUrlSuffix,
 };

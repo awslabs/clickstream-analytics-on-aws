@@ -27,7 +27,12 @@ import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import {
+  addCfnNagForLogRetention,
+  addCfnNagForCustomResourceProvider,
+} from './common/cfn-nag';
 import { LogBucket } from './common/log-bucket';
 import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
@@ -187,5 +192,25 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       }).overrideLogicalId('SourceSecurityGroup');
     }
 
+    // nag
+    addCfnNag(this);
   }
+}
+
+function addCfnNag(stack: Stack) {
+  addCfnNagForLogRetention(stack);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
+  NagSuppressions.addStackSuppressions(stack, [
+    {
+      id: 'AwsSolutions-IAM4',
+      reason:
+        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
+    },
+    {
+      id: 'AwsSolutions-L1',
+      // The non-container Lambda function is not configured to use the latest runtime version
+      reason:
+        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
+    },
+  ]);
 }

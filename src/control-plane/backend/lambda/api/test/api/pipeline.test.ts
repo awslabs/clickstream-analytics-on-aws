@@ -94,9 +94,8 @@ describe('Pipeline test', () => {
           },
           sinkType: 's3',
           sinkS3: {
-            s3Uri: 's3://012345678912-test',
-            sinkType: 's3',
-            s3prefix: 'test',
+            s3DataBucket: 's3://012345678912-test',
+            s3DataPrefix: 'test',
             s3BufferSize: 50,
             s3BufferInterval: 30,
           },
@@ -116,6 +115,14 @@ describe('Pipeline test', () => {
       TableName: dictionaryTableName,
       Key: {
         name: 'Templates',
+      },
+    }).resolves({
+      Item: undefined,
+    });
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Solution',
       },
     }).resolves({
       Item: undefined,
@@ -179,76 +186,6 @@ describe('Pipeline test', () => {
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({ message: 'Add Pipeline Error, templates not found in dictionary.', success: false });
   });
-  it('Create pipeline with dictionary template 404', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
-      Key: {
-        name: 'Templates',
-      },
-    }).resolves({
-      Item: { name: 'Templates', data: '{"k":"v"}' },
-    });
-    sfnMock.on(StartExecutionCommand).resolves({});
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .post('/api/pipeline')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        projectId: MOCK_PROJECT_ID,
-        name: 'Pipeline-01',
-        description: 'Description of Pipeline-01',
-        region: 'us-east-1',
-        dataCollectionSDK: 'Clickstream SDK',
-        tags: [
-          {
-            key: 'name',
-            value: 'clickstream',
-          },
-        ],
-        ingestionServer: {
-          network: {
-            vpcId: 'vpc-0000',
-            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
-            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
-          },
-          size: {
-            serverMin: 2,
-            serverMax: 4,
-            warmPoolSize: 1,
-            scaleOnCpuUtilizationPercent: 50,
-          },
-          domain: {
-            hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'test.dev.com',
-            recordName: 'click',
-          },
-          loadBalancer: {
-            serverEndpointPath: '/collect',
-            serverCorsOrigin: '*',
-            protocol: 'HTTPS',
-            enableApplicationLoadBalancerAccessLog: true,
-            logS3Bucket: 'Pipeline-01-log',
-            logS3Prefix: 'logs',
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
-          },
-          sinkType: 's3',
-          sinkS3: {
-            s3Uri: 's3://012345678912-test',
-            sinkType: 's3',
-            s3prefix: 'test',
-            s3BufferSize: 50,
-            s3BufferInterval: 30,
-          },
-        },
-        etl: {},
-        dataModel: {},
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ message: 'Add Pipeline Error, ingestion template url not found in dictionary.', success: false });
-  });
   it('Create pipeline with mock error', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
@@ -301,9 +238,8 @@ describe('Pipeline test', () => {
           },
           sinkType: 's3',
           sinkS3: {
-            s3Uri: 's3://012345678912-test',
-            sinkType: 's3',
-            s3prefix: 'test',
+            s3DataBucket: 's3://012345678912-test',
+            s3DataPrefix: 'test',
             s3BufferSize: 50,
             s3BufferInterval: 30,
           },
