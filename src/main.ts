@@ -123,7 +123,6 @@ stackSuppressions([
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
 ]);
 
-Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 
 new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
   synthesizer: synthesizer(),
