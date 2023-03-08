@@ -107,6 +107,15 @@ app.get(
   });
 
 app.get(
+  '/api/env/msk/ping',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.mskPing(req, res, next);
+  });
+
+app.get(
   '/api/env/redshift/clusters',
   validate([
     query('vpcId').custom(isValidEmpty),
@@ -118,8 +127,44 @@ app.get(
 
 app.get(
   '/api/env/quicksight/users',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listQuickSightUsers(req, res, next);
+  });
+
+app.get(
+  '/api/env/quicksight/ping',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.quicksightPing(req, res, next);
+  });
+
+app.get(
+  '/api/env/athena/workgroups',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listWorkGroups(req, res, next);
+  });
+
+app.get(
+  '/api/env/athena/ping',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.athenaPing(req, res, next);
+  });
+
+app.get(
+  '/api/env/iam/roles',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listRoles(req, res, next);
   });
 
 app.get(

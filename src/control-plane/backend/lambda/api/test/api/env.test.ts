@@ -15,7 +15,9 @@ limitations under the License.
 */
 
 import { AccountClient, ListRegionsCommand } from '@aws-sdk/client-account';
+import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
 import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
+import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
@@ -32,6 +34,8 @@ const kafkaClient = mockClient(KafkaClient);
 const redshiftClient = mockClient(RedshiftClient);
 const quickSightClient = mockClient(QuickSightClient);
 const route53Client = mockClient(Route53Client);
+const athenaClient = mockClient(AthenaClient);
+const iamClient = mockClient(IAMClient);
 
 describe('Account Env test', () => {
 
@@ -62,7 +66,10 @@ describe('Account Env test', () => {
           CidrBlock: '10.255.0.0/16',
           IsDefault: false,
           Tags: [
-            { Key: 'Name', Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC' },
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
+            },
           ],
         },
         {
@@ -103,7 +110,10 @@ describe('Account Env test', () => {
           CidrBlock: '10.255.0.0/16',
           IsDefault: false,
           Tags: [
-            { Key: 'Name', Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC' },
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
+            },
           ],
         },
         {
@@ -607,6 +617,30 @@ describe('Account Env test', () => {
       ],
     });
   });
+  it('Ping MSK', async () => {
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [],
+    });
+    let res = await request(app).get('/api/env/msk/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: true,
+    });
+    const mockError = new Error('Mock DynamoDB error');
+    mockError.name = 'UnrecognizedClientException';
+    kafkaClient.on(ListClustersV2Command).rejects(mockError);
+    res = await request(app).get('/api/env/msk/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: false,
+    });
+  });
   it('Get Redshift cluster', async () => {
     redshiftClient.on(DescribeClustersCommand).resolves({
       Clusters: [
@@ -712,6 +746,124 @@ describe('Account Env test', () => {
           active: true,
         },
       ],
+    });
+  });
+  it('Ping QuickSight', async () => {
+    quickSightClient.on(ListUsersCommand).resolves({
+      UserList: [],
+    });
+    let res = await request(app).get('/api/env/quicksight/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: true,
+    });
+    const mockError = new Error('Mock DynamoDB error');
+    mockError.name = 'UnrecognizedClientException';
+    quickSightClient.on(ListUsersCommand).rejects(mockError);
+    res = await request(app).get('/api/env/quicksight/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: false,
+    });
+  });
+  it('Get Athena Work Groups', async () => {
+    athenaClient.on(ListWorkGroupsCommand).resolves({
+      WorkGroups: [
+        {
+          CreationTime: new Date(),
+          Description: '',
+          EngineVersion: {
+            EffectiveEngineVersion: 'Athena engine version 2',
+            SelectedEngineVersion: 'AUTO',
+          },
+          Name: 'primary',
+          State: 'ENABLED',
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/athena/workgroups');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          description: '',
+          engineVersion: 'Athena engine version 2',
+          name: 'primary',
+          state: 'ENABLED',
+        },
+      ],
+    });
+  });
+  it('Get IAM roles', async () => {
+    iamClient.on(ListRolesCommand).resolves({
+      Roles: [
+        {
+          Path: '/',
+          RoleName: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          RoleId: 'AROAY6VU67QTP62MJAQ3O',
+          Arn: 'arn:aws:iam::615633583142:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22apigateway.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D',
+          Description: '',
+          MaxSessionDuration: 3600,
+        },
+        {
+          Path: '/',
+          RoleName: 'XenaAuditorRole-DO-NOT-DELETE',
+          RoleId: 'AROAY6VU67QTN6EXB2YM5',
+          Arn: 'arn:aws:iam::615633583142:role/XenaAuditorRole-DO-NOT-DELETE',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Sid%22%3A%22%22%2C%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22AWS%22%3A%22arn%3Aaws%3Aiam%3A%3A691002153696%3Aroot%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%2C%22Condition%22%3A%7B%22StringEquals%22%3A%7B%22sts%3AExternalId%22%3A%22XenaAuditorRoleLkWDhzqUbFcZ%22%7D%7D%7D%5D%7D',
+          MaxSessionDuration: 3600,
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/iam/roles?service=apigateway');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          id: 'AROAY6VU67QTP62MJAQ3O',
+          arn: 'arn:aws:iam::615633583142:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+        },
+      ],
+    });
+  });
+  it('Ping Athena', async () => {
+    athenaClient.on(ListWorkGroupsCommand).resolves({
+      WorkGroups: [],
+    });
+    let res = await request(app).get('/api/env/athena/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: true,
+    });
+    const mockError = new Error('Mock DynamoDB error');
+    mockError.name = 'UnrecognizedClientException';
+    athenaClient.on(ListWorkGroupsCommand).rejects(mockError);
+    res = await request(app).get('/api/env/athena/ping');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: false,
     });
   });
   it('Get Host Zones', async () => {

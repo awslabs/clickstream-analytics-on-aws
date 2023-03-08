@@ -26,8 +26,8 @@ export interface ClickStreamQuickSightUser {
   readonly email: string;
 }
 
-export const listQuickSightUsers = async () => {
-  const quickSightClient = new QuickSightClient({});
+export const listQuickSightUsers = async (region: string) => {
+  const quickSightClient = new QuickSightClient({ region });
 
   const records = await getPaginatedResults(async (NextToken: any) => {
     const params: ListUsersCommand = new ListUsersCommand({
@@ -52,4 +52,20 @@ export const listQuickSightUsers = async () => {
     });
   }
   return users;
+};
+
+export const quickSightPing = async (region: string): Promise<boolean> => {
+  try {
+    const quickSightClient = new QuickSightClient({ region });
+    const params: ListUsersCommand = new ListUsersCommand({
+      AwsAccountId: awsAccountId,
+      Namespace: 'default',
+    });
+    await quickSightClient.send(params);
+  } catch (err) {
+    if ((err as Error).name === 'UnrecognizedClientException') {
+      return false;
+    }
+  }
+  return true;
 };

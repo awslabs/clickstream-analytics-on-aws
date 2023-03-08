@@ -76,3 +76,16 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
   }
   return clusters;
 };
+
+export const mskPing = async (region: string): Promise<boolean> => {
+  try {
+    const kafkaClient = new KafkaClient({ region });
+    const params: ListClustersV2Command = new ListClustersV2Command({});
+    await kafkaClient.send(params);
+  } catch (err) {
+    if ((err as Error).name === 'UnrecognizedClientException') {
+      return false;
+    }
+  }
+  return true;
+};

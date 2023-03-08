@@ -194,7 +194,7 @@ describe('Pipeline test', () => {
     sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));;
+      .rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)

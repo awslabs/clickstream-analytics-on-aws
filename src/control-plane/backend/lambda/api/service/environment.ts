@@ -16,9 +16,11 @@ limitations under the License.
 
 import { ApiSuccess } from '../common/request-valid';
 import { listRegions } from '../store/aws/account';
+import { athenaPing, listWorkGroups } from '../store/aws/athena';
 import { describeVpcs, describeSubnets } from '../store/aws/ec2';
-import { listMSKCluster } from '../store/aws/kafka';
-import { listQuickSightUsers } from '../store/aws/quicksight';
+import { listRoles } from '../store/aws/iam';
+import { listMSKCluster, mskPing } from '../store/aws/kafka';
+import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
 import { describeRedshiftClusters } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { listBuckets } from '../store/aws/s3';
@@ -77,9 +79,19 @@ export class EnvironmentServ {
       next(error);
     }
   }
-  public async listQuickSightUsers(_req: any, res: any, next: any) {
+  public async listQuickSightUsers(req: any, res: any, next: any) {
     try {
-      const result = await listQuickSightUsers();
+      const { region } = req.query;
+      const result = await listQuickSightUsers(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listRoles(req: any, res: any, next: any) {
+    try {
+      const { service } = req.query;
+      const result = await listRoles(service);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -88,6 +100,42 @@ export class EnvironmentServ {
   public async listHostedZones(_req: any, res: any, next: any) {
     try {
       const result = await listHostedZones();
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listWorkGroups(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await listWorkGroups(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async athenaPing(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await athenaPing(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async mskPing(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await mskPing(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async quicksightPing(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await quickSightPing(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

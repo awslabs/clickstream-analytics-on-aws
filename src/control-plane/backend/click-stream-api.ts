@@ -182,6 +182,8 @@ export class ClickStreamApiConstruct extends Construct {
             'ec2:DescribeRouteTables',
             's3:GetBucketLocation',
             'route53:ListHostedZones',
+            'athena:ListWorkGroups',
+            'iam:ListRoles',
           ],
         }),
       ],
