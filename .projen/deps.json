@@ -26,7 +26,12 @@
     },
     {
       "name": "aws-cdk",
-      "version": "^2.1.0",
+      "version": "^2.67.0",
+      "type": "build"
+    },
+    {
+      "name": "aws-sdk-client-mock-jest",
+      "version": "^2.0.1",
       "type": "build"
     },
     {
@@ -86,6 +91,11 @@
       "type": "build"
     },
     {
+      "name": "@aws-cdk/aws-glue-alpha",
+      "version": "^2.67.0-alpha.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-lambda-powertools/logger",
       "version": "^1.5.1",
       "type": "runtime"
@@ -112,6 +122,11 @@
     },
     {
       "name": "@aws-sdk/client-ec2",
+      "version": "^3.272.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-glue",
       "version": "^3.272.0",
       "type": "runtime"
     },
@@ -177,7 +192,7 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "^2.1.0",
+      "version": "^2.67.0",
       "type": "runtime"
     },
     {

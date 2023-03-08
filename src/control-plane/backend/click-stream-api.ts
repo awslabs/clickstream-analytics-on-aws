@@ -51,6 +51,7 @@ import {
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
+import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface DicItem {
   readonly name: string;
@@ -209,7 +210,7 @@ export class ClickStreamApiConstruct extends Construct {
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
-        LOG_LEVEL: 'ERROR',
+        ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,
       timeout: Duration.seconds(30),

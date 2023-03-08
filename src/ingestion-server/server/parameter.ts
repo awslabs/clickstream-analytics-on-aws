@@ -78,6 +78,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
   const logS3BucketParam = Parameters.createS3BucketParameter(scope, 'LogS3Bucket', {
     description: 'S3 bucket name to save log (optional)',
+    default: '',
   });
 
   const logS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'LogS3Prefix', {
@@ -231,9 +232,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
   let s3Params;
   if (props.deliverToS3) {
 
-    const s3DataBucketParam = new CfnParameter(scope, 'S3DataBucket', {
+    const s3DataBucketParam = Parameters.createS3BucketParameter(scope, 'S3DataBucket', {
       description: 'S3 data bucket name',
-      type: 'String',
       default: '',
     });
 
@@ -318,6 +318,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
     const kinesisDataS3BucketParam = Parameters.createS3BucketParameter(scope, 'KinesisDataS3Bucket', {
       description: 'S3 bucket name to save data from Kinesis Data Stream',
+      default: '',
     });
 
     const kinesisDataS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'KinesisDataS3Prefix', {

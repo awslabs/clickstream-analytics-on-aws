@@ -986,3 +986,24 @@ test('Each of kinesis nested templates has Kinesis::Stream', () => {
       });
   }
 });
+
+
+test('Lambda has POWERTOOLS ENV set', () => {
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ].forEach ( stack => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::Lambda::Function', {
+        Environment: {
+          Variables: {
+            LOG_LEVEL: 'ERROR',
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          },
+        },
+      });
+    });
+  }
+
+});

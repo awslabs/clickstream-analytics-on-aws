@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Logger } from '@aws-lambda-powertools/logger';
 import {
   APIGatewayAuthorizerResult,
   APIGatewayTokenAuthorizerEvent,
@@ -22,9 +21,7 @@ import {
 } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
-const logger = new Logger({
-  serviceName: 'ClickstreamAnalyticsOnAWS',
-});
+import { logger } from '../../common/powertools';
 
 const JWKS_URI = process.env.JWKS_URI;
 const ISSUER = process.env.ISSUER;

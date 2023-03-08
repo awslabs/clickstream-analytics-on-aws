@@ -243,6 +243,16 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         'testportalportalfnrole5B2099BA',
       ],
     });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          LOG_LEVEL: 'ERROR',
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+        },
+      },
+    });
+
   });
 
   test('IAM policies are created for Lambda functions', () => {

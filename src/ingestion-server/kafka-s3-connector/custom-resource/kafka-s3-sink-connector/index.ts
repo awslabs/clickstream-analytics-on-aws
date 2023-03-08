@@ -18,7 +18,6 @@ import fs from 'fs';
 import { IncomingMessage } from 'http';
 import https from 'https';
 import path from 'path';
-import { Logger } from '@aws-lambda-powertools/logger';
 import {
   CreateConnectorCommand,
   CreateCustomPluginCommand,
@@ -39,8 +38,7 @@ import {
 } from '@aws-sdk/client-s3';
 
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-
-const logger = new Logger({ serviceName: 'ClickstreamAnalyticsOnAWS' });
+import { logger } from '../../../../common/powertools';
 
 const region = process.env.AWS_REGION;
 

@@ -244,6 +244,15 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     template.hasOutput('VpcId', {});
     template.hasOutput('SourceSecurityGroup', {});
 
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          LOG_LEVEL: 'ERROR',
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+        },
+      },
+    });
+
   });
 
   test('ALBPotalStack - new VPC - private - no custom domain', () => {

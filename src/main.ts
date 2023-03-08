@@ -19,6 +19,7 @@ import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
+import { DataPipelineStack } from './data-pipeline-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 
@@ -148,6 +149,10 @@ new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
 });
 
 new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', { // Kafka S3 sink connector
+  synthesizer: synthesizer(),
+});
+
+new DataPipelineStack(app, 'data-pipeline-stack', {
   synthesizer: synthesizer(),
 });
 

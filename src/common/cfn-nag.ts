@@ -102,21 +102,27 @@ export function ruleRolePolicyWithWildcardResources(pattern: string, name: strin
   };
 }
 
+
+export function rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions(name: string) {
+  return [
+    {
+      id: 'W89',
+      reason:
+          `Lambda function is only used by ${name} for deployment as cloudformation custom resources or per product design, no need to be deployed in VPC`,
+    },
+    {
+      id: 'W92',
+      reason:
+          `Lambda function is only used by ${name} for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions`,
+    },
+  ];
+}
+
+
 export function ruleForLambdaVPCAndReservedConcurrentExecutions(pattern: string, name: string) : AddCfnNagItem {
   return {
     paths_endswith: [pattern],
-    rules_to_suppress: [
-      {
-        id: 'W89',
-        reason:
-            `Lambda function is only used by ${name} for deployment as cloudformation custom resources or per product design, no need to be deployed in VPC`,
-      },
-      {
-        id: 'W92',
-        reason:
-            `Lambda function is only used by ${name} for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions`,
-      },
-    ],
+    rules_to_suppress: rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions(name),
   };
 }
 
@@ -168,3 +174,22 @@ export function addCfnNagToSecurityGroup(securityGroup: ISecurityGroup, wIds: st
   ];
   addCfnNagSuppressRules(securityGroup.node.defaultChild as CfnResource, wIdsAllForSecurityGroup.filter(it => wIds.includes(it.id)));
 }
+
+
+export const commonCdkNagRules = [
+  {
+    id: 'AwsSolutions-IAM4',
+    reason:
+      'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
+  },
+  {
+    id: 'AwsSolutions-IAM5',
+    reason:
+      'LogRetention lambda policy which are created by CDK contains wildcard permissions',
+  },
+  {
+    id: 'AwsSolutions-L1',
+    reason:
+      'Need support AWS China regions, the latest NodeJs version in China regions is 16, and latest version in global regions is 18',
+  },
+];

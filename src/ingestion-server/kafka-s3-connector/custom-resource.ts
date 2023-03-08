@@ -26,6 +26,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
+import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface S3SinkConnectorCustomResourceProps {
   readonly subnetIds: String;
@@ -123,7 +124,7 @@ function createS3SinkConnectorLambda(
     logRetention: RetentionDays.ONE_WEEK,
     role,
     environment: {
-      LOG_LEVEL: 'WARN',
+      ... POWERTOOLS_ENVS,
     },
   });
   fn.node.addDependency(role);

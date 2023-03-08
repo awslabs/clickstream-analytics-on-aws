@@ -217,6 +217,17 @@ describe('CloudFrontS3PotalStack', () => {
     );
   });
 
+  test('Lambda has POWERTOOLS settings', ()=> {
+    commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          LOG_LEVEL: 'ERROR',
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+        },
+      },
+    });
+  });
+
   test('Cognito in Global region', () => {
 
     commonTemplate.hasResourceProperties('AWS::Cognito::UserPoolClient', {
@@ -500,5 +511,4 @@ describe('CloudFrontS3PotalStack', () => {
       Runtime: 'nodejs18.x',
     });
   });
-
 });

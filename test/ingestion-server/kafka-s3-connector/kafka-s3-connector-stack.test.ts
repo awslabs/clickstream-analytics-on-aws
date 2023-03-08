@@ -369,3 +369,15 @@ test('IAM policy for custom resource lambda role has a specified resource and re
       },
     });
 });
+
+
+test('Lambda has POWERTOOLS ENV set', () => {
+  template.hasResourceProperties('AWS::Lambda::Function', {
+    Environment: {
+      Variables: {
+        LOG_LEVEL: 'ERROR',
+        POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+      },
+    },
+  });
+});

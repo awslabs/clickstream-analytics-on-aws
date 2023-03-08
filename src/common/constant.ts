@@ -22,6 +22,9 @@ export const RECORD_NAME_PARRERN = '^[a-zA-Z0-9\\-_]{1,63}$';
 export const VPC_ID_PARRERN = '^vpc-[a-f0-9]+$';
 export const IAM_CERTIFICATE_ID_PARRERN = '^[A-Z0-9]+$';
 export const EMAIL_PARRERN = '\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14}';
+export const S3_BUCKET_NAME_PATTERN = '[a-z0-9\\.\\-]{3,63}';
+export const PROJECT_ID_PATTERN = '[a-z0-9_]{1,128}';
+export const APP_ID_PATTERN = '[a-zA-Z0-9_-]{1,128}';
 
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
 export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';

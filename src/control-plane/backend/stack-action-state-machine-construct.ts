@@ -28,6 +28,7 @@ import { Construct } from 'constructs';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
+import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 
 export interface StackActionStateMachineFuncProps {
@@ -170,7 +171,7 @@ export class StackActionStateMachine extends Construct {
       role: callbackFunctionRole,
       architecture: Architecture.ARM_64,
       environment: {
-        LOG_LEVEL: 'ERROR',
+        ... POWERTOOLS_ENVS,
       },
       ...props.lambdaFuncProps,
     });

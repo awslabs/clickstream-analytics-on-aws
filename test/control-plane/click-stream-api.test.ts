@@ -129,6 +129,16 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       ],
     });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          LOG_LEVEL: 'ERROR',
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+        },
+      },
+    });
+
   });
 
   test('IAM Resource for Api Lambda', () => {

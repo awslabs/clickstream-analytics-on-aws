@@ -30,6 +30,7 @@ import {
   addCfnNagForCustomResourceProvider,
 } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
+import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionInfo } from './common/solution-info';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
@@ -174,6 +175,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       environment: {
         JWKS_URI: issuer + '/.well-known/jwks.json',
         ISSUER: issuer,
+        ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.ARM_64,
       reservedConcurrentExecutions: 100,

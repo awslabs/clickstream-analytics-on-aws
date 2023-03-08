@@ -42,6 +42,7 @@ import {
   PARAMETER_LABEL_OIDC_ISSUER,
   PARAMETER_LABEL_OIDC_CLIENT_ID,
   PARAMETER_GROUP_LABEL_OIDC,
+  S3_BUCKET_NAME_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -180,10 +181,11 @@ export class Parameters {
     });
   }
 
-  public static createS3BucketParameter(scope: Construct, id: string, props: {description: string}) : CfnParameter {
+  public static createS3BucketParameter(scope: Construct, id: string,
+    props: {description: string; allowedPattern?: string; default?: string}) : CfnParameter {
     return new CfnParameter(scope, id, {
       type: 'String',
-      default: '',
+      allowedPattern: `^(${S3_BUCKET_NAME_PATTERN})?$`,
       ... props,
     });
   }

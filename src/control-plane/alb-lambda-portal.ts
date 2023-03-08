@@ -62,6 +62,7 @@ import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb'
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { LogBucket } from '../common/log-bucket';
+import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export interface RouteProps {
   readonly routePath: string;
@@ -181,6 +182,9 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
       architecture: Architecture.X86_64,
+      environment: {
+        ... POWERTOOLS_ENVS,
+      },
     });
 
     createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));

@@ -1,5 +1,10 @@
 const { awscdk, gitlab, typescript } = require('projen');
 const version = '1.0.0';
+const cdkVersion = '2.67.0';
+
+const cdkAlphaModules = [
+  '@aws-cdk/aws-glue-alpha',
+].map(m => `${m}@^${cdkVersion}-alpha.0`);
 
 const commonDeps = [
   'uuid@^9.0.0',
@@ -15,6 +20,7 @@ const commonDevDeps = [
 const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
+  '@aws-sdk/client-glue',
 ].map(dep => `${dep}@^3.272.0`);
 
 const awsSDKDepsForApiProject = [
@@ -52,7 +58,7 @@ const devDepsForApiProject = [
 ];
 const project = new awscdk.AwsCdkTypeScriptApp({
   version,
-  cdkVersion: '2.1.0',
+  cdkVersion,
   defaultReleaseBranch: 'main',
   name: 'clickstream-analytics-on-aws',
   gitignore: [
@@ -71,6 +77,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-bootstrapless-synthesizer@^2.2.7',
     'jsonwebtoken@^9.0.0',
     'jwks-rsa@^3.0.1',
+    ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKDeps,
   ], /* Runtime dependencies of this module. */
@@ -80,6 +87,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 
   devDeps: [
     ...commonDevDeps,
+    'aws-sdk-client-mock@^2.0.1',
+    'aws-sdk-client-mock-jest@^2.0.1',
   ],
   minNodeVersion: '16.18.0',
 });

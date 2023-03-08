@@ -16,13 +16,10 @@ limitations under the License.
 
 import { promisify } from 'util';
 import { gzip } from 'zlib';
-import { Logger } from '@aws-lambda-powertools/logger';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { KinesisStreamEvent, KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuid_v4 } from 'uuid';
-const logger = new Logger({
-  serviceName: 'ClickstreamAnalyticsOnAWS',
-});
+import { logger } from '../../../common/powertools';
 
 const region = process.env.AWS_REGION;
 const s3Bucket = process.env.S3_BUCKET;

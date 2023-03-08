@@ -25,6 +25,7 @@ import { Construct } from 'constructs';
 import { createKinesisToS3LambdaRole } from './iam';
 import { createKinesisToS3LambdaSecurityGroup } from './sg';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
+import { POWERTOOLS_ENVS } from '../../../common/powertools';
 
 export interface KinesisToS3Lambda {
   vpc: IVpc;
@@ -56,7 +57,7 @@ export function createKinesisToS3Lambda(
     environment: {
       S3_BUCKET: props.s3DataBucket.bucketName,
       S3_PREFIX: props.s3DataPrefix,
-      LOG_LEVEL: 'WARN',
+      ... POWERTOOLS_ENVS,
     },
   });
 

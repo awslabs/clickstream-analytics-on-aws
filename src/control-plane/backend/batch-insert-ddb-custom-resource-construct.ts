@@ -26,6 +26,7 @@ import { Construct } from 'constructs';
 import { DicItem } from './click-stream-api';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { cloudWatchSendLogs } from '../../common/lambda';
+import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface CdkCallCustomResourceProps {
   readonly table: Table;
@@ -64,7 +65,7 @@ export class BatchInsertDDBCustomResource extends Construct {
       architecture: Architecture.ARM_64,
       role: customResourceFunctionRole,
       environment: {
-        LOG_LEVEL: 'ERROR',
+        ... POWERTOOLS_ENVS,
       },
     });
 
