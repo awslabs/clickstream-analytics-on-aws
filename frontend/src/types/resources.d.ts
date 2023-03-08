@@ -2,8 +2,9 @@ export {};
 
 declare global {
   interface RegionResponse {
-    name: string;
-    value: string;
+    id: string;
+    cn_name: string;
+    en_name: string;
   }
 
   interface VPCResponse {

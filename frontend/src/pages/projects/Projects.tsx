@@ -69,14 +69,18 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const listProjects = async () => {
     setLoadingData(true);
-    const { success, data }: ApiResponse<ResponseTableData<IProject>> =
-      await getProjectList({
-        pageNumber: currentPage,
-        pageSize: pageSize,
-      });
-    if (success) {
-      setProjectList(data.items);
-      setTotalCount(data.totalCount);
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: currentPage,
+          pageSize: pageSize,
+        });
+      if (success) {
+        setProjectList(data.items);
+        setTotalCount(data.totalCount);
+        setLoadingData(false);
+      }
+    } catch (error) {
       setLoadingData(false);
     }
   };
@@ -108,6 +112,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         variant="full-page"
         header={
           <ProjectsHeader
+            totalProject={totalCount}
             project={selectedItems?.[0]}
             refreshPage={() => {
               changeSelectedItems([]);

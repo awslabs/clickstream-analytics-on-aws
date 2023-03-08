@@ -59,14 +59,18 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   // get all region list
   const getAllRegionList = async () => {
     setLoadingRegion(true);
-    const { success, data }: ApiResponse<RegionResponse[]> =
-      await getRegionList();
-    if (success) {
-      const regionOptions: SelectProps.Options = data.map((element) => ({
-        label: element.name,
-        value: element.value,
-      }));
-      setRegionOptionList(regionOptions);
+    try {
+      const { success, data }: ApiResponse<RegionResponse[]> =
+        await getRegionList();
+      if (success) {
+        const regionOptions: SelectProps.Options = data.map((element) => ({
+          label: element.id,
+          value: element.id,
+        }));
+        setRegionOptionList(regionOptions);
+        setLoadingRegion(false);
+      }
+    } catch (error) {
       setLoadingRegion(false);
     }
   };
@@ -74,14 +78,19 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   // get all supported sdks
   const getALlSDKList = async () => {
     setLoadingSDK(true);
-    const { success, data }: ApiResponse<SDKResponse> = await getSDKTypeList();
-    if (success) {
-      const sdkOptions: SelectProps.Options = data.data.map((element) => ({
-        label: element.name,
-        value: element.value,
-        iconName: 'settings',
-      }));
-      setSDKOptionList(sdkOptions);
+    try {
+      const { success, data }: ApiResponse<SDKResponse> =
+        await getSDKTypeList();
+      if (success) {
+        const sdkOptions: SelectProps.Options = data.data.map((element) => ({
+          label: element.name,
+          value: element.value,
+          iconName: 'settings',
+        }));
+        setSDKOptionList(sdkOptions);
+        setLoadingSDK(false);
+      }
+    } catch (error) {
       setLoadingSDK(false);
     }
   };
@@ -89,16 +98,20 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   // get vpc list after change region
   const getVPCListByRegion = async (region: string) => {
     setLoadingVPC(true);
-    const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList(
-      region
-    );
-    if (success) {
-      const vpcOptions: SelectProps.Options = data.map((element) => ({
-        label: `${element.name}(${element.id})`,
-        value: element.id,
-        description: element.cidr,
-      }));
-      setVPCOptionList(vpcOptions);
+    try {
+      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList(
+        region
+      );
+      if (success) {
+        const vpcOptions: SelectProps.Options = data.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: element.cidr,
+        }));
+        setVPCOptionList(vpcOptions);
+        setLoadingVPC(false);
+      }
+    } catch (error) {
       setLoadingVPC(false);
     }
   };

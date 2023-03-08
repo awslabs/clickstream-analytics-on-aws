@@ -11,18 +11,16 @@ import {
   Table,
   TextFilter,
 } from '@cloudscape-design/components';
-import { getPipelineList } from 'apis/pipeline';
+import { deletePipeline, getPipelineList } from 'apis/pipeline';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import PipelineHeader from './comps/PipelineHeader';
 
 const Content: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState<IPipeline[]>([]);
   const [loadingData, setLoadingData] = useState(false);
@@ -30,18 +28,40 @@ const Content: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pipelineList, setPipelineList] = useState<IPipeline[]>([]);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const listPipelines = async () => {
     setLoadingData(true);
-    const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
-      await getPipelineList({
-        pageNumber: currentPage,
-        pageSize: pageSize,
-      });
-    if (success) {
-      setPipelineList(data.items);
-      setTotalCount(data.totalCount);
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
+        await getPipelineList({
+          pageNumber: currentPage,
+          pageSize: pageSize,
+        });
+      if (success) {
+        setPipelineList(data.items);
+        setTotalCount(data.totalCount);
+        setLoadingData(false);
+      }
+    } catch (error) {
       setLoadingData(false);
+    }
+  };
+
+  const confirmDeletePipeline = async () => {
+    setLoadingDelete(true);
+    try {
+      const resData: ApiResponse<null> = await deletePipeline(
+        selectedItems[0]?.pipelineId || '',
+        selectedItems[0].projectId || ''
+      );
+      if (resData.success) {
+        setSelectedItems([]);
+        listPipelines();
+        setLoadingDelete(false);
+      }
+    } catch (error) {
+      setLoadingDelete(false);
     }
   };
 
@@ -77,7 +97,9 @@ const Content: React.FC = () => {
             header: t('pipeline:list.id'),
             cell: (e) => {
               return (
-                <Link href={`/pipeline/detail/${e.name}`}>{e.pipelineId}</Link>
+                <Link href={`/project/${e.projectId}/pipeline/${e.pipelineId}`}>
+                  {e.pipelineId}
+                </Link>
               );
             },
             sortingField: 'alt',
@@ -124,14 +146,6 @@ const Content: React.FC = () => {
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
               {t('pipeline:list.noPipelineDisplay')}
             </Box>
-            <Button
-              iconName="add-plus"
-              onClick={() => {
-                navigate('/pipelines/create');
-              }}
-            >
-              {t('button.createPipeline')}
-            </Button>
           </Box>
         }
         filter={
@@ -145,21 +159,19 @@ const Content: React.FC = () => {
             description={t('pipeline:list.pipelineDesc')}
             counter={
               selectedItems.length
-                ? '(' + selectedItems.length + '/10)'
-                : '(10)'
+                ? '(' + selectedItems.length + `/${totalCount})`
+                : `(${totalCount})`
             }
             actions={
               <SpaceBetween direction="horizontal" size="xs">
-                <Button>{t('button.disable')}</Button>
-                <Button>{t('button.delete')}</Button>
                 <Button
-                  variant="primary"
-                  iconName="add-plus"
+                  loading={loadingDelete}
+                  disabled={selectedItems.length <= 0}
                   onClick={() => {
-                    navigate('/pipelines/create');
+                    confirmDeletePipeline();
                   }}
                 >
-                  {t('button.createPipeline')}
+                  {t('button.delete')}
                 </Button>
               </SpaceBetween>
             }

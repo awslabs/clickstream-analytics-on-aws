@@ -4,10 +4,8 @@ import InfoLink from 'components/common/InfoLink';
 import CreateProject from 'pages/projects/create/CreateProject';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 const HomeHeader: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [openCreate, setOpenCreate] = useState(false);
   return (
@@ -30,13 +28,6 @@ const HomeHeader: React.FC = () => {
               }}
             >
               {t('button.createProject')}
-            </Button>
-            <Button
-              onClick={() => {
-                navigate('/pipelines/create');
-              }}
-            >
-              {t('button.createPipeline')}
             </Button>
           </SpaceBetween>
         }

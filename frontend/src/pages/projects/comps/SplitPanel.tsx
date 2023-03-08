@@ -77,23 +77,28 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
       setLoadingUpdateEnv(true);
     }
 
-    const { success }: ApiResponse<null> = await updateProject(newProject);
-    if (success) {
-      if (type === 'email') {
-        setPrevEmail(newProject.emails);
-        setIsEditingEmail(false);
+    try {
+      const { success }: ApiResponse<null> = await updateProject(newProject);
+      if (success) {
+        if (type === 'email') {
+          setPrevEmail(newProject.emails);
+          setIsEditingEmail(false);
+        }
+        if (type === 'env') {
+          setPrevEnvOption(
+            PROJECT_STAGE_LIST.find(
+              (element) => element.value === newProject.environment
+            ) || PROJECT_STAGE_LIST[0]
+          );
+          setIsEditingEvn(false);
+        }
       }
-      if (type === 'env') {
-        setPrevEnvOption(
-          PROJECT_STAGE_LIST.find(
-            (element) => element.value === newProject.environment
-          ) || PROJECT_STAGE_LIST[0]
-        );
-        setIsEditingEvn(false);
-      }
+      setLoadingUpdateEmail(false);
+      setLoadingUpdateEnv(false);
+    } catch (error) {
+      setLoadingUpdateEmail(false);
+      setLoadingUpdateEnv(false);
     }
-    setLoadingUpdateEmail(false);
-    setLoadingUpdateEnv(false);
   };
 
   return (

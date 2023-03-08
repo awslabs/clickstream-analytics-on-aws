@@ -76,9 +76,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.status')}
               </Box>
               <div>
-                <StatusIndicator>
-                  Pipeline is operating normally
-                </StatusIndicator>
+                <StatusIndicator>{pipelineInfo.status}</StatusIndicator>
               </div>
             </div>
           </SpaceBetween>

@@ -9,7 +9,7 @@ const getPipelineList = async (params: {
 };
 
 const getPipelineByProject = async (params: { pid: string }) => {
-  const result: any = await apiRequest('get', `/pipeline/`, params);
+  const result: any = await apiRequest('get', `/pipeline`, params);
   return result;
 };
 
@@ -22,7 +22,12 @@ const getPipelineDetail = async (params: { id: string; pid: string }) => {
 };
 
 const createProjectPipeline = async (data: IPipeline) => {
-  const result: any = await apiRequest('post', `/pipeline/`, data);
+  const result: any = await apiRequest('post', `/pipeline`, data);
+  return result;
+};
+
+const deletePipeline = async (id: string, pid: string) => {
+  const result: any = await apiRequest('delete', `/pipeline/${id}?pid=${pid}`);
   return result;
 };
 
@@ -31,4 +36,5 @@ export {
   getPipelineByProject,
   getPipelineDetail,
   createProjectPipeline,
+  deletePipeline,
 };

@@ -35,14 +35,18 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
   // get all s3 bucket
   const getAllS3BucketList = async () => {
     setLoadingBucket(true);
-    const { success, data }: ApiResponse<S3Response[]> =
-      await getS3BucketList();
-    if (success) {
-      const s3Options: AutosuggestProps.Options = data.map((element) => ({
-        label: `s3://${element.name}`,
-        value: `s3://${element.name}`,
-      }));
-      setS3BucketOptionList(s3Options);
+    try {
+      const { success, data }: ApiResponse<S3Response[]> =
+        await getS3BucketList();
+      if (success) {
+        const s3Options: AutosuggestProps.Options = data.map((element) => ({
+          label: `s3://${element.name}`,
+          value: `s3://${element.name}`,
+        }));
+        setS3BucketOptionList(s3Options);
+        setLoadingBucket(false);
+      }
+    } catch (error) {
       setLoadingBucket(false);
     }
   };
@@ -69,7 +73,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         <Autosuggest
           statusType={loadingBucket ? 'loading' : 'finished'}
           onChange={({ detail }) => changeS3Bucket(detail.value)}
-          value={pipelineInfo.ingestionServer.sinkS3.s3Uri}
+          value={pipelineInfo.ingestionServer.sinkS3.s3DataBucket}
           options={s3BucketOptionList}
           enteredTextLabel={(value) => `${t('use')}: "${value}"`}
         />
@@ -82,7 +86,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
       >
         <Input
           placeholder={t('pipeline:create.s3.enterAdditional') || ''}
-          value={pipelineInfo.ingestionServer.sinkS3.s3prefix}
+          value={pipelineInfo.ingestionServer.sinkS3.s3DataPrefix}
           onChange={(e) => {
             changeS3Prefix(e.detail.value);
           }}

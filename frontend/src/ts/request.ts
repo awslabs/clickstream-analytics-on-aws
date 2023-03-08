@@ -1,4 +1,5 @@
 import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { reject } from 'lodash';
 import { COMMON_ALERT_TYPE } from './const';
 import { alertMsg, generateStr } from './utils';
 
@@ -67,7 +68,7 @@ export function getRequest<T>(url: string, params?: any): Promise<T> {
     })
     .catch((err) => {
       errMsg(err);
-      throw new Error(err || 'Error');
+      reject(err);
     });
 }
 
@@ -90,7 +91,7 @@ export function postRequest<T>(
     })
     .catch((err) => {
       errMsg(err);
-      throw new Error(err || 'Error');
+      reject(err);
     });
 }
 
@@ -113,7 +114,7 @@ export function putRequest<T>(
     })
     .catch((err) => {
       errMsg(err);
-      throw new Error(err || 'Error');
+      reject(err);
     });
 }
 
@@ -132,7 +133,7 @@ export function deleteRequest<T>(url: string, data?: any): Promise<T> {
     })
     .catch((err) => {
       errMsg(err);
-      throw new Error(err || 'Error');
+      reject(err);
     });
 }
 
@@ -174,11 +175,10 @@ export const apiRequest = (
 // Error handler
 function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
   if (err && err.response) {
-    console.info('err.response:', JSON.stringify(err.response));
     switch (err.response.status) {
       case 400:
         alertMsg(
-          err.response.data.message,
+          err.response?.data?.message,
           COMMON_ALERT_TYPE.Error as AlertType
         );
         break;

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateProject from '../create/CreateProject';
 
 interface ProjectsHeaderProps {
+  totalProject: number;
   project?: IProject;
   refreshPage: () => void;
 }
@@ -17,7 +18,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
 ) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { project, refreshPage } = props;
+  const { totalProject, project, refreshPage } = props;
   const [openCreate, setOpenCreate] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
@@ -47,7 +48,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
       <Header
         variant="h1"
         info={<InfoLink />}
-        counter="(9)"
+        counter={`(${totalProject})`}
         actions={
           <SpaceBetween size="xs" direction="horizontal">
             <Button

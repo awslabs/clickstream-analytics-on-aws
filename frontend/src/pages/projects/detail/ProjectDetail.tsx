@@ -41,11 +41,15 @@ const ProjectDetail: React.FC = () => {
 
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
-    const { success, data }: ApiResponse<IProject> = await getProjectDetail(
-      projectId
-    );
-    if (success) {
-      setProjectInfo(data);
+    try {
+      const { success, data }: ApiResponse<IProject> = await getProjectDetail(
+        projectId
+      );
+      if (success) {
+        setProjectInfo(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
       setLoadingData(false);
     }
   };

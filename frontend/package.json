@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@cloudscape-design/components": "^3.0.196",
+    "@cloudscape-design/components": "^3.0.222",
     "@cloudscape-design/global-styles": "^1.0.7",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -30,6 +30,7 @@
     "web-vitals": "^3.1.1"
   },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
@@ -68,5 +69,10 @@
     "eslint-plugin-react": "^7.31.10",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4"
+  },
+  "resolutions": {
+    "nth-check": "2.1.1",
+    "http-cache-semantics": "4.1.1",
+    "json5": "2.2.3"
   }
 }

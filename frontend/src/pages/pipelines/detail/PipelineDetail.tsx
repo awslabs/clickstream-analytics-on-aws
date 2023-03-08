@@ -39,11 +39,15 @@ const PipelineDetail: React.FC = () => {
 
   const getProjectDetailById = async () => {
     setLoadingData(true);
-    const { success, data }: ApiResponse<IProject> = await getProjectDetail(
-      pid ?? ''
-    );
-    if (success) {
-      setProjectInfo(data);
+    try {
+      const { success, data }: ApiResponse<IProject> = await getProjectDetail(
+        pid ?? ''
+      );
+      if (success) {
+        setProjectInfo(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
       setLoadingData(false);
     }
   };

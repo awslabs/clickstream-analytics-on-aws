@@ -86,28 +86,34 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   // get subnet list
   const getSubnetListByRegionAndVPC = async (region: string, vpcId: string) => {
     setLoadingSubnet(true);
-    const { success, data }: ApiResponse<SubnetResponse[]> =
-      await getSubnetList({
-        region: region,
-        vpcId: vpcId,
-      });
-    if (success) {
-      const publicSubnets = data.filter((element) => element.type === 'public');
-      const privateSubnets = data.filter(
-        (element) => element.type === 'private'
-      );
-      const publicSubnetOptions = publicSubnets.map((element) => ({
-        label: `${element.name}(${element.id})`,
-        value: element.id,
-        description: `${element.availabilityZone}:${element.cidr}`,
-      }));
-      const privateSubnetOptions = privateSubnets.map((element) => ({
-        label: `${element.name}(${element.id})`,
-        value: element.id,
-        description: `${element.availabilityZone}:${element.cidr}`,
-      }));
-      setPublicSubnetOptionList(publicSubnetOptions);
-      setPrivateSubnetOptionList(privateSubnetOptions);
+    try {
+      const { success, data }: ApiResponse<SubnetResponse[]> =
+        await getSubnetList({
+          region: region,
+          vpcId: vpcId,
+        });
+      if (success) {
+        const publicSubnets = data.filter(
+          (element) => element.type === 'public'
+        );
+        const privateSubnets = data.filter(
+          (element) => element.type === 'private'
+        );
+        const publicSubnetOptions = publicSubnets.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: `${element.availabilityZone}:${element.cidr}`,
+        }));
+        const privateSubnetOptions = privateSubnets.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: `${element.availabilityZone}:${element.cidr}`,
+        }));
+        setPublicSubnetOptionList(publicSubnetOptions);
+        setPrivateSubnetOptionList(privateSubnetOptions);
+        setLoadingSubnet(false);
+      }
+    } catch (error) {
       setLoadingSubnet(false);
     }
   };
@@ -115,14 +121,18 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   // get hosted zone list
   const getAllHostedZoneList = async () => {
     setLoadingHostedZone(true);
-    const { success, data }: ApiResponse<HostedZoneResponse[]> =
-      await getHostedZoneList();
-    if (success) {
-      const hostedZoneOptions: SelectProps.Options = data.map((element) => ({
-        label: element.name,
-        value: element.id,
-      }));
-      setHostedZoneOptionList(hostedZoneOptions);
+    try {
+      const { success, data }: ApiResponse<HostedZoneResponse[]> =
+        await getHostedZoneList();
+      if (success) {
+        const hostedZoneOptions: SelectProps.Options = data.map((element) => ({
+          label: element.name,
+          value: element.id,
+        }));
+        setHostedZoneOptionList(hostedZoneOptions);
+        setLoadingHostedZone(false);
+      }
+    } catch (error) {
       setLoadingHostedZone(false);
     }
   };
@@ -154,8 +164,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
       >
         <SpaceBetween direction="vertical" size="l">
           <FormField
-            label="Public Subnets"
-            description="Plase select public subnets"
+            label={t('pipeline:create.publicSubnet')}
+            description={t('pipeline:create.publicSubnetDesc')}
             stretch
             errorText={
               publicSubnetError ? t('pipeline:valid.publicSubnetEmpty') : ''
@@ -176,8 +186,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           </FormField>
 
           <FormField
-            label="Private Subnets"
-            description="Plase select private subnets"
+            label={t('pipeline:create.privateSubnet')}
+            description={t('pipeline:create.privateSubnetDesc')}
             stretch
             errorText={
               privateSubnetError ? t('pipeline:valid.privateSubnetEmpty') : ''
@@ -295,7 +305,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   paddingTop: 25,
                 }}
               >
-                <Button iconName="refresh" />
+                <Button
+                  iconName="refresh"
+                  loading={loadingHostedZone}
+                  onClick={() => {
+                    getAllHostedZoneList();
+                  }}
+                />
               </div>
             </Grid>
           )}

@@ -32,29 +32,9 @@ const ReviewAndLaunch: React.FC = () => {
           <SpaceBetween direction="vertical" size="l">
             <div>
               <Box variant="awsui-key-label">
-                {t('pipeline:create.deployMode')}
-              </Box>
-              <div>Server-based (ECS)</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.clusterSize')}
-              </Box>
-              <div>XSmall</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
                 {t('pipeline:create.domainName')}
               </Box>
               <div>example.example.com</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.sslName')}
-              </Box>
-              <div>
-                arn:aws:cloudfront::abcdef01234567890.cloudfront.net/SLCCSMWOHOFUY0
-              </div>
             </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">
@@ -78,10 +58,6 @@ const ReviewAndLaunch: React.FC = () => {
                 MSK (arn:aws:msk::abcdef01234567890.msk.net/SLCCSMWOHOFUY0)
               </div>
             </div>
-            <div>
-              <Box variant="awsui-key-label">{t('pipeline:create.topic')}</Box>
-              <div>project-id-2342342</div>
-            </div>
           </SpaceBetween>
         </ColumnLayout>
       </Container>
@@ -89,7 +65,7 @@ const ReviewAndLaunch: React.FC = () => {
       <Container
         header={
           <Header variant="h2" description="Container description">
-            Ingestion setting
+            {t('pipeline:create.ingestSettings')}
           </Header>
         }
       >
@@ -194,13 +170,6 @@ const ReviewAndLaunch: React.FC = () => {
                 {t('pipeline:create.engineDataRange')}
               </Box>
               <div>3 month</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {' '}
-                {t('pipeline:create.engineDataPartition')}
-              </Box>
-              <div>Ingestion time</div>
             </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">

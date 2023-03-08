@@ -27,7 +27,16 @@ export const PLUGINS_LIST = [
   {
     name: 'Event fingerprint',
     description: 'This enrichment generates a fingerprint for the event ...',
-    status: 'Disabled',
+    status: 'Enabled',
+    edited: 'Nov 24, 2022',
+  },
+];
+
+export const TRANSFORM_LIST = [
+  {
+    name: 'Transform user data template',
+    description: 'This Transform template transform user information...',
+    status: 'Enabled',
     edited: 'Nov 24, 2022',
   },
 ];

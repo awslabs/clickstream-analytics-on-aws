@@ -13,8 +13,8 @@ declare global {
     ingestionServer: {
       network: {
         vpcId: string;
-        publicSubnetIds: string;
-        privateSubnetIds: string;
+        publicSubnetIds: string[];
+        privateSubnetIds: string[];
       };
       size: {
         serverMin: string;
@@ -31,15 +31,15 @@ declare global {
         serverEndpointPath: string;
         serverCorsOrigin: string;
         protocol: string;
-        enableApplicationLoadBalancerAccessLog: string;
+        enableApplicationLoadBalancerAccessLog: boolean;
         logS3Bucket: string;
         logS3Prefix: string;
         notificationsTopicArn: string;
       };
       sinkType: string;
       sinkS3: {
-        s3Uri: string;
-        s3prefix: string;
+        s3DataBucket: string;
+        s3DataPrefix: string;
         s3BufferSize: string;
         s3BufferInterval: string;
       };

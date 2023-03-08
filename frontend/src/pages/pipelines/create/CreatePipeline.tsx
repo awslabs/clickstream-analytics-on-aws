@@ -8,16 +8,16 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProtocalType, SinkType } from 'ts/const';
 import BasicInformation from './steps/BasicInformation';
-// import ConfigEnrichment from './steps/ConfigEnrichment';
+import ConfigETL from './steps/ConfigETL';
 import ConfigIngestion from './steps/ConfigIngestion';
-// import DataModeling from './steps/DataModeling';
-// import ReviewAndLaunch from './steps/ReviewAndLaunch';
+import Reporting from './steps/Reporting';
+import ReviewAndLaunch from './steps/ReviewAndLaunch';
 
 const Content: React.FC = () => {
   const { projectId } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [activeStepIndex, setActiveStepIndex] = React.useState(0);
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [loadingCreate, setLoadingCreate] = useState(false);
 
   const [nameEmptyError, setNameEmptyError] = useState(false);
@@ -43,8 +43,8 @@ const Content: React.FC = () => {
     ingestionServer: {
       network: {
         vpcId: '',
-        publicSubnetIds: '',
-        privateSubnetIds: '',
+        publicSubnetIds: [],
+        privateSubnetIds: [],
       },
       size: {
         serverMin: '2',
@@ -61,15 +61,15 @@ const Content: React.FC = () => {
         serverEndpointPath: '/collect',
         serverCorsOrigin: '',
         protocol: ProtocalType.HTTPS,
-        enableApplicationLoadBalancerAccessLog: 'Yes',
+        enableApplicationLoadBalancerAccessLog: true,
         logS3Bucket: '',
         logS3Prefix: '',
         notificationsTopicArn: '',
       },
       sinkType: SinkType.S3,
       sinkS3: {
-        s3Uri: '',
-        s3prefix: '',
+        s3DataBucket: '',
+        s3DataPrefix: '',
         s3BufferSize: '10',
         s3BufferInterval: '300',
       },
@@ -101,10 +101,6 @@ const Content: React.FC = () => {
       setVPCEmptyError(true);
       return false;
     }
-    if (!pipelineInfo.selectedSDK) {
-      setSDKEmptyError(true);
-      return false;
-    }
     return true;
   };
 
@@ -128,7 +124,7 @@ const Content: React.FC = () => {
       }
     }
     if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
-      if (!pipelineInfo.ingestionServer.sinkS3.s3Uri.trim()) {
+      if (!pipelineInfo.ingestionServer.sinkS3.s3DataBucket.trim()) {
         setBufferS3BucketEmptyError(true);
         return false;
       }
@@ -151,7 +147,7 @@ const Content: React.FC = () => {
       const { success, data }: ApiResponse<ResponseCreate> =
         await createProjectPipeline(createPipelineObj);
       if (success && data.id) {
-        navigate('/pipelines');
+        navigate(`/project/detail/${projectId}`);
       }
       setLoadingCreate(false);
     } catch (error) {
@@ -215,11 +211,17 @@ const Content: React.FC = () => {
               }}
               changeRegion={(region) => {
                 setRegionEmptyError(false);
+                setVPCEmptyError(false);
+                setPublicSubnetError(false);
+                setPrivateSubnetError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
                     selectedRegion: region,
                     region: region.value || '',
+                    selectedVPC: null,
+                    selectedPublicSubnet: [],
+                    selectedPrivateSubnet: [],
                   };
                 });
               }}
@@ -280,9 +282,9 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       network: {
                         ...prev.ingestionServer.network,
-                        publicSubnetIds: subnets
-                          .map((element) => element.value)
-                          .join(','),
+                        publicSubnetIds: subnets.map(
+                          (element) => element.value || ''
+                        ),
                       },
                     },
                   };
@@ -298,9 +300,9 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       network: {
                         ...prev.ingestionServer.network,
-                        privateSubnetIds: subnets
-                          .map((element) => element.value)
-                          .join(','),
+                        privateSubnetIds: subnets.map(
+                          (element) => element.value || ''
+                        ),
                       },
                     },
                   };
@@ -436,7 +438,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3Uri: bucket,
+                        s3DataBucket: bucket,
                       },
                     },
                   };
@@ -450,7 +452,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3prefix: prefix,
+                        s3DataPrefix: prefix,
                       },
                     },
                   };
@@ -487,18 +489,18 @@ const Content: React.FC = () => {
             />
           ),
         },
-        // { // need to be new design
-        //   title: t('pipeline:create.configEnrich'),
-        //   content: <ConfigEnrichment />,
-        // },
-        // {
-        //   title: t('pipeline:create.dataModeling'),
-        //   content: <DataModeling />,
-        // },
-        // {
-        //   title: t('pipeline:create.reviewLaunch'),
-        //   content: <ReviewAndLaunch />,
-        // },
+        {
+          title: t('pipeline:create.configETL'),
+          content: <ConfigETL />,
+        },
+        {
+          title: t('pipeline:create.reporting'),
+          content: <Reporting />,
+        },
+        {
+          title: t('pipeline:create.reviewLaunch'),
+          content: <ReviewAndLaunch />,
+        },
       ]}
     />
   );
