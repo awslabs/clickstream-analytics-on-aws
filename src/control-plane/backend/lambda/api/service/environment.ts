@@ -50,9 +50,10 @@ export class EnvironmentServ {
       next(error);
     }
   }
-  public async listBuckets(_req: any, res: any, next: any) {
+  public async listBuckets(req: any, res: any, next: any) {
     try {
-      const result = await listBuckets();
+      const { region } = req.query;
+      const result = await listBuckets(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

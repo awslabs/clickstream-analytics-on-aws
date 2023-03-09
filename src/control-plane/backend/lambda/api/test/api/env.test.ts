@@ -19,7 +19,7 @@ import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
-import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { app, server } from '../../index';
@@ -35,7 +35,17 @@ const athenaClient = mockClient(AthenaClient);
 const iamClient = mockClient(IAMClient);
 
 describe('Account Env test', () => {
-
+  beforeEach(() => {
+    accountClientMock.reset();
+    ec2ClientMock.reset();
+    s3Client.reset();
+    kafkaClient.reset();
+    redshiftClient.reset();
+    quickSightClient.reset();
+    route53Client.reset();
+    athenaClient.reset();
+    iamClient.reset();
+  });
   it('Get regions', async () => {
     accountClientMock.on(ListRegionsCommand).resolves({
       Regions: [
@@ -459,14 +469,21 @@ describe('Account Env test', () => {
     s3Client.on(ListBucketsCommand).resolves({
       Buckets: [
         {
-          Name: 'sagemaker-us-*****-west-2',
+          Name: 'sagemaker-us-*****-east-1',
         },
         {
-          Name: 'ssm-onboarding-bucket-*****-us-west-2',
+          Name: 'ssm-onboarding-bucket-*****-us-east-2',
         },
       ],
     });
-    let res = await request(app).get('/api/env/s3/buckets');
+    s3Client.on(GetBucketLocationCommand)
+      .resolvesOnce({
+        LocationConstraint: 'us-east-1',
+      })
+      .resolves({
+        LocationConstraint: 'us-east-2',
+      });
+    const res = await request(app).get('/api/env/s3/buckets');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -474,10 +491,44 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'sagemaker-us-*****-west-2',
+          name: 'sagemaker-us-*****-east-1',
+          location: 'us-east-1',
         },
         {
-          name: 'ssm-onboarding-bucket-*****-us-west-2',
+          name: 'ssm-onboarding-bucket-*****-us-east-2',
+          location: 'us-east-2',
+        },
+      ],
+    });
+  });
+  it('Get buckets with region', async () => {
+    s3Client.on(ListBucketsCommand).resolves({
+      Buckets: [
+        {
+          Name: 'sagemaker-us-*****-east-1',
+        },
+        {
+          Name: 'ssm-onboarding-bucket-*****-us-east-2',
+        },
+      ],
+    });
+    s3Client.on(GetBucketLocationCommand)
+      .resolvesOnce({
+        LocationConstraint: 'us-east-1',
+      })
+      .resolves({
+        LocationConstraint: 'us-east-2',
+      });
+    const res = await request(app).get('/api/env/s3/buckets?region=us-east-1');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'sagemaker-us-*****-east-1',
+          location: 'us-east-1',
         },
       ],
     });

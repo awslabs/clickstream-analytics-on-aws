@@ -11,23 +11,45 @@
  *  and limitations under the License.
  */
 
-import { S3Client, ListBucketsCommand, Bucket } from '@aws-sdk/client-s3';
+import { S3Client, ListBucketsCommand, GetBucketLocationCommand, GetBucketLocationCommandOutput, Bucket } from '@aws-sdk/client-s3';
+import pLimit from 'p-limit';
+
+const promisePool = pLimit(50);
 
 export interface ClickStreamBucket {
-  readonly name: string | undefined;
+  readonly name: string;
+  readonly location: string;
 }
 
-export const listBuckets = async () => {
+export const listBuckets = async (region: string) => {
   const s3Client = new S3Client({});
   const params: ListBucketsCommand = new ListBucketsCommand({});
   const result = await s3Client.send(params);
   const buckets: ClickStreamBucket[] = [];
   if (result.Buckets) {
-    for (let index in result.Buckets as Bucket[]) {
-      buckets.push({
-        name: result.Buckets[index].Name,
-      });
+    const input = [];
+    for (let bucket of result.Buckets as Bucket[]) {
+      const bucketName = bucket.Name;
+      if (bucketName) {
+        input.push(promisePool(() => {
+          return s3Client.send(new GetBucketLocationCommand({
+            Bucket: bucketName,
+          })).then(res => {
+            buckets.push({
+              name: bucketName,
+              location: (res as GetBucketLocationCommandOutput).LocationConstraint ?? 'us-east-1',
+            });
+          });
+        }));
+      }
     }
+    await Promise.all(input);
   }
+  if (region) {
+    return buckets.filter((obj) => {
+      return obj.location === region;
+    });
+  }
+
   return buckets;
 };

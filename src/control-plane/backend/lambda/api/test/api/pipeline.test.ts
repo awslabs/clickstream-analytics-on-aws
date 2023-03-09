@@ -39,6 +39,7 @@ const sfnMock = mockClient(SFNClient);
 describe('Pipeline test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    sfnMock.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);

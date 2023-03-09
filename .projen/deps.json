@@ -231,6 +231,11 @@
       "type": "runtime"
     },
     {
+      "name": "p-limit",
+      "version": "3.1.0",
+      "type": "runtime"
+    },
+    {
       "name": "uuid",
       "version": "^9.0.0",
       "type": "runtime"

@@ -58,6 +58,7 @@ const depsForApiProject = [
   ...commonDeps,
   'express@^4.18.2',
   'express-validator@^6.14.3',
+  'p-limit@3.1.0',
   ...awsSDKDepsForApiProject,
 ];
 

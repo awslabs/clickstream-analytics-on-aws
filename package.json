@@ -74,6 +74,7 @@
     "express-validator": "^6.14.3",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^3.0.1",
+    "p-limit": "3.1.0",
     "uuid": "^9.0.0"
   },
   "engines": {
