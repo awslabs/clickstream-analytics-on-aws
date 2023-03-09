@@ -429,6 +429,51 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
   });
 
+  test('LogGroup', () => {
+    const { template } = TestEnv.newALBApiStack();
+
+    template.hasResourceProperties('AWS::Logs::LogGroup', {
+      KmsKeyId: {
+        'Fn::GetAtt': [
+          'testClickStreamALBApiStackActionStateMachineLogGroupKmsKeyE240FB96',
+          'Arn',
+        ],
+      },
+      LogGroupName: {
+        'Fn::Join': [
+          '',
+          [
+            '/aws/vendedlogs/states/Clickstream/StackActionLogGroup-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        ],
+      },
+      RetentionInDays: 180,
+    });
+  });
+
 });
 
 describe('Click Stream Api Cloudfront deploy Construct Test', () => {
@@ -888,6 +933,51 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         BurstLimit: 100,
         RateLimit: 50,
       },
+    });
+  });
+
+  test('LogGroup', () => {
+    const { template } = TestEnv.newALBApiStack();
+
+    template.hasResourceProperties('AWS::Logs::LogGroup', {
+      KmsKeyId: {
+        'Fn::GetAtt': [
+          'testClickStreamALBApiStackActionStateMachineLogGroupKmsKeyE240FB96',
+          'Arn',
+        ],
+      },
+      LogGroupName: {
+        'Fn::Join': [
+          '',
+          [
+            '/aws/vendedlogs/states/Clickstream/StackActionLogGroup-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        ],
+      },
+      RetentionInDays: 180,
     });
   });
 

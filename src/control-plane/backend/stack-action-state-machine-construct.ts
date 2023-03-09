@@ -203,7 +203,7 @@ export class StackActionStateMachine extends Construct {
     describeStacksByName.next(progressChoiceUpdate);
 
     const stackActionLogGroup = createLogGroupWithKmsKey(this, {
-      prefix: 'StackActionLogGroup',
+      prefix: '/aws/vendedlogs/states/Clickstream/StackActionLogGroup',
     });
     // Define a state machine
     this.stateMachine = new StateMachine(this, 'StackActionStateMachine', {
