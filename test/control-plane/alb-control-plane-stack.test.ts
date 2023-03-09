@@ -244,7 +244,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
         Variables: {
-          LOG_LEVEL: 'ERROR',
+          LOG_LEVEL: 'WARN',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
         },
       },

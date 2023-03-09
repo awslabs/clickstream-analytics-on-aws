@@ -995,7 +995,7 @@ test('Lambda has POWERTOOLS ENV set', () => {
       template.hasResourceProperties('AWS::Lambda::Function', {
         Environment: {
           Variables: {
-            LOG_LEVEL: 'ERROR',
+            LOG_LEVEL: 'WARN',
             POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
           },
         },

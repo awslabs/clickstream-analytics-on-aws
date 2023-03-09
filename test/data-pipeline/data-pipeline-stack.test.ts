@@ -440,7 +440,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
           APP_IDS: {
             'Fn::Join': Match.anyValue(),
           },
-          LOG_LEVEL: 'ERROR',
+          LOG_LEVEL: 'WARN',
         },
       },
       Role: {
@@ -462,7 +462,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
         Variables: {
-          LOG_LEVEL: 'ERROR',
+          LOG_LEVEL: 'WARN',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
         },
       },

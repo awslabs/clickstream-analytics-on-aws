@@ -97,7 +97,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           AWS_ACCOUNT_ID: {
             Ref: 'AWS::AccountId',
           },
-          LOG_LEVEL: 'ERROR',
+          LOG_LEVEL: 'WARN',
         },
       },
       MemorySize: 512,
@@ -130,7 +130,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
         Variables: {
-          LOG_LEVEL: 'ERROR',
+          LOG_LEVEL: 'WARN',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
         },
       },
