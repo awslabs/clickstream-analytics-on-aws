@@ -13,6 +13,7 @@
 import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { IngestionServerStack } from '../../../src/ingestion-server-stack';
+import { validateSubnetsRule } from '../../rules';
 
 function findResourceByCondition(template: Template, condition: string) {
   const allResources = template.toJSON().Resources;
@@ -102,6 +103,12 @@ test('PublicSubnetIds pattern', () => {
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }
+  });
+});
+
+test('Has Rule to validate subnets in VPC', () => {
+  templates.forEach((template) => {
+    validateSubnetsRule(template);
   });
 });
 

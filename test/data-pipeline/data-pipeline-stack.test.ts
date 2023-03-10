@@ -14,6 +14,7 @@
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
+import { validateSubnetsRule } from '../rules';
 
 function findFirstResourceByKeyPrefix(
   template: Template,
@@ -79,6 +80,10 @@ describe('DataPipelineStack parameter test', () => {
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }
+  });
+
+  test('Has Rule to validate subnets in VPC', () => {
+    validateSubnetsRule(template);
   });
 
   test('Should has parameter ProjectId', () => {

@@ -18,6 +18,7 @@ import {
 import { Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
+import { validateSubnetsRule } from '../rules';
 
 function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
@@ -407,6 +408,10 @@ describe('CloudFormation parameter check', () => {
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }
+  });
+
+  test('Subnets in VPC rule', () => {
+    validateSubnetsRule(template);
   });
 
 });

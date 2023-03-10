@@ -12,7 +12,7 @@
  */
 
 import {
-  CfnParameter,
+  CfnParameter, CfnRule, Fn,
 } from 'aws-cdk-lib';
 
 import { Construct, IConstruct } from 'constructs';
@@ -220,7 +220,6 @@ export class Parameters {
         default: PARAMETER_LABEL_PUBLIC_SUBNETS,
       };
       res.push(publicSubnets.logicalId);
-
     }
 
     const privateSubnets = this.createPrivateSubnetParameter(scope, customId ?? undefined, subnetParameterType ?? SubnetParameterType.List);
@@ -232,6 +231,16 @@ export class Parameters {
     groups.push({
       Label: { default: PARAMETER_GROUP_LABEL_VPC },
       Parameters: res,
+    });
+
+    new CfnRule(scope, 'SubnetsInVpc', {
+      assertions: [
+        {
+          assert: Fn.conditionEachMemberIn(Fn.valueOfAll('AWS::EC2::Subnet::Id', 'VpcId'), Fn.refAll('AWS::EC2::VPC::Id')),
+          assertDescription:
+            'All subnets must in the VPC',
+        },
+      ],
     });
 
     return {
