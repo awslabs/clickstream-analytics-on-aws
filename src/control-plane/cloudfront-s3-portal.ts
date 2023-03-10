@@ -274,7 +274,7 @@ export class CloudFrontS3Portal extends Construct {
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
           cachedMethods: props.distributionProps?.cachedMethods ?? CachedMethods.CACHE_GET_HEAD,
           cachePolicy: new CachePolicy(this, 'defaultCachePolicy', {
-            cachePolicyName: `cachepolicy-${Stack.of(this).stackName}`,
+            cachePolicyName: `cachepolicy-${shortId}`,
             defaultTtl: Duration.days(7),
             minTtl: Duration.seconds(0),
             maxTtl: Duration.days(30),

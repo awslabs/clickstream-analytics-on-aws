@@ -530,3 +530,43 @@ describe('CloudFrontS3Portal', () => {
     });
   });
 });
+
+test('test cache policy name uniqueness', () => {
+
+  commonTemplate.hasResourceProperties('AWS::CloudFront::CachePolicy', {
+    CachePolicyConfig: {
+      Name: {
+        'Fn::Join': [
+          '',
+          [
+            'cachepolicy-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        ],
+      },
+    },
+  });
+
+});
