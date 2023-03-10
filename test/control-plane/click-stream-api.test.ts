@@ -471,6 +471,74 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
   });
 
+  test('State Machine', () => {
+    const { template } = TestEnv.newALBApiStack();
+
+    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+      DefinitionString: {
+        'Fn::Join': [
+          '',
+          [
+            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}]},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","RoleARN":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'Arn',
+              ],
+            },
+            '","Capabilities":["CAPABILITY_IAM"]}},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByResult"},"Create in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Save Stack Runtime"},"DescribeStacksByResult":{"Next":"Create in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"Save Stack Runtime":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:deleteStack","Parameters":{"StackName.$":"$.Input.StackName"}},"Wait 15 Seconds Too":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByName"},"UpdateStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Input.StackName"}}},"TimeoutSeconds":1800}',
+          ],
+        ],
+      },
+      LoggingConfiguration: {
+        Destinations: [
+          {
+            CloudWatchLogsLogGroup: {
+              LogGroupArn: {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
+                  'Arn',
+                ],
+              },
+            },
+          },
+        ],
+        Level: 'ALL',
+      },
+    });
+  });
+
 });
 
 describe('Click Stream Api Cloudfront deploy Construct Test', () => {
@@ -975,6 +1043,74 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
       },
       RetentionInDays: 180,
+    });
+  });
+
+  test('State Machine', () => {
+    const { template } = TestEnv.newALBApiStack();
+
+    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+      DefinitionString: {
+        'Fn::Join': [
+          '',
+          [
+            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}]},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","RoleARN":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'Arn',
+              ],
+            },
+            '","Capabilities":["CAPABILITY_IAM"]}},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByResult"},"Create in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Save Stack Runtime"},"DescribeStacksByResult":{"Next":"Create in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"Save Stack Runtime":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:deleteStack","Parameters":{"StackName.$":"$.Input.StackName"}},"Wait 15 Seconds Too":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByName"},"UpdateStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Input.StackName"}}},"TimeoutSeconds":1800}',
+          ],
+        ],
+      },
+      LoggingConfiguration: {
+        Destinations: [
+          {
+            CloudWatchLogsLogGroup: {
+              LogGroupArn: {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
+                  'Arn',
+                ],
+              },
+            },
+          },
+        ],
+        Level: 'ALL',
+      },
     });
   });
 
