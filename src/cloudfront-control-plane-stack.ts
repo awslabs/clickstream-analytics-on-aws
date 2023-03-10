@@ -14,7 +14,14 @@
 import { join } from 'path';
 import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { CfnDistribution, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import {
+  CfnDistribution,
+  OriginProtocolPolicy,
+  OriginRequestCookieBehavior,
+  OriginRequestPolicy,
+  OriginRequestQueryStringBehavior,
+} from 'aws-cdk-lib/aws-cloudfront';
+import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
@@ -196,6 +203,21 @@ export class CloudFrontControlPlaneStack extends Stack {
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
     }
+
+    let behaviorOptions: AddBehaviorOptions = {};
+    if (!props?.targetToCNRegions) {
+      behaviorOptions = {
+        originRequestPolicy: new OriginRequestPolicy(this, 'ApiGatewayOriginRequestPolicy', {
+          comment: 'Policy to forward all parameters in viewer requests except for the Host header',
+          cookieBehavior: OriginRequestCookieBehavior.all(),
+          headerBehavior: {
+            behavior: 'allExcept',
+            headers: ['host'],
+          },
+          queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+        }),
+      };
+    }
     controlPlane.addHttpOrigin(
       `/${clickStreamApi.lambdaRestApi.deploymentStage.stageName}/*`,
       Fn.select(2, Fn.split('/', clickStreamApi.lambdaRestApi.url)),
@@ -203,6 +225,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
         originPath: `/${clickStreamApi.lambdaRestApi.deploymentStage.stageName}`,
       },
+      behaviorOptions,
     );
 
     const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;

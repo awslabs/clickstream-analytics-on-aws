@@ -18,7 +18,7 @@ import {
   Template,
 } from 'aws-cdk-lib/assertions';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { OriginProtocolPolicy, OriginRequestCookieBehavior, OriginRequestPolicy, OriginRequestQueryStringBehavior } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
@@ -284,6 +284,15 @@ describe('CloudFrontS3Portal', () => {
   test('Control Plane add origin - default', () => {
 
     const testStack = new Stack(new App(), 'testStack');
+    const apiGatewayOriginRequestPolicy = new OriginRequestPolicy(testStack, 'ApiGatewayOriginRequestPolicy', {
+      comment: 'Policy to forward all parameters in viewer requests except for the Host header',
+      cookieBehavior: OriginRequestCookieBehavior.all(),
+      headerBehavior: {
+        behavior: 'allExcept',
+        headers: ['host'],
+      },
+      queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+    });
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
@@ -301,6 +310,9 @@ describe('CloudFrontS3Portal', () => {
       {
         protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
         originPath: '/prod',
+      },
+      {
+        originRequestPolicy: apiGatewayOriginRequestPolicy,
       },
     );
     const template = Template.fromStack(testStack);
@@ -321,6 +333,9 @@ describe('CloudFrontS3Portal', () => {
             ],
             CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad',
             Compress: true,
+            OriginRequestPolicyId: {
+              Ref: 'ApiGatewayOriginRequestPolicy339DF282',
+            },
             PathPattern: '/test/*',
             TargetOriginId: 'testStacktestportalPortalDistributionOrigin2B11D5A7C',
             ViewerProtocolPolicy: 'redirect-to-https',
@@ -367,6 +382,24 @@ describe('CloudFrontS3Portal', () => {
           },
         ],
         PriceClass: 'PriceClass_All',
+      },
+    });
+    template.hasResourceProperties('AWS::CloudFront::OriginRequestPolicy', {
+      OriginRequestPolicyConfig: {
+        Comment: 'Policy to forward all parameters in viewer requests except for the Host header',
+        CookiesConfig: {
+          CookieBehavior: 'all',
+        },
+        HeadersConfig: {
+          HeaderBehavior: 'allExcept',
+          Headers: [
+            'host',
+          ],
+        },
+        Name: 'testStackApiGatewayOriginRequestPolicy0618DD4C',
+        QueryStringsConfig: {
+          QueryStringBehavior: 'all',
+        },
       },
     });
   });

@@ -370,6 +370,7 @@ export class CloudFrontS3Portal extends Construct {
           viewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           cachePolicy: behaviorOptions?.cachePolicy ?? CachePolicy.CACHING_DISABLED,
           allowedMethods: behaviorOptions?.allowedMethods ?? AllowedMethods.ALLOW_ALL,
+          originRequestPolicy: behaviorOptions?.originRequestPolicy,
         },
       );
     } else {

@@ -33,6 +33,26 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.hasOutput('ControlPlaneUrl', {});
     commonTemplate.hasOutput('PortalBucket', {});
     commonTemplate.hasOutput('LogBucket', {});
+
+    // Check Origin Request Policy
+    commonTemplate.hasResourceProperties('AWS::CloudFront::OriginRequestPolicy', {
+      OriginRequestPolicyConfig: {
+        Comment: 'Policy to forward all parameters in viewer requests except for the Host header',
+        CookiesConfig: {
+          CookieBehavior: 'all',
+        },
+        HeadersConfig: {
+          HeaderBehavior: 'allExcept',
+          Headers: [
+            'host',
+          ],
+        },
+        Name: 'CloudFrontS3PotalStackApiGatewayOriginRequestPolicyEED388E3',
+        QueryStringsConfig: {
+          QueryStringBehavior: 'all',
+        },
+      },
+    });
   });
 
   test('Log bucket', () => {
@@ -413,6 +433,9 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+
+    // Check Origin Request Policy
+    template.resourceCountIs('AWS::CloudFront::OriginRequestPolicy', 0);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('PortalBucket', {});

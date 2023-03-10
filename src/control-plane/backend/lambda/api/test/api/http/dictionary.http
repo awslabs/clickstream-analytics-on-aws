@@ -1,9 +1,0 @@
-GET {{HOST}}/api/dictionary
-Accept: application/json
-
-###
-
-GET {{HOST}}/api/dictionary/Solution
-Accept: application/json
-
-###
