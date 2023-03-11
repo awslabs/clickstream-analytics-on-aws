@@ -15,7 +15,7 @@
 import { Aws, CfnMapping } from 'aws-cdk-lib';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AccountPrincipal, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 export interface LogProps {
@@ -135,31 +135,33 @@ export function createBucketPolicyForAlbAccessLog(
     albLogPrefix: string;
   },
 ) {
-  const albLogServiceAccountMapping = new CfnMapping(
-    scope,
-    'ALBServiceAccountMapping',
-    ALBLogServiceAccountMapping,
-  );
+  if (props.albLogBucket instanceof Bucket) {
+    const albLogServiceAccountMapping = new CfnMapping(
+      scope,
+      'ALBServiceAccountMapping',
+      ALBLogServiceAccountMapping,
+    );
 
-  const albAccountId = albLogServiceAccountMapping.findInMap(
-    Aws.REGION,
-    'account',
-  );
+    const albAccountId = albLogServiceAccountMapping.findInMap(
+      Aws.REGION,
+      'account',
+    );
 
-  // the grantPut does not work if the bucket is not created in the same stack, e.g: Bucket.fromBucketName
-  props.albLogBucket.grantPut(
-    {
-      grantPrincipal: new AccountPrincipal(albAccountId),
-    },
-    `${props.albLogPrefix}/*`,
-  );
+    // the grantPut does not work if the bucket is not created in the same stack, e.g: Bucket.fromBucketName
+    props.albLogBucket.grantPut(
+      {
+        grantPrincipal: new AccountPrincipal(albAccountId),
+      },
+      `${props.albLogPrefix}/*`,
+    );
 
-  props.albLogBucket.grantPut(
-    {
-      grantPrincipal: new ServicePrincipal(
-        'logdelivery.elasticloadbalancing.amazonaws.com',
-      ),
-    },
-    `${props.albLogPrefix}/*`,
-  );
+    props.albLogBucket.grantPut(
+      {
+        grantPrincipal: new ServicePrincipal(
+          'logdelivery.elasticloadbalancing.amazonaws.com',
+        ),
+      },
+      `${props.albLogPrefix}/*`,
+    );
+  }
 }
