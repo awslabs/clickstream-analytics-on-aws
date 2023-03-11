@@ -80,7 +80,7 @@ const commonSuppresionRulesForCloudFrontS3Pattern = [
   { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
   { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
   { id: 'AwsSolutions-APIG1', reason: 'TODO: Fix it later' },
-  { id: 'AwsSolutions-APIG2', reason: 'TODO: Fix it later' },
+  { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
   { id: 'AwsSolutions-APIG3', reason: 'TODO: Fix it later' },
   { id: 'AwsSolutions-APIG4', reason: 'TODO: Fix it later' },
   { id: 'AwsSolutions-COG1', reason: 'TODO: Fix it later' },
