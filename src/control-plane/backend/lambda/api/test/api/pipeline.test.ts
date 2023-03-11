@@ -86,14 +86,18 @@ describe('Pipeline test', () => {
             serverCorsOrigin: '*',
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
-            logS3Bucket: 'Pipeline-01-log',
-            logS3Prefix: 'logs',
+            logS3Bucket: {
+              name: '012345678912-test',
+              prefix: 'logs',
+            },
             notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
           },
           sinkType: 's3',
           sinkS3: {
-            s3DataBucket: 's3://012345678912-test',
-            s3DataPrefix: 'test',
+            s3DataBucket: {
+              name: '012345678912-test',
+              prefix: 'test',
+            },
             s3BufferSize: 50,
             s3BufferInterval: 30,
           },
@@ -230,14 +234,18 @@ describe('Pipeline test', () => {
             serverCorsOrigin: '*',
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
-            logS3Bucket: 'Pipeline-01-log',
-            logS3Prefix: 'logs',
+            logS3Bucket: {
+              name: '012345678912-test',
+              prefix: 'logs',
+            },
             notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
           },
           sinkType: 's3',
           sinkS3: {
-            s3DataBucket: 's3://012345678912-test',
-            s3DataPrefix: 'test',
+            s3DataBucket: {
+              name: '012345678912-test',
+              prefix: 'test',
+            },
             s3BufferSize: 50,
             s3BufferInterval: 30,
           },
@@ -349,7 +357,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
       Item: {
-        projectId: MOCK_PROJECT_ID,
+        id: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
         base: {},
@@ -367,7 +375,7 @@ describe('Pipeline test', () => {
       success: true,
       message: '',
       data: {
-        projectId: MOCK_PROJECT_ID,
+        id: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
         base: {},
@@ -384,7 +392,7 @@ describe('Pipeline test', () => {
     const detailInput: GetCommandInput = {
       TableName: clickStreamTableName,
       Key: {
-        projectId: MOCK_PROJECT_ID,
+        id: MOCK_PROJECT_ID,
         type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
       },
     };

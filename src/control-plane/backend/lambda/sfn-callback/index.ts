@@ -38,7 +38,7 @@ interface SfnCallbackParameters {
 
 interface SfnCallback {
   readonly TableName: string;
-  readonly ProjectId: string;
+  readonly Id: string;
   readonly Type: string;
   readonly AttributeName: string;
 }
@@ -57,7 +57,7 @@ export const handler = async (event: SfnCallbackEvent, _context: any): Promise<a
     const command: UpdateCommand = new UpdateCommand({
       TableName: event.Callback.TableName,
       Key: {
-        projectId: event.Callback.ProjectId,
+        id: event.Callback.Id,
         type: event.Callback.Type,
       },
       // Define expressions for the new or updated attributes

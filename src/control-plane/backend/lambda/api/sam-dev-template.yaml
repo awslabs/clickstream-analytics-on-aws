@@ -30,14 +30,14 @@ Resources:
     Properties:
       KeySchema:
         -
-          AttributeName: projectId
+          AttributeName: id
           KeyType: HASH
         -
           AttributeName: type
           KeyType: RANGE
       AttributeDefinitions:
         -
-          AttributeName: projectId
+          AttributeName: id
           AttributeType: S
         -
           AttributeName: type

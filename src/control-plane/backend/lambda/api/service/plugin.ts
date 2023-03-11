@@ -13,17 +13,17 @@
 
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
-import { Application } from '../model/application';
+import { Plugin } from '../model/plugin';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 
-export class ApplicationServ {
+export class PluginServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { pid, pageNumber, pageSize } = req.query;
-      const result = await store.listApplication(pid, true, pageSize, pageNumber);
+      const { type, order, pageNumber, pageSize } = req.query;
+      const result = await store.listPlugin(type, order, true, pageSize, pageNumber);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -32,10 +32,9 @@ export class ApplicationServ {
 
   public async add(req: any, res: any, next: any) {
     try {
-      let app: Application = req.body;
-      app.id = app.projectId;
-      const id = await store.addApplication(app);
-      return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
+      const plugin: Plugin = req.body;
+      const id = await store.addPlugin(plugin);
+      return res.status(201).json(new ApiSuccess({ id }, 'Plugin created.'));
     } catch (error) {
       next(error);
     }
@@ -44,11 +43,10 @@ export class ApplicationServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
-      const { pid } = req.query;
-      const result = await store.getApplication(pid, id);
+      const result = await store.getPlugin(id);
       if (!result) {
-        logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
-        return res.status(404).json(new ApiFail('Application not found'));
+        logger.warn(`No Plugin with ID ${id} found in the databases while trying to retrieve a Plugin`);
+        return res.status(404).json(new ApiFail('Plugin not found'));
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -58,11 +56,13 @@ export class ApplicationServ {
 
   public async update(req: any, res: any, next: any) {
     try {
-      let app: Application = req.body as Application;
-      app.id = app.projectId;
-      await store.updateApplication(app);
-      return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
+      let plugin: Plugin = req.body as Plugin;
+      await store.updatePlugin(plugin);
+      return res.status(201).json(new ApiSuccess(null, 'Plugin updated.'));
     } catch (error) {
+      if ((error as Error).name === 'ConditionalCheckFailedException') {
+        return res.status(400).json(new ApiFail('The bounded plugin does not support modification.'));
+      }
       next(error);
     }
   }
@@ -70,10 +70,12 @@ export class ApplicationServ {
   public async delete(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
-      const { pid } = req.query;
-      await store.deleteApplication(pid, id);
-      return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
+      await store.deletePlugin(id);
+      return res.status(200).json(new ApiSuccess(null, 'Plugin deleted.'));
     } catch (error) {
+      if ((error as Error).name === 'ConditionalCheckFailedException') {
+        return res.status(400).json(new ApiFail('The bounded plugin does not support deleted.'));
+      }
       next(error);
     }
   };

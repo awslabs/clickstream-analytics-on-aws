@@ -59,7 +59,7 @@ export class BatchInsertDDBCustomResource extends Construct {
       timeout: Duration.seconds(30),
       runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       memorySize: 256,
-      architecture: Architecture.ARM_64,
+      architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
       role: customResourceFunctionRole,
       environment: {
         ... POWERTOOLS_ENVS,

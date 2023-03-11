@@ -12,39 +12,15 @@
  */
 
 import path from 'path';
-import {
-  aws_dynamodb,
-  aws_iam as iam,
-  CfnResource,
-  Duration,
-  IgnoreMode,
-  RemovalPolicy,
-  Stack,
-  Aws,
-} from 'aws-cdk-lib';
-import {
-  EndpointType,
-  RestApi,
-  LambdaRestApi,
-  MethodLoggingLevel,
-  LogGroupLogDestination,
-} from 'aws-cdk-lib/aws-apigateway';
-import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import {
-  Connections,
-  ISecurityGroup,
-  Port,
-  SecurityGroup,
-  SubnetSelection,
-  IVpc, SubnetType,
-} from 'aws-cdk-lib/aws-ec2';
+import { Aws, aws_dynamodb, aws_iam as iam, CfnResource, Duration, IgnoreMode, RemovalPolicy, Stack } from 'aws-cdk-lib';
+import { EndpointType, LambdaRestApi, LogGroupLogDestination, MethodLoggingLevel, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { AttributeType, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
+import { Connections, ISecurityGroup, IVpc, Port, SecurityGroup, SubnetSelection, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import dictionary from './config/dictionary.json';
-import {
-  StackActionStateMachine,
-} from './stack-action-state-machine-construct';
+import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroupWithKmsKey } from '../../common/logs';
@@ -93,7 +69,7 @@ export class ClickStreamApiConstruct extends Construct {
 
     const clickStreamTable = new aws_dynamodb.Table(this, 'ClickstreamMetadata', {
       partitionKey: {
-        name: 'projectId',
+        name: 'id',
         type: aws_dynamodb.AttributeType.STRING,
       },
       sortKey: {
@@ -105,6 +81,18 @@ export class ClickStreamApiConstruct extends Construct {
       pointInTimeRecovery: true,
       encryption: TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'ttl',
+    });
+    const prefixTimeGSIName = 'prefix-time-index';
+    clickStreamTable.addGlobalSecondaryIndex({
+      indexName: prefixTimeGSIName,
+      partitionKey: {
+        name: 'prefix',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'createAt',
+        type: AttributeType.NUMBER,
+      },
     });
 
     // Dictionary data init
@@ -205,6 +193,7 @@ export class ClickStreamApiConstruct extends Construct {
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
+        PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         ... POWERTOOLS_ENVS,

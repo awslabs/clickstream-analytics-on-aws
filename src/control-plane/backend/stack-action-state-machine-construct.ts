@@ -168,7 +168,7 @@ export class StackActionStateMachine extends Construct {
       runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
       role: callbackFunctionRole,
-      architecture: Architecture.ARM_64,
+      architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
       environment: {
         ... POWERTOOLS_ENVS,
       },

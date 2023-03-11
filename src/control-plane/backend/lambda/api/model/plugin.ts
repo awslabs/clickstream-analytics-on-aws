@@ -11,26 +11,33 @@
  *  and limitations under the License.
  */
 
-export interface Project {
+export interface Plugin {
   id: string;
   type: string;
   prefix: string;
 
   name: string;
-  tableName: string;
   description: string;
-  emails: string;
-  platform: string;
-  region: string;
-  environment: string;
-  status: string;
+  status: 'Enabled' | 'Disabled';
+  jarFile: string;
+  dependencyFiles: string[];
+  mainFunction: string;
+  pluginType: 'Transform' | 'Enrich';
+  builtIn: boolean;
+  /**
+   * Record the binding count of plugin.
+   * bind by pipeline: +1
+   * unbind by pipeline: -1
+   */
+  bindCount: number;
+
   createAt: number;
   updateAt: number;
   operator: string;
   deleted: boolean;
 }
 
-export interface ProjectList {
+export interface PluginList {
   totalCount: number | undefined;
-  items: Project[];
+  items: Plugin[];
 }

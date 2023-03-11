@@ -11,10 +11,6 @@
  *  and limitations under the License.
  */
 
-import {
-  Match,
-  // Capture,
-} from 'aws-cdk-lib/assertions';
 import { TestEnv } from './test-utils';
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
@@ -46,7 +42,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     template.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
-          AttributeName: 'projectId',
+          AttributeName: 'id',
           KeyType: 'HASH',
         },
         {
@@ -56,15 +52,41 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       ],
       AttributeDefinitions: [
         {
-          AttributeName: 'projectId',
+          AttributeName: 'id',
           AttributeType: 'S',
         },
         {
           AttributeName: 'type',
           AttributeType: 'S',
         },
+        {
+          AttributeName: 'prefix',
+          AttributeType: 'S',
+        },
+        {
+          AttributeName: 'createAt',
+          AttributeType: 'N',
+        },
       ],
       BillingMode: 'PAY_PER_REQUEST',
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'prefix-time-index',
+          KeySchema: [
+            {
+              AttributeName: 'prefix',
+              KeyType: 'HASH',
+            },
+            {
+              AttributeName: 'createAt',
+              KeyType: 'RANGE',
+            },
+          ],
+          Projection: {
+            ProjectionType: 'ALL',
+          },
+        },
+      ],
       PointInTimeRecoverySpecification: {
         PointInTimeRecoveryEnabled: true,
       },
@@ -78,7 +100,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
   });
 
-  test('Api lambda', () => {
+  test('Api lambda Function', () => {
     const { template } = TestEnv.newALBApiStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -136,6 +158,53 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
     });
 
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'arm64',
+      ],
+      Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
+      Runtime: 'nodejs18.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'arm64',
+      ],
+      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Runtime: 'nodejs18.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      PackageType: 'Image',
+      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+    });
+
+  });
+
+  test('Api lambda Function in GCR', () => {
+    const { template } = TestEnv.newALBApiStack(true);
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
+      Runtime: 'nodejs16.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Runtime: 'nodejs16.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+    });
   });
 
   test('IAM Resource for Api Lambda', () => {
@@ -155,107 +224,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
       },
     });
-
-    // And finally the execution role's policy
-    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-    }));
-
-    // Check lambda api policy for aws sdk
-    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'kafka:ListClustersV2',
-              'kafka:ListClusters',
-              's3:ListAllMyBuckets',
-              'ec2:DescribeVpcs',
-              'redshift:DescribeClusters',
-              'account:ListRegions',
-              's3:ListBucket',
-              'quicksight:ListUsers',
-              'ec2:DescribeSubnets',
-              'ec2:DescribeRouteTables',
-              's3:GetBucketLocation',
-              'route53:ListHostedZones',
-              'athena:ListWorkGroups',
-              'iam:ListRoles',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
-        },
-      ],
-    }));
-
   });
 
   test('Check SecurityGroup', () => {
@@ -296,6 +264,278 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   test('Policy', () => {
     const { template } = TestEnv.newALBApiStack();
 
+    // DicInitCustomResourceFunctionRoleDefaultPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionRoleDefaultPolicyE1ACA4DE',
+    });
+
+    // StateMachineCallbackFunctionRoleDefaultPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineCallbackFunctionRoleDefaultPolicyFE05CE8A',
+    });
+
+    // StateMachineRoleDefaultPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogDelivery',
+              'logs:GetLogDelivery',
+              'logs:UpdateLogDelivery',
+              'logs:DeleteLogDelivery',
+              'logs:ListLogDeliveries',
+              'logs:PutResourcePolicy',
+              'logs:DescribeResourcePolicies',
+              'logs:DescribeLogGroups',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: 'cloudformation:createStack',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'cloudformation:describeStacks',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'lambda:InvokeFunction',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'Arn',
+                      ],
+                    },
+                    ':*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: 'cloudformation:deleteStack',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'cloudformation:updateStack',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
+    });
+
+    // SMCloudformationPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'Arn',
+              ],
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineSMCloudformationPolicyF657B988',
+    });
+
+    // ApiFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -351,7 +591,18 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 ],
               },
               {
-                Ref: 'AWS::NoValue',
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
               },
             ],
           },
@@ -360,56 +611,44 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
       PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
     });
+
+    // ApiStepFunctionPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
-            Action: [
-              'logs:CreateLogStream',
-              'logs:PutLogEvents',
-              'logs:CreateLogGroup',
-            ],
+            Action: 'states:StartExecution',
             Effect: 'Allow',
             Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':logs:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':log-group:/aws/lambda/',
-                  {
-                    Ref: 'testClickStreamALBApiClickStreamApiFunction4A01DB3A',
-                  },
-                  ':*',
-                ],
-              ],
+              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
           },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'apifunclogs9F7B9244',
+      PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
     });
+
+    // ApiAWSSdkPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
             Action: [
-              'ec2:CreateNetworkInterface',
-              'ec2:DescribeNetworkInterfaces',
-              'ec2:DeleteNetworkInterface',
-              'ec2:AssignPrivateIpAddresses',
-              'ec2:UnassignPrivateIpAddresses',
+              'kafka:ListClustersV2',
+              'kafka:ListClusters',
+              's3:ListAllMyBuckets',
+              'ec2:DescribeVpcs',
+              'redshift:DescribeClusters',
+              'account:ListRegions',
+              's3:ListBucket',
+              'quicksight:ListUsers',
+              'ec2:DescribeSubnets',
+              'ec2:DescribeRouteTables',
+              's3:GetBucketLocation',
+              'route53:ListHostedZones',
+              'athena:ListWorkGroups',
+              'iam:ListRoles',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -417,13 +656,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'apifunceni59253B5A',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
-        },
-      ],
+      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
     });
+
   });
 
   test('LogGroup', () => {
@@ -469,6 +704,78 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
       RetentionInDays: 180,
     });
+  });
+
+  test('Custom Resource', () => {
+    const { template } = TestEnv.newALBApiStack();
+
+    template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
+          'Arn',
+        ],
+      },
+      tableName: {
+        Ref: 'testClickStreamALBApiClickstreamDictionary0A1156B6',
+      },
+    });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'arm64',
+      ],
+      Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
+      Environment: {
+        Variables: {
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '0.5',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        },
+      },
+      Handler: 'index.handler',
+      MemorySize: 256,
+      Runtime: 'nodejs18.x',
+      Timeout: 30,
+    });
+
+    template.hasResourceProperties('AWS::IAM::Role', {
+      AssumeRolePolicyDocument: {
+        Statement: [
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Principal: {
+              Service: 'lambda.amazonaws.com',
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      Policies: [
+        {
+          PolicyDocument: {
+            Statement: [
+              {
+                Action: 'dynamodb:BatchWriteItem',
+                Effect: 'Allow',
+                Resource: {
+                  'Fn::GetAtt': [
+                    'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                    'Arn',
+                  ],
+                },
+              },
+            ],
+            Version: '2012-10-17',
+          },
+          PolicyName: 'ddb',
+        },
+      ],
+    });
+
   });
 
   test('State Machine', () => {
@@ -570,7 +877,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     template.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
-          AttributeName: 'projectId',
+          AttributeName: 'id',
           KeyType: 'HASH',
         },
         {
@@ -580,15 +887,41 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       ],
       AttributeDefinitions: [
         {
-          AttributeName: 'projectId',
+          AttributeName: 'id',
           AttributeType: 'S',
         },
         {
           AttributeName: 'type',
           AttributeType: 'S',
         },
+        {
+          AttributeName: 'prefix',
+          AttributeType: 'S',
+        },
+        {
+          AttributeName: 'createAt',
+          AttributeType: 'N',
+        },
       ],
       BillingMode: 'PAY_PER_REQUEST',
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'prefix-time-index',
+          KeySchema: [
+            {
+              AttributeName: 'prefix',
+              KeyType: 'HASH',
+            },
+            {
+              AttributeName: 'createAt',
+              KeyType: 'RANGE',
+            },
+          ],
+          Projection: {
+            ProjectionType: 'ALL',
+          },
+        },
+      ],
       PointInTimeRecoverySpecification: {
         PointInTimeRecoveryEnabled: true,
       },
@@ -602,7 +935,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     });
   });
 
-  test('Api lambda', () => {
+  test('Api lambda Function', () => {
     const { template } = TestEnv.newCloudfrontApiStack();
 
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -632,6 +965,55 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
       ],
     });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'arm64',
+      ],
+      Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
+      Runtime: 'nodejs18.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'arm64',
+      ],
+      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Runtime: 'nodejs18.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      PackageType: 'Image',
+      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+    });
+
+  });
+
+  test('Api lambda Function in GCR', () => {
+    const { template } = TestEnv.newALBApiStack(true);
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
+      Runtime: 'nodejs16.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Runtime: 'nodejs16.x',
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+    });
+
   });
 
   test('IAM Resource for Api Lambda', () => {
@@ -651,83 +1033,12 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
       },
     });
-
-    // And finally the execution role's policy
-    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickstreamMetadata11A455BB',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
-      Roles: [
-        {
-          Ref: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
-        },
-      ],
-    }));
-
   });
 
   test('Policy', () => {
-    const { template } = TestEnv.newCloudfrontApiStack();
+    const { template } = TestEnv.newALBApiStack();
 
+    // DicInitCustomResourceFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -750,35 +1061,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickstreamMetadata11A455BB',
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
                   'Arn',
                 ],
               },
@@ -790,17 +1073,96 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
+      PolicyName: 'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionRoleDefaultPolicyE1ACA4DE',
     });
+
+    // StateMachineCallbackFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
             Action: [
-              'logs:CreateLogStream',
-              'logs:PutLogEvents',
-              'logs:CreateLogGroup',
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
             ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineCallbackFunctionRoleDefaultPolicyFE05CE8A',
+    });
+
+    // StateMachineRoleDefaultPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogDelivery',
+              'logs:GetLogDelivery',
+              'logs:UpdateLogDelivery',
+              'logs:DeleteLogDelivery',
+              'logs:ListLogDeliveries',
+              'logs:PutResourcePolicy',
+              'logs:DescribeResourcePolicies',
+              'logs:DescribeLogGroups',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: 'cloudformation:createStack',
             Effect: 'Allow',
             Resource: {
               'Fn::Join': [
@@ -810,7 +1172,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                   {
                     Ref: 'AWS::Partition',
                   },
-                  ':logs:',
+                  ':cloudformation:',
                   {
                     Ref: 'AWS::Region',
                   },
@@ -818,11 +1180,105 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':log-group:/aws/lambda/',
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'cloudformation:describeStacks',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
                   {
-                    Ref: 'testClickStreamCloudfrontApiClickStreamApiFunction25FEE34E',
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
                   },
                   ':*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'lambda:InvokeFunction',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'Arn',
+                      ],
+                    },
+                    ':*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: 'cloudformation:deleteStack',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'cloudformation:updateStack',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
                 ],
               ],
             },
@@ -830,18 +1286,143 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'apifunclogs9F7B9244',
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
     });
+
+    // SMCloudformationPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'Arn',
+              ],
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineSMCloudformationPolicyF657B988',
+    });
+
+    // ApiFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
             Action: [
-              'ec2:CreateNetworkInterface',
-              'ec2:DescribeNetworkInterfaces',
-              'ec2:DeleteNetworkInterface',
-              'ec2:AssignPrivateIpAddresses',
-              'ec2:UnassignPrivateIpAddresses',
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
+    });
+
+    // ApiStepFunctionPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'states:StartExecution',
+            Effect: 'Allow',
+            Resource: {
+              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
+    });
+
+    // ApiAWSSdkPolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'kafka:ListClustersV2',
+              'kafka:ListClusters',
+              's3:ListAllMyBuckets',
+              'ec2:DescribeVpcs',
+              'redshift:DescribeClusters',
+              'account:ListRegions',
+              's3:ListBucket',
+              'quicksight:ListUsers',
+              'ec2:DescribeSubnets',
+              'ec2:DescribeRouteTables',
+              's3:GetBucketLocation',
+              'route53:ListHostedZones',
+              'athena:ListWorkGroups',
+              'iam:ListRoles',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -849,9 +1430,9 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'apifunceni59253B5A',
-
+      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
     });
+
   });
 
   test('ApiGateway', () => {

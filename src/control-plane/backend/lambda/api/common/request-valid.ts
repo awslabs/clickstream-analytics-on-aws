@@ -85,6 +85,20 @@ export const defaultPageValueValid: CustomValidator = (value, { req }) => {
   return true;
 };
 
+export const defaultOrderValueValid: CustomValidator = (value, { req }) => {
+  if (req.query) {
+    const { order } = value;
+    if (isEmpty(order)) {
+      req.query.order = 'asc';
+    } else {
+      if (!['asc', 'desc'].includes(order)) {
+        throw new Error('order in query must be: \'asc\', \'desc\'.');
+      }
+    }
+  }
+  return true;
+};
+
 export const defaultRegionValueValid: CustomValidator = (value, { req }) => {
   if (req.query) {
     const { region } = value;
@@ -169,6 +183,18 @@ export const isRequestIdExisted: CustomValidator = value => {
   return store.isRequestIdExisted(value).then(existed => {
     if (existed) {
       return Promise.reject('Not Modified.');
+    }
+    return true;
+  });
+};
+
+export const isPluginIdValid: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  return store.isPluginExisted(value).then(existed => {
+    if (!existed) {
+      return Promise.reject('Plugin resource does not exist.');
     }
     return true;
   });

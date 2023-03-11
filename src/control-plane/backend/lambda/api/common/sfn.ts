@@ -34,7 +34,7 @@ export interface StackRequestInputParameter {
 }
 export interface StackRequestCallback {
   readonly TableName: string;
-  readonly ProjectId: string;
+  readonly Id: string;
   readonly Type: string;
   readonly AttributeName: string;
 }

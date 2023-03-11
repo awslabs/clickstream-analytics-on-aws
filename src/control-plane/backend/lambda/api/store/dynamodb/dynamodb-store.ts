@@ -17,11 +17,12 @@ import {
   GetCommandOutput,
   PutCommand,
   ScanCommand,
+  QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
 import { isEmpty } from '../../common/utils';
@@ -32,6 +33,7 @@ import {
   PipelineList,
   PipelineStatus,
 } from '../../model/pipeline';
+import { Plugin, PluginList } from '../../model/plugin';
 import { Project, ProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
@@ -46,7 +48,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
-        projectId: id,
+        id: id,
         type: `METADATA#${id}`,
         name: project.name,
         tableName: project.tableName,
@@ -70,7 +72,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: id,
+        id: id,
         type: `METADATA#${id}`,
       },
     });
@@ -86,7 +88,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `METADATA#${projectId}`,
       },
     });
@@ -143,8 +145,8 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: project.projectId,
-        type: `METADATA#${project.projectId}`,
+        id: project.id,
+        type: `METADATA#${project.id}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -160,7 +162,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const scan_params: ScanCommand = new ScanCommand({
         TableName: clickStreamTableName,
-        FilterExpression: 'projectId = :p AND deleted = :d',
+        FilterExpression: 'id = :p AND deleted = :d',
         ExpressionAttributeValues: {
           ':p': id,
           ':d': false,
@@ -178,7 +180,7 @@ export class DynamoDbStore implements ClickStreamStore {
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
         Key: {
-          projectId: id,
+          id: id,
           type: projects[index].type,
         },
         // Define expressions for the new or updated attributes
@@ -233,8 +235,9 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
-        projectId: app.projectId,
+        id: app.id,
         type: `APP#${id}`,
+        projectId: app.projectId,
         appId: id,
         name: app.name,
         description: app.description,
@@ -255,7 +258,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `APP#${appId}`,
       },
     });
@@ -280,7 +283,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: app.projectId,
+        id: app.id,
         type: `APP#${app.appId}`,
       },
       // Define expressions for the new or updated attributes
@@ -336,7 +339,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `APP#${appId}`,
       },
       // Define expressions for the new or updated attributes
@@ -354,7 +357,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `APP#${appId}`,
       },
     });
@@ -371,9 +374,10 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
-        projectId: pipeline.projectId,
+        id: pipeline.id,
         type: `PIPELINE#${pipeline.pipelineId}#latest`,
         pipelineId: pipeline.pipelineId,
+        projectId: pipeline.projectId,
         name: pipeline.name,
         description: pipeline.description,
         region: pipeline.region,
@@ -400,7 +404,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `PIPELINE#${pipelineId}#${skVersion}`,
       },
     });
@@ -411,7 +415,6 @@ export class DynamoDbStore implements ClickStreamStore {
     const pipeline: Pipeline = result.Item as Pipeline;
     return !pipeline.deleted ? pipeline : undefined;
   };
-
 
   public async updatePipeline(pipeline: Pipeline, curPipeline: Pipeline): Promise<void> {
     // Update new pipeline && Backup the current pipeline
@@ -435,9 +438,10 @@ export class DynamoDbStore implements ClickStreamStore {
               '#ConditionType': 'type',
             },
             Item: {
-              projectId: { S: curPipeline.projectId },
+              id: { S: curPipeline.id },
               type: { S: `PIPELINE#${curPipeline.pipelineId}#${curPipeline.version}` },
               pipelineId: { S: curPipeline.pipelineId },
+              projectId: { S: curPipeline.projectId },
               name: { S: curPipeline.name },
               description: { S: curPipeline.description },
               region: { S: curPipeline.region },
@@ -463,7 +467,7 @@ export class DynamoDbStore implements ClickStreamStore {
           Update: {
             TableName: clickStreamTableName,
             Key: {
-              projectId: { S: pipeline.projectId },
+              id: { S: pipeline.id },
               type: { S: `PIPELINE#${pipeline.pipelineId}#latest` },
             },
             ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
@@ -473,7 +477,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'description = :description, ' +
               '#region = :region, ' +
               'dataCollectionSDK = :dataCollectionSDK, ' +
-              '#status = :status' +
+              '#status = :status, ' +
               '#tags = :tags, ' +
               'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
@@ -525,7 +529,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const scan_params: ScanCommand = new ScanCommand({
         TableName: clickStreamTableName,
-        FilterExpression: 'projectId = :p AND begins_with(#type, :t) AND deleted = :d',
+        FilterExpression: 'id = :p AND begins_with(#type, :t) AND deleted = :d',
         ExpressionAttributeNames: {
           '#type': 'type',
         },
@@ -547,7 +551,7 @@ export class DynamoDbStore implements ClickStreamStore {
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
         Key: {
-          projectId: projectId,
+          id: projectId,
           type: pipelines[index].type,
         },
         // Define expressions for the new or updated attributes
@@ -572,7 +576,7 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':vt', version);
     }
     if (!isEmpty(projectId)) {
-      filterExpression = `${filterExpression} AND projectId = :p`;
+      filterExpression = `${filterExpression} AND id = :p`;
       expressionAttributeValues.set(':p', projectId);
     }
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
@@ -613,7 +617,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
-        projectId: projectId,
+        id: projectId,
         type: `PIPELINE#${pipelineId}#latest`,
       },
     });
@@ -661,11 +665,11 @@ export class DynamoDbStore implements ClickStreamStore {
       const params: PutCommand = new PutCommand({
         TableName: clickStreamTableName,
         Item: {
-          projectId: id,
+          id: id,
           type: 'REQUESTID',
           ttl: Date.now() / 1000 + 600,
         },
-        ConditionExpression: 'attribute_not_exists(projectId)',
+        ConditionExpression: 'attribute_not_exists(id)',
       });
       await docClient.send(params);
       return false;
@@ -675,5 +679,167 @@ export class DynamoDbStore implements ClickStreamStore {
       }
       throw error;
     }
+  };
+
+  public async addPlugin(plugin: Plugin): Promise<string> {
+    const id = uuidv4();
+    const params: PutCommand = new PutCommand({
+      TableName: clickStreamTableName,
+      Item: {
+        id: id,
+        type: `PLUGIN#${id}`,
+        prefix: 'PLUGIN',
+        name: plugin.name,
+        description: plugin.description,
+        status: 'Disabled',
+        jarFile: plugin.jarFile,
+        dependencyFiles: plugin.dependencyFiles,
+        mainFunction: plugin.mainFunction,
+        pluginType: plugin.pluginType,
+        builtIn: false,
+        bindCount: 0,
+        createAt: Date.now(),
+        updateAt: Date.now(),
+        operator: '',
+        deleted: false,
+      },
+    });
+    await docClient.send(params);
+    return id;
+  };
+
+  public async getPlugin(pluginId: string): Promise<Plugin | undefined> {
+    const params: GetCommand = new GetCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: pluginId,
+        type: `PLUGIN#${pluginId}`,
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    if (!result.Item) {
+      return undefined;
+    }
+    const plugin: Plugin = result.Item as Plugin;
+    return !plugin.deleted ? plugin : undefined;
+  };
+
+  public async updatePlugin(plugin: Plugin): Promise<void> {
+    let updateExpression = 'SET #updateAt= :u';
+    let expressionAttributeValues = new Map();
+    let expressionAttributeNames = {} as KeyVal<string>;
+    expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':bindCount', 0);
+    expressionAttributeNames['#updateAt'] = 'updateAt';
+    if (plugin.description) {
+      updateExpression = `${updateExpression}, description= :d`;
+      expressionAttributeValues.set(':d', plugin.description);
+    }
+    if (plugin.jarFile) {
+      updateExpression = `${updateExpression}, jarFile= :jarFile`;
+      expressionAttributeValues.set(':jarFile', plugin.jarFile);
+    }
+    if (plugin.dependencyFiles) {
+      updateExpression = `${updateExpression}, dependencyFiles= :dependencyFiles`;
+      expressionAttributeValues.set(':dependencyFiles', plugin.dependencyFiles);
+    }
+    if (plugin.mainFunction) {
+      updateExpression = `${updateExpression}, mainFunction= :mainFunction`;
+      expressionAttributeValues.set(':mainFunction', plugin.mainFunction);
+    }
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: plugin.id,
+        type: `PLUGIN#${plugin.id}`,
+      },
+      ConditionExpression: 'bindCount = :bindCount',
+      // Define expressions for the new or updated attributes
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
+  public async listPlugin(
+    pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PluginList> {
+    let filterExpression = 'deleted = :d';
+    let expressionAttributeValues = new Map();
+    expressionAttributeValues.set(':d', false);
+    expressionAttributeValues.set(':prefix', 'PLUGIN');
+    if (!isEmpty(pluginType)) {
+      filterExpression = `${filterExpression} AND pluginType=:pluginType`;
+      expressionAttributeValues.set(':pluginType', pluginType);
+    }
+    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
+      const params: QueryCommand = new QueryCommand({
+        TableName: clickStreamTableName,
+        IndexName: prefixTimeGSIName,
+        KeyConditionExpression: '#prefix= :prefix',
+        FilterExpression: filterExpression,
+        ExpressionAttributeNames: {
+          '#prefix': 'prefix',
+        },
+        ExpressionAttributeValues: expressionAttributeValues,
+        ScanIndexForward: order === 'asc',
+        ExclusiveStartKey,
+      });
+      const queryResponse = await docClient.send(params);
+      return {
+        marker: queryResponse.LastEvaluatedKey,
+        results: queryResponse.Items,
+      };
+    });
+
+    let plugins: PluginList = { totalCount: 0, items: [] };
+    plugins.totalCount = records?.length;
+    if (pagination) {
+      if (plugins.totalCount) {
+        pageNumber = Math.min(Math.ceil(plugins.totalCount / pageSize), pageNumber);
+        const startIndex = pageSize * (pageNumber - 1);
+        const endIndex = Math.min(pageSize * pageNumber, plugins.totalCount);
+        plugins.items = records?.slice(startIndex, endIndex) as Plugin[];
+      }
+    } else {
+      plugins.items = records as Plugin[];
+    }
+    return plugins;
+  };
+
+  public async deletePlugin(pluginId: string): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: pluginId,
+        type: `PLUGIN#${pluginId}`,
+      },
+      ConditionExpression: 'bindCount = :bindCount',
+      // Define expressions for the new or updated attributes
+      UpdateExpression: 'SET deleted= :d',
+      ExpressionAttributeValues: {
+        ':d': true,
+        ':bindCount': 0,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
+  public async isPluginExisted(pluginId: string): Promise<boolean> {
+    const params: GetCommand = new GetCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: pluginId,
+        type: `PLUGIN#${pluginId}`,
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    if (!result.Item) {
+      return false;
+    }
+    const plugin: Plugin = result.Item as Plugin;
+    return plugin && !plugin.deleted;
   };
 }

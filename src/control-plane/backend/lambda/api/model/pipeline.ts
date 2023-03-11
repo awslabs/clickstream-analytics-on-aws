@@ -63,22 +63,14 @@ interface IngestionServerLoadBalancerProps {
   /**
    * S3 bucket to save log (optional)
    */
-  readonly logS3Bucket?: string;
-  /**
-   * S3 object prefix to save log (optional)
-   */
-  readonly logS3Prefix?: string;
+  readonly logS3Bucket?: S3Bucket;
 }
 
 interface IngestionServerSinkS3Props {
   /**
-   * S3 bucket name
+   * S3 bucket
    */
-  readonly s3DataBucket: string;
-  /**
-   * s3 object prefix
-   */
-  readonly s3DataPrefix: string;
+  readonly s3DataBucket: S3Bucket;
   /**
    * s3 Batch max bytes
    */
@@ -144,14 +136,9 @@ interface IngestionServerSinkKinesisProps {
    */
   readonly kinesisMaxBatchingWindowSeconds?: number;
   /**
-   * S3 bucket name to save data from Kinesis Data Stream
+   * S3 bucket to save data from Kinesis Data Stream
    */
-  readonly kinesisDataS3Bucket?: string;
-  /**
-   * S3 object prefix to save data from Kinesis Data Stream
-   * default: 'kinesis-data'
-   */
-  readonly kinesisDataS3Prefix?: string;
+  readonly kinesisDataS3Bucket?: S3Bucket;
 
 }
 
@@ -197,6 +184,9 @@ interface IngestionServer {
 }
 
 export interface ETL {
+  readonly appIds: string[];
+  readonly sourceS3Bucket: S3Bucket;
+  readonly sinkS3Bucket: S3Bucket;
 }
 
 export interface DataModel {
@@ -204,6 +194,11 @@ export interface DataModel {
 
 export interface Tag {
   [key: string]: string;
+}
+
+interface S3Bucket {
+  readonly name: string;
+  readonly prefix: string;
 }
 
 export enum PipelineStatus {
@@ -219,10 +214,12 @@ export enum PipelineStatus {
 }
 
 export interface Pipeline {
+  id: string;
+  type: string;
+  prefix: string;
+
   projectId: string;
   pipelineId: string;
-  type: string;
-
   name: string;
   description: string;
   region: string;
@@ -324,22 +321,22 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackParameter 
   });
   parameters.push({
     ParameterKey: 'LogS3Bucket',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket ?? '',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? '',
   });
   parameters.push({
     ParameterKey: 'LogS3Prefix',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Prefix ?? '',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix ?? '',
   });
   // S3 sink
   if (pipeline.ingestionServer.sinkType === 's3') {
-    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket) {
+    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket.name) {
       return {
         result: false,
         message: 'S3 Sink must have s3DataBucket.',
         parameters,
       };
     }
-    if (!pipeline.ingestionServer.sinkS3?.s3DataPrefix) {
+    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket.prefix) {
       return {
         result: false,
         message: 'S3 Sink must have s3DataPrefix.',
@@ -348,11 +345,11 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackParameter 
     }
     parameters.push({
       ParameterKey: 'S3DataBucket',
-      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket,
+      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket.name,
     });
     parameters.push({
       ParameterKey: 'S3DataPrefix',
-      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataPrefix,
+      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket.prefix,
     });
     parameters.push({
       ParameterKey: 'S3BatchMaxBytes',
@@ -385,14 +382,14 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackParameter 
   }
   // Kinesis sink
   if (pipeline.ingestionServer.sinkType === 'kinesis') {
-    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket) {
+    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket?.name) {
       return {
         result: false,
         message: 'Kinesis Sink must have kinesisDataS3Bucket.',
         parameters,
       };
     }
-    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Prefix) {
+    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.prefix) {
       return {
         result: false,
         message: 'Kinesis Sink must have kinesisDataS3Prefix.',
@@ -401,11 +398,11 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackParameter 
     }
     parameters.push({
       ParameterKey: 'KinesisDataS3Bucket',
-      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket,
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.name,
     });
     parameters.push({
       ParameterKey: 'KinesisDataS3Prefix',
-      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Prefix,
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.prefix,
     });
     parameters.push({
       ParameterKey: 'KinesisStreamMode',

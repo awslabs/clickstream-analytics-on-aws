@@ -250,7 +250,7 @@ export class TestEnv {
     return stack;
   }
 
-  public static newALBApiStack(): ApiStackElements {
+  public static newALBApiStack(cn: boolean = false): ApiStackElements {
 
     const stack = new TestStack(new App(), 'apiTestStack');
 
@@ -262,14 +262,14 @@ export class TestEnv {
         subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
         securityGroup: stack.sg,
       },
+      targetToCNRegions: cn,
     });
 
     const template = Template.fromStack(stack);
-
     return { stack, template };
   }
 
-  public static newCloudfrontApiStack(): ApiStackElements {
+  public static newCloudfrontApiStack(cn: boolean = false): ApiStackElements {
 
     const stack = new TestStack(new App(), 'apiTestStack');
 
@@ -279,10 +279,10 @@ export class TestEnv {
       apiGateway: {
         stageName: 'api',
       },
+      targetToCNRegions: cn,
     });
 
     const template = Template.fromStack(stack);
-
     return { stack, template };
   }
 

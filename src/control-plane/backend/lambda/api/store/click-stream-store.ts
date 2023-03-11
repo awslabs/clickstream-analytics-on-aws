@@ -14,6 +14,7 @@
 import { Application, ApplicationList } from '../model/application';
 import { Dictionary } from '../model/dictionary';
 import { Pipeline, PipelineList } from '../model/pipeline';
+import { Plugin, PluginList } from '../model/plugin';
 import { Project, ProjectList } from '../model/project';
 
 export interface ClickStreamStore {
@@ -37,6 +38,13 @@ export interface ClickStreamStore {
   listPipeline: (projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
   deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
+
+  addPlugin: (plugin: Plugin) => Promise<string>;
+  getPlugin: (pluginId: string) => Promise<Plugin | undefined>;
+  updatePlugin: (plugin: Plugin) => Promise<void>;
+  listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PluginList>;
+  deletePlugin: (pluginId: string) => Promise<void>;
+  isPluginExisted: (pluginId: string) => Promise<boolean>;
 
   getDictionary: (name: string) => Promise<Dictionary | undefined>;
   listDictionary: () => Promise<Dictionary[]>;

@@ -38,6 +38,7 @@ export class PipelineServ {
     try {
       // create stack
       let pipeline: Pipeline = req.body;
+      pipeline.id = pipeline.projectId;
       pipeline.pipelineId = uuidv4();
       // Get TemplateURL from dictionary
       const templateURL = await this.getTemplateUrl(pipeline, `ingestion_${pipeline.ingestionServer.sinkType}`);
@@ -58,7 +59,7 @@ export class PipelineServ {
         },
         Callback: {
           TableName: clickStreamTableName ?? '',
-          ProjectId: pipeline.projectId,
+          Id: pipeline.id,
           Type: `PIPELINE#${pipeline.pipelineId}#latest`,
           AttributeName: 'ingestionRuntime',
         },
@@ -87,8 +88,9 @@ export class PipelineServ {
   public async update(req: any, res: any, next: any) {
     try {
       let pipeline: Pipeline = req.body;
+      pipeline.id = pipeline.projectId;
       // Read current version from db
-      const curPipeline = await store.getPipeline(pipeline.projectId, pipeline.pipelineId);
+      const curPipeline = await store.getPipeline(pipeline.id, pipeline.pipelineId);
       if (!curPipeline) {
         return res.status(404).send(new ApiFail('Pipeline resource does not exist.'));
       }

@@ -18,6 +18,7 @@ const MOCK_TOKEN = '0000-0000';
 const MOCK_PROJECT_ID = '8888-8888';
 const MOCK_APP_ID = '7777-7777';
 const MOCK_PIPELINE_ID = '6666-6666';
+const MOCK_PLUGIN_ID = '5555-5555';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -32,13 +33,13 @@ function projectExistedMock(ddbMock: any, existed: boolean): any {
   const tokenInput: GetCommandInput = {
     TableName: clickStreamTableName,
     Key: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       type: `METADATA#${MOCK_PROJECT_ID}`,
     },
   };
   return ddbMock.on(GetCommand, tokenInput).resolves({
     Item: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       deleted: !existed,
     },
   });
@@ -48,13 +49,13 @@ function appExistedMock(ddbMock: any, existed: boolean): any {
   const tokenInput: GetCommandInput = {
     TableName: clickStreamTableName,
     Key: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       type: `APP#${MOCK_APP_ID}`,
     },
   };
   return ddbMock.on(GetCommand, tokenInput).resolves({
     Item: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       appId: MOCK_PROJECT_ID,
       deleted: !existed,
     },
@@ -65,15 +66,32 @@ function pipelineExistedMock(ddbMock: any, existed: boolean): any {
   const tokenInput: GetCommandInput = {
     TableName: clickStreamTableName,
     Key: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
     },
   };
   return ddbMock.on(GetCommand, tokenInput).resolves({
     Item: {
-      projectId: MOCK_PROJECT_ID,
+      id: MOCK_PROJECT_ID,
       type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
       pipelineId: MOCK_PIPELINE_ID,
+      deleted: !existed,
+    },
+  });
+}
+
+function pluginExistedMock(ddbMock: any, existed: boolean): any {
+  const tokenInput: GetCommandInput = {
+    TableName: clickStreamTableName,
+    Key: {
+      id: MOCK_PLUGIN_ID,
+      type: `PLUGIN#${MOCK_PLUGIN_ID}`,
+    },
+  };
+  return ddbMock.on(GetCommand, tokenInput).resolves({
+    Item: {
+      id: MOCK_PLUGIN_ID,
+      type: `PLUGIN#${MOCK_PLUGIN_ID}`,
       deleted: !existed,
     },
   });
@@ -84,8 +102,10 @@ export {
   MOCK_PROJECT_ID,
   MOCK_APP_ID,
   MOCK_PIPELINE_ID,
+  MOCK_PLUGIN_ID,
   tokenMock,
   projectExistedMock,
   appExistedMock,
   pipelineExistedMock,
+  pluginExistedMock,
 };

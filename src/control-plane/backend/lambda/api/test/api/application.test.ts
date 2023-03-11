@@ -173,7 +173,7 @@ describe('Application test', () => {
         operator: '',
         description: 'Description of App-01',
         appId: 'e250bc17-405f-4473-862d-2346d6cefb49',
-        projectId: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         name: 'App-01',
       },
     });
@@ -194,7 +194,7 @@ describe('Application test', () => {
         operator: '',
         description: 'Description of App-01',
         appId: 'e250bc17-405f-4473-862d-2346d6cefb49',
-        projectId: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         name: 'App-01',
       },
     });
@@ -205,7 +205,7 @@ describe('Application test', () => {
     const input: GetCommandInput = {
       TableName: clickStreamTableName,
       Key: {
-        projectId: MOCK_PROJECT_ID,
+        id: MOCK_PROJECT_ID,
         type: `APP#${MOCK_APP_ID}`,
       },
     };

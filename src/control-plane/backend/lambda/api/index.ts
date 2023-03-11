@@ -21,12 +21,13 @@ import {
   isValidEmpty,
   validate,
   validMatchParamId,
-  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted,
+  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid,
 } from './common/request-valid';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
 import { EnvironmentServ } from './service/environment';
 import { PipelineServ } from './service/pipeline';
+import { PluginServ } from './service/plugin';
 import { ProjectServ } from './service/project';
 
 const app = express();
@@ -37,6 +38,7 @@ const projectServ: ProjectServ = new ProjectServ();
 const appServ: ApplicationServ = new ApplicationServ();
 const pipelineServ: PipelineServ = new PipelineServ();
 const environmentServ: EnvironmentServ = new EnvironmentServ();
+const pluginServ: PluginServ = new PluginServ();
 
 
 app.use(express.json());
@@ -209,7 +211,7 @@ app.put(
   '/api/project/:id',
   validate([
     body().custom(isValidEmpty),
-    body('projectId')
+    body('id')
       .custom(isProjectEmptyAndExisted)
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
   ]),
@@ -333,6 +335,52 @@ app.delete(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.delete(req, res, next);
+  });
+
+app.get(
+  '/api/plugin',
+  validate([
+    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
+      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pluginServ.list(req, res, next);
+  });
+
+app.post(
+  '/api/plugin',
+  validate([
+    body().custom(isValidEmpty),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pluginServ.add(req, res, next);
+  });
+
+app.get(
+  '/api/plugin/:id',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pluginServ.details(req, res, next);
+  });
+
+app.put(
+  '/api/plugin/:id',
+  validate([
+    body('id')
+      .custom(isPluginIdValid)
+      .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pluginServ.update(req, res, next);
+  });
+
+app.delete(
+  '/api/plugin/:id',
+  validate([
+    param('id').custom(isPluginIdValid),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pluginServ.delete(req, res, next);
   });
 
 // Implement the “catch-all” errorHandler function

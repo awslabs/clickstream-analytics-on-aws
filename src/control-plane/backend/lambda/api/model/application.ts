@@ -12,9 +12,12 @@
  */
 
 export interface Application {
+  id: string;
+  type: string;
+  prefix: string;
+
   projectId: string;
   appId: string;
-  type: string;
   name: string;
   description: string;
   platform: string;

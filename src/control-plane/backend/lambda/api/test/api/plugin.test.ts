@@ -15,57 +15,53 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  ScanCommand,
+  QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 
-describe('Project test', () => {
+describe('Plugin test', () => {
   beforeEach(() => {
     ddbMock.reset();
   });
-  it('Create project', async () => {
+  it('Create plugin', async () => {
     tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
     ddbMock.on(PutCommand).resolvesOnce({});
     const res = await request(app)
-      .post('/api/project')
+      .post('/api/plugin')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        name: 'Project-01',
-        tableName: 'Project-01',
-        description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
-        platform: 'Web',
-        region: 'us-east-1',
-        environment: 'Dev',
+        name: 'Plugin-01',
+        description: 'Description of Plugin-01',
+        jarFile: 'jarFile',
+        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        mainFunction: 'com.cn.sre.main',
+        pluginType: 'Transform',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
-    expect(res.body.message).toEqual('Project created.');
+    expect(res.body.message).toEqual('Plugin created.');
     expect(res.body.success).toEqual(true);
   });
-  it('Create project with mock error', async () => {
-    projectExistedMock(ddbMock, false);
+  it('Create plugin with mock error', async () => {
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
       .rejects(new Error('Mock DynamoDB error'));;
     const res = await request(app)
-      .post('/api/project')
+      .post('/api/plugin')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        name: 'Project-01',
-        tableName: 'Project-01',
-        description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
-        platform: 'Web',
-        region: 'us-east-1',
-        environment: 'Dev',
+        name: 'Plugin-01',
+        description: 'Description of Plugin-01',
+        jarFile: 'jarFile',
+        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        mainFunction: 'com.cn.sre.main',
+        pluginType: 'Transform',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -75,11 +71,10 @@ describe('Project test', () => {
       error: 'Error',
     });
   });
-  it('Create project 400', async () => {
+  it('Create plugin 400', async () => {
     tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
     const res = await request(app)
-      .post('/api/project');
+      .post('/api/plugin');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -100,19 +95,18 @@ describe('Project test', () => {
       ],
     });
   });
-  it('Create project Not Modified', async () => {
+  it('Create plugin Not Modified', async () => {
     tokenMock(ddbMock, true);
     const res = await request(app)
-      .post('/api/project')
+      .post('/api/plugin')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        name: 'Project-01',
-        tableName: 'Project-01',
-        description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
-        platform: 'Web',
-        region: 'us-east-1',
-        environment: 'Dev',
+        name: 'Plugin-01',
+        description: 'Description of Plugin-01',
+        jarFile: 'jarFile',
+        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        mainFunction: 'com.cn.sre.main',
+        pluginType: 'Transform',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -129,54 +123,62 @@ describe('Project test', () => {
       ],
     });
   });
-  it('Get project by ID', async () => {
+  it('Get plugin by ID', async () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
-        environment: 'Dev',
-        updateAt: 1675321494735,
+        updateAt: 1678276073222,
+        builtIn: false,
+        status: 'Disabled',
         operator: '',
-        name: 'Project-01',
+        mainFunction: 'com.cn.sre.main',
+        name: 'Plugin-01',
         deleted: false,
-        platform: 'Web',
-        createAt: 1675321494735,
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
-        tableName: 't1',
-        type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
-        region: 'us-east-1',
-        status: 'UNKNOW',
-        description: 'Description of Project-01',
-        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        createAt: 1678275909650,
+        jarFile: 'jarFile',
+        typeName: 'PLUGIN',
+        bindCount: 0,
+        description: '3223 Description of Plugin-01',
+        id: '674f5434-ffa0-4eda-8685-044af36548ad',
+        dependencyFiles: [
+          'dependencyFiles1',
+          'dependencyFiles2',
+        ],
+        pluginType: 'Transform',
       },
     });
     let res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}`);
+      .get(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
       data: {
-        environment: 'Dev',
-        updateAt: 1675321494735,
+        updateAt: 1678276073222,
+        builtIn: false,
+        status: 'Disabled',
         operator: '',
-        name: 'Project-01',
+        mainFunction: 'com.cn.sre.main',
+        name: 'Plugin-01',
         deleted: false,
-        platform: 'Web',
-        createAt: 1675321494735,
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
-        tableName: 't1',
-        type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
-        region: 'us-east-1',
-        status: 'UNKNOW',
-        description: 'Description of Project-01',
-        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        createAt: 1678275909650,
+        jarFile: 'jarFile',
+        typeName: 'PLUGIN',
+        bindCount: 0,
+        description: '3223 Description of Plugin-01',
+        id: '674f5434-ffa0-4eda-8685-044af36548ad',
+        dependencyFiles: [
+          'dependencyFiles1',
+          'dependencyFiles2',
+        ],
+        pluginType: 'Transform',
       },
     });
 
     // Mock DynamoDB error
     ddbMock.on(GetCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}`);
+      .get(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
 
@@ -186,29 +188,29 @@ describe('Project test', () => {
       error: 'Error',
     });
   });
-  it('Get non-existent project', async () => {
-    projectExistedMock(ddbMock, false);
+  it('Get non-existent plugin', async () => {
+    pluginExistedMock(ddbMock, false);
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}`);
+      .get(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
-      message: 'Project not found',
+      message: 'Plugin not found',
     });
   });
-  it('Get project list', async () => {
-    ddbMock.on(ScanCommand).resolves({
+  it('Get plugin list', async () => {
+    ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Project-01' },
-        { name: 'Project-02' },
-        { name: 'Project-03' },
-        { name: 'Project-04' },
-        { name: 'Project-05' },
+        { name: 'plugin-01' },
+        { name: 'plugin-02' },
+        { name: 'plugin-03' },
+        { name: 'plugin-04' },
+        { name: 'plugin-05' },
       ],
     });
     let res = await request(app)
-      .get('/api/project');
+      .get('/api/plugin');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -216,20 +218,20 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-01' },
-          { name: 'Project-02' },
-          { name: 'Project-03' },
-          { name: 'Project-04' },
-          { name: 'Project-05' },
+          { name: 'plugin-01' },
+          { name: 'plugin-02' },
+          { name: 'plugin-03' },
+          { name: 'plugin-04' },
+          { name: 'plugin-05' },
         ],
         totalCount: 5,
       },
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
-      .get('/api/project');
+      .get('/api/plugin');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
 
@@ -239,18 +241,18 @@ describe('Project test', () => {
       error: 'Error',
     });
   });
-  it('Get project list with page', async () => {
-    ddbMock.on(ScanCommand).resolves({
+  it('Get plugin list with page', async () => {
+    ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Project-01' },
-        { name: 'Project-02' },
-        { name: 'Project-03' },
-        { name: 'Project-04' },
-        { name: 'Project-05' },
+        { name: 'plugin-01' },
+        { name: 'plugin-02' },
+        { name: 'plugin-03' },
+        { name: 'plugin-04' },
+        { name: 'plugin-05' },
       ],
     });
     const res = await request(app)
-      .get('/api/project?pageNumber=2&pageSize=2');
+      .get('/api/plugin?pageNumber=2&pageSize=2');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -258,51 +260,105 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03' },
-          { name: 'Project-04' },
+          { name: 'plugin-03' },
+          { name: 'plugin-04' },
         ],
         totalCount: 5,
       },
     });
   });
-  it('Update project', async () => {
-    projectExistedMock(ddbMock, true);
+  it('Get plugin list with type', async () => {
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { name: 'plugin-01' },
+        { name: 'plugin-02' },
+        { name: 'plugin-03' },
+      ],
+    });
+    const res = await request(app)
+      .get('/api/plugin?type=Enrich');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          { name: 'plugin-01' },
+          { name: 'plugin-02' },
+          { name: 'plugin-03' },
+        ],
+        totalCount: 3,
+      },
+    });
+  });
+  it('Get plugin list with order', async () => {
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { name: 'plugin-01' },
+        { name: 'plugin-02' },
+        { name: 'plugin-03' },
+      ],
+    });
+    const res = await request(app)
+      .get('/api/plugin?order=desc');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          { name: 'plugin-01' },
+          { name: 'plugin-02' },
+          { name: 'plugin-03' },
+        ],
+        totalCount: 3,
+      },
+    });
+  });
+  it('Update plugin', async () => {
+    pluginExistedMock(ddbMock, true);
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
-      .put(`/api/project/${MOCK_PROJECT_ID}`)
+      .put(`/api/plugin/${MOCK_PLUGIN_ID}`)
       .send({
-        id: MOCK_PROJECT_ID,
-        environment: '1Dev',
-        updateAt: 1676261555751,
+        id: MOCK_PLUGIN_ID,
+        updateAt: 1678276073222,
+        builtIn: false,
+        status: 'Disabled',
         operator: '',
-        name: '1Project-01',
+        mainFunction: 'com.cn.sre.main',
+        name: 'Plugin-01',
         deleted: false,
-        createAt: 1676259929614,
-        emails: '1update@amazon.com',
-        platform: '1Web',
-        tableName: '1t1',
-        region: '1us-east-1',
-        description: '1update Description of Project-01',
-        status: '1UNKNOW',
+        createAt: 1678275909650,
+        jarFile: 'jarFile',
+        typeName: 'PLUGIN',
+        bindCount: 0,
+        description: '3223 Description of Plugin-01',
+        dependencyFiles: [
+          'dependencyFiles1',
+          'dependencyFiles2',
+        ],
+        pluginType: 'Transform',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
       data: null,
       success: true,
-      message: 'Project updated.',
+      message: 'Plugin updated.',
     });
   });
-  it('Update project mock error', async () => {
+  it('Update plugin mock error', async () => {
     // Mock DynamoDB error
-    projectExistedMock(ddbMock, true);
+    pluginExistedMock(ddbMock, true);
     ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
-      .put(`/api/project/${MOCK_PROJECT_ID}`)
+      .put(`/api/plugin/${MOCK_PLUGIN_ID}`)
       .send({
-        id: MOCK_PROJECT_ID,
+        id: MOCK_PLUGIN_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -313,15 +369,14 @@ describe('Project test', () => {
       error: 'Error',
     });
   });
-  it('Update project with not match id', async () => {
-    projectExistedMock(ddbMock, true);
+  it('Update plugin with not match id', async () => {
+    pluginExistedMock(ddbMock, true);
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
-      .put(`/api/project/${MOCK_PROJECT_ID}1`)
+      .put(`/api/plugin/${MOCK_PLUGIN_ID}1`)
       .send({
-        id: MOCK_PROJECT_ID,
+        id: MOCK_PLUGIN_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -333,28 +388,22 @@ describe('Project test', () => {
           location: 'body',
           msg: 'ID in path does not match ID in body.',
           param: 'id',
-          value: MOCK_PROJECT_ID,
+          value: MOCK_PLUGIN_ID,
         },
       ],
     });
   });
-  it('Update project with not body', async () => {
-    projectExistedMock(ddbMock, true);
+  it('Update plugin with not body', async () => {
+    pluginExistedMock(ddbMock, true);
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
-      .put(`/api/project/${MOCK_PROJECT_ID}`);
+      .put(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
       message: 'Parameter verification failed.',
       error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
         {
           location: 'body',
           msg: 'Value is empty.',
@@ -368,14 +417,13 @@ describe('Project test', () => {
       ],
     });
   });
-  it('Update project with no existed', async () => {
-    projectExistedMock(ddbMock, false);
+  it('Update plugin with no existed', async () => {
+    pluginExistedMock(ddbMock, false);
     const res = await request(app)
-      .put(`/api/project/${MOCK_PROJECT_ID}`)
+      .put(`/api/plugin/${MOCK_PLUGIN_ID}`)
       .send({
-        id: MOCK_PROJECT_ID,
+        id: MOCK_PLUGIN_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -385,35 +433,30 @@ describe('Project test', () => {
       error: [
         {
           location: 'body',
-          msg: 'Project resource does not exist.',
+          msg: 'Plugin resource does not exist.',
           param: 'id',
-          value: MOCK_PROJECT_ID,
+          value: MOCK_PLUGIN_ID,
         },
       ],
     });
   });
-  it('Delete project', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        { type: 'project-01' },
-      ],
-    });
+  it('Delete plugin', async () => {
+    pluginExistedMock(ddbMock, true);
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+      .delete(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       data: null,
       success: true,
-      message: 'Project deleted.',
+      message: 'Plugin deleted.',
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+      .delete(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
 
@@ -423,11 +466,11 @@ describe('Project test', () => {
       error: 'Error',
     });
   });
-  it('Delete project with no existed', async () => {
-    projectExistedMock(ddbMock, false);
+  it('Delete plugin with no existed', async () => {
+    pluginExistedMock(ddbMock, false);
     ddbMock.on(UpdateCommand).resolves({});
     const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+      .delete(`/api/plugin/${MOCK_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -436,44 +479,11 @@ describe('Project test', () => {
       error: [
         {
           location: 'params',
-          msg: 'Project resource does not exist.',
+          msg: 'Plugin resource does not exist.',
           param: 'id',
-          value: MOCK_PROJECT_ID,
+          value: MOCK_PLUGIN_ID,
         },
       ],
-    });
-  });
-  it('Verification project table name existed', async () => {
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        { name: 'Project-01', tableName: 't1' },
-        { name: 'Project-02', tableName: 't2' },
-        { name: 'Project-03', tableName: 't3' },
-        { name: 'Project-04', tableName: 't4' },
-        { name: 'Project-05', tableName: 't5' },
-      ],
-    });
-    const res = await request(app)
-      .get('/api/project/verification/t1');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: { exist: true },
-    });
-  });
-  it('Verification project with mock error', async () => {
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
-    const res = await request(app)
-      .get('/api/project/verification/t1');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Unexpected error occurred at server.',
-      error: 'Error',
     });
   });
 
