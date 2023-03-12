@@ -84,6 +84,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'frontend/amplify',
     'test-deploy*.sh',
     'deployment/global-s3-assets/',
+    '.viperlightrc',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -356,7 +357,7 @@ gitlabMain.createNestedTemplates({
       'build',
     ],
     jobs: {
-      license: {
+      'license header': {
         stage: 'build',
         image: {
           name: 'public.ecr.aws/amazonlinux/amazonlinux:2',
@@ -378,7 +379,39 @@ gitlabMain.createNestedTemplates({
           'sed -n 1,12p .projenrc.js > $LICENSE_FILE && cat $LICENSE_FILE',
         ],
         script: [
-          '/tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java && [[ -z `git status -s` ]]',
+          '/tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java && ([[ -z `git status -s` ]] || (echo "Found files violdate with license header" && exit 1))',
+        ],
+      },
+    },
+  },
+  'viperlight': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      viperlight: {
+        stage: 'build',
+        image: {
+          name: 'public.ecr.aws/docker/library/python:3.11',
+        },
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        before_script: [
+          'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
+          'apt -y install nodejs',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
+          'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
+        ],
+        script: [
+          './codescan-prebuild-custom.sh',
         ],
       },
     },

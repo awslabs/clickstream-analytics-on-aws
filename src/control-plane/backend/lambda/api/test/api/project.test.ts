@@ -40,7 +40,7 @@ describe('Project test', () => {
         name: 'Project-01',
         tableName: 'Project-01',
         description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
         region: 'us-east-1',
         environment: 'Dev',
@@ -62,7 +62,7 @@ describe('Project test', () => {
         name: 'Project-01',
         tableName: 'Project-01',
         description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
         region: 'us-east-1',
         environment: 'Dev',
@@ -109,7 +109,7 @@ describe('Project test', () => {
         name: 'Project-01',
         tableName: 'Project-01',
         description: 'Description of Project-01',
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
         region: 'us-east-1',
         environment: 'Dev',
@@ -139,7 +139,7 @@ describe('Project test', () => {
         deleted: false,
         platform: 'Web',
         createAt: 1675321494735,
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
         tableName: 't1',
         type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         region: 'us-east-1',
@@ -163,7 +163,7 @@ describe('Project test', () => {
         deleted: false,
         platform: 'Web',
         createAt: 1675321494735,
-        emails: 'u1@amazon.com,u2@amazon.com,u3@amazon.com',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
         tableName: 't1',
         type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         region: 'us-east-1',
@@ -278,7 +278,7 @@ describe('Project test', () => {
         name: '1Project-01',
         deleted: false,
         createAt: 1676259929614,
-        emails: '1update@amazon.com',
+        emails: '1update@example.com',
         platform: '1Web',
         tableName: '1t1',
         region: '1us-east-1',
@@ -302,7 +302,7 @@ describe('Project test', () => {
       .send({
         id: MOCK_PROJECT_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
+        emails: 'update@example.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -321,7 +321,7 @@ describe('Project test', () => {
       .send({
         id: MOCK_PROJECT_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
+        emails: 'update@example.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -375,7 +375,7 @@ describe('Project test', () => {
       .send({
         id: MOCK_PROJECT_ID,
         description: 'Update Description',
-        emails: 'update@amazon.com',
+        emails: 'update@example.com',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);

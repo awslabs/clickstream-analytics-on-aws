@@ -117,7 +117,7 @@ async function _handler(event: ResourceEvent, context: Context) {
 }
 
 function getResourceName(event: ResourceEvent) {
-  //event.StackId="arn:aws:cloudformation:us-east-1:012345678912:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299";
+  //event.StackId="arn:aws:cloudformation:us-east-1:111122223333:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299";
   const props = event.ResourceProperties as ResourcePropertiesType;
   const stackShortId = event.StackId.split('/')[2].split('-')[4];
   const stackName = event.StackId.split('/')[1];

@@ -16,6 +16,7 @@
 /.gitlab/ci-templates/license-check.yml linguist-generated
 /.gitlab/ci-templates/prlint.yml linguist-generated
 /.gitlab/ci-templates/semgrep.yml linguist-generated
+/.gitlab/ci-templates/viperlight.yml linguist-generated
 /.mergify.yml linguist-generated
 /.npmignore linguist-generated
 /.projen/** linguist-generated

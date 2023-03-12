@@ -2,7 +2,7 @@
 
 stages:
   - build
-license:
+license header:
   stage: build
   image:
     name: public.ecr.aws/amazonlinux/amazonlinux:2
@@ -16,4 +16,4 @@ license:
     - mkdir -p /tmp/license-check && curl -s https://raw.githubusercontent.com/lluissm/license-header-checker/master/install.sh | bash -s -- -b /tmp/license-check
     - sed -n 1,12p .projenrc.js > $LICENSE_FILE && cat $LICENSE_FILE
   script:
-    - /tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java && [[ -z `git status -s` ]]
+    - /tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java && ([[ -z `git status -s` ]] || (echo "Found files violdate with license header" && exit 1))

@@ -538,7 +538,7 @@ describe('Account Env test', () => {
       ClusterInfoList: [
         {
           ClusterName: 'demo-cluster-1',
-          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterArn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           ClusterType: 'PROVISIONED',
           Provisioned: {
             BrokerNodeGroupInfo: {
@@ -578,7 +578,7 @@ describe('Account Env test', () => {
       data: [
         {
           name: 'demo-cluster-1',
-          arn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           type: 'PROVISIONED',
           state: 'ACTIVE',
           securityGroupId: 'sg-111',
@@ -591,7 +591,7 @@ describe('Account Env test', () => {
       ClusterInfoList: [
         {
           ClusterName: 'demo-cluster-1',
-          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterArn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           ClusterType: 'SERVERLESS',
           Serverless: {
             VpcConfigs: [
@@ -631,7 +631,7 @@ describe('Account Env test', () => {
       data: [
         {
           name: 'demo-cluster-1',
-          arn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           type: 'SERVERLESS',
           state: 'ACTIVE',
           securityGroupId: 'sg-111',
@@ -644,7 +644,7 @@ describe('Account Env test', () => {
       ClusterInfoList: [
         {
           ClusterName: 'demo-cluster-1',
-          ClusterArn: 'arn:aws:kafka:us-east-1:012345678912:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterArn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           ClusterType: 'PROVISIONED',
           State: 'ACTIVE',
         },
@@ -771,9 +771,9 @@ describe('Account Env test', () => {
     quickSightClient.on(ListUsersCommand).resolves({
       UserList: [
         {
-          UserName: 'Admin/fake-Isengard',
-          Arn: 'arn:aws:quicksight:us-east-1:012345678912:user/default/Admin/fake-Isengard',
-          Email: 'fake@amazon.com',
+          UserName: 'Admin/fake',
+          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
+          Email: 'fake@example.com',
           Role: 'ADMIN',
           Active: true,
         },
@@ -787,9 +787,9 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          userName: 'Admin/fake-Isengard',
-          arn: 'arn:aws:quicksight:us-east-1:012345678912:user/default/Admin/fake-Isengard',
-          email: 'fake@amazon.com',
+          userName: 'Admin/fake',
+          arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
+          email: 'fake@example.com',
           role: 'ADMIN',
           active: true,
         },
@@ -858,7 +858,7 @@ describe('Account Env test', () => {
           Path: '/',
           RoleName: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
           RoleId: 'AROAY6VU67QTP62MJAQ3O',
-          Arn: 'arn:aws:iam::615633583142:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          Arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
           CreateDate: new Date(),
           AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22apigateway.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D',
           Description: '',
@@ -866,9 +866,9 @@ describe('Account Env test', () => {
         },
         {
           Path: '/',
-          RoleName: 'XenaAuditorRole-DO-NOT-DELETE',
+          RoleName: 'arole',
           RoleId: 'AROAY6VU67QTN6EXB2YM5',
-          Arn: 'arn:aws:iam::615633583142:role/XenaAuditorRole-DO-NOT-DELETE',
+          Arn: 'arn:aws:iam::111122223333:role/arole',
           CreateDate: new Date(),
           AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Sid%22%3A%22%22%2C%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22AWS%22%3A%22arn%3Aaws%3Aiam%3A%3A691002153696%3Aroot%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%2C%22Condition%22%3A%7B%22StringEquals%22%3A%7B%22sts%3AExternalId%22%3A%22XenaAuditorRoleLkWDhzqUbFcZ%22%7D%7D%7D%5D%7D',
           MaxSessionDuration: 3600,
@@ -885,7 +885,7 @@ describe('Account Env test', () => {
         {
           name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
           id: 'AROAY6VU67QTP62MJAQ3O',
-          arn: 'arn:aws:iam::615633583142:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
         },
       ],
     });
@@ -919,7 +919,7 @@ describe('Account Env test', () => {
       HostedZones: [
         {
           Id: '/hostedzone/Z000000000000000000E',
-          Name: 'fake.test.dev.com.',
+          Name: 'fake.example.com.',
           CallerReference: '',
         },
       ],
@@ -933,7 +933,7 @@ describe('Account Env test', () => {
       data: [
         {
           id: 'Z000000000000000000E',
-          name: 'fake.test.dev.com.',
+          name: 'fake.example.com.',
         },
       ],
     });

@@ -11,6 +11,7 @@ include:
   - local: .gitlab/ci-templates/docs.yml
   - local: .gitlab/ci-templates/semgrep.yml
   - local: .gitlab/ci-templates/license-check.yml
+  - local: .gitlab/ci-templates/viperlight.yml
   - local: .gitlab/ci-templates/cfn-nag.yml
 workflow:
   rules:

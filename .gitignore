@@ -38,6 +38,7 @@ docs/site/
 frontend/amplify
 test-deploy*.sh
 deployment/global-s3-assets/
+.viperlightrc
 !/.projenrc.js
 /test-reports/
 junit.xml
@@ -65,4 +66,5 @@ junit.xml
 !/.gitlab/ci-templates/docs.yml
 !/.gitlab/ci-templates/semgrep.yml
 !/.gitlab/ci-templates/license-check.yml
+!/.gitlab/ci-templates/viperlight.yml
 !/.gitlab/ci-templates/cfn-nag.yml

@@ -69,7 +69,7 @@ describe('Pipeline test', () => {
           },
           domain: {
             hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'test.dev.com',
+            hostedZoneName: 'example.com',
             recordName: 'click',
           },
           loadBalancer: {
@@ -78,15 +78,15 @@ describe('Pipeline test', () => {
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
             logS3Bucket: {
-              name: '012345678912-test',
+              name: '111122223333-test',
               prefix: 'logs',
             },
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
           },
           sinkType: 's3',
           sinkS3: {
             s3DataBucket: {
-              name: '012345678912-test',
+              name: '111122223333-test',
               prefix: 'test',
             },
             s3BufferSize: 50,
@@ -151,7 +151,7 @@ describe('Pipeline test', () => {
           },
           domain: {
             hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'test.dev.com',
+            hostedZoneName: 'example.com',
             recordName: 'click',
           },
           loadBalancer: {
@@ -161,11 +161,11 @@ describe('Pipeline test', () => {
             enableApplicationLoadBalancerAccessLog: true,
             logS3Bucket: 'Pipeline-01-log',
             logS3Prefix: 'logs',
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
           },
           sinkType: 's3',
           sinkS3: {
-            s3Uri: 's3://012345678912-test',
+            s3Uri: 's3://DOC-EXAMPLE-BUCKET',
             sinkType: 's3',
             s3prefix: 'test',
             s3BufferSize: 50,
@@ -223,7 +223,7 @@ describe('Pipeline test', () => {
           },
           domain: {
             hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'test.dev.com',
+            hostedZoneName: 'example.com',
             recordName: 'click',
           },
           loadBalancer: {
@@ -232,15 +232,15 @@ describe('Pipeline test', () => {
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
             logS3Bucket: {
-              name: '012345678912-test',
+              name: '111122223333-test',
               prefix: 'logs',
             },
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
           },
           sinkType: 's3',
           sinkS3: {
             s3DataBucket: {
-              name: '012345678912-test',
+              name: '111122223333-test',
               prefix: 'test',
             },
             s3BufferSize: 50,
@@ -944,7 +944,7 @@ describe('Pipeline test', () => {
         },
         domain: {
           hostedZoneId: 'Z000000000000000000E',
-          hostedZoneName: 'fake.test.dev.com',
+          hostedZoneName: 'fake.example.com',
           recordName: 'click',
         },
         loadBalancer: {
@@ -953,15 +953,15 @@ describe('Pipeline test', () => {
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
           logS3Bucket: {
-            name: '012345678912-test',
+            name: '111122223333-test',
             prefix: 'logs',
           },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
         },
         sinkType: 's3',
         sinkS3: {
           s3DataBucket: {
-            name: '012345678912-test',
+            name: '111122223333-test',
             prefix: 'test',
           },
           s3BatchMaxBytes: 50,
@@ -979,7 +979,7 @@ describe('Pipeline test', () => {
           kinesisStreamMode: 'ON_DEMAND',
           kinesisShardCount: 3,
           kinesisDataS3Bucket: {
-            name: '012345678912-test',
+            name: '111122223333-test',
             prefix: 'kinesis',
           },
         },
@@ -987,16 +987,16 @@ describe('Pipeline test', () => {
       etl: {
         appIds: ['appId1', 'appId2'],
         sourceS3Bucket: {
-          name: '012345678912-test',
+          name: '111122223333-test',
           prefix: 'source',
         },
         sinkS3Bucket: {
-          name: '012345678912-test',
+          name: '111122223333-test',
           prefix: 'sink',
         },
       },
       dataModel: {},
-      version: '162321434322',
+      version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
       updateAt: 162321434322,
@@ -1028,7 +1028,7 @@ describe('Pipeline test', () => {
       },
       {
         ParameterKey: 'HostedZoneName',
-        ParameterValue: 'fake.test.dev.com',
+        ParameterValue: 'fake.example.com',
       },
       {
         ParameterKey: 'RecordName',
@@ -1064,7 +1064,7 @@ describe('Pipeline test', () => {
       },
       {
         ParameterKey: 'NotificationsTopicArn',
-        ParameterValue: 'arn:aws:sns:us-east-1:012345678912:test',
+        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
       },
       {
         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -1072,7 +1072,7 @@ describe('Pipeline test', () => {
       },
       {
         ParameterKey: 'LogS3Bucket',
-        ParameterValue: '012345678912-test',
+        ParameterValue: '111122223333-test',
       },
       {
         ParameterKey: 'LogS3Prefix',
@@ -1080,7 +1080,7 @@ describe('Pipeline test', () => {
       },
       {
         ParameterKey: 'S3DataBucket',
-        ParameterValue: '012345678912-test',
+        ParameterValue: '111122223333-test',
       },
       {
         ParameterKey: 'S3DataPrefix',
@@ -1128,7 +1128,7 @@ describe('Pipeline test', () => {
         },
         domain: {
           hostedZoneId: 'Z000000000000000000E',
-          hostedZoneName: 'fake.test.dev.com',
+          hostedZoneName: 'fake.example.com',
           recordName: 'click',
         },
         loadBalancer: {
@@ -1137,10 +1137,10 @@ describe('Pipeline test', () => {
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
           logS3Bucket: {
-            name: '012345678912-test',
+            name: '111122223333-test',
             prefix: 'logs',
           },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
         },
         sinkType: 's3',
         sinkKafka: {
@@ -1155,7 +1155,7 @@ describe('Pipeline test', () => {
           kinesisStreamMode: 'ON_DEMAND',
           kinesisShardCount: 3,
           kinesisDataS3Bucket: {
-            name: '012345678912-test',
+            name: '111122223333-test',
             prefix: 'kinesis',
           },
         },
@@ -1163,16 +1163,16 @@ describe('Pipeline test', () => {
       etl: {
         appIds: ['appId1', 'appId2'],
         sourceS3Bucket: {
-          name: '012345678912-test',
+          name: '111122223333-test',
           prefix: 'source',
         },
         sinkS3Bucket: {
-          name: '012345678912-test',
+          name: '111122223333-test',
           prefix: 'sink',
         },
       },
       dataModel: {},
-      version: '162321434322',
+      version: '124',
       versionTag: 'latest',
       createAt: 162321434322,
       updateAt: 162321434322,

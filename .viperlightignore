@@ -8,3 +8,28 @@ node_modules/
 coverage/
 .*/package-lock.json
 
+# account id for ALB access log
+src/common/alb.ts:34
+src/common/alb.ts:37
+src/common/alb.ts:40
+src/common/alb.ts:43
+src/common/alb.ts:46
+src/common/alb.ts:49
+src/common/alb.ts:52
+src/common/alb.ts:55
+src/common/alb.ts:58
+src/common/alb.ts:61
+src/common/alb.ts:64
+src/common/alb.ts:67
+src/common/alb.ts:70
+src/common/alb.ts:73
+src/common/alb.ts:76
+src/common/alb.ts:79
+src/common/alb.ts:82
+src/common/alb.ts:85
+src/common/alb.ts:88
+src/common/alb.ts:91
+src/common/alb.ts:94
+src/common/alb.ts:97
+src/common/alb.ts:100
+src/common/alb.ts:103
