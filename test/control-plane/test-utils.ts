@@ -91,7 +91,7 @@ export interface ApplicationLoadBalancerLambdaPortalTestProps {
   readonly applicationLoadBalancerProps?: ApplicationLoadBalancerProps;
   readonly networkProps?: NetworkProps;
   readonly frontendProps?: FrontendProps;
-  readonly domainProsps?: DomainProps;
+  readonly domainProps?: DomainProps;
   readonly hasCert?: boolean;
   readonly port?: number;
   readonly externalBucket?: boolean;
@@ -244,7 +244,7 @@ export class TestEnv {
       applicationLoadBalancerProps: applicationLoadBalancerProps,
       networkProps: networkProps,
       frontendProps: frontendProps,
-      domainProsps: domainProps,
+      domainProps: domainProps,
     });
 
     return stack;

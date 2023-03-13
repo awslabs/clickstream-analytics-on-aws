@@ -114,7 +114,7 @@ export interface ApplicationLoadBalancerLambdaPortalProps {
   readonly applicationLoadBalancerProps: ApplicationLoadBalancerProps;
   readonly networkProps: NetworkProps;
   readonly frontendProps: FrontendProps;
-  readonly domainProsps?: DomainProps;
+  readonly domainProps?: DomainProps;
 }
 
 export class ApplicationLoadBalancerLambdaPortal extends Construct {
@@ -138,7 +138,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     this.node.addValidation({
       validate: () => {
         const messages: string[] = [];
-        if (props.domainProsps !== undefined && props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTP) {
+        if (props.domainProps !== undefined && props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTP) {
           messages.push(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
         }
         return messages;
@@ -217,7 +217,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
 
     let port = props.networkProps.port;
     if ( port === undefined) {
-      if (props.domainProsps?.certificate === undefined) {
+      if (props.domainProps?.certificate === undefined) {
         port = 80;
       } else {
         port = 443;
@@ -268,8 +268,8 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       http2Enabled: props.applicationLoadBalancerProps.http2Enabled ?? true,
     });
 
-    if (props.domainProsps !== undefined) {
-      const customDomainName = Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostedZoneName]);
+    if (props.domainProps !== undefined) {
+      const customDomainName = Fn.join('.', [props.domainProps.recordName, props.domainProps.hostedZoneName]);
       this.controlPlaneUrl = 'https://' + customDomainName + ':' + this.port;
     } else {
       this.controlPlaneUrl = 'http://' + this.applicationLoadBalancer.loadBalancerDnsName + ':' + this.port;
@@ -290,15 +290,15 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       });
     }
 
-    if (props.domainProsps !== undefined) {
+    if (props.domainProps !== undefined) {
       let certificate: ICertificate;
-      if (props.domainProsps?.certificate === undefined) {
+      if (props.domainProps?.certificate === undefined) {
         certificate = new Certificate(this, 'Certificate', {
-          domainName: Fn.join('.', [props.domainProsps.recordName, props.domainProsps.hostedZoneName]),
-          validation: CertificateValidation.fromDns(props.domainProsps?.hostedZone),
+          domainName: Fn.join('.', [props.domainProps.recordName, props.domainProps.hostedZoneName]),
+          validation: CertificateValidation.fromDns(props.domainProps?.hostedZone),
         });
       } else {
-        certificate = props.domainProsps.certificate;
+        certificate = props.domainProps.certificate;
       }
 
       this.listener = this.applicationLoadBalancer.addListener('Listener', {
@@ -370,10 +370,10 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       methods: ['POST', 'GET'],
     });
 
-    if (props.domainProsps !== undefined) {
+    if (props.domainProps !== undefined) {
       new ARecord(this, 'aliasRecord', {
-        recordName: props.domainProsps.recordName,
-        zone: props.domainProsps.hostedZone,
+        recordName: props.domainProps.recordName,
+        zone: props.domainProps.hostedZone,
         target: RecordTarget.fromAlias(new LoadBalancerTarget(this.applicationLoadBalancer)),
       });
     }

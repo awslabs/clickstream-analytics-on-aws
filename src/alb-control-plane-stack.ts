@@ -97,7 +97,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     }
 
     const logBucket = new LogBucket(this, 'logBucket');
-    let domainProsps = undefined;
+    let domainProps = undefined;
     let protocol = ApplicationProtocol.HTTP;
 
     if (props.useCustomDomain) {
@@ -116,7 +116,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         validation: CertificateValidation.fromDns(hostedZone),
       });
 
-      domainProsps = {
+      domainProps = {
         recordName: domainParameters.recordName.valueAsString,
         hostedZoneName: domainParameters.hostedZoneName.valueAsString,
         hostedZone: hostedZone,
@@ -138,7 +138,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         subnets: subnets,
         port: port,
       },
-      domainProsps: domainProsps,
+      domainProps: domainProps,
       frontendProps: {
         directory: path.join(__dirname, '../'),
         dockerfile: 'src/control-plane/frontend/Dockerfile',

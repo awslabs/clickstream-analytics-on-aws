@@ -106,6 +106,7 @@ export class CloudFrontS3Portal extends Construct {
   public readonly bucket: IBucket;
   public readonly logBucket: IBucket;
   public readonly controlPlaneUrl: string;
+  public readonly buckeyDeployment: BucketDeployment;
   private origins: Array<CfnDistribution.OriginProperty | IResolvable> | IResolvable;
   private cacheBehaviors: Array<CfnDistribution.CacheBehaviorProperty | IResolvable> | IResolvable;
 
@@ -322,13 +323,13 @@ export class CloudFrontS3Portal extends Construct {
       });
 
       if (props.domainProps !== undefined) {
-        new ARecord(this, 'arecord', {
+        const record = new ARecord(this, 'arecord', {
           recordName: props.domainProps.recordName!,
           zone: props.domainProps.hostZone,
           target: RecordTarget.fromAlias(new CloudFrontTarget(this.distribution)),
         });
 
-        this.controlPlaneUrl = 'https://' + Fn.join('.', [props.domainProps.recordName, props.domainProps.hostZone.zoneName]);
+        this.controlPlaneUrl = 'https://' + record.domainName;
       } else {
         this.controlPlaneUrl = 'https://' + this.distribution.distributionDomainName;
       }
@@ -338,7 +339,7 @@ export class CloudFrontS3Portal extends Construct {
     this.bucket = portalBucket;
 
     // upload static web assets
-    new BucketDeployment(this, 'portal_deploy', {
+    this.buckeyDeployment = new BucketDeployment(this, 'portal_deploy', {
       sources: [
         Source.asset(props.frontendProps.assetPath, {
           bundling: {

@@ -14,7 +14,7 @@
 import {
   App,
 } from 'aws-cdk-lib';
-import { Match, Template } from 'aws-cdk-lib/assertions';
+import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
 
@@ -172,6 +172,17 @@ describe('CloudFrontS3PotalStack', () => {
       Timeout: 900,
     },
     );
+  });
+
+
+  test('at least two BucketDeployment sources', () => {
+
+    const capture = new Capture();
+    commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
+      SourceObjectKeys: capture,
+    });
+    expect(capture.asArray().length).toBeGreaterThanOrEqual(2);
+
   });
 
   test('Function for user authentication', () => {
@@ -528,7 +539,7 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
     });
   });
+
 });

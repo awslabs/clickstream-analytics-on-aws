@@ -25,6 +25,7 @@ import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution'
 import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
 import {
@@ -142,7 +143,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           'export APP_PATH=/tmp/app && mkdir $APP_PATH && cp -r `ls -A /asset-input | grep -v "node_modules" | grep -v "build"` $APP_PATH && cd $APP_PATH && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
         ],
         user: 'node',
-        autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/locales/*'],
+        autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/aws-exports.json', '/locales/*'],
       },
       cnCloudFrontS3PortalProps,
       domainProps,
@@ -154,6 +155,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     });
 
     let issuer: string;
+    let clientId: string;
     //Create Cognito user pool and client for backend api
     if (!props?.useExistingOIDCProvider && !props?.targetToCNRegions) {
       const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
@@ -166,10 +168,12 @@ export class CloudFrontControlPlaneStack extends Stack {
       });
 
       issuer = cognito.oidcProps.issuer;
+      clientId = cognito.oidcProps.appClientId;
 
     } else {
       const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
       issuer = oidcParameters.oidcProvider.valueAsString;
+      clientId = oidcParameters.oidcClientId.valueAsString;
     }
 
     const authFunction = new NodejsFunction(this, 'AuthorizerFunction', {
@@ -227,6 +231,15 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
       behaviorOptions,
     );
+
+    // upload config to S3
+    const key = 'aws-exports.json';
+    const awsExports = {
+      oidc_provider: issuer,
+      oidc_client_id: clientId,
+      oidc_customer_domain: controlPlane.controlPlaneUrl,
+    };
+    controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));
 
     const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;
 

@@ -66,7 +66,7 @@ export interface NetworkParameters {
 
 export interface OIDCParameters {
   oidcProvider: CfnParameter;
-  oidcClientId?: CfnParameter;
+  oidcClientId: CfnParameter;
   paramLabels: any[];
   paramGroups: any[];
 }

@@ -41,8 +41,8 @@ export interface AddCfnNagItem {
   readonly rules_to_suppress: CfnNagSuppressRule[];
 }
 
-export function addCfnNagToStack(stack: Stack, cfnNagList: AddCfnNagItem[]) {
-  Aspects.of(stack).add(new AddCfnNagForCdkPath(cfnNagList));
+export function addCfnNagToStack(stack: Stack, cfnNagList: AddCfnNagItem[], typeList?: string[]) {
+  Aspects.of(stack).add(new AddCfnNagForCdkPath(cfnNagList, typeList));
 }
 
 export function addCfnNagForCustomResourceProvider(stack: Stack, name: string, pattern: string, serviceName?: string,
@@ -78,13 +78,14 @@ export function addCfnNagForLogRetention(stack: Stack, extraCfnNagList: AddCfnNa
   addCfnNagForCfnResource(stack, 'CDK built-in LogRetention', 'LogRetention[a-f0-9]+', 'logs', extraCfnNagList);
 }
 
-export function addCfnNagForCfnResource(stack: Stack, name: string, pattern: string, serviceName: string, extraCfnNagList: AddCfnNagItem[] = []) {
+export function addCfnNagForCfnResource(stack: Stack, name: string, pattern: string, serviceName?: string,
+  extraCfnNagList: AddCfnNagItem[] = [], typeList?: string[]) {
   const cfnNagListForLogRetention : AddCfnNagItem[]= [
-    ruleRolePolicyWithWildcardResources(`${pattern}/ServiceRole/DefaultPolicy/Resource`, name, serviceName),
+    ...(serviceName ? [ruleRolePolicyWithWildcardResources(`${pattern}/ServiceRole/DefaultPolicy/Resource`, name, serviceName)] : []),
     ruleForLambdaVPCAndReservedConcurrentExecutions(`${pattern}/Resource`, name),
     ... extraCfnNagList,
   ];
-  addCfnNagToStack(stack, cfnNagListForLogRetention);
+  addCfnNagToStack(stack, cfnNagListForLogRetention, typeList);
 }
 
 export function ruleRolePolicyWithWildcardResources(pattern: string, name: string, serviceName: string) : AddCfnNagItem {
@@ -123,19 +124,27 @@ export function ruleForLambdaVPCAndReservedConcurrentExecutions(pattern: string,
   };
 }
 
-
 class AddCfnNagForCdkPath implements IAspect {
   cfnNagList: AddCfnNagItem[];
-  constructor(cfnNagList: AddCfnNagItem[]) {
+  typeList: string[] | undefined;
+
+  constructor(cfnNagList: AddCfnNagItem[], typeList?: string[]) {
     this.cfnNagList = cfnNagList;
+    this.typeList = typeList;
   }
   visit(node: IConstruct): void {
     if (node instanceof CfnResource) {
       for (const nagConfig of this.cfnNagList) {
         for (const path of nagConfig.paths_endswith) {
           if (
-            node.node.path.endsWith(path) ||
-            node.node.path.match(new RegExp(path + '$'))
+            (
+              node.node.path.endsWith(path) ||
+              node.node.path.match(new RegExp(path + '$'))
+            ) &&
+            (
+              this.typeList === undefined
+              || this.typeList.includes(node.cfnResourceType)
+            )
           ) {
             (node as CfnResource).addMetadata('cfn_nag', {
               rules_to_suppress: nagConfig.rules_to_suppress,
