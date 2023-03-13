@@ -67,7 +67,7 @@
     "@aws-sdk/util-dynamodb": "^3.272.0",
     "@types/aws-lambda": "^8.10.110",
     "aws-cdk-lib": "^2.67.0",
-    "cdk-bootstrapless-synthesizer": "^2.2.7",
+    "cdk-bootstrapless-synthesizer": "^2.2.11",
     "cdk-nag": "^2.20.6",
     "constructs": "^10.0.5",
     "express": "^4.18.2",

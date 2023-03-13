@@ -83,12 +83,13 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'docs/site/',
     'frontend/amplify',
     'test-deploy*.sh',
+    'deployment/global-s3-assets/',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
     ...commonDeps,
     'cdk-nag@^2.20.6',
-    'cdk-bootstrapless-synthesizer@^2.2.7',
+    'cdk-bootstrapless-synthesizer@^2.2.11',
     'jsonwebtoken@^9.0.0',
     'jwks-rsa@^3.0.1',
     ...cdkAlphaModules,

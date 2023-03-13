@@ -88,5 +88,3 @@ export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${prefixes[0]}"
 
 update_dict "$TARGET/${prefixes[0]}"
 run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
-
-node $SRC_PATH/deployment/cdk-helper/index.js

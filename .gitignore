@@ -37,6 +37,7 @@ cdk.context.json
 docs/site/
 frontend/amplify
 test-deploy*.sh
+deployment/global-s3-assets/
 !/.projenrc.js
 /test-reports/
 junit.xml
