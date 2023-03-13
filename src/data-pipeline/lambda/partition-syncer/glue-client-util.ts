@@ -87,11 +87,12 @@ export class GlueClientUtil {
 
   public async addDailyPartitionsForSinkTable
   (s3Bucket: string, s3Prefix: string, databaseName: string, tableName: string, projectId: string, appIds: string, date: Date): Promise<void> {
-    const partitions = this.generateDailyPartitionsOfDay(s3Bucket, s3Prefix, projectId, appIds, date);
+    const partitions = this.generateDailyPartitionsOfDay(s3Bucket, s3Prefix, projectId, tableName, appIds, date);
     await this.addNewPartitions(databaseName, tableName, partitions);
   }
 
-  public generateDailyPartitionsOfDay(s3Bucket: string, s3Prefix: string, projectId: string, appIds: string, date: Date): PartitionInput[] {
+  public generateDailyPartitionsOfDay(s3Bucket: string, s3Prefix: string, projectId: string, tableName: string,
+    appIds: string, date: Date): PartitionInput[] {
     const partitions: PartitionInput[] = [];
 
     const year = date.getFullYear().toString();
@@ -107,7 +108,9 @@ export class GlueClientUtil {
           day,
         ],
         StorageDescriptor: {
-          Location: `s3://${s3Bucket}/${s3Prefix}/${projectId}/app_id=${appId}/partition_year=${year}/partition_month=${month}/partition_day=${day}/`,
+          Location: `s3://${s3Bucket}/${s3Prefix}/${projectId}/${tableName}/` +
+          `partition_app=${appId}/partition_year=${year}/partition_month=${month}/partition_day=${day}/`,
+
           InputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',
           OutputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',
           Compressed: false,

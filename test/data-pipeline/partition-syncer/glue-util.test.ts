@@ -85,11 +85,12 @@ describe('Glue catalog add partition test', () => {
     const s3Prefix = 'prefix1';
 
     const projectId = 'projectId1';
+    const tableName = 'test_table';
     const appIds = 'appId1,appId2';
 
     const date = new Date(2022, 0, 1);
 
-    const partitions: PartitionInput[] = glueClientUtil.generateDailyPartitionsOfDay(s3Bucket, s3Prefix, projectId, appIds, date);
+    const partitions: PartitionInput[] = glueClientUtil.generateDailyPartitionsOfDay(s3Bucket, s3Prefix, projectId, tableName, appIds, date);
 
     expect(partitions.length).toBe(2);
 
@@ -99,7 +100,7 @@ describe('Glue catalog add partition test', () => {
       }).length).toBe(1);
       expect(partitions.filter((partitionInput) => {
         return partitionInput.StorageDescriptor?.Location ==
-          `s3://bucket1/prefix1/${projectId}/app_id=${appId}/partition_year=2022/partition_month=01/partition_day=01/`;
+          `s3://bucket1/prefix1/${projectId}/${tableName}/partition_app=${appId}/partition_year=2022/partition_month=01/partition_day=01/`;
       }).length).toBe(1);
     });
   });
