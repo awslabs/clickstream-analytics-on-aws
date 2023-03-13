@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { StackRequestInputParameter } from '../common/sfn';
+import { Parameter, Stack, StackStatus } from '@aws-sdk/client-cloudformation';
+import { isEmpty } from '../common/utils';
 
 interface IngestionServerSizeProps {
   /**
@@ -214,32 +215,32 @@ export enum PipelineStatus {
 }
 
 export interface Pipeline {
-  id: string;
-  type: string;
-  prefix: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
-  projectId: string;
+  readonly projectId: string;
   pipelineId: string;
-  name: string;
-  description: string;
-  region: string;
-  dataCollectionSDK: string;
-  status: PipelineStatus | string;
-  tags: Tag[];
+  readonly name: string;
+  readonly description: string;
+  readonly region: string;
+  readonly dataCollectionSDK: string;
+  status: PipelineStatus;
+  readonly tags: Tag[];
 
-  ingestionServer: IngestionServer;
-  etl: ETL;
-  dataModel: DataModel;
-  ingestionServerRuntime: any;
-  etlRuntime: any;
-  dataModelRuntime: any;
+  readonly ingestionServer: IngestionServer;
+  readonly etl: ETL;
+  readonly dataModel: DataModel;
+  ingestionServerRuntime?: Stack;
+  etlRuntime?: Stack;
+  dataModelRuntime?: Stack;
 
-  version: string;
-  versionTag: string;
-  createAt: number;
-  updateAt: number;
-  operator: string;
-  deleted: boolean;
+  readonly version: string;
+  readonly versionTag: string;
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
 }
 
 export interface PipelineList {
@@ -250,11 +251,38 @@ export interface PipelineList {
 export interface StackParameter {
   readonly result: boolean;
   readonly message: string;
-  readonly parameters: StackRequestInputParameter[];
+  readonly parameters: Parameter[];
 }
 
-export function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
-  let parameters: StackRequestInputParameter[] = [];
+export interface InitStack {
+  readonly result: boolean;
+  readonly message: string;
+  readonly stack?: Stack;
+}
+
+export function getInitIngestionRuntime(pipeline: Pipeline): InitStack {
+  const ingestionStackParameters = getIngestionStackParameters(pipeline);
+  if (!ingestionStackParameters.result) {
+    return {
+      result: ingestionStackParameters.result,
+      message: ingestionStackParameters.message,
+    };
+  }
+  const stack: Stack = {
+    StackName: `clickstream-pipeline-${pipeline.pipelineId}`,
+    Parameters: ingestionStackParameters.parameters,
+    StackStatus: StackStatus.CREATE_IN_PROGRESS,
+    CreationTime: new Date(),
+  };
+  return {
+    result: true,
+    message: 'OK',
+    stack: stack,
+  };
+}
+
+function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
+  const parameters: Parameter[] = [];
   // VPC Information
   parameters.push({
     ParameterKey: 'VpcId',
@@ -430,4 +458,36 @@ export function getIngestionStackParameters(pipeline: Pipeline): StackParameter 
     message: '',
     parameters,
   };
+}
+
+export function getPipelineStatus(pipeline: Pipeline): PipelineStatus {
+  const runtimeStatus = [];
+  if (pipeline.ingestionServerRuntime?.StackStatus) {
+    runtimeStatus.push(pipeline.ingestionServerRuntime?.StackStatus);
+  }
+  if (pipeline.etlRuntime?.StackStatus) {
+    runtimeStatus.push(pipeline.etlRuntime?.StackStatus);
+  }
+  if (pipeline.dataModelRuntime?.StackStatus) {
+    runtimeStatus.push(pipeline.dataModelRuntime?.StackStatus);
+  }
+
+  if (isEmpty(runtimeStatus)) {
+    return pipeline.status;
+  }
+
+  // All status are COMPLETE by default
+  // In all stack status, if ANY stack FAILED, the result is FAILED
+  // If there are no failed stacks, and if any stack is being IN_PROGRESS, the result is being IN_PROGRESS
+  let result = 'COMPLETE';
+  for (let runtime of runtimeStatus) {
+    if (runtime.endsWith('FAILED')) {
+      result = 'FAILED';
+      break;
+    } else if (runtime.endsWith('IN_PROGRESS')) {
+      result = 'IN_PROGRESS';
+      break;
+    }
+  }
+  return `${pipeline.status.split('_')[0]}_${result}` as PipelineStatus;
 }

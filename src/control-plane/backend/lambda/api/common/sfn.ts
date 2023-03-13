@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Parameter } from '@aws-sdk/client-cloudformation';
 import { SFNClient, StartExecutionCommand, StartExecutionCommandOutput } from '@aws-sdk/client-sfn';
 import { stackActionStateMachineArn } from '../common/constants';
 
@@ -23,14 +24,10 @@ export interface StackRequest {
 }
 export interface StackRequestInput {
   readonly Action: string;
-  readonly StackName: string;
+  readonly StackName: string | undefined;
   readonly TemplateURL: string;
-  readonly Parameters: StackRequestInputParameter[];
+  readonly Parameters: Parameter[] | undefined;
 
-}
-export interface StackRequestInputParameter {
-  readonly ParameterKey: string;
-  readonly ParameterValue: string;
 }
 export interface StackRequestCallback {
   readonly TableName: string;

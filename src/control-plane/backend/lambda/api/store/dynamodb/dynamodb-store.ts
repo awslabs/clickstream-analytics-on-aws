@@ -29,6 +29,7 @@ import { isEmpty } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
 import {
+  getPipelineStatus,
   Pipeline,
   PipelineList,
   PipelineStatus,
@@ -382,7 +383,7 @@ export class DynamoDbStore implements ClickStreamStore {
         description: pipeline.description,
         region: pipeline.region,
         dataCollectionSDK: pipeline.dataCollectionSDK,
-        status: pipeline.status ?? PipelineStatus.CREATE_COMPLETE,
+        status: pipeline.status ?? PipelineStatus.CREATE_IN_PROGRESS,
         tags: pipeline.tags ?? [],
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
@@ -413,6 +414,7 @@ export class DynamoDbStore implements ClickStreamStore {
       return undefined;
     }
     const pipeline: Pipeline = result.Item as Pipeline;
+    pipeline.status = getPipelineStatus(pipeline);
     return !pipeline.deleted ? pipeline : undefined;
   };
 
@@ -502,7 +504,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
-              ':status': { S: pipeline.status },
+              ':status': { S: PipelineStatus.UPDATE_IN_PROGRESS },
               ':tags': marshallPipeline.tags,
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
@@ -555,9 +557,13 @@ export class DynamoDbStore implements ClickStreamStore {
           type: pipelines[index].type,
         },
         // Define expressions for the new or updated attributes
-        UpdateExpression: 'SET deleted= :d',
+        UpdateExpression: 'SET deleted= :d, #status =:status',
+        ExpressionAttributeNames: {
+          '#status': 'status',
+        },
         ExpressionAttributeValues: {
           ':d': true,
+          ':status': PipelineStatus.DELETE_IN_PROGRESS,
         },
         ReturnValues: 'ALL_NEW',
       });

@@ -13,25 +13,13 @@
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  ScanCommand,
-  QueryCommand,
-  UpdateCommand, GetCommand, GetCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import {
-  MOCK_PIPELINE_ID,
-  MOCK_PROJECT_ID,
-  MOCK_TOKEN,
-  pipelineExistedMock,
-  projectExistedMock,
-  tokenMock,
-} from './ddb-mock';
+import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
+import { getInitIngestionRuntime, getPipelineStatus, Pipeline, PipelineStatus } from '../../model/pipeline';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -45,7 +33,10 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: { name: 'Templates', data: '{"ingestion": "xxx"}' },
+      Item: {
+        name: 'Templates',
+        data: '{"ingestion": "xxx"}',
+      },
     });
     sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
@@ -186,12 +177,18 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ message: 'Add Pipeline Error, templates not found in dictionary.', success: false });
+    expect(res.body).toEqual({
+      message: 'Add Pipeline Error, templates not found in dictionary.',
+      success: false,
+    });
   });
   it('Create pipeline with mock error', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: { name: 'Templates', data: '{"ingestion": "xxx"}' },
+      Item: {
+        name: 'Templates',
+        data: '{"ingestion": "xxx"}',
+      },
     });
     sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
@@ -913,6 +910,313 @@ describe('Pipeline test', () => {
         },
       ],
     });
+  });
+  it('Pipeline status', async () => {
+    // Init
+    const pipeline1 = {
+      id: MOCK_PROJECT_ID,
+      prefix: 'PIPELINE',
+      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
+      projectId: MOCK_PROJECT_ID,
+      pipelineId: MOCK_PIPELINE_ID,
+      name: 'Pipeline-01',
+      description: 'Description of Pipeline-01',
+      region: 'us-east-1',
+      dataCollectionSDK: 'Clickstream SDK',
+      status: PipelineStatus.CREATE_IN_PROGRESS,
+      tags: [
+        {
+          key: 'name',
+          value: 'clickstream',
+        },
+      ],
+      ingestionServer: {
+        network: {
+          vpcId: 'vpc-0ba32b04ccc029088',
+          publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+          privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+        },
+        size: {
+          serverMin: 2,
+          serverMax: 4,
+          warmPoolSize: 1,
+          scaleOnCpuUtilizationPercent: 50,
+        },
+        domain: {
+          hostedZoneId: 'Z000000000000000000E',
+          hostedZoneName: 'fake.test.dev.com',
+          recordName: 'click',
+        },
+        loadBalancer: {
+          serverEndpointPath: '/collect',
+          serverCorsOrigin: '*',
+          protocol: 'HTTPS',
+          enableApplicationLoadBalancerAccessLog: true,
+          logS3Bucket: {
+            name: '012345678912-test',
+            prefix: 'logs',
+          },
+          notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+        },
+        sinkType: 's3',
+        sinkS3: {
+          s3DataBucket: {
+            name: '012345678912-test',
+            prefix: 'test',
+          },
+          s3BatchMaxBytes: 50,
+          s3BatchTimeout: 30,
+        },
+        sinkKafka: {
+          selfHost: false,
+          kafkaBrokers: 'test1,test2,test3',
+          kafkaTopic: 't1',
+          mskClusterName: 'mskClusterName',
+          mskTopic: 'mskTopic',
+          mskSecurityGroupId: 'sg-0000000000002',
+        },
+        sinkKinesis: {
+          kinesisStreamMode: 'ON_DEMAND',
+          kinesisShardCount: 3,
+          kinesisDataS3Bucket: {
+            name: '012345678912-test',
+            prefix: 'kinesis',
+          },
+        },
+      },
+      etl: {
+        appIds: ['appId1', 'appId2'],
+        sourceS3Bucket: {
+          name: '012345678912-test',
+          prefix: 'source',
+        },
+        sinkS3Bucket: {
+          name: '012345678912-test',
+          prefix: 'sink',
+        },
+      },
+      dataModel: {},
+      version: '162321434322',
+      versionTag: 'latest',
+      createAt: 162321434322,
+      updateAt: 162321434322,
+      operator: '',
+      deleted: false,
+    };
+    const init1 = getInitIngestionRuntime(pipeline1 as Pipeline);
+    console.log(JSON.stringify(init1.stack?.Parameters));
+    expect(init1.result).toEqual(true);
+    expect(init1.message).toEqual('OK');
+    expect(init1.stack?.StackName).toEqual(`clickstream-pipeline-${MOCK_PIPELINE_ID}`);
+    expect(init1.stack?.StackStatus).toEqual(PipelineStatus.CREATE_IN_PROGRESS);
+    expect(init1.stack?.Parameters).toEqual([
+      {
+        ParameterKey: 'VpcId',
+        ParameterValue: 'vpc-0ba32b04ccc029088',
+      },
+      {
+        ParameterKey: 'PublicSubnetIds',
+        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+      },
+      {
+        ParameterKey: 'PrivateSubnetIds',
+        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+      },
+      {
+        ParameterKey: 'HostedZoneId',
+        ParameterValue: 'Z000000000000000000E',
+      },
+      {
+        ParameterKey: 'HostedZoneName',
+        ParameterValue: 'fake.test.dev.com',
+      },
+      {
+        ParameterKey: 'RecordName',
+        ParameterValue: 'click',
+      },
+      {
+        ParameterKey: 'Protocol',
+        ParameterValue: 'HTTPS',
+      },
+      {
+        ParameterKey: 'ServerEndpointPath',
+        ParameterValue: '/collect',
+      },
+      {
+        ParameterKey: 'ServerCorsOrigin',
+        ParameterValue: '*',
+      },
+      {
+        ParameterKey: 'ServerMax',
+        ParameterValue: '4',
+      },
+      {
+        ParameterKey: 'ServerMin',
+        ParameterValue: '2',
+      },
+      {
+        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+        ParameterValue: '50',
+      },
+      {
+        ParameterKey: 'WarmPoolSize',
+        ParameterValue: '1',
+      },
+      {
+        ParameterKey: 'NotificationsTopicArn',
+        ParameterValue: 'arn:aws:sns:us-east-1:012345678912:test',
+      },
+      {
+        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+        ParameterValue: 'Yes',
+      },
+      {
+        ParameterKey: 'LogS3Bucket',
+        ParameterValue: '012345678912-test',
+      },
+      {
+        ParameterKey: 'LogS3Prefix',
+        ParameterValue: 'logs',
+      },
+      {
+        ParameterKey: 'S3DataBucket',
+        ParameterValue: '012345678912-test',
+      },
+      {
+        ParameterKey: 'S3DataPrefix',
+        ParameterValue: 'test',
+      },
+      {
+        ParameterKey: 'S3BatchMaxBytes',
+        ParameterValue: '50',
+      },
+      {
+        ParameterKey: 'S3BatchTimeout',
+        ParameterValue: '30',
+      },
+    ]);
+
+    // Init error
+    const pipeline2 = {
+      id: MOCK_PROJECT_ID,
+      prefix: 'PIPELINE',
+      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
+      projectId: MOCK_PROJECT_ID,
+      pipelineId: MOCK_PIPELINE_ID,
+      name: 'Pipeline-01',
+      description: 'Description of Pipeline-01',
+      region: 'us-east-1',
+      dataCollectionSDK: 'Clickstream SDK',
+      status: PipelineStatus.CREATE_IN_PROGRESS,
+      tags: [
+        {
+          key: 'name',
+          value: 'clickstream',
+        },
+      ],
+      ingestionServer: {
+        network: {
+          vpcId: 'vpc-0ba32b04ccc029088',
+          publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+          privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+        },
+        size: {
+          serverMin: 2,
+          serverMax: 4,
+          warmPoolSize: 1,
+          scaleOnCpuUtilizationPercent: 50,
+        },
+        domain: {
+          hostedZoneId: 'Z000000000000000000E',
+          hostedZoneName: 'fake.test.dev.com',
+          recordName: 'click',
+        },
+        loadBalancer: {
+          serverEndpointPath: '/collect',
+          serverCorsOrigin: '*',
+          protocol: 'HTTPS',
+          enableApplicationLoadBalancerAccessLog: true,
+          logS3Bucket: {
+            name: '012345678912-test',
+            prefix: 'logs',
+          },
+          notificationsTopicArn: 'arn:aws:sns:us-east-1:012345678912:test',
+        },
+        sinkType: 's3',
+        sinkKafka: {
+          selfHost: false,
+          kafkaBrokers: 'test1,test2,test3',
+          kafkaTopic: 't1',
+          mskClusterName: 'mskClusterName',
+          mskTopic: 'mskTopic',
+          mskSecurityGroupId: 'sg-0000000000002',
+        },
+        sinkKinesis: {
+          kinesisStreamMode: 'ON_DEMAND',
+          kinesisShardCount: 3,
+          kinesisDataS3Bucket: {
+            name: '012345678912-test',
+            prefix: 'kinesis',
+          },
+        },
+      },
+      etl: {
+        appIds: ['appId1', 'appId2'],
+        sourceS3Bucket: {
+          name: '012345678912-test',
+          prefix: 'source',
+        },
+        sinkS3Bucket: {
+          name: '012345678912-test',
+          prefix: 'sink',
+        },
+      },
+      dataModel: {},
+      version: '162321434322',
+      versionTag: 'latest',
+      createAt: 162321434322,
+      updateAt: 162321434322,
+      operator: '',
+      deleted: false,
+    };
+    const init2 = getInitIngestionRuntime(pipeline2 as Pipeline);
+    expect(init2.result).toEqual(false);
+    expect(init2.message).toEqual('S3 Sink must have s3DataBucket.');
+
+    // Get status
+    const pipeline3 = {
+      status: PipelineStatus.CREATE_IN_PROGRESS,
+      ingestionServerRuntime: {
+        StackStatus: 'CREATE_COMPLETE',
+      },
+      etlRuntime: {
+        StackStatus: 'CREATE_COMPLETE',
+      },
+      dataModelRuntime: {
+        StackStatus: 'CREATE_COMPLETE',
+      },
+    };
+    expect(getPipelineStatus(pipeline3 as Pipeline)).toEqual(PipelineStatus.CREATE_COMPLETE);
+    const pipeline4 = {
+      status: PipelineStatus.UPDATE_IN_PROGRESS,
+      ingestionServerRuntime: {
+        StackStatus: 'UPDATE_COMPLETE',
+      },
+      etlRuntime: {
+        StackStatus: 'UPDATE_IN_PROGRESS',
+      },
+    };
+    expect(getPipelineStatus(pipeline4 as Pipeline)).toEqual(PipelineStatus.UPDATE_IN_PROGRESS);
+    const pipeline5 = {
+      status: PipelineStatus.DELETE_IN_PROGRESS,
+      ingestionServerRuntime: {
+        StackStatus: 'DELETE_FAILED',
+      },
+      etlRuntime: {
+        StackStatus: 'DELETE_COMPLETE',
+      },
+    };
+    expect(getPipelineStatus(pipeline5 as Pipeline)).toEqual(PipelineStatus.DELETE_FAILED);
   });
 
   afterAll((done) => {

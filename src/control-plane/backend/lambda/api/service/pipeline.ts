@@ -16,7 +16,7 @@ import { awsUrlSuffix, clickStreamTableName } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { StackManager } from '../common/sfn';
 import { tryToJson } from '../common/utils';
-import { getIngestionStackParameters, Pipeline } from '../model/pipeline';
+import { getInitIngestionRuntime, Pipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -37,25 +37,27 @@ export class PipelineServ {
   public async add(req: any, res: any, next: any) {
     try {
       // create stack
+      const { projectId } = req.body;
+      req.body.id = projectId;
+      req.body.pipelineId = uuidv4();
       let pipeline: Pipeline = req.body;
-      pipeline.id = pipeline.projectId;
-      pipeline.pipelineId = uuidv4();
       // Get TemplateURL from dictionary
       const templateURL = await this.getTemplateUrl(pipeline, `ingestion_${pipeline.ingestionServer.sinkType}`);
       if (!templateURL) {
         return res.status(404).json(new ApiFail('Add Pipeline Error, templates not found in dictionary.'));
       }
       // Create stack
-      const stackParameters = getIngestionStackParameters(pipeline);
-      if (!stackParameters.result) {
-        return res.status(400).json(new ApiFail(stackParameters.message));
+      const initIngestionRuntime = getInitIngestionRuntime(pipeline);
+      if (!initIngestionRuntime.result) {
+        return res.status(400).json(new ApiFail(initIngestionRuntime.message));
       }
+      pipeline.ingestionServerRuntime = initIngestionRuntime.stack;
       await stackManager.execute({
         Input: {
           Action: 'Create',
-          StackName: `clickstream-pipeline-${pipeline.pipelineId}`,
+          StackName: initIngestionRuntime.stack?.StackName,
           TemplateURL: templateURL,
-          Parameters: stackParameters.parameters,
+          Parameters: initIngestionRuntime.stack?.Parameters,
         },
         Callback: {
           TableName: clickStreamTableName ?? '',
@@ -87,8 +89,9 @@ export class PipelineServ {
 
   public async update(req: any, res: any, next: any) {
     try {
+      const { projectId } = req.body;
+      req.body.id = projectId;
       let pipeline: Pipeline = req.body;
-      pipeline.id = pipeline.projectId;
       // Read current version from db
       const curPipeline = await store.getPipeline(pipeline.id, pipeline.pipelineId);
       if (!curPipeline) {
