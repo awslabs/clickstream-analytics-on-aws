@@ -10,18 +10,25 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Header } from '@cloudscape-design/components';
-import InfoLink from 'components/common/InfoLink';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 
-const PipelineHeader: React.FC = () => {
-  const { t } = useTranslation();
-  return (
-    <Header variant="h1" info={<InfoLink />}>
-      {t('pipeline:pipelines')}
-    </Header>
-  );
+import { apiRequest } from 'ts/request';
+
+const getPluginList = async (params: {
+  pageNumber: number;
+  pageSize: number;
+}) => {
+  const result: any = await apiRequest('get', '/plugin', params);
+  return result;
 };
 
-export default PipelineHeader;
+const createPlugin = async (data: IPlugin) => {
+  const result: any = await apiRequest('post', `/plugin`, data);
+  return result;
+};
+
+const deletePlugin = async (id: string) => {
+  const result: any = await apiRequest('delete', `/plugin/${id}`);
+  return result;
+};
+
+export { getPluginList, createPlugin, deletePlugin };

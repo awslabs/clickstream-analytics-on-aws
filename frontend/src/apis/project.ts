@@ -27,11 +27,7 @@ const createProject = async (params: IProject) => {
 };
 
 const updateProject = async (params: IProject) => {
-  const result: any = await apiRequest(
-    'put',
-    `/project/${params.projectId}`,
-    params
-  );
+  const result: any = await apiRequest('put', `/project/${params.id}`, params);
   return result;
 };
 

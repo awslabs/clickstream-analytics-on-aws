@@ -119,7 +119,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
       <ColumnLayout columns={2} variant="text-grid">
         <div>
           <Box variant="awsui-key-label">{t('project:split.id')}</Box>
-          <div className="mb-10">{project.projectId}</div>
+          <div className="mb-10">{project.id}</div>
           <Box variant="awsui-key-label">{t('project:split.name')}</Box>
           <div className="mb-10">{project.name}</div>
           <Box variant="awsui-key-label">{t('project:split.created')}</Box>

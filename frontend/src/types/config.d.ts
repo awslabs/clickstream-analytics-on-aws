@@ -37,8 +37,12 @@ declare global {
     alertType: AlertType;
   }
 
-  interface AmplifyConfigType {
-    aws_project_region: string;
+  interface ConfigType {
+    oidc_provider: string;
+    oidc_client_id: string;
+    oidc_customer_domain: string;
+    oidc_logout_endpoint: string;
+    project_region: string;
     version: string;
   }
 }

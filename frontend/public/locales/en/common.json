@@ -1,17 +1,22 @@
 {
   "name": "Clickstream Analytics on AWS",
   "info": "Info",
+  "oops": "Oops...",
+  "welcome": "Welcome to Clickstream Analytics on AWS",
   "breadCrumb": {
     "name": "Clickstream Analytics",
     "pipelines": "Pipelines",
     "createPipeline": "Create Pipeline",
     "home": "Home",
-    "projects": "Projects"
+    "projects": "Projects",
+    "plugins": "Plugins",
+    "createPlugin": "Create Plugin"
   },
   "nav": {
     "home": "Home",
     "projects": "Projects",
     "pipelines": "Pipelines",
+    "plugin": "Plugin",
     "analytics": "Analytics",
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
@@ -210,7 +215,9 @@
     "addPipeline": "Add pipeline",
     "addApplication": "Add Application",
     "complete": "Complete",
-    "downloadJSON": "Download the config json file"
+    "downloadJSON": "Download the config json file",
+    "signin": "Sign In",
+    "chooseFile": "Choose file"
   },
   "item": "item",
   "items": "items",

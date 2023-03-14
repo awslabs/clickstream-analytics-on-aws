@@ -76,7 +76,7 @@ export class SolutionCognito extends Construct {
           authorizationCodeGrant: true,
           implicitCodeGrant: true,
         },
-        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL],
+        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
         callbackUrls: props.callbackUrls,
       },
     });

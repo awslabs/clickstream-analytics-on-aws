@@ -11,36 +11,81 @@
  *  and limitations under the License.
  */
 
+import { Button, Spinner } from '@cloudscape-design/components';
+import Axios from 'axios';
 import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
+import { WebStorageStateStore } from 'oidc-client-ts';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import PipelineList from 'pages/pipelines/PipelineList';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
+import PluginList from 'pages/plugins/PluginList';
+import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AuthProviderProps, useAuth } from 'react-oidc-context';
+import { AuthProvider } from 'react-oidc-context';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
 
-interface SignedInPageProps {
-  user: any;
-  signOut: any;
-}
+const LoginCallback: React.FC = () => {
+  useEffect(() => {
+    const baseUrl = '/';
+    window.location.href = baseUrl;
+  }, []);
+  return (
+    <div className="page-loading">
+      <Spinner />
+    </div>
+  );
+};
 
-const App: React.FC = () => {
-  const SignedInPage: React.FC<SignedInPageProps> = ({
-    user,
-    signOut,
-  }: SignedInPageProps) => {
+const SignedInPage: React.FC = () => {
+  const auth = useAuth();
+  const { t } = useTranslation();
+  useEffect(() => {
+    // the `return` is important - addAccessTokenExpiring() returns a cleanup function
+    return auth?.events?.addAccessTokenExpiring((event) => {
+      auth.signinSilent();
+    });
+  }, [auth.events, auth.signinSilent]);
+
+  if (auth.isLoading) {
+    return (
+      <div className="page-loading">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (auth.error) {
+    return (
+      <div className="text-center pd-20">
+        {t('oops')} {auth.error.message}
+      </div>
+    );
+  }
+
+  if (auth.isAuthenticated) {
     return (
       <Router>
         <div id="b">
-          <Header user={user} signOut={signOut} />
+          <Header
+            user={auth.user}
+            signOut={() => {
+              auth.removeUser();
+              localStorage.removeItem(PROJECT_CONFIG_JSON);
+            }}
+          />
           <Suspense fallback={null}>
             <div id="app">
               <Routes>
+                <Route path="/signin" element={<LoginCallback />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/project/detail/:id" element={<ProjectDetail />} />
@@ -58,6 +103,8 @@ const App: React.FC = () => {
                   path="/project/:id/application/create"
                   element={<CreateApplication />}
                 />
+                <Route path="/plugins" element={<PluginList />} />
+                <Route path="/plugins/create" element={<CreatePlugin />} />
               </Routes>
             </div>
           </Suspense>
@@ -66,11 +113,94 @@ const App: React.FC = () => {
         <Footer />
       </Router>
     );
+  }
+
+  return (
+    <div className="oidc-login">
+      <div>
+        <div className="title">{t('welcome')}</div>
+      </div>
+      {
+        <div>
+          <Button
+            variant="primary"
+            onClick={() => {
+              auth.signinRedirect();
+            }}
+          >
+            {t('button.signin')}
+          </Button>
+        </div>
+      }
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [oidcConfig, setOidcConfig] = useState<AuthProviderProps>();
+
+  const initAuthentication = (configData: ConfigType) => {
+    const settings = {
+      userStore: new WebStorageStateStore({ store: window.localStorage }),
+      authority: configData.oidc_provider,
+      scope: 'openid email profile',
+      automaticSilentRenew: true,
+      client_id: configData.oidc_client_id,
+      redirect_uri: configData.oidc_customer_domain,
+    };
+    setOidcConfig(settings);
   };
+
+  const getConfig = async () => {
+    const timeStamp = new Date().getTime();
+    setLoadingConfig(true);
+    // Get config
+    const res = await Axios.get(`${CONFIG_URL}?timestamp=${timeStamp}`);
+    const configData: ConfigType = res.data;
+    // Get oidc logout url from openid configuration
+    await Axios.get(
+      `${configData.oidc_provider}/.well-known/openid-configuration`
+    ).then((oidcRes) => {
+      configData.oidc_logout_endpoint = oidcRes.data.end_session_endpoint;
+      localStorage.setItem(PROJECT_CONFIG_JSON, JSON.stringify(configData));
+      initAuthentication(configData);
+      setLoadingConfig(false);
+    });
+  };
+
+  const setLocalStorageAfterLoad = async () => {
+    if (localStorage.getItem(PROJECT_CONFIG_JSON)) {
+      const configData = JSON.parse(
+        localStorage.getItem(PROJECT_CONFIG_JSON) || ''
+      );
+      initAuthentication(configData);
+      setLoadingConfig(false);
+    } else {
+      await getConfig();
+    }
+  };
+
+  useEffect(() => {
+    const { type } = window.performance.getEntriesByType('navigation')[0];
+    if (type === 'reload') {
+      getConfig();
+    } else {
+      setLocalStorageAfterLoad();
+    }
+  }, []);
 
   return (
     <div className="App">
-      <SignedInPage signOut={null} user={null} />
+      {loadingConfig ? (
+        <div className="page-loading">
+          <Spinner />
+        </div>
+      ) : (
+        <AuthProvider {...oidcConfig}>
+          <SignedInPage />
+        </AuthProvider>
+      )}
     </div>
   );
 };

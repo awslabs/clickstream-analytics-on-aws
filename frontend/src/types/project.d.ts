@@ -20,6 +20,7 @@ declare global {
   }
 
   interface IProject {
+    id?: string;
     name: string;
     platform: string;
     environment: string;
@@ -27,7 +28,6 @@ declare global {
     tableName: string;
     region: string;
     description: string;
-    projectId?: string;
     updateAt?: number;
     operator?: string;
     deleted?: boolean;

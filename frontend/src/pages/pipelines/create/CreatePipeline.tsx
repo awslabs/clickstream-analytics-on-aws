@@ -75,19 +75,37 @@ const Content: React.FC = () => {
         serverCorsOrigin: '',
         protocol: ProtocalType.HTTPS,
         enableApplicationLoadBalancerAccessLog: true,
-        logS3Bucket: '',
-        logS3Prefix: '',
+        logS3Bucket: {
+          name: '',
+          prefix: '',
+        },
         notificationsTopicArn: '',
       },
       sinkType: SinkType.S3,
       sinkS3: {
-        s3DataBucket: '',
-        s3DataPrefix: '',
+        s3DataBucket: {
+          name: '',
+          prefix: '',
+        },
         s3BufferSize: '10',
         s3BufferInterval: '300',
       },
-      sinkMSK: '',
-      sinkKDS: '',
+      sinkKafka: {
+        selfHost: false,
+        kafkaBrokers: '',
+        kafkaTopic: '',
+        mskClusterName: '',
+        mskTopic: '',
+        mskSecurityGroupId: '',
+      },
+      sinkKinesis: {
+        kinesisStreamMode: 'ON_DEMAND',
+        kinesisShardCount: '',
+        kinesisDataS3Bucket: {
+          name: '',
+          prefix: '',
+        },
+      },
     },
     etl: {},
     dataModel: {},
@@ -137,7 +155,7 @@ const Content: React.FC = () => {
       }
     }
     if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
-      if (!pipelineInfo.ingestionServer.sinkS3.s3DataBucket.trim()) {
+      if (!pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name.trim()) {
         setBufferS3BucketEmptyError(true);
         return false;
       }
@@ -185,6 +203,9 @@ const Content: React.FC = () => {
         if (detail.requestedStepIndex === 1 && !validateBasicInfo()) {
           return;
         }
+        if (detail.requestedStepIndex === 2 && !validateIngestionServer()) {
+          return;
+        }
         setActiveStepIndex(detail.requestedStepIndex);
       }}
       onSubmit={() => {
@@ -200,7 +221,6 @@ const Content: React.FC = () => {
       }}
       isLoadingNextStep={loadingCreate}
       activeStepIndex={activeStepIndex}
-      // allowSkipTo
       steps={[
         {
           title: t('pipeline:create.basicInfo'),
@@ -451,7 +471,10 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3DataBucket: bucket,
+                        s3DataBucket: {
+                          ...prev.ingestionServer.sinkS3.s3DataBucket,
+                          name: bucket,
+                        },
                       },
                     },
                   };
@@ -465,7 +488,10 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3DataPrefix: prefix,
+                        s3DataBucket: {
+                          ...prev.ingestionServer.sinkS3.s3DataBucket,
+                          prefix: prefix,
+                        },
                       },
                     },
                   };

@@ -3,6 +3,7 @@
   "basic": "Basic information",
   "name": "Name",
   "desc": "Description",
+  "status": "Status",
   "creationMethod": "Creation method",
   "lastEditDate": "Last edit date",
   "tagDesc": "Those tags will propogated to all the resource in this pipeline",

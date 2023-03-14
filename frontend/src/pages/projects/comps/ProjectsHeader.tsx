@@ -10,8 +10,6 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 import { Button, Header, SpaceBetween } from '@cloudscape-design/components';
 import { deleteProject } from 'apis/project';
 import InfoLink from 'components/common/InfoLink';
@@ -38,9 +36,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
   const confirmDeleteProject = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deleteProject(
-        project?.projectId || ''
-      );
+      const resData: ApiResponse<null> = await deleteProject(project?.id || '');
       if (resData.success) {
         refreshPage();
         setLoadingDelete(false);
@@ -66,15 +62,15 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
           <SpaceBetween size="xs" direction="horizontal">
             <Button
               loading={loadingDelete}
-              disabled={!project?.projectId}
+              disabled={!project?.id}
               onClick={confirmDeleteProject}
             >
               {t('button.delete')}
             </Button>
             <Button
-              disabled={!project?.projectId}
+              disabled={!project?.id}
               onClick={() => {
-                navigate(`/project/detail/${project?.projectId}`);
+                navigate(`/project/detail/${project?.id}`);
               }}
             >
               {t('button.viewDetails')}

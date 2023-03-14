@@ -37,8 +37,10 @@ const getHostedZoneList = async () => {
   return result;
 };
 
-const getS3BucketList = async () => {
-  const result: any = await apiRequest('get', `/env/s3/buckets`);
+const getS3BucketList = async (region?: string) => {
+  const result: any = await apiRequest('get', `/env/s3/buckets`, {
+    region: region,
+  });
   return result;
 };
 

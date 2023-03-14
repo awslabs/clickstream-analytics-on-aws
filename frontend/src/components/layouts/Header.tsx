@@ -12,8 +12,9 @@
  */
 
 import { TopNavigation } from '@cloudscape-design/components';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PROJECT_CONFIG_JSON } from 'ts/const';
 
 interface IHeaderProps {
   user: any;
@@ -31,6 +32,8 @@ const LANGUAGE_ITEMS = [
 const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
+  const [fullLogoutUrl, setFullLogoutUrl] = useState('');
+  const [logoutEndpoint, setLogoutEndpoint] = useState('');
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
@@ -38,6 +41,13 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
       changeLanguage('zh');
     }
+    const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
+      ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
+      : {};
+    setLogoutEndpoint(configJSONObj.oidc_logout_endpoint);
+    setFullLogoutUrl(
+      `${configJSONObj.oidc_logout_endpoint}?id_token_hint=${user.id_token}&post_logout_redirect_uri=${configJSONObj.oidc_customer_domain}`
+    );
   }, []);
 
   return (
@@ -92,12 +102,16 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           },
           {
             type: 'menu-dropdown',
-            text: user?.attributes?.email || '',
-            description: user?.attributes?.email,
+            text: user?.profile?.email || '',
+            description: user?.profile?.email,
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
-                signOut && signOut();
+                if (logoutEndpoint) {
+                  window.location.href = fullLogoutUrl;
+                } else {
+                  signOut && signOut();
+                }
               }
             },
             items: [

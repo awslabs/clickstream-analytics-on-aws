@@ -10,18 +10,24 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Header } from '@cloudscape-design/components';
-import InfoLink from 'components/common/InfoLink';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 
-const PipelineHeader: React.FC = () => {
-  const { t } = useTranslation();
-  return (
-    <Header variant="h1" info={<InfoLink />}>
-      {t('pipeline:pipelines')}
-    </Header>
-  );
-};
-
-export default PipelineHeader;
+export {};
+declare global {
+  interface IPlugin {
+    id?: string;
+    name: string;
+    description: string;
+    pluginType: string;
+    mainFunction: string;
+    jarFile: string;
+    dependencyFiles: string[];
+    prefix?: string;
+    operator?: string;
+    deleted?: boolean;
+    builtIn?: boolean;
+    status?: string;
+    bindCount?: number;
+    createAt?: number;
+    updateAt?: string;
+  }
+}

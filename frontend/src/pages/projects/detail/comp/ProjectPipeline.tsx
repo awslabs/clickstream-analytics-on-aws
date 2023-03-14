@@ -20,10 +20,10 @@ import {
   Link,
   Pagination,
   SpaceBetween,
-  StatusIndicator,
   Table,
   TextFilter,
 } from '@cloudscape-design/components';
+import PipelineStatus from 'components/pipeline/PipelineStatus';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -89,7 +89,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.status')}
               </Box>
               <div>
-                <StatusIndicator>{pipelineInfo.status}</StatusIndicator>
+                <PipelineStatus status={pipelineInfo.status} />
               </div>
             </div>
           </SpaceBetween>

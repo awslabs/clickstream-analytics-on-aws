@@ -13,8 +13,22 @@
 
 import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { reject } from 'lodash';
-import { COMMON_ALERT_TYPE } from './const';
+import { User } from 'oidc-client-ts';
+import { COMMON_ALERT_TYPE, PROJECT_CONFIG_JSON } from './const';
 import { alertMsg, generateStr } from './utils';
+
+function getUser() {
+  const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
+    ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
+    : {};
+  const oidcStorage = localStorage.getItem(
+    `oidc.user:${configJSONObj.oidc_provider}:${configJSONObj.oidc_client_id}`
+  );
+  if (!oidcStorage) {
+    return null;
+  }
+  return User.fromStorageString(oidcStorage);
+}
 
 const BASE_URL = '/api';
 // define reqeustId key
@@ -32,9 +46,11 @@ const axios = Axios.create({
  */
 axios.interceptors.request.use(
   (config) => {
+    const user = getUser();
+    const token = user?.access_token;
     config.headers = {
       'Content-Type': 'application/json',
-      // Authorization: token ? `Bearer ${token}` : undefined,
+      Authorization: token ? `Bearer ${token}` : undefined,
     };
     // set x-click-stream-request-id
     if (!config.headers[REQUEST_ID_KEY]) {

@@ -267,6 +267,7 @@ describe('CloudFrontS3PotalStack', () => {
       AllowedOAuthScopes: [
         'openid',
         'email',
+        'profile',
       ],
       ExplicitAuthFlows: [
         'ALLOW_USER_PASSWORD_AUTH',

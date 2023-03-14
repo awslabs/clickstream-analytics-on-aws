@@ -45,19 +45,37 @@ declare global {
         serverCorsOrigin: string;
         protocol: string;
         enableApplicationLoadBalancerAccessLog: boolean;
-        logS3Bucket: string;
-        logS3Prefix: string;
+        logS3Bucket: {
+          name: string;
+          prefix: string;
+        };
         notificationsTopicArn: string;
       };
       sinkType: string;
       sinkS3: {
-        s3DataBucket: string;
-        s3DataPrefix: string;
+        s3DataBucket: {
+          name: string;
+          prefix: string;
+        };
         s3BufferSize: string;
         s3BufferInterval: string;
       };
-      sinkMSK: any;
-      sinkKDS: any;
+      sinkKafka: {
+        selfHost: false;
+        kafkaBrokers: string;
+        kafkaTopic: string;
+        mskClusterName: string;
+        mskTopic: string;
+        mskSecurityGroupId: string;
+      };
+      sinkKinesis: {
+        kinesisStreamMode: 'ON_DEMAND';
+        kinesisShardCount: string;
+        kinesisDataS3Bucket: {
+          name: string;
+          prefix: string;
+        };
+      };
     };
     etl: any;
     dataModel: any;

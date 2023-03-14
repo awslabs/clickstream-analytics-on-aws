@@ -31,6 +31,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     { type: 'link', text: t('nav.home'), href: '/' },
     { type: 'link', text: t('nav.projects'), href: '/projects' },
     { type: 'link', text: t('nav.pipelines'), href: '/pipelines' },
+    { type: 'link', text: t('nav.plugin'), href: '/plugins' },
     { type: 'link', text: t('nav.analytics'), href: '#/analytics' },
     {
       text: t('nav.operation'),

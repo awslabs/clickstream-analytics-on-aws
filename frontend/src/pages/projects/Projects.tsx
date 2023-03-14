@@ -44,7 +44,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const CARD_DEFINITIONS = {
     header: (item: IProject) => (
       <div>
-        <Link fontSize="heading-m" href={`/project/detail/${item.projectId}`}>
+        <Link fontSize="heading-m" href={`/project/detail/${item.id}`}>
           {item.name}
         </Link>
       </div>
@@ -58,7 +58,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       {
         id: 'projectId',
         header: t('project:list.id'),
-        content: (item: IProject) => item.projectId,
+        content: (item: IProject) => item.id,
       },
       {
         id: 'projectPlatform',

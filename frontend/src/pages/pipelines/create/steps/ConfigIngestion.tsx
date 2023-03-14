@@ -380,9 +380,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               columns={1}
               items={[
                 {
-                  label: t('pipeline:create.bufferS3'),
-                  description: t('pipeline:create.bufferS3Desc'),
-                  value: SinkType.S3,
+                  label: t('pipeline:create.bufferKDS'),
+                  description: t('pipeline:create.bufferKDSDesc'),
+                  value: SinkType.KDS,
                 },
                 {
                   label: t('pipeline:create.bufferMSK'),
@@ -390,9 +390,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   value: SinkType.MSK,
                 },
                 {
-                  label: t('pipeline:create.bufferKDS'),
-                  description: t('pipeline:create.bufferKDSDesc'),
-                  value: SinkType.KDS,
+                  label: t('pipeline:create.bufferS3'),
+                  description: t('pipeline:create.bufferS3Desc'),
+                  value: SinkType.S3,
                 },
               ]}
             />

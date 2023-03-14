@@ -17,42 +17,46 @@ import {
   Button,
   ContentLayout,
   Header,
-  Link,
   Pagination,
   SpaceBetween,
   Table,
   TextFilter,
 } from '@cloudscape-design/components';
-import { deletePipeline, getPipelineList } from 'apis/pipeline';
+import { deletePlugin, getPluginList } from 'apis/plugin';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
-import PipelineHeader from './comps/PipelineHeader';
+import PluginHeader from './comps/PluginHeader';
 
 const Content: React.FC = () => {
   const { t } = useTranslation();
-  const [selectedItems, setSelectedItems] = useState<IPipeline[]>([]);
+  const navigate = useNavigate();
+  const [selectedItems, setSelectedItems] = useState<IPlugin[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [pipelineList, setPipelineList] = useState<IPipeline[]>([]);
+  const [pluginList, setPluginList] = useState<IPlugin[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
-  const listPipelines = async () => {
+  const redirectToCreatePage = () => {
+    navigate(`/plugins/create`);
+  };
+
+  const listPlugins = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
-        await getPipelineList({
+      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+        await getPluginList({
           pageNumber: currentPage,
           pageSize: pageSize,
         });
       if (success) {
-        setPipelineList(data.items);
+        setPluginList(data.items);
         setTotalCount(data.totalCount);
         setLoadingData(false);
       }
@@ -61,16 +65,15 @@ const Content: React.FC = () => {
     }
   };
 
-  const confirmDeletePipeline = async () => {
+  const confirmDeletePlugin = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deletePipeline(
-        selectedItems[0]?.pipelineId || '',
-        selectedItems[0].projectId || ''
+      const resData: ApiResponse<null> = await deletePlugin(
+        selectedItems[0]?.id || ''
       );
       if (resData.success) {
         setSelectedItems([]);
-        listPipelines();
+        listPlugins();
         setLoadingDelete(false);
       }
     } catch (error) {
@@ -79,7 +82,7 @@ const Content: React.FC = () => {
   };
 
   useEffect(() => {
-    listPipelines();
+    listPlugins();
   }, [currentPage]);
 
   return (
@@ -106,34 +109,22 @@ const Content: React.FC = () => {
         loading={loadingData}
         columnDefinitions={[
           {
-            id: 'id',
-            header: t('pipeline:list.id'),
-            cell: (e) => {
-              return (
-                <Link href={`/project/${e.projectId}/pipeline/${e.pipelineId}`}>
-                  {e.pipelineId}
-                </Link>
-              );
-            },
-            sortingField: 'alt',
-          },
-          {
             id: 'name',
-            header: t('pipeline:list.name'),
+            header: t('plugin:list.name'),
             cell: (e) => e.name,
             sortingField: 'name',
           },
           {
-            id: 'region',
-            header: t('pipeline:list.region'),
-            cell: (e) => e.region,
+            id: 'description',
+            header: t('plugin:list.desc'),
+            cell: (e) => e.description,
+            sortingField: 'desc',
           },
           {
-            id: 'status',
-            header: t('pipeline:list.status'),
-            cell: (e) => {
-              return <PipelineStatus status={e.status} />;
-            },
+            id: 'pluginType',
+            header: t('plugin:list.type'),
+            cell: (e) => e.pluginType,
+            sortingField: 'pluginType',
           },
           {
             id: 'created',
@@ -143,27 +134,27 @@ const Content: React.FC = () => {
             },
           },
         ]}
-        items={pipelineList}
-        loadingText={t('pipeline:list.loading') || 'Loading'}
+        items={pluginList}
+        loadingText={t('plugin:list.loading') || 'Loading'}
         selectionType="single"
         trackBy="name"
         empty={
           <Box textAlign="center" color="inherit">
-            <b>{t('pipeline:list.noPipeline')}</b>
+            <b>{t('plugin:list.noPlugin')}</b>
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('pipeline:list.noPipelineDisplay')}
+              {t('plugin:list.noPluginDisplay')}
             </Box>
           </Box>
         }
         filter={
           <TextFilter
-            filteringPlaceholder={t('pipeline:list.findPipeline') || ''}
+            filteringPlaceholder={t('plugin:list.findPlugin') || ''}
             filteringText=""
           />
         }
         header={
           <Header
-            description={t('pipeline:list.pipelineDesc')}
+            description={t('plugin:list.desc')}
             counter={
               selectedItems.length
                 ? '(' + selectedItems.length + `/${totalCount})`
@@ -175,15 +166,23 @@ const Content: React.FC = () => {
                   loading={loadingDelete}
                   disabled={selectedItems.length <= 0}
                   onClick={() => {
-                    confirmDeletePipeline();
+                    confirmDeletePlugin();
                   }}
                 >
                   {t('button.delete')}
                 </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    redirectToCreatePage();
+                  }}
+                >
+                  {t('button.create')}
+                </Button>
               </SpaceBetween>
             }
           >
-            {t('pipeline:list.pipelineList')}
+            {t('plugin:list.pluginList')}
           </Header>
         }
         pagination={
@@ -206,7 +205,7 @@ const Content: React.FC = () => {
   );
 };
 
-const PipelineList: React.FC = () => {
+const PluginList: React.FC = () => {
   const { t } = useTranslation();
   const breadcrumbItems = [
     {
@@ -214,22 +213,22 @@ const PipelineList: React.FC = () => {
       href: '/',
     },
     {
-      text: t('breadCrumb.pipelines'),
+      text: t('breadCrumb.plugins'),
       href: '/',
     },
   ];
   return (
     <AppLayout
       content={
-        <ContentLayout header={<PipelineHeader />}>
+        <ContentLayout header={<PluginHeader />}>
           <Content />
         </ContentLayout>
       }
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
-      navigation={<Navigation activeHref="/pipelines" />}
+      navigation={<Navigation activeHref="/plugins" />}
     />
   );
 };
 
-export default PipelineList;
+export default PluginList;

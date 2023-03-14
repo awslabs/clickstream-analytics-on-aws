@@ -1,0 +1,37 @@
+{
+  "plugins": "Plugins",
+  "list": {
+    "id": "Plugin ID",
+    "name": "Plugin name",
+    "desc": "Description",
+    "type": "Type",
+    "pluginList": "Plugin List",
+    "loading": "Loading resources",
+    "noPlugin": "No plugins",
+    "noPluginDisplay": "No plugins to display.",
+    "findPlugin": "Find your plugin",
+    "pipelineDesc": "All the clickstream analytics plugins in your AWS account."
+  },
+  "valid": {
+    "nameEmpty": "Please input plugin name",
+    "typeEmpty": "Please select plugin type",
+    "mainFuncEmpty": "Plase input main function class"
+  },
+  "create": {
+    "createPlugin": "Create Plugin",
+    "pluginInfo": "Plugin Information",
+    "name": "Name",
+    "nameDesc": "Provide a name for the plugin",
+    "desc": "Description",
+    "descDesc": "Provide a description for your plugin",
+    "pluginDesc": "Plugin description",
+    "type": "Plugin Type",
+    "typeDesc": "Please select the plugin type",
+    "uploadJar": "Upload custom JAR file",
+    "uploadJarDesc": "Please upload a JAR file contains the main function of the plugin",
+    "uploadFile": "Upload the dependency files",
+    "uploadFileDesc": "Please upload files contains the main function of the plugin",
+    "mainFunc": "Main function class",
+    "mainFuncDesc": "Specify the main function class as an entry point to initiate the plugin"
+  }
+}

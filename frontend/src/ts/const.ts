@@ -10,7 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
+export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
+export const CONFIG_URL = '/aws-exports.json';
 export const COMMON_ALERT_TYPE = {
   Success: 'success',
   Error: 'error',
@@ -22,6 +23,11 @@ export const PROJECT_STAGE_LIST = [
   { label: 'Dev', value: 'Dev' },
   { label: 'Test', value: 'Test' },
   { label: 'Prod', value: 'Prod' },
+];
+
+export const PLUGIN_TYPE_LIST = [
+  { label: 'Enrich', value: 'Enrich' },
+  { label: 'Transform', value: 'Transform' },
 ];
 
 export const PLUGINS_LIST = [
