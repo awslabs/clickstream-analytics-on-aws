@@ -20,6 +20,7 @@ import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, pro
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
 import { getInitIngestionRuntime, getPipelineStatus, Pipeline, PipelineStatus } from '../../model/pipeline';
+import { PipelineServ } from '../../service/pipeline';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -35,7 +36,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
         name: 'Templates',
-        data: '{"ingestion": "xxx"}',
+        data: '{"ingestion_s3": "xxx"}',
       },
     });
     sfnMock.on(StartExecutionCommand).resolves({});
@@ -187,7 +188,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
         name: 'Templates',
-        data: '{"ingestion": "xxx"}',
+        data: '{"ingestion_s3": "xxx"}',
       },
     });
     sfnMock.on(StartExecutionCommand).resolves({});
@@ -1218,7 +1219,35 @@ describe('Pipeline test', () => {
     };
     expect(getPipelineStatus(pipeline5 as Pipeline)).toEqual(PipelineStatus.DELETE_FAILED);
   });
+  it('Pipeline template url', async () => {
+    ddbMock.on(GetCommand)
+      .resolvesOnce({
+        Item: {
+          name: 'Solution',
+          data: {
+            name: 'clickstream',
+            dist_output_bucket: 'EXAMPLE-BUCKET',
+            prefix: 'feature/main/default',
+          },
+        },
+      })
+      .resolves({
+        Item: {
+          name: 'Templates',
+          data: {
+            ingestion_kafka: 'ingestion-server-kafka-stack.template.json',
+            ingestion_kinesis: 'ingestion-server-kinesis-stack.template.json',
+            ingestion_s3: 'ingestion-server-s3-stack.template.json',
+          },
+        },
+      });
+    const ps = new PipelineServ();
+    let templateURL = await ps.getTemplateUrl('ingestion_s3');
+    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream/feature/main/default/ingestion-server-s3-stack.template.json');
+    templateURL = await ps.getTemplateUrl('ingestion_no');
+    expect(templateURL).toEqual(undefined);
 
+  });
   afterAll((done) => {
     server.close();
     done();

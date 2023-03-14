@@ -47,6 +47,7 @@ export interface ClickStreamApiProps {
   readonly applicationLoadBalancer?: ApplicationLoadBalancerProps;
   readonly apiGateway?: ApiGatewayProps;
   readonly targetToCNRegions?: boolean;
+  readonly s3MainRegion?: string;
 }
 
 export class ClickStreamApiConstruct extends Construct {
@@ -196,6 +197,7 @@ export class ClickStreamApiConstruct extends Construct {
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
+        S3_MAIN_REGION: props.s3MainRegion?? 'us-east-1',
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

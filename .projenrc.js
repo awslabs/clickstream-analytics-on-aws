@@ -107,6 +107,11 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'aws-sdk-client-mock-jest@^2.0.1',
   ],
   minNodeVersion: '16.18.0',
+  jestOptions: {
+    jestConfig: {
+      setupFiles: ['./test/jestEnv.js'],
+    },
+  },
 });
 
 project.eslint?.addRules({

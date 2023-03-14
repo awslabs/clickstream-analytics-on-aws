@@ -12,10 +12,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { awsUrlSuffix, clickStreamTableName } from '../common/constants';
+import { awsUrlSuffix, clickStreamTableName, s3MainRegion } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { StackManager } from '../common/sfn';
-import { tryToJson } from '../common/utils';
+import { isEmpty, tryToJson } from '../common/utils';
 import { getInitIngestionRuntime, Pipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -42,7 +42,7 @@ export class PipelineServ {
       req.body.pipelineId = uuidv4();
       let pipeline: Pipeline = req.body;
       // Get TemplateURL from dictionary
-      const templateURL = await this.getTemplateUrl(pipeline, `ingestion_${pipeline.ingestionServer.sinkType}`);
+      const templateURL = await this.getTemplateUrl(`ingestion_${pipeline.ingestionServer.sinkType}`);
       if (!templateURL) {
         return res.status(404).json(new ApiFail('Add Pipeline Error, templates not found in dictionary.'));
       }
@@ -115,13 +115,16 @@ export class PipelineServ {
     }
   };
 
-  public async getTemplateUrl(pipeline: Pipeline, name: string) {
+  public async getTemplateUrl(name: string) {
     const solution = await store.getDictionary('Solution');
     const templates = await store.getDictionary('Templates');
     if (solution && templates) {
       solution.data = tryToJson(solution.data);
       templates.data = tryToJson(templates.data);
-      const s3Host = `https://${solution.data.dist_output_bucket}.s3.${pipeline.region}.${awsUrlSuffix}`;
+      if (isEmpty(templates.data[name])) {
+        return undefined;
+      }
+      const s3Host = `https://${solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
       const prefix = solution.data.prefix;
       return `${s3Host}/${solution.data.name}/${prefix}/${templates.data[name]}`;
     }

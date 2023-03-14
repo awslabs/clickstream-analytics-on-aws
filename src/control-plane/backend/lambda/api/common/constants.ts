@@ -20,6 +20,7 @@ const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
+const s3MainRegion = process.env.S3_MAIN_REGION;
 
 export {
   clickStreamTableName,
@@ -30,4 +31,5 @@ export {
   awsRegion,
   awsAccountId,
   awsUrlSuffix,
+  s3MainRegion,
 };
