@@ -1445,7 +1445,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       RestApiId: {
         Ref: 'testClickStreamCloudfrontApiClickStreamApi77242134',
       },
-      AuthorizationType: 'NONE',
+      AuthorizationType: 'CUSTOM',
       Integration: {
         IntegrationHttpMethod: 'POST',
         Type: 'AWS_PROXY',
@@ -1485,7 +1485,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       RestApiId: {
         Ref: 'testClickStreamCloudfrontApiClickStreamApi77242134',
       },
-      AuthorizationType: 'NONE',
+      AuthorizationType: 'CUSTOM',
       Integration: {
         IntegrationHttpMethod: 'POST',
         Type: 'AWS_PROXY',
@@ -1549,7 +1549,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         Format: '$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId',
       },
       DeploymentId: {
-        Ref: 'testClickStreamCloudfrontApiClickStreamApiDeploymentD81E884Ac2c12fc874966dd173da874f67d1251b',
+        Ref: 'testClickStreamCloudfrontApiClickStreamApiDeploymentD81E884Adde54841819a5cb2bcfcf208847bd745',
       },
       MethodSettings: [
         {

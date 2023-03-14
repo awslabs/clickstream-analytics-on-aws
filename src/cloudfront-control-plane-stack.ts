@@ -13,6 +13,7 @@
 
 import { join } from 'path';
 import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
+import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   CfnDistribution,
@@ -24,6 +25,7 @@ import {
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
@@ -126,14 +128,6 @@ export class CloudFrontControlPlaneStack extends Stack {
       }
     }
 
-    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
-      fronting: 'cloudfront',
-      apiGateway: {
-        stageName: 'api',
-      },
-      targetToCNRegions: props?.targetToCNRegions,
-    });
-
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
         assetPath: join(__dirname, '../frontend'),
@@ -186,7 +180,8 @@ export class CloudFrontControlPlaneStack extends Stack {
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.ARM_64,
-      reservedConcurrentExecutions: 100,
+      reservedConcurrentExecutions: 3,
+      logRetention: RetentionDays.TEN_YEARS,
     });
     addCfnNagSuppressRules(
       authFunction.node.defaultChild as CfnFunction,
@@ -198,11 +193,19 @@ export class CloudFrontControlPlaneStack extends Stack {
       ],
     );
 
-    // keep for future use
-    // new TokenAuthorizer(this, 'JWTAuthorizer', {
-    //   handler: authFunction,
-    //   validationRegex: "^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$"
-    // });
+    const authorizer = new TokenAuthorizer(this, 'JWTAuthorizer', {
+      handler: authFunction,
+      validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
+    });
+
+    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
+      fronting: 'cloudfront',
+      apiGateway: {
+        stageName: 'api',
+        authorizer: authorizer,
+      },
+      targetToCNRegions: props?.targetToCNRegions,
+    });
 
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
@@ -313,20 +316,7 @@ class InjectCustomResourceConfig implements IAspect {
 }
 
 function addCfnNag(stack: Stack) {
-  // TODO: apigateway no authorization
   const cfnNagList = [
-    {
-      paths_endswith: [
-        'ClickStreamApi/ClickStreamApi/Default/{proxy+}/ANY/Resource',
-        'ClickStreamApi/ClickStreamApi/Default/ANY/Resource',
-      ],
-      rules_to_suppress: [
-        {
-          id: 'W59',
-          reason: 'TODO authorization will be added later',
-        },
-      ],
-    },
     {
       paths_endswith: [
         'ClickStreamApi/ApiGatewayAccessLogs/Resource',

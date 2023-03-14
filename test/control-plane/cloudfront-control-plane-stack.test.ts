@@ -239,7 +239,7 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
-      ReservedConcurrentExecutions: 100,
+      ReservedConcurrentExecutions: 3,
       Runtime: 'nodejs18.x',
     },
     );
@@ -337,16 +337,16 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('AWS::CloudFront::Distribution', 1);
     commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
-    expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function'))
+    expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
-        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
-        'AuthorizerFunctionB4DBAA43',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
 
   });
@@ -365,17 +365,17 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('HostedZoneName', {});
     template.hasParameter('RecordName', {});
 
-    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
-        'certificateCertificateRequestorFunction5D4BA95F',
+        'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
-        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
-        'AuthorizerFunctionB4DBAA43',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'certificateCertificateRequestorFunction5D4BA95F',
       ]);
     expect(findResourcesName(template, 'AWS::CloudFormation::CustomResource'))
       .toEqual([
@@ -427,16 +427,16 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('OIDCProvider', {});
     template.hasParameter('OIDCClientId', {});
 
-    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'ClickStreamApiClickStreamApiFunction8C843168',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
-        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
-        'AuthorizerFunctionB4DBAA43',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
     template.resourceCountIs('AWS::S3::Bucket', 2);
 
@@ -511,10 +511,39 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
-      ReservedConcurrentExecutions: 100,
+      ReservedConcurrentExecutions: 3,
       Runtime: 'nodejs18.x',
     },
     );
+  });
+
+  test('Authorizer function should kepp logs for at least 10 years', () => {
+
+    const capture = new Capture();
+    commonTemplate.hasResourceProperties('Custom::LogRetention', {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('LogRetention[a-fA-F0-9]+'),
+          'Arn',
+        ],
+      },
+      LogGroupName: {
+        'Fn::Join': [
+          '',
+          [
+            '/aws/lambda/',
+            {
+              Ref: Match.stringLikeRegexp('AuthorizerFunction[A-F0-9]+'),
+            },
+          ],
+        ],
+      },
+      RetentionInDays: capture,
+    },
+    );
+
+    expect(capture.asNumber()).toBeGreaterThanOrEqual(3653);
+
   });
 
   test('exist OIDC', () => {
@@ -540,6 +569,63 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
+    });
+  });
+
+  test('exist api authorizer', () => {
+    commonTemplate.hasResourceProperties('AWS::ApiGateway::Authorizer', {
+      Type: 'TOKEN',
+      AuthorizerUri: {
+        'Fn::Join': [
+          '',
+          [
+            'arn:',
+            {
+              'Fn::Select': [
+                1,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      'Fn::GetAtt': [
+                        Match.anyValue(),
+                        'Arn',
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ':apigateway:',
+            {
+              'Fn::Select': [
+                3,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      'Fn::GetAtt': [
+                        Match.anyValue(),
+                        'Arn',
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ':lambda:path/2015-03-31/functions/',
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+            '/invocations',
+          ],
+        ],
+      },
+      IdentitySource: 'method.request.header.Authorization',
+      IdentityValidationExpression: '^(Bearer )[a-zA-Z0-9-_]+?.[a-zA-Z0-9-_]+?.([a-zA-Z0-9-_]+)$',
     });
   });
 

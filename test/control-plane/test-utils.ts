@@ -13,9 +13,12 @@
 
 import { App, Stack } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Vpc, IVpc, SubnetType, SecurityGroup, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 import { LogBucket } from '../../src/common/log-bucket';
@@ -273,11 +276,28 @@ export class TestEnv {
 
     const stack = new TestStack(new App(), 'apiTestStack');
 
+    const authFunction = new NodejsFunction(stack, 'AuthorizerFunction', {
+      runtime: Runtime.NODEJS_16_X,
+      handler: 'handler',
+      entry: './src/control-plane/auth/index.ts',
+      environment: {
+        JWKS_URI: 'https://idp.example.com/.well-known/jwks.json',
+        ISSUER: 'https://idp.example.com/GF13ivtJ2',
+      },
+      reservedConcurrentExecutions: 3,
+    });
+
+    const authorizer = new TokenAuthorizer(stack, 'JWTAuthorizer', {
+      handler: authFunction,
+      validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
+    });
+
     new ClickStreamApiConstruct(stack, 'testClickStreamCloudfrontApi', {
       dictionaryItems: stack.dics,
       fronting: 'cloudfront',
       apiGateway: {
         stageName: 'api',
+        authorizer: authorizer,
       },
       targetToCNRegions: cn,
     });

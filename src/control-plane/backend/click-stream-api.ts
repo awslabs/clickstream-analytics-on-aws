@@ -12,10 +12,34 @@
  */
 
 import path from 'path';
-import { Aws, aws_dynamodb, aws_iam as iam, CfnResource, Duration, IgnoreMode, RemovalPolicy, Stack } from 'aws-cdk-lib';
-import { EndpointType, LambdaRestApi, LogGroupLogDestination, MethodLoggingLevel, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import {
+  aws_dynamodb,
+  aws_iam as iam,
+  CfnResource,
+  Duration,
+  IgnoreMode,
+  RemovalPolicy,
+  Stack,
+  Aws,
+} from 'aws-cdk-lib';
+import {
+  EndpointType,
+  RestApi,
+  LambdaRestApi,
+  MethodLoggingLevel,
+  LogGroupLogDestination,
+  AuthorizationType,
+  IAuthorizer,
+} from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import { Connections, ISecurityGroup, IVpc, Port, SecurityGroup, SubnetSelection, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import {
+  Connections,
+  ISecurityGroup,
+  Port,
+  SecurityGroup,
+  SubnetSelection,
+  IVpc, SubnetType,
+} from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
@@ -39,6 +63,7 @@ export interface ApplicationLoadBalancerProps {
 
 export interface ApiGatewayProps {
   readonly stageName: string;
+  readonly authorizer: IAuthorizer;
 }
 
 export interface ClickStreamApiProps {
@@ -217,11 +242,16 @@ export class ClickStreamApiConstruct extends Construct {
       if (!props.apiGateway) {
         throw new Error('Cloudfront fronting backend api must be have Api Gateway parameters.');
       }
+
       const apiGatewayAccessLogGroup = createLogGroupWithKmsKey(this, {});
 
       this.lambdaRestApi = new LambdaRestApi(this, 'ClickStreamApi', {
         handler: this.clickStreamApiFunction,
         proxy: true,
+        defaultMethodOptions: {
+          authorizationType: AuthorizationType.CUSTOM,
+          authorizer: props.apiGateway.authorizer,
+        },
         endpointConfiguration: {
           types: [EndpointType.REGIONAL],
         },
