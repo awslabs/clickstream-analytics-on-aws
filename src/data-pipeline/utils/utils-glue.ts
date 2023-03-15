@@ -14,12 +14,14 @@
 import { Database, DataFormat, Table } from '@aws-cdk/aws-glue-alpha';
 import { Schema } from '@aws-cdk/aws-glue-alpha/lib/schema';
 import { aws_s3 as s3 } from 'aws-cdk-lib';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { getSinkTableLocationPrefix } from './utils-common';
 
 interface Props {
-  readonly sourceS3Bucket: string;
+  readonly sourceS3Bucket: IBucket;
   readonly sourceS3Prefix: string;
-  readonly sinkS3Bucket: string;
+  readonly sinkS3Bucket: IBucket;
   readonly sinkS3Prefix: string;
 }
 
@@ -107,13 +109,13 @@ export class GlueUtil {
       }],
       compressed: false,
       dataFormat: DataFormat.JSON,
-
-      bucket: s3.Bucket.fromBucketName(this.scope, 'SourceBucket', this.props.sourceS3Bucket),
-      s3Prefix: this.props.sourceS3Prefix,
+      enablePartitionFiltering: true,
+      bucket: s3.Bucket.fromBucketName(this.scope, 'SourceBucket', this.props.sourceS3Bucket.bucketName),
+      s3Prefix: `${this.props.sourceS3Prefix}/`,
     });
   }
 
-  public createSinkTable(glueDatabase: Database, tableName: string) {
+  public createSinkTable(glueDatabase: Database, projectId: string, tableName: string) {
     return new Table(this.scope, 'SinkTable', {
       database: glueDatabase,
       description: 'ClickStream data pipeline sink table',
@@ -486,9 +488,10 @@ export class GlueUtil {
       ],
       compressed: false,
       dataFormat: DataFormat.PARQUET,
+      enablePartitionFiltering: true,
 
-      bucket: s3.Bucket.fromBucketName(this.scope, 'SinkBucket', this.props.sinkS3Bucket),
-      s3Prefix: this.props.sinkS3Prefix,
+      bucket: s3.Bucket.fromBucketName(this.scope, 'SinkBucket', this.props.sinkS3Bucket.bucketName),
+      s3Prefix: getSinkTableLocationPrefix(this.props.sinkS3Prefix, projectId, tableName),
     });
   }
 

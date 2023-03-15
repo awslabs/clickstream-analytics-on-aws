@@ -51,6 +51,56 @@ export function createStackParameters(scope: Construct) {
     default: 'pipeline-sink',
   });
 
+
+  const pipelineS3BucketParam = Parameters.createS3BucketParameter(scope, 'PipelineS3Bucket', {
+    description: 'Pipeline S3 bucket name in which to save temporary result',
+    allowedPattern: `^${S3_BUCKET_NAME_PATTERN}$`,
+  });
+
+  const pipelineS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'PipelineS3Prefix', {
+    description: 'Pipeline S3 prefix',
+    default: 'pipeline-temp',
+  });
+
+  const dataFreshnessInHourParam = new CfnParameter(scope, 'DataFreshnessInHour', {
+    description: 'Data Freshness in hour, default is 72 hours (3 days)',
+    default: 72,
+    type: 'Number',
+  });
+
+  const scheduleExpressionParam = new CfnParameter(scope, 'ScheduleExpression', {
+    description: 'The schedule expression to run ETL job, e.g: rate(24 hours) or cron(0 1 * * ? *)',
+    default: 'cron(0 1 * * ? *)',
+    allowedPattern: '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$',
+    type: 'String',
+  });
+
+  const entryPointJarParam = new CfnParameter(scope, 'EntryPointJar', {
+    description: 'The entry point jar file for spark job',
+    allowedPattern: `^s3://${S3_BUCKET_NAME_PATTERN}/.*.jar$`,
+    type: 'String',
+  });
+
+  const transformerAndEnrichClassNamesParam = new CfnParameter(scope, 'TransformerAndEnrichClassNames', {
+    description: 'The class name list of custom plugins to transform or enrich data',
+    default: 'com.amazonaws.solution.clickstream.Transformer,com.amazonaws.solution.clickstream.UAEnrichment,com.amazonaws.solution.clickstream.IPEnrichment',
+    type: 'CommaDelimitedList',
+  });
+
+  const s3PathPluginJarsParam = new CfnParameter(scope, 'S3PathPluginJars', {
+    description: 'The java jars of custom plugins to transform or enrich data',
+    default: '',
+    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/.*.jar)?$`,
+    type: 'CommaDelimitedList',
+  });
+
+  const s3PathPluginFilesParam = new CfnParameter(scope, 'S3PathPluginFiles', {
+    description: 'The files of custom plugins to transform or enrich data',
+    default: '',
+    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/.*)?$`,
+    type: 'CommaDelimitedList',
+  });
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -80,6 +130,26 @@ export function createStackParameters(scope: Construct) {
             sourceS3PrefixParam.logicalId,
             sinkS3BucketParam.logicalId,
             sinkS3PrefixParam.logicalId,
+            pipelineS3BucketParam.logicalId,
+            pipelineS3PrefixParam.logicalId,
+          ],
+        },
+
+        {
+          Label: { default: 'Job Schedule' },
+          Parameters: [
+            dataFreshnessInHourParam.logicalId,
+            scheduleExpressionParam.logicalId,
+          ],
+        },
+
+        {
+          Label: { default: 'Transformation and enrichment assets' },
+          Parameters: [
+            entryPointJarParam.logicalId,
+            transformerAndEnrichClassNamesParam.logicalId,
+            s3PathPluginJarsParam.logicalId,
+            s3PathPluginFilesParam.logicalId,
           ],
         },
       ],
@@ -110,6 +180,37 @@ export function createStackParameters(scope: Construct) {
         [sinkS3PrefixParam.logicalId]: {
           default: 'Sink S3 prefix',
         },
+
+        [pipelineS3BucketParam.logicalId]: {
+          default: 'Pipeline S3 bucket name',
+        },
+        [pipelineS3PrefixParam.logicalId]: {
+          default: 'Pipeline S3 prefix',
+        },
+
+        [dataFreshnessInHourParam.logicalId]: {
+          default: 'Data freshness',
+        },
+
+        [scheduleExpressionParam.logicalId]: {
+          default: 'Job schedule expression',
+        },
+
+        [entryPointJarParam.logicalId]: {
+          default: 'Entry point jar',
+        },
+
+        [transformerAndEnrichClassNamesParam.logicalId]: {
+          default: 'Class name list for plugins',
+        },
+
+        [s3PathPluginJarsParam.logicalId]: {
+          default: 'Plugin jars',
+        },
+
+        [s3PathPluginFilesParam.logicalId]: {
+          default: 'Plugin files',
+        },
       },
     },
   };
@@ -119,12 +220,20 @@ export function createStackParameters(scope: Construct) {
     params: {
       vpcIdParam: netWorkProps.vpcId,
       privateSubnetIdsParam: netWorkProps.privateSubnets,
-      projectIdParam: projectIdParam,
-      appIdsParam: appIdsParam,
-      sourceS3BucketParam: sourceS3BucketParam,
-      sourceS3PrefixParam: sourceS3PrefixParam,
-      sinkS3BucketParam: sinkS3BucketParam,
-      sinkS3PrefixParam: sinkS3PrefixParam,
+      projectIdParam,
+      appIdsParam,
+      sourceS3BucketParam,
+      sourceS3PrefixParam,
+      sinkS3BucketParam,
+      sinkS3PrefixParam,
+      pipelineS3BucketParam,
+      pipelineS3PrefixParam,
+      dataFreshnessInHourParam,
+      scheduleExpressionParam,
+      transformerAndEnrichClassNamesParam,
+      s3PathPluginJarsParam,
+      s3PathPluginFilesParam,
+      entryPointJarParam,
     },
   };
 }

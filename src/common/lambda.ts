@@ -18,6 +18,7 @@ import {
   CfnPolicy,
   Role,
   ServicePrincipal,
+  PrincipalBase,
 } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { IConstruct } from 'constructs';
@@ -110,9 +111,10 @@ export function createLambdaRole(
   id: string,
   inVpc: boolean,
   extraPolicyStatements: PolicyStatement[],
+  assumedBy: PrincipalBase = new ServicePrincipal('lambda.amazonaws.com'),
 ): Role {
   const role = new Role(scope, id, {
-    assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+    assumedBy,
   });
   getLambdaBasicPolicyStatements(inVpc).forEach((ps) => role.addToPolicy(ps));
   extraPolicyStatements.forEach((ps) => role.addToPolicy(ps));

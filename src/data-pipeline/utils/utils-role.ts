@@ -12,14 +12,13 @@
  */
 
 
-import { Arn, ArnFormat, Aws, aws_iam as iam, Stack } from 'aws-cdk-lib';
-
-import { Effect } from 'aws-cdk-lib/aws-iam';
+import { Database, Table } from '@aws-cdk/aws-glue-alpha';
+import { Arn, ArnFormat, Aws, Stack } from 'aws-cdk-lib';
+import { CompositePrincipal, Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { createLambdaRole } from '../../common/lambda';
 
 export class RoleUtil {
-
   public static newInstance(scope: Construct) {
     return new this(scope);
   }
@@ -30,15 +29,16 @@ export class RoleUtil {
     this.scope = scope;
   }
 
-  public createPartitionSyncerRole(roleName: string, databaseName: string, sourceTableName: string, sinkTableName: string): iam.Role {
+  public createPartitionSyncerRole(
+    roleName: string,
+    databaseName: string,
+    sourceTableName: string,
+    sinkTableName: string,
+  ): Role {
     return createLambdaRole(this.scope, roleName, true, [
-      new iam.PolicyStatement({
+      new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
-          // `arn:aws:glue:*:${this.props.account}:catalog`,
-          // `arn:aws:glue:*:${this.props.account}:database/${databaseName}`,
-          // `arn:aws:glue:*:${this.props.account}:table/${databaseName}/${sourceTableName}`,
-          // `arn:aws:glue:*:${this.props.account}:table/${databaseName}/${sinkTableName}`,
           this.getGlueResourceArn('catalog'),
           this.getGlueResourceArn(`database/${databaseName}`),
           this.getGlueResourceArn(`table/${databaseName}/${sourceTableName}`),
@@ -60,5 +60,101 @@ export class RoleUtil {
       },
       Stack.of(this.scope),
     );
+  }
+
+  public createJobSubmitterLambdaRole(glueDB: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string): Role {
+    const assumedBy = new CompositePrincipal(
+      new ServicePrincipal('lambda.amazonaws.com'),
+      new ServicePrincipal('emr-serverless.amazonaws.com'),
+    );
+
+    const policyStatement: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          Arn.format(
+            {
+              resource: `applications/${emrApplicationId}`,
+              region: Aws.REGION,
+              account: Aws.ACCOUNT_ID,
+              service: 'emr-serverless',
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            },
+            Stack.of(this.scope),
+          ),
+        ],
+        actions: [
+          'emr-serverless:StartApplication',
+        ],
+      }),
+
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          Arn.format(
+            {
+              resource: '*',
+              region: Aws.REGION,
+              account: Aws.ACCOUNT_ID,
+              service: 'emr-serverless',
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            },
+            Stack.of(this.scope),
+          ),
+        ],
+        actions: [
+          'emr-serverless:StartJobRun',
+        ],
+      }),
+
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          this.getGlueResourceArn('catalog'),
+          this.getGlueResourceArn(`database/${glueDB.databaseName}`),
+          this.getGlueResourceArn(`table/${glueDB.databaseName}/${sourceTable.tableName}`),
+          this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),
+        ],
+        actions: ['glue:GetDatabase', 'glue:GetTable', 'glue:GetPartitions'],
+      }),
+
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          // arn:aws:iam::1111222233333:role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless
+          Arn.format(
+            {
+              resource: 'role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless',
+              region: '',
+              account: Aws.ACCOUNT_ID,
+              service: 'iam',
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            },
+            Stack.of(this.scope),
+          ),
+        ],
+        actions: ['iam:CreateServiceLinkedRole'],
+      }),
+    ];
+
+    const role = createLambdaRole(
+      this.scope,
+      'EmrSparkJobSubmitterLambdaRole',
+      true,
+      policyStatement,
+      assumedBy,
+    );
+    const passRolePolicy = new Policy(this.scope, 'PassRolePolicy');
+    passRolePolicy.addStatements(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          role.roleArn,
+        ],
+        actions: ['iam:PassRole'],
+      }),
+    );
+    role.attachInlinePolicy(passRolePolicy);
+    return role;
   }
 }

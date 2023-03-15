@@ -13,9 +13,12 @@
 
 import { Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
-import { addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
+import {
+  addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
+} from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
 import { DataPipelineConstruct } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
@@ -40,6 +43,14 @@ export class DataPipelineStack extends Stack {
         sourceS3PrefixParam,
         sinkS3BucketParam,
         sinkS3PrefixParam,
+        pipelineS3BucketParam,
+        pipelineS3PrefixParam,
+        dataFreshnessInHourParam,
+        scheduleExpressionParam,
+        transformerAndEnrichClassNamesParam,
+        s3PathPluginJarsParam,
+        s3PathPluginFilesParam,
+        entryPointJarParam,
       },
     } = createStackParameters(this);
 
@@ -56,15 +67,42 @@ export class DataPipelineStack extends Stack {
       subnets: vpc.privateSubnets,
     };
 
+    // Bucket
+    const sourceS3Bucket = Bucket.fromBucketName(
+      this,
+      'from-sourceS3Bucket',
+      sourceS3BucketParam.valueAsString,
+    );
+
+    const sinkS3Bucket = Bucket.fromBucketName(
+      this,
+      'from-sinkS3Bucket',
+      sinkS3BucketParam.valueAsString,
+    );
+
+    const pipelineS3Bucket = Bucket.fromBucketName(
+      this,
+      'from-pipelineS3Bucket',
+      pipelineS3BucketParam.valueAsString,
+    );
+
     new DataPipelineConstruct(this, 'DataPipeline', {
       vpc: vpc,
       vpcSubnets: subnetSelection,
       projectId: projectIdParam.valueAsString,
       appIds: Fn.join(',', appIdsParam.valueAsList),
-      sourceS3Bucket: sourceS3BucketParam.valueAsString,
+      sourceS3Bucket,
       sourceS3Prefix: sourceS3PrefixParam.valueAsString,
-      sinkS3Bucket: sinkS3BucketParam.valueAsString,
+      sinkS3Bucket,
       sinkS3Prefix: sinkS3PrefixParam.valueAsString,
+      pipelineS3Bucket,
+      pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsString,
+      transformerAndEnrichClassNames: Fn.join(',', transformerAndEnrichClassNamesParam.valueAsList),
+      entryPointJar: entryPointJarParam.valueAsString,
+      s3PathPluginJars: Fn.join(',', s3PathPluginJarsParam.valueAsList),
+      s3PathPluginFiles: Fn.join(',', s3PathPluginFilesParam.valueAsList),
+      scheduleExpression: scheduleExpressionParam.valueAsString,
     });
     addCfnNag(this);
   }
@@ -72,7 +110,32 @@ export class DataPipelineStack extends Stack {
 
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
-  addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources('partitionSyncerLambdaRole/DefaultPolicy/Resource', 'CDK', 'Lambda')]);
+  [
+    'partitionSyncerLambdaRole/DefaultPolicy/Resource',
+    'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
+    'InitPartitionLambdaRole/DefaultPolicy/Resource',
+  ].forEach(
+    p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
+  );
+
+  addCfnNagToStack(stack, [
+    {
+      paths_endswith: ['EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        {
+          id: 'W12',
+          reason: 'Some permissions are not resource based, need set * in resource',
+        },
+        {
+          id: 'W76',
+          reason: 'ACK: SPCM for IAM policy document is higher than 25',
+        },
+      ],
+    },
+  ]),
   NagSuppressions.addStackSuppressions(stack, commonCdkNagRules);
+  addCfnNagForCustomResourceProvider(stack, 'CopyAssets', 'CopyAssetsCustomResourceProvider', '');
+  addCfnNagForCustomResourceProvider(stack, 'InitPartition', 'InitPartitionCustomResourceProvider', '');
+
 }
 

@@ -77,77 +77,82 @@
     },
     {
       "name": "@aws-sdk/client-account",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-athena",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudformation",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-dynamodb",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ec2",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-emr-serverless",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-iam",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-quicksight",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-route-53",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-s3",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sfn",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/lib-dynamodb",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/types",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/util-dynamodb",
-      "version": "^3.272.0",
+      "version": "^3.288.0",
       "type": "runtime"
     },
     {

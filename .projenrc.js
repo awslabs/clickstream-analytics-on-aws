@@ -34,7 +34,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-glue',
-].map(dep => `${dep}@^3.272.0`);
+].map(dep => `${dep}@^3.288.0`);
 
 const awsSDKDepsForApiProject = [
   '@aws-sdk/types',
@@ -52,7 +52,8 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-iam',
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
-].map(dep => `${dep}@^3.272.0`);
+  '@aws-sdk/client-emr-serverless',
+].map(dep => `${dep}@^3.288.0`);
 
 const depsForApiProject = [
   ...commonDeps,

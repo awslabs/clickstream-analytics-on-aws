@@ -12,7 +12,7 @@
  */
 
 import { BatchCreatePartitionCommand, GlueClient } from '@aws-sdk/client-glue';
-import { Context, EventBridgeEvent } from 'aws-lambda';
+import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler as add_partition_handler } from '../../../src/data-pipeline/lambda/partition-syncer';
 import 'aws-sdk-client-mock-jest';
@@ -33,6 +33,21 @@ const dateEvent = {
   year: 2023,
   month: 2,
   day: 22,
+};
+
+const cloudFormationCreateEvent: CloudFormationCustomResourceEvent = {
+  RequestType: 'Create',
+  ServiceToken: 'token',
+  ResponseURL: 'test_url',
+  StackId: 'test',
+  RequestId: 'test',
+  LogicalResourceId: 'test',
+  ResourceType: 'test',
+  ResourceProperties: {
+    ServiceToken: 'testtoken',
+    p1: 'test',
+    p2: 'test',
+  },
 };
 
 const c: Context = {
@@ -105,4 +120,50 @@ describe('Glue catalog add partition test', () => {
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
   });
+
+
+  it('Should Add partition can be triggered by custom resource - create', async () => {
+    process.env.APP_IDS = 'id1,id2';
+    //@ts-ignore
+    cloudFormationCreateEvent.RequestType = 'Create';
+    const response = await add_partition_handler(
+      cloudFormationCreateEvent,
+      c,
+    );
+    expect(response.Status).toEqual('SUCCESS');
+    // @ts-ignore
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
+  });
+
+  it('Should Add partition cannot be triggered by custom resource - delete', async () => {
+    process.env.APP_IDS = 'id1,id2';
+
+    // @ts-ignore
+    cloudFormationCreateEvent.RequestType = 'Delete';
+
+    const response = await add_partition_handler(
+      cloudFormationCreateEvent,
+      c,
+    );
+    expect(response.Status).toEqual('SUCCESS');
+    // @ts-ignore
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 0);
+  });
+
+
+  it('Should Add partition cannot be triggered by custom resource - update', async () => {
+    process.env.APP_IDS = 'id1,id2';
+    // @ts-ignore
+    cloudFormationCreateEvent.RequestType = 'Update';
+
+    const response = await add_partition_handler(
+      cloudFormationCreateEvent,
+      c,
+    );
+    expect(response.Status).toEqual('SUCCESS');
+    // @ts-ignore
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 0);
+  });
+
+
 });

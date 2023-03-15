@@ -12,7 +12,7 @@
  */
 
 
-import { Context, EventBridgeEvent } from 'aws-lambda';
+import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { GlueClientUtil } from './glue-client-util';
 import { logger } from '../../../common/powertools';
 
@@ -31,7 +31,7 @@ interface EmptyEventDetail {
 
 
 type ScheduledEvent = EventBridgeEvent<'Scheduled Event', EmptyEventDetail>;
-export const handler = async (event: ScheduledEvent | PartitionDateEvent, context: Context) => {
+export const handler = async (event: ScheduledEvent | PartitionDateEvent | CloudFormationCustomResourceEvent, context: Context) => {
   logger.info(JSON.stringify(event));
 
   const date = isAnPartitionDate(event) ? new Date(event.year, event.month - 1, event.day) : new Date();
@@ -40,6 +40,10 @@ export const handler = async (event: ScheduledEvent | PartitionDateEvent, contex
     Reason: '',
     Status: 'SUCCESS',
   };
+
+  if (['Delete', 'Update'].includes((event as any).RequestType)) {
+    return response;
+  }
 
   try {
     await _handler(date, context);

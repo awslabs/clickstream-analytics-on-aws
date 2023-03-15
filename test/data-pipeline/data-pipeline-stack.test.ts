@@ -16,6 +16,10 @@ import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { validateSubnetsRule } from '../rules';
 
+const RefAnyValue = {
+  Ref: Match.anyValue(),
+};
+
 function findFirstResourceByKeyPrefix(
   template: Template,
   type: string,
@@ -212,8 +216,130 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(8);
+    expect(paramCount).toEqual(16);
   });
+
+
+  test('Should has parameter PipelineS3Bucket', () => {
+    template.hasParameter('PipelineS3Bucket', {
+      Type: 'String',
+    });
+  });
+
+
+  test('Should has parameter PipelineS3Prefix', () => {
+    template.hasParameter('PipelineS3Prefix', {
+      Type: 'String',
+    });
+  });
+
+
+  test('Should has parameter DataFreshnessInHour', () => {
+    template.hasParameter('DataFreshnessInHour', {
+      Default: 72,
+      Type: 'Number',
+    });
+  });
+
+  test('Should has parameter ScheduleExpression', () => {
+    template.hasParameter('ScheduleExpression', {
+      Type: 'String',
+    });
+  });
+
+  test('Should check ScheduleExpression pattern', () => {
+    const param = getParameter(template, 'ScheduleExpression');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'rate(1 hour)',
+      'rate(2 hours)',
+      'rate(1 day)',
+      'rate(2 days)',
+      'rate( 2 days )',
+      'cron(0 1 * * ? *)',
+      'cron(15,45 * * * ? *)',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'ab',
+      '1',
+      'cron',
+      '2 hours',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('Should has parameter TransformerAndEnrichClassNames', () => {
+    template.hasParameter('TransformerAndEnrichClassNames', {
+      Type: 'CommaDelimitedList',
+    });
+  });
+
+
+  test('Should has parameter S3PathPluginJars', () => {
+    template.hasParameter('S3PathPluginJars', {
+      Type: 'CommaDelimitedList',
+    });
+  });
+
+  test('Should check S3PathPluginJars pattern', () => {
+    const param = getParameter(template, 'S3PathPluginJars');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      's3://abc/abc.jar',
+      's3://abc/abc/test.jar',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'abc/abc.jar',
+      's3://abc/abc.txt',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('Should has parameter S3PathPluginFiles', () => {
+    template.hasParameter('S3PathPluginFiles', {
+      Type: 'CommaDelimitedList',
+    });
+  });
+
+  test('Should check  S3PathPluginFiles pattern', () => {
+    const param = getParameter(template, 'S3PathPluginFiles');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      's3://abc/abc.txt',
+      's3://abc/abc/test.txt',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'abc/abc.txt',
+      's3://abc_abc/abc/test.txt',
+      's3://Abc/abc/test.txt',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
 });
 
 describe('DataPipelineStack Glue catalog resources test', () => {
@@ -462,7 +588,6 @@ describe('DataPipelineStack Glue catalog resources test', () => {
     });
   });
 
-
   test('Lambda has POWERTOOLS settings', ()=> {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
@@ -473,5 +598,361 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
     });
   });
+});
+
+describe ('ETL job submitter', () => {
+
+  const app = new App();
+  const stack = new DataPipelineStack(app, 'test-stack');
+  const template = Template.fromStack(stack);
+
+  test ('Has lambda and emr-serverless IAM role', ()=> {
+    template.hasResourceProperties('AWS::IAM::Role', {
+      AssumeRolePolicyDocument: {
+        Statement: [
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Principal: {
+              Service: 'lambda.amazonaws.com',
+            },
+          },
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Principal: {
+              Service: 'emr-serverless.amazonaws.com',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('Emr SparkJob Submitter Function', () =>{
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      VpcConfig: {
+        SubnetIds: {
+          'Fn::Split': [
+            ',',
+            {
+              Ref: 'PrivateSubnetIds',
+            },
+          ],
+        },
+        SecurityGroupIds: Match.anyValue(),
+      },
+      Environment: {
+        Variables: {
+          EMR_SERVERLESS_APPLICATION_ID: Match.anyValue(),
+          STACK_ID: Match.anyValue(),
+          PROJECT_ID: Match.anyValue(),
+          APP_IDS: Match.anyValue(),
+          ROLE_ARN: Match.anyValue(),
+          GLUE_CATALOG_ID: Match.anyValue(),
+          GLUE_DB: Match.anyValue(),
+          SOURCE_TABLE_NAME: Match.anyValue(),
+          SOURCE_S3_BUCKET_NAME: RefAnyValue,
+          SOURCE_S3_PREFIX: RefAnyValue,
+          SINK_S3_BUCKET_NAME: RefAnyValue,
+          SINK_S3_PREFIX: RefAnyValue,
+          PIPELINE_S3_BUCKET_NAME: RefAnyValue,
+          PIPELINE_S3_PREFIX: RefAnyValue,
+          DATA_FRESHNESS_IN_HOUR: RefAnyValue,
+          SCHEDULE_EXPRESSION: RefAnyValue,
+          TRANSFORMER_AND_ENRICH_CLASS_NAMES: Match.anyValue(),
+          S3_PATH_PLUGIN_JARS: {
+            'Fn::GetAtt': [
+              'CopyAssetsCustomResource',
+              's3PathPluginJars',
+            ],
+          },
+          S3_PATH_PLUGIN_FILES: {
+            'Fn::GetAtt': [
+              'CopyAssetsCustomResource',
+              's3PathPluginFiles',
+            ],
+          },
+          S3_PATH_ENTRY_POINT_JAR: {
+            'Fn::GetAtt': [
+              'CopyAssetsCustomResource',
+              'entryPointJar',
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  test('Has ScheduleExpression rule', ()=> {
+    template.hasResourceProperties('AWS::Events::Rule', {
+      ScheduleExpression: {
+        Ref: 'ScheduleExpression',
+      },
+      State: 'ENABLED',
+    });
+  });
+
+  test('Has EMR EMRServerless Application', ()=> {
+    template.hasResourceProperties('AWS::EMRServerless::Application', {
+      Name: Match.anyValue(),
+      ReleaseLabel: 'emr-6.9.0',
+      Type: 'SPARK',
+      AutoStartConfiguration: {
+        Enabled: true,
+      },
+      AutoStopConfiguration: {
+        Enabled: true,
+        IdleTimeoutMinutes: 5,
+      },
+      NetworkConfiguration: Match.anyValue(),
+    });
+  });
+
+
+  test('IAM::Policy for EMR job role has specified resource', ()=> {
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          Match.anyValue(),
+          Match.anyValue(),
+          {
+            Action:
+              'emr-serverless:StartApplication',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':emr-serverless:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':applications/',
+                  {
+                    'Fn::GetAtt': [
+                      Match.anyValue(),
+                      'ApplicationId',
+                    ],
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            Action:
+                'emr-serverless:StartJobRun',
+
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':emr-serverless:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'glue:GetDatabase',
+              'glue:GetTable',
+              'glue:GetPartitions',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':catalog',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':database/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':table/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':table/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: 'iam:CreateServiceLinkedRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':iam::',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless',
+                ],
+              ],
+            },
+          },
+          Match.anyValue(),
+          Match.anyValue(),
+          Match.anyValue(),
+          Match.anyValue(),
+        ],
+      },
+    });
+  });
+
+
+  test('IAM::Policy for copy asset lambda role has specified resource', ()=> {
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          Match.anyValue(),
+          {
+            Action: [
+              's3:CopyObject',
+              's3:GetObject',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':s3:::',
+                  {
+                    'Fn::Select': [
+                      2,
+                      {
+                        'Fn::Split': [
+                          '/',
+                          {
+                            Ref: 'EntryPointJar',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  '/*',
+                ],
+              ],
+            },
+          },
+          Match.anyValue(),
+        ],
+      },
+    });
+  });
+
 
 });
