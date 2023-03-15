@@ -158,7 +158,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
       const cognito = new SolutionCognito(this, 'solution-cognito', {
         email: emailParamerter.valueAsString,
-        callbackUrls: [controlPlane.controlPlaneUrl],
+        callbackUrls: [`${controlPlane.controlPlaneUrl}/signin`],
       });
 
       issuer = cognito.oidcProps.issuer;

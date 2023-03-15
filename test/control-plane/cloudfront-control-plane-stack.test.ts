@@ -629,4 +629,43 @@ describe('CloudFrontS3PotalStack', () => {
     });
   });
 
+  test('OIDC callback url', () => {
+    commonTemplate.hasResourceProperties('AWS::Cognito::UserPoolClient', {
+      AllowedOAuthFlows: [
+        'implicit',
+        'code',
+      ],
+      AllowedOAuthFlowsUserPoolClient: true,
+      AllowedOAuthScopes: [
+        'openid',
+        'email',
+        'profile',
+      ],
+      ExplicitAuthFlows: [
+        'ALLOW_USER_PASSWORD_AUTH',
+        'ALLOW_REFRESH_TOKEN_AUTH',
+      ],
+      SupportedIdentityProviders: [
+        'COGNITO',
+      ],
+      CallbackURLs: [
+        {
+          'Fn::Join': [
+            '',
+            [
+              'https://',
+              {
+                'Fn::GetAtt': [
+                  Match.anyValue(),
+                  'DomainName',
+                ],
+              },
+              '/signin',
+            ],
+          ],
+        },
+      ],
+    });
+  });
+
 });
