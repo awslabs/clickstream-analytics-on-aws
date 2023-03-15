@@ -241,6 +241,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       oidc_provider: issuer,
       oidc_client_id: clientId,
       oidc_customer_domain: `${controlPlane.controlPlaneUrl}/signin`,
+      solution_version: process.env.BUILD_VERSION || 'v1',
     };
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));
 
