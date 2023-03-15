@@ -61,7 +61,7 @@ declare global {
         s3BufferInterval: string;
       };
       sinkKafka: {
-        selfHost: false;
+        selfHost: boolean;
         kafkaBrokers: string;
         kafkaTopic: string;
         mskClusterName: string;
@@ -69,7 +69,7 @@ declare global {
         mskSecurityGroupId: string;
       };
       sinkKinesis: {
-        kinesisStreamMode: 'ON_DEMAND';
+        kinesisStreamMode: string;
         kinesisShardCount: string;
         kinesisDataS3Bucket: {
           name: string;
@@ -91,7 +91,9 @@ declare global {
     selectedSDK: SelectProps.Option | null;
     selectedPublicSubnet: OptionDefinition[];
     selectedPrivateSubnet: OptionDefinition[];
-    enableEdp: boolean;
     selectedHostedZone: SelectProps.Option | null;
+    mskCreateMethod: string;
+    selectedMSK: SelectProps.Option | null;
+    seledtedKDKProvisionType: SelectProps.Option | null;
   }
 }

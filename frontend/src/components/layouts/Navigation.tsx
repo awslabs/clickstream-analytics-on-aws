@@ -12,7 +12,6 @@
  */
 
 import {
-  Badge,
   SideNavigation,
   SideNavigationProps,
 } from '@cloudscape-design/components';
@@ -30,34 +29,22 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const navItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
     { type: 'link', text: t('nav.projects'), href: '/projects' },
-    { type: 'link', text: t('nav.pipelines'), href: '/pipelines' },
-    { type: 'link', text: t('nav.plugin'), href: '/plugins' },
-    { type: 'link', text: t('nav.analytics'), href: '#/analytics' },
     {
       text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
-      items: [
-        { type: 'link', text: t('nav.dashboard'), href: '#/dashboard' },
-        { type: 'link', text: t('nav.monitorAlerts'), href: '#/monitors' },
-      ],
+      items: [{ type: 'link', text: t('nav.monitorAlerts'), href: '#/alarms' }],
     },
     {
       text: t('nav.tools'),
       type: 'section',
       defaultExpanded: true,
       items: [
-        { type: 'link', text: t('nav.simuTest'), href: '#/simulation' },
+        { type: 'link', text: t('nav.plugin'), href: '/plugins' },
         { type: 'link', text: t('nav.sdkIntegration'), href: '#/skd' },
       ],
     },
     { type: 'divider' },
-    {
-      type: 'link',
-      text: t('nav.notifications'),
-      href: '#/notifications',
-      info: <Badge color="red">23</Badge>,
-    },
     {
       type: 'link',
       text: t('nav.doc'),

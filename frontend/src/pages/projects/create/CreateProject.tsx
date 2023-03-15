@@ -44,15 +44,14 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [visible, setVisible] = useState(openModel);
   const [curStep, setCurStep] = useState(0);
-  const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option>(
-    PROJECT_STAGE_LIST[0]
+  const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option | null>(
+    null
   );
   const [editing, setEditing] = useState(false);
   const [curProject, setCurProject] = useState<IProject>(INIT_PROJECT_DATA);
 
   const [projectNameRequiredError, setProjectNameRequiredError] =
     useState(false);
-  const [emailsEmptyError, setEmailsEmptyError] = useState(false);
   const [emailsInvalidError, setEmailsInvalidError] = useState(false);
 
   const STEP_TITLE = [
@@ -64,7 +63,6 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const navigate = useNavigate();
   useEffect(() => {
     setProjectNameRequiredError(false);
-    setEmailsEmptyError(false);
     setEmailsInvalidError(false);
     setCurProject(INIT_PROJECT_DATA);
     setCurStep(0);
@@ -74,7 +72,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = selectedEnv.value || '';
+      curProject.environment = selectedEnv?.value || 'Unspecified';
       const { success, data }: ApiResponse<ResponseCreate> =
         await createProject(curProject);
       if (success && data.id) {
@@ -124,11 +122,11 @@ const CreateProject: React.FC<CreateProjectProps> = (
                       setProjectNameRequiredError(true);
                       return false;
                     }
-                    if (curStep === 1 && !curProject.emails) {
-                      setEmailsEmptyError(true);
-                      return false;
-                    }
-                    if (curStep === 1 && !validateEmails(curProject.emails)) {
+                    if (
+                      curStep === 1 &&
+                      curProject.emails &&
+                      !validateEmails(curProject.emails)
+                    ) {
                       setEmailsInvalidError(true);
                       return false;
                     }
@@ -229,18 +227,13 @@ const CreateProject: React.FC<CreateProjectProps> = (
               label={t('project:create.inputEmail')}
               stretch
               errorText={
-                emailsEmptyError
-                  ? t('project:valid.emailEmpty')
-                  : emailsInvalidError
-                  ? t('project:valid.emailInvalid')
-                  : ''
+                emailsInvalidError ? t('project:valid.emailInvalid') : ''
               }
             >
               <Input
                 placeholder={t('project:create.inputEmailPlaceholder') || ''}
                 value={curProject.emails}
                 onChange={(e) => {
-                  setEmailsEmptyError(false);
                   setEmailsInvalidError(false);
                   setCurProject((prev) => {
                     return {

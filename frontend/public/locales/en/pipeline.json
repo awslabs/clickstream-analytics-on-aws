@@ -12,16 +12,16 @@
     "regionEmpty": "Please select region.",
     "vpcEmpty": "Please select VPC.",
     "sdkEmpty": "Please select SDK",
+    "s3BucketEmpty": "Please select Amazon S3 Bucket",
     "publicSubnetEmpty": "Please select public subnets",
     "privateSubnetEmpty": "Please select private subnets",
     "domainNameEmpty": "Please input domain name",
-    "hostedZoneEmpty": "Please select hosted zone",
-    "s3BufferBucketEmpty": "Please select Amazon S3 Bucket"
+    "hostedZoneEmpty": "Please select hosted zone"
   },
   "create": {
     "basicInfo": "Basic information",
     "configIngestion": "Configure ingestion",
-    "configETL": "Configure ETL",
+    "dataProcessor": "Data Processor",
     "reporting": "Reporting",
     "reviewLaunch": "Review and launch",
     "selectFile": "Select a mapping file",
@@ -37,6 +37,9 @@
     "enterKey": "Enter key",
     "enterValue": "Enter value",
     "noItems": "No items associated with the resource.",
+    "s3Assets": "Pipeline asset location",
+    "s3AssetsDesc": "Choose an Amazon S3 location to store the raw and processed data for this project, you can also specify a storage class for it",
+    "selectS3": "Select an Amazon S3 Bucket",
     "kds": {
       "kdsSettings": "Amazon Kinesis Data Stream settings",
       "kdsSettingsDesc": "The solution will create a KDS for you based on your specifications.",
@@ -45,7 +48,12 @@
       "enableAS": "Enable autoscaling",
       "enableASDesc": "Choose Yes if you want to enable autoscaling for the KDS",
       "maxShard": "Maximum shard number",
-      "maxShardDesc": "Specify maximum number of shards. "
+      "maxShardDesc": "Specify maximum number of shards. ",
+      "provisionMode": "Provision mode",
+      "provisionModeDesc": "Choose Yes if you want to enable autoscaling for the KDS",
+      "selectMode": "Select provision mode",
+      "ondemand": "On-demand",
+      "provisioned": "Provisioned"
     },
     "msk": {
       "mskCluster": "Connect to an Apache Kafka Cluster",
@@ -58,7 +66,12 @@
       "brokerLink": "Broker link",
       "brokerLinkDesc": "Enter the connection URL for the cluster you wish to connect to.",
       "brokerLindPlaceHolder": "Enter the connection URL",
-      "manualTopicDesc": "Please specify the topic for storing the data"
+      "manualTopicDesc": "Please specify the topic for storing the data",
+      "selectMSK": "Please select a MKS Cluster",
+      "createMSK": "Create a quick-start cluster",
+      "createMSKDesc": "The solution creates a small MSK cluster (2vcpu, 8RAM) as starter, suitable for testing purpose",
+      "exsitingMSK": "Select an existing cluster",
+      "exsitingMSKDesc": "The solution establish connection with a MSK cluster within the same VPC"
     },
     "s3": {
       "selectS3": "Select a S3 bucket for data buffer",
@@ -175,7 +188,7 @@
     "modelSettings": "Data modeling setting",
     "modelSettingsDesc": "Data modeling setting description",
     "modelEngine": "Modeling engine",
-    "enableETL": "Enable ETL",
+    "enableETL": "Enable Data Processor",
     "enableETLDesc1": "This solution ships with an inbuilt data schema ",
     "enableETLDesc2": " to model the raw event data sent from your web and mobile apps, so that it can generate out-of-the-box dashboards and makes it easy for you to build your business-specific analytics. To use our data model, you need to enable ETL to transform the raw event data to our data model. If you choose otherwise, your data will be saved in S3 in its raw format.",
     "transform": "Transform",

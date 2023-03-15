@@ -19,7 +19,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ProtocalType, SinkType } from 'ts/const';
+import { ProtocalType, ResourceCreateMehod, SinkType } from 'ts/const';
 import BasicInformation from './steps/BasicInformation';
 import ConfigETL from './steps/ConfigETL';
 import ConfigIngestion from './steps/ConfigIngestion';
@@ -37,6 +37,7 @@ const Content: React.FC = () => {
   const [regionEmptyError, setRegionEmptyError] = useState(false);
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
+  const [assetsBucketEmptyError, setAssetsBucketEmptyError] = useState(false);
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
@@ -68,7 +69,7 @@ const Content: React.FC = () => {
       domain: {
         hostedZoneId: '',
         hostedZoneName: '',
-        recordName: 'click',
+        recordName: '',
       },
       loadBalancer: {
         serverEndpointPath: '/collect',
@@ -81,7 +82,7 @@ const Content: React.FC = () => {
         },
         notificationsTopicArn: '',
       },
-      sinkType: SinkType.S3,
+      sinkType: SinkType.MSK,
       sinkS3: {
         s3DataBucket: {
           name: '',
@@ -99,8 +100,8 @@ const Content: React.FC = () => {
         mskSecurityGroupId: '',
       },
       sinkKinesis: {
-        kinesisStreamMode: 'ON_DEMAND',
-        kinesisShardCount: '',
+        kinesisStreamMode: '',
+        kinesisShardCount: '2',
         kinesisDataS3Bucket: {
           name: '',
           prefix: '',
@@ -115,8 +116,10 @@ const Content: React.FC = () => {
     selectedSDK: null,
     selectedPublicSubnet: [],
     selectedPrivateSubnet: [],
-    enableEdp: true,
     selectedHostedZone: null,
+    mskCreateMethod: ResourceCreateMehod.EXSITING,
+    selectedMSK: null,
+    seledtedKDKProvisionType: null,
   });
 
   const validateBasicInfo = () => {
@@ -132,6 +135,14 @@ const Content: React.FC = () => {
       setVPCEmptyError(true);
       return false;
     }
+    if (!pipelineInfo.dataCollectionSDK) {
+      setSDKEmptyError(true);
+      return false;
+    }
+    if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name) {
+      setAssetsBucketEmptyError(true);
+      return false;
+    }
     return true;
   };
 
@@ -140,11 +151,9 @@ const Content: React.FC = () => {
       setPublicSubnetError(true);
       return false;
     }
-    if (pipelineInfo.selectedPrivateSubnet.length <= 0) {
-      setPrivateSubnetError(true);
-      return false;
-    }
-    if (pipelineInfo.enableEdp) {
+    if (
+      pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
+    ) {
       if (!pipelineInfo.ingestionServer.domain.recordName.trim()) {
         setDomainNameEmptyError(true);
         return false;
@@ -231,6 +240,7 @@ const Content: React.FC = () => {
               vpcEmptyError={vpcEmptyError}
               sdkEmptyError={sdkEmptyError}
               pipelineInfo={pipelineInfo}
+              assetsS3BucketEmptyError={assetsBucketEmptyError}
               changePipelineName={(name) => {
                 setNameEmptyError(false);
                 setPipelineInfo((prev) => {
@@ -281,6 +291,32 @@ const Content: React.FC = () => {
                     ...prev,
                     selectedSDK: sdk,
                     dataCollectionSDK: sdk.value || '',
+                  };
+                });
+              }}
+              changeS3Bucket={(bucket) => {
+                setAssetsBucketEmptyError(false);
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        logS3Bucket: {
+                          ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                          name: bucket,
+                        },
+                      },
+                      sinkKinesis: {
+                        ...prev.ingestionServer.sinkKinesis,
+                        kinesisDataS3Bucket: {
+                          ...prev.ingestionServer.sinkKinesis
+                            .kinesisDataS3Bucket,
+                          name: bucket,
+                        },
+                      },
+                    },
                   };
                 });
               }}
@@ -380,14 +416,6 @@ const Content: React.FC = () => {
                         warmPoolSize: size,
                       },
                     },
-                  };
-                });
-              }}
-              changeEnableEdp={(enable) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    enableEdp: enable,
                   };
                 });
               }}
@@ -525,11 +553,120 @@ const Content: React.FC = () => {
                   };
                 });
               }}
+              changeCreateMSKMethod={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    mskCreateMethod: type,
+                  };
+                });
+              }}
+              changeSelectedMSK={(msk) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedMSK: msk,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        mskClusterName: msk.label || '',
+                        mskSecurityGroupId: msk.description || '',
+                      },
+                    },
+                  };
+                });
+              }}
+              changeMSKTopic={(topic) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        mskTopic: topic,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSelfHosted={(selfHost) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        selfHost: selfHost,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeKafkaBrokers={(brokers) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        kafkaBrokers: brokers,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeKafkaTopic={(topic) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        kafkaTopic: topic,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeKDSProvisionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    seledtedKDKProvisionType: type,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKinesis: {
+                        ...prev.ingestionServer.sinkKinesis,
+                        kinesisStreamMode: type.value || '',
+                      },
+                    },
+                  };
+                });
+              }}
+              changeKDSShardNumber={(num) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKinesis: {
+                        ...prev.ingestionServer.sinkKinesis,
+                        kinesisShardCount: num,
+                      },
+                    },
+                  };
+                });
+              }}
             />
           ),
         },
         {
-          title: t('pipeline:create.configETL'),
+          title: t('pipeline:create.dataProcessor'),
           content: <ConfigETL />,
         },
         {
@@ -550,10 +687,6 @@ const CreatePipeline: React.FC = () => {
   const breadcrumbItems = [
     {
       text: t('breadCrumb.name'),
-      href: '/',
-    },
-    {
-      text: t('breadCrumb.pipelines'),
       href: '/',
     },
     {

@@ -53,8 +53,8 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         await getS3BucketList(pipelineInfo.region);
       if (success) {
         const s3Options: AutosuggestProps.Options = data.map((element) => ({
-          label: `s3://${element.name}`,
-          value: `s3://${element.name}`,
+          label: `${element.name}`,
+          value: `${element.name}`,
         }));
         setS3BucketOptionList(s3Options);
         setLoadingBucket(false);
@@ -76,14 +76,12 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
       />
       <FormField
         label={t('pipeline:create.s3.s3URI')}
-        constraintText={t('pipeline:create.s3.s3URIFormat')}
         errorText={
-          bufferS3BucketEmptyError
-            ? t('pipeline:valid.s3BufferBucketEmpty')
-            : ''
+          bufferS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
         }
       >
         <Autosuggest
+          placeholder={t('pipeline:create.selectS3') || ''}
           statusType={loadingBucket ? 'loading' : 'finished'}
           onChange={({ detail }) => changeS3Bucket(detail.value)}
           value={pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name}

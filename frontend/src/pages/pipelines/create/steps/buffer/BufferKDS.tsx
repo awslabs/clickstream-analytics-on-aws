@@ -15,54 +15,69 @@ import {
   FormField,
   Input,
   Select,
+  SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { YES_NO, YES_NO_LIST } from 'ts/const';
+import { KDSProvisionType } from 'ts/const';
 
-const BufferKDS: React.FC = () => {
+interface BufferKDSProps {
+  pipelineInfo: IExtPipeline;
+  changeKDSProvisionType: (provision: SelectProps.Option) => void;
+  changeKDSShardNumber: (num: string) => void;
+}
+
+const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
   const { t } = useTranslation();
-  const [enableAS, setEnableAS] = useState<any>({
-    value: YES_NO.YES,
-    label: 'Yes',
-  });
+  const { pipelineInfo, changeKDSProvisionType, changeKDSShardNumber } = props;
   return (
     <SpaceBetween direction="vertical" size="l">
       <FormField
         label={t('pipeline:create.kds.kdsSettings')}
         description={t('pipeline:create.kds.kdsSettingsDesc')}
       />
-      <FormField
-        label={t('pipeline:create.kds.shardNum')}
-        description={t('pipeline:create.kds.shardNumDesc')}
-      >
-        <Input value="1" type="number" />
-      </FormField>
 
       <FormField
-        label={t('pipeline:create.kds.enableAS')}
-        description={t('pipeline:create.kds.enableASDesc')}
+        label={t('pipeline:create.kds.provisionMode')}
+        description={t('pipeline:create.kds.provisionModeDesc')}
       >
         <Select
-          selectedOption={enableAS}
-          onChange={({ detail }) => setEnableAS(detail.selectedOption)}
-          options={YES_NO_LIST}
-          filteringType="auto"
+          placeholder={t('pipeline:create.kds.selectMode') || ''}
+          selectedOption={pipelineInfo.seledtedKDKProvisionType}
+          onChange={({ detail }) =>
+            changeKDSProvisionType(detail.selectedOption)
+          }
+          options={[
+            {
+              label: t('pipeline:create.kds.ondemand') || '',
+              value: KDSProvisionType.ON_DEMAND,
+            },
+            {
+              label: t('pipeline:create.kds.provisioned') || '',
+              value: KDSProvisionType.PROVISIONED,
+            },
+          ]}
           selectedAriaLabel="Selected"
         />
       </FormField>
 
-      <FormField
-        label={t('pipeline:create.kds.maxShard')}
-        description={t('pipeline:create.kds.maxShardDesc')}
-      >
-        <Input
-          disabled={enableAS.value === YES_NO.NO}
-          value="2"
-          type="number"
-        />
-      </FormField>
+      {pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode ===
+        KDSProvisionType.PROVISIONED && (
+        <FormField
+          label={t('pipeline:create.kds.shardNum')}
+          description={t('pipeline:create.kds.shardNumDesc')}
+        >
+          <Input
+            placeholder="2"
+            value={pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount}
+            type="number"
+            onChange={(e) => {
+              changeKDSShardNumber(e.detail.value);
+            }}
+          />
+        </FormField>
+      )}
     </SpaceBetween>
   );
 };

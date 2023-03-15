@@ -48,4 +48,12 @@ declare global {
   interface S3Response {
     name: string;
   }
+
+  interface MSKResponse {
+    arn: string;
+    name: string;
+    securityGroupId: string;
+    state: string;
+    type: string;
+  }
 }

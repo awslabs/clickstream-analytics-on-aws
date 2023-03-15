@@ -57,10 +57,6 @@ const ReviewAndLaunch: React.FC = () => {
               </Box>
               <div>/collect</div>
             </div>
-            <div>
-              <Box variant="awsui-key-label">{t('pipeline:create.asName')}</Box>
-              <div>Min:2, Max:4, Warm: 2</div>
-            </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">
             <div>

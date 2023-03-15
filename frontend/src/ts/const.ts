@@ -60,6 +60,11 @@ export const TRANSFORM_LIST = [
   },
 ];
 
+export enum ResourceCreateMehod {
+  CREATE = 'create',
+  EXSITING = 'exsiting',
+}
+
 export enum YES_NO {
   YES = 'Yes',
   NO = 'No',
@@ -74,11 +79,16 @@ export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export enum SinkType {
   S3 = 's3',
-  MSK = 'msk',
-  KDS = 'kds',
+  MSK = 'kafka',
+  KDS = 'kinesis',
 }
 
 export enum ProtocalType {
   HTTP = 'HTTP',
   HTTPS = 'HTTPS',
+}
+
+export enum KDSProvisionType {
+  ON_DEMAND = 'ON_DEMAND',
+  PROVISIONED = 'PROVISIONED',
 }

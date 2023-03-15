@@ -12,6 +12,8 @@
  */
 
 import {
+  Autosuggest,
+  AutosuggestProps,
   Container,
   FormField,
   Header,
@@ -23,7 +25,7 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { getSDKTypeList } from 'apis/dictionary';
-import { getRegionList, getVPCList } from 'apis/resource';
+import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
 import InfoLink from 'components/common/InfoLink';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
@@ -37,10 +39,12 @@ interface BasicInformationProps {
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
   changeTags: (tag: TagEditorProps.Tag[]) => void;
+  changeS3Bucket: (bucket: string) => void;
   nameEmptyError: boolean;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
+  assetsS3BucketEmptyError: boolean;
 }
 
 const BasicInformation: React.FC<BasicInformationProps> = (
@@ -55,19 +59,24 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     changeVPC,
     changeSDK,
     changeTags,
+    changeS3Bucket,
     nameEmptyError,
     regionEmptyError,
     vpcEmptyError,
     sdkEmptyError,
+    assetsS3BucketEmptyError,
   } = props;
   const [loadingRegion, setLoadingRegion] = useState(false);
   const [loadingVPC, setLoadingVPC] = useState(false);
   const [loadingSDK, setLoadingSDK] = useState(false);
+  const [loadingBucket, setLoadingBucket] = useState(false);
   const [regionOptionList, setRegionOptionList] = useState<SelectProps.Options>(
     []
   );
   const [vpcOptionList, setVPCOptionList] = useState<SelectProps.Options>([]);
   const [sdkOptionList, setSDKOptionList] = useState<SelectProps.Options>([]);
+  const [s3BucketOptionList, setS3BucketOptionList] =
+    useState<AutosuggestProps.Options>([]);
 
   // get all region list
   const getAllRegionList = async () => {
@@ -111,6 +120,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   // get vpc list after change region
   const getVPCListByRegion = async (region: string) => {
     setLoadingVPC(true);
+    setVPCOptionList([]);
     try {
       const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList(
         region
@@ -129,10 +139,31 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     }
   };
 
+  // get all s3 bucket
+  const getAllS3BucketList = async (region: string) => {
+    setLoadingBucket(true);
+    setS3BucketOptionList([]);
+    try {
+      const { success, data }: ApiResponse<S3Response[]> =
+        await getS3BucketList(region);
+      if (success) {
+        const s3Options: AutosuggestProps.Options = data.map((element) => ({
+          label: `${element.name}`,
+          value: `${element.name}`,
+        }));
+        setS3BucketOptionList(s3Options);
+        setLoadingBucket(false);
+      }
+    } catch (error) {
+      setLoadingBucket(false);
+    }
+  };
+
   // Monitor region change
   useEffect(() => {
     if (pipelineInfo.selectedRegion && pipelineInfo.selectedRegion.value) {
       getVPCListByRegion(pipelineInfo.selectedRegion.value);
+      getAllS3BucketList(pipelineInfo.selectedRegion.value);
     }
   }, [pipelineInfo.selectedRegion]);
 
@@ -181,6 +212,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           errorText={regionEmptyError ? t('pipeline:valid.regionEmpty') : ''}
         >
           <Select
+            filteringType="auto"
             placeholder={t('pipeline:create.awsRegionPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedRegion}
             options={regionOptionList}
@@ -223,6 +255,23 @@ const BasicInformation: React.FC<BasicInformationProps> = (
             onChange={(e) => {
               changeSDK(e.detail.selectedOption);
             }}
+          />
+        </FormField>
+
+        <FormField
+          label={t('pipeline:create.s3Assets')}
+          constraintText={t('pipeline:create.s3AssetsDesc')}
+          errorText={
+            assetsS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
+          }
+        >
+          <Autosuggest
+            placeholder={t('pipeline:create.selectS3') || ''}
+            statusType={loadingBucket ? 'loading' : 'finished'}
+            onChange={({ detail }) => changeS3Bucket(detail.value)}
+            value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}
+            options={s3BucketOptionList}
+            enteredTextLabel={(value) => `${t('use')}: "${value}"`}
           />
         </FormField>
 

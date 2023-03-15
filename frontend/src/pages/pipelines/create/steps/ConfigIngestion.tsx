@@ -42,7 +42,6 @@ interface ConfigIngestionProps {
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;
-  changeEnableEdp: (enable: boolean) => void;
   changeRecordName: (name: string) => void;
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
@@ -52,6 +51,16 @@ interface ConfigIngestionProps {
   changeBufferS3Prefix: (prefix: string) => void;
   changeS3BufferSize: (size: string) => void;
   changeBufferInterval: (interval: string) => void;
+
+  changeSelfHosted: (selfHosted: boolean) => void;
+  changeCreateMSKMethod: (type: string) => void;
+  changeSelectedMSK: (msk: SelectProps.Option) => void;
+  changeMSKTopic: (topic: string) => void;
+  changeKafkaBrokers: (brokers: string) => void;
+  changeKafkaTopic: (topic: string) => void;
+
+  changeKDSProvisionType: (provision: SelectProps.Option) => void;
+  changeKDSShardNumber: (num: string) => void;
 
   publicSubnetError: boolean;
   privateSubnetError: boolean;
@@ -71,7 +80,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeServerMin,
     changeServerMax,
     changeWarmSize,
-    changeEnableEdp,
     changeRecordName,
     changeProtocal,
     changeServerEdp,
@@ -81,6 +89,14 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeBufferS3Prefix,
     changeS3BufferSize,
     changeBufferInterval,
+    changeSelfHosted,
+    changeCreateMSKMethod,
+    changeSelectedMSK,
+    changeMSKTopic,
+    changeKafkaBrokers,
+    changeKafkaTopic,
+    changeKDSProvisionType,
+    changeKDSShardNumber,
     publicSubnetError,
     privateSubnetError,
     domainNameEmptyError,
@@ -261,15 +277,22 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           <FormField>
             <Checkbox
-              onChange={({ detail }) => changeEnableEdp(detail.checked)}
-              checked={pipelineInfo.enableEdp}
-              description={t('pipeline:create.enableEdpDesc')}
+              onChange={({ detail }) =>
+                changeProtocal(
+                  detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP
+                )
+              }
+              checked={
+                pipelineInfo.ingestionServer.loadBalancer.protocol ===
+                ProtocalType.HTTPS
+              }
             >
-              <b>{t('pipeline:create.enableEdp')}</b>
+              <b>{t('pipeline:create.enableHttps')}</b>
             </Checkbox>
           </FormField>
 
-          {pipelineInfo.enableEdp && (
+          {pipelineInfo.ingestionServer.loadBalancer.protocol ===
+            ProtocalType.HTTPS && (
             <Grid
               gridDefinition={[{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }]}
             >
@@ -283,7 +306,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }
                 >
                   <Input
-                    placeholder="subdomain"
+                    placeholder="example.domain.com"
                     value={pipelineInfo.ingestionServer.domain.recordName}
                     onChange={(e) => {
                       changeRecordName(e.detail.value);
@@ -329,22 +352,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             </Grid>
           )}
 
-          <FormField>
-            <Checkbox
-              onChange={({ detail }) =>
-                changeProtocal(
-                  detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP
-                )
-              }
-              checked={
-                pipelineInfo.ingestionServer.loadBalancer.protocol ===
-                ProtocalType.HTTPS
-              }
-            >
-              <b>{t('pipeline:create.enableHttps')}</b>
-            </Checkbox>
-          </FormField>
-
           <FormField
             label={t('pipeline:create.requestPath')}
             description={t('pipeline:create.requestPathDesc')}
@@ -380,11 +387,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               columns={1}
               items={[
                 {
-                  label: t('pipeline:create.bufferKDS'),
-                  description: t('pipeline:create.bufferKDSDesc'),
-                  value: SinkType.KDS,
-                },
-                {
                   label: t('pipeline:create.bufferMSK'),
                   description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
@@ -393,6 +395,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: t('pipeline:create.bufferS3'),
                   description: t('pipeline:create.bufferS3Desc'),
                   value: SinkType.S3,
+                },
+                {
+                  label: t('pipeline:create.bufferKDS'),
+                  description: t('pipeline:create.bufferKDSDesc'),
+                  value: SinkType.KDS,
                 },
               ]}
             />
@@ -417,10 +424,38 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             />
           )}
           {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
-            <BufferMSK />
+            <BufferMSK
+              pipelineInfo={pipelineInfo}
+              changeCreateMSKMethod={(type) => {
+                changeCreateMSKMethod(type);
+              }}
+              changeSelectedMSK={(msk) => {
+                changeSelectedMSK(msk);
+              }}
+              changeMSKTopic={(topic) => {
+                changeMSKTopic(topic);
+              }}
+              changeSelfHosted={(selfHosted) => {
+                changeSelfHosted(selfHosted);
+              }}
+              changeKafkaBrokers={(brokers) => {
+                changeKafkaBrokers(brokers);
+              }}
+              changeKafkaTopic={(topic) => {
+                changeKafkaTopic(topic);
+              }}
+            />
           )}
           {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (
-            <BufferKDS />
+            <BufferKDS
+              pipelineInfo={pipelineInfo}
+              changeKDSProvisionType={(type) => {
+                changeKDSProvisionType(type);
+              }}
+              changeKDSShardNumber={(num) => {
+                changeKDSShardNumber(num);
+              }}
+            />
           )}
         </SpaceBetween>
       </Container>

@@ -44,10 +44,19 @@ const getS3BucketList = async (region?: string) => {
   return result;
 };
 
+const getMSKList = async (vpcId: string, region?: string) => {
+  const result: any = await apiRequest('get', `/env/msk/clusters`, {
+    vpcId: vpcId,
+    region: region,
+  });
+  return result;
+};
+
 export {
   getRegionList,
   getVPCList,
   getSubnetList,
   getHostedZoneList,
   getS3BucketList,
+  getMSKList,
 };
