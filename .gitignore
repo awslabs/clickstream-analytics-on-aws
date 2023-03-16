@@ -68,3 +68,4 @@ junit.xml
 !/.gitlab/ci-templates/license-check.yml
 !/.gitlab/ci-templates/viperlight.yml
 !/.gitlab/ci-templates/cfn-nag.yml
+!/.gitlab/ci-templates/cfn-lint.yml

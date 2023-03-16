@@ -13,6 +13,7 @@ include:
   - local: .gitlab/ci-templates/license-check.yml
   - local: .gitlab/ci-templates/viperlight.yml
   - local: .gitlab/ci-templates/cfn-nag.yml
+  - local: .gitlab/ci-templates/cfn-lint.yml
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"

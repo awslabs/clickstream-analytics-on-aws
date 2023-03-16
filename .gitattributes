@@ -10,6 +10,7 @@
 /.gitignore linguist-generated
 /.gitlab-ci.yml linguist-generated
 /.gitlab/ci-templates/build.yml linguist-generated
+/.gitlab/ci-templates/cfn-lint.yml linguist-generated
 /.gitlab/ci-templates/cfn-nag.yml linguist-generated
 /.gitlab/ci-templates/docs.yml linguist-generated
 /.gitlab/ci-templates/git-secrets-scan.yml linguist-generated

@@ -9,6 +9,7 @@
     ".gitignore",
     ".gitlab-ci.yml",
     ".gitlab/ci-templates/build.yml",
+    ".gitlab/ci-templates/cfn-lint.yml",
     ".gitlab/ci-templates/cfn-nag.yml",
     ".gitlab/ci-templates/docs.yml",
     ".gitlab/ci-templates/git-secrets-scan.yml",
