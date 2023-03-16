@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage, Duration } from 'aws-cdk-lib';
 import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -196,6 +196,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     const authorizer = new TokenAuthorizer(this, 'JWTAuthorizer', {
       handler: authFunction,
       validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
+      resultsCacheTtl: Duration.seconds(0),
     });
 
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {

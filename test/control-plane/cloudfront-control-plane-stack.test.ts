@@ -575,6 +575,7 @@ describe('CloudFrontS3PotalStack', () => {
   test('exist api authorizer', () => {
     commonTemplate.hasResourceProperties('AWS::ApiGateway::Authorizer', {
       Type: 'TOKEN',
+      AuthorizerResultTtlInSeconds: 0,
       AuthorizerUri: {
         'Fn::Join': [
           '',
