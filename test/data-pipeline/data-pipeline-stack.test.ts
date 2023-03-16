@@ -916,10 +916,7 @@ describe ('ETL job submitter', () => {
         Statement: [
           Match.anyValue(),
           {
-            Action: [
-              's3:CopyObject',
-              's3:GetObject',
-            ],
+            Action: 's3:GetObject',
             Effect: 'Allow',
             Resource: {
               'Fn::Join': [

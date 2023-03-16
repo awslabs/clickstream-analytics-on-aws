@@ -88,7 +88,6 @@ function createCopyAssetsLambda(
   const role = createLambdaRole(scope, 'CopyAssetsCustomResourceLambdaRole', false, [
     new PolicyStatement({
       actions: [
-        's3:CopyObject',
         's3:GetObject',
       ],
       resources: [`${copySourceS3Arn}/*`],
