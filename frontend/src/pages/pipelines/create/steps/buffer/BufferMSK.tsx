@@ -52,7 +52,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const [mskOptionList, setMSKOptionList] = useState<AutosuggestProps.Options>(
     []
   );
-  // get all s3 bucket
+  // get msk clusters by region
   const getAllMSKClusterList = async () => {
     setLoadingMSK(true);
     try {

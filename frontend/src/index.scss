@@ -119,8 +119,16 @@ code {
   margin-top: 5px;
 }
 
+.ml-10 {
+  margin-left: 10px;
+}
+
 .w-45p {
   width: 45%;
+}
+
+.divider {
+  background-color: #ccc;
 }
 
 .more-settings {
@@ -270,6 +278,11 @@ ul.menu-list li.checkbox-item {
   right: 0;
   z-index: 2000;
 }
+
+.version {
+  color: #d1d5db;
+}
+
 @media only screen and (max-width: 493px) {
   #f {
     padding: 10px 20px;

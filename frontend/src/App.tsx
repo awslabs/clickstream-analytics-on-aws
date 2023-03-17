@@ -16,6 +16,7 @@ import Axios from 'axios';
 import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
+import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -137,6 +138,7 @@ const SignedInPage: React.FC = () => {
 const App: React.FC = () => {
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [oidcConfig, setOidcConfig] = useState<AuthProviderProps>();
+  const [contextData, setContextData] = useState<ConfigType>();
 
   const initAuthentication = (configData: ConfigType) => {
     const settings = {
@@ -156,6 +158,7 @@ const App: React.FC = () => {
     // Get config
     const res = await Axios.get(`${CONFIG_URL}?timestamp=${timeStamp}`);
     const configData: ConfigType = res.data;
+    setContextData(configData);
     // Get oidc logout url from openid configuration
     await Axios.get(
       `${configData.oidc_provider}/.well-known/openid-configuration`
@@ -196,7 +199,9 @@ const App: React.FC = () => {
         </div>
       ) : (
         <AuthProvider {...oidcConfig}>
-          <SignedInPage />
+          <AppContext.Provider value={contextData}>
+            <SignedInPage />
+          </AppContext.Provider>
         </AuthProvider>
       )}
     </div>

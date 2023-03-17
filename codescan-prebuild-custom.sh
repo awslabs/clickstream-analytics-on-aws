@@ -65,7 +65,7 @@ scan_py() {
 echo -----------------------------------------------------------
 echo Scanning all Nodejs projects
 echo -----------------------------------------------------------
-find_all_node_projects ${viperlight_temp}
+# find_all_node_projects ${viperlight_temp}
 if [[ -e ${viperlight_temp}/scan_npm_list.txt ]]; then
     while read folder
         do
@@ -101,7 +101,7 @@ echo -----------------------------------------------------------
 echo Scanning everywhere else
 echo -----------------------------------------------------------
 cd ${solution_dir}
-viperlight scan -x node-yarnoutdated
+viperlight scan -x node-yarnoutdated -x node-npmaudit
 rc=$?
 if [ $rc -gt 0 ]; then
     ((failed_scans=failed_scans+1))

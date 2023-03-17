@@ -19,10 +19,15 @@ import cloneDeep from 'lodash/cloneDeep';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ProtocalType, ResourceCreateMehod, SinkType } from 'ts/const';
+import {
+  ExecutionType,
+  ProtocalType,
+  ResourceCreateMehod,
+  SinkType,
+} from 'ts/const';
 import BasicInformation from './steps/BasicInformation';
-import ConfigETL from './steps/ConfigETL';
 import ConfigIngestion from './steps/ConfigIngestion';
+import DataProcessing from './steps/DataProcessing';
 import Reporting from './steps/Reporting';
 import ReviewAndLaunch from './steps/ReviewAndLaunch';
 
@@ -49,6 +54,7 @@ const Content: React.FC = () => {
 
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>({
     projectId: projectId ?? ''.toString(),
+    appIds: [],
     name: '',
     description: '',
     region: '',
@@ -108,7 +114,24 @@ const Content: React.FC = () => {
         },
       },
     },
-    etl: {},
+    etl: {
+      dataFreshnessInHour: '',
+      scheduleExpression: '',
+      sourceS3Bucket: {
+        name: '',
+        prefix: '',
+      },
+      sinkS3Bucket: {
+        name: '',
+        prefix: '',
+      },
+      pipelineBucket: {
+        name: '',
+        prefix: '',
+      },
+      transformPlugin: '',
+      enrichPlugin: [],
+    },
     dataModel: {},
 
     selectedRegion: null,
@@ -120,6 +143,25 @@ const Content: React.FC = () => {
     mskCreateMethod: ResourceCreateMehod.EXSITING,
     selectedMSK: null,
     seledtedKDKProvisionType: null,
+
+    enableDataProcessing: true,
+    scheduleExpression: '',
+
+    exeCronExp: '',
+    excutionFixedValue: '',
+    enableRedshift: true,
+    enableAsana: false,
+    eventFreshValue: '',
+    redshiftExecutionValue: '',
+
+    selectedExcutionType: null,
+    selectedExcutionUnit: null,
+    selectedEventFreshUnit: null,
+    selectedRedshiftCluster: null,
+    selectedRedshiftExecutionUnit: null,
+
+    selectedTransformPlugins: [],
+    selectedEnrichPlugins: [],
   });
 
   const validateBasicInfo = () => {
@@ -174,6 +216,24 @@ const Content: React.FC = () => {
 
   const confirmCreatePipeline = async () => {
     const createPipelineObj: any = cloneDeep(pipelineInfo);
+
+    if (createPipelineObj.enableDataProcessing) {
+      createPipelineObj.etl.dataFreshnessInHour =
+        pipelineInfo.selectedEventFreshUnit?.value === 'day'
+          ? parseInt(pipelineInfo.eventFreshValue) * 24
+          : pipelineInfo.eventFreshValue;
+      createPipelineObj.etl.scheduleExpression =
+        pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE
+          ? `${pipelineInfo.excutionFixedValue}${pipelineInfo.selectedExcutionUnit?.value}`
+          : pipelineInfo.exeCronExp;
+      createPipelineObj.etl.transformPlugin =
+        pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
+      createPipelineObj.etl.enrichPlugin =
+        pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
+    } else {
+      createPipelineObj.etl = null;
+    }
+
     // remove temporary properties
     delete createPipelineObj.selectedRegion;
     delete createPipelineObj.selectedVPC;
@@ -182,6 +242,30 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedPrivateSubnet;
     delete createPipelineObj.enableEdp;
     delete createPipelineObj.selectedHostedZone;
+
+    delete createPipelineObj.mskCreateMethod;
+    delete createPipelineObj.selectedMSK;
+    delete createPipelineObj.seledtedKDKProvisionType;
+
+    delete createPipelineObj.enableDataProcessing;
+    delete createPipelineObj.scheduleExpression;
+
+    delete createPipelineObj.exeCronExp;
+    delete createPipelineObj.excutionFixedValue;
+    delete createPipelineObj.enableRedshift;
+
+    delete createPipelineObj.enableAsana;
+    delete createPipelineObj.eventFreshValue;
+
+    delete createPipelineObj.redshiftExecutionValue;
+    delete createPipelineObj.selectedExcutionType;
+    delete createPipelineObj.selectedExcutionUnit;
+    delete createPipelineObj.selectedEventFreshUnit;
+    delete createPipelineObj.selectedRedshiftCluster;
+    delete createPipelineObj.selectedRedshiftExecutionUnit;
+    delete createPipelineObj.selectedTransformPlugins;
+    delete createPipelineObj.selectedEnrichPlugins;
+
     setLoadingCreate(true);
     try {
       const { success, data }: ApiResponse<ResponseCreate> =
@@ -315,6 +399,21 @@ const Content: React.FC = () => {
                             .kinesisDataS3Bucket,
                           name: bucket,
                         },
+                      },
+                    },
+                    etl: {
+                      ...prev.etl,
+                      sourceS3Bucket: {
+                        ...prev.etl.sourceS3Bucket,
+                        name: bucket,
+                      },
+                      sinkS3Bucket: {
+                        ...prev.etl.sinkS3Bucket,
+                        name: bucket,
+                      },
+                      pipelineBucket: {
+                        ...prev.etl.pipelineBucket,
+                        name: bucket,
                       },
                     },
                   };
@@ -667,7 +766,123 @@ const Content: React.FC = () => {
         },
         {
           title: t('pipeline:create.dataProcessor'),
-          content: <ConfigETL />,
+          content: (
+            <DataProcessing
+              pipelineInfo={pipelineInfo}
+              changeEnableDataProcessing={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableDataProcessing: enable,
+                  };
+                });
+              }}
+              changeExecutionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedExcutionType: type,
+                  };
+                });
+              }}
+              changeExecutionCronExp={(cron) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    exeCronExp: cron,
+                  };
+                });
+              }}
+              changeExecutionFixedValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    excutionFixedValue: value,
+                  };
+                });
+              }}
+              changeExecutionFixedUnit={(unit) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedExcutionUnit: unit,
+                  };
+                });
+              }}
+              changeEventFreshValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    eventFreshValue: value,
+                  };
+                });
+              }}
+              changeEventFreshUnit={(unit) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedEventFreshUnit: unit,
+                  };
+                });
+              }}
+              changeEnrichPlugins={(plugins) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedEnrichPlugins: plugins,
+                  };
+                });
+              }}
+              changeTransformPlugins={(plugins) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedTransformPlugins: plugins,
+                  };
+                });
+              }}
+              changeEnableRedshift={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableRedshift: enable,
+                  };
+                });
+              }}
+              changeSelectedRedshift={(cluster) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedRedshiftCluster: cluster,
+                  };
+                });
+              }}
+              changeRedshiftExecutionUnit={(unit) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedRedshiftExecutionUnit: unit,
+                  };
+                });
+              }}
+              changeRedshiftExecutionDuration={(duration) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftExecutionValue: duration,
+                  };
+                });
+              }}
+              changeEnableAsana={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableAsana: enable,
+                  };
+                });
+              }}
+            />
+          ),
         },
         {
           title: t('pipeline:create.reporting'),
@@ -701,7 +916,6 @@ const CreatePipeline: React.FC = () => {
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref="/pipelines" />}
-      // navigationOpen={false}
     />
   );
 };

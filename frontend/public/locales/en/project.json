@@ -53,6 +53,7 @@
     "status": "Status",
     "loading": "Loading projects",
     "filter": "Filter projects",
-    "find": "Find projects"
+    "find": "Find projects",
+    "noProject": "You don’t have any clickstream analytics project yet"
   }
 }

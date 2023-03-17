@@ -52,6 +52,14 @@ const getMSKList = async (vpcId: string, region?: string) => {
   return result;
 };
 
+const getRedshiftCluster = async (vpcId: string, region?: string) => {
+  const result: any = await apiRequest('get', `/env/redshift/clusters`, {
+    vpcId: vpcId,
+    region: region,
+  });
+  return result;
+};
+
 export {
   getRegionList,
   getVPCList,
@@ -59,4 +67,5 @@ export {
   getHostedZoneList,
   getS3BucketList,
   getMSKList,
+  getRedshiftCluster,
 };

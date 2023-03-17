@@ -17,6 +17,7 @@ export {};
 declare global {
   interface IPipeline {
     pipelineId?: string;
+    appIds: string[];
     projectId: string;
     name: string;
     description: string;
@@ -77,7 +78,24 @@ declare global {
         };
       };
     };
-    etl: any;
+    etl: {
+      dataFreshnessInHour: string;
+      scheduleExpression: string;
+      sourceS3Bucket: {
+        name: string;
+        prefix: string;
+      };
+      sinkS3Bucket: {
+        name: string;
+        prefix: string;
+      };
+      pipelineBucket: {
+        name: string;
+        prefix: string;
+      };
+      transformPlugin: string;
+      enrichPlugin: string[];
+    };
     dataModel: any;
     status?: string;
     createAt?: string;
@@ -95,5 +113,24 @@ declare global {
     mskCreateMethod: string;
     selectedMSK: SelectProps.Option | null;
     seledtedKDKProvisionType: SelectProps.Option | null;
+
+    enableDataProcessing: boolean;
+    scheduleExpression: string;
+
+    exeCronExp: string;
+    excutionFixedValue: string;
+    enableRedshift: boolean;
+
+    enableAsana: boolean;
+    eventFreshValue: string;
+
+    redshiftExecutionValue: string;
+    selectedExcutionType: SelectProps.Option | null;
+    selectedExcutionUnit: SelectProps.Option | null;
+    selectedEventFreshUnit: SelectProps.Option | null;
+    selectedRedshiftCluster: SelectProps.Option | null;
+    selectedRedshiftExecutionUnit: SelectProps.Option | null;
+    selectedTransformPlugins: IPlugin[];
+    selectedEnrichPlugins: IPlugin[];
   }
 }

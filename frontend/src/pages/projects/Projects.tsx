@@ -14,6 +14,7 @@
 import {
   AppLayout,
   Box,
+  Button,
   Cards,
   Link,
   Pagination,
@@ -27,6 +28,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProjectsHeader from './comps/ProjectsHeader';
 import SplitPanelContent from './comps/SplitPanel';
+import CreateProject from './create/CreateProject';
 
 interface ContentProps {
   selectedItems: IProject[];
@@ -37,10 +39,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const { t } = useTranslation();
   const { selectedItems, changeSelectedItems } = props;
   const [pageSize] = useState(12);
-  const [loadingData, setLoadingData] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [projectList, setProjectList] = useState<IProject[]>([]);
+  const [openCreate, setOpenCreate] = useState(false);
   const CARD_DEFINITIONS = {
     header: (item: IProject) => (
       <div>
@@ -104,6 +107,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   return (
     <div className="pb-30">
+      <CreateProject
+        openModel={openCreate}
+        closeModel={() => {
+          setOpenCreate(false);
+        }}
+      />
       <Cards
         selectedItems={selectedItems}
         onSelectionChange={(event) => {
@@ -112,8 +121,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         empty={
           <Box textAlign="center" color="inherit">
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('noData')}
+              <b>{t('project:list.noProject')}</b>
             </Box>
+            <Button
+              variant="primary"
+              iconName="add-plus"
+              onClick={() => {
+                setOpenCreate(true);
+              }}
+            >
+              {t('button.createProject')}
+            </Button>
           </Box>
         }
         loading={loadingData}

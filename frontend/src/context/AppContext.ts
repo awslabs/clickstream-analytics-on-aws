@@ -11,25 +11,12 @@
  *  and limitations under the License.
  */
 
-import { apiRequest } from 'ts/request';
-
-const getPluginList = async (params: {
-  pageNumber: number;
-  pageSize: number;
-  type?: string;
-}) => {
-  const result: any = await apiRequest('get', '/plugin', params);
-  return result;
-};
-
-const createPlugin = async (data: IPlugin) => {
-  const result: any = await apiRequest('post', `/plugin`, data);
-  return result;
-};
-
-const deletePlugin = async (id: string) => {
-  const result: any = await apiRequest('delete', `/plugin/${id}`);
-  return result;
-};
-
-export { getPluginList, createPlugin, deletePlugin };
+import { createContext } from 'react';
+export const AppContext = createContext<ConfigType | undefined>({
+  oidc_provider: '',
+  oidc_client_id: '',
+  oidc_customer_domain: '',
+  oidc_logout_endpoint: '',
+  project_region: '',
+  solution_version: '',
+});

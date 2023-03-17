@@ -56,4 +56,16 @@ declare global {
     state: string;
     type: string;
   }
+
+  interface RedshiftResponse {
+    endpoint: {
+      Address: string;
+      Port: string;
+    };
+    Address: string;
+    Port: string;
+    name: string;
+    nodeType: string;
+    status: string;
+  }
 }

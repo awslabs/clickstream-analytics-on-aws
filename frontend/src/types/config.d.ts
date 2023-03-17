@@ -43,6 +43,6 @@ declare global {
     oidc_customer_domain: string;
     oidc_logout_endpoint: string;
     project_region: string;
-    version: string;
+    solution_version: string;
   }
 }

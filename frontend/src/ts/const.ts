@@ -19,6 +19,8 @@ export const COMMON_ALERT_TYPE = {
   Info: 'info',
 };
 
+export const DEFAULT_TRANSFORM_SDK_IDS = ['clickstream', 'amplify'];
+
 export const PROJECT_STAGE_LIST = [
   { label: 'Dev', value: 'Dev' },
   { label: 'Test', value: 'Test' },
@@ -92,3 +94,30 @@ export enum KDSProvisionType {
   ON_DEMAND = 'ON_DEMAND',
   PROVISIONED = 'PROVISIONED',
 }
+
+export enum ExecutionType {
+  FIXED_RATE = 'fixed',
+  CRON_EXPRESS = 'cron',
+}
+
+export const EXECUTION_TYPE_LIST = [
+  {
+    label: 'Fixed Rate',
+    value: ExecutionType.FIXED_RATE,
+  },
+  {
+    label: 'Cron Expression',
+    value: ExecutionType.CRON_EXPRESS,
+  },
+];
+
+export const EXCUTION_UNIT_LIST = [
+  { label: 'Hours', value: 'hour' },
+  { label: 'Minutes', value: 'minute' },
+  { label: 'Days', value: 'day' },
+];
+
+export const EVENT_REFRESH_UNIT_LIST = [
+  { label: 'Hours', value: 'hour' },
+  { label: 'Days', value: 'day' },
+];

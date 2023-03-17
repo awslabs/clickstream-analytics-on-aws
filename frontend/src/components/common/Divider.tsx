@@ -11,25 +11,16 @@
  *  and limitations under the License.
  */
 
-import { apiRequest } from 'ts/request';
+import React from 'react';
 
-const getPluginList = async (params: {
-  pageNumber: number;
-  pageSize: number;
-  type?: string;
-}) => {
-  const result: any = await apiRequest('get', '/plugin', params);
-  return result;
+interface DividerProps {
+  height?: number;
+}
+const Divider: React.FC<DividerProps> = (props: DividerProps) => {
+  const { height } = props;
+  return (
+    <div style={{ height: height ? height : 1 }} className="divider"></div>
+  );
 };
 
-const createPlugin = async (data: IPlugin) => {
-  const result: any = await apiRequest('post', `/plugin`, data);
-  return result;
-};
-
-const deletePlugin = async (id: string) => {
-  const result: any = await apiRequest('delete', `/plugin/${id}`);
-  return result;
-};
-
-export { getPluginList, createPlugin, deletePlugin };
+export default Divider;

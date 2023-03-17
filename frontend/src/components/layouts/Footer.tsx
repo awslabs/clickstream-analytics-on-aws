@@ -11,13 +11,15 @@
  *  and limitations under the License.
  */
 
-import React from 'react';
+import { AppContext } from 'context/AppContext';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
+  const appConfig = useContext(AppContext);
   return (
-    <footer id="f">
+    <footer id="f" className="flex">
       <ul>
         <li>
           <a href="/about/about-cloudscape/">{t('footer.about')}</a>
@@ -29,6 +31,11 @@ const Footer: React.FC = () => {
           © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>
+      {appConfig?.solution_version && (
+        <span className="version">
+          {t('version')}: {appConfig.solution_version}
+        </span>
+      )}
     </footer>
   );
 };
