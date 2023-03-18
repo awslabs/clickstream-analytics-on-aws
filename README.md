@@ -16,7 +16,60 @@ TBA
 
 ### Regions
 
-All AWS regions and AWS China regions
+**Supported regions for control plane**
+
+| Region Name                               | Launch with Cognito User Pool         | Launch with OpenID Connect            |
+|-------------------------------------------|---------------------------------------|---------------------------------------|
+| US East (N. Virginia)                     | Yes  | Yes  |
+| US East (Ohio)                            | Yes  | Yes  |
+| US West (N. California)                   | Yes  | Yes  |
+| US West (Oregon)                          | Yes  | Yes  |
+| Africa (Cape Town)                        | No   | Yes  |
+| Asia Pacific (Hong Kong)                  | No   | Yes  |
+| Asia Pacific (Hyderabad)                  | No   | Yes  |
+| Asia Pacific (Jakarta)                    | No   | Yes  |
+| Asia Pacific (Melbourne)                  | No   | Yes  |
+| Asia Pacific (Mumbai)                     | Yes  | Yes  |
+| Asia Pacific (Osaka)                      | No   | Yes  |
+| Asia Pacific (Seoul)                      | Yes  | Yes  |
+| Asia Pacific (Singapore)                  | Yes  | Yes  |
+| Asia Pacific (Sydney)                     | Yes  | Yes  |
+| Asia Pacific (Tokyo)                      | Yes  | Yes  |
+| Canada (Central)                          | Yes  | Yes  |
+| Europe (Frankfurt)                        | Yes  | Yes  |
+| Europe (Ireland)                          | Yes  | Yes  |
+| Europe (London)                           | Yes  | Yes  |
+| Europe (Milan)                            | No   | Yes  |
+| Europe (Paris)                            | Yes  | Yes  |
+| Europe (Spain)                            | No   | Yes  |
+| Europe (Stockholm)                        | Yes  | Yes  |
+| Europe (Zurich)                           | No   | Yes  |
+| Middle East (Bahrain)                     | Yes  | Yes  |
+| Middle East (UAE)                         | No   | Yes  |
+| South America (Sao Paulo)                 | Yes  | Yes  |
+| China (Beijing) Region Operated by Sinnet | No   | Yes  |
+| China (Ningxia) Regions operated by NWCD  | No   | Yes  |
+
+**Supported regions for clickstream analytics pipeline**
+| Region Name                               | Launch with pipeline         | Launch with dashboard            |
+|-------------------------------------------|------------------------------|----------------------------------|
+| US East (N. Virginia)                     | Yes  | Yes  |
+| US East (Ohio)                            | Yes  | Yes  |
+| US West (Oregon)                          | Yes  | Yes  |
+| Asia Pacific (Mumbai)                     | Yes  | Yes  |
+| Asia Pacific (Seoul)                      | Yes  | Yes  |
+| Asia Pacific (Singapore)                  | Yes  | Yes  |
+| Asia Pacific (Sydney)                     | Yes  | Yes  |
+| Asia Pacific (Tokyo)                      | Yes  | Yes  |
+| Canada (Central)                          | Yes  | Yes  |
+| Europe (Frankfurt)                        | Yes  | Yes  |
+| Europe (Ireland)                          | Yes  | Yes  |
+| Europe (London)                           | Yes  | Yes  |
+| Europe (Paris)                            | Yes  | Yes  |
+| Europe (Stockholm)                        | Yes  | Yes  |
+| South America (Sao Paulo)                 | Yes* | Yes  |
+
+*: Redshift serverless is not supported
 
 ### Quick deployment
 
@@ -35,8 +88,8 @@ TBA
 
 #### Deploy it
 ```shell
-# deploy the control plane of the solution within a newly created VPC
-npx cdk deploy public-new-vpc-control-plane-stack
+# deploy the control plane of the solution 
+npx cdk deploy cloudfront-s3-control-plane-stack-global
 ```
 
 ## How to test
