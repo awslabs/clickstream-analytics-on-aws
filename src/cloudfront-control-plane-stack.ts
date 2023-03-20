@@ -39,6 +39,7 @@ import {
 import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionInfo } from './common/solution-info';
+import { getShortIdOfStack } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
@@ -182,7 +183,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         ISSUER: issuer,
         ... POWERTOOLS_ENVS,
       },
-      architecture: Architecture.ARM_64,
+      architecture: props?.targetToCNRegions ? undefined : Architecture.ARM_64,
       reservedConcurrentExecutions: 3,
       logRetention: RetentionDays.TEN_YEARS,
     });
@@ -220,6 +221,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       behaviorOptions = {
         originRequestPolicy: new OriginRequestPolicy(this, 'ApiGatewayOriginRequestPolicy', {
           comment: 'Policy to forward all parameters in viewer requests except for the Host header',
+          originRequestPolicyName: `ApiGatewayOriginRequestPolicy-${getShortIdOfStack(this)}`,
           cookieBehavior: OriginRequestCookieBehavior.all(),
           headerBehavior: {
             behavior: 'allExcept',

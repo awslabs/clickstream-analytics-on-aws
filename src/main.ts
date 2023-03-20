@@ -93,7 +93,6 @@ stackSuppressions([
 ], [
   ...commonSuppresionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
-  { id: 'AwsSolutions-L1', reason: 'NODEJS_18_X is not supported in China regions' },
 ]);
 
 const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [

@@ -47,7 +47,37 @@ describe('CloudFrontS3PotalStack', () => {
             'host',
           ],
         },
-        Name: 'CloudFrontS3PotalStackApiGatewayOriginRequestPolicyEED388E3',
+        Name: {
+          'Fn::Join': [
+            '',
+            [
+              'ApiGatewayOriginRequestPolicy-',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
         QueryStringsConfig: {
           QueryStringBehavior: 'all',
         },
@@ -667,6 +697,39 @@ describe('CloudFrontS3PotalStack', () => {
         },
       ],
     });
+  });
+
+
+  test('Function for user authentication in CN region', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      targetToCNRegions: true,
+    });
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Code: {
+        S3Bucket: {
+          'Fn::Sub': Match.anyValue(),
+        },
+        S3Key: Match.anyValue(),
+      },
+      Role: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          'Arn',
+        ],
+      },
+      Architectures: Match.absent(),
+      Handler: 'index.handler',
+      ReservedConcurrentExecutions: 3,
+      Runtime: 'nodejs16.x',
+    },
+    );
+
   });
 
 });
