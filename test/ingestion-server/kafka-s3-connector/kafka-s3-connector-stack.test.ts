@@ -257,7 +257,6 @@ test('IAM policy for custom resource lambda role has a specified resource and re
   const statement = policy.Properties.PolicyDocument.Statement as any[];
   expect(statement[0].Action).toEqual([
     'iam:PassRole',
-    'iam:CreateServiceLinkedRole',
     'iam:AttachRolePolicy',
     'iam:PutRolePolicy',
     'iam:UpdateRoleDescription',
@@ -268,6 +267,27 @@ test('IAM policy for custom resource lambda role has a specified resource and re
     sinkRoleKey,
     'Arn',
   ]);
+
+  expect(statement[1]).toEqual({
+    Action: 'iam:CreateServiceLinkedRole',
+    Effect: 'Allow',
+    Resource: {
+      'Fn::Join': [
+        '',
+        [
+          'arn:',
+          {
+            Ref: 'AWS::Partition',
+          },
+          ':iam::',
+          {
+            Ref: 'AWS::AccountId',
+          },
+          ':role/aws-service-role/kafkaconnect.amazonaws.com/AWSServiceRoleForKafkaConnect',
+        ],
+      ],
+    },
+  });
 
   expect(statement).toContainEqual( {
     Action: [

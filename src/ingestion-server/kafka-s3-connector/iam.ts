@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Arn, ArnFormat, Stack } from 'aws-cdk-lib';
+import { Aws, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
@@ -34,12 +34,19 @@ export function createRoleForS3SinkConnectorCustomResourceLambda(
       ],
       actions: [
         'iam:PassRole',
-        'iam:CreateServiceLinkedRole',
         'iam:AttachRolePolicy',
         'iam:PutRolePolicy',
         'iam:UpdateRoleDescription',
         'iam:DeleteServiceLinkedRole',
         'iam:GetServiceLinkedRoleDeletionStatus',
+      ],
+    }),
+    new PolicyStatement({
+      resources: [
+        `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/kafkaconnect.amazonaws.com/AWSServiceRoleForKafkaConnect`,
+      ],
+      actions: [
+        'iam:CreateServiceLinkedRole',
       ],
     }),
     new PolicyStatement({

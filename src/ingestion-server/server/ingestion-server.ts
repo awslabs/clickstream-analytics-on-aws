@@ -126,6 +126,7 @@ export class IngestionServer extends Construct {
     if (props.kafkaSinkConfig?.mskSecurityGroup) {
       const mskSg = props.kafkaSinkConfig?.mskSecurityGroup;
       mskSg.addIngressRule(ecsSecurityGroup, Port.tcpRange(9092, 9198));
+      mskSg.addIngressRule(mskSg, Port.tcpRange(9092, 9198));
     }
 
     // ECS Cluster

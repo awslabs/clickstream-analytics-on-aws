@@ -486,6 +486,24 @@ test('SecurityGroupIngress is added to Msk security group', () => {
   expect(findSgIngress).toBeTruthy();
 });
 
+test('SecurityGroup is added into SecurityGroupIngress for MSK as sink', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    serverEndpointPath: '/test_end_point',
+  });
+  const template = Template.fromStack(stack);
+  const sgIngress = findResources(template, 'AWS::EC2::SecurityGroupIngress');
+  let findSgIngress = false;
+  for (const ingress of sgIngress) {
+    if (JSON.stringify(ingress.Properties.GroupId) == JSON.stringify(ingress.Properties.SourceSecurityGroupId)) {
+      findSgIngress = true;
+      break;
+    }
+  }
+  expect(findSgIngress).toBeTruthy();
+});
+
 test('SecurityGroupIngress is added to ECS cluster SecurityGroup to allow access from ALB', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
