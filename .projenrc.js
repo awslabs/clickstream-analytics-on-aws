@@ -30,19 +30,21 @@ const commonDevDeps = [
   'aws-sdk-client-mock@^2.0.1',
 ];
 
+const awsSDKVersion = '3.294.0';
 const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-glue',
-].map(dep => `${dep}@^3.288.0`);
+  '@aws-sdk/client-redshift-data',
+].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [
-  '@aws-sdk/types',
   '@aws-sdk/client-ec2',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-sfn',
   '@aws-sdk/client-kafka',
   '@aws-sdk/client-redshift',
+  '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-account',
   '@aws-sdk/client-dynamodb',
@@ -53,7 +55,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
-].map(dep => `${dep}@^3.288.0`);
+].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const depsForApiProject = [
   ...commonDeps,
