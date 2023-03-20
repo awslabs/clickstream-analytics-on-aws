@@ -21,6 +21,7 @@ import {
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
@@ -142,6 +143,12 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       frontendProps: {
         directory: path.join(__dirname, '../'),
         dockerfile: 'src/control-plane/frontend/Dockerfile',
+        plaform: Platform.LINUX_AMD64,
+        buildArgs: {
+          GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
+          CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '102400',
+          CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '204800',
+        },
       },
     });
 

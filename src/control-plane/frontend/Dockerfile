@@ -2,7 +2,10 @@ FROM public.ecr.aws/docker/library/node:16 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY frontend .
-RUN npm install && npm run build
+ARG GENERATE_SOURCEMAP=false
+ARG CHUNK_MIN_SIZE=102400
+ARG CHUNK_MAX_SIZE=204800
+RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE} && npm install && npm run crabuild
 
 FROM public.ecr.aws/docker/library/nginx:1.22
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.6.1	/lambda-adapter /opt/extensions/lambda-adapter

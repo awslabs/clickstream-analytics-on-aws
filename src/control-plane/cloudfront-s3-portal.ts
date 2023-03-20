@@ -80,6 +80,9 @@ export interface FrontendProps {
   readonly autoInvalidFilePaths?: string[];
   readonly assetHash?: string;
   readonly assetHashType?: AssetHashType;
+  readonly environment?: {
+    [key: string]: string;
+  };
 }
 
 export interface DomainProps {
@@ -347,6 +350,7 @@ export class CloudFrontS3Portal extends Construct {
             command: props.frontendProps.buildCommand,
             user: props.frontendProps.user,
             outputType: BundlingOutput.NOT_ARCHIVED,
+            environment: props.frontendProps.environment,
           },
           assetHash: props.frontendProps.assetHash ?? undefined,
           assetHashType: props.frontendProps.assetHashType ?? AssetHashType.SOURCE,

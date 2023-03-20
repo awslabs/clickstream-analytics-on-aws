@@ -79,6 +79,11 @@ export interface FixedResponseProps {
 export interface FrontendProps {
   readonly directory: string;
   readonly dockerfile: string;
+  readonly buildArgs?: {
+    [key: string]: string;
+  };
+  readonly plaform?: Platform;
+
   /**
    * The maximum of concurrent executations you want to reserve for the Frontend function
    *
@@ -170,7 +175,8 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
         file: dockerFile,
         ignoreMode: IgnoreMode.DOCKER,
-        platform: Platform.LINUX_AMD64,
+        buildArgs: props.frontendProps.buildArgs,
+        platform: props.frontendProps.plaform,
       }),
       role: fnRole,
       reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,
