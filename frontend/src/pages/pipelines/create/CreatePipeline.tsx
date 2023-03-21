@@ -104,6 +104,7 @@ const Content: React.FC = () => {
         mskClusterName: '',
         mskTopic: '',
         mskSecurityGroupId: '',
+        mskClusterArn: '',
       },
       sinkKinesis: {
         kinesisStreamMode: '',
@@ -162,6 +163,9 @@ const Content: React.FC = () => {
 
     selectedTransformPlugins: [],
     selectedEnrichPlugins: [],
+
+    selectedQuickSightRole: null,
+    quickSightDataset: '',
   });
 
   const validateBasicInfo = () => {
@@ -265,6 +269,8 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedRedshiftExecutionUnit;
     delete createPipelineObj.selectedTransformPlugins;
     delete createPipelineObj.selectedEnrichPlugins;
+
+    delete createPipelineObj.selectedQuickSightRole;
 
     setLoadingCreate(true);
     try {
@@ -671,6 +677,7 @@ const Content: React.FC = () => {
                         ...prev.ingestionServer.sinkKafka,
                         mskClusterName: msk.label || '',
                         mskSecurityGroupId: msk.description || '',
+                        mskClusterArn: msk.iconAlt || '',
                       },
                     },
                   };
@@ -886,11 +893,31 @@ const Content: React.FC = () => {
         },
         {
           title: t('pipeline:create.reporting'),
-          content: <Reporting />,
+          content: (
+            <Reporting
+              pipelineInfo={pipelineInfo}
+              changeQuickSightSelectedRole={(role) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedQuickSightRole: role,
+                  };
+                });
+              }}
+              changeDatasetName={(name) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    quickSightDataset: name,
+                  };
+                });
+              }}
+            />
+          ),
         },
         {
           title: t('pipeline:create.reviewLaunch'),
-          content: <ReviewAndLaunch />,
+          content: <ReviewAndLaunch pipelineInfo={pipelineInfo} />,
         },
       ]}
     />

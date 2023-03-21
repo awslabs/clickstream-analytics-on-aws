@@ -66,6 +66,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
           value: element.arn,
           description: element.securityGroupId,
           labelTag: element.type,
+          iconAlt: element.arn,
         }));
         setMSKOptionList(mskOptions);
         setLoadingMSK(false);

@@ -19,14 +19,51 @@ import {
   Toggle,
   Select,
   Input,
+  SelectProps,
 } from '@cloudscape-design/components';
-import { useState } from 'react';
+import { getServiceRoles } from 'apis/resource';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const Reporting = () => {
+interface ReportingProps {
+  pipelineInfo: IExtPipeline;
+  changeQuickSightSelectedRole: (role: SelectProps.Option) => void;
+  changeDatasetName: (name: string) => void;
+}
+
+const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const { t } = useTranslation();
+  const { pipelineInfo, changeQuickSightSelectedRole, changeDatasetName } =
+    props;
   const [createDashboard, setCreateDashboard] = useState(true);
-  const [selectedQuicksightRole, setSelectedQuicksightRole] = useState<any>();
+  const [quickSightRoleOptions, setQuickSightRoleOptions] =
+    useState<SelectProps.Options>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+
+  // get msk clusters by region
+  const getQuickSightRoles = async () => {
+    setLoadingRoles(true);
+    try {
+      const { success, data }: ApiResponse<QuickSightResponse[]> =
+        await getServiceRoles('quicksight');
+      if (success) {
+        const mskOptions: SelectProps.Options = data.map((element) => ({
+          label: element.name,
+          value: element.arn,
+          iconName: 'settings',
+          description: element.id,
+        }));
+        setQuickSightRoleOptions(mskOptions);
+        setLoadingRoles(false);
+      }
+    } catch (error) {
+      setLoadingRoles(false);
+    }
+  };
+
+  useEffect(() => {
+    getQuickSightRoles();
+  }, []);
 
   return (
     <Container
@@ -56,27 +93,14 @@ const Reporting = () => {
               description={t('pipeline:create.quickSightAccountDesc')}
             >
               <Select
+                statusType={loadingRoles ? 'loading' : 'finished'}
                 placeholder={t('pipeline:create.quickSIghtPlaceholder') || ''}
-                selectedOption={selectedQuicksightRole}
+                selectedOption={pipelineInfo.selectedQuickSightRole}
                 onChange={({ detail }) =>
-                  setSelectedQuicksightRole(detail.selectedOption)
+                  changeQuickSightSelectedRole(detail.selectedOption)
                 }
-                options={[
-                  {
-                    label: 'my-quicksight-role-1',
-                    value: '1',
-                    iconName: 'settings',
-                    description: 'ecommerce department',
-                  },
-                  {
-                    label: 'my-quicksight-role-2',
-                    value: '2',
-                    iconName: 'settings',
-                    description: 'gaming dept',
-                  },
-                ]}
+                options={quickSightRoleOptions}
                 filteringType="auto"
-                selectedAriaLabel="Selected"
               />
             </FormField>
 
@@ -84,7 +108,13 @@ const Reporting = () => {
               label={t('pipeline:create.datasetName')}
               description={t('pipeline:create.datasetNameDesc')}
             >
-              <Input placeholder="my-dataset" value="" />
+              <Input
+                placeholder="my-dataset"
+                value={pipelineInfo.quickSightDataset}
+                onChange={(e) => {
+                  changeDatasetName(e.detail.value);
+                }}
+              />
             </FormField>
           </>
         )}

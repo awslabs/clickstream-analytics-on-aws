@@ -24,13 +24,20 @@ import {
 import BasicInfo from 'pages/pipelines/comps/BasicInfo';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SinkType } from 'ts/const';
 
-const ReviewAndLaunch: React.FC = () => {
+interface ReviewAndLaunchProps {
+  pipelineInfo: IExtPipeline;
+}
+
+const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
+  props: ReviewAndLaunchProps
+) => {
   const { t } = useTranslation();
+  const { pipelineInfo } = props;
   return (
     <SpaceBetween direction="vertical" size="l">
-      <BasicInfo />
-
+      <BasicInfo pipelineInfo={pipelineInfo} />
       <Container
         header={
           <Header
@@ -41,13 +48,13 @@ const ReviewAndLaunch: React.FC = () => {
           </Header>
         }
       >
-        <ColumnLayout columns={3} variant="text-grid">
+        <ColumnLayout columns={2} variant="text-grid">
           <SpaceBetween direction="vertical" size="l">
             <div>
               <Box variant="awsui-key-label">
                 {t('pipeline:create.domainName')}
               </Box>
-              <div>example.example.com</div>
+              <div>{pipelineInfo.ingestionServer.domain.recordName}</div>
             </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">
@@ -55,146 +62,120 @@ const ReviewAndLaunch: React.FC = () => {
               <Box variant="awsui-key-label">
                 {t('pipeline:create.requestPath')}
               </Box>
-              <div>/collect</div>
-            </div>
-          </SpaceBetween>
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.dataSink')}
-              </Box>
               <div>
-                MSK (arn:aws:msk::abcdef01234567890.msk.net/SLCCSMWOHOFUY0)
+                {pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath}
               </div>
             </div>
           </SpaceBetween>
         </ColumnLayout>
+        <SpaceBetween direction="vertical" size="l">
+          <div className="mt-10">
+            <Box variant="awsui-key-label">{t('pipeline:create.dataSink')}</Box>
+            {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
+              <div>
+                MSK ({pipelineInfo.ingestionServer.sinkKafka.mskClusterArn})
+              </div>
+            )}
+            {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
+              <div>
+                S3 ({pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name})
+              </div>
+            )}
+            {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (
+              <div>KDS</div>
+            )}
+          </div>
+        </SpaceBetween>
       </Container>
 
-      <Container
-        header={
-          <Header variant="h2" description="Container description">
-            {t('pipeline:create.ingestSettings')}
-          </Header>
-        }
-      >
-        <Grid gridDefinition={[{ colspan: 4 }, { colspan: 8 }]}>
-          <div style={{ borderRight: '2px solid #e9ebed' }}>
-            <SpaceBetween size="l" direction="vertical">
-              <div>
-                <Box variant="awsui-key-label">{t('status')}</Box>
+      {pipelineInfo.selectedEnrichPlugins.length > 0 && (
+        <Container
+          header={
+            <Header variant="h2" description="">
+              {t('pipeline:create.enrichPlugins')}
+            </Header>
+          }
+        >
+          <Grid gridDefinition={[{ colspan: 4 }, { colspan: 8 }]}>
+            <div style={{ borderRight: '2px solid #e9ebed' }}>
+              <SpaceBetween size="l" direction="vertical">
                 <div>
-                  <StatusIndicator>Enabled</StatusIndicator>
+                  <Box variant="awsui-key-label">{t('status')}</Box>
+                  <div>
+                    <StatusIndicator>Enabled</StatusIndicator>
+                  </div>
                 </div>
-              </div>
-            </SpaceBetween>
-          </div>
+              </SpaceBetween>
+            </div>
 
-          <div>
-            <Table
-              variant="embedded"
-              columnDefinitions={[
-                {
-                  id: 'name',
-                  header: 'Plugin name',
-                  cell: (item) => item.key || '-',
-                },
-                {
-                  id: 'status',
-                  header: 'Status',
-                  cell: (item) => item.status || '-',
-                },
-                {
-                  id: 'date',
-                  header: 'Last edit date',
-                  cell: (item) => item.date || '-',
-                },
-              ]}
-              items={[
-                {
-                  key: 'IP lookup',
-                  status: 'Enabled',
-                  date: 'Nov 26, 2022',
-                },
-                {
-                  key: 'UA parser',
-                  status: 'Enabled',
-                  date: 'Nov 26, 2022',
-                },
-                {
-                  key: 'Event fingerprint',
-                  value: 'Enabled',
-                  date: 'Nov 26, 2022',
-                },
-              ]}
-              sortingDisabled
-              empty={''}
-              header={
-                <Header variant="h3">
-                  {t('pipeline:create.enrichPlugins')}
-                </Header>
-              }
-            />
-          </div>
-        </Grid>
-      </Container>
+            <div>
+              <Table
+                variant="embedded"
+                columnDefinitions={[
+                  {
+                    id: 'name',
+                    header: t('plugin:list.name'),
+                    cell: (item) => item.name || '-',
+                  },
+                  {
+                    id: 'description',
+                    header: t('plugin:list.desc'),
+                    cell: (item) => item.description || '-',
+                  },
+                  {
+                    id: 'date',
+                    header: 'Last edit date',
+                    cell: (item) => item.updateAt || '-',
+                  },
+                ]}
+                items={pipelineInfo.selectedEnrichPlugins}
+                sortingDisabled
+                empty={''}
+                header={
+                  <Header variant="h3">
+                    {t('pipeline:create.enrichPlugins')}
+                  </Header>
+                }
+              />
+            </div>
+          </Grid>
+        </Container>
+      )}
 
       <Container
         header={
-          <Header
-            variant="h2"
-            description={t('pipeline:create.modelSettingsDesc')}
-          >
-            {t('pipeline:create.modelSettings')}
-          </Header>
+          <Header variant="h2">{t('pipeline:create.dataProcessor')}</Header>
         }
       >
-        <ColumnLayout columns={3} variant="text-grid">
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">{t('status')}</Box>
-              <div>
-                <StatusIndicator>Enabled</StatusIndicator>
-              </div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.modelCreationMethod')}
-              </Box>
-              <div>Mapping file</div>
-            </div>
-          </SpaceBetween>
+        <ColumnLayout columns={2} variant="text-grid">
           <SpaceBetween direction="vertical" size="l">
             <div>
               <Box variant="awsui-key-label">
                 {t('pipeline:create.modelEngine')}
               </Box>
               <div>
-                Redshift
-                ((arn:aws:cloudfront::abcdef01234567890.cloudfront.net/SLCCSMWOHOFUY0))
+                Redshift ({pipelineInfo.selectedRedshiftCluster?.label})
               </div>
             </div>
             <div>
               <Box variant="awsui-key-label">
                 {t('pipeline:create.engineDataRange')}
               </Box>
-              <div>3 month</div>
+              <div>{`${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit?.label} `}</div>
             </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">
             <div>
               <Box variant="awsui-key-label">
-                {' '}
                 {t('pipeline:create.quickSightAccount')}
               </Box>
-              <div>clickstream-BI</div>
+              <div>{pipelineInfo.selectedQuickSightRole?.label}</div>
             </div>
             <div>
               <Box variant="awsui-key-label">
-                {' '}
                 {t('pipeline:create.datasetName')}
               </Box>
-              <div>clickstream</div>
+              <div>{pipelineInfo.quickSightDataset}</div>
             </div>
           </SpaceBetween>
         </ColumnLayout>

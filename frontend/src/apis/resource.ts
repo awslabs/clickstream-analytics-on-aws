@@ -60,6 +60,13 @@ const getRedshiftCluster = async (vpcId: string, region?: string) => {
   return result;
 };
 
+const getServiceRoles = async (service?: string) => {
+  const result: any = await apiRequest('get', `/env/iam/roles`, {
+    service: service,
+  });
+  return result;
+};
+
 export {
   getRegionList,
   getVPCList,
@@ -68,4 +75,5 @@ export {
   getS3BucketList,
   getMSKList,
   getRedshiftCluster,
+  getServiceRoles,
 };

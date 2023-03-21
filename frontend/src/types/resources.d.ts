@@ -68,4 +68,10 @@ declare global {
     nodeType: string;
     status: string;
   }
+
+  interface QuickSightResponse {
+    arn: string;
+    id: string;
+    name: string;
+  }
 }

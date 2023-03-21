@@ -52,15 +52,27 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             <div>{pipelineInfo?.description}</div>
           </div>
           <div>
-            <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
-            <div>
-              <PipelineStatus status={pipelineInfo?.status} />
-            </div>
+            <Box variant="awsui-key-label">
+              {t('pipeline:create.awsRegion')}
+            </Box>
+            <div>{pipelineInfo?.region}</div>
           </div>
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:lastEditDate')}</Box>
-            <div>{moment(pipelineInfo?.updateAt).format(TIME_FORMAT)}</div>
-          </div>
+          {pipelineInfo?.pipelineId && (
+            <>
+              <div>
+                <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
+                <div>
+                  <PipelineStatus status={pipelineInfo?.status} />
+                </div>
+              </div>
+              <div>
+                <Box variant="awsui-key-label">
+                  {t('pipeline:lastEditDate')}
+                </Box>
+                <div>{moment(pipelineInfo?.updateAt).format(TIME_FORMAT)}</div>
+              </div>
+            </>
+          )}
         </SpaceBetween>
         <div>
           <FormField label={t('tag.name')} description={t('pipeline:tagDesc')}>

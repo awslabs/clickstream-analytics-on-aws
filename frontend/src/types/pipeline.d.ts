@@ -68,6 +68,7 @@ declare global {
         mskClusterName: string;
         mskTopic: string;
         mskSecurityGroupId: string;
+        mskClusterArn: string;
       };
       sinkKinesis: {
         kinesisStreamMode: string;
@@ -132,5 +133,8 @@ declare global {
     selectedRedshiftExecutionUnit: SelectProps.Option | null;
     selectedTransformPlugins: IPlugin[];
     selectedEnrichPlugins: IPlugin[];
+
+    selectedQuickSightRole: SelectProps.Option | null;
+    quickSightDataset: string;
   }
 }
