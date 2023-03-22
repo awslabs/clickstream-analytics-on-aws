@@ -216,7 +216,7 @@ test('Has Parameter serverCorsOrigin', () => {
   templates.forEach((template) => {
     template.hasParameter('ServerCorsOrigin', {
       Type: 'String',
-      Default: '*',
+      Default: '',
     });
   });
 });
@@ -227,6 +227,7 @@ test('ServerCorsOrigin pattern', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
+      '',
       '*',
       '*.test.com',
       'abc.test.com',

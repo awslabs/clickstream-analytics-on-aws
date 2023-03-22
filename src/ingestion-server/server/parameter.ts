@@ -50,8 +50,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
   const serverCorsOriginParam = new CfnParameter(scope, 'ServerCorsOrigin', {
     description: 'Server CORS origin',
     type: 'String',
-    default: '*',
-    allowedPattern: `^\\*$|^(${domainNamePattern}(,\\s*${domainNamePattern})*)$`,
+    default: '',
+    allowedPattern: `^$|\\*$|^(${domainNamePattern}(,\\s*${domainNamePattern})*)$`,
     constraintDescription: `ServerCorsOrigin must match pattern \\*|(${domainNamePattern}(,\\s*${domainNamePattern})*)`,
   });
 
