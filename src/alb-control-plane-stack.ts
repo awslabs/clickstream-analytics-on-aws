@@ -20,7 +20,7 @@ import {
   CfnOutput,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
-import { Vpc, IVpc, SubnetType, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
@@ -92,9 +92,9 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
     let subnets: SubnetSelection;
     if (props.internetFacing) {
-      subnets = { subnetType: SubnetType.PUBLIC };
+      subnets = { subnets: vpcStack.vpc.publicSubnets };
     } else {
-      subnets = { subnetType: SubnetType.PRIVATE_WITH_EGRESS };
+      subnets = { subnets: vpcStack.vpc.privateSubnets };
     }
 
     const logBucket = new LogBucket(this, 'logBucket');

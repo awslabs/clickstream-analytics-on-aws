@@ -1011,3 +1011,28 @@ test('Lambda has POWERTOOLS ENV set', () => {
   }
 
 });
+
+test('Each of kinesis nested templates can handle multi subnets', () => {
+  expect(kinesisStack.kinesisNestedStacks).toBeDefined();
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResourceProperties('AWS::Lambda::Function', {
+          VpcConfig: {
+            SubnetIds: {
+              'Fn::Split': [
+                ',',
+                {
+                  Ref: Match.anyValue(),
+                },
+              ],
+            },
+          },
+        });
+      });
+  }
+});

@@ -20,7 +20,7 @@ import {
   NestedStackProps,
   Stack,
 } from 'aws-cdk-lib';
-import { IVpc, Subnet, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Stream, StreamMode } from 'aws-cdk-lib/aws-kinesis';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -94,10 +94,7 @@ export function createKinesisNestStack(
   const shardCount = props.kinesisParams.kinesisShardCountParam.valueAsNumber;
 
   const subnetSelection: SubnetSelection = {
-    subnets: [
-      Subnet.fromSubnetId(scope, 'from-kinesis-subnet-id-1', Fn.select(0, Fn.split(',', props.privateSubnetIdsParam.valueAsString))),
-      Subnet.fromSubnetId(scope, 'from-kinesis-subnet-id-2', Fn.select(1, Fn.split(',', props.privateSubnetIdsParam.valueAsString))),
-    ],
+    subnets: vpc.privateSubnets,
   };
 
   const p = {

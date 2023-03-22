@@ -331,3 +331,13 @@ export function findResourcesName(template: Template, type: string) {
   }
   return resources;
 }
+
+export function findResourceByKeyAndType(template: Template, inputKey: string, type: String) {
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    if (key.startsWith(inputKey) && allResources[key].Type == type) {
+      return allResources[key];
+    }
+  }
+  return undefined;
+}

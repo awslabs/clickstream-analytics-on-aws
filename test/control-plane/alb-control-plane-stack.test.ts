@@ -16,7 +16,7 @@ import {
   Aws,
 } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { findResourcesName } from './test-utils';
+import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
 import { validateSubnetsRule } from '../rules';
 
@@ -55,6 +55,9 @@ describe('ALBLambdaPotalStack', () => {
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
       Protocol: 'HTTPS',
     });
+
+    const albControlPlanePortalFn = findResourceByKeyAndType(template, 'albcontrolplaneportalfn', 'AWS::Lambda::Function');
+    expect(JSON.stringify(albControlPlanePortalFn.Properties.VpcConfig.SubnetIds)).toContain('{"Ref":"PublicSubnets"}');
 
     expect(findResourcesName(template, 'AWS::CertificateManager::Certificate'))
       .toEqual(['certificateEC031123']);
@@ -219,6 +222,9 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
     });
     template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
+
+    const albControlPlanePortalFn = findResourceByKeyAndType(template, 'albcontrolplaneportalfn', 'AWS::Lambda::Function');
+    expect(JSON.stringify(albControlPlanePortalFn.Properties.VpcConfig.SubnetIds)).toContain('{"Ref":"PrivateSubnets"}');
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
