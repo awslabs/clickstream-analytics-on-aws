@@ -11,14 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Aws, Stack } from 'aws-cdk-lib';
-import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Key } from 'aws-cdk-lib/aws-kms';
+import { CfnResource, Stack } from 'aws-cdk-lib';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from './cfn-nag';
 import { getShortIdOfStack } from './stack';
 
-export function createLogGroupWithKmsKey(
+export function createLogGroup(
   scope: Construct,
   props: {
     prefix?: string;
@@ -27,26 +26,17 @@ export function createLogGroupWithKmsKey(
 ) {
   const shortId = getShortIdOfStack(Stack.of(scope));
   const logGroupName = `${props.prefix ?? 'clickstream-loggroup'}-${shortId}`;
-  const logGroupKmsKey = new Key(scope, 'LogGroupKmsKey', {
-    description: 'KMS key for log group encryption',
-    enableKeyRotation: true,
-  });
+
   const logGroup = new LogGroup(scope, 'LogGroup', {
     logGroupName,
-    encryptionKey: logGroupKmsKey,
     retention: props.retention ?? RetentionDays.SIX_MONTHS,
   });
-  const policyStatement = new PolicyStatement({
-    effect: Effect.ALLOW,
-    actions: ['kms:Encrypt*', 'kms:Decrypt*', 'kms:ReEncrypt*', 'kms:GenerateDataKey*', 'kms:DescribeKey'],
-    principals: [new ServicePrincipal('logs.amazonaws.com')],
-    resources: ['*'],
-    conditions: {
-      ArnLike: {
-        'kms:EncryptionContext:aws:logs:arn': `arn:${Aws.PARTITION}:logs:${Aws.REGION}:${Aws.ACCOUNT_ID}:log-group:${logGroupName}`,
-      },
+  addCfnNagSuppressRules(logGroup.node.defaultChild as CfnResource, [
+    {
+      id: 'W84',
+      reason:
+        'Log group data is always encrypted in CloudWatch Logs. By default, CloudWatch Logs uses server-side encryption for the log data at rest.',
     },
-  });
-  logGroupKmsKey.addToResourcePolicy(policyStatement);
+  ]);
   return logGroup;
 }

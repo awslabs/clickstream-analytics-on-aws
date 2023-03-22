@@ -47,7 +47,7 @@ import dictionary from './config/dictionary.json';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
-import { createLogGroupWithKmsKey } from '../../common/logs';
+import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface DicItem {
@@ -243,7 +243,7 @@ export class ClickStreamApiConstruct extends Construct {
         throw new Error('Cloudfront fronting backend api must be have Api Gateway parameters.');
       }
 
-      const apiGatewayAccessLogGroup = createLogGroupWithKmsKey(this, {});
+      const apiGatewayAccessLogGroup = createLogGroup(this, {});
 
       this.lambdaRestApi = new LambdaRestApi(this, 'ClickStreamApi', {
         handler: this.clickStreamApiFunction,

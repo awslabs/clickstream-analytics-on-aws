@@ -665,12 +665,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     const { template } = TestEnv.newALBApiStack();
 
     template.hasResourceProperties('AWS::Logs::LogGroup', {
-      KmsKeyId: {
-        'Fn::GetAtt': [
-          'testClickStreamALBApiStackActionStateMachineLogGroupKmsKeyE240FB96',
-          'Arn',
-        ],
-      },
       LogGroupName: {
         'Fn::Join': [
           '',
@@ -1586,12 +1580,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     const { template } = TestEnv.newALBApiStack();
 
     template.hasResourceProperties('AWS::Logs::LogGroup', {
-      KmsKeyId: {
-        'Fn::GetAtt': [
-          'testClickStreamALBApiStackActionStateMachineLogGroupKmsKeyE240FB96',
-          'Arn',
-        ],
-      },
       LogGroupName: {
         'Fn::Join': [
           '',

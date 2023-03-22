@@ -24,7 +24,7 @@ import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-task
 import { Construct } from 'constructs';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
-import { createLogGroupWithKmsKey } from '../../common/logs';
+import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 
@@ -201,7 +201,7 @@ export class StackActionStateMachine extends Construct {
     describeStacksByResult.next(progressChoiceCreate);
     describeStacksByName.next(progressChoiceUpdate);
 
-    const stackActionLogGroup = createLogGroupWithKmsKey(this, {
+    const stackActionLogGroup = createLogGroup(this, {
       prefix: '/aws/vendedlogs/states/Clickstream/StackActionLogGroup',
     });
     // Define a state machine
