@@ -277,7 +277,7 @@ test('Has Parameter LogS3Prefix', () => {
   templates.forEach((template) => {
     template.hasParameter('LogS3Prefix', {
       Type: 'String',
-      Default: 'ingestion-server-log',
+      Default: 'ingestion-server-log/',
     });
   });
 });
@@ -429,7 +429,7 @@ test('Has Parameter KinesisDataS3Bucket', () => {
 test('Has Parameter KinesisDataS3Prefix', () => {
   kinesisTemplate.hasParameter('KinesisDataS3Prefix', {
     Type: 'String',
-    Default: 'kinesis-data',
+    Default: 'kinesis-data/',
   });
 });
 
@@ -484,7 +484,7 @@ test('Has Parameter S3DataBucket', () => {
 test('Has Parameter S3DataPrefix', () => {
   s3Template.hasParameter('S3DataPrefix', {
     Type: 'String',
-    Default: 's3-data',
+    Default: 's3-data/',
   });
 });
 
@@ -1035,5 +1035,25 @@ test('Each of kinesis nested templates can handle multi subnets', () => {
           },
         });
       });
+  }
+});
+
+test('S3DataPrefix pattern', () => {
+  const param = getParameter(s3Template, 'S3DataPrefix');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    '',
+    'prefix/',
+    'prefix/prefix/',
+  ];
+
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
+
+  const invalidValues = ['/prefix'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
   }
 });

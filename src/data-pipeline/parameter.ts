@@ -38,7 +38,7 @@ export function createStackParameters(scope: Construct) {
 
   const sourceS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'SourceS3Prefix', {
     description: 'Source S3 prefix',
-    default: 'pipeline-source',
+    default: 'pipeline-source/',
   });
 
   const sinkS3BucketParam = Parameters.createS3BucketParameter(scope, 'SinkS3Bucket', {
@@ -48,7 +48,7 @@ export function createStackParameters(scope: Construct) {
 
   const sinkS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'SinkS3Prefix', {
     description: 'Sink S3 prefix',
-    default: 'pipeline-sink',
+    default: 'pipeline-sink/',
   });
 
 
@@ -59,7 +59,7 @@ export function createStackParameters(scope: Construct) {
 
   const pipelineS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'PipelineS3Prefix', {
     description: 'Pipeline S3 prefix',
-    default: 'pipeline-temp',
+    default: 'pipeline-temp/',
   });
 
   const dataFreshnessInHourParam = new CfnParameter(scope, 'DataFreshnessInHour', {

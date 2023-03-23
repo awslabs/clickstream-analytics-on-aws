@@ -80,7 +80,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
   const logS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'LogS3Prefix', {
     description: 'S3 object prefix to save log (optional)',
-    default: 'ingestion-server-log',
+    default: 'ingestion-server-log/',
   });
 
 
@@ -236,7 +236,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
     const s3DataPrefixParam = Parameters.createS3PrefixParameter(scope, 'S3DataPrefix', {
       description: 'S3 data object prefix',
-      default: 's3-data',
+      default: 's3-data/',
     });
 
 
@@ -320,7 +320,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
     const kinesisDataS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'KinesisDataS3Prefix', {
       description: 'S3 object prefix to save data from Kinesis Data Stream',
-      default: 'kinesis-data',
+      default: 'kinesis-data/',
     });
 
     const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {

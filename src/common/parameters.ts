@@ -190,8 +190,8 @@ export class Parameters {
   public static createS3PrefixParameter(scope: Construct, id: string, props: {description: string; default: string}) : CfnParameter {
     return new CfnParameter(scope, id, {
       type: 'String',
-      allowedPattern: '^[^/]+$',
-      constraintDescription: `${id} must match pattern [^/]+`,
+      allowedPattern: '^(|[^/].*/)$',
+      constraintDescription: `${id} must match pattern (|[^/].*/)`,
       ... props,
     });
   }
