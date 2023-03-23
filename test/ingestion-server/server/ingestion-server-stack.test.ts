@@ -146,25 +146,25 @@ test('PrivateSubnetIds pattern', () => {
   });
 });
 
-test('Has Parameter HostedZoneId', () => {
+test('Has Parameter DomainName', () => {
   templates.forEach((template) => {
-    template.hasParameter('HostedZoneId', {
-      Type: 'AWS::Route53::HostedZone::Id',
-    });
-  });
-});
-
-test('Has Parameter HostedZoneName', () => {
-  templates.forEach((template) => {
-    template.hasParameter('HostedZoneName', {
+    template.hasParameter('DomainName', {
       Type: 'String',
     });
   });
 });
 
-test('HostedZoneName pattern', () => {
+test('Has Parameter ACMCertificateArn', () => {
   templates.forEach((template) => {
-    const param = getParameter(template, 'HostedZoneName');
+    template.hasParameter('ACMCertificateArn', {
+      Type: 'String',
+    });
+  });
+});
+
+test('domainName pattern', () => {
+  templates.forEach((template) => {
+    const param = getParameter(template, 'DomainName');
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
@@ -178,7 +178,7 @@ test('HostedZoneName pattern', () => {
       expect(v).toMatch(regex);
     }
 
-    const invalidValues = ['', 'a', 'abc.example_test', 'abc.c', 'abc^.com'];
+    const invalidValues = ['a', 'abc.example_test', 'abc.c', 'abc^.com'];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }
@@ -375,14 +375,6 @@ test('Has Parameter MskClusterName', () => {
   });
 });
 
-test('Has Parameter RecordName', () => {
-  templates.forEach((template) => {
-    template.hasParameter('RecordName', {
-      Type: 'String',
-    });
-  });
-});
-
 test('Has Parameter ServerMin', () => {
   templates.forEach((template) => {
     template.hasParameter('ServerMin', {
@@ -533,9 +525,8 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'KafkaTopic',
     'MskClusterName',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
+    'DomainName',
+    'ACMCertificateArn',
     'LogS3Bucket',
     'LogS3Prefix',
     'PublicSubnetIds',
@@ -570,9 +561,6 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
     'KafkaBrokers',
@@ -608,9 +596,8 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
+    'DomainName',
+    'ACMCertificateArn',
     'LogS3Bucket',
     'LogS3Prefix',
     'PublicSubnetIds',
@@ -645,9 +632,6 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
   ];
@@ -680,9 +664,8 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
+    'DomainName',
+    'ACMCertificateArn',
     'LogS3Bucket',
     'LogS3Prefix',
     'PublicSubnetIds',
@@ -720,9 +703,6 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'VpcId',
-    'RecordName',
-    'HostedZoneName',
-    'HostedZoneId',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
     'S3DataBucket',
@@ -1056,4 +1036,25 @@ test('S3DataPrefix pattern', () => {
   for (const v of invalidValues) {
     expect(v).not.toMatch(regex);
   }
+});
+
+test('check ACMCertificateArn pattern', () => {
+  templates.forEach((template) => {
+    const param = getParameter(template, 'ACMCertificateArn');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      '',
+      'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+      'arn:aws-cn:acm:cn-northwest-1:111111111111:certificate/fake',
+      'arn:aws-us-gov:acm:us-gov-west-1:111111111111:certificate/fake',
+    ];
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+    const invalidValues = ['abc', 'arn:aws-cx:acm:us-east-1:111111111111:certificate/fake', 'arn:aws:acme:us-east-1:111111111111:certificate/fake'];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
 });

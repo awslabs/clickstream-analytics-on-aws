@@ -31,7 +31,6 @@ import {
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Key } from 'aws-cdk-lib/aws-kms';
-import { PublicHostedZone } from 'aws-cdk-lib/aws-route53';
 import {
   BlockPublicAccess,
   Bucket,
@@ -125,12 +124,6 @@ export function createSns(scope: Construct): Topic {
   return topic;
 }
 
-export function createHostZone(scope: Construct) {
-  return new PublicHostedZone(scope, 'HostedZone', {
-    zoneName: 'cs.test-example.com',
-  });
-}
-
 export function createMSKSecurityGroup(
   scope: Construct,
   vpc: IVpc,
@@ -147,7 +140,6 @@ export function createMSKSecurityGroup(
 
 export interface TestStackProps extends StackProps {
   withAlbAccessLog?: boolean;
-  withDomainZone?: boolean;
   withMskConfig?: boolean;
   withS3SinkConfig?: boolean;
   withKinesisSinkConfig?: boolean;
@@ -155,6 +147,9 @@ export interface TestStackProps extends StackProps {
   serverCorsOrigin?: string;
   warmPoolSize?: number;
   withWarmPoolSizeParameter?: boolean;
+  domainName?: string;
+  certificateArn?: string;
+  protocol?: ApplicationProtocol;
 }
 
 export class TestStack extends Stack {
@@ -162,12 +157,14 @@ export class TestStack extends Stack {
     scope: Construct,
     id: string,
     props: TestStackProps = {
-      withDomainZone: false,
       withMskConfig: false,
       withS3SinkConfig: false,
       withKinesisSinkConfig: false,
       withAlbAccessLog: false,
       serverCorsOrigin: '*',
+      domainName: 'www.example.com',
+      certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+      protocol: ApplicationProtocol.HTTP,
       warmPoolSize: 0,
       withWarmPoolSizeParameter: false,
     },
@@ -198,17 +195,6 @@ export class TestStack extends Stack {
     }
 
     const notificationsTopic = createSns(this);
-    const domainZone = createHostZone(this);
-
-    let protocol = ApplicationProtocol.HTTP;
-
-    let domainZoneConfig = {};
-    if (props.withDomainZone) {
-      domainZoneConfig = {
-        domainZone,
-      };
-      protocol = ApplicationProtocol.HTTPS;
-    }
 
     let mskSink = {};
 
@@ -237,7 +223,7 @@ export class TestStack extends Stack {
     let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
     if (props.withKinesisSinkConfig) {
       kinesisSinkConfig = {
-        kinesisDataStream: Stream.fromStreamArn(this, 'test-kinesis-stream', 'arn:aws:kinesis:us-east-1:123456789012:stream/test-kinesis-stream'),
+        kinesisDataStream: Stream.fromStreamArn(this, 'test-kinesis-stream', 'arn:aws:kinesis:us-east-1:111111111111:stream/test-kinesis-stream'),
       };
     }
 
@@ -269,10 +255,11 @@ export class TestStack extends Stack {
         : '/collect',
       serverCorsOrigin: props.serverCorsOrigin || '*',
       notificationsTopic,
-      protocol,
+      protocol: props.protocol || ApplicationProtocol.HTTP,
+      domainName: props.domainName || 'www.example.com',
+      certificateArn: props.certificateArn || 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
       ...mskSink,
       ...accessLogConfig,
-      ...domainZoneConfig,
       s3SinkConfig,
       kinesisSinkConfig,
     };

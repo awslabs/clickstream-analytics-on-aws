@@ -28,6 +28,8 @@ export function createCommonConditions(
     logS3PrefixParam: CfnParameter;
     notificationsTopicArnParam: CfnParameter;
     protocolParam: CfnParameter;
+    domainNameParam: CfnParameter;
+    certificateArnParam: CfnParameter;
   },
 ) {
   // ALB enableAccessLogCondition
@@ -88,6 +90,8 @@ export function createCommonConditions(
       condition: protocolHttpsCondition,
       serverProps: {
         protocol: 'HTTPS',
+        domainName: props.domainNameParam.valueAsString,
+        certificateArn: props.certificateArnParam.valueAsString,
       },
     },
 

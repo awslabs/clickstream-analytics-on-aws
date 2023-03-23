@@ -39,6 +39,8 @@ function addECSTargetsToListener(
   listener: ApplicationListener,
   endpointPath: string,
   proxyContainerName: string,
+  protocol: ApplicationProtocol,
+  domainName: string,
 ) {
   const targetGroup = listener.addTargets('ECS', {
     protocol: ApplicationProtocol.HTTP,
@@ -61,7 +63,7 @@ function addECSTargetsToListener(
     },
   });
 
-  addActionRules(listener, endpointPath, targetGroup, 'forwardToECS');
+  addActionRules(listener, endpointPath, targetGroup, 'forwardToECS', protocol, domainName);
 }
 
 function addActionRules(
@@ -69,10 +71,15 @@ function addActionRules(
   endpointPath: string,
   targetGroup: ApplicationTargetGroup,
   forwardRuleName: string,
+  protocol: ApplicationProtocol,
+  domainName: string,
 ) {
   listener.addAction(forwardRuleName, {
     priority: 1,
-    conditions: [ListenerCondition.pathPatterns([`${endpointPath}*`])],
+    conditions: [
+      ListenerCondition.pathPatterns([`${endpointPath}*`]),
+      ...(protocol === ApplicationProtocol.HTTPS ? [ListenerCondition.hostHeaders([domainName])] : []),
+    ],
     action: ListenerAction.forward([targetGroup]),
   });
 
@@ -87,7 +94,9 @@ function addActionRules(
 
 export interface ApplicationLoadBalancerProps {
   vpc: IVpc;
-  certificateArn?: string;
+  certificateArn: string;
+  domainName: string;
+  protocol: ApplicationProtocol;
   sg: SecurityGroup;
   service: Ec2Service;
   endpointPath: string;
@@ -144,7 +153,7 @@ export function createApplicationLoadBalancer(
 
   let albUrl = '';
 
-  if (props.certificateArn) {
+  if (props.protocol === ApplicationProtocol.HTTPS) {
     const httpsListener = alb.addListener('HTTPSListener', {
       protocol: ApplicationProtocol.HTTPS,
       port: httpsPort,
@@ -158,6 +167,8 @@ export function createApplicationLoadBalancer(
       httpsListener,
       endpointPath,
       httpContainerName,
+      props.protocol,
+      props.domainName,
     );
 
     albUrl = getAlbUrl(alb, 'https', httpsPort, endpointPath);
@@ -194,6 +205,8 @@ export function createApplicationLoadBalancer(
       httpListener,
       endpointPath,
       httpContainerName,
+      props.protocol,
+      props.domainName,
     );
 
     addCfnNagSuppressRules(

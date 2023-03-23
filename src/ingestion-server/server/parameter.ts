@@ -15,14 +15,13 @@ import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import {
   DOMAIN_NAME_PATTERN,
-  PARAMETER_GROUP_LABEL_DOMAIN,
   PARAMETER_GROUP_LABEL_VPC,
-  PARAMETER_LABEL_HOST_ZONE_ID,
-  PARAMETER_LABEL_HOST_ZONE_NAME,
+  PARAMETER_GROUP_LABEL_DOMAIN,
   PARAMETER_LABEL_PRIVATE_SUBNETS,
   PARAMETER_LABEL_PUBLIC_SUBNETS,
-  PARAMETER_LABEL_RECORD_NAME,
   PARAMETER_LABEL_VPCID,
+  PARAMETER_LABEL_CERTIFICATE_ARN,
+  PARAMETER_LABEL_DOMAIN_NAME,
 } from '../../common/constant';
 
 import { Parameters, SubnetParameterType } from '../../common/parameters';
@@ -32,7 +31,29 @@ const domainNamePattern = DOMAIN_NAME_PATTERN;
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
   // CfnParameter
   const netWorkProps = Parameters.createNetworkParameters(scope, true, SubnetParameterType.String);
-  const domainProps = Parameters.createDomainParameters(scope);
+
+  const domainNameParam = new CfnParameter(
+    scope,
+    'DomainName',
+    {
+      description: 'The custom domain name.',
+      type: 'String',
+      default: '',
+      allowedPattern: `^$|^${DOMAIN_NAME_PATTERN}$`,
+      constraintDescription: `Domain name must match pattern ${DOMAIN_NAME_PATTERN}`,
+    },
+  );
+
+  const certificateArnParam = new CfnParameter(
+    scope,
+    'ACMCertificateArn',
+    {
+      description: 'The ACM Certificate arn',
+      type: 'String',
+      default: '',
+      allowedPattern: '^$|^arn:aws(-cn|-us-gov)?:acm:[a-z0-9-]+:[0-9]{12}:certificate\/[a-zA-Z0-9-]+$',
+    },
+  );
 
   const serverEndpointPathParam = new CfnParameter(
     scope,
@@ -462,9 +483,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         {
           Label: { default: PARAMETER_GROUP_LABEL_DOMAIN },
           Parameters: [
-            domainProps.hostedZoneId.logicalId,
-            domainProps.hostedZoneName.logicalId,
-            domainProps.recordName.logicalId,
+            domainNameParam.logicalId,
+            certificateArnParam.logicalId,
           ],
         },
 
@@ -505,16 +525,12 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
           default: PARAMETER_LABEL_PRIVATE_SUBNETS,
         },
 
-        [domainProps.hostedZoneId.logicalId]: {
-          default: PARAMETER_LABEL_HOST_ZONE_ID,
+        [domainNameParam.logicalId]: {
+          default: PARAMETER_LABEL_DOMAIN_NAME,
         },
 
-        [domainProps.hostedZoneName.logicalId]: {
-          default: PARAMETER_LABEL_HOST_ZONE_NAME,
-        },
-
-        [domainProps.recordName.logicalId]: {
-          default: PARAMETER_LABEL_RECORD_NAME,
+        [certificateArnParam.logicalId]: {
+          default: PARAMETER_LABEL_CERTIFICATE_ARN,
         },
 
         [serverEndpointPathParam.logicalId]: {
@@ -572,8 +588,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       vpcIdParam: netWorkProps.vpcId,
       publicSubnetIdsParam: netWorkProps.publicSubnets,
       privateSubnetIdsParam: netWorkProps.privateSubnets,
-      hostedZoneIdParam: domainProps.hostedZoneId,
-      zoneNameParam: domainProps.hostedZoneName,
+      domainNameParam,
+      certificateArnParam,
       serverEndpointPathParam,
       serverCorsOriginParam,
       protocolParam,
@@ -581,7 +597,6 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       logS3BucketParam,
       logS3PrefixParam,
       notificationsTopicArnParam,
-      domainPrefixParam: domainProps.recordName,
       serverMinParam,
       serverMaxParam,
       warmPoolSizeParam,

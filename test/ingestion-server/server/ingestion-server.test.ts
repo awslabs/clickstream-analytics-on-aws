@@ -13,6 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
+import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { TestStack } from './TestTask';
 
 function findFirstResource(template: Template, type: string) {
@@ -207,7 +208,9 @@ test('ALB has certification and protocol https', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
-    withDomainZone: true,
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTPS,
   });
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
@@ -317,58 +320,13 @@ test('Sink to Msk container - nginx environments', () => {
   expect(hasEndpointEnv).toBeTruthy();
 });
 
-test('Hosted Zone record is Type A', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withDomainZone: true,
-    withMskConfig: true,
-  });
-  const template = Template.fromStack(stack);
-  template.hasResource('AWS::Route53::RecordSet', {
-    Properties: {
-      Name: 'test.cs.test-example.com.',
-      Type: 'A',
-      AliasTarget: Match.anyValue(),
-      HostedZoneId: Match.anyValue(),
-    },
-  });
-});
-
-test('A Certificate is created if hosted zone is set', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withDomainZone: true,
-    withMskConfig: true,
-  });
-  const template = Template.fromStack(stack);
-  const certificate = findFirstResource(
-    template,
-    'AWS::CertificateManager::Certificate',
-  )?.resource;
-  expect(
-    certificate.Properties.DomainName == 'test.cs.test-example.com',
-  ).toBeTruthy();
-});
-
-test('Https is used if hosted zone is set', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withDomainZone: true,
-    withMskConfig: true,
-  });
-  const template = Template.fromStack(stack);
-  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
-    Certificates: Match.anyValue(),
-    Port: 443,
-    Protocol: 'HTTPS',
-  });
-});
-
 test('Http is redirected to Https if hosted zone is set', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
-    withDomainZone: true,
     withMskConfig: true,
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTPS,
   });
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
@@ -391,8 +349,10 @@ test('Construct has property server url - https', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
-    withDomainZone: true,
     serverEndpointPath: '/test_me',
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTPS,
   });
   const template = Template.fromStack(stack);
   const ingestionServerUrlOutput = template.findOutputs(
@@ -745,5 +705,32 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   const streamValue = vector.Environment.filter((e: any) => e.Name == 'AWS_KINESIS_STREAM_NAME')[0].Value;
   expect(streamValue).not.toEqual('__NOT_SET__');
 
+});
+
+test('ALB Listener has rule to check host', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTPS,
+  });
+  const template = Template.fromStack(stack);
+  const listenerRule = findResources(template, 'AWS::ElasticLoadBalancingV2::ListenerRule');
+
+  expect(listenerRule[0].Properties.Conditions[1].HostHeaderConfig.Values).toEqual(['www.example.com']);
+});
+
+test('ALB Listener does not have rule to check host if the protocol is HTTP', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    protocol: ApplicationProtocol.HTTP,
+    serverEndpointPath: '/test_end_point',
+  });
+  const template = Template.fromStack(stack);
+  const listenerRule = findResources(template, 'AWS::ElasticLoadBalancingV2::ListenerRule');
+
+  expect(listenerRule[0].Properties.Conditions.length == 1).toBeTruthy();
+  expect(listenerRule[0].Properties.Conditions[0].PathPatternConfig.Values[0].startsWith('/test_end_point')).toBeTruthy();
 });
 

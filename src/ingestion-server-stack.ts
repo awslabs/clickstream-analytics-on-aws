@@ -29,7 +29,6 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
-import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { NagSuppressions } from 'cdk-nag';
@@ -122,10 +121,9 @@ interface IngestionServerNestStackProps extends StackProps {
 
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
-  readonly hostedZoneId?: string;
-  readonly hostedZoneName?: string;
-  readonly protocol?: string;
-  readonly domainPrefix?: string;
+  readonly protocol: string;
+  readonly domainName: string;
+  readonly certificateArn: string;
   readonly notificationsTopicArn?: string;
   readonly enableApplicationLoadBalancerAccessLog?: string;
   readonly logBucketName?: string;
@@ -168,17 +166,6 @@ export class IngestionServerNestedStack extends NestedStack {
       privateSubnetIds: Fn.split(',', props.privateSubnetIds),
     });
 
-    let domainZone;
-    if (props.hostedZoneId && props.hostedZoneName) {
-      domainZone = HostedZone.fromHostedZoneAttributes(
-        this,
-        'from-hostedZone',
-        {
-          hostedZoneId: props.hostedZoneId,
-          zoneName: props.hostedZoneName,
-        },
-      );
-    }
     let notificationsTopic;
 
     if (props.notificationsTopicArn) {
@@ -289,9 +276,9 @@ export class IngestionServerNestedStack extends NestedStack {
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
       loadBalancerLogProps,
-      domainPrefix: props.domainPrefix,
       protocol,
-      domainZone,
+      domainName: props.domainName,
+      certificateArn: props.certificateArn,
       notificationsTopic,
       kafkaSinkConfig,
       s3SinkConfig,
@@ -343,8 +330,8 @@ export class IngestionServerStack extends Stack {
         vpcIdParam,
         publicSubnetIdsParam,
         privateSubnetIdsParam,
-        hostedZoneIdParam,
-        zoneNameParam,
+        domainNameParam,
+        certificateArnParam,
         serverEndpointPathParam,
         serverCorsOriginParam,
         protocolParam,
@@ -352,7 +339,6 @@ export class IngestionServerStack extends Stack {
         logS3BucketParam,
         logS3PrefixParam,
         notificationsTopicArnParam,
-        domainPrefixParam,
         serverMinParam,
         serverMaxParam,
         warmPoolSizeParam,
@@ -384,9 +370,9 @@ export class IngestionServerStack extends Stack {
       scaleOnCpuUtilizationPercentParam.valueAsNumber,
       serverEndpointPath: serverEndpointPathParam.valueAsString,
       serverCorsOrigin: serverCorsOriginParam.valueAsString,
-      domainPrefix: domainPrefixParam.valueAsString,
-      hostedZoneId: hostedZoneIdParam.valueAsString,
-      hostedZoneName: zoneNameParam.valueAsString,
+      domainName: domainNameParam.valueAsString,
+      certificateArn: certificateArnParam.valueAsString,
+      protocol: protocolParam.valueAsString,
     };
 
     let nestStackProps = { ... nestStackCommonProps };
@@ -398,7 +384,6 @@ export class IngestionServerStack extends Stack {
         s3Prefix: s3Params.s3DataPrefixParam.valueAsString,
         batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,
         batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
-
       };
     }
 
@@ -408,6 +393,8 @@ export class IngestionServerStack extends Stack {
       logS3PrefixParam,
       notificationsTopicArnParam,
       protocolParam,
+      domainNameParam,
+      certificateArnParam,
     });
     let stackConditionsAndProps = commonConditionsAndProps;
 
