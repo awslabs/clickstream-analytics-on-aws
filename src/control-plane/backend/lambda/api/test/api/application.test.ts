@@ -349,6 +349,9 @@ describe('Application test', () => {
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
+        androidPackage: 'Update androidPackage',
+        iosBundleId: 'Update iosBundleId',
+        iosAppStoreId: 'Update iosAppStoreId',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -366,6 +369,9 @@ describe('Application test', () => {
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
+        androidPackage: 'Update androidPackage',
+        iosBundleId: 'Update iosBundleId',
+        iosAppStoreId: 'Update iosAppStoreId',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -384,6 +390,9 @@ describe('Application test', () => {
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
+        androidPackage: 'Update androidPackage',
+        iosBundleId: 'Update iosBundleId',
+        iosAppStoreId: 'Update iosAppStoreId',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -438,6 +447,9 @@ describe('Application test', () => {
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
         description: 'Update Description of App-01',
+        androidPackage: 'Update androidPackage',
+        iosBundleId: 'Update iosBundleId',
+        iosAppStoreId: 'Update iosAppStoreId',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);

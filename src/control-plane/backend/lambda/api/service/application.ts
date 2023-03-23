@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { Application } from '../model/application';
@@ -32,8 +33,10 @@ export class ApplicationServ {
 
   public async add(req: any, res: any, next: any) {
     try {
+      const { projectId } = req.body;
+      req.body.id = projectId;
+      req.body.appId = uuidv4();
       let app: Application = req.body;
-      app.id = app.projectId;
       const id = await store.addApplication(app);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
@@ -59,7 +62,6 @@ export class ApplicationServ {
   public async update(req: any, res: any, next: any) {
     try {
       let app: Application = req.body as Application;
-      app.id = app.projectId;
       await store.updateApplication(app);
       return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
     } catch (error) {

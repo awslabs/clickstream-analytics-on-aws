@@ -242,8 +242,9 @@ export class DynamoDbStore implements ClickStreamStore {
         appId: id,
         name: app.name,
         description: app.description,
-        platform: app.platform,
-        sdk: app.sdk,
+        androidPackage: app.androidPackage?? '',
+        iosBundleId: app.iosBundleId?? '',
+        iosAppStoreId: app.iosAppStoreId?? '',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: '',
@@ -281,10 +282,22 @@ export class DynamoDbStore implements ClickStreamStore {
       updateExpression = `${updateExpression}, description= :d`;
       expressionAttributeValues.set(':d', app.description);
     }
+    if (app.androidPackage) {
+      updateExpression = `${updateExpression}, androidPackage= :androidPackage`;
+      expressionAttributeValues.set(':androidPackage', app.androidPackage);
+    }
+    if (app.iosBundleId) {
+      updateExpression = `${updateExpression}, iosBundleId= :iosBundleId`;
+      expressionAttributeValues.set(':iosBundleId', app.iosBundleId);
+    }
+    if (app.iosAppStoreId) {
+      updateExpression = `${updateExpression}, iosAppStoreId= :iosAppStoreId`;
+      expressionAttributeValues.set(':iosAppStoreId', app.iosAppStoreId);
+    }
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
-        id: app.id,
+        id: app.projectId,
         type: `APP#${app.appId}`,
       },
       // Define expressions for the new or updated attributes

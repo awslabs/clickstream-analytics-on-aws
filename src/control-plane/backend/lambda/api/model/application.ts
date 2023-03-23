@@ -12,20 +12,22 @@
  */
 
 export interface Application {
-  id: string;
-  type: string;
-  prefix: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
-  projectId: string;
-  appId: string;
-  name: string;
-  description: string;
-  platform: string;
-  sdk: string;
-  createAt: number;
-  updateAt: number;
-  operator: string;
-  deleted: boolean;
+  readonly projectId: string;
+  readonly appId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly androidPackage?: string;
+  readonly iosBundleId?: string;
+  readonly iosAppStoreId?: string;
+
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
 }
 
 export interface ApplicationList {
