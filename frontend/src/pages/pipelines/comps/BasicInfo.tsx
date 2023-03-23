@@ -47,6 +47,12 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             <Box variant="awsui-key-label">{t('pipeline:name')}</Box>
             <div>{pipelineInfo?.name}</div>
           </div>
+          {pipelineInfo?.pipelineId && (
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:id')}</Box>
+              <div>{pipelineInfo?.pipelineId}</div>
+            </div>
+          )}
           <div>
             <Box variant="awsui-key-label">{t('pipeline:desc')}</Box>
             <div>{pipelineInfo?.description}</div>

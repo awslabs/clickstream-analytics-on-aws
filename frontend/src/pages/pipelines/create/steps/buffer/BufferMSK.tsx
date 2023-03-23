@@ -56,10 +56,10 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const getAllMSKClusterList = async () => {
     setLoadingMSK(true);
     try {
-      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList(
-        pipelineInfo.ingestionServer.network.vpcId,
-        pipelineInfo.region
-      );
+      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
+        vpcId: pipelineInfo.network.vpcId,
+        region: pipelineInfo.region,
+      });
       if (success) {
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
           label: element.name,
@@ -92,11 +92,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
           onChange={(e) => {
             changeSelfHosted(e.detail.activeTabId === 'manual' ? true : false);
           }}
-          activeTabId={
-            pipelineInfo.ingestionServer.sinkKafka.selfHost
-              ? 'manual'
-              : 'select'
-          }
+          activeTabId={pipelineInfo.kafkaSelfHost ? 'manual' : 'select'}
           tabs={[
             {
               label: t('pipeline:create.msk.select'),
@@ -147,7 +143,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         placeholder={
                           t('pipeline:create.msk.enterTopicName') || ''
                         }
-                        value={pipelineInfo.ingestionServer.sinkKafka.mskTopic}
+                        value={pipelineInfo.ingestionServer.sinkKafka.topic}
                         onChange={(e) => {
                           changeMSKTopic(e.detail.value);
                         }}
@@ -172,9 +168,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           placeholder={
                             t('pipeline:create.msk.brokerLindPlaceHolder') || ''
                           }
-                          value={
-                            pipelineInfo.ingestionServer.sinkKafka.kafkaBrokers
-                          }
+                          value={pipelineInfo.kafkaBrokers}
                           onChange={(e) => {
                             changeKafkaBrokers(e.detail.value);
                           }}
@@ -188,9 +182,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           placeholder={
                             t('pipeline:create.msk.enterTopicName') || ''
                           }
-                          value={
-                            pipelineInfo.ingestionServer.sinkKafka.kafkaTopic
-                          }
+                          value={pipelineInfo.ingestionServer.sinkKafka.topic}
                           onChange={(e) => {
                             changeKafkaTopic(e.detail.value);
                           }}

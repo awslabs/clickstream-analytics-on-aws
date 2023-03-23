@@ -13,38 +13,39 @@
 
 import { apiRequest } from 'ts/request';
 
-const getProjectList = async (params: {
+const getApplicationListByPipeline = async (params: {
+  pid: string;
   pageNumber: number;
   pageSize: number;
 }) => {
-  const result: any = await apiRequest('get', '/project', params);
+  const result: any = await apiRequest('get', '/app', params);
   return result;
 };
 
-const createProject = async (params: IProject) => {
-  const result: any = await apiRequest('post', '/project', params);
+const createApplication = async (params: IApplication) => {
+  const result: any = await apiRequest('post', '/app', params);
   return result;
 };
 
-const updateProject = async (params: IProject) => {
-  const result: any = await apiRequest('put', `/project/${params.id}`, params);
+const getApplicationDetail = async (params: { id: string; pid: string }) => {
+  const result: any = await apiRequest(
+    'get',
+    `/app/${params.id}?pid=${params.pid}`
+  );
   return result;
 };
 
-const getProjectDetail = async (params: { id: string }) => {
-  const result: any = await apiRequest('get', `/project/${params.id}`);
-  return result;
-};
-
-const deleteProject = async (params: { id: string }) => {
-  const result: any = await apiRequest('delete', `/project/${params.id}`);
+const deleteApplication = async (params: { id: string; pid: string }) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/app/${params.id}?pid=${params.pid}`
+  );
   return result;
 };
 
 export {
-  getProjectList,
-  createProject,
-  updateProject,
-  getProjectDetail,
-  deleteProject,
+  getApplicationListByPipeline,
+  createApplication,
+  getApplicationDetail,
+  deleteApplication,
 };

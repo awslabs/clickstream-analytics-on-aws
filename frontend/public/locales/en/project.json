@@ -36,6 +36,7 @@
     "status": "Status",
     "region": "Region",
     "appName": "App name",
+    "appDesc": "App Description",
     "platform": "Platform",
     "appId": "App ID",
     "time": "Register Time",

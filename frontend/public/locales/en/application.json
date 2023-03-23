@@ -1,32 +1,39 @@
 {
+  "valid": {
+    "nameEmpty": "Plase input application name"
+  },
+  "appName": "App Name",
+  "appDesc": "App Description",
+  "androidPackageName": "Android package name",
+  "iosAppBundleId": "App Bundle ID",
+  "iosAppStoreId": "App Store ID ",
+  "createdTime": "Created",
   "create": {
     "registerApp": "Register App",
-    "selectPlatform": "1. select a platform",
-    "provideInfo": "2: Provide app information",
-    "appNickName": "App nickname",
-    "androidPackageName": "Android package name",
-    "iosAppBundleId": "App Bundle ID",
-    "iosAppStoreId": "App Store ID ",
     "configSDK": "Configure SDK",
-    "downloadJSON": "3: Download and then add config file",
+    "downloadJSON": "1: Download and then add config file",
     "downloadJSONAndoridDesc": "Instructions for Android Studio below | Other developer tools please refer to documentation.",
     "configAndroidTip1": "1. Switch to the Project view in Android Studio to see your project root directory.",
     "configAndroidTip2": "2. Move your downloaded amplifyconfig.json file into the “raw” directory.",
-    "steupSKD": "4: Set up SDK",
-    "amplifyAndoridSDK": "Add AWS Amplify Android SDK",
+    "steupSKD": "2: Set up SDK",
     "mySDK": "Update my SDK",
     "totalSteps": "Total steps({{step}}):",
     "androidStep1": "Step 1: Add the plugin as a buildscript dependency to your project-level build.gradle file:",
     "androidStep2": "Step 2: Include Maven dependancy",
     "downloadJSONIOSDesc": "Instructions for Xcode below | Other developer tools please refer to documentation.",
     "configIOSTips": "Move the clickstream.plist file you just downloaded into the root of your Xcode project and add it to all targets.",
-    "amplifyIOSSDK": "Add AWS Amplify iOS SDK",
     "iosStep1": "Step 1: Add the following code to its initializer. If there is none, you can create a default:",
-    "steupWebSKD": "3: Set up SDK",
-    "amplifyWebSDK": "Add AWS Amplify Web SDK",
+    "steupWebSDK": "Set up SDK",
     "configWebTip1": "Step 1: Add the following code to its initializer. If there is none, you can create a default:",
     "webStep1": "Step 1: If you're already using npm and a module bundler such as webpack or Rollup, you can run the following command to install the latest SDK:",
     "webStep2": "Step 2: Initialize the SDK",
     "webStep3": "Step 3:  Record a Custom Event with Attributes"
+  },
+  "detail": {
+    "basicInfo": "Basic Information",
+    "appIntegration": "Application Integration",
+    "android": "Android",
+    "ios": "iOS",
+    "web": "Web"
   }
 }

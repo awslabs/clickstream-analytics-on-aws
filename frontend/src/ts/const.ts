@@ -1,3 +1,5 @@
+import { SelectProps } from '@cloudscape-design/components';
+
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -26,6 +28,12 @@ export const PROJECT_STAGE_LIST = [
   { label: 'Test', value: 'Test' },
   { label: 'Prod', value: 'Prod' },
 ];
+
+export enum EAppPlatform {
+  Andorid = 'Andorid',
+  IOS = 'IOS',
+  Web = 'Web',
+}
 
 export const PLUGIN_TYPE_LIST = [
   { label: 'Enrich', value: 'Enrich' },
@@ -120,4 +128,17 @@ export const EXCUTION_UNIT_LIST = [
 export const EVENT_REFRESH_UNIT_LIST = [
   { label: 'Hours', value: 'hour' },
   { label: 'Days', value: 'day' },
+];
+
+export const SDK_LIST: SelectProps.Option[] = [
+  {
+    label: 'ClickStream SDK',
+    value: 'clickstream',
+    iconName: 'settings',
+  },
+  {
+    label: 'Third-Party SDK',
+    value: 'thirdparty',
+    iconName: 'settings',
+  },
 ];

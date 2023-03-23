@@ -74,4 +74,9 @@ declare global {
     id: string;
     name: string;
   }
+
+  interface CetificateResponse {
+    arn: string;
+    domain: string;
+  }
 }

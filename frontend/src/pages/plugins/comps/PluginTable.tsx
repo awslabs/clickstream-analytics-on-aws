@@ -85,9 +85,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const confirmDeletePlugin = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deletePlugin(
-        selectedItems[0]?.id || ''
-      );
+      const resData: ApiResponse<null> = await deletePlugin({
+        id: selectedItems[0]?.id || '',
+      });
       if (resData.success) {
         setSelectedItems([]);
         listPlugins();

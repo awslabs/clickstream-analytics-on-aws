@@ -18,17 +18,13 @@ const getRegionList = async () => {
   return result;
 };
 
-const getVPCList = async (region?: string) => {
-  const result: any = await apiRequest('get', `/env/vpc?region=${region}`);
+const getVPCList = async (params: { region?: string }) => {
+  const result: any = await apiRequest('get', `/env/vpc`, params);
   return result;
 };
 
-interface SubnetsPrams {
-  region: string;
-  vpcId: string;
-}
-const getSubnetList = async (subnetParams: SubnetsPrams) => {
-  const result: any = await apiRequest('get', `/env/vpc/subnet`, subnetParams);
+const getSubnetList = async (params: { region: string; vpcId: string }) => {
+  const result: any = await apiRequest('get', `/env/vpc/subnet`, params);
   return result;
 };
 
@@ -44,26 +40,26 @@ const getS3BucketList = async (region?: string) => {
   return result;
 };
 
-const getMSKList = async (vpcId: string, region?: string) => {
-  const result: any = await apiRequest('get', `/env/msk/clusters`, {
-    vpcId: vpcId,
-    region: region,
-  });
+const getMSKList = async (params: { vpcId: string; region?: string }) => {
+  const result: any = await apiRequest('get', `/env/msk/clusters`, params);
   return result;
 };
 
-const getRedshiftCluster = async (vpcId: string, region?: string) => {
-  const result: any = await apiRequest('get', `/env/redshift/clusters`, {
-    vpcId: vpcId,
-    region: region,
-  });
+const getRedshiftCluster = async (params: {
+  vpcId: string;
+  region?: string;
+}) => {
+  const result: any = await apiRequest('get', `/env/redshift/clusters`, params);
   return result;
 };
 
-const getServiceRoles = async (service?: string) => {
-  const result: any = await apiRequest('get', `/env/iam/roles`, {
-    service: service,
-  });
+const getServiceRoles = async (params: { service?: string }) => {
+  const result: any = await apiRequest('get', `/env/iam/roles`, params);
+  return result;
+};
+
+const getCertificates = async (params: { region: string }) => {
+  const result: any = await apiRequest('get', `/env/acm/certificates`, params);
   return result;
 };
 
@@ -76,4 +72,5 @@ export {
   getMSKList,
   getRedshiftCluster,
   getServiceRoles,
+  getCertificates,
 };

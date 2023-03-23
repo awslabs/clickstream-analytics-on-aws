@@ -24,12 +24,16 @@ declare global {
     region: string;
     dataCollectionSDK: string;
     tags: ITag[];
+    network: {
+      vpcId: string;
+      publicSubnetIds: string[];
+      privateSubnetIds: string[];
+    };
+    bucket: {
+      name: string;
+      prefix: string;
+    };
     ingestionServer: {
-      network: {
-        vpcId: string;
-        publicSubnetIds: string[];
-        privateSubnetIds: string[];
-      };
       size: {
         serverMin: string;
         serverMax: string;
@@ -37,9 +41,8 @@ declare global {
         scaleOnCpuUtilizationPercent: string;
       };
       domain: {
-        hostedZoneId: string;
-        hostedZoneName: string;
-        recordName: string;
+        domainName: string;
+        certificateArn: string;
       };
       loadBalancer: {
         serverEndpointPath: string;
@@ -62,13 +65,13 @@ declare global {
         s3BufferInterval: string;
       };
       sinkKafka: {
-        selfHost: boolean;
-        kafkaBrokers: string;
-        kafkaTopic: string;
-        mskClusterName: string;
-        mskTopic: string;
-        mskSecurityGroupId: string;
-        mskClusterArn: string;
+        brokers: string[];
+        topic: string;
+        mskCluster: {
+          name: string;
+          arn: string;
+          securityGroupId: string;
+        };
       };
       sinkKinesis: {
         kinesisStreamMode: string;
@@ -110,10 +113,12 @@ declare global {
     selectedSDK: SelectProps.Option | null;
     selectedPublicSubnet: OptionDefinition[];
     selectedPrivateSubnet: OptionDefinition[];
-    selectedHostedZone: SelectProps.Option | null;
+    selectedCertificate: SelectProps.Option | null;
     mskCreateMethod: string;
     selectedMSK: SelectProps.Option | null;
     seledtedKDKProvisionType: SelectProps.Option | null;
+    kafkaSelfHost: boolean;
+    kafkaBrokers: string;
 
     enableDataProcessing: boolean;
     scheduleExpression: string;
@@ -122,7 +127,7 @@ declare global {
     excutionFixedValue: string;
     enableRedshift: boolean;
 
-    enableAsana: boolean;
+    enableAthena: boolean;
     eventFreshValue: string;
 
     redshiftExecutionValue: string;

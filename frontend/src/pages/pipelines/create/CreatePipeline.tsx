@@ -47,7 +47,7 @@ const Content: React.FC = () => {
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
   const [domainNameEmptyError, setDomainNameEmptyError] = useState(false);
-  const [hostedZoneEmptyError, setHostedZoneEmptyError] = useState(false);
+  const [certificateEmptyError, setCertificateEmptyError] = useState(false);
 
   const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
     useState(false);
@@ -60,12 +60,16 @@ const Content: React.FC = () => {
     region: '',
     dataCollectionSDK: '',
     tags: [],
+    network: {
+      vpcId: '',
+      publicSubnetIds: [],
+      privateSubnetIds: [],
+    },
+    bucket: {
+      name: '',
+      prefix: '',
+    },
     ingestionServer: {
-      network: {
-        vpcId: '',
-        publicSubnetIds: [],
-        privateSubnetIds: [],
-      },
       size: {
         serverMin: '2',
         serverMax: '4',
@@ -73,9 +77,8 @@ const Content: React.FC = () => {
         scaleOnCpuUtilizationPercent: '50',
       },
       domain: {
-        hostedZoneId: '',
-        hostedZoneName: '',
-        recordName: '',
+        domainName: '',
+        certificateArn: '',
       },
       loadBalancer: {
         serverEndpointPath: '/collect',
@@ -98,13 +101,13 @@ const Content: React.FC = () => {
         s3BufferInterval: '300',
       },
       sinkKafka: {
-        selfHost: false,
-        kafkaBrokers: '',
-        kafkaTopic: '',
-        mskClusterName: '',
-        mskTopic: '',
-        mskSecurityGroupId: '',
-        mskClusterArn: '',
+        brokers: [],
+        topic: '',
+        mskCluster: {
+          name: '',
+          arn: '',
+          securityGroupId: '',
+        },
       },
       sinkKinesis: {
         kinesisStreamMode: '',
@@ -140,10 +143,12 @@ const Content: React.FC = () => {
     selectedSDK: null,
     selectedPublicSubnet: [],
     selectedPrivateSubnet: [],
-    selectedHostedZone: null,
+    selectedCertificate: null,
     mskCreateMethod: ResourceCreateMehod.EXSITING,
     selectedMSK: null,
     seledtedKDKProvisionType: null,
+    kafkaSelfHost: false,
+    kafkaBrokers: '',
 
     enableDataProcessing: true,
     scheduleExpression: '',
@@ -151,7 +156,7 @@ const Content: React.FC = () => {
     exeCronExp: '',
     excutionFixedValue: '',
     enableRedshift: true,
-    enableAsana: false,
+    enableAthena: false,
     eventFreshValue: '',
     redshiftExecutionValue: '',
 
@@ -200,12 +205,12 @@ const Content: React.FC = () => {
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
     ) {
-      if (!pipelineInfo.ingestionServer.domain.recordName.trim()) {
+      if (!pipelineInfo.ingestionServer.domain.domainName.trim()) {
         setDomainNameEmptyError(true);
         return false;
       }
-      if (!pipelineInfo.selectedHostedZone) {
-        setHostedZoneEmptyError(true);
+      if (!pipelineInfo.selectedCertificate) {
+        setCertificateEmptyError(true);
         return false;
       }
     }
@@ -238,6 +243,11 @@ const Content: React.FC = () => {
       createPipelineObj.etl = null;
     }
 
+    // set msk cluster when user selected self-hosted
+    if (createPipelineObj.kafkaSelfHost) {
+      createPipelineObj.ingestionServer.sinkKafka.mskCluster = null;
+    }
+
     // remove temporary properties
     delete createPipelineObj.selectedRegion;
     delete createPipelineObj.selectedVPC;
@@ -245,7 +255,7 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedPublicSubnet;
     delete createPipelineObj.selectedPrivateSubnet;
     delete createPipelineObj.enableEdp;
-    delete createPipelineObj.selectedHostedZone;
+    delete createPipelineObj.selectedCertificate;
 
     delete createPipelineObj.mskCreateMethod;
     delete createPipelineObj.selectedMSK;
@@ -258,7 +268,7 @@ const Content: React.FC = () => {
     delete createPipelineObj.excutionFixedValue;
     delete createPipelineObj.enableRedshift;
 
-    delete createPipelineObj.enableAsana;
+    delete createPipelineObj.enableAthena;
     delete createPipelineObj.eventFreshValue;
 
     delete createPipelineObj.redshiftExecutionValue;
@@ -271,6 +281,8 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedEnrichPlugins;
 
     delete createPipelineObj.selectedQuickSightRole;
+    delete createPipelineObj.kafkaSelfHost;
+    delete createPipelineObj.kafkaBrokers;
 
     setLoadingCreate(true);
     try {
@@ -364,12 +376,9 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     selectedVPC: vpc,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      network: {
-                        ...prev.ingestionServer.network,
-                        vpcId: vpc.value || '',
-                      },
+                    network: {
+                      ...prev.network,
+                      vpcId: vpc.value || '',
                     },
                   };
                 });
@@ -389,6 +398,10 @@ const Content: React.FC = () => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
+                    bucket: {
+                      ...prev.bucket,
+                      name: bucket,
+                    },
                     ingestionServer: {
                       ...prev.ingestionServer,
                       loadBalancer: {
@@ -444,7 +457,7 @@ const Content: React.FC = () => {
               publicSubnetError={publicSubnetError}
               privateSubnetError={privateSubnetError}
               domainNameEmptyError={domainNameEmptyError}
-              hostedZoneEmptyError={hostedZoneEmptyError}
+              certificateEmptyError={certificateEmptyError}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
@@ -452,14 +465,11 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     selectedPublicSubnet: subnets,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      network: {
-                        ...prev.ingestionServer.network,
-                        publicSubnetIds: subnets.map(
-                          (element) => element.value || ''
-                        ),
-                      },
+                    network: {
+                      ...prev.network,
+                      publicSubnetIds: subnets.map(
+                        (element) => element.value || ''
+                      ),
                     },
                   };
                 });
@@ -470,14 +480,11 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     selectedPrivateSubnet: subnets,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      network: {
-                        ...prev.ingestionServer.network,
-                        privateSubnetIds: subnets.map(
-                          (element) => element.value || ''
-                        ),
-                      },
+                    network: {
+                      ...prev.network,
+                      publicSubnetIds: subnets.map(
+                        (element) => element.value || ''
+                      ),
                     },
                   };
                 });
@@ -524,7 +531,7 @@ const Content: React.FC = () => {
                   };
                 });
               }}
-              changeRecordName={(name) => {
+              changeDomainName={(name) => {
                 setDomainNameEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
@@ -533,7 +540,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       domain: {
                         ...prev.ingestionServer.domain,
-                        recordName: name,
+                        domainName: name,
                       },
                     },
                   };
@@ -567,18 +574,17 @@ const Content: React.FC = () => {
                   };
                 });
               }}
-              changeHostedZone={(zone) => {
-                setHostedZoneEmptyError(false);
+              changeCertificate={(cert) => {
+                setCertificateEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    selectedHostedZone: zone,
+                    selectedCertificate: cert,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       domain: {
                         ...prev.ingestionServer.domain,
-                        hostedZoneId: zone.value || '',
-                        hostedZoneName: zone.label || '',
+                        certificateArn: cert.value || '',
                       },
                     },
                   };
@@ -675,9 +681,11 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        mskClusterName: msk.label || '',
-                        mskSecurityGroupId: msk.description || '',
-                        mskClusterArn: msk.iconAlt || '',
+                        mskCluster: {
+                          name: msk.label || '',
+                          arn: msk.iconAlt || '',
+                          securityGroupId: msk.description || '',
+                        },
                       },
                     },
                   };
@@ -691,7 +699,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        mskTopic: topic,
+                        topic: topic,
                       },
                     },
                   };
@@ -701,13 +709,7 @@ const Content: React.FC = () => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        selfHost: selfHost,
-                      },
-                    },
+                    kafkaSelfHost: selfHost,
                   };
                 });
               }}
@@ -715,11 +717,12 @@ const Content: React.FC = () => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
+                    kafkaBrokers: brokers,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        kafkaBrokers: brokers,
+                        brokers: brokers.split(','),
                       },
                     },
                   };
@@ -733,7 +736,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        kafkaTopic: topic,
+                        topic: topic,
                       },
                     },
                   };
@@ -880,11 +883,11 @@ const Content: React.FC = () => {
                   };
                 });
               }}
-              changeEnableAsana={(enable) => {
+              changeEnableAthena={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    enableAsana: enable,
+                    enableAthena: enable,
                   };
                 });
               }}

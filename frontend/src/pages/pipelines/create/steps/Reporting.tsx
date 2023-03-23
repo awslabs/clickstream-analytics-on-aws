@@ -45,7 +45,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     setLoadingRoles(true);
     try {
       const { success, data }: ApiResponse<QuickSightResponse[]> =
-        await getServiceRoles('quicksight');
+        await getServiceRoles({ service: 'quicksight' });
       if (success) {
         const mskOptions: SelectProps.Options = data.map((element) => ({
           label: element.name,

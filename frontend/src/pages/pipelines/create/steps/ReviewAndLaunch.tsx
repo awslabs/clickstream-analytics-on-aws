@@ -21,10 +21,11 @@ import {
   StatusIndicator,
   Grid,
 } from '@cloudscape-design/components';
+import moment from 'moment';
 import BasicInfo from 'pages/pipelines/comps/BasicInfo';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SinkType } from 'ts/const';
+import { SinkType, TIME_FORMAT } from 'ts/const';
 
 interface ReviewAndLaunchProps {
   pipelineInfo: IExtPipeline;
@@ -54,7 +55,7 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
               <Box variant="awsui-key-label">
                 {t('pipeline:create.domainName')}
               </Box>
-              <div>{pipelineInfo.ingestionServer.domain.recordName}</div>
+              <div>{pipelineInfo.ingestionServer.domain.domainName}</div>
             </div>
           </SpaceBetween>
           <SpaceBetween direction="vertical" size="l">
@@ -73,7 +74,7 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
             <Box variant="awsui-key-label">{t('pipeline:create.dataSink')}</Box>
             {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
               <div>
-                MSK ({pipelineInfo.ingestionServer.sinkKafka.mskClusterArn})
+                MSK ({pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn})
               </div>
             )}
             {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
@@ -125,7 +126,8 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
                   {
                     id: 'date',
                     header: 'Last edit date',
-                    cell: (item) => item.updateAt || '-',
+                    cell: (item) =>
+                      moment(item.updateAt).format(TIME_FORMAT) || '-',
                   },
                 ]}
                 items={pipelineInfo.selectedEnrichPlugins}

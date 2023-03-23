@@ -64,10 +64,10 @@ const Content: React.FC = () => {
   const confirmDeletePipeline = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deletePipeline(
-        selectedItems[0]?.pipelineId || '',
-        selectedItems[0].projectId || ''
-      );
+      const resData: ApiResponse<null> = await deletePipeline({
+        id: selectedItems[0]?.pipelineId || '',
+        pid: selectedItems[0].projectId || '',
+      });
       if (resData.success) {
         setSelectedItems([]);
         listPipelines();

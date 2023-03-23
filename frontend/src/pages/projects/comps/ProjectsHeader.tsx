@@ -36,7 +36,9 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
   const confirmDeleteProject = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deleteProject(project?.id || '');
+      const resData: ApiResponse<null> = await deleteProject({
+        id: project?.id || '',
+      });
       if (resData.success) {
         refreshPage();
         setLoadingDelete(false);

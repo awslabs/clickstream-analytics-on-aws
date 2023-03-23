@@ -24,12 +24,12 @@ import {
   TagEditorProps,
   Textarea,
 } from '@cloudscape-design/components';
-import { getSDKTypeList } from 'apis/dictionary';
 import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
 import InfoLink from 'components/common/InfoLink';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SDK_LIST } from 'ts/const';
 
 interface BasicInformationProps {
   pipelineInfo: IExtPipeline;
@@ -68,13 +68,11 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   } = props;
   const [loadingRegion, setLoadingRegion] = useState(false);
   const [loadingVPC, setLoadingVPC] = useState(false);
-  const [loadingSDK, setLoadingSDK] = useState(false);
   const [loadingBucket, setLoadingBucket] = useState(false);
   const [regionOptionList, setRegionOptionList] = useState<SelectProps.Options>(
     []
   );
   const [vpcOptionList, setVPCOptionList] = useState<SelectProps.Options>([]);
-  const [sdkOptionList, setSDKOptionList] = useState<SelectProps.Options>([]);
   const [s3BucketOptionList, setS3BucketOptionList] =
     useState<AutosuggestProps.Options>([]);
 
@@ -97,34 +95,14 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     }
   };
 
-  // get all supported sdks
-  const getALlSDKList = async () => {
-    setLoadingSDK(true);
-    try {
-      const { success, data }: ApiResponse<SDKResponse> =
-        await getSDKTypeList();
-      if (success) {
-        const sdkOptions: SelectProps.Options = data.data.map((element) => ({
-          label: element.name,
-          value: element.value,
-          iconName: 'settings',
-        }));
-        setSDKOptionList(sdkOptions);
-        setLoadingSDK(false);
-      }
-    } catch (error) {
-      setLoadingSDK(false);
-    }
-  };
-
   // get vpc list after change region
   const getVPCListByRegion = async (region: string) => {
     setLoadingVPC(true);
     setVPCOptionList([]);
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList(
-        region
-      );
+      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+        region: region,
+      });
       if (success) {
         const vpcOptions: SelectProps.Options = data.map((element) => ({
           label: `${element.name}(${element.id})`,
@@ -169,7 +147,6 @@ const BasicInformation: React.FC<BasicInformationProps> = (
 
   useEffect(() => {
     getAllRegionList();
-    getALlSDKList();
   }, []);
 
   return (
@@ -249,9 +226,8 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           <Select
             placeholder={t('pipeline:create.dataSDKPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedSDK}
-            options={sdkOptionList}
+            options={SDK_LIST}
             selectedAriaLabel="Selected"
-            statusType={loadingSDK ? 'loading' : 'finished'}
             onChange={(e) => {
               changeSDK(e.detail.selectedOption);
             }}

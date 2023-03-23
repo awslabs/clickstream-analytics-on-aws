@@ -19,6 +19,7 @@ import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import CreateApplication from 'pages/application/create/CreateApplication';
+import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
 import PluginList from 'pages/plugins/PluginList';
@@ -104,6 +105,10 @@ const SignedInPage: React.FC = () => {
                 />
                 <Route path="/plugins" element={<PluginList />} />
                 <Route path="/plugins/create" element={<CreatePlugin />} />
+                <Route
+                  path="/project/:pid/application/detail/:id"
+                  element={<ApplicationDetail />}
+                />
               </Routes>
             </div>
           </Suspense>

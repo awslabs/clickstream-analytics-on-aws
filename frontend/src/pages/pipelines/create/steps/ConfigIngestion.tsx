@@ -27,7 +27,7 @@ import {
   Tiles,
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { getHostedZoneList, getSubnetList } from 'apis/resource';
+import { getCertificates, getSubnetList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
@@ -42,10 +42,10 @@ interface ConfigIngestionProps {
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;
-  changeRecordName: (name: string) => void;
+  changeDomainName: (name: string) => void;
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
-  changeHostedZone: (zone: SelectProps.Option) => void;
+  changeCertificate: (cert: SelectProps.Option) => void;
   changeBufferType: (type: string) => void;
   changeBufferS3Bucket: (s3: string) => void;
   changeBufferS3Prefix: (prefix: string) => void;
@@ -65,7 +65,7 @@ interface ConfigIngestionProps {
   publicSubnetError: boolean;
   privateSubnetError: boolean;
   domainNameEmptyError: boolean;
-  hostedZoneEmptyError: boolean;
+  certificateEmptyError: boolean;
   bufferS3BucketEmptyError: boolean;
 }
 
@@ -80,10 +80,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeServerMin,
     changeServerMax,
     changeWarmSize,
-    changeRecordName,
+    changeDomainName,
     changeProtocal,
     changeServerEdp,
-    changeHostedZone,
+    changeCertificate,
     changeBufferType,
     changeBufferS3Bucket,
     changeBufferS3Prefix,
@@ -100,16 +100,16 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     publicSubnetError,
     privateSubnetError,
     domainNameEmptyError,
-    hostedZoneEmptyError,
+    certificateEmptyError,
     bufferS3BucketEmptyError,
   } = props;
   const [loadingSubnet, setLoadingSubnet] = useState(false);
-  const [loadingHostedZone, setLoadingHostedZone] = useState(false);
+  const [loadingCertificate, setLoadingCertificate] = useState(false);
   const [publicSubnetOptionList, setPublicSubnetOptionList] =
     useState<SelectProps.Options>([]);
   const [privateSubnetOptionList, setPrivateSubnetOptionList] =
     useState<SelectProps.Options>([]);
-  const [hostedZoneOptionList, setHostedZoneOptionList] =
+  const [certificateOptionList, setCertificateOptionList] =
     useState<SelectProps.Options>([]);
 
   // get subnet list
@@ -147,22 +147,22 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     }
   };
 
-  // get hosted zone list
-  const getAllHostedZoneList = async () => {
-    setLoadingHostedZone(true);
+  // get certificate list
+  const getCetificateListByRegion = async () => {
+    setLoadingCertificate(true);
     try {
-      const { success, data }: ApiResponse<HostedZoneResponse[]> =
-        await getHostedZoneList();
+      const { success, data }: ApiResponse<CetificateResponse[]> =
+        await getCertificates({ region: pipelineInfo.region });
       if (success) {
-        const hostedZoneOptions: SelectProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.id,
+        const certificateOptions: SelectProps.Options = data.map((element) => ({
+          label: element.domain,
+          value: element.arn,
         }));
-        setHostedZoneOptionList(hostedZoneOptions);
-        setLoadingHostedZone(false);
+        setCertificateOptionList(certificateOptions);
+        setLoadingCertificate(false);
       }
     } catch (error) {
-      setLoadingHostedZone(false);
+      setLoadingCertificate(false);
     }
   };
 
@@ -176,7 +176,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
 
   useEffect(() => {
-    getAllHostedZoneList();
+    getCetificateListByRegion();
   }, []);
 
   return (
@@ -307,31 +307,29 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 >
                   <Input
                     placeholder="example.domain.com"
-                    value={pipelineInfo.ingestionServer.domain.recordName}
+                    value={pipelineInfo.ingestionServer.domain.domainName}
                     onChange={(e) => {
-                      changeRecordName(e.detail.value);
+                      changeDomainName(e.detail.value);
                     }}
                   />
                 </FormField>
               </div>
               <div>
                 <FormField
-                  label={t('pipeline:create.hostedZone')}
+                  label={t('pipeline:create.certificate')}
                   errorText={
-                    hostedZoneEmptyError
-                      ? t('pipeline:valid.hostedZoneEmpty')
+                    certificateEmptyError
+                      ? t('pipeline:valid.certificateEmpty')
                       : ''
                   }
                 >
                   <Select
-                    statusType={loadingHostedZone ? 'loading' : 'finished'}
-                    placeholder={
-                      t('pipeline:create.domainNameR53Placeholder') || ''
-                    }
-                    selectedOption={pipelineInfo.selectedHostedZone}
-                    options={hostedZoneOptionList}
+                    statusType={loadingCertificate ? 'loading' : 'finished'}
+                    placeholder={t('pipeline:create.selectCertificate') || ''}
+                    selectedOption={pipelineInfo.selectedCertificate}
+                    options={certificateOptionList}
                     onChange={(e) => {
-                      changeHostedZone(e.detail.selectedOption);
+                      changeCertificate(e.detail.selectedOption);
                     }}
                   />
                 </FormField>
@@ -343,9 +341,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               >
                 <Button
                   iconName="refresh"
-                  loading={loadingHostedZone}
+                  loading={loadingCertificate}
                   onClick={() => {
-                    getAllHostedZoneList();
+                    getCetificateListByRegion();
                   }}
                 />
               </div>

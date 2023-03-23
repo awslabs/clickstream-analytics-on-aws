@@ -11,11 +11,23 @@
  *  and limitations under the License.
  */
 
-import { apiRequest } from 'ts/request';
+export {};
+declare global {
+  interface IApplication {
+    id?: string;
+    type?: string;
+    prefix?: string;
 
-const getSDKTypeList = async () => {
-  const result: any = await apiRequest('get', `/dictionary/SDK_Type`);
-  return result;
-};
-
-export { getSDKTypeList };
+    projectId: string;
+    appId: string;
+    name: string;
+    description: string;
+    androidPackage: string;
+    iosBundleId: string;
+    iosAppStoreId: string;
+    createAt?: number;
+    updateAt?: number;
+    operator?: string;
+    deleted?: boolean;
+  }
+}

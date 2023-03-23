@@ -51,7 +51,7 @@ interface DataProcessingProps {
   changeSelectedRedshift: (cluster: SelectProps.Option) => void;
   changeRedshiftExecutionDuration: (duration: string) => void;
   changeRedshiftExecutionUnit: (unit: SelectProps.Option) => void;
-  changeEnableAsana: (enable: boolean) => void;
+  changeEnableAthena: (enable: boolean) => void;
 
   changeTransformPlugins: (plugins: IPlugin[]) => void;
   changeEnrichPlugins: (plugins: IPlugin[]) => void;
@@ -74,7 +74,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeSelectedRedshift,
     changeRedshiftExecutionDuration,
     changeRedshiftExecutionUnit,
-    changeEnableAsana,
+    changeEnableAthena,
     changeTransformPlugins,
     changeEnrichPlugins,
   } = props;
@@ -100,10 +100,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     setLoadingRedshift(true);
     try {
       const { success, data }: ApiResponse<RedshiftResponse[]> =
-        await getRedshiftCluster(
-          pipelineInfo.ingestionServer.network.vpcId,
-          pipelineInfo.region
-        );
+        await getRedshiftCluster({
+          vpcId: pipelineInfo.network.vpcId,
+          region: pipelineInfo.region,
+        });
       if (success) {
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
           label: element.name,
@@ -370,14 +370,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <Divider height={2} />
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
-                  checked={pipelineInfo.enableAsana}
+                  checked={pipelineInfo.enableAthena}
                   onChange={(e) => {
-                    changeEnableAsana(e.detail.checked);
+                    changeEnableAthena(e.detail.checked);
                   }}
                 />
                 <FormField
-                  label={t('pipeline:create.asana')}
-                  description={t('pipeline:create.asanaDesc')}
+                  label={t('pipeline:create.athena')}
+                  description={t('pipeline:create.athenaDesc')}
                 ></FormField>
               </SpaceBetween>
             </SpaceBetween>

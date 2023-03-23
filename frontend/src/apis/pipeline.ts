@@ -39,8 +39,11 @@ const createProjectPipeline = async (data: IPipeline) => {
   return result;
 };
 
-const deletePipeline = async (id: string, pid: string) => {
-  const result: any = await apiRequest('delete', `/pipeline/${id}?pid=${pid}`);
+const deletePipeline = async (params: { id: string; pid: string }) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/pipeline/${params.id}?pid=${params.pid}`
+  );
   return result;
 };
 

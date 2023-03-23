@@ -1,6 +1,7 @@
 {
   "pipelines": "Pipelines",
   "basic": "Basic information",
+  "id": "ID",
   "name": "Name",
   "desc": "Description",
   "status": "Status",
@@ -16,7 +17,7 @@
     "publicSubnetEmpty": "Please select public subnets",
     "privateSubnetEmpty": "Please select private subnets",
     "domainNameEmpty": "Please input domain name",
-    "hostedZoneEmpty": "Please select hosted zone"
+    "certificateEmpty": "Please select SSL certificate"
   },
   "create": {
     "basicInfo": "Basic information",
@@ -214,8 +215,10 @@
     "redshiftDesc": "Data will be load into Amazon Redshift data warehouse for further modeling and query.",
     "redshiftCluster": "Redshift cluster",
     "redshiftClusterDesc": "Select a redshift cluster as the data modeling engine for this pipeline.",
-    "asana": "Athena",
-    "asanaDesc": "Select this option will create table schema and sample queries in Athena for you to query the processed data on S3"
+    "athena": "Athena",
+    "athenaDesc": "Select this option will create table schema and sample queries in Athena for you to query the processed data on S3",
+    "certificate": "SSL Certificate",
+    "selectCertificate": "Choose SSL Certificate"
   },
   "detail": {
     "ingestionEdp": "Ingestion endpoint",

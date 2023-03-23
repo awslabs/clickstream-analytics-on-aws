@@ -23,10 +23,16 @@ import {
   Table,
   TextFilter,
 } from '@cloudscape-design/components';
+import {
+  deleteApplication,
+  getApplicationListByPipeline,
+} from 'apis/application';
 import PipelineStatus from 'components/pipeline/PipelineStatus';
-import React from 'react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { TIME_FORMAT } from 'ts/const';
 
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;
@@ -38,11 +44,61 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { pipelineInfo } = props;
-  const [selectedItems, setSelectedItems] = React.useState<any>([]);
+  const [selectedItems, setSelectedItems] = useState<IApplication[]>([]);
+  const [loadingApp, setLoadingApp] = useState(false);
+  const [pageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [applicationList, setApplicationList] = useState<IApplication[]>([]);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const goToCreateApplication = () => {
     navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
+
+  const goToApplicationDetail = () => {
+    navigate(`/application/detail/${selectedItems[0]?.appId}`);
+  };
+
+  const listApplicationByProject = async () => {
+    setLoadingApp(true);
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IApplication>> =
+        await getApplicationListByPipeline({
+          pid: pipelineInfo.projectId || '',
+          pageNumber: currentPage,
+          pageSize: pageSize,
+        });
+      if (success) {
+        setApplicationList(data.items);
+        setTotalCount(data.totalCount);
+        setLoadingApp(false);
+      }
+    } catch (error) {
+      setLoadingApp(false);
+    }
+  };
+
+  const confirmDeleteApplication = async () => {
+    setLoadingDelete(true);
+    try {
+      const resData: ApiResponse<null> = await deleteApplication({
+        pid: pipelineInfo.projectId || '',
+        id: selectedItems[0]?.appId || '',
+      });
+      if (resData.success) {
+        setSelectedItems([]);
+        listApplicationByProject();
+        setLoadingDelete(false);
+      }
+    } catch (error) {
+      setLoadingDelete(false);
+    }
+  };
+
+  useEffect(() => {
+    listApplicationByProject();
+  }, [currentPage]);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -113,29 +169,35 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
           {
             id: 'name',
             header: t('project:pipeline.appName'),
-            cell: (e: any) => e.name,
+            cell: (e) => (
+              <Link
+                href={`/project/${pipelineInfo.projectId}/application/detail/${e.appId}`}
+              >
+                {e.name}
+              </Link>
+            ),
           },
-          {
-            id: 'platform',
-            header: t('project:pipeline.platform'),
-            cell: (e: any) => e.platform,
-          },
-          { id: 'sdk', header: 'SDK', cell: (e) => e.sdk },
           {
             id: 'appId',
             header: t('project:pipeline.appId'),
-            cell: (e: any) => e.appId,
+            cell: (e) => e.appId,
+          },
+          {
+            id: 'desc',
+            header: t('project:pipeline.appDesc'),
+            cell: (e) => e.description,
           },
           {
             id: 'time',
             header: t('project:pipeline.time'),
-            cell: (e: any) => e.time,
+            cell: (e) => moment(e.createAt).format(TIME_FORMAT),
           },
         ]}
-        items={[]}
+        loading={loadingApp}
+        items={applicationList}
         loadingText={t('project:pipeline.loading') || ''}
-        selectionType="multi"
-        trackBy="name"
+        selectionType="single"
+        trackBy="appId"
         empty={
           <Box textAlign="center" color="inherit">
             <b>{t('project:pipeline.noApp')}</b>
@@ -166,8 +228,30 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             description={t('project:pipeline.yourAppDesc')}
             actions={
               <SpaceBetween direction="horizontal" size="xs">
-                <Button disabled>{t('button.viewDetails')}</Button>
-                <Button disabled>{t('button.delete')}</Button>
+                <Button
+                  loading={loadingApp}
+                  iconName="refresh"
+                  onClick={() => {
+                    listApplicationByProject();
+                  }}
+                />
+                <Button
+                  disabled={selectedItems.length <= 0}
+                  onClick={() => {
+                    goToApplicationDetail();
+                  }}
+                >
+                  {t('button.viewDetails')}
+                </Button>
+                <Button
+                  loading={loadingDelete}
+                  disabled={selectedItems.length <= 0}
+                  onClick={() => {
+                    confirmDeleteApplication();
+                  }}
+                >
+                  {t('button.delete')}
+                </Button>
                 <Button
                   variant="primary"
                   iconName="add-plus"
@@ -185,8 +269,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         }
         pagination={
           <Pagination
-            currentPageIndex={1}
-            pagesCount={2}
+            currentPageIndex={currentPage}
+            onChange={(e) => {
+              setCurrentPage(e.detail.currentPageIndex);
+            }}
+            pagesCount={Math.floor(totalCount / pageSize)}
             ariaLabels={{
               nextPageLabel: t('nextPage') || '',
               previousPageLabel: t('prePage') || '',

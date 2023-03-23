@@ -55,9 +55,9 @@ const ProjectDetail: React.FC = () => {
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail(
-        projectId
-      );
+      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
+        id: projectId,
+      });
       if (success) {
         setProjectInfo(data);
         setLoadingData(false);
@@ -95,14 +95,14 @@ const ProjectDetail: React.FC = () => {
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1" info={<InfoLink />}>
-                {projectInfo?.name}
-              </Header>
+              {projectInfo && (
+                <Header variant="h1" info={<InfoLink />}>
+                  {projectInfo?.name}
+                </Header>
+              )}
             </SpaceBetween>
           }
         >
-          {/* <NonePipeline />
-        <ProjectPipeline /> */}
           {loadingData ? (
             <Loading />
           ) : !projectPipeline?.projectId ? (

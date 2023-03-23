@@ -27,8 +27,8 @@ const createPlugin = async (data: IPlugin) => {
   return result;
 };
 
-const deletePlugin = async (id: string) => {
-  const result: any = await apiRequest('delete', `/plugin/${id}`);
+const deletePlugin = async (params: { id: string }) => {
+  const result: any = await apiRequest('delete', `/plugin/${params.id}`);
   return result;
 };
 
