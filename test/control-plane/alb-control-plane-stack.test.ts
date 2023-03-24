@@ -15,9 +15,10 @@ import {
   App,
   Aws,
 } from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
+import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-config';
 import { validateSubnetsRule } from '../rules';
 
 function getParameter(template: Template, param: string) {
@@ -557,4 +558,170 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
     });
 
   });
+
+  test('Cognito', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      existingVpc: false,
+      internetFacing: true,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+    });
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasResourceProperties('AWS::Cognito::UserPoolClient', {
+      AllowedOAuthFlows: [
+        'implicit',
+        'code',
+      ],
+      AllowedOAuthFlowsUserPoolClient: true,
+      AllowedOAuthScopes: [
+        'openid',
+        'email',
+        'profile',
+      ],
+      ExplicitAuthFlows: [
+        'ALLOW_USER_PASSWORD_AUTH',
+        'ALLOW_REFRESH_TOKEN_AUTH',
+      ],
+      SupportedIdentityProviders: [
+        'COGNITO',
+      ],
+    });
+
+    template.hasResourceProperties('AWS::Cognito::UserPool', {
+      AccountRecoverySetting: {
+        RecoveryMechanisms: [
+          {
+            Name: 'verified_phone_number',
+            Priority: 1,
+          },
+          {
+            Name: 'verified_email',
+            Priority: 2,
+          },
+        ],
+      },
+      AdminCreateUserConfig: {
+        AllowAdminCreateUserOnly: true,
+      },
+      AutoVerifiedAttributes: [
+        'email',
+      ],
+      Policies: {
+        PasswordPolicy: {
+          MinimumLength: 8,
+          RequireLowercase: true,
+          RequireNumbers: true,
+          RequireSymbols: true,
+          RequireUppercase: true,
+        },
+      },
+      UsernameConfiguration: {
+        CaseSensitive: false,
+      },
+      UserPoolAddOns: {
+        AdvancedSecurityMode: 'ENFORCED',
+      },
+    });
+
+    template.hasResourceProperties('AWS::Cognito::UserPoolDomain', {});
+    template.hasResourceProperties('AWS::Cognito::UserPoolUser', {
+      UserPoolId: {
+        Ref: Match.stringLikeRegexp('userPool[a-zA-Z0-9]+'),
+      },
+      UserAttributes: [
+        {
+          Name: 'email',
+          Value: {
+            Ref: 'Email',
+          },
+        },
+      ],
+      Username: {
+        Ref: 'Email',
+      },
+    });
+
+  });
+
+
+  test('Fix response', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      existingVpc: false,
+      internetFacing: true,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+    });
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
+      Actions: [
+        {
+          FixedResponseConfig: {
+            ContentType: 'application/json',
+            MessageBody: {
+              'Fn::Join': [
+                '',
+                [
+                  '{"oidc_provider":"https://cognito-idp.',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  '.amazonaws.com/',
+                  {
+                    Ref: Match.anyValue(),
+                  },
+                  '","oidc_client_id":"',
+                  {
+                    Ref: Match.anyValue(),
+                  },
+                  '","oidc_redirect_url":"https://',
+                  {
+                    'Fn::Join': [
+                      '.',
+                      [
+                        {
+                          Ref: 'RecordName',
+                        },
+                        {
+                          Ref: 'HostedZoneName',
+                        },
+                      ],
+                    ],
+                  },
+                  ':443/signin","solution_version":"v1","cotrol_plane_mode":"ALB"}',
+                ],
+              ],
+            },
+            StatusCode: '200',
+          },
+          Type: 'fixed-response',
+        },
+      ],
+      Conditions: [
+        {
+          Field: 'path-pattern',
+          PathPatternConfig: {
+            Values: [
+              SOLUTION_CONFIG_PATH,
+            ],
+          },
+        },
+      ],
+      ListenerArn: {
+        Ref: Match.anyValue(),
+      },
+      Priority: 45,
+    });
+
+  });
+
 });

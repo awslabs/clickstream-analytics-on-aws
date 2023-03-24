@@ -40,7 +40,7 @@ declare global {
   interface ConfigType {
     oidc_provider: string;
     oidc_client_id: string;
-    oidc_customer_domain: string;
+    oidc_redirect_url: string;
     oidc_logout_endpoint: string;
     project_region: string;
     solution_version: string;

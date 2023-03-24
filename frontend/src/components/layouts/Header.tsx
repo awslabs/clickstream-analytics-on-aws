@@ -46,7 +46,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       : {};
     setLogoutEndpoint(configJSONObj.oidc_logout_endpoint);
     setFullLogoutUrl(
-      `${configJSONObj.oidc_logout_endpoint}?id_token_hint=${user.id_token}&post_logout_redirect_uri=${configJSONObj.oidc_customer_domain}`
+      `${configJSONObj.oidc_logout_endpoint}?id_token_hint=${user.id_token}&post_logout_redirect_uri=${configJSONObj.oidc_redirect_url}`
     );
   }, []);
 

@@ -11,12 +11,23 @@
  *  and limitations under the License.
  */
 
-import { createContext } from 'react';
-export const AppContext = createContext<ConfigType | undefined>({
-  oidc_provider: '',
-  oidc_client_id: '',
-  oidc_redirect_url: '',
-  oidc_logout_endpoint: '',
-  project_region: '',
-  solution_version: '',
-});
+
+export const SOLUTION_CONFIG_PATH = '/aws-exports.json';
+
+export interface SolutionConfigProps {
+  readonly issuer: string;
+  readonly clientId: string;
+  readonly redirectUrl: string;
+  readonly solutionVersion: string;
+  readonly cotrolPlaneMode: 'ALB' | 'CLOUDFRONT';
+}
+
+export function generateSolutionConfig(props: SolutionConfigProps ) {
+  return {
+    oidc_provider: props.issuer,
+    oidc_client_id: props.clientId,
+    oidc_redirect_url: props.redirectUrl + '/signin',
+    solution_version: props.solutionVersion,
+    cotrol_plane_mode: props.cotrolPlaneMode,
+  };
+}

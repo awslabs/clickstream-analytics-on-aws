@@ -48,6 +48,7 @@ import {
   supressWarningsForCloudFrontS3Portal,
 } from './control-plane/private/nag';
 import { SolutionCognito } from './control-plane/private/solution-cognito';
+import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 
 export interface CloudFrontControlPlaneStackProps extends StackProps {
   /**
@@ -143,7 +144,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
         },
         user: 'node',
-        autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', '/aws-exports.json', '/locales/*'],
+        autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', SOLUTION_CONFIG_PATH, '/locales/*'],
       },
       cnCloudFrontS3PortalProps,
       domainProps,
@@ -246,13 +247,15 @@ export class CloudFrontControlPlaneStack extends Stack {
     );
 
     // upload config to S3
-    const key = 'aws-exports.json';
-    const awsExports = {
-      oidc_provider: issuer,
-      oidc_client_id: clientId,
-      oidc_customer_domain: `${controlPlane.controlPlaneUrl}/signin`,
-      solution_version: process.env.BUILD_VERSION || 'v1',
-    };
+    const key = SOLUTION_CONFIG_PATH.substring(1); //remove slash
+    const awsExports = generateSolutionConfig({
+      issuer: issuer,
+      clientId: clientId,
+      redirectUrl: controlPlane.controlPlaneUrl,
+      solutionVersion: process.env.BUILD_VERSION || 'v1',
+      cotrolPlaneMode: 'CLOUDFRONT',
+    });
+
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));
 
     const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;

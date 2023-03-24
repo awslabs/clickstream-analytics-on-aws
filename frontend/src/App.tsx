@@ -152,7 +152,7 @@ const App: React.FC = () => {
       scope: 'openid email profile',
       automaticSilentRenew: true,
       client_id: configData.oidc_client_id,
-      redirect_uri: configData.oidc_customer_domain,
+      redirect_uri: configData.oidc_redirect_url,
     };
     setOidcConfig(settings);
   };

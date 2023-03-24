@@ -63,6 +63,12 @@ export interface ApplicationLoadBalancerProps {
   readonly securityGroup: ISecurityGroup;
 }
 
+export interface AuthProps {
+  readonly issuer: string;
+  readonly clientId: string;
+  readonly callbackUrl: string;
+}
+
 export interface ApiGatewayProps {
   readonly stageName: string;
   readonly authorizer: IAuthorizer;
@@ -75,6 +81,7 @@ export interface ClickStreamApiProps {
   readonly targetToCNRegions?: boolean;
   readonly stackWorkflowS3Bucket: IBucket;
   readonly s3MainRegion?: string;
+  readonly authProps?: AuthProps;
 }
 
 export class ClickStreamApiConstruct extends Construct {
@@ -244,6 +251,7 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         S3_MAIN_REGION: props.s3MainRegion?? 'us-east-1',
+        ... props.authProps,
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

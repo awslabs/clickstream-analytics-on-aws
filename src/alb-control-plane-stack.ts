@@ -37,6 +37,8 @@ import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
+import { SolutionCognito } from './control-plane/private/solution-cognito';
+import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 
 export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProps {
   /**
@@ -58,6 +60,11 @@ export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProp
    * @default - false.
    */
   useCustomDomain?: boolean;
+
+  /**
+   * user existing OIDC provider or not
+   */
+  useExistingOIDCProvider?: boolean;
 }
 
 export class ApplicationLoadBalancerControlPlaneStack extends Stack {
@@ -152,6 +159,37 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
     });
 
+    let issuer: string;
+    let clientId: string;
+    /**
+     * Create Cognito user pool and client for backend api,
+     * The client of Congito requires the redirect url using HTTPS
+     */
+    if (!props.useExistingOIDCProvider && props.useCustomDomain) {
+      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
+      this.paramLabels[emailParamerter.logicalId] = {
+        default: 'Admin User Email',
+      };
+
+      this.paramGroups.push({
+        Label: { default: 'Authentication Information' },
+        Parameters: [emailParamerter.logicalId],
+      });
+
+      const cognito = new SolutionCognito(this, 'solution-cognito', {
+        email: emailParamerter.valueAsString,
+        callbackUrls: [`${controlPlane.controlPlaneUrl}/signin`],
+      });
+
+      issuer = cognito.oidcProps.issuer;
+      clientId = cognito.oidcProps.appClientId;
+
+    } else {
+      const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
+      issuer = oidcParameters.oidcProvider.valueAsString;
+      clientId = oidcParameters.oidcClientId.valueAsString;
+    }
+
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
         ParameterGroups: this.paramGroups,
@@ -170,6 +208,11 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         subnets,
         securityGroup: controlPlane.securityGroup,
       },
+      authProps: {
+        issuer: issuer,
+        clientId: clientId,
+        callbackUrl: controlPlane.controlPlaneUrl,
+      },
       stackWorkflowS3Bucket: solutionBucket.bucket,
     });
 
@@ -184,6 +227,20 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       methods: ['POST', 'GET', 'PUT', 'DELETE'],
     });
 
+    const awsExports = generateSolutionConfig({
+      issuer: issuer,
+      clientId: clientId,
+      redirectUrl: controlPlane.controlPlaneUrl,
+      solutionVersion: process.env.BUILD_VERSION || 'v1',
+      cotrolPlaneMode: 'ALB',
+    });
+
+    controlPlane.addFixedResponse('aws-exports', {
+      routePath: SOLUTION_CONFIG_PATH,
+      priority: controlPlane.rootPathPriority - 5,
+      content: JSON.stringify(awsExports),
+      contentType: 'application/json',
+    });
 
     new CfnOutput(this, 'ControlPlaneUrl', {
       description: 'The url of the controlPlane UI',

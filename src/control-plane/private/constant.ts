@@ -29,4 +29,5 @@ export class Constant {
 
   public static readonly NAG_REASON_COGNITO_MANAGED_FUN = 'Lambda Function is managed by Cognito to get service token.';
 
+
 }

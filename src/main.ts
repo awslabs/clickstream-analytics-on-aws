@@ -33,24 +33,14 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: false,
+    useExistingOIDCProvider: true,
     synthesizer: synthesizer(),
   }),
   new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
     existingVpc: true,
     internetFacing: true,
     useCustomDomain: true,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-control-plane-stack', {
-    existingVpc: false,
-    internetFacing: true,
-    useCustomDomain: false,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-new-vpc-custom-domain-control-plane-stack', {
-    existingVpc: false,
-    internetFacing: true,
-    useCustomDomain: true,
+    useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
 ], [
@@ -64,12 +54,14 @@ stackSuppressions([
     existingVpc: true,
     internetFacing: false,
     useCustomDomain: false,
+    useExistingOIDCProvider: true,
     synthesizer: synthesizer(),
   }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'private-new-vpc-control-plane-stack', {
-    existingVpc: false,
+  new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-cognito-control-plane-stack', {
+    existingVpc: true,
     internetFacing: false,
-    useCustomDomain: false,
+    useCustomDomain: true,
+    useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
 ], [
