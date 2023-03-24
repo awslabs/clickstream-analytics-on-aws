@@ -28,6 +28,13 @@ export class PipelineServ {
     try {
       const { pid, version, pageNumber, pageSize } = req.query;
       const result = await store.listPipeline(pid, version, true, pageSize, pageNumber);
+      for (let pipeline of result.items as Pipeline[] ) {
+        const curStatus = await stackManager.getExecutionStatus(pipeline.executionArn) ?? ExecutionStatus.FAILED;
+        if (pipeline.status !== curStatus) {
+          pipeline.status = curStatus;
+          await store.updatePipelineStatus(pipeline, curStatus);
+        }
+      }
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -64,7 +71,11 @@ export class PipelineServ {
       if (!result) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      result.status = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
+      const curStatus = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
+      if (result.status !== curStatus) {
+        result.status = curStatus;
+        await store.updatePipelineStatus(result, curStatus);
+      }
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

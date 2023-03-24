@@ -230,7 +230,7 @@ export interface Pipeline {
   readonly bucket: S3Bucket;
   readonly ingestionServer: IngestionServer;
   readonly etl?: ETL;
-  readonly dataModel: DataModel;
+  readonly dataModel?: DataModel;
 
   status: ExecutionStatus | string;
   workflow: string;
@@ -252,16 +252,16 @@ export interface PipelineList {
 export function getBucketPrefix(pipeline: Pipeline, key: string, value: string | undefined): string {
   if (value === undefined || value === '' || value === '/') {
     const prefixs: Map<string, string> = new Map();
-    prefixs.set('logs-alb', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/alb`);
-    prefixs.set('logs-kafka-connector', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/kafka-connector`);
-    prefixs.set('data-buffer', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/buffer`);
-    prefixs.set('data-ods', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/ods`);
-    prefixs.set('data-pipeline-temp', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/pipeline-temp`);
-    prefixs.set('kafka-connector-plugin', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/runtime/ingestion/kafka-connector/plugins`);
+    prefixs.set('logs-alb', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/alb/`);
+    prefixs.set('logs-kafka-connector', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/kafka-connector/`);
+    prefixs.set('data-buffer', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/buffer/`);
+    prefixs.set('data-ods', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/ods/`);
+    prefixs.set('data-pipeline-temp', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/pipeline-temp/`);
+    prefixs.set('kafka-connector-plugin', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/runtime/ingestion/kafka-connector/plugins/`);
     return prefixs.get(key)?? '';
   }
-  if (value.endsWith('/')) {
-    return value?.substring(0, value?.length - 1);
+  if (!value.endsWith('/')) {
+    return `${value}/`;
   }
   return value;
 }
@@ -280,7 +280,8 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   });
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
-    ParameterValue: pipeline.network.privateSubnetIds.join(','),
+    ParameterValue: isEmpty(pipeline.network.privateSubnetIds) ?
+      pipeline.network.publicSubnetIds.join(','): pipeline.network.privateSubnetIds.join(','),
   });
   // Domain Information
   if (pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {

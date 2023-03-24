@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { Application, ApplicationList } from '../model/application';
 import { Dictionary } from '../model/dictionary';
 import { Pipeline, PipelineList } from '../model/pipeline';
@@ -35,6 +36,7 @@ export interface ClickStreamStore {
   addPipeline: (pipeline: Pipeline) => Promise<string>;
   getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<Pipeline | undefined>;
   updatePipeline: (pipeline: Pipeline, curPipeline: Pipeline) => Promise<void>;
+  updatePipelineStatus: (pipeline: Pipeline, status: ExecutionStatus | string) => Promise<void>;
   listPipeline: (projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
   deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;

@@ -544,6 +544,25 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
+  public async updatePipelineStatus(pipeline: Pipeline, status: ExecutionStatus | string): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: pipeline.projectId,
+        type: pipeline.type,
+      },
+      // Define expressions for the new or updated attributes
+      UpdateExpression: 'SET #status =:status',
+      ExpressionAttributeNames: {
+        '#status': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':status': status,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
 
   public async deletePipeline(projectId: string, pipelineId: string): Promise<void> {
     // Scan all pipeline versions

@@ -47,6 +47,30 @@ interface SfnStackCallback {
   readonly BucketPrefix: string;
 }
 
+interface WorkflowTemplate {
+  readonly Version: string;
+  readonly Workflow: WorkflowParallel;
+}
+
+interface WorkflowParallel {
+  readonly Type: string;
+  readonly Branches: WorkflowParallelBranch[];
+  readonly End?: boolean;
+}
+
+interface WorkflowParallelBranch {
+  readonly StartAt: string;
+  readonly States: WorkflowState;
+}
+
+interface WorkflowState {
+  [name: string]: {
+    readonly Type: string;
+    readonly Data: any;
+    readonly End: boolean;
+  };
+}
+
 const store: ClickStreamStore = new DynamoDbStore();
 
 export class StackManager {
@@ -54,7 +78,7 @@ export class StackManager {
 
     const stackData = await this.getStackData(pipeline, executionName);
     // TODO：read workflow template from dictionary （）
-    const workflowTemplate = {
+    const workflowTemplate: WorkflowTemplate = {
       Version: '2022-03-15',
       Workflow: {
         Type: 'Parallel',
@@ -70,29 +94,33 @@ export class StackManager {
               },
             },
           },
-          {
-            StartAt: 'KafkaConnector',
-            States: {
-              KafkaConnector: {
-                Type: 'Stack',
-                Data: stackData.KafkaConnector,
-                End: true,
-              },
-            },
-          },
-          {
-            StartAt: 'ETLPipeline',
-            States: {
-              ETLPipeline: {
-                Type: 'Stack',
-                Data: stackData.ETLPipeline,
-                End: true,
-              },
-            },
-          },
         ],
       },
     };
+    if (pipeline.ingestionServer.sinkType === 'kafka') {
+      workflowTemplate.Workflow.Branches.push({
+        StartAt: 'KafkaConnector',
+        States: {
+          KafkaConnector: {
+            Type: 'Stack',
+            Data: stackData.KafkaConnector,
+            End: true,
+          },
+        },
+      });
+    }
+    if (!isEmpty(pipeline.etl)) {
+      workflowTemplate.Workflow.Branches.push({
+        StartAt: 'ETL',
+        States: {
+          ETL: {
+            Type: 'Stack',
+            Data: stackData.ETL,
+            End: true,
+          },
+        },
+      });
+    }
     return workflowTemplate;
   }
 
@@ -117,7 +145,7 @@ export class StackManager {
       throw Error(`Template: ingestion_${pipeline.ingestionServer.sinkType} not found in dictionary.`);
     }
     const ingestionStackParameters = await getIngestionStackParameters(pipeline);
-    const ingestionStackName = `clickstream-ingestion-${pipeline.pipelineId}`;
+    const ingestionStackName = `clickstream-ingestion-${pipeline.ingestionServer.sinkType}-${pipeline.pipelineId}`;
     stackDataMap.Ingestion = {
       Input: {
         Action: 'Create',
@@ -127,7 +155,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/${ingestionStackName}`,
+        BucketPrefix: `workflow/${executionName}/Ingestion`,
       },
     };
 
@@ -136,7 +164,7 @@ export class StackManager {
       throw Error('Template: kafka-s3-sink not found in dictionary.');
     }
     const kafkaConnectorStackParameters = await getKafkaConnectorStackParameters(pipeline);
-    const kafkaConnectorStackName = `clickstream-kafka-${pipeline.pipelineId}`;
+    const kafkaConnectorStackName = `clickstream-kafka-connector-${pipeline.pipelineId}`;
     stackDataMap.KafkaConnector = {
       Input: {
         Action: 'Create',
@@ -146,7 +174,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/${kafkaConnectorStackName}`,
+        BucketPrefix: `workflow/${executionName}/KafkaConnector`,
       },
     };
 
@@ -156,8 +184,8 @@ export class StackManager {
     }
 
     const pipelineStackParameters = await getETLPipelineStackParameters(pipeline);
-    const pipelineStackName = `clickstream-pipeline-${pipeline.pipelineId}`;
-    stackDataMap.ETLPipeline = {
+    const pipelineStackName = `clickstream-etl-${pipeline.pipelineId}`;
+    stackDataMap.ETL = {
       Input: {
         Action: 'Create',
         StackName: pipelineStackName,
@@ -166,7 +194,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/${pipelineStackName}`,
+        BucketPrefix: `workflow/${executionName}/ETL`,
       },
     };
 
