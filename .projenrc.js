@@ -52,6 +52,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-route-53',
   '@aws-sdk/client-athena',
   '@aws-sdk/client-iam',
+  '@aws-sdk/client-acm',
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
@@ -96,6 +97,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-bootstrapless-synthesizer@^2.2.11',
     'jsonwebtoken@^9.0.0',
     'jwks-rsa@^3.0.1',
+    'jsonpath-plus@^7.2.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKDeps,
@@ -108,6 +110,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDevDeps,
     'aws-sdk-client-mock@^2.0.1',
     'aws-sdk-client-mock-jest@^2.0.1',
+    '@types/jsonpath-plus@^5.0.2',
   ],
   minNodeVersion: '16.18.0',
   jestOptions: {

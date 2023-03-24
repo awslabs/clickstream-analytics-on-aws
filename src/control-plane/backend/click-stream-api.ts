@@ -41,10 +41,12 @@ import {
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import dictionary from './config/dictionary.json';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
+import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
@@ -68,10 +70,10 @@ export interface ApiGatewayProps {
 
 export interface ClickStreamApiProps {
   readonly fronting: 'alb' | 'cloudfront';
-  readonly dictionaryItems?: DicItem[];
   readonly applicationLoadBalancer?: ApplicationLoadBalancerProps;
   readonly apiGateway?: ApiGatewayProps;
   readonly targetToCNRegions?: boolean;
+  readonly stackWorkflowS3Bucket: IBucket;
   readonly s3MainRegion?: string;
 }
 
@@ -158,7 +160,17 @@ export class ClickStreamApiConstruct extends Construct {
       clickStreamTable,
       lambdaFuncProps: apiFunctionProps,
       targetToCNRegions: props.targetToCNRegions ?? false,
+      workflowBucket: props.stackWorkflowS3Bucket,
     });
+
+    // Create stack workflow StateMachine
+    const stackWorkflowStateMachine = new StackWorkflowStateMachine(this, 'StackWorkflowStateMachine', {
+      stateActionMachine: stackActionStateMachine.stateMachine,
+      lambdaFuncProps: apiFunctionProps,
+      targetToCNRegions: props.targetToCNRegions ?? false,
+      workflowBucket: props.stackWorkflowS3Bucket,
+    });
+    stackActionStateMachine.stateMachine.grantStartExecution(stackWorkflowStateMachine.stackWorkflowMachine);
 
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
@@ -168,7 +180,10 @@ export class ClickStreamApiConstruct extends Construct {
       statements: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          resources: [stackActionStateMachine.stateMachine.stateMachineArn],
+          resources: [
+            stackActionStateMachine.stateMachine.stateMachineArn,
+            stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
+          ],
           actions: [
             'states:StartExecution',
           ],
@@ -184,6 +199,7 @@ export class ClickStreamApiConstruct extends Construct {
           actions: [
             'kafka:ListClustersV2',
             'kafka:ListClusters',
+            'kafka:ListNodes',
             's3:ListAllMyBuckets',
             'ec2:DescribeVpcs',
             'redshift:DescribeClusters',
@@ -196,6 +212,9 @@ export class ClickStreamApiConstruct extends Construct {
             'route53:ListHostedZones',
             'athena:ListWorkGroups',
             'iam:ListRoles',
+            'iam:ListServerCertificates',
+            'states:DescribeExecution',
+            'acm:ListCertificates',
           ],
         }),
       ],
@@ -219,6 +238,8 @@ export class ClickStreamApiConstruct extends Construct {
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
+        STACK_WORKFLOW_SATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
+        STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,

@@ -15,6 +15,8 @@
 const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
+const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_SATE_MACHINE;
+const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
@@ -26,6 +28,8 @@ export {
   clickStreamTableName,
   dictionaryTableName,
   stackActionStateMachineArn,
+  stackWorkflowStateMachineArn,
+  stackWorkflowS3Bucket,
   prefixTimeGSIName,
   serviceName,
   awsRegion,

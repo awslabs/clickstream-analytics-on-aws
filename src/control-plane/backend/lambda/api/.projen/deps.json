@@ -81,6 +81,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-acm",
+      "version": "^3.294.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-athena",
       "version": "^3.294.0",
       "type": "runtime"

@@ -11,38 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
-import { SFNClient, StartExecutionCommand, StartExecutionCommandOutput } from '@aws-sdk/client-sfn';
-import { stackActionStateMachineArn } from '../common/constants';
+import {
+  SFNClient,
+} from '@aws-sdk/client-sfn';
 
 // Create SFN Client
 const sfnClient = new SFNClient({});
 
-export interface StackRequest {
-  readonly Input: StackRequestInput;
-  readonly Callback: StackRequestCallback;
-}
-export interface StackRequestInput {
-  readonly Action: string;
-  readonly StackName: string | undefined;
-  readonly TemplateURL: string;
-  readonly Parameters: Parameter[] | undefined;
-
-}
-export interface StackRequestCallback {
-  readonly TableName: string;
-  readonly Id: string;
-  readonly Type: string;
-  readonly AttributeName: string;
-}
-
-export class StackManager {
-  public async execute(req: StackRequest): Promise<string | undefined> {
-    const params: StartExecutionCommand = new StartExecutionCommand({
-      stateMachineArn: stackActionStateMachineArn,
-      input: JSON.stringify(req),
-    });
-    const result: StartExecutionCommandOutput = await sfnClient.send(params);
-    return result.executionArn;
-  }
-}
+export {
+  sfnClient,
+};

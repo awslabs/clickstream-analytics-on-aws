@@ -20,6 +20,7 @@ import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LogBucket } from '../../src/common/log-bucket';
 import {
@@ -256,9 +257,9 @@ export class TestEnv {
   public static newALBApiStack(cn: boolean = false): ApiStackElements {
 
     const stack = new TestStack(new App(), 'apiTestStack');
+    const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
     new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
-      dictionaryItems: stack.dics,
       fronting: 'alb',
       applicationLoadBalancer: {
         vpc: stack.vpc,
@@ -266,6 +267,7 @@ export class TestEnv {
         securityGroup: stack.sg,
       },
       targetToCNRegions: cn,
+      stackWorkflowS3Bucket: s3Bucket,
     });
 
     const template = Template.fromStack(stack);
@@ -275,6 +277,7 @@ export class TestEnv {
   public static newCloudfrontApiStack(cn: boolean = false): ApiStackElements {
 
     const stack = new TestStack(new App(), 'apiTestStack');
+    const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
     const authFunction = new NodejsFunction(stack, 'AuthorizerFunction', {
       runtime: Runtime.NODEJS_16_X,
@@ -293,13 +296,13 @@ export class TestEnv {
     });
 
     new ClickStreamApiConstruct(stack, 'testClickStreamCloudfrontApi', {
-      dictionaryItems: stack.dics,
       fronting: 'cloudfront',
       apiGateway: {
         stageName: 'api',
         authorizer: authorizer,
       },
       targetToCNRegions: cn,
+      stackWorkflowS3Bucket: s3Bucket,
     });
 
     const template = Template.fromStack(stack);

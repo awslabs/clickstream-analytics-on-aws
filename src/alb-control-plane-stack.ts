@@ -97,7 +97,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       subnets = { subnets: vpcStack.vpc.privateSubnets };
     }
 
-    const logBucket = new LogBucket(this, 'logBucket');
+    const solutionBucket = new LogBucket(this, 'solutionBucket');
     let domainProps = undefined;
     let protocol = ApplicationProtocol.HTTP;
 
@@ -131,7 +131,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         protocol: protocol,
         logProps: {
           enableAccessLog: true,
-          bucket: logBucket.bucket,
+          bucket: solutionBucket.bucket,
         },
       },
       networkProps: {
@@ -162,14 +162,15 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     if (!controlPlane.applicationLoadBalancer.vpc) {
       throw new Error('Application Load Balancer VPC create error.');
     }
+
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'alb',
-      dictionaryItems: [],
       applicationLoadBalancer: {
         vpc: controlPlane.applicationLoadBalancer.vpc,
         subnets,
         securityGroup: controlPlane.securityGroup,
       },
+      stackWorkflowS3Bucket: solutionBucket.bucket,
     });
 
     controlPlane.addRoute('api-targets', {

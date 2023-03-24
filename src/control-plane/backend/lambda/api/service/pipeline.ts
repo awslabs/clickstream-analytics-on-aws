@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
-import { awsUrlSuffix, clickStreamTableName, s3MainRegion } from '../common/constants';
+import { StackManager } from './stack';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
-import { StackManager } from '../common/sfn';
-import { isEmpty, tryToJson } from '../common/utils';
-import { getInitIngestionRuntime, Pipeline } from '../model/pipeline';
+import { Pipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+
 
 const store: ClickStreamStore = new DynamoDbStore();
 const stackManager: StackManager = new StackManager();
@@ -41,31 +41,14 @@ export class PipelineServ {
       req.body.id = projectId;
       req.body.pipelineId = uuidv4();
       let pipeline: Pipeline = req.body;
-      // Get TemplateURL from dictionary
-      const templateURL = await this.getTemplateUrl(`ingestion_${pipeline.ingestionServer.sinkType}`);
-      if (!templateURL) {
-        return res.status(404).json(new ApiFail('Add Pipeline Error, templates not found in dictionary.'));
-      }
-      // Create stack
-      const initIngestionRuntime = getInitIngestionRuntime(pipeline);
-      if (!initIngestionRuntime.result) {
-        return res.status(400).json(new ApiFail(initIngestionRuntime.message));
-      }
-      pipeline.ingestionServerRuntime = initIngestionRuntime.stack;
-      await stackManager.execute({
-        Input: {
-          Action: 'Create',
-          StackName: initIngestionRuntime.stack?.StackName,
-          TemplateURL: templateURL,
-          Parameters: initIngestionRuntime.stack?.Parameters,
-        },
-        Callback: {
-          TableName: clickStreamTableName ?? '',
-          Id: pipeline.id,
-          Type: `PIPELINE#${pipeline.pipelineId}#latest`,
-          AttributeName: 'ingestionRuntime',
-        },
-      });
+
+      // state machine
+      const executionName = `main-${uuidv4()}`;
+      const workflow = await stackManager.generateWorkflow(pipeline, executionName);
+      pipeline.workflow = JSON.stringify(workflow);
+      const executionArn = await stackManager.execute(JSON.stringify(workflow.Workflow), executionName);
+      pipeline.executionArn = executionArn;
+
       const id = await store.addPipeline(pipeline);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
     } catch (error) {
@@ -81,6 +64,7 @@ export class PipelineServ {
       if (!result) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
+      result.status = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -113,22 +97,6 @@ export class PipelineServ {
     } catch (error) {
       next(error);
     }
-  };
-
-  public async getTemplateUrl(name: string) {
-    const solution = await store.getDictionary('Solution');
-    const templates = await store.getDictionary('Templates');
-    if (solution && templates) {
-      solution.data = tryToJson(solution.data);
-      templates.data = tryToJson(templates.data);
-      if (isEmpty(templates.data[name])) {
-        return undefined;
-      }
-      const s3Host = `https://${solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
-      const prefix = solution.data.prefix;
-      return `${s3Host}/${solution.data.name}/${prefix}/${templates.data[name]}`;
-    }
-    return undefined;
   };
 
 }

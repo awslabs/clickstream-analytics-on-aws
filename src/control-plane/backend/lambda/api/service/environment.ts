@@ -13,6 +13,7 @@
 
 import { ApiSuccess } from '../common/request-valid';
 import { listRegions } from '../store/aws/account';
+import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
 import { describeVpcs, describeSubnets } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
@@ -21,6 +22,7 @@ import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
 import { describeRedshiftClusters } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { listBuckets } from '../store/aws/s3';
+
 
 export class EnvironmentServ {
 
@@ -134,6 +136,15 @@ export class EnvironmentServ {
     try {
       const { region } = req.query;
       const result = await quickSightPing(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listCertificates(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await ListCertificates(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

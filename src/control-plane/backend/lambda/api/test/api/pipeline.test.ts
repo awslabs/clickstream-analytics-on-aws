@@ -12,18 +12,21 @@
  */
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { KafkaClient, ListNodesCommand, ListNodesCommandOutput } from '@aws-sdk/client-kafka';
+import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
-import { getInitIngestionRuntime, getPipelineStatus, Pipeline, PipelineStatus } from '../../model/pipeline';
-import { PipelineServ } from '../../service/pipeline';
+import { Pipeline } from '../../model/pipeline';
+import { StackManager } from '../../service/stack';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
+const stackManager: StackManager = new StackManager();
+const kafkaMock = mockClient(KafkaClient);
 
 describe('Pipeline test', () => {
   beforeEach(() => {
@@ -36,32 +39,58 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
         name: 'Templates',
-        data: '{"ingestion_s3": "xxx"}',
+        data: '{"ingestion_s3": "xxx", "kafka-s3-sink": "yyy", "data-pipeline":"zzz"}',
       },
     });
+
+    const outpus: ListNodesCommandOutput = {
+      NextToken: 'token01',
+      NodeInfoList: [{
+        BrokerNodeInfo: {
+          Endpoints: ['node1,node2'],
+        },
+      }],
+      $metadata: {},
+    };
+    kafkaMock.on(ListNodesCommand).resolves(outpus);
+
     sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(ScanCommand).resolves({
+      Items: [{ id: 1 }, { id: 2 }],
+    });
+
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
+        id: MOCK_PROJECT_ID,
+        prefix: 'PIPELINE',
+        type: `PIPELINE#${MOCK_PIPELINE_ID}`,
         projectId: MOCK_PROJECT_ID,
+        appIds: ['appId1', 'appId2'],
+        pipelineId: MOCK_PIPELINE_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
         region: 'us-east-1',
         dataCollectionSDK: 'Clickstream SDK',
+        status: ExecutionStatus.RUNNING,
         tags: [
           {
             key: 'name',
             value: 'clickstream',
           },
         ],
+        network: {
+          vpcId: 'vpc-0ba32b04ccc029088',
+          publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+          privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+        },
+        bucket: {
+          name: 'EXAMPLE_BUCKET',
+          prefix: 'test',
+        },
         ingestionServer: {
-          network: {
-            vpcId: 'vpc-0000',
-            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
-            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
-          },
           size: {
             serverMin: 2,
             serverMax: 4,
@@ -70,7 +99,7 @@ describe('Pipeline test', () => {
           },
           domain: {
             hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'example.com',
+            hostedZoneName: 'fake.example.com',
             recordName: 'click',
           },
           loadBalancer: {
@@ -79,30 +108,71 @@ describe('Pipeline test', () => {
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
             logS3Bucket: {
-              name: '111122223333-test',
+              name: 'EXAMPLE_BUCKET',
               prefix: 'logs',
             },
             notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
           },
           sinkType: 's3',
           sinkS3: {
-            s3DataBucket: {
-              name: '111122223333-test',
+            sinkBucket: {
+              name: 'EXAMPLE_BUCKET',
               prefix: 'test',
             },
-            s3BufferSize: 50,
-            s3BufferInterval: 30,
+            s3BatchMaxBytes: 50,
+            s3BatchTimeout: 30,
+          },
+          sinkKafka: {
+            brokers: ['test1', 'test2', 'test3'],
+            topic: 't1',
+            mskCluster: {
+              name: 'mskClusterName',
+              arn: 'mskClusterArn',
+              securityGroupId: 'sg-0000000000002',
+            },
+            kafkaConnector: {
+              sinkBucket: {
+                name: 'EXAMPLE-BUCKET',
+                prefix: 'kinesis',
+              },
+            },
+          },
+          sinkKinesis: {
+            kinesisStreamMode: 'ON_DEMAND',
+            kinesisShardCount: 3,
+            sinkBucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: 'kinesis',
+            },
           },
         },
-        etl: {},
+        // etl: {
+        //   sourceS3Bucket: {
+        //     name: 'EXAMPLE_BUCKET',
+        //     prefix: 'source',
+        //   },
+        //   sinkS3Bucket: {
+        //     name: 'EXAMPLE_BUCKET',
+        //     prefix: 'sink',
+        //   },
+        // },
         dataModel: {},
+        workflow: '',
+        executionArn: '',
+        version: '123',
+        versionTag: 'latest',
+        createAt: 162321434322,
+        updateAt: 162321434322,
+        operator: '',
+        deleted: false,
+
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
   });
-  it('Create pipeline with dictionary 404', async () => {
+  it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand, {
@@ -177,9 +247,10 @@ describe('Pipeline test', () => {
         dataModel: {},
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
-      message: 'Add Pipeline Error, templates not found in dictionary.',
+      error: 'Error',
+      message: 'Unexpected error occurred at server.',
       success: false,
     });
   });
@@ -210,12 +281,16 @@ describe('Pipeline test', () => {
             value: 'clickstream',
           },
         ],
+        network: {
+          vpcId: 'vpc-0000',
+          publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
+          privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
+        },
+        bucket: {
+          name: 'EXAMPLE_BUCKET',
+          prefix: '',
+        },
         ingestionServer: {
-          network: {
-            vpcId: 'vpc-0000',
-            publicSubnetIds: ['subnet-1111', 'subnet-2222', 'subnet-3333'],
-            privateSubnetIds: ['subnet-44444', 'subnet-55555', 'subnet-6666'],
-          },
           size: {
             serverMin: 2,
             serverMax: 4,
@@ -233,15 +308,15 @@ describe('Pipeline test', () => {
             protocol: 'HTTPS',
             enableApplicationLoadBalancerAccessLog: true,
             logS3Bucket: {
-              name: '111122223333-test',
+              name: 'EXAMPLE_BUCKET',
               prefix: 'logs',
             },
             notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
           },
           sinkType: 's3',
           sinkS3: {
-            s3DataBucket: {
-              name: '111122223333-test',
+            sinkBucket: {
+              name: 'EXAMPLE_BUCKET',
               prefix: 'test',
             },
             s3BufferSize: 50,
@@ -358,13 +433,81 @@ describe('Pipeline test', () => {
         id: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
-        base: {},
-        runtime: {},
-        ingestion: {},
-        etl: {},
+        status: 'RUNNING',
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0ba32b04ccc029088',
+            publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+            privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'fake.example.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'logs',
+            },
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:1111111111111111:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3DataBucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'test',
+            },
+            s3BatchMaxBytes: 50,
+            s3BatchTimeout: 30,
+          },
+          sinkKafka: {
+            selfHost: false,
+            kafkaBrokers: 'test1,test2,test3',
+            kafkaTopic: 't1',
+            mskClusterName: 'mskClusterName',
+            mskTopic: 'mskTopic',
+            mskSecurityGroupId: 'sg-0000000000002',
+          },
+          sinkKinesis: {
+            kinesisStreamMode: 'ON_DEMAND',
+            kinesisShardCount: 3,
+            kinesisDataS3Bucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'kinesis',
+            },
+          },
+        },
+        etl: {
+          appIds: ['appId1', 'appId2'],
+          sourceS3Bucket: {
+            name: 'EXAMPLE-BUCKET',
+            prefix: 'source',
+          },
+          sinkS3Bucket: {
+            name: 'EXAMPLE-BUCKET',
+            prefix: 'sink',
+          },
+        },
         dataModel: {},
       },
     });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xxx',
+      stateMachineArn: 'aaa',
+      status: ExecutionStatus.RUNNING,
+    });
+
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -376,10 +519,72 @@ describe('Pipeline test', () => {
         id: MOCK_PROJECT_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
-        base: {},
-        runtime: {},
-        ingestion: {},
-        etl: {},
+        status: 'RUNNING',
+        ingestionServer: {
+          network: {
+            vpcId: 'vpc-0ba32b04ccc029088',
+            publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+            privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+          },
+          size: {
+            serverMin: 2,
+            serverMax: 4,
+            warmPoolSize: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          domain: {
+            hostedZoneId: 'Z000000000000000000E',
+            hostedZoneName: 'fake.example.com',
+            recordName: 'click',
+          },
+          loadBalancer: {
+            serverEndpointPath: '/collect',
+            serverCorsOrigin: '*',
+            protocol: 'HTTPS',
+            enableApplicationLoadBalancerAccessLog: true,
+            logS3Bucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'logs',
+            },
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:1111111111111111:test',
+          },
+          sinkType: 's3',
+          sinkS3: {
+            s3DataBucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'test',
+            },
+            s3BatchMaxBytes: 50,
+            s3BatchTimeout: 30,
+          },
+          sinkKafka: {
+            selfHost: false,
+            kafkaBrokers: 'test1,test2,test3',
+            kafkaTopic: 't1',
+            mskClusterName: 'mskClusterName',
+            mskTopic: 'mskTopic',
+            mskSecurityGroupId: 'sg-0000000000002',
+          },
+          sinkKinesis: {
+            kinesisStreamMode: 'ON_DEMAND',
+            kinesisShardCount: 3,
+            kinesisDataS3Bucket: {
+              name: 'EXAMPLE-BUCKET',
+              prefix: 'kinesis',
+            },
+          },
+        },
+        etl: {
+          appIds: ['appId1', 'appId2'],
+          sourceS3Bucket: {
+            name: 'EXAMPLE-BUCKET',
+            prefix: 'source',
+          },
+          sinkS3Bucket: {
+            name: 'EXAMPLE-BUCKET',
+            prefix: 'sink',
+          },
+        },
         dataModel: {},
       },
     });
@@ -913,30 +1118,44 @@ describe('Pipeline test', () => {
     });
   });
   it('Pipeline status', async () => {
-    // Init
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        name: 'Templates',
+        data: '{"ingestion_s3": "xxx", "kafka-s3-sink": "yyy", "data-pipeline":"zzz"}',
+      },
+    });
+    ddbMock.on(ScanCommand).resolves({
+      Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
+    });
+
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
       prefix: 'PIPELINE',
       type: `PIPELINE#${MOCK_PIPELINE_ID}`,
       projectId: MOCK_PROJECT_ID,
+      appIds: ['appId1', 'appId2'],
       pipelineId: MOCK_PIPELINE_ID,
       name: 'Pipeline-01',
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: PipelineStatus.CREATE_IN_PROGRESS,
+      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
           value: 'clickstream',
         },
       ],
+      network: {
+        vpcId: 'vpc-0ba32b04ccc029088',
+        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+      },
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
       ingestionServer: {
-        network: {
-          vpcId: 'vpc-0ba32b04ccc029088',
-          publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-          privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        },
         size: {
           serverMin: 2,
           serverMax: 4,
@@ -944,9 +1163,8 @@ describe('Pipeline test', () => {
           scaleOnCpuUtilizationPercent: 50,
         },
         domain: {
-          hostedZoneId: 'Z000000000000000000E',
-          hostedZoneName: 'fake.example.com',
-          recordName: 'click',
+          domainName: 'click.example.com',
+          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
         },
         loadBalancer: {
           serverEndpointPath: '/collect',
@@ -954,49 +1172,59 @@ describe('Pipeline test', () => {
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
           logS3Bucket: {
-            name: '111122223333-test',
+            name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
           },
           notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
         },
         sinkType: 's3',
         sinkS3: {
-          s3DataBucket: {
-            name: '111122223333-test',
+          sinkBucket: {
+            name: 'EXAMPLE_BUCKET',
             prefix: 'test',
           },
           s3BatchMaxBytes: 50,
           s3BatchTimeout: 30,
         },
         sinkKafka: {
-          selfHost: false,
-          kafkaBrokers: 'test1,test2,test3',
-          kafkaTopic: 't1',
-          mskClusterName: 'mskClusterName',
-          mskTopic: 'mskTopic',
-          mskSecurityGroupId: 'sg-0000000000002',
+          brokers: ['test1', 'test2', 'test3'],
+          topic: 't1',
+          mskCluster: {
+            name: 'mskClusterName',
+            arn: 'mskClusterArn',
+            securityGroupId: 'sg-0000000000002',
+          },
         },
         sinkKinesis: {
           kinesisStreamMode: 'ON_DEMAND',
           kinesisShardCount: 3,
-          kinesisDataS3Bucket: {
-            name: '111122223333-test',
+          sinkBucket: {
+            name: 'EXAMPLE_BUCKET',
             prefix: 'kinesis',
           },
         },
       },
       etl: {
-        appIds: ['appId1', 'appId2'],
+        dataFreshnessInHour: 72,
+        scheduleExpression: '3hour',
         sourceS3Bucket: {
-          name: '111122223333-test',
-          prefix: 'source',
+          name: 'EXAMPLE_BUCKET',
+          prefix: 'etl-source',
         },
         sinkS3Bucket: {
-          name: '111122223333-test',
-          prefix: 'sink',
+          name: 'EXAMPLE_BUCKET',
+          prefix: 'etl-sink',
         },
+        pipelineBucket: {
+          name: 'EXAMPLE_BUCKET',
+          prefix: 'etl-pipeline',
+        },
+        transformPlugin: '',
+        enrichPlugin: [],
       },
       dataModel: {},
+      workflow: '',
+      executionArn: '',
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -1004,220 +1232,273 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const init1 = getInitIngestionRuntime(pipeline1 as Pipeline);
-    console.log(JSON.stringify(init1.stack?.Parameters));
-    expect(init1.result).toEqual(true);
-    expect(init1.message).toEqual('OK');
-    expect(init1.stack?.StackName).toEqual(`clickstream-pipeline-${MOCK_PIPELINE_ID}`);
-    expect(init1.stack?.StackStatus).toEqual(PipelineStatus.CREATE_IN_PROGRESS);
-    expect(init1.stack?.Parameters).toEqual([
-      {
-        ParameterKey: 'VpcId',
-        ParameterValue: 'vpc-0ba32b04ccc029088',
-      },
-      {
-        ParameterKey: 'PublicSubnetIds',
-        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
-      },
-      {
-        ParameterKey: 'PrivateSubnetIds',
-        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
-      },
-      {
-        ParameterKey: 'HostedZoneId',
-        ParameterValue: 'Z000000000000000000E',
-      },
-      {
-        ParameterKey: 'HostedZoneName',
-        ParameterValue: 'fake.example.com',
-      },
-      {
-        ParameterKey: 'RecordName',
-        ParameterValue: 'click',
-      },
-      {
-        ParameterKey: 'Protocol',
-        ParameterValue: 'HTTPS',
-      },
-      {
-        ParameterKey: 'ServerEndpointPath',
-        ParameterValue: '/collect',
-      },
-      {
-        ParameterKey: 'ServerCorsOrigin',
-        ParameterValue: '*',
-      },
-      {
-        ParameterKey: 'ServerMax',
-        ParameterValue: '4',
-      },
-      {
-        ParameterKey: 'ServerMin',
-        ParameterValue: '2',
-      },
-      {
-        ParameterKey: 'ScaleOnCpuUtilizationPercent',
-        ParameterValue: '50',
-      },
-      {
-        ParameterKey: 'WarmPoolSize',
-        ParameterValue: '1',
-      },
-      {
-        ParameterKey: 'NotificationsTopicArn',
-        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
-      },
-      {
-        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
-        ParameterValue: 'Yes',
-      },
-      {
-        ParameterKey: 'LogS3Bucket',
-        ParameterValue: '111122223333-test',
-      },
-      {
-        ParameterKey: 'LogS3Prefix',
-        ParameterValue: 'logs',
-      },
-      {
-        ParameterKey: 'S3DataBucket',
-        ParameterValue: '111122223333-test',
-      },
-      {
-        ParameterKey: 'S3DataPrefix',
-        ParameterValue: 'test',
-      },
-      {
-        ParameterKey: 'S3BatchMaxBytes',
-        ParameterValue: '50',
-      },
-      {
-        ParameterKey: 'S3BatchTimeout',
-        ParameterValue: '30',
-      },
-    ]);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
 
-    // Init error
-    const pipeline2 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      status: PipelineStatus.CREATE_IN_PROGRESS,
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      ingestionServer: {
-        network: {
-          vpcId: 'vpc-0ba32b04ccc029088',
-          publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-          privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        },
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          hostedZoneId: 'Z000000000000000000E',
-          hostedZoneName: 'fake.example.com',
-          recordName: 'click',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          logS3Bucket: {
-            name: '111122223333-test',
-            prefix: 'logs',
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'workflow/6666-6666/clickstream-ingestion-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'click.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '*',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs',
+                      },
+                      {
+                        ParameterKey: 'S3DataBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'S3DataPrefix',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'S3BatchMaxBytes',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'S3BatchTimeout',
+                        ParameterValue: '30',
+                      },
+                    ],
+                    StackName: 'clickstream-ingestion-6666-6666',
+                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/xxx',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
           },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 's3',
-        sinkKafka: {
-          selfHost: false,
-          kafkaBrokers: 'test1,test2,test3',
-          kafkaTopic: 't1',
-          mskClusterName: 'mskClusterName',
-          mskTopic: 'mskTopic',
-          mskSecurityGroupId: 'sg-0000000000002',
-        },
-        sinkKinesis: {
-          kinesisStreamMode: 'ON_DEMAND',
-          kinesisShardCount: 3,
-          kinesisDataS3Bucket: {
-            name: '111122223333-test',
-            prefix: 'kinesis',
+          {
+            StartAt: 'KafkaConnector',
+            States: {
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'workflow/6666-6666/clickstream-kafka-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'DataS3Prefix',
+                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'clickstream/8888-8888/6666-6666/logs/kafka-connector',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Prefix',
+                        ParameterValue: 'clickstream/8888-8888/6666-6666/runtime/ingestion/kafka-connector/plugins',
+                      },
+                      {
+                        ParameterKey: 'SubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1,test2,test3',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'mskClusterName',
+                      },
+                      {
+                        ParameterKey: 'SecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                    ],
+                    StackName: 'clickstream-kafka-6666-6666',
+                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/yyy',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
           },
-        },
+          {
+            StartAt: 'ETLPipeline',
+            States: {
+              ETLPipeline: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'workflow/6666-6666/clickstream-pipeline-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'EntryPointJar',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: '8888-8888',
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: '1,2',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'etl-source',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'etl-sink',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'etl-pipeline',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '72',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: '3hour',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: '',
+                      },
+                    ],
+                    StackName: 'clickstream-pipeline-6666-6666',
+                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/zzz',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
       },
-      etl: {
-        appIds: ['appId1', 'appId2'],
-        sourceS3Bucket: {
-          name: '111122223333-test',
-          prefix: 'source',
-        },
-        sinkS3Bucket: {
-          name: '111122223333-test',
-          prefix: 'sink',
-        },
-      },
-      dataModel: {},
-      version: '124',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
     };
-    const init2 = getInitIngestionRuntime(pipeline2 as Pipeline);
-    expect(init2.result).toEqual(false);
-    expect(init2.message).toEqual('S3 Sink must have s3DataBucket.');
 
-    // Get status
-    const pipeline3 = {
-      status: PipelineStatus.CREATE_IN_PROGRESS,
-      ingestionServerRuntime: {
-        StackStatus: 'CREATE_COMPLETE',
-      },
-      etlRuntime: {
-        StackStatus: 'CREATE_COMPLETE',
-      },
-      dataModelRuntime: {
-        StackStatus: 'CREATE_COMPLETE',
-      },
-    };
-    expect(getPipelineStatus(pipeline3 as Pipeline)).toEqual(PipelineStatus.CREATE_COMPLETE);
-    const pipeline4 = {
-      status: PipelineStatus.UPDATE_IN_PROGRESS,
-      ingestionServerRuntime: {
-        StackStatus: 'UPDATE_COMPLETE',
-      },
-      etlRuntime: {
-        StackStatus: 'UPDATE_IN_PROGRESS',
-      },
-    };
-    expect(getPipelineStatus(pipeline4 as Pipeline)).toEqual(PipelineStatus.UPDATE_IN_PROGRESS);
-    const pipeline5 = {
-      status: PipelineStatus.DELETE_IN_PROGRESS,
-      ingestionServerRuntime: {
-        StackStatus: 'DELETE_FAILED',
-      },
-      etlRuntime: {
-        StackStatus: 'DELETE_COMPLETE',
-      },
-    };
-    expect(getPipelineStatus(pipeline5 as Pipeline)).toEqual(PipelineStatus.DELETE_FAILED);
+    expect(wf).toEqual(expected);
   });
   it('Pipeline template url', async () => {
     ddbMock.on(GetCommand)
@@ -1241,10 +1522,9 @@ describe('Pipeline test', () => {
           },
         },
       });
-    const ps = new PipelineServ();
-    let templateURL = await ps.getTemplateUrl('ingestion_s3');
+    let templateURL = await stackManager.getTemplateUrl('ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream/feature/main/default/ingestion-server-s3-stack.template.json');
-    templateURL = await ps.getTemplateUrl('ingestion_no');
+    templateURL = await stackManager.getTemplateUrl('ingestion_no');
     expect(templateURL).toEqual(undefined);
 
   });

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Cluster, ClusterType, KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
+import { Cluster, ClusterType, KafkaClient, ListClustersV2Command, ListNodesCommand, NodeInfo } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
 import { getPaginatedResults } from '../../common/paginator';
 
@@ -35,6 +35,7 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
       results: queryResponse.ClusterInfoList,
     };
   });
+
   const clusters: ClickStreamMSKCluster[] = [];
   for (let cluster of records as Cluster[]) {
     if (cluster.ClusterType === ClusterType.PROVISIONED) {
@@ -72,6 +73,33 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
     }
   }
   return clusters;
+};
+
+export const listMSKClusterBrokers = async (region: string, clusterArn: string | undefined) => {
+  const nodeEndpoints: string[] = [];
+  if (!clusterArn) {
+    return nodeEndpoints;
+  }
+  const kafkaClient = new KafkaClient({ region });
+  const records = await getPaginatedResults(async (NextToken: any) => {
+    const params: ListNodesCommand = new ListNodesCommand({
+      NextToken,
+      ClusterArn: clusterArn,
+    });
+    const queryResponse = await kafkaClient.send(params);
+    return {
+      marker: queryResponse.NextToken,
+      results: queryResponse.NodeInfoList,
+    };
+  });
+
+  for (let nodeInfo of records as NodeInfo[]) {
+    if (nodeInfo.BrokerNodeInfo !== undefined && nodeInfo.BrokerNodeInfo.Endpoints !== undefined) {
+      nodeEndpoints.push(nodeInfo.BrokerNodeInfo.Endpoints?.join(','));
+    }
+  }
+  return nodeEndpoints;
+
 };
 
 export const mskPing = async (region: string): Promise<boolean> => {

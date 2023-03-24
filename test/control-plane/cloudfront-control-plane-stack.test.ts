@@ -98,7 +98,7 @@ describe('CloudFrontS3PotalStack', () => {
         ],
       },
       LoggingConfiguration: {
-        LogFilePrefix: 'log-bucket-access-log/',
+        LogFilePrefix: 'log-bucket-access-logs',
       },
       PublicAccessBlockConfiguration: {
         BlockPublicAcls: true,
@@ -374,6 +374,7 @@ describe('CloudFrontS3PotalStack', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
@@ -402,6 +403,7 @@ describe('CloudFrontS3PotalStack', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
@@ -464,6 +466,7 @@ describe('CloudFrontS3PotalStack', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',

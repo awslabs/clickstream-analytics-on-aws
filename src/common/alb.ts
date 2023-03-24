@@ -114,7 +114,6 @@ export function setAccessLogForApplicationLoadBalancer(
   },
 ) {
   createBucketPolicyForAlbAccessLog(scope, {
-    alb: props.alb,
     albLogBucket: props.albLogBucket,
     albLogPrefix: props.albLogPrefix,
   });
@@ -130,7 +129,6 @@ export function setAccessLogForApplicationLoadBalancer(
 export function createBucketPolicyForAlbAccessLog(
   scope: Construct,
   props: {
-    alb: ApplicationLoadBalancer;
     albLogBucket: IBucket;
     albLogPrefix: string;
   },

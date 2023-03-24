@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
+    "@types/jsonpath-plus": "^5.0.2",
     "@types/node": "^16",
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5",
@@ -49,6 +50,7 @@
     "@aws-cdk/aws-glue-alpha": "^2.67.0-alpha.0",
     "@aws-lambda-powertools/logger": "^1.5.1",
     "@aws-sdk/client-account": "^3.294.0",
+    "@aws-sdk/client-acm": "^3.294.0",
     "@aws-sdk/client-athena": "^3.294.0",
     "@aws-sdk/client-cloudformation": "^3.294.0",
     "@aws-sdk/client-dynamodb": "^3.294.0",
@@ -74,6 +76,7 @@
     "constructs": "^10.0.5",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
+    "jsonpath-plus": "^7.2.0",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^3.0.1",
     "p-limit": "3.1.0",

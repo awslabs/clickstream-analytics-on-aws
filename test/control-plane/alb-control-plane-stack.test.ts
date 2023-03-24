@@ -64,7 +64,7 @@ describe('ALBLambdaPotalStack', () => {
     expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
       .toEqual(['albcontrolplanealiasRecord2560DD98']);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
-      .toEqual(['logBucketLogBucket8B6A5D6C']);
+      .toEqual(['solutionBucketLogBucket39CCA1AD']);
 
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('VpcId', {});
@@ -101,7 +101,7 @@ describe('ALBLambdaPotalStack', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'logBucketLogBucket8B6A5D6C',
+        'solutionBucketLogBucket39CCA1AD',
       ]);
 
     template.hasOutput('ControlPlaneUrl', {});
@@ -136,7 +136,7 @@ describe('ALBLambdaPotalStack', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'logBucketLogBucket8B6A5D6C',
+        'solutionBucketLogBucket39CCA1AD',
       ]);
 
     template.hasOutput('ControlPlaneUrl', {});
@@ -180,7 +180,7 @@ describe('ALBLambdaPotalStack', () => {
       ]);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'logBucketLogBucket8B6A5D6C',
+        'solutionBucketLogBucket39CCA1AD',
       ]);
 
     template.hasOutput('ControlPlaneUrl', {});
@@ -228,7 +228,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'logBucketLogBucket8B6A5D6C',
+        'solutionBucketLogBucket39CCA1AD',
       ]);
     expect(findResourcesName(template, 'AWS::Lambda::Function'))
       .toEqual([
@@ -236,6 +236,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineCallbackFunction4F5BE492',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'ClickStreamApiClickStreamApiFunction8C843168',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
@@ -286,7 +287,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'logBucketLogBucket8B6A5D6C',
+        'solutionBucketLogBucket39CCA1AD',
       ]);
 
     template.hasOutput('ControlPlaneUrl', {});

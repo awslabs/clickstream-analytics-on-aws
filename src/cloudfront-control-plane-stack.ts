@@ -36,6 +36,7 @@ import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
 } from './common/cfn-nag';
+import { LogBucket } from './common/log-bucket';
 import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionInfo } from './common/solution-info';
@@ -79,6 +80,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     let domainProps: DomainProps | undefined = undefined;
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
+    const solutionBucket = new LogBucket(this, 'solutionBucket');
 
     if (props?.targetToCNRegions) {
       const iamCertificateId = Parameters.createIAMCertificateIdParameter(this);
@@ -148,6 +150,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       distributionProps: {
         logProps: {
           enableAccessLog: true,
+          bucket: solutionBucket.bucket,
         },
       },
     });
@@ -210,6 +213,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         authorizer: authorizer,
       },
       targetToCNRegions: props?.targetToCNRegions,
+      stackWorkflowS3Bucket: solutionBucket.bucket,
     });
 
     if (!clickStreamApi.lambdaRestApi) {

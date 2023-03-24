@@ -316,6 +316,40 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'stackWorkflowS3BucketF67B9562',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'stackWorkflowS3BucketF67B9562',
+                        'Arn',
+                      ],
+                    },
+                    '/clickstream/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
               'dynamodb:BatchGetItem',
               'dynamodb:GetRecords',
               'dynamodb:GetShardIterator',
@@ -388,6 +422,32 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Resource: '*',
           },
           {
+            Action: 'lambda:InvokeFunction',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'Arn',
+                      ],
+                    },
+                    ':*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
             Action: 'cloudformation:createStack',
             Effect: 'Allow',
             Resource: {
@@ -430,36 +490,10 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':*',
+                  ':stack/clickstream-*',
                 ],
               ],
             },
-          },
-          {
-            Action: 'lambda:InvokeFunction',
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                        'Arn',
-                      ],
-                    },
-                    ':*',
-                  ],
-                ],
-              },
-            ],
           },
           {
             Action: 'cloudformation:deleteStack',
@@ -619,9 +653,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           {
             Action: 'states:StartExecution',
             Effect: 'Allow',
-            Resource: {
-              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
-            },
+            Resource: [
+              {
+                Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+              },
+              {
+                Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
+              },
+            ],
           },
         ],
         Version: '2012-10-17',
@@ -637,6 +676,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Action: [
               'kafka:ListClustersV2',
               'kafka:ListClusters',
+              'kafka:ListNodes',
               's3:ListAllMyBuckets',
               'ec2:DescribeVpcs',
               'redshift:DescribeClusters',
@@ -649,6 +689,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'route53:ListHostedZones',
               'athena:ListWorkGroups',
               'iam:ListRoles',
+              'iam:ListServerCertificates',
+              'states:DescribeExecution',
+              'acm:ListCertificates',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -780,7 +823,18 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'Fn::Join': [
           '',
           [
-            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}]},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}],"Default":"EndState"},"EndState":{"Type":"Pass","End":true},"Save Stack Runtime":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -795,18 +849,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"Save Stack Runtime":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
-            {
-              'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                'Arn',
-              ],
-            },
-            '","Payload.$":"$"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -822,20 +865,114 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           ],
         ],
       },
-      LoggingConfiguration: {
-        Destinations: [
-          {
-            CloudWatchLogsLogGroup: {
-              LogGroupArn: {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
-                  'Arn',
-                ],
-              },
+    });
+    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+      DefinitionString: {
+        'Fn::Join': [
+          '',
+          [
+            '{"StartAt":"InputTask","States":{"InputTask":{"Next":"TypeChoice","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
             },
-          },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"TypeChoice":{"Type":"Choice","OutputPath":"$.Data","Choices":[{"Variable":"$.Type","StringEquals":"Stack","Next":"StackExecution"},{"Variable":"$.Type","StringEquals":"Serial","Next":"SerialMap"},{"Variable":"$.Type","StringEquals":"Parallel","Next":"ParallelMap"}],"Default":"Pass"},"Pass":{"Type":"Pass","End":true},"StackExecution":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
+            {
+              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+            },
+            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","MapRun":true,"Data.$":"$"},"StateMachineArn":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:',
+            {
+              Ref: 'AWS::Region',
+            },
+            ':',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':stateMachine:clickstream-stack-workflow-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","MapRun":true,"Data.$":"$"},"StateMachineArn":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:',
+            {
+              Ref: 'AWS::Region',
+            },
+            ':',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':stateMachine:clickstream-stack-workflow-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":3600}',
+          ],
         ],
-        Level: 'ALL',
       },
     });
   });
@@ -1084,6 +1221,40 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           },
           {
             Action: [
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'stackWorkflowS3BucketF67B9562',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'stackWorkflowS3BucketF67B9562',
+                        'Arn',
+                      ],
+                    },
+                    '/clickstream/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
               'dynamodb:BatchGetItem',
               'dynamodb:GetRecords',
               'dynamodb:GetShardIterator',
@@ -1156,6 +1327,32 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Resource: '*',
           },
           {
+            Action: 'lambda:InvokeFunction',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'Arn',
+                      ],
+                    },
+                    ':*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
             Action: 'cloudformation:createStack',
             Effect: 'Allow',
             Resource: {
@@ -1198,36 +1395,10 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':*',
+                  ':stack/clickstream-*',
                 ],
               ],
             },
-          },
-          {
-            Action: 'lambda:InvokeFunction',
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                        'Arn',
-                      ],
-                    },
-                    ':*',
-                  ],
-                ],
-              },
-            ],
           },
           {
             Action: 'cloudformation:deleteStack',
@@ -1387,9 +1558,14 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           {
             Action: 'states:StartExecution',
             Effect: 'Allow',
-            Resource: {
-              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
-            },
+            Resource: [
+              {
+                Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+              },
+              {
+                Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
+              },
+            ],
           },
         ],
         Version: '2012-10-17',
@@ -1405,6 +1581,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Action: [
               'kafka:ListClustersV2',
               'kafka:ListClusters',
+              'kafka:ListNodes',
               's3:ListAllMyBuckets',
               'ec2:DescribeVpcs',
               'redshift:DescribeClusters',
@@ -1417,6 +1594,9 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               'route53:ListHostedZones',
               'athena:ListWorkGroups',
               'iam:ListRoles',
+              'iam:ListServerCertificates',
+              'states:DescribeExecution',
+              'acm:ListCertificates',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -1617,13 +1797,23 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
 
   test('State Machine', () => {
     const { template } = TestEnv.newALBApiStack();
-
     template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',
           [
-            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}]},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}],"Default":"EndState"},"EndState":{"Type":"Pass","End":true},"Save Stack Runtime":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1638,18 +1828,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"Save Stack Runtime":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
-            {
-              'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
-                'Arn',
-              ],
-            },
-            '","Payload.$":"$"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1665,20 +1844,114 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           ],
         ],
       },
-      LoggingConfiguration: {
-        Destinations: [
-          {
-            CloudWatchLogsLogGroup: {
-              LogGroupArn: {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
-                  'Arn',
-                ],
-              },
+    });
+    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+      DefinitionString: {
+        'Fn::Join': [
+          '',
+          [
+            '{"StartAt":"InputTask","States":{"InputTask":{"Next":"TypeChoice","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
             },
-          },
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
+            {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
+                'Arn',
+              ],
+            },
+            '","Payload.$":"$"}},"TypeChoice":{"Type":"Choice","OutputPath":"$.Data","Choices":[{"Variable":"$.Type","StringEquals":"Stack","Next":"StackExecution"},{"Variable":"$.Type","StringEquals":"Serial","Next":"SerialMap"},{"Variable":"$.Type","StringEquals":"Parallel","Next":"ParallelMap"}],"Default":"Pass"},"Pass":{"Type":"Pass","End":true},"StackExecution":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
+            {
+              Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+            },
+            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","MapRun":true,"Data.$":"$"},"StateMachineArn":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:',
+            {
+              Ref: 'AWS::Region',
+            },
+            ':',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':stateMachine:clickstream-stack-workflow-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","MapRun":true,"Data.$":"$"},"StateMachineArn":"arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':states:',
+            {
+              Ref: 'AWS::Region',
+            },
+            ':',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':stateMachine:clickstream-stack-workflow-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":3600}',
+          ],
         ],
-        Level: 'ALL',
       },
     });
   });

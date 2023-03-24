@@ -27,7 +27,14 @@ import {
   Context,
 } from 'aws-lambda';
 
-const logger = new Logger({ serviceName: 'ClickstreamBatchInsertDDB' });
+export const POWERTOOLS_ENVS = {
+  POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+  POWERTOOLS_LOGGER_SAMPLE_RATE: '0.5',
+  POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+  LOG_LEVEL: 'WARN',
+};
+
+const logger = new Logger();
 
 // Create an Amazon DynamoDB service client object.
 const ddbClient = new DynamoDBClient({});

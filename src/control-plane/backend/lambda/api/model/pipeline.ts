@@ -11,8 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Stack, StackStatus } from '@aws-sdk/client-cloudformation';
+import { Parameter } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { isEmpty } from '../common/utils';
+import { listMSKClusterBrokers } from '../store/aws/kafka';
+
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 interface IngestionServerSizeProps {
   /**
@@ -71,7 +76,7 @@ interface IngestionServerSinkS3Props {
   /**
    * S3 bucket
    */
-  readonly s3DataBucket: S3Bucket;
+  readonly sinkBucket: S3Bucket;
   /**
    * s3 Batch max bytes
    */
@@ -84,29 +89,18 @@ interface IngestionServerSinkS3Props {
 
 interface IngestionServerSinkKafkaProps {
   /**
-   * Host type
+   * Kafka
    */
-  readonly selfHost: boolean;
+  readonly topic: string;
+  readonly brokers: string[];
   /**
-   * Kafka brokers string
+   * Amazon managed streaming for apache kafka (Amazon MSK) cluster
    */
-  readonly kafkaBrokers?: string;
+  readonly mskCluster?: mskClusterProps;
   /**
-   * Kafka topic
+   * Kafka Connector
    */
-  readonly kafkaTopic?: string;
-  /**
-   * Amazon managed streaming for apache kafka (Amazon MSK) cluster name
-   */
-  readonly mskClusterName?: string;
-  /**
-   * Amazon managed streaming for apache kafka (Amazon MSK) topic
-   */
-  readonly mskTopic?: string;
-  /**
-   * Amazon managed streaming for apache kafka (Amazon MSK) security group id
-   */
-  readonly mskSecurityGroupId?: string;
+  readonly kafkaConnector?: KafkaS3Connector;
 }
 
 interface IngestionServerSinkKinesisProps {
@@ -139,26 +133,22 @@ interface IngestionServerSinkKinesisProps {
   /**
    * S3 bucket to save data from Kinesis Data Stream
    */
-  readonly kinesisDataS3Bucket?: S3Bucket;
+  readonly sinkBucket: S3Bucket;
 
 }
 
 interface IngestionServerDomainProps {
   /**
-   * The hosted zone ID in Route 53.
+   * The custom domain name.
    */
-  readonly hostedZoneId?: string;
+  readonly domainName: string;
   /**
-   * The hosted zone name in Route 53
+   * The ACM Certificate arn
    */
-  readonly hostedZoneName?: string;
-  /**
-   * The record name
-   */
-  readonly recordName?: string;
+  readonly certificateArn: string;
 }
 
-interface IngestionServerNetworkProps {
+interface NetworkProps {
   /**
    * Select the virtual private cloud (VPC).
    */
@@ -174,20 +164,34 @@ interface IngestionServerNetworkProps {
 }
 
 interface IngestionServer {
-  readonly network: IngestionServerNetworkProps;
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
-  readonly sinkType: string;
+  readonly sinkType: 's3' | 'kafka' | 'kinesis';
   readonly sinkS3?: IngestionServerSinkS3Props;
   readonly sinkKafka?: IngestionServerSinkKafkaProps;
   readonly sinkKinesis?: IngestionServerSinkKinesisProps;
 }
 
 export interface ETL {
-  readonly appIds: string[];
+  readonly dataFreshnessInHour: number;
+  readonly scheduleExpression: string;
   readonly sourceS3Bucket: S3Bucket;
   readonly sinkS3Bucket: S3Bucket;
+  readonly pipelineBucket: S3Bucket;
+  readonly transformPlugin?: string;
+  readonly enrichPlugin?: string[];
+}
+
+export interface KafkaS3Connector {
+  readonly sinkBucket: S3Bucket;
+  readonly maxWorkerCount?: number;
+  readonly minWorkerCount?: number;
+  readonly workerMcuCount?: number;
+  readonly pluginUrl: string;
+  readonly rotateIntervalMS?: number;
+  readonly flushSize?: number;
+  readonly customConnectorConfiguration?: string;
 }
 
 export interface DataModel {
@@ -202,16 +206,10 @@ interface S3Bucket {
   readonly prefix: string;
 }
 
-export enum PipelineStatus {
-  CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS',
-  CREATE_COMPLETE = 'CREATE_COMPLETE',
-  CREATE_FAILED = 'CREATE_FAILED',
-  UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS',
-  UPDATE_COMPLETE = 'UPDATE_COMPLETE',
-  UPDATE_FAILED = 'UPDATE_FAILED',
-  DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
-  DELETE_COMPLETE = 'DELETE_COMPLETE',
-  DELETE_FAILED = 'DELETE_FAILED',
+interface mskClusterProps {
+  readonly name: string;
+  readonly arn: string;
+  readonly securityGroupId: string;
 }
 
 export interface Pipeline {
@@ -220,20 +218,23 @@ export interface Pipeline {
   readonly prefix: string;
 
   readonly projectId: string;
-  pipelineId: string;
+  readonly appIds: string[];
+  readonly pipelineId: string;
   readonly name: string;
   readonly description: string;
   readonly region: string;
   readonly dataCollectionSDK: string;
-  status: PipelineStatus;
   readonly tags: Tag[];
 
+  readonly network: NetworkProps;
+  readonly bucket: S3Bucket;
   readonly ingestionServer: IngestionServer;
-  readonly etl: ETL;
+  readonly etl?: ETL;
   readonly dataModel: DataModel;
-  ingestionServerRuntime?: Stack;
-  etlRuntime?: Stack;
-  dataModelRuntime?: Stack;
+
+  status: ExecutionStatus | string;
+  workflow: string;
+  executionArn: string;
 
   readonly version: string;
   readonly versionTag: string;
@@ -248,67 +249,50 @@ export interface PipelineList {
   items: Pipeline[];
 }
 
-export interface StackParameter {
-  readonly result: boolean;
-  readonly message: string;
-  readonly parameters: Parameter[];
-}
-
-export interface InitStack {
-  readonly result: boolean;
-  readonly message: string;
-  readonly stack?: Stack;
-}
-
-export function getInitIngestionRuntime(pipeline: Pipeline): InitStack {
-  const ingestionStackParameters = getIngestionStackParameters(pipeline);
-  if (!ingestionStackParameters.result) {
-    return {
-      result: ingestionStackParameters.result,
-      message: ingestionStackParameters.message,
-    };
+export function getBucketPrefix(pipeline: Pipeline, key: string, value: string | undefined): string {
+  if (value === undefined || value === '' || value === '/') {
+    const prefixs: Map<string, string> = new Map();
+    prefixs.set('logs-alb', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/alb`);
+    prefixs.set('logs-kafka-connector', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/kafka-connector`);
+    prefixs.set('data-buffer', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/buffer`);
+    prefixs.set('data-ods', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/ods`);
+    prefixs.set('data-pipeline-temp', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/pipeline-temp`);
+    prefixs.set('kafka-connector-plugin', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/runtime/ingestion/kafka-connector/plugins`);
+    return prefixs.get(key)?? '';
   }
-  const stack: Stack = {
-    StackName: `clickstream-pipeline-${pipeline.pipelineId}`,
-    Parameters: ingestionStackParameters.parameters,
-    StackStatus: StackStatus.CREATE_IN_PROGRESS,
-    CreationTime: new Date(),
-  };
-  return {
-    result: true,
-    message: 'OK',
-    stack: stack,
-  };
+  if (value.endsWith('/')) {
+    return value?.substring(0, value?.length - 1);
+  }
+  return value;
 }
 
-function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
+export async function getIngestionStackParameters(pipeline: Pipeline) {
+
   const parameters: Parameter[] = [];
   // VPC Information
   parameters.push({
     ParameterKey: 'VpcId',
-    ParameterValue: pipeline.ingestionServer.network.vpcId,
+    ParameterValue: pipeline.network.vpcId,
   });
   parameters.push({
     ParameterKey: 'PublicSubnetIds',
-    ParameterValue: pipeline.ingestionServer.network.publicSubnetIds.join(','),
+    ParameterValue: pipeline.network.publicSubnetIds.join(','),
   });
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
-    ParameterValue: pipeline.ingestionServer.network.privateSubnetIds.join(','),
+    ParameterValue: pipeline.network.privateSubnetIds.join(','),
   });
   // Domain Information
-  parameters.push({
-    ParameterKey: 'HostedZoneId',
-    ParameterValue: pipeline.ingestionServer.domain?.hostedZoneId ?? '',
-  });
-  parameters.push({
-    ParameterKey: 'HostedZoneName',
-    ParameterValue: pipeline.ingestionServer.domain?.hostedZoneName ?? '',
-  });
-  parameters.push({
-    ParameterKey: 'RecordName',
-    ParameterValue: pipeline.ingestionServer.domain?.recordName ?? '',
-  });
+  if (pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
+    parameters.push({
+      ParameterKey: 'DomainName',
+      ParameterValue: pipeline.ingestionServer.domain?.domainName ?? '',
+    });
+    parameters.push({
+      ParameterKey: 'ACMCertificateArn',
+      ParameterValue: pipeline.ingestionServer.domain?.certificateArn ?? '',
+    });
+  }
   // Server
   parameters.push({
     ParameterKey: 'Protocol',
@@ -320,7 +304,7 @@ function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
   });
   parameters.push({
     ParameterKey: 'ServerCorsOrigin',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.serverCorsOrigin,
+    ParameterValue: pipeline.ingestionServer.loadBalancer.serverCorsOrigin ?? '',
   });
   parameters.push({
     ParameterKey: 'ServerMax',
@@ -349,35 +333,22 @@ function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
   });
   parameters.push({
     ParameterKey: 'LogS3Bucket',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? '',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'LogS3Prefix',
-    ParameterValue: pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix ?? '',
+    ParameterValue: getBucketPrefix(pipeline, 'logs-alb', pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
   });
+
   // S3 sink
   if (pipeline.ingestionServer.sinkType === 's3') {
-    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket.name) {
-      return {
-        result: false,
-        message: 'S3 Sink must have s3DataBucket.',
-        parameters,
-      };
-    }
-    if (!pipeline.ingestionServer.sinkS3?.s3DataBucket.prefix) {
-      return {
-        result: false,
-        message: 'S3 Sink must have s3DataPrefix.',
-        parameters,
-      };
-    }
     parameters.push({
       ParameterKey: 'S3DataBucket',
-      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket.name,
+      ParameterValue: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
     });
     parameters.push({
       ParameterKey: 'S3DataPrefix',
-      ParameterValue: pipeline.ingestionServer.sinkS3?.s3DataBucket.prefix,
+      ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
     });
     parameters.push({
       ParameterKey: 'S3BatchMaxBytes',
@@ -389,48 +360,53 @@ function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
     });
 
   }
+
   // Kafka sink
   if (pipeline.ingestionServer.sinkType === 'kafka') {
-    parameters.push({
-      ParameterKey: 'KafkaBrokers',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaBrokers ?? '',
-    });
-    parameters.push({
-      ParameterKey: 'KafkaTopic',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaTopic ?? '',
-    });
-    parameters.push({
-      ParameterKey: 'MskClusterName',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.mskClusterName ?? '',
-    });
-    parameters.push({
-      ParameterKey: 'MskSecurityGroupId',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.mskSecurityGroupId ?? '',
-    });
+    if (!isEmpty(pipeline.ingestionServer.sinkKafka?.mskCluster)) { //MSK
+      parameters.push({
+        ParameterKey: 'MskClusterName',
+        ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.name ?? '',
+      });
+      parameters.push({
+        ParameterKey: 'MskSecurityGroupId',
+        ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
+      });
+      parameters.push({
+        ParameterKey: 'KafkaTopic',
+        ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
+      });
+      let kafkaBrokers = pipeline.ingestionServer.sinkKafka?.brokers;
+      if (isEmpty(kafkaBrokers)) {
+        kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
+      }
+      parameters.push({
+        ParameterKey: 'KafkaBrokers',
+        ParameterValue: kafkaBrokers?.join(','),
+      });
+
+    } else { //self hosted kafka culster
+      parameters.push({
+        ParameterKey: 'KafkaBrokers',
+        ParameterValue: pipeline.ingestionServer.sinkKafka?.brokers?.join(','),
+      });
+
+      parameters.push({
+        ParameterKey: 'KafkaTopic',
+        ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
+      });
+    }
+
   }
   // Kinesis sink
   if (pipeline.ingestionServer.sinkType === 'kinesis') {
-    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket?.name) {
-      return {
-        result: false,
-        message: 'Kinesis Sink must have kinesisDataS3Bucket.',
-        parameters,
-      };
-    }
-    if (!pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.prefix) {
-      return {
-        result: false,
-        message: 'Kinesis Sink must have kinesisDataS3Prefix.',
-        parameters,
-      };
-    }
     parameters.push({
       ParameterKey: 'KinesisDataS3Bucket',
-      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.name,
+      ParameterValue: pipeline.ingestionServer.sinkKinesis?.sinkBucket.name ?? pipeline.bucket.name,
     });
     parameters.push({
       ParameterKey: 'KinesisDataS3Prefix',
-      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisDataS3Bucket.prefix,
+      ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
     });
     parameters.push({
       ParameterKey: 'KinesisStreamMode',
@@ -453,41 +429,202 @@ function getIngestionStackParameters(pipeline: Pipeline): StackParameter {
       ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisMaxBatchingWindowSeconds ?? 300).toString(),
     });
   }
-  return {
-    result: true,
-    message: '',
-    parameters,
-  };
+  return parameters;
 }
 
-export function getPipelineStatus(pipeline: Pipeline): PipelineStatus {
-  const runtimeStatus = [];
-  if (pipeline.ingestionServerRuntime?.StackStatus) {
-    runtimeStatus.push(pipeline.ingestionServerRuntime?.StackStatus);
+export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
+  const parameters: Parameter[] = [];
+
+  parameters.push({
+    ParameterKey: 'DataS3Bucket',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.name?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'DataS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.prefix),
+  });
+
+  parameters.push({
+    ParameterKey: 'LogS3Bucket',
+    ParameterValue: pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'LogS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'logs-kafka-connector', ''),
+  });
+
+  parameters.push({
+    ParameterKey: 'PluginS3Bucket',
+    ParameterValue: pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'PluginS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'kafka-connector-plugin', ''),
+  });
+
+  parameters.push({
+    ParameterKey: 'SubnetIds',
+    ParameterValue: pipeline.network.privateSubnetIds.join(','),
+  });
+
+  let kafkaBrokers = pipeline.ingestionServer.sinkKafka?.brokers;
+  if (isEmpty(kafkaBrokers)) {
+    kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
   }
-  if (pipeline.etlRuntime?.StackStatus) {
-    runtimeStatus.push(pipeline.etlRuntime?.StackStatus);
-  }
-  if (pipeline.dataModelRuntime?.StackStatus) {
-    runtimeStatus.push(pipeline.dataModelRuntime?.StackStatus);
+  parameters.push({
+    ParameterKey: 'KafkaBrokers',
+    ParameterValue: kafkaBrokers?.join(','),
+  });
+  parameters.push({
+    ParameterKey: 'KafkaTopic',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
+  });
+
+  parameters.push({
+    ParameterKey: 'MskClusterName',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
+  });
+  parameters.push({
+    ParameterKey: 'SecurityGroupId',
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
+  });
+
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.maxWorkerCount !== undefined) {
+    parameters.push({
+      ParameterKey: 'MaxWorkerCount',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.maxWorkerCount?.toString(),
+    });
   }
 
-  if (isEmpty(runtimeStatus)) {
-    return pipeline.status;
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.minWorkerCount !== undefined) {
+    parameters.push({
+      ParameterKey: 'MinWorkerCount',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.minWorkerCount?.toString(),
+    });
   }
 
-  // All status are COMPLETE by default
-  // In all stack status, if ANY stack FAILED, the result is FAILED
-  // If there are no failed stacks, and if any stack is being IN_PROGRESS, the result is being IN_PROGRESS
-  let result = 'COMPLETE';
-  for (let runtime of runtimeStatus) {
-    if (runtime.endsWith('FAILED')) {
-      result = 'FAILED';
-      break;
-    } else if (runtime.endsWith('IN_PROGRESS')) {
-      result = 'IN_PROGRESS';
-      break;
-    }
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.workerMcuCount !== undefined) {
+    parameters.push({
+      ParameterKey: 'WorkerMcuCount',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.workerMcuCount?.toString(),
+    });
   }
-  return `${pipeline.status.split('_')[0]}_${result}` as PipelineStatus;
+
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.pluginUrl !== undefined) {
+    parameters.push({
+      ParameterKey: 'PluginUrl',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl,
+    });
+  }
+
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.rotateIntervalMS !== undefined) {
+    parameters.push({
+      ParameterKey: 'RotateIntervalMS',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.rotateIntervalMS.toString(),
+    });
+  }
+
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.flushSize !== undefined) {
+    parameters.push({
+      ParameterKey: 'FlushSize',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.flushSize.toString(),
+    });
+  }
+
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.customConnectorConfiguration !== undefined) {
+    parameters.push({
+      ParameterKey: 'CustomConnectorConfiguration',
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.customConnectorConfiguration,
+    });
+  }
+
+  return parameters;
+}
+
+export async function getETLPipelineStackParameters(pipeline: Pipeline) {
+
+  const store: ClickStreamStore = new DynamoDbStore();
+  const apps = await store.listApplication(pipeline.projectId, false, 1, 1);
+
+  const parameters: Parameter[] = [];
+
+  parameters.push({
+    ParameterKey: 'VpcId',
+    ParameterValue: pipeline.network.vpcId,
+  });
+
+  parameters.push({
+    ParameterKey: 'PrivateSubnetIds',
+    ParameterValue: pipeline.network.privateSubnetIds.join(','),
+  });
+
+  parameters.push({
+    ParameterKey: 'EntryPointJar',
+    ParameterValue: '',
+  });
+
+  parameters.push({
+    ParameterKey: 'ProjectId',
+    ParameterValue: pipeline.projectId,
+  });
+
+  const appIds: string[] = apps.items.map(a => a.appId);
+  parameters.push({
+    ParameterKey: 'AppIds',
+    ParameterValue: appIds.join(','),
+  });
+
+  parameters.push({
+    ParameterKey: 'SourceS3Bucket',
+    ParameterValue: pipeline.etl?.sourceS3Bucket.name?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'SourceS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.etl?.sourceS3Bucket.prefix),
+  });
+
+  parameters.push({
+    ParameterKey: 'SinkS3Bucket',
+    ParameterValue: pipeline.etl?.sinkS3Bucket.name?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'SinkS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-ods', pipeline.etl?.sinkS3Bucket.prefix),
+  });
+
+  parameters.push({
+    ParameterKey: 'PipelineS3Bucket',
+    ParameterValue: pipeline.etl?.pipelineBucket.name?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'PipelineS3Prefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-pipeline-temp', pipeline.etl?.pipelineBucket.prefix),
+  });
+
+  parameters.push({
+    ParameterKey: 'DataFreshnessInHour',
+    ParameterValue: (pipeline.etl?.dataFreshnessInHour ?? 72).toString(),
+  });
+
+  parameters.push({
+    ParameterKey: 'ScheduleExpression',
+    ParameterValue: pipeline.etl?.scheduleExpression,
+  });
+
+  parameters.push({
+    ParameterKey: 'TransformerAndEnrichClassNames',
+    ParameterValue: '',
+  });
+
+  parameters.push({
+    ParameterKey: 'S3PathPluginJars',
+    ParameterValue: '',
+  });
+
+  parameters.push({
+    ParameterKey: 'S3PathPluginFiles',
+    ParameterValue: '',
+  });
+
+  return parameters;
 }

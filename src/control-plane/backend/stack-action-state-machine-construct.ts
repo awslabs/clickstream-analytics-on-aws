@@ -19,7 +19,8 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Effect, Policy, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { StateMachine, JsonPath, Condition, Choice, WaitTime, Wait, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { StateMachine, JsonPath, Condition, Choice, WaitTime, Wait, TaskInput, Pass } from 'aws-cdk-lib/aws-stepfunctions';
 import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
@@ -38,6 +39,7 @@ export interface StackActionStateMachineProps {
   readonly clickStreamTable: Table;
   readonly lambdaFuncProps: StackActionStateMachineFuncProps;
   readonly targetToCNRegions?: boolean;
+  readonly workflowBucket: IBucket;
 }
 
 export class StackActionStateMachine extends Construct {
@@ -117,10 +119,13 @@ export class StackActionStateMachine extends Construct {
       iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
     });
 
+    const endState = new Pass(this, 'EndState');
+
     const actionChoice = new Choice(this, 'Action')
       .when(Condition.stringEquals('$.Input.Action', 'Create'), createStack)
       .when(Condition.stringEquals('$.Input.Action', 'Delete'), deleteStack)
-      .when(Condition.stringEquals('$.Input.Action', 'Update'), updateStack);
+      .when(Condition.stringEquals('$.Input.Action', 'Update'), updateStack)
+      .otherwise(endState);
 
     const wait15 = new Wait(this, 'Wait 15 Seconds', {
       time: WaitTime.duration(Duration.seconds(15)),
@@ -140,7 +145,7 @@ export class StackActionStateMachine extends Construct {
         StackName: JsonPath.stringAt('$.Result.Stacks[0].StackId'),
       },
       resultPath: '$.Result',
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:*`],
+      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
     });
 
     const describeStacksByName = new CallAwsService(this, 'DescribeStacksByName', {
@@ -150,7 +155,7 @@ export class StackActionStateMachine extends Construct {
         StackName: JsonPath.stringAt('$.Input.StackName'),
       },
       resultPath: '$.Result',
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:*`],
+      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
     });
 
     wait15.next(describeStacksByResult);
@@ -174,6 +179,7 @@ export class StackActionStateMachine extends Construct {
       },
       ...props.lambdaFuncProps,
     });
+    props.workflowBucket.grantWrite(this.callbackFunction, 'clickstream/*');
     props.clickStreamTable.grantReadWriteData(this.callbackFunction);
     cloudWatchSendLogs('callback-func-logs', this.callbackFunction);
     createENI('callback-func-eni', this.callbackFunction);
@@ -200,6 +206,7 @@ export class StackActionStateMachine extends Construct {
 
     describeStacksByResult.next(progressChoiceCreate);
     describeStacksByName.next(progressChoiceUpdate);
+    saveStackRuntimeTask.next(endState);
 
     const stackActionLogGroup = createLogGroup(this, {
       prefix: '/aws/vendedlogs/states/Clickstream/StackActionLogGroup',

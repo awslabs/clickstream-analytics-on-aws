@@ -12,6 +12,7 @@
  */
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import {
   GetCommand,
   GetCommandOutput,
@@ -29,10 +30,8 @@ import { isEmpty } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
 import {
-  getPipelineStatus,
   Pipeline,
   PipelineList,
-  PipelineStatus,
 } from '../../model/pipeline';
 import { Plugin, PluginList } from '../../model/plugin';
 import { Project, ProjectList } from '../../model/project';
@@ -396,11 +395,13 @@ export class DynamoDbStore implements ClickStreamStore {
         description: pipeline.description,
         region: pipeline.region,
         dataCollectionSDK: pipeline.dataCollectionSDK,
-        status: pipeline.status ?? PipelineStatus.CREATE_IN_PROGRESS,
+        status: pipeline.status ?? ExecutionStatus.RUNNING,
         tags: pipeline.tags ?? [],
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataModel: pipeline.dataModel,
+        workflow: pipeline.workflow,
+        executionArn: pipeline.executionArn,
         version: pipeline.version ? pipeline.version : Date.now().toString(),
         versionTag: 'latest',
         createAt: pipeline.createAt ? pipeline.createAt : Date.now(),
@@ -427,7 +428,6 @@ export class DynamoDbStore implements ClickStreamStore {
       return undefined;
     }
     const pipeline: Pipeline = result.Item as Pipeline;
-    pipeline.status = getPipelineStatus(pipeline);
     return !pipeline.deleted ? pipeline : undefined;
   };
 
@@ -469,6 +469,8 @@ export class DynamoDbStore implements ClickStreamStore {
               ingestionServerRuntime: marshallCurPipeline.ingestionServerRuntime ?? { M: {} },
               etlRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
               dataModelRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
+              workflow: { S: curPipeline.workflow },
+              executionArn: { S: curPipeline.executionArn },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
@@ -500,6 +502,8 @@ export class DynamoDbStore implements ClickStreamStore {
               'ingestionServerRuntime = :ingestionServerRuntime, ' +
               'etlRuntime = :etlRuntime, ' +
               'dataModelRuntime = :dataModelRuntime, ' +
+              'workflow = :workflow, ' +
+              'executionArn = :executionArn, ' +
               'version = :version, ' +
               'versionTag = :versionTag, ' +
               'updateAt = :updateAt, ' +
@@ -517,7 +521,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
-              ':status': { S: PipelineStatus.UPDATE_IN_PROGRESS },
+              ':status': { S: ExecutionStatus.RUNNING },
               ':tags': marshallPipeline.tags,
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
@@ -526,6 +530,8 @@ export class DynamoDbStore implements ClickStreamStore {
               ':etlRuntime': marshallPipeline.etlRuntime ?? { M: {} },
               ':dataModelRuntime': marshallPipeline.dataModelRuntime ?? { M: {} },
               ':ConditionVersionValue': { S: pipeline.version },
+              ':workflow': { S: pipeline.workflow },
+              ':executionArn': { S: pipeline.executionArn },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
@@ -576,7 +582,7 @@ export class DynamoDbStore implements ClickStreamStore {
         },
         ExpressionAttributeValues: {
           ':d': true,
-          ':status': PipelineStatus.DELETE_IN_PROGRESS,
+          ':status': ExecutionStatus.RUNNING,
         },
         ReturnValues: 'ALL_NEW',
       });

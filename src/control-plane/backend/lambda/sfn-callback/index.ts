@@ -11,66 +11,61 @@
  *  and limitations under the License.
  */
 
-import { Logger } from '@aws-lambda-powertools/logger';
-import { Stack } from '@aws-sdk/client-cloudformation';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { Stack, Parameter } from '@aws-sdk/client-cloudformation';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { logger } from '../../../../common/powertools';
 
-const logger = new Logger({ serviceName: 'ClickstreamSfnCallback' });
-
-interface SfnCallbackEvent {
-  readonly Input: SfnCallbackInput;
-  readonly Callback: SfnCallback;
+interface SfnStackEvent {
+  readonly Input: SfnStackInput;
+  readonly Callback: SfnStackCallback;
   readonly Result?: SfnCallbackResult;
 }
 
-interface SfnCallbackInput {
+interface SfnStackInput {
   readonly Action: string;
   readonly StackName: string;
   readonly TemplateURL: string;
-  readonly Parameters: SfnCallbackParameters[];
+  readonly Parameters: Parameter[];
 }
 
-interface SfnCallbackParameters {
-  readonly ParameterKey: string;
-  readonly ParameterValue: string;
-}
-
-interface SfnCallback {
-  readonly TableName: string;
-  readonly Id: string;
-  readonly Type: string;
-  readonly AttributeName: string;
+interface SfnStackCallback {
+  readonly BucketName: string;
+  readonly BucketPrefix: string;
 }
 
 interface SfnCallbackResult {
   readonly Stacks: Stack[];
 }
 
-export const handler = async (event: SfnCallbackEvent, _context: any): Promise<any> => {
+export const handler = async (event: SfnStackEvent, _context: any): Promise<any> => {
   logger.info('Lambda is invoked', JSON.stringify(event, null, 2));
   try {
-    // Create DynamoDB Client and patch it for tracing
-    const ddbClient = new DynamoDBClient({});
-    // Create the DynamoDB Document client.
-    const docClient = DynamoDBDocumentClient.from(ddbClient);
-    const command: UpdateCommand = new UpdateCommand({
-      TableName: event.Callback.TableName,
-      Key: {
-        id: event.Callback.Id,
-        type: event.Callback.Type,
-      },
-      // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET #AttributeName = :v',
-      ExpressionAttributeNames: {
-        '#AttributeName': event.Callback.AttributeName,
-      },
-      ExpressionAttributeValues: {
-        ':v': event.Result?.Stacks[0],
-      },
-      ReturnValues: 'ALL_NEW',
-    });
-    await docClient.send(command);
+    if (!event.Callback.BucketName ||
+      !event.Callback.BucketPrefix
+    ) {
+      logger.error('Save runtime to S3 failed, Parameter error.', {
+        event: event,
+      });
+      throw new Error('Save runtime to S3 failed, Parameter error.');
+    }
+    const s3Client = new S3Client({});
+    const output = event.Result?.Stacks[0];
+    const input = {
+      Body: JSON.stringify({ [event.Input.StackName]: output }),
+      Bucket: event.Callback.BucketName,
+      Key: `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
+      ContentType: 'application/json',
+    };
+    const command = new PutObjectCommand(input);
+    await s3Client.send(command);
+
+    if (output?.StackStatus?.startsWith('ROLLBACK') ||
+      output?.StackStatus?.endsWith('FAILED')) {
+      logger.error('Stack failed.', {
+        event: event,
+      });
+      throw new Error('Stack failed.');
+    }
 
     return {
       statusCode: 200,
