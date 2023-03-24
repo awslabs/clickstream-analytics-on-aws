@@ -79,7 +79,7 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
             )}
             {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
               <div>
-                S3 ({pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name})
+                S3 ({pipelineInfo.ingestionServer.sinkS3.sinkBucket.name})
               </div>
             )}
             {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (

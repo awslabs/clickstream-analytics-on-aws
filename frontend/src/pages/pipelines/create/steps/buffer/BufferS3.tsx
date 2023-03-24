@@ -84,7 +84,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
           placeholder={t('pipeline:create.selectS3') || ''}
           statusType={loadingBucket ? 'loading' : 'finished'}
           onChange={({ detail }) => changeS3Bucket(detail.value)}
-          value={pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name}
+          value={pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}
           options={s3BucketOptionList}
           enteredTextLabel={(value) => `${t('use')}: "${value}"`}
         />
@@ -97,7 +97,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
       >
         <Input
           placeholder={t('pipeline:create.s3.enterAdditional') || ''}
-          value={pipelineInfo.ingestionServer.sinkS3.s3DataBucket.prefix}
+          value={pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
           onChange={(e) => {
             changeS3Prefix(e.detail.value);
           }}

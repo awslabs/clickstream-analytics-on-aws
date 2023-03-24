@@ -93,7 +93,7 @@ const Content: React.FC = () => {
       },
       sinkType: SinkType.MSK,
       sinkS3: {
-        s3DataBucket: {
+        sinkBucket: {
           name: '',
           prefix: '',
         },
@@ -112,7 +112,7 @@ const Content: React.FC = () => {
       sinkKinesis: {
         kinesisStreamMode: '',
         kinesisShardCount: '2',
-        kinesisDataS3Bucket: {
+        sinkBucket: {
           name: '',
           prefix: '',
         },
@@ -215,7 +215,7 @@ const Content: React.FC = () => {
       }
     }
     if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
-      if (!pipelineInfo.ingestionServer.sinkS3.s3DataBucket.name.trim()) {
+      if (!pipelineInfo.ingestionServer.sinkS3.sinkBucket.name.trim()) {
         setBufferS3BucketEmptyError(true);
         return false;
       }
@@ -413,9 +413,8 @@ const Content: React.FC = () => {
                       },
                       sinkKinesis: {
                         ...prev.ingestionServer.sinkKinesis,
-                        kinesisDataS3Bucket: {
-                          ...prev.ingestionServer.sinkKinesis
-                            .kinesisDataS3Bucket,
+                        sinkBucket: {
+                          ...prev.ingestionServer.sinkKinesis.sinkBucket,
                           name: bucket,
                         },
                       },
@@ -610,8 +609,8 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3DataBucket: {
-                          ...prev.ingestionServer.sinkS3.s3DataBucket,
+                        sinkBucket: {
+                          ...prev.ingestionServer.sinkS3.sinkBucket,
                           name: bucket,
                         },
                       },
@@ -627,8 +626,8 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3DataBucket: {
-                          ...prev.ingestionServer.sinkS3.s3DataBucket,
+                        sinkBucket: {
+                          ...prev.ingestionServer.sinkS3.sinkBucket,
                           prefix: prefix,
                         },
                       },

@@ -57,7 +57,7 @@ declare global {
       };
       sinkType: string;
       sinkS3: {
-        s3DataBucket: {
+        sinkBucket: {
           name: string;
           prefix: string;
         };
@@ -76,7 +76,7 @@ declare global {
       sinkKinesis: {
         kinesisStreamMode: string;
         kinesisShardCount: string;
-        kinesisDataS3Bucket: {
+        sinkBucket: {
           name: string;
           prefix: string;
         };
