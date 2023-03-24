@@ -481,7 +481,7 @@ const Content: React.FC = () => {
                     selectedPrivateSubnet: subnets,
                     network: {
                       ...prev.network,
-                      publicSubnetIds: subnets.map(
+                      privateSubnetIds: subnets.map(
                         (element) => element.value || ''
                       ),
                     },
