@@ -20,19 +20,24 @@ import {
   Header,
   SpaceBetween,
   Tabs,
+  Link,
+  Spinner,
 } from '@cloudscape-design/components';
 import { getApplicationDetail } from 'apis/application';
 import { getProjectDetail } from 'apis/project';
-import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import PipelineStatus, {
+  EPipelineStatus,
+} from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EAppPlatform, TIME_FORMAT } from 'ts/const';
-import ConfigSDK from './comp/ConfigSDK';
+import { TIME_FORMAT } from 'ts/const';
+import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
+import ConfigIOSSDK from './comp/ConfigIOSSDK';
 
 const ApplicationDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -57,6 +62,21 @@ const ApplicationDetail: React.FC = () => {
     },
   ];
 
+  const getProjectDetailById = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
+        id: pid ?? '',
+      });
+      if (success) {
+        setProjectInfo(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
+
   const getApplicationDetailByAppId = async () => {
     setLoadingData(true);
     try {
@@ -67,23 +87,7 @@ const ApplicationDetail: React.FC = () => {
         });
       if (success) {
         setApplicationInfo(data);
-        setLoadingData(false);
         getProjectDetailById();
-      }
-    } catch (error) {
-      setLoadingData(false);
-    }
-  };
-
-  const getProjectDetailById = async () => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: pid ?? '',
-      });
-      if (success) {
-        setProjectInfo(data);
-        setLoadingData(false);
       }
     } catch (error) {
       setLoadingData(false);
@@ -100,9 +104,7 @@ const ApplicationDetail: React.FC = () => {
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1" info={<InfoLink />}>
-                {applicationInfo?.name}
-              </Header>
+              <Header variant="h1">{applicationInfo?.name}</Header>
             </SpaceBetween>
           }
         >
@@ -170,6 +172,56 @@ const ApplicationDetail: React.FC = () => {
                   </SpaceBetween>
                 </ColumnLayout>
               </Container>
+
+              <Container
+                header={
+                  <Header variant="h2">
+                    {t('application:detail.pipelineInfo')}
+                  </Header>
+                }
+              >
+                <ColumnLayout columns={3} variant="text-grid">
+                  <SpaceBetween direction="vertical" size="l">
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('project:pipeline.pipeline')}
+                      </Box>
+                      <div>
+                        <Link
+                          external
+                          externalIconAriaLabel="Opens in a new tab"
+                          href={`/project/${pid}/pipeline/${applicationInfo?.pipeline?.id}`}
+                        >
+                          {applicationInfo?.pipeline?.name}
+                        </Link>
+                      </div>
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="l">
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('application:detail.serverEdp')}
+                      </Box>
+                      <div>{applicationInfo?.pipeline?.endpoint}</div>
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="l">
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('project:pipeline.status')}
+                      </Box>
+                      <div>
+                        <PipelineStatus
+                          status={applicationInfo?.pipeline?.status}
+                        />{' '}
+                        {applicationInfo?.pipeline?.status ===
+                          EPipelineStatus.UPDATE_IN_PROGRESS && <Spinner />}
+                      </div>
+                    </div>
+                  </SpaceBetween>
+                </ColumnLayout>
+              </Container>
+
               <Container
                 disableContentPaddings
                 header={
@@ -185,7 +237,7 @@ const ApplicationDetail: React.FC = () => {
                       id: 'endpoint',
                       content: (
                         <div className="pd-20">
-                          <ConfigSDK sdkType={EAppPlatform.Andorid} />
+                          <ConfigAndroidSDK appInfo={applicationInfo} />
                         </div>
                       ),
                     },
@@ -194,16 +246,7 @@ const ApplicationDetail: React.FC = () => {
                       id: 'enrich',
                       content: (
                         <div className="pd-20">
-                          <ConfigSDK sdkType={EAppPlatform.IOS} />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('application:detail.web'),
-                      id: 'model',
-                      content: (
-                        <div className="pd-20">
-                          <ConfigSDK sdkType={EAppPlatform.Web} />
+                          <ConfigIOSSDK appInfo={applicationInfo} />
                         </div>
                       ),
                     },

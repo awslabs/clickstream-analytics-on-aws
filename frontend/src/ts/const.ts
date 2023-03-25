@@ -29,12 +29,6 @@ export const PROJECT_STAGE_LIST = [
   { label: 'Prod', value: 'Prod' },
 ];
 
-export enum EAppPlatform {
-  Andorid = 'Andorid',
-  IOS = 'IOS',
-  Web = 'Web',
-}
-
 export const PLUGIN_TYPE_LIST = [
   { label: 'Enrich', value: 'Enrich' },
   { label: 'Transform', value: 'Transform' },

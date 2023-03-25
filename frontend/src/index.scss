@@ -160,6 +160,22 @@ code {
   }
 }
 
+.code-container {
+  position: relative;
+  color: #9ba7b6;
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 10px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  .copy-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+}
+
 #h {
   display: block;
   position: fixed;

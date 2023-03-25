@@ -64,7 +64,7 @@ const RegisterApp: React.FC = () => {
   return (
     <Container
       header={
-        <Header variant="h2">{t('application:create.registerApp')}</Header>
+        <Header variant="h2">{t('application:sdkGuide.registerApp')}</Header>
       }
     >
       <Form

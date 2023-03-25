@@ -42,3 +42,11 @@ export const validateEmails = (emails: string) => {
   }
   return true;
 };
+
+export const generateFileDownloadLink = (fileContent: string): string => {
+  // Create Blob url
+  const blob = new Blob([fileContent], { type: 'text/plain' });
+  // create URL Object
+  const url = URL.createObjectURL(blob);
+  return url;
+};

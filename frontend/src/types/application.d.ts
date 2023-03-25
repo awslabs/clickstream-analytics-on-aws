@@ -25,6 +25,12 @@ declare global {
     androidPackage: string;
     iosBundleId: string;
     iosAppStoreId: string;
+    pipeline?: {
+      id: string;
+      name: string;
+      status: string;
+      endpoint: string;
+    };
     createAt?: number;
     updateAt?: number;
     operator?: string;
