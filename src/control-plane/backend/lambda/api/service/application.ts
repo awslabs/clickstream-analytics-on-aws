@@ -12,6 +12,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { StackManager } from './stack';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { Application } from '../model/application';
@@ -19,6 +20,7 @@ import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
+const stackManager: StackManager = new StackManager();
 
 export class ApplicationServ {
   public async list(req: any, res: any, next: any) {
@@ -53,7 +55,26 @@ export class ApplicationServ {
         logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
         return res.status(404).json(new ApiFail('Application not found'));
       }
-      return res.json(new ApiSuccess(result));
+      const latestPipeline = await store.listPipeline(result.id, 'latest', false, 1, 1);
+      if (latestPipeline.totalCount === 0) {
+        return res.status(404).json(new ApiFail('Pipeline info no found'));
+      }
+      const outputValue = await stackManager.getStackOutput(latestPipeline.items[0], 'ingestion', 'ServerEndpointPath');
+      return res.json(new ApiSuccess({
+        projectId: result.projectId,
+        appId: result.appId,
+        name: result.name,
+        description: result.description,
+        androidPackage: result.androidPackage,
+        iosBundleId: result.iosBundleId,
+        iosAppStoreId: result.iosAppStoreId,
+        pipeline: {
+          id: latestPipeline.items[0].pipelineId,
+          name: latestPipeline.items[0].name,
+          status: latestPipeline.items[0].status,
+          endpoint: outputValue,
+        },
+      }));
     } catch (error) {
       next(error);
     }

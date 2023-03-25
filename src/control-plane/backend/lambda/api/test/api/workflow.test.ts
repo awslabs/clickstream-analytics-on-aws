@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExecutionStatus, SFNClient } from '@aws-sdk/client-sfn';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
@@ -20,13 +20,11 @@ import { Pipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
-const sfnMock = mockClient(SFNClient);
 const stackManager: StackManager = new StackManager();
 
 describe('Pipeline test', () => {
   beforeEach(() => {
     ddbMock.reset();
-    sfnMock.reset();
   });
   it('Generate Workflow ingestion-server-s3', async () => {
     ddbMock.on(GetCommand).resolves({
@@ -122,7 +120,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/Ingestion',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -318,7 +316,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/Ingestion',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -420,7 +418,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/KafkaConnector',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-kafka-connector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -579,7 +577,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/Ingestion',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-kinesis-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -805,7 +803,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/Ingestion',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -907,7 +905,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'workflow/6666-6666/ETL',
+                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-etl-6666-6666',
                   },
                   Input: {
                     Action: 'Create',

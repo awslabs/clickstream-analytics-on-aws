@@ -11,12 +11,16 @@
  *  and limitations under the License.
  */
 
+import { Readable } from 'stream';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
   PutCommand,
   ScanCommand,
   GetCommand, GetCommandInput, UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
@@ -24,11 +28,12 @@ import { clickStreamTableName } from '../../common/constants';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
-
+const s3Mock = mockClient(S3Client);
 
 describe('Application test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    s3Mock.reset();
   });
   it('Create application', async () => {
     tokenMock(ddbMock, false);
@@ -166,16 +171,62 @@ describe('Application test', () => {
       Item: {
         deleted: false,
         updateAt: 1674202173912,
-        platform: 'Web',
         createAt: 1674202173912,
         type: 'APP#e250bc17-405f-4473-862d-2346d6cefb49',
         sdk: 'Clickstream SDK',
         operator: '',
         description: 'Description of App-01',
-        appId: 'e250bc17-405f-4473-862d-2346d6cefb49',
-        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        appId: MOCK_APP_ID,
+        projectId: MOCK_PROJECT_ID,
+        id: MOCK_PROJECT_ID,
         name: 'App-01',
+        androidPackage: 'androidPackage',
+        iosBundleId: 'iosBundleId',
+        iosAppStoreId: 'iosAppStoreId',
       },
+    });
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          pipelineId: MOCK_PROJECT_ID,
+          status: ExecutionStatus.RUNNING,
+          ingestionServer: {
+            sinkType: 's3',
+          },
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        },
+      ],
+    });
+    // create Stream from string
+    const stream = new Readable();
+    stream.push(JSON.stringify({
+      MOCK_STACK: {
+        Capabilities: ['CAPABILITY_IAM'],
+        CreationTime: '2023-03-15T02:45:47.903Z',
+        Description: '',
+        DisableRollback: false,
+        DriftInformation: { StackDriftStatus: 'NOT_CHECKED' },
+        EnableTerminationProtection: false,
+        NotificationARNs: [],
+        Outputs: [
+          {
+            OutputKey: 'ServerEndpointPath',
+            OutputValue: 'http://xxx/xxx',
+          },
+        ],
+        Parameters: [],
+        RoleARN: '',
+        RollbackConfiguration: {},
+        StackId: '',
+        StackName: 'MOCK_STACK',
+        StackStatus: 'CREATE_COMPLETE',
+        Tags: [],
+      },
+    }));
+    stream.push(null); // end of stream
+    s3Mock.on(GetObjectCommand).resolves({
+      Body: sdkStreamMixin(stream),
     });
     let res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
@@ -185,17 +236,19 @@ describe('Application test', () => {
       success: true,
       message: '',
       data: {
-        deleted: false,
-        updateAt: 1674202173912,
-        platform: 'Web',
-        createAt: 1674202173912,
-        type: 'APP#e250bc17-405f-4473-862d-2346d6cefb49',
-        sdk: 'Clickstream SDK',
-        operator: '',
         description: 'Description of App-01',
-        appId: 'e250bc17-405f-4473-862d-2346d6cefb49',
-        id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
+        appId: '7777-7777',
+        projectId: '8888-8888',
         name: 'App-01',
+        androidPackage: 'androidPackage',
+        iosAppStoreId: 'iosAppStoreId',
+        iosBundleId: 'iosBundleId',
+        pipeline: {
+          endpoint: 'http://xxx/xxx',
+          id: '8888-8888',
+          name: 'Pipeline-01',
+          status: 'RUNNING',
+        },
       },
     });
   });

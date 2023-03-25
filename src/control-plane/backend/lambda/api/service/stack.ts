@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
+import { Parameter, Stack, Output } from '@aws-sdk/client-cloudformation';
 import {
   StartExecutionCommand,
   StartExecutionCommandOutput,
@@ -23,6 +23,7 @@ import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket, stackWorkflowStateMa
 import { sfnClient } from '../common/sfn';
 import { isEmpty, tryToJson } from '../common/utils';
 import { getETLPipelineStackParameters, getIngestionStackParameters, getKafkaConnectorStackParameters, Pipeline } from '../model/pipeline';
+import { getS3Object } from '../store/aws/s3';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -77,7 +78,7 @@ export class StackManager {
   public async generateWorkflow(pipeline: Pipeline, executionName: string): Promise<any> {
 
     const stackData = await this.getStackData(pipeline, executionName);
-    // TODO：read workflow template from dictionary （）
+    // TODO：read workflow template from dictionary
     const workflowTemplate: WorkflowTemplate = {
       Version: '2022-03-15',
       Workflow: {
@@ -145,7 +146,7 @@ export class StackManager {
       throw Error(`Template: ingestion_${pipeline.ingestionServer.sinkType} not found in dictionary.`);
     }
     const ingestionStackParameters = await getIngestionStackParameters(pipeline);
-    const ingestionStackName = `clickstream-ingestion-${pipeline.ingestionServer.sinkType}-${pipeline.pipelineId}`;
+    const ingestionStackName = this.getStackName(pipeline, 'ingestion');
     stackDataMap.Ingestion = {
       Input: {
         Action: 'Create',
@@ -155,7 +156,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/Ingestion`,
+        BucketPrefix: `clickstream/workflow/${executionName}/${ingestionStackName}`,
       },
     };
 
@@ -164,7 +165,7 @@ export class StackManager {
       throw Error('Template: kafka-s3-sink not found in dictionary.');
     }
     const kafkaConnectorStackParameters = await getKafkaConnectorStackParameters(pipeline);
-    const kafkaConnectorStackName = `clickstream-kafka-connector-${pipeline.pipelineId}`;
+    const kafkaConnectorStackName = this.getStackName(pipeline, 'kafka-connector');
     stackDataMap.KafkaConnector = {
       Input: {
         Action: 'Create',
@@ -174,7 +175,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/KafkaConnector`,
+        BucketPrefix: `clickstream/workflow/${executionName}/${kafkaConnectorStackName}`,
       },
     };
 
@@ -184,7 +185,7 @@ export class StackManager {
     }
 
     const pipelineStackParameters = await getETLPipelineStackParameters(pipeline);
-    const pipelineStackName = `clickstream-etl-${pipeline.pipelineId}`;
+    const pipelineStackName = this.getStackName(pipeline, 'etl');
     stackDataMap.ETL = {
       Input: {
         Action: 'Create',
@@ -194,7 +195,7 @@ export class StackManager {
       },
       Callback: {
         BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `workflow/${executionName}/ETL`,
+        BucketPrefix: `clickstream/workflow/${executionName}/${pipelineStackName}`,
       },
     };
 
@@ -224,5 +225,33 @@ export class StackManager {
     }
     return undefined;
   };
+
+  public async getStackOutput(pipeline: Pipeline, key: string, outputKey: string): Promise<string | undefined> {
+    if (isEmpty(pipeline.executionArn)) {
+      return undefined;
+    }
+    const executionSplit = pipeline.executionArn.split(':');
+    const executionName = executionSplit[executionSplit.length - 1];
+    const bucketPrefix = `clickstream/workflow/${executionName}/${this.getStackName(pipeline, key)}`;
+    if (stackWorkflowS3Bucket) {
+      const outputContents = await getS3Object(pipeline.region, stackWorkflowS3Bucket, `${bucketPrefix}/output.json`);
+      const stack = JSON.parse(outputContents) as {[name: string]: Stack};
+      const stackOutputs = Object.values(stack)[0].Outputs;
+      for (let out of stackOutputs as Output[]) {
+        if (out.OutputKey === outputKey) {
+          return out.OutputValue ?? '';
+        }
+      }
+    }
+    return undefined;
+  }
+
+  public getStackName(pipeline: Pipeline, key: string): string {
+    const names: Map<string, string> = new Map();
+    names.set('ingestion', `clickstream-ingestion-${pipeline.ingestionServer.sinkType}-${pipeline.pipelineId}`);
+    names.set('kafka-connector', `clickstream-kafka-connector-${pipeline.pipelineId}`);
+    names.set('etl', `clickstream-etl-${pipeline.pipelineId}`);
+    return names.get(key)?? '';
+  }
 
 }

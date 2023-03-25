@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { S3Client, ListBucketsCommand, GetBucketLocationCommand, GetBucketLocationCommandOutput, Bucket } from '@aws-sdk/client-s3';
+import { S3Client, ListBucketsCommand, GetBucketLocationCommand, GetBucketLocationCommandOutput, Bucket, GetObjectCommand } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
 
 const promisePool = pLimit(50);
@@ -53,3 +53,26 @@ export const listBuckets = async (region: string) => {
 
   return buckets;
 };
+
+export async function getS3Object(region: string, bucket: string, key: string): Promise<any> {
+  const streamToString = (stream: any) => new Promise((resolve, reject) => {
+    const chunks: any = [];
+    stream.on('data', (chunk: any) => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+  });
+
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+
+  try {
+    const s3Client = new S3Client({ region });
+    const { Body } = await s3Client.send(command);
+    const bodyContents = await streamToString(Body);
+    return bodyContents;
+  } catch (error) {
+    return undefined;
+  }
+}
