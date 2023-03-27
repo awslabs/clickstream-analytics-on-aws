@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, {
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+  AxiosResponse,
+} from 'axios';
 import { reject } from 'lodash';
 import { User } from 'oidc-client-ts';
 import { COMMON_ALERT_TYPE, PROJECT_CONFIG_JSON } from './const';
@@ -51,7 +55,7 @@ axios.interceptors.request.use(
     config.headers = {
       'Content-Type': 'application/json',
       Authorization: token ? `Bearer ${token}` : undefined,
-    };
+    } as AxiosRequestHeaders;
     // set x-click-stream-request-id
     if (!config.headers[REQUEST_ID_KEY]) {
       config.headers[REQUEST_ID_KEY] = requestId || generateStr(18);

@@ -258,9 +258,9 @@ gitlabMain.createNestedTemplates({
           'cd $CI_PROJECT_DIR/frontend',
         ],
         script: [
-          'npm install',
-          'npm run test',
-          'npm run build',
+          'yarn install',
+          'yarn run build',
+          'yarn run test',
         ],
         artifacts: {
           paths: [

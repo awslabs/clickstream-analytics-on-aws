@@ -78,7 +78,6 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "start": "node scripts/start.js",
     "build": "node esbuild.ts",
     "crabuild": "node scripts/build.js",
@@ -121,12 +120,6 @@
     "html-minifier": "^4.0.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4"
-  },
-  "resolutions": {
-    "webpack": "5.76.1",
-    "nth-check": "2.1.1",
-    "http-cache-semantics": "4.1.1",
-    "json5": "2.2.3"
   },
   "jest": {
     "roots": [

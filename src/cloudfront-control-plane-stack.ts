@@ -138,7 +138,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
-          'export APP_PATH=/tmp/app && mkdir $APP_PATH && find . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && npm install --loglevel error && npm run build --loglevel error && cp -r ./build/* /asset-output/',
+          'export APP_PATH=/tmp/app && mkdir $APP_PATH && find . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
