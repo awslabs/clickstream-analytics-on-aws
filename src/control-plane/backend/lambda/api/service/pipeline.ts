@@ -46,7 +46,7 @@ export class PipelineServ {
       // create stack
       const { projectId } = req.body;
       req.body.id = projectId;
-      req.body.pipelineId = uuidv4();
+      req.body.pipelineId = uuidv4().replace(/-/g, '');
       let pipeline: Pipeline = req.body;
 
       // state machine

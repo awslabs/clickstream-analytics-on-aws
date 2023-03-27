@@ -22,7 +22,6 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { v4 as uuidv4 } from 'uuid';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
@@ -44,12 +43,11 @@ interface KeyVal<T> {
 export class DynamoDbStore implements ClickStreamStore {
 
   public async createProject(project: Project): Promise<string> {
-    const id = uuidv4();
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
-        id: id,
-        type: `METADATA#${id}`,
+        id: project.id,
+        type: `METADATA#${project.id}`,
         name: project.name,
         tableName: project.tableName,
         description: project.description,
@@ -65,7 +63,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     await docClient.send(params);
-    return id;
+    return project.id;
   };
 
   public async getProject(id: string): Promise<Project | undefined> {
@@ -231,14 +229,13 @@ export class DynamoDbStore implements ClickStreamStore {
 
 
   public async addApplication(app: Application): Promise<string> {
-    const id = uuidv4();
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
         id: app.id,
-        type: `APP#${id}`,
+        type: `APP#${app.appId}`,
         projectId: app.projectId,
-        appId: id,
+        appId: app.appId,
         name: app.name,
         description: app.description,
         androidPackage: app.androidPackage?? '',
@@ -251,7 +248,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     await docClient.send(params);
-    return id;
+    return app.appId;
   };
 
 
@@ -726,12 +723,11 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async addPlugin(plugin: Plugin): Promise<string> {
-    const id = uuidv4();
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
-        id: id,
-        type: `PLUGIN#${id}`,
+        id: plugin.id,
+        type: `PLUGIN#${plugin.id}`,
         prefix: 'PLUGIN',
         name: plugin.name,
         description: plugin.description,
@@ -749,7 +745,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     await docClient.send(params);
-    return id;
+    return plugin.id;
   };
 
   public async getPlugin(pluginId: string): Promise<Plugin | undefined> {

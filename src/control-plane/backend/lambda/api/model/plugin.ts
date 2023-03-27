@@ -12,18 +12,18 @@
  */
 
 export interface Plugin {
-  id: string;
-  type: string;
-  prefix: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
-  name: string;
-  description: string;
-  status: 'Enabled' | 'Disabled';
-  jarFile: string;
-  dependencyFiles: string[];
-  mainFunction: string;
-  pluginType: 'Transform' | 'Enrich';
-  builtIn: boolean;
+  readonly name: string;
+  readonly description: string;
+  readonly status: 'Enabled' | 'Disabled';
+  readonly jarFile: string;
+  readonly dependencyFiles: string[];
+  readonly mainFunction: string;
+  readonly pluginType: 'Transform' | 'Enrich';
+  readonly builtIn: boolean;
   /**
    * Record the binding count of plugin.
    * bind by pipeline: +1
@@ -31,10 +31,10 @@ export interface Plugin {
    */
   bindCount: number;
 
-  createAt: number;
-  updateAt: number;
-  operator: string;
-  deleted: boolean;
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
 }
 
 export interface PluginList {

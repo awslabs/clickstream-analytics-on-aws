@@ -235,6 +235,9 @@ export class StackManager {
     const bucketPrefix = `clickstream/workflow/${executionName}/${this.getStackName(pipeline, key)}`;
     if (stackWorkflowS3Bucket) {
       const outputContents = await getS3Object(pipeline.region, stackWorkflowS3Bucket, `${bucketPrefix}/output.json`);
+      if (isEmpty(outputContents)) {
+        return undefined;
+      }
       const stack = JSON.parse(outputContents) as {[name: string]: Stack};
       const stackOutputs = Object.values(stack)[0].Outputs;
       for (let out of stackOutputs as Output[]) {

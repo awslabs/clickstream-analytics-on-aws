@@ -37,7 +37,7 @@ export class ApplicationServ {
     try {
       const { projectId } = req.body;
       req.body.id = projectId;
-      req.body.appId = uuidv4();
+      req.body.appId = uuidv4().replace(/-/g, '');
       let app: Application = req.body;
       const id = await store.addApplication(app);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));

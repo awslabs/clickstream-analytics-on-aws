@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { Plugin } from '../model/plugin';
@@ -32,6 +33,7 @@ export class PluginServ {
 
   public async add(req: any, res: any, next: any) {
     try {
+      req.body.id = uuidv4().replace(/-/g, '');
       const plugin: Plugin = req.body;
       const id = await store.addPlugin(plugin);
       return res.status(201).json(new ApiSuccess({ id }, 'Plugin created.'));

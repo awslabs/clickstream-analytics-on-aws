@@ -920,7 +920,7 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'EntryPointJar',
-                        ParameterValue: '',
+                        ParameterValue: 's3://MOCK_BUCKET/MOCK.jar',
                       },
                       {
                         ParameterKey: 'ProjectId',

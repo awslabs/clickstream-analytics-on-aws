@@ -561,7 +561,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'EntryPointJar',
-    ParameterValue: '',
+    ParameterValue: 's3://MOCK_BUCKET/MOCK.jar',
   });
 
   parameters.push({

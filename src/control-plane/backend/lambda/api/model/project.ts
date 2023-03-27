@@ -12,22 +12,22 @@
  */
 
 export interface Project {
-  id: string;
-  type: string;
-  prefix: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
-  name: string;
-  tableName: string;
-  description: string;
-  emails: string;
-  platform: string;
-  region: string;
-  environment: string;
-  status: string;
-  createAt: number;
-  updateAt: number;
-  operator: string;
-  deleted: boolean;
+  readonly name: string;
+  readonly tableName: string;
+  readonly description: string;
+  readonly emails: string;
+  readonly platform: string;
+  readonly region: string;
+  readonly environment: string;
+  readonly status: string;
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
 }
 
 export interface ProjectList {

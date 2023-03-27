@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/request-valid';
 import { Project } from '../model/project';
@@ -32,6 +33,7 @@ export class ProjectServ {
 
   public async create(req: any, res: any, next: any) {
     try {
+      req.body.id = uuidv4().replace(/-/g, '');
       let project: Project = req.body;
       const id = await store.createProject(project);
       return res.status(201).json(new ApiSuccess({ id }, 'Project created.'));
