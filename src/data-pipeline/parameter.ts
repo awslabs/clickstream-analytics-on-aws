@@ -13,23 +13,13 @@
 
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { APP_ID_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, PROJECT_ID_PATTERN, S3_BUCKET_NAME_PATTERN } from '../common/constant';
+import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
   const netWorkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
 
-  const projectIdParam = new CfnParameter(scope, 'ProjectId', {
-    description: 'Project Id',
-    allowedPattern: `^${PROJECT_ID_PATTERN}$`,
-    type: 'String',
-  });
-
-  const appIdsParam = new CfnParameter(scope, 'AppIds', {
-    description: 'App Ids, comma delimited list',
-    type: 'CommaDelimitedList',
-    allowedPattern: `^${APP_ID_PATTERN}$`,
-  });
+  const { projectIdParam, appIdsParam } = Parameters.createProjectAndAppsParameters(scope, 'ProjectId', 'AppIds');
 
   const sourceS3BucketParam = Parameters.createS3BucketParameter(scope, 'SourceS3Bucket', {
     description: 'Source S3 bucket name',

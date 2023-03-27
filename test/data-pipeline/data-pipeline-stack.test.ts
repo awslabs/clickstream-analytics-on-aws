@@ -126,7 +126,7 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter AppIds', () => {
     template.hasParameter('AppIds', {
-      Type: 'CommaDelimitedList',
+      Type: 'String',
     });
   });
 
@@ -136,9 +136,10 @@ describe('DataPipelineStack parameter test', () => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
-        'abc001',
+        'abc001,abc002,abc003',
         'abc-test-01',
         'Abc_test',
+        '',
       ];
 
       for (const v of validValues) {
@@ -147,8 +148,9 @@ describe('DataPipelineStack parameter test', () => {
 
       const invalidValues = [
         'abc.test',
+        'abc,',
+        ',abc',
         'a#',
-        '',
       ];
       for (const v of invalidValues) {
         expect(v).not.toMatch(regex);
@@ -569,7 +571,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
             Ref: 'ProjectId',
           },
           APP_IDS: {
-            'Fn::Join': Match.anyValue(),
+            Ref: Match.anyValue(),
           },
           LOG_LEVEL: 'WARN',
         },

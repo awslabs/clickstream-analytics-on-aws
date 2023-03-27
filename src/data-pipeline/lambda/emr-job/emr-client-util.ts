@@ -32,6 +32,12 @@ export class EMRServerlessUtil {
       logger.info('enter start');
       const config = this.getConfig();
       logger.info('config', { config });
+      if (!config.appIds) {
+        logger.warn('appIds is empty, please check env: APP_IDS');
+        return {
+          jobId: '',
+        };
+      }
       const jobId = await EMRServerlessUtil.startJobRun(
         event,
         config,
@@ -162,7 +168,7 @@ export class EMRServerlessUtil {
       emrServerlessApplicationId: process.env.EMR_SERVERLESS_APPLICATION_ID!,
       stackId: process.env.STACK_ID!,
       projectId: process.env.PROJECT_ID!,
-      appIds: process.env.APP_IDS!,
+      appIds: process.env.APP_IDS,
       roleArn: process.env.ROLE_ARN!,
       catalogId: process.env.GLUE_CATALOG_ID!,
       databaseName: process.env.GLUE_DB!,

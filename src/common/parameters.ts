@@ -40,6 +40,8 @@ import {
   PARAMETER_LABEL_OIDC_CLIENT_ID,
   PARAMETER_GROUP_LABEL_OIDC,
   S3_BUCKET_NAME_PATTERN,
+  PROJECT_ID_PATTERN,
+  APP_ID_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -402,5 +404,29 @@ export class Parameters {
 
     return securityGroupIdParam;
   }
+
+  public static createProjectAndAppsParameters(scope: IConstruct,
+    projectIdName: string = 'ProjectId',
+    appIdsName: string = 'AppIds') {
+    const projectIdParam = new CfnParameter(scope, projectIdName, {
+      description: 'Project Id',
+      allowedPattern: `^${PROJECT_ID_PATTERN}$`,
+      type: 'String',
+    });
+
+    const appIdsParam = new CfnParameter(scope, appIdsName, {
+      description: 'App Ids, comma delimited list',
+      type: 'String',
+      default: '',
+      allowedPattern: `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`,
+    });
+
+    return {
+      projectIdParam,
+      appIdsParam,
+    };
+
+  }
+
 }
 

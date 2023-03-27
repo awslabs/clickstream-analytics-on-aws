@@ -90,7 +90,7 @@ export class DataPipelineStack extends Stack {
       vpc: vpc,
       vpcSubnets: subnetSelection,
       projectId: projectIdParam.valueAsString,
-      appIds: Fn.join(',', appIdsParam.valueAsList),
+      appIds: appIdsParam.valueAsString,
       sourceS3Bucket,
       sourceS3Prefix: sourceS3PrefixParam.valueAsString,
       sinkS3Bucket,
