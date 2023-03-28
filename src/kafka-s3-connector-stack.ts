@@ -46,12 +46,9 @@ export class KafkaS3SinkConnectorStack extends Stack {
       type: 'String',
     });
 
-    const dataS3PrefixParam = new CfnParameter(this, 'DataS3Prefix', {
-      description: 'S3 object prefix to save data',
-      type: 'String',
-      allowedPattern: '^[^/]+$',
-      constraintDescription: 'DataS3Prefix must match pattern [^/]+',
-      default: 'data',
+    const dataS3PrefixParam = Parameters.createS3PrefixParameter(this, 'DataS3Prefix', {
+      description: 'S3 data object prefix',
+      default: 'data/',
     });
 
     const logS3BucketParam = new CfnParameter(this, 'LogS3Bucket', {
@@ -59,12 +56,9 @@ export class KafkaS3SinkConnectorStack extends Stack {
       type: 'String',
     });
 
-    const logS3PrefixParam = new CfnParameter(this, 'LogS3Prefix', {
-      description: 'S3 object prefix to save log',
-      type: 'String',
-      allowedPattern: '^[^/]+$',
-      constraintDescription: 'LogS3Prefix must match pattern [^/]+',
-      default: 'log',
+    const logS3PrefixParam = Parameters.createS3PrefixParameter(this, 'LogS3Prefix', {
+      description: 'S3 object prefix to save log (optional)',
+      default: 'kafka-connect/log/',
     });
 
     const pluginS3BucketParam = new CfnParameter(this, 'PluginS3Bucket', {
@@ -72,12 +66,9 @@ export class KafkaS3SinkConnectorStack extends Stack {
       type: 'String',
     });
 
-    const pluginS3PrefixParam = new CfnParameter(this, 'PluginS3Prefix', {
-      description: 'S3 object prefix to save the plugin zip file ',
-      type: 'String',
-      allowedPattern: '^[^/]+$',
-      constraintDescription: 'PluginS3Prefix must match pattern [^/]+',
-      default: 'plugin',
+    const pluginS3PrefixParam = Parameters.createS3PrefixParameter(this, 'PluginS3Prefix', {
+      description: 'S3 object prefix to save the plugin zip file',
+      default: 'kafka-connect/plugin/',
     });
 
     const subnetIdsParam = new CfnParameter(this, 'SubnetIds', {

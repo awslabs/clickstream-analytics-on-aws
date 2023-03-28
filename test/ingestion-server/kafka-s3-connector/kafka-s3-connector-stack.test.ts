@@ -51,11 +51,11 @@ test('Parameters settings are as expected', () => {
   const params = [
     //Name, Type, Default
     ['DataS3Bucket', 'String'],
-    ['DataS3Prefix', 'String', 'data'],
+    ['DataS3Prefix', 'String', 'data/'],
     ['LogS3Bucket', 'String'],
-    ['LogS3Prefix', 'String', 'log'],
+    ['LogS3Prefix', 'String', 'kafka-connect/log/'],
     ['PluginS3Bucket', 'String'],
-    ['PluginS3Prefix', 'String', 'plugin'],
+    ['PluginS3Prefix', 'String', 'kafka-connect/plugin/'],
     ['SubnetIds', 'List<AWS::EC2::Subnet::Id>'],
     ['KafkaBrokers', 'String'],
     ['KafkaTopic', 'String'],
@@ -89,8 +89,8 @@ test('Parameters settings are as expected', () => {
 });
 
 test('S3Prefix pattern', () => {
-  const validValues = ['abc', '123'];
-  const invalidValues = ['abc/', 'abc/abc'];
+  const validValues = ['abc/', '123/', '', 'abc/def/'];
+  const invalidValues = ['abc', 'abc/abc', '/abc/abc'];
   const paramNames = ['DataS3Prefix', 'LogS3Prefix', 'PluginS3Prefix'];
   paramNames.forEach((p) => checkPattern(p, validValues, invalidValues));
 });
