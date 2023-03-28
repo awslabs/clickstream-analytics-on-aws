@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+import { SelectProps } from '@cloudscape-design/components';
+import { ExecutionType } from './const';
+
 export const generateStr = (length: number) => {
   let randomString = '';
   const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -49,4 +52,33 @@ export const generateFileDownloadLink = (fileContent: string): string => {
   // create URL Object
   const url = URL.createObjectURL(blob);
   return url;
+};
+
+export const generateDataProcessingInterval = (
+  type: string | undefined,
+  fixedValue: number,
+  cronExp: string,
+  unit: SelectProps.Option | null
+) => {
+  if (type === ExecutionType.FIXED_RATE) {
+    if (fixedValue && fixedValue > 0) {
+      if (unit?.value === 'hour') {
+        return `rate(${fixedValue} ${fixedValue > 1 ? 'hours' : 'hour'})`;
+      } else if (unit?.value === 'day') {
+        return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
+      } else {
+        return `rate(1 hour)`;
+      }
+    } else {
+      return `rate(1 hour)`;
+    }
+  } else if (type === ExecutionType.CRON_EXPRESS) {
+    if (cronExp) {
+      return `cron(${cronExp})`;
+    } else {
+      return `rate(1 hour)`;
+    }
+  } else {
+    return `rate(1 hour)`;
+  }
 };

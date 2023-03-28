@@ -43,6 +43,7 @@ interface ConfigIngestionProps {
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;
   changeDomainName: (name: string) => void;
+  changeEnableALBAccessLog: (enable: boolean) => void;
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
   changeCertificate: (cert: SelectProps.Option) => void;
@@ -81,6 +82,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeServerMax,
     changeWarmSize,
     changeDomainName,
+    changeEnableALBAccessLog,
     changeProtocal,
     changeServerEdp,
     changeCertificate,
@@ -273,6 +275,20 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 />
               </div>
             </ColumnLayout>
+          </FormField>
+
+          <FormField>
+            <Checkbox
+              onChange={({ detail }) =>
+                changeEnableALBAccessLog(detail.checked)
+              }
+              checked={
+                pipelineInfo.ingestionServer.loadBalancer
+                  .enableApplicationLoadBalancerAccessLog
+              }
+            >
+              <b>{t('pipeline:create.enableALBLog')}</b>
+            </Checkbox>
           </FormField>
 
           <FormField>

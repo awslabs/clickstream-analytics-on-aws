@@ -118,6 +118,7 @@
     "enableEdpDesc": "The solution provides an auto-generate URL as ingestion endpoint, but you can also use a custom endpoint. Please note, the host name must be registered in Amazon Route53 service",
     "edpSettings": "Ingestion endpoint settings",
     "edpSettingsDesc": "The solution will spin up a web service as an ingestion endpoint to collect data sent from your SDKs.",
+    "enableALBLog": "Enable Application Load Balancer Access Log",
     "enableHttps": "Enable HTTPS",
     "domainName": "Domain name",
     "domainNameDesc": "Specifify a domain name for your ingestion endpoint, the solution will create entry in Route53 for you automatically.",

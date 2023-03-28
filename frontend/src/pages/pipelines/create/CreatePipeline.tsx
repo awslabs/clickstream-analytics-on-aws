@@ -25,6 +25,7 @@ import {
   ResourceCreateMehod,
   SinkType,
 } from 'ts/const';
+import { generateDataProcessingInterval } from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
 import DataProcessing from './steps/DataProcessing';
@@ -230,11 +231,14 @@ const Content: React.FC = () => {
       createPipelineObj.etl.dataFreshnessInHour =
         pipelineInfo.selectedEventFreshUnit?.value === 'day'
           ? parseInt(pipelineInfo.eventFreshValue) * 24
-          : pipelineInfo.eventFreshValue;
-      createPipelineObj.etl.scheduleExpression =
-        pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE
-          ? `${pipelineInfo.excutionFixedValue}${pipelineInfo.selectedExcutionUnit?.value}`
-          : pipelineInfo.exeCronExp;
+          : pipelineInfo.eventFreshValue || 72;
+      createPipelineObj.etl.scheduleExpression = generateDataProcessingInterval(
+        pipelineInfo.selectedExcutionType?.value,
+        parseInt(pipelineInfo.excutionFixedValue),
+        pipelineInfo.exeCronExp,
+        pipelineInfo.selectedExcutionUnit
+      );
+
       createPipelineObj.etl.transformPlugin =
         pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
       createPipelineObj.etl.enrichPlugin =
@@ -540,6 +544,20 @@ const Content: React.FC = () => {
                       domain: {
                         ...prev.ingestionServer.domain,
                         domainName: name,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeEnableALBAccessLog={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        enableApplicationLoadBalancerAccessLog: enable,
                       },
                     },
                   };
