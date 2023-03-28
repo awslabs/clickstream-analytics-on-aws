@@ -343,7 +343,7 @@ export class CloudFrontS3Portal extends Construct {
 
     // upload static web assets
     this.buckeyDeployment = new BucketDeployment(this, 'portal_deploy', {
-      sources: [
+      sources: process.env.IS_SKIP_ASSET_BUNDLE === 'true' ? [Source.data('test', 'test')] : [
         Source.asset(props.frontendProps.assetPath, {
           bundling: {
             image: props.frontendProps.dockerImage,
