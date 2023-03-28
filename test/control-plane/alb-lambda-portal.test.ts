@@ -137,7 +137,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
         {
           Key: 'access_logs.s3.prefix',
-          Value: 'console-alb-access-logs',
+          Value: 'console-alb-access-logs/alb-log',
         },
       ]),
     });
@@ -710,7 +710,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
         {
           Key: 'access_logs.s3.prefix',
-          Value: 'console-alb-access-logs',
+          Value: 'console-alb-access-logs/alb-log',
         },
       ]),
     });
@@ -727,7 +727,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         },
       },
       externalBucket: true,
-      prefix: 'test-prefix',
+      prefix: 'test-prefix/',
     });
 
     const template = Template.fromStack(testStack);
@@ -739,7 +739,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       LoadBalancerAttributes: Match.arrayWith([
         {
           Key: 'access_logs.s3.prefix',
-          Value: 'test-prefix',
+          Value: 'test-prefix/alb-log',
         },
       ]),
     });

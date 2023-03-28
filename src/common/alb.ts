@@ -123,7 +123,7 @@ export function setAccessLogForApplicationLoadBalancer(
     'access_logs.s3.bucket',
     props.albLogBucket.bucketName,
   );
-  props.alb.setAttribute('access_logs.s3.prefix', props.albLogPrefix);
+  props.alb.setAttribute('access_logs.s3.prefix', `${props.albLogPrefix}alb-log`);
 }
 
 export function createBucketPolicyForAlbAccessLog(
@@ -150,7 +150,7 @@ export function createBucketPolicyForAlbAccessLog(
       {
         grantPrincipal: new AccountPrincipal(albAccountId),
       },
-      `${props.albLogPrefix}/*`,
+      `${props.albLogPrefix}*`,
     );
 
     props.albLogBucket.grantPut(
@@ -159,7 +159,7 @@ export function createBucketPolicyForAlbAccessLog(
           'logdelivery.elasticloadbalancing.amazonaws.com',
         ),
       },
-      `${props.albLogPrefix}/*`,
+      `${props.albLogPrefix}*`,
     );
   }
 }

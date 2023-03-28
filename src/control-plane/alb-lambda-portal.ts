@@ -288,7 +288,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       } else {
         albLogBucket = props.applicationLoadBalancerProps.logProps.bucket;
       }
-      const albLogPrefix = props.applicationLoadBalancerProps.logProps?.prefix ?? 'console-alb-access-logs';
+      const albLogPrefix = props.applicationLoadBalancerProps.logProps?.prefix ?? 'console-alb-access-logs/';
       setAccessLogForApplicationLoadBalancer(scope, {
         alb: this.applicationLoadBalancer,
         albLogBucket: albLogBucket,
