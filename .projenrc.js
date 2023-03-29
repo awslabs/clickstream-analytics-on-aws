@@ -64,6 +64,8 @@ const depsForApiProject = [
   'express@^4.18.2',
   'express-validator@^6.14.3',
   'p-limit@3.1.0',
+  'jsonwebtoken@^9.0.0',
+  'jwks-rsa@^3.0.1',
   ...awsSDKDepsForApiProject,
 ];
 

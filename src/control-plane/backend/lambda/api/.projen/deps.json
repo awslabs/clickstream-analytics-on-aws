@@ -181,6 +181,16 @@
       "type": "runtime"
     },
     {
+      "name": "jsonwebtoken",
+      "version": "^9.0.0",
+      "type": "runtime"
+    },
+    {
+      "name": "jwks-rsa",
+      "version": "^3.0.1",
+      "type": "runtime"
+    },
+    {
       "name": "p-limit",
       "version": "3.1.0",
       "type": "runtime"

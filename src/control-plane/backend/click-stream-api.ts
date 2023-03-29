@@ -65,8 +65,6 @@ export interface ApplicationLoadBalancerProps {
 
 export interface AuthProps {
   readonly issuer: string;
-  readonly clientId: string;
-  readonly callbackUrl: string;
 }
 
 export interface ApiGatewayProps {
@@ -250,8 +248,9 @@ export class ClickStreamApiConstruct extends Construct {
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
+        FRONT_END: props.fronting,
         S3_MAIN_REGION: props.s3MainRegion?? 'us-east-1',
-        ... props.authProps,
+        ISSUER: props.authProps?.issuer ?? '',
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

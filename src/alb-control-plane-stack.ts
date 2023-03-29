@@ -210,8 +210,6 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
       authProps: {
         issuer: issuer,
-        clientId: clientId,
-        callbackUrl: controlPlane.controlPlaneUrl,
       },
       stackWorkflowS3Bucket: solutionBucket.bucket,
     });

@@ -13,6 +13,7 @@
 
 import express from 'express';
 import { body, header, param, query } from 'express-validator';
+import jwksClient from 'jwks-rsa';
 import { logger } from './common/powertools';
 import {
   defaultPageValueValid,
@@ -23,6 +24,7 @@ import {
   validMatchParamId,
   ApiFail, defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid,
 } from './common/request-valid';
+import { JWTAuthorizer } from './middle-ware/authorizer';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
 import { EnvironmentServ } from './service/environment';
@@ -32,6 +34,7 @@ import { ProjectServ } from './service/project';
 
 const app = express();
 const port = process.env.PORT || 8080;
+const frontend = process.env.FRONT_END;
 
 const dictionaryServ: DictionaryServ = new DictionaryServ();
 const projectServ: ProjectServ = new ProjectServ();
@@ -40,6 +43,14 @@ const pipelineServ: PipelineServ = new PipelineServ();
 const environmentServ: EnvironmentServ = new EnvironmentServ();
 const pluginServ: PluginServ = new PluginServ();
 
+const issuer = process.env.ISSUER ?? '';
+const client = jwksClient({
+  jwksUri: issuer + '/.well-known/jwks.json',
+  cache: true,
+  cacheMaxAge: 300000, //5mins
+  rateLimit: true,
+  jwksRequestsPerMinute: 10,
+});
 
 app.use(express.json());
 
@@ -56,6 +67,24 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
       });
   }
   next();
+});
+
+// Implement logger middleware function
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (frontend === 'alb') {
+    const authorization = req.get('authorization');
+    if (authorization === undefined) {
+      logger.info('missing auth token.');
+      return res.status(403).send({ auth: false, message: 'No token provided.' });
+    } else {
+      logger.info(authorization.toString());
+      const isAuthorized = await JWTAuthorizer.auth(client, issuer, authorization);
+      if (!isAuthorized) {
+        return res.status(403).send({ auth: false, message: 'Invalid token provided.' });
+      }
+    }
+  }
+  return next();
 });
 
 // healthcheck
