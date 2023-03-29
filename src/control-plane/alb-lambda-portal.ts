@@ -349,6 +349,13 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
           port: this.port.toString(),
         }),
       });
+
+      //add ingress rule to allow 80 port
+      this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'rule of allow inbound traffic from 80 port ');
+      if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
+        this.securityGroup.addIngressRule(Peer.anyIpv6(), Port.tcp(80), 'rule of allow IPv6 inbound traffic from 80 port ');
+      }
+
       addCfnNagSuppressRules(
         httpListener.node.defaultChild as CfnListener,
         [

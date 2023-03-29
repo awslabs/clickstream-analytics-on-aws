@@ -28,6 +28,11 @@ function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) 
   });
 }
 
+const commonSuppresionRulesForALBLambdaPattern = [
+  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
+  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
+];
+
 stackSuppressions([
   new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-control-plane-stack', {
     existingVpc: true,
@@ -43,10 +48,7 @@ stackSuppressions([
     useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
-]);
+], commonSuppresionRulesForALBLambdaPattern);
 
 
 stackSuppressions([
@@ -64,9 +66,7 @@ stackSuppressions([
     useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-]);
+], commonSuppresionRulesForALBLambdaPattern);
 
 const commonSuppresionRulesForCloudFrontS3Pattern = [
   { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },

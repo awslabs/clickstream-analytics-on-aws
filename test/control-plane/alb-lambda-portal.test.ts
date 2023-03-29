@@ -481,6 +481,39 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
   }); //end test case
 
+  test('security inbound rule for http redirect', () => {
+    const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
+      applicationLoadBalancerProps: {
+        internetFacing: true,
+        protocol: ApplicationProtocol.HTTPS,
+        logProps: {
+          enableAccessLog: true,
+        },
+      },
+      hasCert: true,
+    });
+    const template = Template.fromStack(testStack);
+
+    template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+      SecurityGroupIngress: [
+        {
+          CidrIp: '0.0.0.0/0',
+          Description: 'rule of allow inbound traffic from servier port ',
+          FromPort: 443,
+          IpProtocol: 'tcp',
+          ToPort: 443,
+        },
+        {
+          CidrIp: '0.0.0.0/0',
+          Description: 'rule of allow inbound traffic from 80 port ',
+          FromPort: 80,
+          IpProtocol: 'tcp',
+          ToPort: 80,
+        },
+      ],
+    });
+  }); //end test case
+
   test('Custom https port', () => {
     const testStack = TestEnv.newAlbStackWithPortalPropsAndCusdomain({
       hasCert: true,
