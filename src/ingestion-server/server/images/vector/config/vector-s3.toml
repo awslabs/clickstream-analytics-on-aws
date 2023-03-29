@@ -3,7 +3,7 @@ inputs          = ["json_parser"]
 type            = "aws_s3"
 region          = "%%AWS_REGION%%"
 bucket          = "%%AWS_S3_BUCKET%%"
-key_prefix      = "%%AWS_S3_PREFIX%%/year=%Y/month=%m/day=%d/hour=%H/"  
+key_prefix      = "%%AWS_S3_PREFIX%%year=%Y/month=%m/day=%d/hour=%H/"
 compression     = "gzip"               # compress final objects
 framing.method  = "newline_delimited"  # new line delimited...
 encoding.codec  = "json"               # ...JSON
