@@ -42,6 +42,8 @@ import {
   S3_BUCKET_NAME_PATTERN,
   PROJECT_ID_PATTERN,
   APP_ID_PATTERN,
+  PARAMETER_LABEL_OIDC_JWKS_SUFFIX,
+  OIDC_JWKS_SUFFIX_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -69,6 +71,7 @@ export interface NetworkParameters {
 export interface OIDCParameters {
   oidcProvider: CfnParameter;
   oidcClientId: CfnParameter;
+  jwksUriSuffix: CfnParameter;
   paramLabels: any[];
   paramGroups: any[];
 }
@@ -314,14 +317,26 @@ export class Parameters {
       default: PARAMETER_LABEL_OIDC_CLIENT_ID,
     };
 
+    const jwksUriSuffix = new CfnParameter(scope, id ? id + '-OIDCJwskUriSuffix' : 'OIDCJwskUriSuffix', {
+      type: 'String',
+      description: 'The jwksuri suffix, get this value from your OIDC provider, must start with /',
+      allowedPattern: OIDC_JWKS_SUFFIX_PATTERN,
+      constraintDescription: `Jwks uri suffix must match pattern ${OIDC_JWKS_SUFFIX_PATTERN}`,
+      default: '/.well-known/jwks.json',
+    });
+    labels[jwksUriSuffix.logicalId] = {
+      default: PARAMETER_LABEL_OIDC_JWKS_SUFFIX,
+    };
+
     groups.push({
       Label: { default: PARAMETER_GROUP_LABEL_OIDC },
-      Parameters: [oidcProvider.logicalId, oidcClientId.logicalId],
+      Parameters: [oidcProvider.logicalId, oidcClientId.logicalId, jwksUriSuffix.logicalId],
     });
 
     return {
       oidcProvider,
       oidcClientId,
+      jwksUriSuffix,
       paramLabels: labels,
       paramGroups: groups,
     };

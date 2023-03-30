@@ -15,16 +15,17 @@ import {
   APIGatewayAuthorizerResult,
   APIGatewayTokenAuthorizerEvent,
   APIGatewayTokenAuthorizerHandler,
+  Context,
 } from 'aws-lambda';
-import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { JWTAuthorizer } from './authorizer';
 import { logger } from '../../common/powertools';
 
-const JWKS_URI = process.env.JWKS_URI;
-const ISSUER = process.env.ISSUER;
+const issuer = process.env.ISSUER;
+const jwksUri = process.env.JWKS_URI;
 
 const client = jwksClient({
-  jwksUri: JWKS_URI!,
+  jwksUri: jwksUri!,
   cache: true,
   cacheMaxAge: 300000, //5mins
   rateLimit: true,
@@ -48,66 +49,26 @@ const denyResult: APIGatewayAuthorizerResult = {
   },
 };
 
-export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent)=> {
+export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent, context: Context)=> {
 
-  try {
-    if (event.authorizationToken === undefined
-      || (event.authorizationToken as string).indexOf('Bearer ') != 0 ) {
-
-      logger.error('authorizationToken is undefined or has invalid format');
-      return denyResult;
-    }
-
-    // Get the token from the Authorization header
-    const token = event.authorizationToken.split(' ')[1];
-    // Decode the token
-    const decodedToken = jwt.decode(token, { complete: true });
-    if (decodedToken === null) {
-      logger.error('decodedToken is null');
-      return denyResult;
-    }
-
-    // Get the kid from the header
-    const kid = decodedToken.header.kid;
-    // Retrieve the public key from the JWKS endpoint using the kid
-    const key = await new Promise<jwt.Secret>((resolve: any, reject: any) => {
-      client.getSigningKey(kid, (err: Error | null, signingKey: jwksClient.SigningKey | undefined) => {
-        if (err) {
-          logger.error('Error when get signing key: ' + err);
-          reject(err);
-        } else {
-          resolve(signingKey?.getPublicKey());
-        }
-      });
-    });
-
-    // Verify the token using the public key
-    const verifiedToken = jwt.verify(token, key, {
-      algorithms: ['RS256'],
-      issuer: ISSUER,
-    });
-    if (verifiedToken.sub === undefined) {
-      logger.error('Verify result is invalid');
-      return denyResult;
-    } else {
-      // Return a policy document that allows access to the API
-      logger.debug('token verified');
-      return {
-        principalId: verifiedToken.sub.toString(),
-        policyDocument: {
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Action: 'execute-api:Invoke',
-              Effect: 'Allow',
-              Resource: event.methodArn,
-            },
-          ],
-        },
-      };
-    }
-  } catch (error) {
-    logger.error('Token verification failed due to : ' + (error as Error).message);
+  const authResult = await JWTAuthorizer.auth(client, issuer!, event.authorizationToken);
+  if (!authResult[0]) {
+    logger.warn(`authtication failed. Request ID: ${context.awsRequestId}`);
     return denyResult;
   }
+
+  logger.info('authtication success.');
+  return {
+    principalId: authResult[1]!.toString(),
+    policyDocument: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: 'execute-api:Invoke',
+          Effect: 'Allow',
+          Resource: event.methodArn,
+        },
+      ],
+    },
+  };
 };

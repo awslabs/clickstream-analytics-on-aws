@@ -34,7 +34,7 @@ import { ProjectServ } from './service/project';
 
 const app = express();
 const port = process.env.PORT || 8080;
-const frontend = process.env.FRONT_END;
+const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
 
 const dictionaryServ: DictionaryServ = new DictionaryServ();
 const projectServ: ProjectServ = new ProjectServ();
@@ -44,8 +44,10 @@ const environmentServ: EnvironmentServ = new EnvironmentServ();
 const pluginServ: PluginServ = new PluginServ();
 
 const issuer = process.env.ISSUER ?? '';
+const jwksUri = process.env.JWKS_URI ?? '';
+
 const client = jwksClient({
-  jwksUri: issuer + '/.well-known/jwks.json',
+  jwksUri: jwksUri,
   cache: true,
   cacheMaxAge: 300000, //5mins
   rateLimit: true,
@@ -69,17 +71,17 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
   next();
 });
 
-// Implement logger middleware function
+// Implement authorization middleware function
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (frontend === 'alb') {
+  if (WITH_AUTH_MIDDLEWARE === 'true') {
     const authorization = req.get('authorization');
     if (authorization === undefined) {
-      logger.info('missing auth token.');
-      return res.status(403).send({ auth: false, message: 'No token provided.' });
+      logger.info('Missing authentication token.');
+      return res.status(401).send({ auth: false, message: 'No token provided.' });
     } else {
-      logger.info(authorization.toString());
       const isAuthorized = await JWTAuthorizer.auth(client, issuer, authorization);
       if (!isAuthorized) {
+        logger.warn(`Authentication failed. Request ID:${header('X-Click-Stream-Request-Id')}`);
         return res.status(403).send({ auth: false, message: 'Invalid token provided.' });
       }
     }

@@ -68,9 +68,6 @@ export class SolutionCognito extends Construct {
     const userPoolClient = new UserPoolClient(scope, 'clickstream-backend-client', {
       userPool: userPool,
       preventUserExistenceErrors: true,
-      authFlows: {
-        userPassword: true,
-      },
       oAuth: {
         flows: {
           authorizationCodeGrant: true,

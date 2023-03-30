@@ -299,10 +299,6 @@ describe('CloudFrontS3PotalStack', () => {
         'email',
         'profile',
       ],
-      ExplicitAuthFlows: [
-        'ALLOW_USER_PASSWORD_AUTH',
-        'ALLOW_REFRESH_TOKEN_AUTH',
-      ],
       SupportedIdentityProviders: [
         'COGNITO',
       ],
@@ -597,7 +593,6 @@ describe('CloudFrontS3PotalStack', () => {
       ],
       Environment: {
         Variables: {
-          JWKS_URI: Match.anyValue(),
           ISSUER: Match.anyValue(),
         },
       },
@@ -674,10 +669,6 @@ describe('CloudFrontS3PotalStack', () => {
         'openid',
         'email',
         'profile',
-      ],
-      ExplicitAuthFlows: [
-        'ALLOW_USER_PASSWORD_AUTH',
-        'ALLOW_REFRESH_TOKEN_AUTH',
       ],
       SupportedIdentityProviders: [
         'COGNITO',

@@ -23,6 +23,8 @@ const commonDeps = [
   'uuid@^9.0.0',
   '@types/aws-lambda@^8.10.110',
   '@aws-lambda-powertools/logger@^1.5.1',
+  'jsonwebtoken@^9.0.0',
+  'jwks-rsa@^3.0.1',
 ];
 
 const commonDevDeps = [
@@ -105,8 +107,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDeps,
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.11',
-    'jsonwebtoken@^9.0.0',
-    'jwks-rsa@^3.0.1',
     'jsonpath-plus@^7.2.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
@@ -477,7 +477,7 @@ gitlabMain.createNestedTemplates({
               path: './src/data-pipeline/spark-etl/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml',
             },
           },
-        }
+        },
         // coverage: '/    - Instruction Coverage: ([0-9.]+)%/',
       },
     },

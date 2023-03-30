@@ -122,3 +122,6 @@ export const ALBLogServiceAccountMapping = {
     },
   },
 };
+
+export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX = 'OpenID Connector Jwks Uri Suffix';
+export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';

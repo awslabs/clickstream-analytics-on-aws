@@ -583,10 +583,6 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
         'email',
         'profile',
       ],
-      ExplicitAuthFlows: [
-        'ALLOW_USER_PASSWORD_AUTH',
-        'ALLOW_REFRESH_TOKEN_AUTH',
-      ],
       SupportedIdentityProviders: [
         'COGNITO',
       ],

@@ -161,6 +161,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
     let issuer: string;
     let clientId: string;
+    let jwksUriSuffix: string;
     /**
      * Create Cognito user pool and client for backend api,
      * The client of Congito requires the redirect url using HTTPS
@@ -183,11 +184,13 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
       issuer = cognito.oidcProps.issuer;
       clientId = cognito.oidcProps.appClientId;
+      jwksUriSuffix = '/.well-known/jwks.json';
 
     } else {
       const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
       issuer = oidcParameters.oidcProvider.valueAsString;
       clientId = oidcParameters.oidcClientId.valueAsString;
+      jwksUriSuffix = oidcParameters.jwksUriSuffix.valueAsString;
     }
 
     this.templateOptions.metadata = {
@@ -210,6 +213,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
       authProps: {
         issuer: issuer,
+        jwksUri: Fn.join('', [issuer, jwksUriSuffix]),
       },
       stackWorkflowS3Bucket: solutionBucket.bucket,
     });
