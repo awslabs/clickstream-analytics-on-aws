@@ -103,17 +103,13 @@ export class EnvironmentServ {
           const check = this.checkPolicy(
             policyStr,
             { key: 'AWS', value: `arn:${partition}:iam::${accountId}:root` },
-            `arn:${partition}:s3:::${bucket}/*`) &&
-            this.checkPolicy(
-              policyStr,
-              { key: 'Service', value: 'logdelivery.elasticloadbalancing.amazonaws.com' },
-              `arn:${partition}:s3:::${bucket}/*`);
+            `arn:${partition}:s3:::${bucket}/clickstream/*`);
           return res.json(new ApiSuccess({ check: check }));
         } else {
           const check = this.checkPolicy(
             policyStr,
             { key: 'Service', value: 'logdelivery.elasticloadbalancing.amazonaws.com' },
-            `arn:${partition}:s3:::${bucket}/*`);
+            `arn:${partition}:s3:::${bucket}/clickstream/*`);
           return res.json(new ApiSuccess({ check: check }));
         }
       }
