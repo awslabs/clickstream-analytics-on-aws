@@ -11,7 +11,15 @@
  *  and limitations under the License.
  */
 
-import { S3Client, ListBucketsCommand, GetBucketLocationCommand, GetBucketLocationCommandOutput, Bucket, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  ListBucketsCommand,
+  GetBucketLocationCommand,
+  GetBucketLocationCommandOutput,
+  Bucket,
+  GetObjectCommand,
+  GetBucketPolicyCommand,
+} from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
 
 const promisePool = pLimit(50);
@@ -76,3 +84,12 @@ export async function getS3Object(region: string, bucket: string, key: string): 
     return undefined;
   }
 }
+
+export const getS3BucketPolicy = async (bucket: string) => {
+  const s3Client = new S3Client({});
+  const params: GetBucketPolicyCommand = new GetBucketPolicyCommand({
+    Bucket: bucket,
+  });
+  const result = await s3Client.send(params);
+  return result.Policy;
+};

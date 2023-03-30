@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ALBLogServiceAccountMapping } from '../common/constants-ln';
 import { ApiSuccess } from '../common/request-valid';
 import { listRegions } from '../store/aws/account';
 import { ListCertificates } from '../store/aws/acm';
@@ -21,8 +22,38 @@ import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
 import { describeRedshiftClusters } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
-import { listBuckets } from '../store/aws/s3';
+import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
 
+export interface Policy {
+  readonly Version: string;
+  readonly Statement: PolicyStatement[];
+}
+
+export interface PolicyStatement {
+  readonly Sid?: string;
+  readonly Effect?: string;
+  readonly Action?: string | string[];
+  readonly Principal?: {
+    [name: string]: any;
+  };
+  readonly Resource?: string | string[];
+  readonly Condition?: any;
+}
+
+interface ALBRegionMappingObject {
+  [key: string]: {
+    account: string;
+  };
+}
+
+function getRegionAccount(map: ALBRegionMappingObject, region: string) {
+  for (let key in map) {
+    if (key === region) {
+      return map[key].account;
+    }
+  }
+  return undefined;
+}
 
 export class EnvironmentServ {
 
@@ -57,6 +88,36 @@ export class EnvironmentServ {
       const { region } = req.query;
       const result = await listBuckets(region);
       return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async checkALBLogPolicy(req: any, res: any, next: any) {
+    try {
+      const { region, bucket } = req.query;
+      const policyStr = await getS3BucketPolicy(bucket);
+      const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
+      if (policyStr) {
+        const accountId = getRegionAccount(ALBLogServiceAccountMapping.mapping, region);
+        if (accountId) {
+          const check = this.checkPolicy(
+            policyStr,
+            { key: 'AWS', value: `arn:${partition}:iam::${accountId}:root` },
+            `arn:${partition}:s3:::${bucket}/*`) &&
+            this.checkPolicy(
+              policyStr,
+              { key: 'Service', value: 'logdelivery.elasticloadbalancing.amazonaws.com' },
+              `arn:${partition}:s3:::${bucket}/*`);
+          return res.json(new ApiSuccess({ check: check }));
+        } else {
+          const check = this.checkPolicy(
+            policyStr,
+            { key: 'Service', value: 'logdelivery.elasticloadbalancing.amazonaws.com' },
+            `arn:${partition}:s3:::${bucket}/*`);
+          return res.json(new ApiSuccess({ check: check }));
+        }
+      }
+      return res.json(new ApiSuccess({ check: false }));
     } catch (error) {
       next(error);
     }
@@ -148,6 +209,36 @@ export class EnvironmentServ {
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
+    }
+  }
+
+  checkPolicy(policyStr: string, principal: {key: string; value: string}, resource: string): boolean {
+    try {
+      const policy = JSON.parse(policyStr) as Policy;
+      let match: boolean = false;
+      for (let statement of policy.Statement as PolicyStatement[]) {
+        if (statement.Effect === 'Allow' && statement.Principal && statement.Resource) {
+          if (
+            (typeof statement.Principal[principal.key] === 'string' &&
+            statement.Principal[principal.key] === principal.value) ||
+            (Array.prototype.isPrototypeOf(statement.Principal[principal.key]) &&
+              (statement.Principal[principal.key] as string[]).indexOf(principal.value) > -1)
+          ) {
+            if (
+              (typeof statement.Resource === 'string' &&
+                statement.Resource === resource) ||
+              (Array.prototype.isPrototypeOf(statement.Resource) &&
+                (statement.Resource as string[]).indexOf(resource) > -1)
+            ) {
+              // find resource
+              match = true;
+            }
+          }
+        }
+      }
+      return match;
+    } catch (error) {
+      return false;
     }
   }
 }

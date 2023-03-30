@@ -125,6 +125,12 @@ app.get(
   });
 
 app.get(
+  '/api/env/s3/checkalblogpolicy',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.checkALBLogPolicy(req, res, next);
+  });
+
+app.get(
   '/api/env/msk/clusters',
   validate([
     query('vpcId').custom(isValidEmpty),

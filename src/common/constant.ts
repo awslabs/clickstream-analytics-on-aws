@@ -40,3 +40,85 @@ export const OIDC_ISSUER_PATTERN = '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
 export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
+
+
+/**
+ * check mapping from doc https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
+ */
+
+export const ALBLogServiceAccountMapping = {
+  mapping: {
+    'me-south-1': {
+      account: '076674570225',
+    },
+    'eu-south-1': {
+      account: '635631232127',
+    },
+    'ap-northeast-1': {
+      account: '582318560864',
+    },
+    'ap-northeast-2': {
+      account: '600734575887',
+    },
+    'ap-northeast-3': {
+      account: '383597477331',
+    },
+    'ap-south-1': {
+      account: '718504428378',
+    },
+    'ap-southeast-1': {
+      account: '114774131450',
+    },
+    'ap-southeast-2': {
+      account: '783225319266',
+    },
+    'ca-central-1': {
+      account: '985666609251',
+    },
+    'eu-central-1': {
+      account: '054676820928',
+    },
+    'eu-north-1': {
+      account: '897822967062',
+    },
+    'eu-west-1': {
+      account: '156460612806',
+    },
+    'eu-west-2': {
+      account: '652711504416',
+    },
+    'eu-west-3': {
+      account: '009996457667',
+    },
+    'sa-east-1': {
+      account: '507241528517',
+    },
+    'us-east-1': {
+      account: '127311923021',
+    },
+    'us-east-2': {
+      account: '033677994240',
+    },
+    'us-west-1': {
+      account: '027434742980',
+    },
+    'us-west-2': {
+      account: '797873946194',
+    },
+    'ap-east-1': {
+      account: '754344448648',
+    },
+    'af-south-1': {
+      account: '098369216593',
+    },
+    'ap-southeast-3': {
+      account: '589379963580',
+    },
+    'cn-north-1': {
+      account: '638102146993',
+    },
+    'cn-northwest-1': {
+      account: '037604701340',
+    },
+  },
+};
