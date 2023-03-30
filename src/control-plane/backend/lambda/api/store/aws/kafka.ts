@@ -95,7 +95,8 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
 
   for (let nodeInfo of records as NodeInfo[]) {
     if (nodeInfo.BrokerNodeInfo !== undefined && nodeInfo.BrokerNodeInfo.Endpoints !== undefined) {
-      nodeEndpoints.push(nodeInfo.BrokerNodeInfo.Endpoints?.join(','));
+      const endpoints = nodeInfo.BrokerNodeInfo.Endpoints.map(e => `${e}:9092`);
+      nodeEndpoints.push(endpoints.join(','));
     }
   }
   return nodeEndpoints;
