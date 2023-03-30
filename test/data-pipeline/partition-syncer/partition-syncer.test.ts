@@ -75,9 +75,10 @@ const glueClientMock = mockClient(GlueClient);
 const s3ClientMock = mockClient(S3Client);
 
 process.env.SOURCE_S3_BUCKET_NAME = 'bucket1';
-process.env.SOURCE_S3_PREFIX = 'prefix1';
+process.env.SOURCE_S3_PREFIX = 'prefix1/';
 process.env.SINK_S3_BUCKET_NAME = 'bucket2';
-process.env.SINK_S3_PREFIX = 'prefix2 ';
+process.env.SINK_S3_PREFIX = 'prefix2/';
+process.env.PROJECT_ID = 'test_proj_id';
 process.env.DATABASE_NAME = 'database1';
 process.env.SOURCE_TABLE_NAME = 'table1';
 process.env.SINK_TABLE_NAME = 'table2';
@@ -97,6 +98,13 @@ describe('Glue catalog add partition test', () => {
       schedulerEvent as EventBridgeEvent<'Scheduled Event', any>,
       c,
     );
+    s3ClientMock.on(PutObjectCommand).callsFake(input => {
+      expect(
+        (input.Key.startsWith('prefix1/year=') && input.Bucket == 'bucket1') ||
+        (input.Key.startsWith('prefix2/test_proj_id/table2/partition_app=') && input.Bucket == 'bucket2'),
+      ).toBeTruthy();
+    });
+
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 1);

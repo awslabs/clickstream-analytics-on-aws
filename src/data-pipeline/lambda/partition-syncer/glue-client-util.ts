@@ -56,7 +56,7 @@ export class GlueClientUtil {
     const s3ObjUri = `${p.StorageDescriptor.Location}_.json`;
     const s3Url = new URL(s3ObjUri);
     const bucket = s3Url.hostname;
-    const key = s3Url.pathname;
+    const key = s3Url.pathname.substring(1);
     await putStringToS3('', bucket, key);
   }
 
