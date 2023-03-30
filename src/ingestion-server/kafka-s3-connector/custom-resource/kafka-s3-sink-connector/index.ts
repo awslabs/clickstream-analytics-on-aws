@@ -73,6 +73,7 @@ interface ResourcePropertiesType {
   flushSize: string;
   rotateIntervalMS: string;
   customConnectorConfiguration: string;
+  stackShortId: string;
 }
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -119,13 +120,13 @@ async function _handler(event: ResourceEvent, context: Context) {
 function getResourceName(event: ResourceEvent) {
   //event.StackId="arn:aws:cloudformation:us-east-1:111122223333:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299";
   const props = event.ResourceProperties as ResourcePropertiesType;
-  const stackShortId = event.StackId.split('/')[2].split('-')[4];
+  const stackShortId = props.stackShortId;
   const stackName = event.StackId.split('/')[1];
   const uid = `${stackName}-${stackShortId}`;
   const logicalResourceId = event.LogicalResourceId;
   const resourceSuffix = `${logicalResourceId}${stackShortId}`;
-  const connectorName = `${stackName}-Connector-${resourceSuffix}`;
-  const pluginName = `${stackName}-Plugin-${resourceSuffix}`;
+  const connectorName = `${stackShortId}-Connector-${resourceSuffix}`;
+  const pluginName = `${stackShortId}-Plugin-${resourceSuffix}`;
   const awsPartition = event.StackId.split(':')[1];
   const pluginUrl = props.pluginUrl;
   const fileName = path.basename(pluginUrl);

@@ -49,6 +49,7 @@ const event = {
     rotateIntervalMS: '60000',
     customConnectorConfiguration: '{"max.task": "8"}',
     flushSize: '100',
+    stackShortId: '54bce910',
   },
 };
 const c: Context = {
@@ -83,7 +84,7 @@ const KafkaConnectClientMock = {
         {
           customPluginArn: 'arn:aws:test-plugin',
           customPluginState: 'ACTIVE',
-          name: 'test-Plugin-create-test-custom-resource1212426f2299',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
         },
       ],
       connectors: [
@@ -292,7 +293,7 @@ test('Delete s3 sink plugin not found - success', async () => {
         {
           customPluginArn: 'arn:aws:test-plugin',
           customPluginState: 'ACTIVE',
-          name: 'test-Plugin-create-test-custom-resource1212426f2299',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
         },
       ],
     };
@@ -325,7 +326,7 @@ test('Delete s3 sink describe plugin error - error', async () => {
         {
           customPluginArn: 'arn:aws:test-plugin',
           customPluginState: 'ACTIVE',
-          name: 'test-Plugin-create-test-custom-resource1212426f2299',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
         },
       ],
     };
@@ -358,7 +359,7 @@ test('Delete s3 sink connector not found - success', async () => {
         {
           customPluginArn: 'arn:aws:test-plugin',
           customPluginState: 'ACTIVE',
-          name: 'test-Plugin-create-test-custom-resource1212426f2299',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
         },
       ],
     };

@@ -11,17 +11,18 @@
  *  and limitations under the License.
  */
 
-import { Aws, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
+import { Aws, Arn, ArnFormat, Stack, Fn } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { getShortIdOfStack } from '../../common/stack';
 
 export function createRoleForS3SinkConnectorCustomResourceLambda(
   scope: Construct,
   props: { logS3BucketName: string; pluginS3BucketName: string; connectorRole: IRole },
 ) {
-  const stackName = Stack.of(scope).stackName;
-  const connectorName = `${stackName}-Connector-*`;
-  const pluginName = `${stackName}-Plugin-*`;
+  const stackShortId = getShortIdOfStack(Stack.of(scope));
+  const connectorName = Fn.join('-', [stackShortId, 'Connector-*']);
+  const pluginName = Fn.join('-', [stackShortId, 'Plugin-*']);
 
   const role = new Role(scope, 'S3SinkConnectorCustomResourceLambdaRole', {
     assumedBy: new ServicePrincipal('lambda.amazonaws.com'),

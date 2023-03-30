@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { CfnResource, CustomResource, Duration, Resource } from 'aws-cdk-lib';
+import { CfnResource, CustomResource, Duration, Resource, Stack } from 'aws-cdk-lib';
 import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -24,6 +24,7 @@ import { Construct } from 'constructs';
 import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { getShortIdOfStack } from '../../common/stack';
 
 export interface S3SinkConnectorCustomResourceProps {
   readonly subnetIds: String;
@@ -65,6 +66,7 @@ export function createS3SinkConnectorCustomResource(
       logRetention: RetentionDays.FIVE_DAYS,
     },
   );
+  const stackShortId = getShortIdOfStack(Stack.of(scope));
   const cr = new CustomResource(scope, 's3SinkConnectorCustomResource', {
     serviceToken: provider.serviceToken,
     properties: {
@@ -87,6 +89,7 @@ export function createS3SinkConnectorCustomResource(
       rotateIntervalMS: props.rotateIntervalMS,
       customConnectorConfiguration: props.customConnectorConfiguration,
       flushSize: props.flushSize,
+      stackShortId: stackShortId,
     },
   });
 
