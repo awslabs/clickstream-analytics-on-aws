@@ -65,30 +65,35 @@ export function createStackParameters(scope: Construct) {
     type: 'String',
   });
 
-  const entryPointJarParam = new CfnParameter(scope, 'EntryPointJar', {
-    description: 'The entry point jar file for spark job',
-    allowedPattern: `^s3://${S3_BUCKET_NAME_PATTERN}/.*.jar$`,
-    type: 'String',
-  });
 
   const transformerAndEnrichClassNamesParam = new CfnParameter(scope, 'TransformerAndEnrichClassNames', {
     description: 'The class name list of custom plugins to transform or enrich data',
-    default: 'com.amazonaws.solution.clickstream.Transformer,com.amazonaws.solution.clickstream.UAEnrichment,com.amazonaws.solution.clickstream.IPEnrichment',
-    type: 'CommaDelimitedList',
+    default: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+    type: 'String',
   });
 
   const s3PathPluginJarsParam = new CfnParameter(scope, 'S3PathPluginJars', {
     description: 'The java jars of custom plugins to transform or enrich data',
     default: '',
-    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/.*.jar)?$`,
-    type: 'CommaDelimitedList',
+    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?)?$`,
+    type: 'String',
   });
 
   const s3PathPluginFilesParam = new CfnParameter(scope, 'S3PathPluginFiles', {
     description: 'The files of custom plugins to transform or enrich data',
     default: '',
-    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/.*)?$`,
-    type: 'CommaDelimitedList',
+    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?)?$`,
+    type: 'String',
+  });
+
+  const outputFormatParam = new CfnParameter(scope, 'OutputFormat', {
+    description: 'Output format',
+    default: 'parquet',
+    allowedValues: [
+      'parquet',
+      'json',
+    ],
+    type: 'String',
   });
 
   const metadata = {
@@ -136,10 +141,10 @@ export function createStackParameters(scope: Construct) {
         {
           Label: { default: 'Transformation and enrichment assets' },
           Parameters: [
-            entryPointJarParam.logicalId,
             transformerAndEnrichClassNamesParam.logicalId,
             s3PathPluginJarsParam.logicalId,
             s3PathPluginFilesParam.logicalId,
+            outputFormatParam.logicalId,
           ],
         },
       ],
@@ -186,10 +191,6 @@ export function createStackParameters(scope: Construct) {
           default: 'Job schedule expression',
         },
 
-        [entryPointJarParam.logicalId]: {
-          default: 'Entry point jar',
-        },
-
         [transformerAndEnrichClassNamesParam.logicalId]: {
           default: 'Class name list for plugins',
         },
@@ -200,6 +201,10 @@ export function createStackParameters(scope: Construct) {
 
         [s3PathPluginFilesParam.logicalId]: {
           default: 'Plugin files',
+        },
+
+        [outputFormatParam.logicalId]: {
+          default: 'Output Format',
         },
       },
     },
@@ -223,7 +228,7 @@ export function createStackParameters(scope: Construct) {
       transformerAndEnrichClassNamesParam,
       s3PathPluginJarsParam,
       s3PathPluginFilesParam,
-      entryPointJarParam,
+      outputFormatParam,
     },
   };
 }

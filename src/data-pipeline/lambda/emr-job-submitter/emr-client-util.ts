@@ -19,6 +19,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
+import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 
 const emrClient = new EMRServerlessClient({});
 
@@ -66,35 +67,41 @@ export class EMRServerlessUtil {
       config,
     );
 
+    const sinkPrefix = getSinkTableLocationPrefix(config.sinkS3Prefix, config.projectId, config.sinkTableName);
+
+    const corruptedRecordsDir = `corrupted_records/${(new Date()).toISOString().split('T')[0]}/${startTimestamp}-${endTimestamp}`;
+
     const entryPointArguments = [
       config.databaseName, // [0] glue catalog database.
       config.sourceTableName, // [1] glue catalog source table name.
       `${startTimestamp}`, // [2] start timestamp of event.
       `${endTimestamp}`, // [3] end timestamp of event.
-      `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}`, // [4] job data path
+      `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}${config.projectId}/${corruptedRecordsDir}`, // [4] job data path to save corrupted_records
       config.transformerAndEnrichClassNames, // [5] transformer class names with comma-separated
-      `s3://${config.sinkBucketName}/${config.sinkS3Prefix}`, // [6] output path.
+      `s3://${config.sinkBucketName}/${sinkPrefix}`, // [6] output path.
       config.projectId, // [7] projectId
       config.appIds, // [8] app_ids
-      `${config.dataFreshnessInHour}`, // [9] dataFreshnessInHour
+      `${config.dataFreshnessInHour}`, // [9] dataFreshnessInHour,
+      config.outputFormat, // [10] outputFormat
     ];
 
     const jars = Array.from(
       new Set([
         config.entryPointJar,
-        ...(config.s3PathPluginJars as string).split(','),
+        ...(config.s3PathPluginJars as string).split(',').filter(s => s.length > 0),
       ]),
     ).join(',');
 
     const sparkSubmitParameters = [
       '--class',
-      'com.amazonaws.solution.clickstream.App',
+      'sofeware.aws.solution.clickstream.DataProcessor',
       '--jars',
       jars,
     ];
 
     if (config.s3PathPluginFiles) {
-      sparkSubmitParameters.push('--files', config.s3PathPluginFiles);
+      const filesSet = new Set((config.s3PathPluginFiles as string).split(',').filter(s => s.length > 0));
+      sparkSubmitParameters.push('--files', Array.from(filesSet).join(','));
     }
 
     // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/metastore-config.html
@@ -119,7 +126,7 @@ export class EMRServerlessUtil {
       configurationOverrides: {
         monitoringConfiguration: {
           s3MonitoringConfiguration: {
-            logUri: `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}/pipeline-logs/${config.projectId}/`,
+            logUri: `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}pipeline-logs/${config.projectId}/`,
           },
         },
       },
@@ -186,11 +193,13 @@ export class EMRServerlessUtil {
       s3PathPluginJars: process.env.S3_PATH_PLUGIN_JARS!,
       s3PathPluginFiles: process.env.S3_PATH_PLUGIN_FILES!,
       entryPointJar: process.env.S3_PATH_ENTRY_POINT_JAR!,
+      outputFormat: process.env.OUTPUT_FORMAT!,
+      sinkTableName: process.env.SINK_TABLE_NAME!,
     };
   }
 
   private static getJobInfoKey(config: any, jobId: string) {
-    return `${config.pipelineS3Prefix}/job-info/${config.stackId}/${config.projectId}/job-${jobId}.json`;
+    return `${config.pipelineS3Prefix}job-info/${config.stackId}/${config.projectId}/job-${jobId}.json`;
   }
 
   /**
@@ -199,7 +208,7 @@ export class EMRServerlessUtil {
    *
    * 1. try to get startTimestamp, endTimestamp from event.
    * 2. otherwise, get previous timestamps from s3://bucket/prefix/job-info/stackId/projectId/job-latest.json, and set this.startTimestamp = prev.endTimestamp.
-   * 3. otherwise, set startTimestamp to 5 days ago, and endTimestamp to now
+   * 3. otherwise, set startTimestamp to start of today, and endTimestamp to now
    *
    * @param event
    * @param config
@@ -207,8 +216,9 @@ export class EMRServerlessUtil {
    */
   private static async getJobTimestamps(event: any, config: any) {
     logger.info('getJobTimestamps enter');
-    let startTimestamp = (new Date().getTime() - 5 * 24 * 3600) * 1000; // 5 day before
-    let endTimestamp = new Date().getTime() * 1000;
+    let now = new Date();
+    let startTimestamp = (new Date(now.toDateString())).getTime();
+    let endTimestamp = now.getTime();
     if (event.startTimestamp) {
       startTimestamp = getTimestampFromEvent(event.startTimestamp);
     } else {
@@ -247,8 +257,8 @@ function getTimestampFromEvent(inputTimestamp: string|number): number {
     return inputTimestamp;
   }
 
-  if ((inputTimestamp as string).match(/^\d\d\d\d\-\d\d\-\d\dT\d\d:\d\d:\d\d\.\d+Z$/)) {
-    return new Date(inputTimestamp).getTime() * 1000;
+  if ((inputTimestamp as string).match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z$/)) {
+    return new Date(inputTimestamp).getTime();
   }
 
   if ((inputTimestamp as string).match(/^\d+$/)) {

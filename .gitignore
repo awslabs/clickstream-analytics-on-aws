@@ -36,9 +36,16 @@ cdk.context.json
 .DS_Store
 docs/site/
 frontend/amplify
-test-deploy*.sh
+test-deploy*
 deployment/global-s3-assets/
 .viperlightrc
+*.iml
+*.ipr
+*.iws
+src/data-pipeline/spark-etl/.gradle
+src/data-pipeline/spark-etl/build
+src/data-pipeline/spark-etl/bin
+src/data-pipeline/spark-etl/?/
 !/.projenrc.js
 /test-reports/
 junit.xml
@@ -67,5 +74,6 @@ junit.xml
 !/.gitlab/ci-templates/semgrep.yml
 !/.gitlab/ci-templates/license-check.yml
 !/.gitlab/ci-templates/viperlight.yml
+!/.gitlab/ci-templates/data-pipeline-spark-etl.yml
 !/.gitlab/ci-templates/cfn-nag.yml
 !/.gitlab/ci-templates/cfn-lint.yml

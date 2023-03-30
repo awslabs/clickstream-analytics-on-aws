@@ -104,14 +104,13 @@ export class GlueUtil {
         name: 'compression',
         type: Schema.STRING,
       }, {
-        name: 'timestamp',
-        type: Schema.STRING,
+        name: 'ingest_time',
+        type: Schema.BIG_INT,
       }],
       compressed: false,
       dataFormat: DataFormat.JSON,
-      enablePartitionFiltering: true,
       bucket: s3.Bucket.fromBucketName(this.scope, 'SourceBucket', this.props.sourceS3Bucket.bucketName),
-      s3Prefix: `${this.props.sourceS3Prefix}/`,
+      s3Prefix: `${this.props.sourceS3Prefix}`,
     });
   }
 
@@ -121,7 +120,7 @@ export class GlueUtil {
       description: 'ClickStream data pipeline sink table',
       tableName,
       partitionKeys: [{
-        name: 'app_id',
+        name: 'partition_app',
         comment: 'Partition (0)',
         type: Schema.STRING,
       }, {
@@ -247,7 +246,7 @@ export class GlueUtil {
                   },
                   {
                     name: 'int_value',
-                    type: Schema.BIG_INT,
+                    type: Schema.STRING,
                   },
                   {
                     name: 'string_value',
@@ -299,7 +298,7 @@ export class GlueUtil {
                   },
                   {
                     name: 'int_value',
-                    type: Schema.BIG_INT,
+                    type: Schema.STRING,
                   },
                   {
                     name: 'string_value',
@@ -380,7 +379,7 @@ export class GlueUtil {
                   },
                   {
                     name: 'int_value',
-                    type: Schema.BIG_INT,
+                    type: Schema.STRING,
                   },
                   {
                     name: 'string_value',
@@ -466,11 +465,7 @@ export class GlueUtil {
                   },
                   {
                     name: 'int_value',
-                    type: Schema.BIG_INT,
-                  },
-                  {
-                    name: 'set_timestamp_micros',
-                    type: Schema.BIG_INT,
+                    type: Schema.STRING,
                   },
                   {
                     name: 'string_value',
@@ -488,7 +483,6 @@ export class GlueUtil {
       ],
       compressed: false,
       dataFormat: DataFormat.PARQUET,
-      enablePartitionFiltering: true,
 
       bucket: s3.Bucket.fromBucketName(this.scope, 'SinkBucket', this.props.sinkS3Bucket.bucketName),
       s3Prefix: getSinkTableLocationPrefix(this.props.sinkS3Prefix, projectId, tableName),

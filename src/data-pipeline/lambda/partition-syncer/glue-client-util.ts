@@ -18,6 +18,7 @@ import {
   GlueClient,
   PartitionInput,
 } from '@aws-sdk/client-glue';
+import { putStringToS3 } from '../../../common/s3';
 import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 
 export class GlueClientUtil {
@@ -42,6 +43,21 @@ export class GlueClientUtil {
     };
     const batchCreatePartitionCommand = new BatchCreatePartitionCommand(params);
     await this.client.send(batchCreatePartitionCommand);
+
+    for (const p of partitions) {
+      await this.writeEmptyFileForPartition(p);
+    }
+  }
+
+  private async writeEmptyFileForPartition(p: PartitionInput) {
+    if (!p.StorageDescriptor) {
+      throw new Error('empty StorageDescriptor');
+    }
+    const s3ObjUri = `${p.StorageDescriptor.Location}_.json`;
+    const s3Url = new URL(s3ObjUri);
+    const bucket = s3Url.hostname;
+    const key = s3Url.pathname;
+    await putStringToS3('', bucket, key);
   }
 
   public generateHourlyPartitionsOfDay(s3Bucket: string, s3Prefix: string, date: Date): PartitionInput[] {
@@ -61,7 +77,7 @@ export class GlueClientUtil {
           hour,
         ],
         StorageDescriptor: {
-          Location: `s3://${s3Bucket}/${s3Prefix}/year=${year}/month=${month}/day=${day}/hour=${hour}/`,
+          Location: `s3://${s3Bucket}/${s3Prefix}year=${year}/month=${month}/day=${day}/hour=${hour}/`,
           InputFormat: 'org.apache.hadoop.mapred.TextInputFormat',
           OutputFormat: 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat',
           Compressed: false,
@@ -111,7 +127,7 @@ export class GlueClientUtil {
           day,
         ],
         StorageDescriptor: {
-          Location: `s3://${s3Bucket}/${locationPrefix}/` +
+          Location: `s3://${s3Bucket}/${locationPrefix}` +
           `partition_app=${appId}/partition_year=${year}/partition_month=${month}/partition_day=${day}/`,
 
           InputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',

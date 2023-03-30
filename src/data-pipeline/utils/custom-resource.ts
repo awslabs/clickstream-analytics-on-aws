@@ -13,7 +13,7 @@
 
 
 import { join } from 'path';
-import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Stack, Fn } from 'aws-cdk-lib';
+import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -32,17 +32,22 @@ export interface CopyAssetsCustomResourceProps {
   readonly pipelineS3Bucket: IBucket;
   readonly pipelineS3Prefix: string;
   readonly projectId: string;
-
   readonly s3PathPluginJars: string;
-  readonly s3PathPluginFiles: string;
-  readonly entryPointJar: string;
+  readonly s3PathPluginFiles?: string;
 }
 
 export function createCopyAssetsCustomResource(
   scope: Construct,
   props: CopyAssetsCustomResourceProps,
 ): CustomResource {
-  const fn = createCopyAssetsLambda(scope, props);
+
+  const customPluginSourceBucketName = Fn.select(2, Fn.split('/', props.s3PathPluginJars));
+
+  const fn = createCopyAssetsLambda(scope,
+    {
+      ...props,
+      customPluginSourceBucketName,
+    });
 
   const provider = new Provider(
     scope,
@@ -57,7 +62,6 @@ export function createCopyAssetsCustomResource(
     properties: {
       s3PathPluginJars: props.s3PathPluginJars,
       s3PathPluginFiles: props.s3PathPluginFiles,
-      entryPointJar: props.entryPointJar,
     },
   });
 
@@ -70,13 +74,13 @@ function createCopyAssetsLambda(
     projectId: string;
     pipelineS3Bucket: IBucket;
     pipelineS3Prefix: string;
-    entryPointJar: string;
+    customPluginSourceBucketName: string;
   },
 ): NodejsFunction {
 
   const copySourceS3Arn = Arn.format(
     {
-      resource: Fn.select(2, Fn.split('/', props.entryPointJar)),
+      resource: props.customPluginSourceBucketName,
       region: '',
       account: '',
       service: 's3',

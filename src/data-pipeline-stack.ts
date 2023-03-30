@@ -11,26 +11,29 @@
  *  and limitations under the License.
  */
 
-import { Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnCondition, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import {
+  addCfnNagForBucketDeployment,
   addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
-import { DataPipelineConstruct } from './data-pipeline/data-pipeline';
+import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
 
 export interface ETLStackProps extends StackProps {
 }
 
 export class DataPipelineStack extends Stack {
+  public nestedStacks: NestedStack[] = [];
+
   constructor(scope: Construct, id: string, props: ETLStackProps = {}) {
     super(scope, id, props);
 
-    const featureName = 'DataPipeline ' + id;
+    const featureName = 'DataPipeline';
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
     const {
@@ -50,11 +53,34 @@ export class DataPipelineStack extends Stack {
         transformerAndEnrichClassNamesParam,
         s3PathPluginJarsParam,
         s3PathPluginFilesParam,
-        entryPointJarParam,
+        outputFormatParam,
       },
     } = createStackParameters(this);
 
     this.templateOptions.metadata = metadata;
+
+    // CfnCondition without custom plugins
+    const withoutCustomPluginsCondition = new CfnCondition(
+      this,
+      'withoutCustomPluginsCondition',
+      {
+        expression:
+          Fn.conditionEquals( s3PathPluginJarsParam.valueAsString, ''),
+
+      },
+    );
+
+    // CfnCondition with custom plugins
+    const withCustomPluginsCondition = new CfnCondition(
+      this,
+      'withCustomPluginsCondition',
+      {
+        expression:
+        Fn.conditionNot(
+          withoutCustomPluginsCondition,
+        ),
+      },
+    );
 
     // Vpc
     const vpc = Vpc.fromVpcAttributes(this, 'from-vpc-for-data-pipeline', {
@@ -86,7 +112,7 @@ export class DataPipelineStack extends Stack {
       pipelineS3BucketParam.valueAsString,
     );
 
-    new DataPipelineConstruct(this, 'DataPipeline', {
+    const dataPipelineStackWithCustomPlugins = new DataPipelineNestedStack(this, 'DataPipelineWithCustomPlugins', {
       vpc: vpc,
       vpcSubnets: subnetSelection,
       projectId: projectIdParam.valueAsString,
@@ -98,11 +124,49 @@ export class DataPipelineStack extends Stack {
       pipelineS3Bucket,
       pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
       dataFreshnessInHour: dataFreshnessInHourParam.valueAsString,
-      transformerAndEnrichClassNames: Fn.join(',', transformerAndEnrichClassNamesParam.valueAsList),
-      entryPointJar: entryPointJarParam.valueAsString,
-      s3PathPluginJars: Fn.join(',', s3PathPluginJarsParam.valueAsList),
-      s3PathPluginFiles: Fn.join(',', s3PathPluginFilesParam.valueAsList),
       scheduleExpression: scheduleExpressionParam.valueAsString,
+      transformerAndEnrichClassNames: transformerAndEnrichClassNamesParam.valueAsString,
+      s3PathPluginJars: s3PathPluginJarsParam.valueAsString,
+      s3PathPluginFiles: s3PathPluginFilesParam.valueAsString,
+      outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
+    });
+
+    (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
+    this.nestedStacks.push(dataPipelineStackWithCustomPlugins);
+
+    const dataPipelineStackWithoutCustomPlugins = new DataPipelineNestedStack(this, 'DataPipelineWithoutCustomPlugins', {
+      vpc: vpc,
+      vpcSubnets: subnetSelection,
+      projectId: projectIdParam.valueAsString,
+      appIds: appIdsParam.valueAsString,
+      sourceS3Bucket,
+      sourceS3Prefix: sourceS3PrefixParam.valueAsString,
+      sinkS3Bucket,
+      sinkS3Prefix: sinkS3PrefixParam.valueAsString,
+      pipelineS3Bucket,
+      pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsString,
+      scheduleExpression: scheduleExpressionParam.valueAsString,
+      transformerAndEnrichClassNames: transformerAndEnrichClassNamesParam.valueAsString,
+      outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
+    });
+
+    (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
+    this.nestedStacks.push(dataPipelineStackWithoutCustomPlugins);
+  }
+}
+
+interface DataPipelineNestedStackProps extends NestedStackProps, DataPipelineProps {
+}
+
+class DataPipelineNestedStack extends NestedStack {
+  constructor(scope: Construct, id: string, props: DataPipelineNestedStackProps) {
+    super(scope, id, props);
+    const featureName = 'DataPipeline ' + id;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+
+    new DataPipelineConstruct(this, 'NestedStack', {
+      ... props,
     });
     addCfnNag(this);
   }
@@ -136,6 +200,6 @@ function addCfnNag(stack: Stack) {
   NagSuppressions.addStackSuppressions(stack, commonCdkNagRules);
   addCfnNagForCustomResourceProvider(stack, 'CopyAssets', 'CopyAssetsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'InitPartition', 'InitPartitionCustomResourceProvider', '');
-
+  addCfnNagForBucketDeployment(stack, 'data-pipeline');
 }
 

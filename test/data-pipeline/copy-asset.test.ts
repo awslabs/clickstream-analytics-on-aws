@@ -24,7 +24,6 @@ const event = {
   ResourceType: 'AWS::CloudFormation::CustomResource',
   ResourceProperties: {
     ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
-    entryPointJar: 's3://my-bucket/my-test-prefix/spark-main.jar',
     s3PathPluginJars: 's3://my-bucket/my-test-prefix/jar/plugin1.jar,s3://my-bucket/my-test-prefix/jar/plugin2.jar',
     s3PathPluginFiles: 's3://my-bucket/my-test-prefix/files/file1.mmdb,s3://my-bucket/my-test-prefix/files/file2.mmdb',
   },
@@ -67,7 +66,7 @@ process.env.STACK_ID = 'test-stack-id';
 process.env.POWERTOOLS_SERVICE_NAME = 'Jest TEST';
 process.env.LOG_LEVEL = 'INFO';
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipeline-bucket',
-process.env.PIPELINE_S3_PREFIX = 'test-prefix';
+process.env.PIPELINE_S3_PREFIX = 'test-prefix/';
 process.env.PROJECT_ID = 'test_project_id';
 
 import { handler } from '../../src/data-pipeline/lambda/copy-assets';
@@ -79,9 +78,8 @@ test('CloudFormation Create ', async () => {
     c,
   )) as any;
   expect(response.Data).toEqual({
-    entryPointJar: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/spark-main.jar',
-    s3PathPluginJars: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/plugin1.jar,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/plugin2.jar',
-    s3PathPluginFiles: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/files/file1.mmdb,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/files/file2.mmdb',
+    s3PathPluginJars: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/jars/plugin1.jar,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/jars/plugin2.jar',
+    s3PathPluginFiles: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/files/file1.mmdb,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/files/file2.mmdb',
   });
 });
 
@@ -92,9 +90,8 @@ test('CloudFormation Update ', async () => {
     c,
   )) as any;
   expect(response.Data).toEqual({
-    entryPointJar: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/spark-main.jar',
-    s3PathPluginJars: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/plugin1.jar,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/jars/plugin2.jar',
-    s3PathPluginFiles: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/files/file1.mmdb,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/files/file2.mmdb',
+    s3PathPluginJars: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/jars/plugin1.jar,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/jars/plugin2.jar',
+    s3PathPluginFiles: 's3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/files/file1.mmdb,s3://test-pipeline-bucket/test-prefix/test-stack-id/test_project_id/custom-plugins/files/file2.mmdb',
   });
 });
 
@@ -104,7 +101,7 @@ test('CloudFormation Delete ', async () => {
       return {
         Contents: [
           {
-            Key: 'test-prefix/test-stack-id/test_project_id/jars/plugin1.jar',
+            Key: 'test-prefix/test-stack-id/test_project_id/custom-plugins/jars/plugin1.jar',
           },
         ],
       };

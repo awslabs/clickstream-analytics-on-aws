@@ -12,12 +12,15 @@
  */
 
 import { BatchCreatePartitionCommand, GlueClient, PartitionInput } from '@aws-sdk/client-glue';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { GlueClientUtil } from '../../../src/data-pipeline/lambda/partition-syncer/glue-client-util';
 
 // @ts-ignore
 const glueClientMock = mockClient(GlueClient);
+const s3ClientMock = mockClient(S3Client);
 
 const glueClientUtil = new GlueClientUtil();
 
@@ -28,7 +31,7 @@ describe('Glue catalog add partition test', () => {
 
   it('Should add hourly partitions for source table', async () => {
     const s3Bucket = 'bucket1';
-    const s3Prefix = 'prefix1';
+    const s3Prefix = 'prefix1/';
     const databaseName = 'db1';
     const tableName = 'table1';
 
@@ -38,12 +41,13 @@ describe('Glue catalog add partition test', () => {
 
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 1);
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
 
   it('Should generate hourly partitions for one day', async () => {
     const s3Bucket = 'bucket1';
-    const s3Prefix = 'prefix1';
+    const s3Prefix = 'prefix1/';
 
     const date = new Date(2022, 0, 1);
 
@@ -60,12 +64,13 @@ describe('Glue catalog add partition test', () => {
         return partitionInput.StorageDescriptor?.Location ==
           `s3://bucket1/prefix1/year=2022/month=01/day=01/hour=${hourStr}/`;
       }).length).toBe(1);
+      expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
     }
   });
 
   it('Should add daily partitions for sink table', async () => {
     const s3Bucket = 'bucket1';
-    const s3Prefix = 'prefix1';
+    const s3Prefix = 'prefix1/';
     const databaseName = 'db1';
     const tableName = 'table1';
 
@@ -82,7 +87,7 @@ describe('Glue catalog add partition test', () => {
 
   it('Should generate daily partitions for one day', async () => {
     const s3Bucket = 'bucket1';
-    const s3Prefix = 'prefix1';
+    const s3Prefix = 'prefix1/';
 
     const projectId = 'projectId1';
     const tableName = 'test_table';
@@ -103,6 +108,7 @@ describe('Glue catalog add partition test', () => {
           `s3://bucket1/prefix1/${projectId}/${tableName}/partition_app=${appId}/partition_year=2022/partition_month=01/partition_day=01/`;
       }).length).toBe(1);
     });
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
 });

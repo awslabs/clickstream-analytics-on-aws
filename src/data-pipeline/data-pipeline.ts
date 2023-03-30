@@ -19,7 +19,11 @@ import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { createCopyAssetsCustomResource, createInitPartitionCustomResource } from './utils/custom-resource';
+import {
+  createCopyAssetsCustomResource,
+  createInitPartitionCustomResource,
+} from './utils/custom-resource';
+import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
@@ -41,10 +45,10 @@ export interface DataPipelineProps {
   readonly pipelineS3Prefix: string;
   readonly dataFreshnessInHour: string;
   readonly transformerAndEnrichClassNames: string;
-  readonly s3PathPluginJars: string;
-  readonly s3PathPluginFiles: string;
-  readonly entryPointJar: string;
+  readonly s3PathPluginJars?: string;
+  readonly s3PathPluginFiles?: string;
   readonly scheduleExpression: string;
+  readonly outputFormat: 'json'|'parquet';
 }
 
 export class DataPipelineConstruct extends Construct {
@@ -57,15 +61,38 @@ export class DataPipelineConstruct extends Construct {
     super(scope, id);
     this.props = props;
 
-    // Custom resource - copies ETL jars and files to pipelineS3Bucket
-    const copiedAsset = createCopyAssetsCustomResource(scope, {
-      pipelineS3Bucket: props.pipelineS3Bucket,
-      pipelineS3Prefix: props.pipelineS3Prefix,
-      projectId: props.projectId,
-      s3PathPluginJars: props.s3PathPluginJars,
-      s3PathPluginFiles: props.s3PathPluginFiles,
-      entryPointJar: props.entryPointJar,
-    });
+    const pluginPrefix = Fn.join('', [this.props.pipelineS3Prefix, Fn.join('/', [
+      'plugins',
+      getShortIdOfStack(Stack.of(scope)),
+      this.props.projectId,
+      'built-in',
+    ])]);
+
+    const {
+      entryPointJar,
+      jars: builtInJars,
+      files: builtInFiles,
+    } = uploadBuiltInSparkJarsAndFiles(
+      scope,
+      this.props.pipelineS3Bucket,
+      pluginPrefix,
+    );
+
+    const s3PathPluginJars = [builtInJars];
+    const s3PathPluginFiles = [builtInFiles];
+
+    if (props.s3PathPluginJars) {
+      // Custom resource - copies ETL jars and files to pipelineS3Bucket
+      const copiedAsset = createCopyAssetsCustomResource(scope, {
+        pipelineS3Bucket: props.pipelineS3Bucket,
+        pipelineS3Prefix: props.pipelineS3Prefix,
+        projectId: props.projectId,
+        s3PathPluginJars: props.s3PathPluginJars,
+        s3PathPluginFiles: props.s3PathPluginFiles,
+      });
+      s3PathPluginJars.push(copiedAsset.getAttString('s3PathPluginJars'));
+      s3PathPluginFiles.push(copiedAsset.getAttString('s3PathPluginFiles'));
+    }
 
     this.roleUtil = RoleUtil.newInstance(scope);
     this.glueUtil = GlueUtil.newInstance(scope, {
@@ -75,57 +102,98 @@ export class DataPipelineConstruct extends Construct {
       sinkS3Prefix: this.props.sinkS3Prefix,
     });
 
-    this.lambdaUtil = LambdaUtil.newInstance(scope, {
-      vpc: this.props.vpc,
-      vpcSubnets: this.props.vpcSubnets,
-      projectId: this.props.projectId,
-      pipelineS3Bucket: this.props.pipelineS3Bucket,
-      pipelineS3Prefix: this.props.pipelineS3Prefix,
-      sourceS3Bucket: this.props.sourceS3Bucket,
-      sourceS3Prefix: this.props.sourceS3Prefix,
-      sinkS3Bucket: this.props.sinkS3Bucket,
-      sinkS3Prefix: this.props.sinkS3Prefix,
-      appIds: this.props.appIds,
-      dataFreshnessInHour: this.props.dataFreshnessInHour,
-      transformerAndEnrichClassNames: this.props.transformerAndEnrichClassNames,
-      scheduleExpression: this.props.scheduleExpression,
-
-      entryPointJar: copiedAsset.getAttString('entryPointJar'),
-      s3PathPluginJars: copiedAsset.getAttString('s3PathPluginJars'),
-      s3PathPluginFiles: copiedAsset.getAttString('s3PathPluginFiles'),
-
-    }, this.roleUtil);
+    this.lambdaUtil = LambdaUtil.newInstance(
+      scope,
+      {
+        vpc: this.props.vpc,
+        vpcSubnets: this.props.vpcSubnets,
+        projectId: this.props.projectId,
+        pipelineS3Bucket: this.props.pipelineS3Bucket,
+        pipelineS3Prefix: this.props.pipelineS3Prefix,
+        sourceS3Bucket: this.props.sourceS3Bucket,
+        sourceS3Prefix: this.props.sourceS3Prefix,
+        sinkS3Bucket: this.props.sinkS3Bucket,
+        sinkS3Prefix: this.props.sinkS3Prefix,
+        appIds: this.props.appIds,
+        dataFreshnessInHour: this.props.dataFreshnessInHour,
+        transformerAndEnrichClassNames:
+          this.props.transformerAndEnrichClassNames,
+        scheduleExpression: this.props.scheduleExpression,
+        entryPointJar: entryPointJar,
+        s3PathPluginJars: Fn.join(',', s3PathPluginJars),
+        s3PathPluginFiles: Fn.join(',', s3PathPluginFiles),
+        outputFormat: this.props.outputFormat,
+      },
+      this.roleUtil,
+    );
 
     const emrServerlessApp = this.createEmrServerlessApplication();
-    const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(this.props.projectId);
-    this.createSparkJobSubmitter(glueDatabase, sourceTable, sinkTable, emrServerlessApp.attrApplicationId);
+    const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
+      this.props.projectId,
+    );
+    this.createSparkJobSubmitter(
+      glueDatabase,
+      sourceTable,
+      sinkTable,
+      emrServerlessApp.attrApplicationId,
+    );
   }
 
   private createGlueResources(projectId: string) {
     const stackShortId = getShortIdOfStack(Stack.of(this));
     //If you plan to access the table from Amazon Athena,
     //then the name should be under 256 characters and contain only lowercase letters (a-z), numbers (0-9), and underscore (_).
-    const glueDatabase = this.glueUtil.createDatabase(Fn.join('_', ['clickstream', projectId, stackShortId]));
-    const sourceTable = this.glueUtil.createSourceTable(glueDatabase, Fn.join('_', [projectId, 'source']));
-    const sinkTable = this.glueUtil.createSinkTable(glueDatabase, projectId, Fn.join('_', [projectId, 'sink']));
+    const glueDatabase = this.glueUtil.createDatabase(
+      Fn.join('_', ['clickstream', projectId, stackShortId]),
+    );
+    const sourceTable = this.glueUtil.createSourceTable(
+      glueDatabase,
+      Fn.join('_', [projectId, 'source']),
+    );
+    const sinkTable = this.glueUtil.createSinkTable(
+      glueDatabase,
+      projectId,
+      Fn.join('_', [projectId, 'sink']),
+    );
 
-    const partitionSyncerLambda = this.lambdaUtil.createPartitionSyncerLambda(glueDatabase.databaseName,
-      sourceTable.tableName, sinkTable.tableName);
-    this.scheduleLambda('partitionSyncerScheduler', partitionSyncerLambda, 'cron(0 0 * * ? *)');
+    const partitionSyncerLambda = this.lambdaUtil.createPartitionSyncerLambda(
+      glueDatabase.databaseName,
+      sourceTable.tableName,
+      sinkTable.tableName,
+    );
+    this.scheduleLambda(
+      'partitionSyncerScheduler',
+      partitionSyncerLambda,
+      'cron(0 0 * * ? *)',
+    );
 
     createInitPartitionCustomResource(this, partitionSyncerLambda);
     return { glueDatabase, sourceTable, sinkTable };
   }
 
-  private scheduleLambda(id: string, lambdaFunction: lambda.Function, scheduleExpression: string) {
+  private scheduleLambda(
+    id: string,
+    lambdaFunction: lambda.Function,
+    scheduleExpression: string,
+  ) {
     new Rule(this, id, {
       schedule: Schedule.expression(scheduleExpression),
       targets: [new LambdaFunction(lambdaFunction)],
     });
   }
 
-  private createSparkJobSubmitter(glueDatabase: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string) {
-    const jobSubmitterLambda = this.lambdaUtil.createEmrJobSubmitterLambda(glueDatabase, sourceTable, sinkTable, emrApplicationId);
+  private createSparkJobSubmitter(
+    glueDatabase: Database,
+    sourceTable: Table,
+    sinkTable: Table,
+    emrApplicationId: string,
+  ) {
+    const jobSubmitterLambda = this.lambdaUtil.createEmrJobSubmitterLambda(
+      glueDatabase,
+      sourceTable,
+      sinkTable,
+      emrApplicationId,
+    );
     new Rule(this, 'jobSubmitterScheduler', {
       schedule: Schedule.expression(this.props.scheduleExpression),
       targets: [new LambdaFunction(jobSubmitterLambda)],
@@ -145,7 +213,7 @@ export class DataPipelineConstruct extends Construct {
       releaseLabel: EMR_VERSION,
       type: 'SPARK',
       networkConfiguration: {
-        subnetIds: this.props.vpcSubnets.subnets?.map(s => s.subnetId),
+        subnetIds: this.props.vpcSubnets.subnets?.map((s) => s.subnetId),
         securityGroupIds: [emrSg.securityGroupId],
       },
       autoStartConfiguration: {
@@ -160,5 +228,3 @@ export class DataPipelineConstruct extends Construct {
     return serverlessApp;
   }
 }
-
-

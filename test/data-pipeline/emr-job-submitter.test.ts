@@ -37,7 +37,7 @@ jest.mock('../../src/common/s3', () => {
   };
 });
 
-import { EMRServerlessUtil } from '../../src/data-pipeline/lambda/emr-job/emr-client-util';
+import { EMRServerlessUtil } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
 
 process.env.EMR_SERVERLESS_APPLICATION_ID='testApplicationId',
 process.env.PROJECT_ID = 'test_proj_001';
@@ -46,18 +46,20 @@ process.env.ROLE_ARN = 'arn:aws::role:role1';
 process.env.GLUE_CATALOG_ID = 'cid_001';
 process.env.GLUE_DB = 'test_db';
 process.env.SOURCE_TABLE_NAME = 'source_table';
+process.env.SINK_TABLE_NAME = 'sink_table';
 process.env.SOURCE_S3_BUCKET_NAME = 'test-bucket-src';
-process.env.SOURCE_S3_PREFIX = 'src-prefix';
+process.env.SOURCE_S3_PREFIX = 'src-prefix/';
 process.env.SINK_S3_BUCKET_NAME = 'test-bucket-sink';
-process.env.SINK_S3_PREFIX = 'sink-prefix';
+process.env.SINK_S3_PREFIX = 'sink-prefix/';
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
-process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix';
+process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.DATA_FRESHNESS_IN_HOUR = '24';
 process.env.SCHEDULE_EXPRESSION = 'rate(1 day)';
 process.env.TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'com.test.ClassMain,com.test.ClassMainTest';
 process.env.S3_PATH_PLUGIN_JARS = 's3://test/test1.jar,s3://test/test2.jar';
 process.env.S3_PATH_PLUGIN_FILES = 's3://test/test1.txt,s3://test/test2.txt';
 process.env.S3_PATH_ENTRY_POINT_JAR = 's3://test/main.jar';
+process.env.OUTPUT_FORMAT = 'json';
 
 
 test('start ETL job', async () => {
@@ -83,16 +85,17 @@ test('start ETL job with timestamp - string', async () => {
         entryPointArguments: [
           'test_db',
           'source_table',
-          '1678613606572000',
-          '1678700006572000',
-          's3://test-pipe-line-bucket/pipeline-prefix',
+          '1678613606572',
+          '1678700006572',
+          `s3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/corrupted_records/${(new Date()).toISOString().split('T')[0]}/1678613606572-1678700006572`, // pipeline data path
           'com.test.ClassMain,com.test.ClassMainTest',
-          's3://test-bucket-sink/sink-prefix',
+          's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
           'test_proj_001',
           'app1,app2',
           '24',
+          'json',
         ],
-        sparkSubmitParameters: '--class com.amazonaws.solution.clickstream.App \
+        sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
@@ -120,7 +123,7 @@ test('start ETL job with timestamp - string', async () => {
 
 test('start ETL job with timestamp - number', async () => {
   await EMRServerlessUtil.start({
-    startTimestamp: '1678700304279000',
+    startTimestamp: '1678700304279',
   });
   expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
 });

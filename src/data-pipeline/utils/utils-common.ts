@@ -12,5 +12,9 @@
  */
 
 export function getSinkTableLocationPrefix(s3Prefix: string, projectId: string, tableName: string): string {
-  return `${s3Prefix}/${projectId}/${tableName}`;
+  return `${s3Prefix}${projectId}/${tableName}/`;
+}
+
+export function getPluginS3Prefix(pipelineS3Prefix:string, stackId: string, projectId: string, type: string = 'custom-plugins') {
+  return `${pipelineS3Prefix}${stackId}/${projectId}/${type}/`;
 }

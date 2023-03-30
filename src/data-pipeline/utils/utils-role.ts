@@ -111,6 +111,7 @@ export class RoleUtil {
         effect: Effect.ALLOW,
         resources: [
           this.getGlueResourceArn('catalog'),
+          this.getGlueResourceArn('database/default'),
           this.getGlueResourceArn(`database/${glueDB.databaseName}`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sourceTable.tableName}`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),

@@ -16,6 +16,13 @@ import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { validateSubnetsRule } from '../rules';
 
+const app = new App();
+const rootStack = new DataPipelineStack(app, 'test-stack');
+const nestedStacks = rootStack.nestedStacks;
+
+const rootTemplate = Template.fromStack(rootStack);
+const nestedTemplates = nestedStacks.map(stack => Template.fromStack(stack));
+
 const RefAnyValue = {
   Ref: Match.anyValue(),
 };
@@ -45,10 +52,13 @@ function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
 }
 
+test('has two nested stacks', ()=> {
+  expect(nestedTemplates).toHaveLength(2);
+});
+
 describe('DataPipelineStack parameter test', () => {
-  const app = new App();
-  const stack = new DataPipelineStack(app, 'test-stack');
-  const template = Template.fromStack(stack);
+
+  const template = rootTemplate;
 
   test('Should has Parameter VpcId', () => {
     template.hasParameter('VpcId', {
@@ -177,7 +187,6 @@ describe('DataPipelineStack parameter test', () => {
     });
   });
 
-
   test('Should check SourceS3Bucket and SinkS3Bucket pattern', () => {
     [getParameter(template, 'SourceS3Bucket'),
       getParameter(template, 'SinkS3Bucket')].forEach(param => {
@@ -211,6 +220,35 @@ describe('DataPipelineStack parameter test', () => {
       Type: 'String',
     });
   });
+
+
+  test('Check S3Prefix pattern', () => {
+    [getParameter(template, 'SourceS3Prefix'),
+      getParameter(template, 'SinkS3Prefix'),
+      getParameter(template, 'PipelineS3Prefix')].forEach(param => {
+      const pattern = param.AllowedPattern;
+      const regex = new RegExp(`${pattern}`);
+      const validValues = [
+        'abc/',
+        'abc/test/',
+        'ABC/test/',
+      ];
+
+      for (const v of validValues) {
+        expect(v).toMatch(regex);
+      }
+
+      const invalidValues = [
+        '/ab',
+        'ab_test',
+        'ab/test',
+      ];
+      for (const v of invalidValues) {
+        expect(v).not.toMatch(regex);
+      }
+    });
+  });
+
 
   test('Should has ParameterGroups and ParameterLabels', () => {
     const cfnInterface =
@@ -280,14 +318,14 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter TransformerAndEnrichClassNames', () => {
     template.hasParameter('TransformerAndEnrichClassNames', {
-      Type: 'CommaDelimitedList',
+      Type: 'String',
     });
   });
 
 
   test('Should has parameter S3PathPluginJars', () => {
     template.hasParameter('S3PathPluginJars', {
-      Type: 'CommaDelimitedList',
+      Type: 'String',
     });
   });
 
@@ -315,11 +353,11 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter S3PathPluginFiles', () => {
     template.hasParameter('S3PathPluginFiles', {
-      Type: 'CommaDelimitedList',
+      Type: 'String',
     });
   });
 
-  test('Should check  S3PathPluginFiles pattern', () => {
+  test('Should check S3PathPluginFiles pattern', () => {
     const param = getParameter(template, 'S3PathPluginFiles');
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
@@ -345,9 +383,8 @@ describe('DataPipelineStack parameter test', () => {
 });
 
 describe('DataPipelineStack Glue catalog resources test', () => {
-  const app = new App();
-  const stack = new DataPipelineStack(app, 'test-stack');
-  const template = Template.fromStack(stack);
+
+  const template = nestedTemplates[0];
 
   test('Should has one Glue catalog database', () => {
     template.resourceCountIs('AWS::Glue::Database', 1);
@@ -362,7 +399,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
       TableInput: {
         Name: {
-          'Fn::Join': ['_', [{ Ref: 'ProjectId' }, 'source']],
+          'Fn::Join': ['_', [{ Ref: Match.anyValue() }, 'source']],
         },
         TableType: 'EXTERNAL_TABLE',
       },
@@ -374,7 +411,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
       TableInput: {
         Name: {
-          'Fn::Join': ['_', [{ Ref: 'ProjectId' }, 'sink']],
+          'Fn::Join': ['_', [{ Ref: Match.anyValue() }, 'sink']],
         },
         TableType: 'EXTERNAL_TABLE',
       },
@@ -396,6 +433,8 @@ describe('DataPipelineStack Glue catalog resources test', () => {
 
     const statement = policy.Properties.PolicyDocument.Statement as any[];
     expect(statement[2].Action).toEqual('glue:BatchCreatePartition');
+    const roles = policy.Properties.Roles as any[];
+    expect(roles[0].Ref).toEqual(roleKey);
 
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -485,7 +524,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                     },
                     ':table/',
                     {
-                      Ref: Match.anyValue(),
+                      Ref: 'GlueDatabase24880C74',
                     },
                     '/',
                     {
@@ -524,7 +563,106 @@ describe('DataPipelineStack Glue catalog resources test', () => {
             ],
           },
           {
-            Action: ['xray:PutTraceSegments', 'xray:PutTelemetryRecords'],
+            Action: [
+              's3:GetObject*',
+              's3:GetBucket*',
+              's3:List*',
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              's3:GetObject*',
+              's3:GetBucket*',
+              's3:List*',
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+            ],
             Effect: 'Allow',
             Resource: '*',
           },
@@ -532,8 +670,6 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
     });
 
-    const roles = policy.Properties.Roles as any[];
-    expect(roles[0].Ref).toEqual(roleKey);
   });
 
   test('Should create partition syncer lambda', () => {
@@ -547,16 +683,16 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       Environment: {
         Variables: {
           SOURCE_S3_BUCKET_NAME: {
-            Ref: 'SourceS3Bucket',
+            Ref: Match.anyValue(),
           },
           SOURCE_S3_PREFIX: {
-            Ref: 'SourceS3Prefix',
+            Ref: Match.anyValue(),
           },
           SINK_S3_BUCKET_NAME: {
-            Ref: 'SinkS3Bucket',
+            Ref: Match.anyValue(),
           },
           SINK_S3_PREFIX: {
-            Ref: 'SinkS3Prefix',
+            Ref: Match.anyValue(),
           },
           DATABASE_NAME: {
             Ref: Match.anyValue(),
@@ -568,7 +704,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
             Ref: Match.anyValue(),
           },
           PROJECT_ID: {
-            Ref: 'ProjectId',
+            Ref: Match.anyValue(),
           },
           APP_IDS: {
             Ref: Match.anyValue(),
@@ -603,10 +739,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
 });
 
 describe ('ETL job submitter', () => {
-
-  const app = new App();
-  const stack = new DataPipelineStack(app, 'test-stack');
-  const template = Template.fromStack(stack);
+  const template = nestedTemplates[0];
 
   test ('Has lambda and emr-serverless IAM role', ()=> {
     template.hasResourceProperties('AWS::IAM::Role', {
@@ -638,7 +771,7 @@ describe ('ETL job submitter', () => {
           'Fn::Split': [
             ',',
             {
-              Ref: 'PrivateSubnetIds',
+              Ref: Match.anyValue(),
             },
           ],
         },
@@ -654,6 +787,7 @@ describe ('ETL job submitter', () => {
           GLUE_CATALOG_ID: Match.anyValue(),
           GLUE_DB: Match.anyValue(),
           SOURCE_TABLE_NAME: Match.anyValue(),
+          SINK_TABLE_NAME: Match.anyValue(),
           SOURCE_S3_BUCKET_NAME: RefAnyValue,
           SOURCE_S3_PREFIX: RefAnyValue,
           SINK_S3_BUCKET_NAME: RefAnyValue,
@@ -663,24 +797,10 @@ describe ('ETL job submitter', () => {
           DATA_FRESHNESS_IN_HOUR: RefAnyValue,
           SCHEDULE_EXPRESSION: RefAnyValue,
           TRANSFORMER_AND_ENRICH_CLASS_NAMES: Match.anyValue(),
-          S3_PATH_PLUGIN_JARS: {
-            'Fn::GetAtt': [
-              'CopyAssetsCustomResource',
-              's3PathPluginJars',
-            ],
-          },
-          S3_PATH_PLUGIN_FILES: {
-            'Fn::GetAtt': [
-              'CopyAssetsCustomResource',
-              's3PathPluginFiles',
-            ],
-          },
-          S3_PATH_ENTRY_POINT_JAR: {
-            'Fn::GetAtt': [
-              'CopyAssetsCustomResource',
-              'entryPointJar',
-            ],
-          },
+          S3_PATH_PLUGIN_JARS: Match.anyValue(),
+          S3_PATH_PLUGIN_FILES: Match.anyValue(),
+          S3_PATH_ENTRY_POINT_JAR: Match.anyValue(),
+          OUTPUT_FORMAT: Match.anyValue(),
         },
       },
     });
@@ -689,7 +809,7 @@ describe ('ETL job submitter', () => {
   test('Has ScheduleExpression rule', ()=> {
     template.hasResourceProperties('AWS::Events::Rule', {
       ScheduleExpression: {
-        Ref: 'ScheduleExpression',
+        Ref: Match.anyValue(),
       },
       State: 'ENABLED',
     });
@@ -800,6 +920,26 @@ describe ('ETL job submitter', () => {
                       Ref: 'AWS::AccountId',
                     },
                     ':catalog',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':database/default',
                   ],
                 ],
               },
@@ -936,7 +1076,7 @@ describe ('ETL job submitter', () => {
                         'Fn::Split': [
                           '/',
                           {
-                            Ref: 'EntryPointJar',
+                            Ref: Match.anyValue(),
                           },
                         ],
                       },
@@ -953,5 +1093,38 @@ describe ('ETL job submitter', () => {
     });
   });
 
+});
 
+test('Root stack has two nested stacks', ()=>{
+  rootTemplate.resourceCountIs('AWS::CloudFormation::Stack', 2);
+});
+
+
+test('All nested stacks has Custom::CDKBucketDeployment', ()=>{
+  nestedTemplates.forEach(template => {
+    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+  });
+});
+
+
+test('Plugins nested stack has CopyAssetsCustomResource Lambda', ()=>{
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::Lambda::Function', {
+    Environment: {
+      Variables: {
+        STACK_ID: Match.anyValue(),
+        PROJECT_ID: Match.anyValue(),
+        PIPELINE_S3_BUCKET_NAME: Match.anyValue(),
+        PIPELINE_S3_PREFIX: Match.anyValue(),
+      },
+    },
+  });
+});
+
+test('Plugins nested stack has CopyAssetsCustomResource', ()=>{
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    s3PathPluginJars: RefAnyValue,
+    s3PathPluginFiles: RefAnyValue,
+  });
 });

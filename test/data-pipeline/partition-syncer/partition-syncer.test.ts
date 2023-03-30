@@ -12,9 +12,9 @@
  */
 
 import { BatchCreatePartitionCommand, GlueClient } from '@aws-sdk/client-glue';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler as add_partition_handler } from '../../../src/data-pipeline/lambda/partition-syncer';
 import 'aws-sdk-client-mock-jest';
 
 const schedulerEvent = {
@@ -72,6 +72,7 @@ const c: Context = {
 
 // @ts-ignore
 const glueClientMock = mockClient(GlueClient);
+const s3ClientMock = mockClient(S3Client);
 
 process.env.SOURCE_S3_BUCKET_NAME = 'bucket1';
 process.env.SOURCE_S3_PREFIX = 'prefix1';
@@ -80,6 +81,9 @@ process.env.SINK_S3_PREFIX = 'prefix2 ';
 process.env.DATABASE_NAME = 'database1';
 process.env.SOURCE_TABLE_NAME = 'table1';
 process.env.SINK_TABLE_NAME = 'table2';
+
+import { handler as add_partition_handler } from '../../../src/data-pipeline/lambda/partition-syncer';
+
 
 describe('Glue catalog add partition test', () => {
 
@@ -96,6 +100,7 @@ describe('Glue catalog add partition test', () => {
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 1);
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
   it('Should Add partition for both source and sink table when has appIds - success', async () => {
@@ -108,6 +113,7 @@ describe('Glue catalog add partition test', () => {
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
   it('Should Add partition when passing date - success', async () => {
@@ -133,6 +139,7 @@ describe('Glue catalog add partition test', () => {
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
   it('Should Add partition cannot be triggered by custom resource - delete', async () => {

@@ -55,8 +55,8 @@ export function addCfnNagForCustomResourceProvider(stack: Stack, name: string, p
   addCfnNagToStack(stack, cfnNagListForCustomResource);
 }
 
-export function addCfnNagForBucketDeployment(stack: Stack, extraCfnNagList: AddCfnNagItem[] = []) {
-  addCfnNagForCfnResource(stack, 'CDK built-in BucketDeployment', 'Custom::CDKBucketDeployment[A-F0-9]+', 'cloudfront', extraCfnNagList);
+export function addCfnNagForBucketDeployment(stack: Stack, serviceName: string, extraCfnNagList: AddCfnNagItem[] = []) {
+  addCfnNagForCfnResource(stack, 'CDK built-in BucketDeployment', 'Custom::CDKBucketDeployment[A-F0-9]+', serviceName, extraCfnNagList);
 }
 
 export function addCfnNagForS3AutoDelete(stack: Stack, extraCfnNagList: AddCfnNagItem[] = []) {

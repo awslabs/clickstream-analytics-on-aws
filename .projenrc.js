@@ -89,9 +89,16 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '.DS_Store',
     'docs/site/',
     'frontend/amplify',
-    'test-deploy*.sh',
+    'test-deploy*',
     'deployment/global-s3-assets/',
     '.viperlightrc',
+    '*.iml',
+    '*.ipr',
+    '*.iws',
+    'src/data-pipeline/spark-etl/.gradle',
+    'src/data-pipeline/spark-etl/build',
+    'src/data-pipeline/spark-etl/bin',
+    'src/data-pipeline/spark-etl/?/',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -174,6 +181,7 @@ const apiProject = new typescript.TypeScriptProject({
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
+
 
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
@@ -430,6 +438,51 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
+
+  'data-pipeline-spark-etl': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      'etl-unit-test': {
+        stage: 'build',
+        image: {
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+        },
+        variables: {
+        },
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        before_script: [
+          'cd ./src/data-pipeline/spark-etl',
+          `sed -i "s/projectVersion=.*/projectVersion=${version}/" gradle.properties`,
+        ],
+
+        script: [
+          'gradle clean build',
+          'gradle jacocoAggregatedReport',
+        ],
+
+        artifacts: {
+          reports: {
+            junit: './src/data-pipeline/spark-etl/build/test-results/test/TEST-*.xml',
+            coverage_report: {
+              coverage_format: 'cobertura',
+              path: './src/data-pipeline/spark-etl/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml',
+            },
+          },
+        }
+        // coverage: '/    - Instruction Coverage: ([0-9.]+)%/',
+      },
+    },
+  },
+
   'cfn-nag': {
     stages: [
       'qa',
@@ -475,8 +528,8 @@ gitlabMain.createNestedTemplates({
         script: [
           'cd build',
           'cfn-lint -i W3005 -e -r us-east-1,ap-northeast-1 -t cdk.out/*.template.json',
-          'cfn-lint -i W3005 -e -r ap-east-1 --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global* --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json -t cdk.out/*.template.json',
-          'cfn-lint -i W3005 -e -r cn-north-1,cn-northwest-1 --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global*.json --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json -t cdk.out/*.template.json',
+          'cfn-lint -i W3005 -e -r ap-east-1 --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/datapipeline*.nested.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global* --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json -t cdk.out/*.template.json',
+          'cfn-lint -i W3005 -e -r cn-north-1,cn-northwest-1 --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/datapipeline*.nested.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global*.json --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json -t cdk.out/*.template.json',
         ],
       },
     },

@@ -45,6 +45,7 @@ interface Props {
   readonly s3PathPluginFiles: string;
   readonly entryPointJar: string;
   readonly scheduleExpression: string;
+  readonly outputFormat: 'json'|'parquet';
 }
 
 const functionSettings = {
@@ -86,6 +87,9 @@ export class LambdaUtil {
       sourceTableName,
       sinkTableName,
     );
+    this.props.sourceS3Bucket.grantReadWrite(lambdaRole);
+    this.props.sinkS3Bucket.grantReadWrite(lambdaRole);
+
     const lambdaSecurityGroup = this.createSecurityGroup(
       this.scope,
       this.props.vpc,
@@ -158,7 +162,7 @@ export class LambdaUtil {
       vpc: this.props.vpc,
       vpcSubnets: this.props.vpcSubnets,
       awsSdkConnectionReuse: true,
-      entry: join(__dirname, '..', 'lambda', 'emr-job', 'index.ts'),
+      entry: join(__dirname, '..', 'lambda', 'emr-job-submitter', 'index.ts'),
       reservedConcurrentExecutions: 1,
       environment: {
         EMR_SERVERLESS_APPLICATION_ID: emrApplicationId,
@@ -169,6 +173,7 @@ export class LambdaUtil {
         GLUE_CATALOG_ID: glueDB.catalogId,
         GLUE_DB: glueDB.databaseName,
         SOURCE_TABLE_NAME: sourceTable.tableName,
+        SINK_TABLE_NAME: sinkTable.tableName,
         SOURCE_S3_BUCKET_NAME: this.props.sourceS3Bucket.bucketName,
         SOURCE_S3_PREFIX: this.props.sourceS3Prefix,
         SINK_S3_BUCKET_NAME: this.props.sinkS3Bucket.bucketName,
@@ -181,6 +186,7 @@ export class LambdaUtil {
         S3_PATH_PLUGIN_JARS: this.props.s3PathPluginJars,
         S3_PATH_PLUGIN_FILES: this.props.s3PathPluginFiles,
         S3_PATH_ENTRY_POINT_JAR: this.props.entryPointJar,
+        OUTPUT_FORMAT: this.props.outputFormat,
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,

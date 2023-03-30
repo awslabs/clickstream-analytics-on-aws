@@ -21,5 +21,5 @@ export function supressWarningsForCloudFrontS3Portal(stack: Stack) {
 
   addCfnNagForS3AutoDelete(stack);
 
-  addCfnNagForBucketDeployment(stack);
+  addCfnNagForBucketDeployment(stack, 'cloudFront');
 }
