@@ -295,6 +295,7 @@ gitlabMain.createNestedTemplates({
           'apt install -y git git-secrets',
         ],
         script: [
+          'git secrets --register-aws',
           'git secrets --scan',
         ],
       },
