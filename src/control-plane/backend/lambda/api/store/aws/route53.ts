@@ -13,11 +13,7 @@
 
 import { Route53Client, ListHostedZonesCommand, HostedZone } from '@aws-sdk/client-route-53';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface Route53HostedZone {
-  readonly id: string;
-  readonly name: string;
-}
+import { Route53HostedZone } from '../../common/types';
 
 export const listHostedZones = async () => {
   const route53Client = new Route53Client({});

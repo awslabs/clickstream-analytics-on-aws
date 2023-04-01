@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DynamoDBDocumentClient, GetCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
@@ -76,14 +76,14 @@ describe('App test', () => {
   });
 
   it('DDB pagination', async () => {
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1 }, { id: 2 }],
     });
-    const listProjects = await store.listProjects(false, 1, 10);
+    const listProjects = await store.listProjects('asc', false, 1, 10);
     expect(listProjects).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
-    const listApplication = await store.listApplication('666', false, 1, 10);
+    const listApplication = await store.listApplication('666', 'asc', false, 1, 10);
     expect(listApplication).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
-    const listPipeline = await store.listPipeline('666', '', false, 1, 10);
+    const listPipeline = await store.listPipeline('666', '', 'asc', false, 1, 10);
     expect(listPipeline).toEqual({ items: [{ id: 1 }, { id: 2 }], totalCount: 2 });
 
   });

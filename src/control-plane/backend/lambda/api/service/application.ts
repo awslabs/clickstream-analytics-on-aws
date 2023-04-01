@@ -14,7 +14,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/request-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { Application } from '../model/application';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -25,8 +25,8 @@ const stackManager: StackManager = new StackManager();
 export class ApplicationServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { pid, pageNumber, pageSize } = req.query;
-      const result = await store.listApplication(pid, true, pageSize, pageNumber);
+      const { order, pid, pageNumber, pageSize } = req.query;
+      const result = await store.listApplication(pid, order, true, pageSize, pageNumber);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -55,7 +55,7 @@ export class ApplicationServ {
         logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
         return res.status(404).json(new ApiFail('Application not found'));
       }
-      const latestPipeline = await store.listPipeline(result.id, 'latest', false, 1, 1);
+      const latestPipeline = await store.listPipeline(result.id, 'latest', 'asc', false, 1, 1);
       if (latestPipeline.totalCount === 0) {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }

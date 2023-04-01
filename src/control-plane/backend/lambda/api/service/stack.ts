@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Stack, Output } from '@aws-sdk/client-cloudformation';
+import { Stack, Output } from '@aws-sdk/client-cloudformation';
 import {
   StartExecutionCommand,
   StartExecutionCommandOutput,
@@ -21,56 +21,12 @@ import {
 } from '@aws-sdk/client-sfn';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { sfnClient } from '../common/sfn';
+import { StackDataMap, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import { getETLPipelineStackParameters, getIngestionStackParameters, getKafkaConnectorStackParameters, Pipeline } from '../model/pipeline';
 import { getS3Object } from '../store/aws/s3';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
-
-export interface StackDataMap {
-  [name: string]: StackData;
-}
-
-export interface StackData {
-  readonly Input: SfnStackInput;
-  readonly Callback: SfnStackCallback;
-}
-
-interface SfnStackInput {
-  readonly Action: string;
-  readonly StackName: string;
-  readonly TemplateURL: string;
-  readonly Parameters: Parameter[];
-}
-
-interface SfnStackCallback {
-  readonly BucketName: string;
-  readonly BucketPrefix: string;
-}
-
-interface WorkflowTemplate {
-  readonly Version: string;
-  readonly Workflow: WorkflowParallel;
-}
-
-interface WorkflowParallel {
-  readonly Type: string;
-  readonly Branches: WorkflowParallelBranch[];
-  readonly End?: boolean;
-}
-
-interface WorkflowParallelBranch {
-  readonly StartAt: string;
-  readonly States: WorkflowState;
-}
-
-interface WorkflowState {
-  [name: string]: {
-    readonly Type: string;
-    readonly Data: any;
-    readonly End: boolean;
-  };
-}
 
 const store: ClickStreamStore = new DynamoDbStore();
 

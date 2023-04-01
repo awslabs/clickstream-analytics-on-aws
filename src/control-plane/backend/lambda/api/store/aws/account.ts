@@ -13,10 +13,7 @@
 
 import { AccountClient, ListRegionsCommand, Region, RegionOptStatus } from '@aws-sdk/client-account';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface ClickStreamRegion {
-  readonly id: string;
-}
+import { ClickStreamRegion } from '../../common/types';
 
 export const listRegions = async () => {
   const accountClient = new AccountClient({});

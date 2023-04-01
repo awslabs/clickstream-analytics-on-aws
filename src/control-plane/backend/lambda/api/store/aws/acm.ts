@@ -19,16 +19,10 @@ import {
 } from '@aws-sdk/client-acm';
 
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface CertificateInfo {
-  readonly arn: string;
-  readonly domain?: string;
-  readonly id?: string;
-  readonly name?: string;
-}
+import { Certificate } from '../../common/types';
 
 export const ListCertificates = async (region: string) => {
-  const certificates: CertificateInfo[] = [];
+  const certificates: Certificate[] = [];
   const acmClient = new ACMClient({ region });
   const records = await getPaginatedResults(async (Marker: any) => {
     const params: ListCertificatesCommand = new ListCertificatesCommand({

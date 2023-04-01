@@ -14,7 +14,7 @@
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
-import { ApiFail, ApiSuccess } from '../common/request-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { Pipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -26,8 +26,8 @@ const stackManager: StackManager = new StackManager();
 export class PipelineServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { pid, version, pageNumber, pageSize } = req.query;
-      const result = await store.listPipeline(pid, version, true, pageSize, pageNumber);
+      const { pid, version, order, pageNumber, pageSize } = req.query;
+      const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
       for (let pipeline of result.items as Pipeline[] ) {
         const curStatus = await stackManager.getExecutionStatus(pipeline.executionArn) ?? ExecutionStatus.FAILED;
         if (pipeline.status !== curStatus) {

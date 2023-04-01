@@ -22,14 +22,14 @@ export interface ClickStreamStore {
   createProject: (project: Project) => Promise<string>;
   getProject: (id: string) => Promise<Project | undefined>;
   updateProject: (project: Project) => Promise<void>;
-  listProjects: (pagination: boolean, pageSize: number, pageNumber: number) => Promise<ProjectList>;
+  listProjects: (order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<ProjectList>;
   deleteProject: (id: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
   addApplication: (app: Application) => Promise<string>;
   getApplication: (projectId: string, appId: string) => Promise<Application | undefined>;
   updateApplication: (app: Application) => Promise<void>;
-  listApplication: (projectId: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<ApplicationList>;
+  listApplication: (projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<ApplicationList>;
   deleteApplication: (projectId: string, appId: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 
@@ -37,7 +37,8 @@ export interface ClickStreamStore {
   getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<Pipeline | undefined>;
   updatePipeline: (pipeline: Pipeline, curPipeline: Pipeline) => Promise<void>;
   updatePipelineStatus: (pipeline: Pipeline, status: ExecutionStatus | string) => Promise<void>;
-  listPipeline: (projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
+  listPipeline: (projectId: string, version: string, order: string,
+    pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
   deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 

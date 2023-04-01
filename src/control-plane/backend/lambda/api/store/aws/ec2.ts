@@ -25,21 +25,8 @@ import {
 } from '@aws-sdk/client-ec2';
 import { RouteTableAssociation } from '@aws-sdk/client-ec2/dist-types/models/models_2';
 import { getPaginatedResults } from '../../common/paginator';
+import { ClickStreamVpc, ClickStreamSubnet } from '../../common/types';
 import { getValueFromTags, isEmpty } from '../../common/utils';
-
-export interface ClickStreamVpc {
-  readonly id: string;
-  readonly name: string;
-  readonly cidr: string;
-  readonly isDefault: boolean;
-}
-export interface ClickStreamSubnet {
-  readonly id: string;
-  readonly name: string;
-  readonly cidr: string;
-  readonly availabilityZone: string;
-  readonly type: string;
-}
 
 export const describeVpcs = async (region: string) => {
   const ec2Client = new EC2Client({ region });

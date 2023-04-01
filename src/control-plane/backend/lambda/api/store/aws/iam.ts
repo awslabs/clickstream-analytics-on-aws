@@ -13,12 +13,7 @@
 
 import { IAMClient, ListRolesCommand, Role } from '@aws-sdk/client-iam';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface IamRole {
-  readonly name: string;
-  readonly id: string;
-  readonly arn: string;
-}
+import { IamRole } from '../../common/types';
 
 export const listRoles = async (service: string) => {
   const iamClient = new IAMClient({});

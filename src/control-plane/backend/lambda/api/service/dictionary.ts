@@ -12,7 +12,7 @@
  */
 
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/request-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { tryToJson } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';

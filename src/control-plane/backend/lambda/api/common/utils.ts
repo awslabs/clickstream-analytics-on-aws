@@ -12,6 +12,7 @@
  */
 
 import { Tag } from '@aws-sdk/client-ec2';
+import { ALBRegionMappingObject } from './types';
 
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -42,8 +43,18 @@ function getValueFromTags(tag: string, tags: Tag[]): string {
   return '';
 }
 
+function getRegionAccount(map: ALBRegionMappingObject, region: string) {
+  for (let key in map) {
+    if (key === region) {
+      return map[key].account;
+    }
+  }
+  return undefined;
+}
+
 export {
   isEmpty,
   tryToJson,
   getValueFromTags,
+  getRegionAccount,
 };

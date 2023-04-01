@@ -545,7 +545,7 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
 export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   const store: ClickStreamStore = new DynamoDbStore();
-  const apps = await store.listApplication(pipeline.projectId, false, 1, 1);
+  const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
 
   const parameters: Parameter[] = [];
 

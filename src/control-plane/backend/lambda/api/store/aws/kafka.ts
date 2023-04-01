@@ -14,14 +14,7 @@
 import { Cluster, ClusterType, KafkaClient, ListClustersV2Command, ListNodesCommand, NodeInfo } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface ClickStreamMSKCluster {
-  readonly name: string;
-  readonly arn: string;
-  readonly type: string;
-  readonly state: string;
-  readonly securityGroupId: string;
-}
+import { MSKCluster } from '../../common/types';
 
 export const listMSKCluster = async (region: string, vpcId: string) => {
   const kafkaClient = new KafkaClient({ region });
@@ -36,7 +29,7 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
     };
   });
 
-  const clusters: ClickStreamMSKCluster[] = [];
+  const clusters: MSKCluster[] = [];
   for (let cluster of records as Cluster[]) {
     if (cluster.ClusterType === ClusterType.PROVISIONED) {
       const securityGroups = cluster.Provisioned?.BrokerNodeGroupInfo?.SecurityGroups;

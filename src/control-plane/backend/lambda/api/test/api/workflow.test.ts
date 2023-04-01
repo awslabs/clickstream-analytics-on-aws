@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
+import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { DynamoDBDocumentClient, GetCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { server } from '../../index';
 import { Pipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
-import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -36,7 +36,7 @@ describe('Pipeline test', () => {
         data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
 
@@ -233,7 +233,7 @@ describe('Pipeline test', () => {
         data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
 
@@ -495,22 +495,22 @@ describe('Pipeline test', () => {
         data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
           BrokerNodeInfo: {
-            Endpoints: ['test1', 'test2']
-          }
+            Endpoints: ['test1', 'test2'],
+          },
         },
         {
           BrokerNodeInfo: {
-            Endpoints: ['test3']
-          }
-        }
-      ]
+            Endpoints: ['test3'],
+          },
+        },
+      ],
     });
 
     const pipeline1 = {
@@ -771,7 +771,7 @@ describe('Pipeline test', () => {
         data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
 
@@ -978,7 +978,7 @@ describe('Pipeline test', () => {
         data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
 

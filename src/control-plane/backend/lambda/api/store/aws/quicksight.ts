@@ -14,14 +14,7 @@
 import { QuickSightClient, ListUsersCommand, User } from '@aws-sdk/client-quicksight';
 import { awsAccountId } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface ClickStreamQuickSightUser {
-  readonly userName: string;
-  readonly role: string;
-  readonly arn: string;
-  readonly active: string;
-  readonly email: string;
-}
+import { QuickSightUser } from '../../common/types';
 
 export const listQuickSightUsers = async (region: string) => {
   const quickSightClient = new QuickSightClient({ region });
@@ -38,7 +31,7 @@ export const listQuickSightUsers = async (region: string) => {
       results: queryResponse.UserList,
     };
   });
-  const users: ClickStreamQuickSightUser[] = [];
+  const users: QuickSightUser[] = [];
   for (let index in records as User[]) {
     users.push({
       userName: records[index].UserName,

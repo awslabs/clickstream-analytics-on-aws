@@ -13,7 +13,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/request-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { Plugin } from '../model/plugin';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';

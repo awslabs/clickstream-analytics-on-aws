@@ -21,13 +21,9 @@ import {
   GetBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
+import { ClickStreamBucket } from '../../common/types';
 
 const promisePool = pLimit(50);
-
-export interface ClickStreamBucket {
-  readonly name: string;
-  readonly location: string;
-}
 
 export const listBuckets = async (region: string) => {
   const s3Client = new S3Client({});

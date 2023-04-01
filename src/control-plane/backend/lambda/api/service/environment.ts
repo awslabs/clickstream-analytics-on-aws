@@ -12,7 +12,8 @@
  */
 
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
-import { ApiSuccess } from '../common/request-valid';
+import { ApiSuccess, Policy, PolicyStatement } from '../common/types';
+import { getRegionAccount } from '../common/utils';
 import { listRegions } from '../store/aws/account';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
@@ -23,37 +24,6 @@ import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
 import { describeRedshiftClusters } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
-
-export interface Policy {
-  readonly Version: string;
-  readonly Statement: PolicyStatement[];
-}
-
-export interface PolicyStatement {
-  readonly Sid?: string;
-  readonly Effect?: string;
-  readonly Action?: string | string[];
-  readonly Principal?: {
-    [name: string]: any;
-  };
-  readonly Resource?: string | string[];
-  readonly Condition?: any;
-}
-
-interface ALBRegionMappingObject {
-  [key: string]: {
-    account: string;
-  };
-}
-
-function getRegionAccount(map: ALBRegionMappingObject, region: string) {
-  for (let key in map) {
-    if (key === region) {
-      return map[key].account;
-    }
-  }
-  return undefined;
-}
 
 export class EnvironmentServ {
 

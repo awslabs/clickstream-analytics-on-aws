@@ -25,6 +25,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
+import { KeyVal } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
@@ -36,10 +37,6 @@ import { Plugin, PluginList } from '../../model/plugin';
 import { Project, ProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
-interface KeyVal<T> {
-  [key: string]: T;
-}
-
 export class DynamoDbStore implements ClickStreamStore {
 
   public async createProject(project: Project): Promise<string> {
@@ -48,6 +45,7 @@ export class DynamoDbStore implements ClickStreamStore {
       Item: {
         id: project.id,
         type: `METADATA#${project.id}`,
+        prefix: 'METADATA',
         name: project.name,
         tableName: project.tableName,
         description: project.description,
@@ -192,18 +190,21 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listProjects(pagination: boolean, pageSize: number, pageNumber: number): Promise<ProjectList> {
+  public async listProjects(order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ProjectList> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: ScanCommand = new ScanCommand({
+      const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
-        FilterExpression: 'begins_with(#type, :t) AND deleted = :d',
+        IndexName: prefixTimeGSIName,
+        KeyConditionExpression: '#prefix= :prefix',
+        FilterExpression: 'deleted = :d',
         ExpressionAttributeNames: {
-          '#type': 'type',
+          '#prefix': 'prefix',
         },
         ExpressionAttributeValues: {
-          ':t': 'METADATA#',
           ':d': false,
+          ':prefix': 'METADATA',
         },
+        ScanIndexForward: order === 'asc',
         ExclusiveStartKey,
       });
       const queryResponse = await docClient.send(params);
@@ -234,6 +235,7 @@ export class DynamoDbStore implements ClickStreamStore {
       Item: {
         id: app.id,
         type: `APP#${app.appId}`,
+        prefix: 'APP',
         projectId: app.projectId,
         appId: app.appId,
         name: app.name,
@@ -307,19 +309,22 @@ export class DynamoDbStore implements ClickStreamStore {
 
 
   public async listApplication(
-    projectId: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ApplicationList> {
+    projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ApplicationList> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: ScanCommand = new ScanCommand({
+      const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
-        FilterExpression: 'projectId = :p AND begins_with(#type, :t) AND deleted = :d',
+        IndexName: prefixTimeGSIName,
+        KeyConditionExpression: '#prefix= :prefix',
+        FilterExpression: 'projectId = :p AND deleted = :d',
         ExpressionAttributeNames: {
-          '#type': 'type',
+          '#prefix': 'prefix',
         },
         ExpressionAttributeValues: {
           ':p': projectId,
-          ':t': 'APP#',
           ':d': false,
+          ':prefix': 'APP',
         },
+        ScanIndexForward: order === 'asc',
         ExclusiveStartKey,
       });
       const queryResponse = await docClient.send(params);
@@ -386,6 +391,7 @@ export class DynamoDbStore implements ClickStreamStore {
       Item: {
         id: pipeline.id,
         type: `PIPELINE#${pipeline.pipelineId}#latest`,
+        prefix: 'PIPELINE',
         pipelineId: pipeline.pipelineId,
         projectId: pipeline.projectId,
         name: pipeline.name,
@@ -452,6 +458,7 @@ export class DynamoDbStore implements ClickStreamStore {
             Item: {
               id: { S: curPipeline.id },
               type: { S: `PIPELINE#${curPipeline.pipelineId}#${curPipeline.version}` },
+              prefix: { S: curPipeline.prefix },
               pipelineId: { S: curPipeline.pipelineId },
               projectId: { S: curPipeline.projectId },
               name: { S: curPipeline.name },
@@ -487,6 +494,7 @@ export class DynamoDbStore implements ClickStreamStore {
             ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
             // Define expressions for the new or updated attributes
             UpdateExpression: 'SET ' +
+              '#prefix = :prefix, ' +
               '#pipelineName = :name, ' +
               'description = :description, ' +
               '#region = :region, ' +
@@ -506,6 +514,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'updateAt = :updateAt, ' +
               '#pipelineOperator = :operator ',
             ExpressionAttributeNames: {
+              '#prefix': 'prefix',
               '#pipelineName': 'name',
               '#region': 'region',
               '#status': 'status',
@@ -514,6 +523,7 @@ export class DynamoDbStore implements ClickStreamStore {
               '#ConditionVersion': 'version',
             },
             ExpressionAttributeValues: {
+              ':prefix': { S: pipeline.prefix },
               ':name': { S: pipeline.name },
               ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
@@ -607,11 +617,11 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listPipeline(
-    projectId: string, version: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PipelineList> {
-    let filterExpression = 'begins_with(#type, :t) AND deleted = :d';
+    projectId: string, version: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PipelineList> {
+    let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
-    expressionAttributeValues.set(':t', 'PIPELINE#');
     expressionAttributeValues.set(':d', false);
+    expressionAttributeValues.set(':prefix', 'PIPELINE');
     if (!isEmpty(version)) {
       filterExpression = `${filterExpression} AND versionTag=:vt`;
       expressionAttributeValues.set(':vt', version);
@@ -621,17 +631,19 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':p', projectId);
     }
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: ScanCommand = new ScanCommand({
+      const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
+        IndexName: prefixTimeGSIName,
+        KeyConditionExpression: '#prefix= :prefix',
         FilterExpression: filterExpression,
         ExpressionAttributeNames: {
-          '#type': 'type',
+          '#prefix': 'prefix',
         },
         ExpressionAttributeValues: expressionAttributeValues,
+        ScanIndexForward: order === 'asc',
         ExclusiveStartKey,
       });
       const queryResponse = await docClient.send(params);
-
       return {
         marker: queryResponse.LastEvaluatedKey,
         results: queryResponse.Items,

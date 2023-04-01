@@ -13,7 +13,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/request-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { Project } from '../model/project';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -23,8 +23,8 @@ const store: ClickStreamStore = new DynamoDbStore();
 export class ProjectServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { pageNumber, pageSize } = req.query;
-      const result = await store.listProjects(true, pageSize, pageNumber);
+      const { order, pageNumber, pageSize } = req.query;
+      const result = await store.listProjects(order, true, pageSize, pageNumber);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -79,7 +79,7 @@ export class ProjectServ {
   public async verification(req: any, res: any, next: any) {
     try {
       const { tablename } = req.params;
-      const result = await store.listProjects(false, 1, 1);
+      const result = await store.listProjects('asc', false, 1, 1);
       let exist: boolean = false;
       for (let index in result.items) {
         if (result.items[index].tableName && result.items[index].tableName === tablename) {

@@ -14,39 +14,12 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { awsRegion } from './constants';
+import { ApiFail } from './types';
 import { isEmpty } from './utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
-
-export class ApiResponse {
-  public success: boolean;
-  public message: string;
-
-  constructor(success: boolean, message?: string) {
-    this.success = success;
-    this.message = message? message: '';
-  }
-}
-
-export class ApiSuccess extends ApiResponse {
-  public data?: any | never[];
-
-  constructor(data: any | never[], message?: string) {
-    super(true, message);
-    this.data = data;
-  }
-}
-
-export class ApiFail extends ApiResponse {
-  public error?: any;
-
-  constructor(message: string, error?: any) {
-    super(false, message);
-    this.error = error;
-  }
-}
 
 // can be reused by many routes
 // parallel processing
@@ -89,7 +62,7 @@ export const defaultOrderValueValid: CustomValidator = (value, { req }) => {
   if (req.query) {
     const { order } = value;
     if (isEmpty(order)) {
-      req.query.order = 'asc';
+      req.query.order = 'desc';
     } else {
       if (!['asc', 'desc'].includes(order)) {
         throw new Error('order in query must be: \'asc\', \'desc\'.');

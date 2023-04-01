@@ -11,15 +11,9 @@
  *  and limitations under the License.
  */
 
-import { RedshiftClient, DescribeClustersCommand, Cluster, Endpoint } from '@aws-sdk/client-redshift';
+import { RedshiftClient, DescribeClustersCommand, Cluster } from '@aws-sdk/client-redshift';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface RedshiftCluster {
-  readonly name: string;
-  readonly nodeType: string;
-  readonly endpoint?: Endpoint;
-  readonly status: string;
-}
+import { RedshiftCluster } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId: string) => {
   const redshiftClient = new RedshiftClient({ region });

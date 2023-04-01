@@ -13,13 +13,7 @@
 
 import { AthenaClient, ListWorkGroupsCommand, WorkGroupSummary } from '@aws-sdk/client-athena';
 import { getPaginatedResults } from '../../common/paginator';
-
-export interface WorkGroup {
-  readonly name: string;
-  readonly description: string;
-  readonly state: string;
-  readonly engineVersion: string;
-}
+import { WorkGroup } from '../../common/types';
 
 export const listWorkGroups = async (region: string) => {
   const athenaClient = new AthenaClient({ region });

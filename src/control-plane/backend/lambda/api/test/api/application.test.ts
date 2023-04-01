@@ -18,7 +18,7 @@ import {
   DynamoDBDocumentClient,
   PutCommand,
   ScanCommand,
-  GetCommand, GetCommandInput, UpdateCommand,
+  GetCommand, GetCommandInput, UpdateCommand, QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -185,7 +185,7 @@ describe('Application test', () => {
         iosAppStoreId: 'iosAppStoreId',
       },
     });
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         {
           name: 'Pipeline-01',
@@ -306,7 +306,7 @@ describe('Application test', () => {
   });
   it('Get application list', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Application-01' },
         { name: 'Application-02' },
@@ -335,7 +335,7 @@ describe('Application test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/app?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -348,7 +348,7 @@ describe('Application test', () => {
   });
   it('Get application list with page', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Application-01' },
         { name: 'Application-02' },

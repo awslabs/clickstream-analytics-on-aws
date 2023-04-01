@@ -54,7 +54,7 @@ describe('Pipeline test', () => {
 
     sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1 }, { id: 2 }],
     });
 
@@ -662,7 +662,7 @@ describe('Pipeline test', () => {
   it('Get pipeline list', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Pipeline-01' },
         { name: 'Pipeline-02' },
@@ -697,7 +697,7 @@ describe('Pipeline test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -711,7 +711,7 @@ describe('Pipeline test', () => {
   it('Get pipeline list with pid', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Pipeline-01' },
         { name: 'Pipeline-02' },
@@ -746,7 +746,7 @@ describe('Pipeline test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -760,7 +760,7 @@ describe('Pipeline test', () => {
   it('Get pipeline list with version', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Pipeline-01' },
         { name: 'Pipeline-02' },
@@ -795,7 +795,7 @@ describe('Pipeline test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -809,7 +809,7 @@ describe('Pipeline test', () => {
   it('Get pipeline list with page', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Pipeline-01' },
         { name: 'Pipeline-02' },

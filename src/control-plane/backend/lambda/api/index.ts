@@ -22,8 +22,9 @@ import {
   isValidEmpty,
   validate,
   validMatchParamId,
-  ApiFail, defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid,
+  defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid,
 } from './common/request-valid';
+import { ApiFail } from './common/types';
 import { JWTAuthorizer } from './middle-ware/authorizer';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
@@ -233,7 +234,8 @@ app.get('/api/project/verification/:tablename', async (req: express.Request, res
 app.get(
   '/api/project',
   validate([
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
+      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.list(req, res, next);
@@ -278,7 +280,8 @@ app.get(
   '/api/app',
   validate([
     query('pid').custom(isProjectEmptyAndExisted),
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
+      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.list(req, res, next);
@@ -344,7 +347,8 @@ app.get(
   '/api/pipeline',
   validate([
     query('pid').custom(isProjectExisted),
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
+      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.list(req, res, next);

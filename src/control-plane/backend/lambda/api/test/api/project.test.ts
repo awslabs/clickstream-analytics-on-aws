@@ -14,7 +14,7 @@
 import {
   DynamoDBDocumentClient,
   GetCommand,
-  PutCommand,
+  PutCommand, QueryCommand,
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -198,7 +198,7 @@ describe('Project test', () => {
     });
   });
   it('Get project list', async () => {
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Project-01' },
         { name: 'Project-02' },
@@ -227,7 +227,7 @@ describe('Project test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get('/api/project');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -240,7 +240,7 @@ describe('Project test', () => {
     });
   });
   it('Get project list with page', async () => {
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Project-01' },
         { name: 'Project-02' },
@@ -444,7 +444,7 @@ describe('Project test', () => {
     });
   });
   it('Verification project table name existed', async () => {
-    ddbMock.on(ScanCommand).resolves({
+    ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Project-01', tableName: 't1' },
         { name: 'Project-02', tableName: 't2' },
@@ -464,7 +464,7 @@ describe('Project test', () => {
     });
   });
   it('Verification project with mock error', async () => {
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get('/api/project/verification/t1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
