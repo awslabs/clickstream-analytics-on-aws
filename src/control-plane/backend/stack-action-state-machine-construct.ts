@@ -89,6 +89,7 @@ export class StackActionStateMachine extends Construct {
         StackName: JsonPath.stringAt('$.Input.StackName'),
         TemplateURL: JsonPath.stringAt('$.Input.TemplateURL'),
         Parameters: JsonPath.stringAt('$.Input.Parameters'),
+        DisableRollback: true,
         RoleARN: sfnCreateStackRole.roleArn,
         Capabilities: ['CAPABILITY_IAM'],
       },
@@ -112,6 +113,7 @@ export class StackActionStateMachine extends Construct {
       parameters: {
         StackName: JsonPath.stringAt('$.Input.StackName'),
         TemplateURL: JsonPath.stringAt('$.Input.TemplateURL'),
+        DisableRollback: true,
         Parameters: JsonPath.stringAt('$.Input.Parameters'),
         Capabilities: ['CAPABILITY_IAM'],
       },

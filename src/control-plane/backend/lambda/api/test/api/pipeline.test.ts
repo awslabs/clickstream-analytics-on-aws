@@ -19,6 +19,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
+import { WorkflowStateType } from '../../common/types';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -144,18 +145,15 @@ describe('Pipeline test', () => {
             },
           },
         },
-        // etl: {
-        //   sourceS3Bucket: {
-        //     name: 'EXAMPLE_BUCKET',
-        //     prefix: 'source',
-        //   },
-        //   sinkS3Bucket: {
-        //     name: 'EXAMPLE_BUCKET',
-        //     prefix: 'sink',
-        //   },
-        // },
         dataModel: {},
-        workflow: '',
+        workflow: {
+          Version: '2022-03-15',
+          Workflow: {
+            Type: WorkflowStateType.PASS,
+            End: true,
+            Branches: [],
+          },
+        },
         executionArn: '',
         version: '123',
         versionTag: 'latest',
@@ -243,6 +241,17 @@ describe('Pipeline test', () => {
         },
         etl: {},
         dataModel: {},
+        workflow: {
+          Version: '2022-03-15',
+          Workflow: {
+            Type: WorkflowStateType.PASS,
+            End: true,
+            Branches: [],
+          },
+        },
+        executionArn: '',
+        version: '123',
+        versionTag: 'latest',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -323,6 +332,17 @@ describe('Pipeline test', () => {
         },
         etl: {},
         dataModel: {},
+        workflow: {
+          Version: '2022-03-15',
+          Workflow: {
+            Type: WorkflowStateType.PASS,
+            End: true,
+            Branches: [],
+          },
+        },
+        executionArn: '',
+        version: '123',
+        versionTag: 'latest',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -664,9 +684,9 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Pipeline-01' },
-        { name: 'Pipeline-02' },
-        { name: 'Pipeline-03' },
+        { name: 'Pipeline-01', executionArn: 'executionArn' },
+        { name: 'Pipeline-02', executionArn: 'executionArn' },
+        { name: 'Pipeline-03', executionArn: 'executionArn' },
         { name: 'Pipeline-04' },
         { name: 'Pipeline-05' },
       ],
@@ -686,11 +706,11 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Pipeline-01', status: 'RUNNING' },
-          { name: 'Pipeline-02', status: 'RUNNING' },
-          { name: 'Pipeline-03', status: 'RUNNING' },
-          { name: 'Pipeline-04', status: 'RUNNING' },
-          { name: 'Pipeline-05', status: 'RUNNING' },
+          { name: 'Pipeline-01', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-02', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-03', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-04' },
+          { name: 'Pipeline-05' },
         ],
         totalCount: 5,
       },
@@ -713,9 +733,9 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Pipeline-01' },
-        { name: 'Pipeline-02' },
-        { name: 'Pipeline-03' },
+        { name: 'Pipeline-01', executionArn: 'executionArn' },
+        { name: 'Pipeline-02', executionArn: 'executionArn' },
+        { name: 'Pipeline-03', executionArn: 'executionArn' },
         { name: 'Pipeline-04' },
         { name: 'Pipeline-05' },
       ],
@@ -735,11 +755,11 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Pipeline-01', status: 'RUNNING' },
-          { name: 'Pipeline-02', status: 'RUNNING' },
-          { name: 'Pipeline-03', status: 'RUNNING' },
-          { name: 'Pipeline-04', status: 'RUNNING' },
-          { name: 'Pipeline-05', status: 'RUNNING' },
+          { name: 'Pipeline-01', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-02', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-03', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-04' },
+          { name: 'Pipeline-05' },
         ],
         totalCount: 5,
       },
@@ -762,9 +782,9 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Pipeline-01' },
-        { name: 'Pipeline-02' },
-        { name: 'Pipeline-03' },
+        { name: 'Pipeline-01', executionArn: 'executionArn' },
+        { name: 'Pipeline-02', executionArn: 'executionArn' },
+        { name: 'Pipeline-03', executionArn: 'executionArn' },
         { name: 'Pipeline-04' },
         { name: 'Pipeline-05' },
       ],
@@ -784,11 +804,11 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Pipeline-01', status: 'RUNNING' },
-          { name: 'Pipeline-02', status: 'RUNNING' },
-          { name: 'Pipeline-03', status: 'RUNNING' },
-          { name: 'Pipeline-04', status: 'RUNNING' },
-          { name: 'Pipeline-05', status: 'RUNNING' },
+          { name: 'Pipeline-01', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-02', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-03', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-04' },
+          { name: 'Pipeline-05' },
         ],
         totalCount: 5,
       },
@@ -811,9 +831,9 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'Pipeline-01' },
-        { name: 'Pipeline-02' },
-        { name: 'Pipeline-03' },
+        { name: 'Pipeline-01', executionArn: 'executionArn' },
+        { name: 'Pipeline-02', executionArn: 'executionArn' },
+        { name: 'Pipeline-03', executionArn: 'executionArn' },
         { name: 'Pipeline-04' },
         { name: 'Pipeline-05' },
       ],
@@ -833,8 +853,8 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Pipeline-03', status: 'RUNNING' },
-          { name: 'Pipeline-04', status: 'RUNNING' },
+          { name: 'Pipeline-03', executionArn: 'executionArn', status: 'RUNNING' },
+          { name: 'Pipeline-04' },
         ],
         totalCount: 5,
       },

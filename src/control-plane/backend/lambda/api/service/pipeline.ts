@@ -29,10 +29,12 @@ export class PipelineServ {
       const { pid, version, order, pageNumber, pageSize } = req.query;
       const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
       for (let pipeline of result.items as Pipeline[] ) {
-        const curStatus = await stackManager.getExecutionStatus(pipeline.executionArn) ?? ExecutionStatus.FAILED;
-        if (pipeline.status !== curStatus) {
-          pipeline.status = curStatus;
-          await store.updatePipelineStatus(pipeline, curStatus);
+        if (pipeline.executionArn) {
+          const curStatus = await stackManager.getExecutionStatus(pipeline.executionArn) ?? ExecutionStatus.FAILED;
+          if (pipeline.status !== curStatus) {
+            pipeline.status = curStatus;
+            await store.updatePipelineStatus(pipeline, curStatus);
+          }
         }
       }
       return res.json(new ApiSuccess(result));
@@ -50,12 +52,11 @@ export class PipelineServ {
       let pipeline: Pipeline = req.body;
 
       // state machine
-      const executionName = `main-${uuidv4()}`;
-      const workflow = await stackManager.generateWorkflow(pipeline, executionName);
-      pipeline.workflow = JSON.stringify(workflow);
-      const executionArn = await stackManager.execute(JSON.stringify(workflow.Workflow), executionName);
-      pipeline.executionArn = executionArn;
+      pipeline.executionName = `main-${uuidv4()}`;
+      pipeline.workflow = await stackManager.generateWorkflow(pipeline);
+      pipeline.executionArn = await stackManager.execute(pipeline.workflow, pipeline.executionName);
 
+      // save metadata
       const id = await store.addPipeline(pipeline);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
     } catch (error) {
@@ -71,10 +72,12 @@ export class PipelineServ {
       if (!result) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const curStatus = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
-      if (result.status !== curStatus) {
-        result.status = curStatus;
-        await store.updatePipelineStatus(result, curStatus);
+      if (result.executionArn) {
+        const curStatus = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
+        if (result.status !== curStatus) {
+          result.status = curStatus;
+          await store.updatePipelineStatus(result, curStatus);
+        }
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {

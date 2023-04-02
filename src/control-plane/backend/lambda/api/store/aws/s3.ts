@@ -43,6 +43,8 @@ export const listBuckets = async (region: string) => {
               name: bucketName,
               location: (res as GetBucketLocationCommandOutput).LocationConstraint ?? 'us-east-1',
             });
+          }).catch(_ => {
+            return;
           });
         }));
       }

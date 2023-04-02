@@ -228,7 +228,6 @@ export class DynamoDbStore implements ClickStreamStore {
     return projects;
   };
 
-
   public async addApplication(app: Application): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
@@ -252,7 +251,6 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
     return app.appId;
   };
-
 
   public async getApplication(projectId: string, appId: string): Promise<Application | undefined> {
     const params: GetCommand = new GetCommand({
@@ -307,7 +305,6 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-
   public async listApplication(
     projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ApplicationList> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
@@ -349,7 +346,6 @@ export class DynamoDbStore implements ClickStreamStore {
     return apps;
   };
 
-
   public async deleteApplication(projectId: string, appId: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
@@ -367,7 +363,6 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-
   public async isApplicationExisted(projectId: string, appId: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
@@ -383,7 +378,6 @@ export class DynamoDbStore implements ClickStreamStore {
     const app: Application = result.Item as Application;
     return app && !app.deleted;
   };
-
 
   public async addPipeline(pipeline: Pipeline): Promise<string> {
     const params: PutCommand = new PutCommand({
@@ -403,14 +397,15 @@ export class DynamoDbStore implements ClickStreamStore {
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataModel: pipeline.dataModel,
-        workflow: pipeline.workflow,
-        executionArn: pipeline.executionArn,
-        version: pipeline.version ? pipeline.version : Date.now().toString(),
+        workflow: pipeline.workflow ?? {},
+        executionName: pipeline.executionName ?? '',
+        executionArn: pipeline.executionArn ?? '',
+        version: pipeline.version ?? Date.now().toString(),
         versionTag: 'latest',
-        createAt: pipeline.createAt ? pipeline.createAt : Date.now(),
+        createAt: pipeline.createAt ?? Date.now(),
         updateAt: Date.now(),
-        operator: pipeline.operator ? pipeline.operator : '',
-        deleted: pipeline.deleted ? pipeline.deleted : false,
+        operator: pipeline.operator ?? '',
+        deleted: pipeline.deleted ?? false,
       },
     });
     await docClient.send(params);
@@ -418,7 +413,7 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async getPipeline(projectId: string, pipelineId: string, version?: string | undefined): Promise<Pipeline | undefined> {
-    let skVersion: string = version ? version : 'latest';
+    let skVersion: string = version ?? 'latest';
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -473,8 +468,9 @@ export class DynamoDbStore implements ClickStreamStore {
               ingestionServerRuntime: marshallCurPipeline.ingestionServerRuntime ?? { M: {} },
               etlRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
               dataModelRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
-              workflow: { S: curPipeline.workflow },
-              executionArn: { S: curPipeline.executionArn },
+              workflow: marshallCurPipeline.workflow ?? { M: {} },
+              executionName: { S: curPipeline.executionName ?? '' },
+              executionArn: { S: curPipeline.executionArn ?? '' },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
@@ -508,6 +504,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'etlRuntime = :etlRuntime, ' +
               'dataModelRuntime = :dataModelRuntime, ' +
               'workflow = :workflow, ' +
+              'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
               'version = :version, ' +
               'versionTag = :versionTag, ' +
@@ -537,8 +534,9 @@ export class DynamoDbStore implements ClickStreamStore {
               ':etlRuntime': marshallPipeline.etlRuntime ?? { M: {} },
               ':dataModelRuntime': marshallPipeline.dataModelRuntime ?? { M: {} },
               ':ConditionVersionValue': { S: pipeline.version },
-              ':workflow': { S: pipeline.workflow },
-              ':executionArn': { S: pipeline.executionArn },
+              ':workflow': marshallPipeline.workflow ?? { M: {} },
+              ':executionName': { S: curPipeline.executionName ?? '' },
+              ':executionArn': { S: curPipeline.executionArn ?? '' },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
@@ -665,7 +663,6 @@ export class DynamoDbStore implements ClickStreamStore {
     return pipelines;
   };
 
-
   public async isPipelineExisted(projectId: string, pipelineId: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
@@ -681,7 +678,6 @@ export class DynamoDbStore implements ClickStreamStore {
     const pipeline: Pipeline = result.Item as Pipeline;
     return pipeline && !pipeline.deleted;
   };
-
 
   public async getDictionary(name: string): Promise<Dictionary | undefined> {
     const params: GetCommand = new GetCommand({

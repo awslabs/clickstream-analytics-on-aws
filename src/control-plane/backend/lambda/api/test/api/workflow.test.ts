@@ -15,7 +15,8 @@ import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { Pipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
@@ -37,7 +38,13 @@ describe('Pipeline test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
+      Items: [{
+        id: 1,
+        appId: '1',
+      }, {
+        id: 2,
+        appId: '2',
+      }],
     });
 
     const pipeline1 = {
@@ -101,8 +108,8 @@ describe('Pipeline test', () => {
       },
       etl: undefined,
       dataModel: undefined,
-      workflow: '',
       executionArn: '',
+      executionName: 'executionName',
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -110,7 +117,7 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
 
     const expected = {
       Version: '2022-03-15',
@@ -123,7 +130,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -234,7 +241,13 @@ describe('Pipeline test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
+      Items: [{
+        id: 1,
+        appId: '1',
+      }, {
+        id: 2,
+        appId: '2',
+      }],
     });
 
     const pipeline1 = {
@@ -297,8 +310,8 @@ describe('Pipeline test', () => {
           },
         },
       },
-      workflow: '',
       executionArn: '',
+      executionName: 'executionName',
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -306,7 +319,7 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
 
     const expected = {
       Version: '2022-03-15',
@@ -319,7 +332,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -409,19 +422,14 @@ describe('Pipeline test', () => {
                     TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-kafka-stack.template.json',
                   },
                 },
-                End: true,
                 Type: 'Stack',
+                Next: 'KafkaConnector',
               },
-            },
-          },
-          {
-            StartAt: 'KafkaConnector',
-            States: {
               KafkaConnector: {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-kafka-connector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -573,8 +581,16 @@ describe('Pipeline test', () => {
           },
         },
       },
-      workflow: '',
+      workflow: {
+        Version: '2022-03-15',
+        Workflow: {
+          Type: WorkflowStateType.PASS,
+          End: true,
+          Branches: [],
+        },
+      },
       executionArn: '',
+      executionName: MOCK_EXECUTION_ID,
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -582,7 +598,7 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
 
     const expected = {
       Version: '2022-03-15',
@@ -595,7 +611,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -685,19 +701,14 @@ describe('Pipeline test', () => {
                     TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-kafka-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'KafkaConnector',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'KafkaConnector',
-            States: {
               KafkaConnector: {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-kafka-connector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -772,7 +783,13 @@ describe('Pipeline test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
+      Items: [{
+        id: 1,
+        appId: '1',
+      }, {
+        id: 2,
+        appId: '2',
+      }],
     });
 
     const pipeline1 = {
@@ -834,8 +851,8 @@ describe('Pipeline test', () => {
           },
         },
       },
-      workflow: '',
       executionArn: '',
+      executionName: MOCK_EXECUTION_ID,
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -843,7 +860,7 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
 
     const expected = {
       Version: '2022-03-15',
@@ -856,7 +873,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kinesis-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -979,7 +996,13 @@ describe('Pipeline test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
+      Items: [{
+        id: 1,
+        appId: '1',
+      }, {
+        id: 2,
+        appId: '2',
+      }],
     });
 
     const pipeline1 = {
@@ -1060,8 +1083,8 @@ describe('Pipeline test', () => {
         enrichPlugin: [],
       },
       dataModel: undefined,
-      workflow: '',
       executionArn: '',
+      executionName: MOCK_EXECUTION_ID,
       version: '123',
       versionTag: 'latest',
       createAt: 162321434322,
@@ -1069,7 +1092,7 @@ describe('Pipeline test', () => {
       operator: '',
       deleted: false,
     };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline, MOCK_PIPELINE_ID);
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
 
     const expected = {
       Version: '2022-03-15',
@@ -1082,7 +1105,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -1184,7 +1207,7 @@ describe('Pipeline test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/6666-6666/clickstream-etl-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-etl-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
@@ -1196,10 +1219,6 @@ describe('Pipeline test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
-                      },
-                      {
-                        ParameterKey: 'EntryPointJar',
-                        ParameterValue: 's3://MOCK_BUCKET/MOCK.jar',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -1243,15 +1262,19 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: '',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
-                        ParameterValue: '',
+                        ParameterValue: 's3://EXAMPLE_BUCKET/spark-etl-0.1.0.jar',
                       },
                       {
                         ParameterKey: 'S3PathPluginFiles',
-                        ParameterValue: '',
+                        ParameterValue: 's3://EXAMPLE_BUCKET/GeoLite2-City.mmdb',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
                       },
                     ],
                     StackName: 'clickstream-etl-6666-6666',
@@ -1297,6 +1320,586 @@ describe('Pipeline test', () => {
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream/feature/main/default/ingestion-server-s3-stack.template.json');
     templateURL = await stackManager.getTemplateUrl('ingestion_no');
     expect(templateURL).toEqual(undefined);
+
+  });
+  it('Set Workflow Type', async () => {
+    let workflowTemplate: WorkflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Type: WorkflowStateType.STACK,
+        Data: {
+          Input: {
+            Action: 'Create',
+            StackName: 'clickstream-sigle-test2',
+            TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+            Parameters: [
+              {
+                ParameterKey: 'QueueName',
+                ParameterValue: 'test1',
+              },
+            ],
+          },
+          Callback: {
+            BucketName: 'EXAMPLE_BUCKET',
+            BucketPrefix: 'clickstream/workflow/000000',
+          },
+        },
+      },
+    };
+    let res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    expect(res).toEqual({
+      Data: {
+        Callback: {
+          BucketName: 'EXAMPLE_BUCKET',
+          BucketPrefix: 'clickstream/workflow/000000',
+        },
+        Input: {
+          Action: 'Create',
+          Parameters: [
+            {
+              ParameterKey: 'QueueName',
+              ParameterValue: 'test1',
+            },
+          ],
+          StackName: 'clickstream-sigle-test2',
+          TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+        },
+      },
+      Type: 'Pass',
+    });
+
+    workflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Type: WorkflowStateType.PARALLEL,
+        Branches: [{
+          StartAt: 'Stack11',
+          States: {
+            Stack11: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Action: 'Create',
+                  StackName: 'clickstream-test11',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test11',
+                    },
+                  ],
+                },
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+              },
+              Next: 'Stack22',
+            },
+            Stack33: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Action: 'Create',
+                  StackName: 'clickstream-test33',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test33',
+                    },
+                  ],
+                },
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+              },
+              End: true,
+            },
+            Stack22: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Action: 'Create',
+                  StackName: 'clickstream-test22',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test22',
+                    },
+                  ],
+                },
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+              },
+              Next: 'Stack33',
+            },
+          },
+        }],
+      },
+    };
+    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    expect(res).toEqual({
+      Branches: [
+        {
+          StartAt: 'Stack11',
+          States: {
+            Stack11: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test11',
+                    },
+                  ],
+                  StackName: 'clickstream-test11',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              Next: 'Stack22',
+              Type: 'Pass',
+            },
+            Stack22: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test22',
+                    },
+                  ],
+                  StackName: 'clickstream-test22',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              Next: 'Stack33',
+              Type: 'Pass',
+            },
+            Stack33: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test33',
+                    },
+                  ],
+                  StackName: 'clickstream-test33',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+      ],
+      Type: 'Parallel',
+    });
+
+    workflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Type: WorkflowStateType.PARALLEL,
+        Branches: [
+          {
+            StartAt: 'Stack11',
+            States: {
+              Stack11: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test11',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test11',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Stack22',
+            States: {
+              Stack22: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test22',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test22',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Stack33',
+            States: {
+              Stack33: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test33',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test33',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+        ],
+      },
+    };
+    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    expect(res).toEqual({
+      Branches: [
+        {
+          StartAt: 'Stack11',
+          States: {
+            Stack11: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test11',
+                    },
+                  ],
+                  StackName: 'clickstream-test11',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+        {
+          StartAt: 'Stack22',
+          States: {
+            Stack22: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test22',
+                    },
+                  ],
+                  StackName: 'clickstream-test22',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+        {
+          StartAt: 'Stack33',
+          States: {
+            Stack33: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test33',
+                    },
+                  ],
+                  StackName: 'clickstream-test33',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+      ],
+      Type: 'Parallel',
+    });
+
+    workflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Type: WorkflowStateType.PARALLEL,
+        Branches: [
+          {
+            StartAt: 'Stack11',
+            States: {
+              Stack11: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test11',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test11',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                Next: 'Stack12',
+              },
+              Stack12: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test11',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test11',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Stack22',
+            States: {
+              Stack22: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test22',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test22',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Stack33',
+            States: {
+              Stack33: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    StackName: 'clickstream-test33',
+                    TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QueueName',
+                        ParameterValue: 'clickstream-test33',
+                      },
+                    ],
+                  },
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/000000',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+        ],
+      },
+    };
+    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    expect(res).toEqual({
+      Branches: [
+        {
+          StartAt: 'Stack11',
+          States: {
+            Stack11: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test11',
+                    },
+                  ],
+                  StackName: 'clickstream-test11',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              Next: 'Stack12',
+              Type: 'Pass',
+            },
+            Stack12: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test11',
+                    },
+                  ],
+                  StackName: 'clickstream-test11',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+        {
+          StartAt: 'Stack22',
+          States: {
+            Stack22: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test22',
+                    },
+                  ],
+                  StackName: 'clickstream-test22',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+        {
+          StartAt: 'Stack33',
+          States: {
+            Stack33: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/000000',
+                },
+                Input: {
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterKey: 'QueueName',
+                      ParameterValue: 'clickstream-test33',
+                    },
+                  ],
+                  StackName: 'clickstream-test33',
+                  TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
+                },
+              },
+              End: true,
+              Type: 'Pass',
+            },
+          },
+        },
+      ],
+      Type: 'Parallel',
+    });
 
   });
   afterAll((done) => {

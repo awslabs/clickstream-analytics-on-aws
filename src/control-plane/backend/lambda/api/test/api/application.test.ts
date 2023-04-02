@@ -11,16 +11,14 @@
  *  and limitations under the License.
  */
 
-import { Readable } from 'stream';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
   PutCommand,
   ScanCommand,
   GetCommand, GetCommandInput, UpdateCommand, QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
@@ -28,16 +26,41 @@ import { clickStreamTableName } from '../../common/constants';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
-const s3Mock = mockClient(S3Client);
+const sfnMock = mockClient(SFNClient);
+const cloudFormationClient = mockClient(CloudFormationClient);
 
 describe('Application test', () => {
   beforeEach(() => {
     ddbMock.reset();
-    s3Mock.reset();
+    sfnMock.reset();
+    cloudFormationClient.reset();
   });
   it('Create application', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: ExecutionStatus.SUCCEEDED,
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'App-01',
+            appId: MOCK_APP_ID,
+          },
+        ],
+      });
+    sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
@@ -54,8 +77,21 @@ describe('Application test', () => {
     expect(res.body.message).toEqual('Application created.');
     expect(res.body.success).toEqual(true);
   });
-  it('Create application with mock error', async () => {
+  it('Create application with mock ddb error', async () => {
     projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          pipelineId: MOCK_PROJECT_ID,
+          status: ExecutionStatus.SUCCEEDED,
+          ingestionServer: {
+            sinkType: 's3',
+          },
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        },
+      ],
+    });
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
       .rejects(new Error('Mock DynamoDB error'));;
@@ -75,6 +111,78 @@ describe('Application test', () => {
       success: false,
       message: 'Unexpected error occurred at server.',
       error: 'Error',
+    });
+  });
+  it('Create application with mock stack status error', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          pipelineId: MOCK_PROJECT_ID,
+          status: ExecutionStatus.RUNNING,
+          ingestionServer: {
+            sinkType: 's3',
+          },
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        },
+      ],
+    });
+    cloudFormationClient.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'ServerEndpointPath',
+              OutputValue: 'http://xxx/xxx',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_IN_PROGRESS,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    // Mock DynamoDB error
+    ddbMock.on(PutCommand).resolvesOnce({})
+      .rejects(new Error('Mock DynamoDB error'));;
+    const res = await request(app)
+      .post('/api/app')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: 'App-01',
+        description: 'Description of App-01',
+        platform: 'Web',
+        sdk: 'Clickstream SDK',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'The pipeline current status does not allow update.',
+    });
+  });
+  it('Create application with mock pipeline error', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .post('/api/app')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: 'App-01',
+        description: 'Description of App-01',
+        platform: 'Web',
+        sdk: 'Clickstream SDK',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'The latest pipeline not found.',
     });
   });
   it('Create application 400', async () => {
@@ -198,35 +306,20 @@ describe('Application test', () => {
         },
       ],
     });
-    // create Stream from string
-    const stream = new Readable();
-    stream.push(JSON.stringify({
-      MOCK_STACK: {
-        Capabilities: ['CAPABILITY_IAM'],
-        CreationTime: '2023-03-15T02:45:47.903Z',
-        Description: '',
-        DisableRollback: false,
-        DriftInformation: { StackDriftStatus: 'NOT_CHECKED' },
-        EnableTerminationProtection: false,
-        NotificationARNs: [],
-        Outputs: [
-          {
-            OutputKey: 'ServerEndpointPath',
-            OutputValue: 'http://xxx/xxx',
-          },
-        ],
-        Parameters: [],
-        RoleARN: '',
-        RollbackConfiguration: {},
-        StackId: '',
-        StackName: 'MOCK_STACK',
-        StackStatus: 'CREATE_COMPLETE',
-        Tags: [],
-      },
-    }));
-    stream.push(null); // end of stream
-    s3Mock.on(GetObjectCommand).resolves({
-      Body: sdkStreamMixin(stream),
+    cloudFormationClient.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000ingestionServerUrl',
+              OutputValue: 'http://xxx/xxx',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
     });
     let res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
@@ -522,6 +615,19 @@ describe('Application test', () => {
   it('Delete application', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          pipelineId: MOCK_PROJECT_ID,
+          status: ExecutionStatus.SUCCEEDED,
+          ingestionServer: {
+            sinkType: 's3',
+          },
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        },
+      ],
+    });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
@@ -543,6 +649,31 @@ describe('Application test', () => {
       success: false,
       message: 'Unexpected error occurred at server.',
       error: 'Error',
+    });
+  });
+  it('Delete application with error pipeline status', async () => {
+    projectExistedMock(ddbMock, true);
+    appExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          pipelineId: MOCK_PROJECT_ID,
+          status: ExecutionStatus.RUNNING,
+          ingestionServer: {
+            sinkType: 's3',
+          },
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        },
+      ],
+    });
+    let res = await request(app)
+      .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'The pipeline current status does not allow update.',
     });
   });
   it('Delete application with no pid', async () => {

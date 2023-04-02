@@ -70,6 +70,7 @@ export class ProjectServ {
     try {
       const { id } = req.params;
       await store.deleteProject(id);
+      // TODO：Delete pipeline stacks
       return res.json(new ApiSuccess(null, 'Project deleted.'));
     } catch (error) {
       next(error);

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Stack, Output } from '@aws-sdk/client-cloudformation';
+import { Parameter, Output } from '@aws-sdk/client-cloudformation';
 import {
   StartExecutionCommand,
   StartExecutionCommandOutput,
@@ -19,143 +19,221 @@ import {
   DescribeExecutionCommandOutput,
   ExecutionStatus,
 } from '@aws-sdk/client-sfn';
+import { v4 as uuidv4 } from 'uuid';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { sfnClient } from '../common/sfn';
-import { StackDataMap, WorkflowTemplate } from '../common/types';
+import { WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
-import { getETLPipelineStackParameters, getIngestionStackParameters, getKafkaConnectorStackParameters, Pipeline } from '../model/pipeline';
-import { getS3Object } from '../store/aws/s3';
+import {
+  getETLPipelineStackParameters,
+  getIngestionStackParameters,
+  getKafkaConnectorStackParameters,
+  Pipeline,
+} from '../model/pipeline';
+import { describeStack } from '../store/aws/cloudformation';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 
 export class StackManager {
-  public async generateWorkflow(pipeline: Pipeline, executionName: string): Promise<any> {
+  public async generateWorkflow(pipeline: Pipeline): Promise<WorkflowTemplate> {
 
-    const stackData = await this.getStackData(pipeline, executionName);
-    // TODO：read workflow template from dictionary
     const workflowTemplate: WorkflowTemplate = {
       Version: '2022-03-15',
       Workflow: {
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
         End: true,
-        Branches: [
-          {
-            StartAt: 'Ingestion',
-            States: {
-              Ingestion: {
-                Type: 'Stack',
-                Data: stackData.Ingestion,
-                End: true,
-              },
-            },
-          },
-        ],
+        Branches: [],
       },
     };
-    if (pipeline.ingestionServer.sinkType === 'kafka') {
-      workflowTemplate.Workflow.Branches.push({
-        StartAt: 'KafkaConnector',
-        States: {
-          KafkaConnector: {
-            Type: 'Stack',
-            Data: stackData.KafkaConnector,
-            End: true,
-          },
-        },
-      });
+    if (!isEmpty(pipeline.ingestionServer)) {
+      const branch = await this.getStackData(pipeline, 'Ingestion');
+      if (branch) {
+        workflowTemplate.Workflow.Branches?.push(branch);
+      }
     }
     if (!isEmpty(pipeline.etl)) {
-      workflowTemplate.Workflow.Branches.push({
-        StartAt: 'ETL',
-        States: {
-          ETL: {
-            Type: 'Stack',
-            Data: stackData.ETL,
-            End: true,
-          },
-        },
-      });
+      const branch = await this.getStackData(pipeline, 'ETL');
+      if (branch) {
+        workflowTemplate.Workflow.Branches?.push(branch);
+      }
     }
     return workflowTemplate;
   }
 
-  public async execute(input: string, name: string): Promise<string> {
+  public async updateETLWorkflow(pipeline: Pipeline): Promise<void> {
+    if (!pipeline.workflow) {
+      return;
+    }
+    const curPipeline = pipeline;
+
+    const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
+    const appIds: string[] = apps.items.map(a => a.appId);
+
+    let update: boolean = false;
+
+    // update AppIds Parameter
+    pipeline.workflow.Workflow = this.setWorkflowType(pipeline.workflow.Workflow, WorkflowStateType.PASS);
+    for (let branch of pipeline.workflow?.Workflow.Branches as WorkflowParallelBranch[]) {
+      if (Object.keys(branch.States).indexOf('ETL') > -1) {
+        for (let p of branch.States.ETL.Data?.Input.Parameters as Parameter[]) {
+          if (p.ParameterKey === 'AppIds' && p.ParameterValue !== appIds.join(',')) {
+            p.ParameterValue = appIds.join(',');
+            branch.States.ETL.Type = WorkflowStateType.STACK;
+            branch.States.ETL.Data!.Input.Action = 'Update';
+            update = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (update) {
+      // update stack
+      pipeline.executionName = `main-${uuidv4()}`;
+      pipeline.executionArn = await this.execute(pipeline.workflow, pipeline.executionName);
+      // update pipline metadata
+      await store.updatePipeline(pipeline, curPipeline);
+    }
+  }
+
+  public async generateDeleteWorkflow(pipeline: Pipeline): Promise<WorkflowTemplate> {
+    const workflowTemplate: WorkflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Type: WorkflowStateType.PARALLEL,
+        End: true,
+        Branches: [],
+      },
+    };
+    if (!isEmpty(pipeline.ingestionServer)) {
+      const branch = await this.getStackData(pipeline, 'Ingestion');
+      if (branch) {
+        workflowTemplate.Workflow.Branches?.push(branch);
+      }
+    }
+    if (!isEmpty(pipeline.etl)) {
+      const branch = await this.getStackData(pipeline, 'ETL');
+      if (branch) {
+        workflowTemplate.Workflow.Branches?.push(branch);
+      }
+    }
+    return workflowTemplate;
+  }
+
+  public async execute(workflow: WorkflowTemplate | undefined, executionName: string): Promise<string> {
+    if (workflow === undefined) {
+      throw new Error('Pipeline workflow is empty.');
+    }
     const params: StartExecutionCommand = new StartExecutionCommand({
       stateMachineArn: stackWorkflowStateMachineArn,
-      input: input,
-      name: name,
+      input: JSON.stringify(workflow.Workflow),
+      name: executionName,
     });
     const result: StartExecutionCommandOutput = await sfnClient.send(params);
     return result.executionArn ?? '';
   }
 
-  public async getStackData(pipeline: Pipeline, executionName: string): Promise<StackDataMap> {
+  public async getStackData(pipeline: Pipeline, type: string): Promise<WorkflowParallelBranch | undefined> {
     if (!stackWorkflowS3Bucket) {
-      throw Error('Stack Workflow S3Bucket can not empty.');
+      throw new Error('Stack Workflow S3Bucket can not empty.');
     }
-    const stackDataMap: StackDataMap = {};
+    if (type === 'Ingestion') {
+      const ingestionTemplateURL = await this.getTemplateUrl(`ingestion_${pipeline.ingestionServer.sinkType}`);
+      if (!ingestionTemplateURL) {
+        throw Error(`Template: ingestion_${pipeline.ingestionServer.sinkType} not found in dictionary.`);
+      }
+      const ingestionStackParameters = await getIngestionStackParameters(pipeline);
+      const ingestionStackName = this.getStackName(pipeline, 'ingestion');
+      const ingestionState: WorkflowState = {
+        Type: WorkflowStateType.STACK,
+        Data: {
+          Input: {
+            Action: 'Create',
+            StackName: ingestionStackName,
+            TemplateURL: ingestionTemplateURL,
+            Parameters: ingestionStackParameters,
+          },
+          Callback: {
+            BucketName: stackWorkflowS3Bucket,
+            BucketPrefix: `clickstream/workflow/${pipeline.executionName}/${ingestionStackName}`,
+          },
+        },
+      };
 
-    const ingestionTemplateURL = await this.getTemplateUrl(`ingestion_${pipeline.ingestionServer.sinkType}`);
-    if (!ingestionTemplateURL) {
-      throw Error(`Template: ingestion_${pipeline.ingestionServer.sinkType} not found in dictionary.`);
+      if (pipeline.ingestionServer.sinkType === 'kafka') {
+        const kafkaConnectorTemplateURL = await this.getTemplateUrl('kafka-s3-sink');
+        if (!kafkaConnectorTemplateURL) {
+          throw Error('Template: kafka-s3-sink not found in dictionary.');
+        }
+        const kafkaConnectorStackParameters = await getKafkaConnectorStackParameters(pipeline);
+        const kafkaConnectorStackName = this.getStackName(pipeline, 'kafka-connector');
+        const kafkaConnectorState: WorkflowState = {
+          Type: WorkflowStateType.STACK,
+          Data: {
+            Input: {
+              Action: 'Create',
+              StackName: kafkaConnectorStackName,
+              TemplateURL: kafkaConnectorTemplateURL,
+              Parameters: kafkaConnectorStackParameters,
+            },
+            Callback: {
+              BucketName: stackWorkflowS3Bucket,
+              BucketPrefix: `clickstream/workflow/${pipeline.executionName}/${kafkaConnectorStackName}`,
+            },
+          },
+          End: true,
+        };
+        ingestionState.Next = 'KafkaConnector';
+        return {
+          StartAt: 'Ingestion',
+          States: {
+            Ingestion: ingestionState,
+            KafkaConnector: kafkaConnectorState,
+          },
+        };
+      }
+      ingestionState.End = true;
+      return {
+        StartAt: 'Ingestion',
+        States: {
+          Ingestion: ingestionState,
+        },
+      };
     }
-    const ingestionStackParameters = await getIngestionStackParameters(pipeline);
-    const ingestionStackName = this.getStackName(pipeline, 'ingestion');
-    stackDataMap.Ingestion = {
-      Input: {
-        Action: 'Create',
-        StackName: ingestionStackName,
-        TemplateURL: ingestionTemplateURL,
-        Parameters: ingestionStackParameters,
-      },
-      Callback: {
-        BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `clickstream/workflow/${executionName}/${ingestionStackName}`,
-      },
-    };
+    if (type === 'ETL') {
+      const dataPipelineTemplateURL = await this.getTemplateUrl('data-pipeline');
+      if (!dataPipelineTemplateURL) {
+        throw Error('Template: data-pipeline not found in dictionary.');
+      }
 
-    const kafkaConnectorTemplateURL = await this.getTemplateUrl('kafka-s3-sink');
-    if (!kafkaConnectorTemplateURL) {
-      throw Error('Template: kafka-s3-sink not found in dictionary.');
+      const pipelineStackParameters = await getETLPipelineStackParameters(pipeline);
+      const pipelineStackName = this.getStackName(pipeline, 'etl');
+      const etlState: WorkflowState = {
+        Type: WorkflowStateType.STACK,
+        Data: {
+          Input: {
+            Action: 'Create',
+            StackName: pipelineStackName,
+            TemplateURL: dataPipelineTemplateURL,
+            Parameters: pipelineStackParameters,
+          },
+          Callback: {
+            BucketName: stackWorkflowS3Bucket,
+            BucketPrefix: `clickstream/workflow/${pipeline.executionName}/${pipelineStackName}`,
+          },
+        },
+        End: true,
+      };
+      return {
+        StartAt: 'ETL',
+        States: {
+          ETL: etlState,
+        },
+      };
     }
-    const kafkaConnectorStackParameters = await getKafkaConnectorStackParameters(pipeline);
-    const kafkaConnectorStackName = this.getStackName(pipeline, 'kafka-connector');
-    stackDataMap.KafkaConnector = {
-      Input: {
-        Action: 'Create',
-        StackName: kafkaConnectorStackName,
-        TemplateURL: kafkaConnectorTemplateURL,
-        Parameters: kafkaConnectorStackParameters,
-      },
-      Callback: {
-        BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `clickstream/workflow/${executionName}/${kafkaConnectorStackName}`,
-      },
-    };
-
-    const dataPipelineTemplateURL = await this.getTemplateUrl('data-pipeline');
-    if (!dataPipelineTemplateURL) {
-      throw Error('Template: data-pipeline not found in dictionary.');
-    }
-
-    const pipelineStackParameters = await getETLPipelineStackParameters(pipeline);
-    const pipelineStackName = this.getStackName(pipeline, 'etl');
-    stackDataMap.ETL = {
-      Input: {
-        Action: 'Create',
-        StackName: pipelineStackName,
-        TemplateURL: dataPipelineTemplateURL,
-        Parameters: pipelineStackParameters,
-      },
-      Callback: {
-        BucketName: stackWorkflowS3Bucket,
-        BucketPrefix: `clickstream/workflow/${executionName}/${pipelineStackName}`,
-      },
-    };
-
-    return stackDataMap;
+    return undefined;
   }
 
   public async getExecutionStatus(executionArn: string): Promise<ExecutionStatus | string | undefined> {
@@ -183,26 +261,20 @@ export class StackManager {
   };
 
   public async getStackOutput(pipeline: Pipeline, key: string, outputKey: string): Promise<string | undefined> {
-    if (isEmpty(pipeline.executionArn)) {
-      return undefined;
-    }
-    const executionSplit = pipeline.executionArn.split(':');
-    const executionName = executionSplit[executionSplit.length - 1];
-    const bucketPrefix = `clickstream/workflow/${executionName}/${this.getStackName(pipeline, key)}`;
-    if (stackWorkflowS3Bucket) {
-      const outputContents = await getS3Object(pipeline.region, stackWorkflowS3Bucket, `${bucketPrefix}/output.json`);
-      if (isEmpty(outputContents)) {
-        return undefined;
-      }
-      const stack = JSON.parse(outputContents) as {[name: string]: Stack};
-      const stackOutputs = Object.values(stack)[0].Outputs;
-      for (let out of stackOutputs as Output[]) {
-        if (out.OutputKey === outputKey) {
+    const stack = await describeStack(pipeline.region, this.getStackName(pipeline, key));
+    if (stack) {
+      for (let out of stack.Outputs as Output[]) {
+        if (out.OutputKey?.endsWith(outputKey)) {
           return out.OutputValue ?? '';
         }
       }
     }
     return undefined;
+  }
+
+  public async getStackStatus(pipeline: Pipeline, key: string): Promise<string | undefined> {
+    const stack = await describeStack(pipeline.region, this.getStackName(pipeline, key));
+    return stack ? stack.StackStatus : undefined;
   }
 
   public getStackName(pipeline: Pipeline, key: string): string {
@@ -211,6 +283,19 @@ export class StackManager {
     names.set('kafka-connector', `clickstream-kafka-connector-${pipeline.pipelineId}`);
     names.set('etl', `clickstream-etl-${pipeline.pipelineId}`);
     return names.get(key)?? '';
+  }
+
+  public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {
+    if (state.Type === 'Parallel') {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this.setWorkflowType(branch.States[key], type);
+        }
+      }
+    } else {
+      state.Type = type;
+    }
+    return state;
   }
 
 }

@@ -19,6 +19,7 @@ const MOCK_PROJECT_ID = '8888-8888';
 const MOCK_APP_ID = '7777-7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
+const MOCK_EXECUTION_ID = '3333-3333';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -103,6 +104,7 @@ export {
   MOCK_APP_ID,
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,
+  MOCK_EXECUTION_ID,
   tokenMock,
   projectExistedMock,
   appExistedMock,

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { logger } from '../common/powertools';
@@ -39,7 +40,18 @@ export class ApplicationServ {
       req.body.id = projectId;
       req.body.appId = uuidv4().replace(/-/g, '');
       let app: Application = req.body;
+      // Check pipeline status
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
+      if (latestPipelines.totalCount === 0) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      const pipeline = latestPipelines.items[0];
+      if (pipeline.status !== ExecutionStatus.SUCCEEDED) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
+      }
+
       const id = await store.addApplication(app);
+      await stackManager.updateETLWorkflow(pipeline);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -59,7 +71,7 @@ export class ApplicationServ {
       if (latestPipeline.totalCount === 0) {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
-      const outputValue = await stackManager.getStackOutput(latestPipeline.items[0], 'ingestion', 'ServerEndpointPath');
+      const outputValue = await stackManager.getStackOutput(latestPipeline.items[0], 'ingestion', 'ingestionServerUrl');
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -94,7 +106,18 @@ export class ApplicationServ {
     try {
       const { id } = req.params;
       const { pid } = req.query;
+      // Check pipeline status
+      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc', false, 1, 1);
+      if (latestPipelines.totalCount === 0) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      const pipeline = latestPipelines.items[0];
+      if (pipeline.status !== ExecutionStatus.SUCCEEDED) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
+      }
+
       await store.deleteApplication(pid, id);
+      await stackManager.updateETLWorkflow(pipeline);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

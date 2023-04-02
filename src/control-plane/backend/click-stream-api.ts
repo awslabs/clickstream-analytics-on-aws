@@ -221,6 +221,7 @@ export class ClickStreamApiConstruct extends Construct {
             'iam:ListServerCertificates',
             'states:DescribeExecution',
             'acm:ListCertificates',
+            'cloudformation:DescribeStacks',
           ],
         }),
       ],

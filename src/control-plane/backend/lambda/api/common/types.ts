@@ -64,17 +64,13 @@ export interface ALBRegionMappingObject {
   };
 }
 
-export interface StackDataMap {
-  [name: string]: StackData;
-}
-
 export interface StackData {
-  readonly Input: SfnStackInput;
+  Input: SfnStackInput;
   readonly Callback: SfnStackCallback;
 }
 
 export interface SfnStackInput {
-  readonly Action: string;
+  Action: string;
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
@@ -87,25 +83,27 @@ export interface SfnStackCallback {
 
 export interface WorkflowTemplate {
   readonly Version: string;
-  readonly Workflow: WorkflowParallel;
+  Workflow: WorkflowState;
 }
 
-export interface WorkflowParallel {
-  readonly Type: string;
-  readonly Branches: WorkflowParallelBranch[];
-  readonly End?: boolean;
+export interface WorkflowState {
+  Type: WorkflowStateType;
+  Data?: StackData;
+  readonly Branches?: WorkflowParallelBranch[];
+  End?: boolean;
+  Next?: string;
+}
+
+export enum WorkflowStateType {
+  PASS = 'Pass',
+  PARALLEL = 'Parallel',
+  STACK = 'Stack',
 }
 
 export interface WorkflowParallelBranch {
   readonly StartAt: string;
-  readonly States: WorkflowState;
-}
-
-export interface WorkflowState {
-  [name: string]: {
-    readonly Type: string;
-    readonly Data: any;
-    readonly End: boolean;
+  readonly States: {
+    [name: string]: WorkflowState;
   };
 }
 

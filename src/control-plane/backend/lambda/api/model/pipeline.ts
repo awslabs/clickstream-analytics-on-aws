@@ -13,6 +13,7 @@
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { WorkflowTemplate } from '../common/types';
 import { isEmpty } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
@@ -179,8 +180,7 @@ export interface ETL {
   readonly sourceS3Bucket: S3Bucket;
   readonly sinkS3Bucket: S3Bucket;
   readonly pipelineBucket: S3Bucket;
-  readonly transformPlugin?: string;
-  readonly enrichPlugin?: string[];
+  readonly outputFormat?: 'parquet' | 'json';
 }
 
 export interface KafkaS3Connector {
@@ -233,8 +233,9 @@ export interface Pipeline {
   readonly dataModel?: DataModel;
 
   status: ExecutionStatus | string;
-  workflow: string;
-  executionArn: string;
+  workflow?: WorkflowTemplate;
+  executionName?: string;
+  executionArn?: string;
 
   readonly version: string;
   readonly versionTag: string;
@@ -258,7 +259,7 @@ export function getBucketPrefix(pipeline: Pipeline, key: string, value: string |
     prefixs.set('data-ods', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/ods/`);
     prefixs.set('data-pipeline-temp', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/data/pipeline-temp/`);
     prefixs.set('kafka-connector-plugin', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/runtime/ingestion/kafka-connector/plugins/`);
-    return prefixs.get(key)?? '';
+    return prefixs.get(key) ?? '';
   }
   if (!value.endsWith('/')) {
     return `${value}/`;
@@ -281,7 +282,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: isEmpty(pipeline.network.privateSubnetIds) ?
-      pipeline.network.publicSubnetIds.join(','): pipeline.network.privateSubnetIds.join(','),
+      pipeline.network.publicSubnetIds.join(',') : pipeline.network.privateSubnetIds.join(','),
   });
   // Domain Information
   if (pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
@@ -353,11 +354,11 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
     });
     parameters.push({
       ParameterKey: 'S3BatchMaxBytes',
-      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes?? 30000000).toString(),
+      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes ?? 30000000).toString(),
     });
     parameters.push({
       ParameterKey: 'S3BatchTimeout',
-      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchTimeout?? 300).toString(),
+      ParameterValue: (pipeline.ingestionServer.sinkS3?.s3BatchTimeout ?? 300).toString(),
     });
 
   }
@@ -438,7 +439,7 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'DataS3Bucket',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.name?? pipeline.bucket.name,
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'DataS3Prefix',
@@ -560,11 +561,6 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
   });
 
   parameters.push({
-    ParameterKey: 'EntryPointJar',
-    ParameterValue: 's3://MOCK_BUCKET/MOCK.jar',
-  });
-
-  parameters.push({
     ParameterKey: 'ProjectId',
     ParameterValue: pipeline.projectId,
   });
@@ -577,7 +573,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'SourceS3Bucket',
-    ParameterValue: pipeline.etl?.sourceS3Bucket.name?? pipeline.bucket.name,
+    ParameterValue: pipeline.etl?.sourceS3Bucket.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'SourceS3Prefix',
@@ -586,7 +582,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'SinkS3Bucket',
-    ParameterValue: pipeline.etl?.sinkS3Bucket.name?? pipeline.bucket.name,
+    ParameterValue: pipeline.etl?.sinkS3Bucket.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'SinkS3Prefix',
@@ -595,7 +591,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'PipelineS3Bucket',
-    ParameterValue: pipeline.etl?.pipelineBucket.name?? pipeline.bucket.name,
+    ParameterValue: pipeline.etl?.pipelineBucket.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'PipelineS3Prefix',
@@ -614,18 +610,24 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'TransformerAndEnrichClassNames',
-    ParameterValue: '',
+    ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
   });
 
   parameters.push({
     ParameterKey: 'S3PathPluginJars',
-    ParameterValue: '',
+    ParameterValue: `s3://${pipeline.bucket.name}/spark-etl-0.1.0.jar`,
   });
 
   parameters.push({
     ParameterKey: 'S3PathPluginFiles',
-    ParameterValue: '',
+    ParameterValue: `s3://${pipeline.bucket.name}/GeoLite2-City.mmdb`,
   });
+
+  parameters.push({
+    ParameterKey: 'OutputFormat',
+    ParameterValue: pipeline.etl?.outputFormat ?? 'parquet',
+  });
+
 
   return parameters;
 }

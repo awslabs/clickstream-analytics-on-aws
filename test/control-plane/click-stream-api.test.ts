@@ -692,6 +692,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:ListServerCertificates',
               'states:DescribeExecution',
               'acm:ListCertificates',
+              'cloudformation:DescribeStacks',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -838,7 +839,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","RoleARN":"',
+            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","DisableRollback":true,"RoleARN":"',
             {
               'Fn::GetAtt': [
                 'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
@@ -857,7 +858,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","DisableRollback":true,"Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1597,6 +1598,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               'iam:ListServerCertificates',
               'states:DescribeExecution',
               'acm:ListCertificates',
+              'cloudformation:DescribeStacks',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -1817,7 +1819,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","RoleARN":"',
+            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","DisableRollback":true,"RoleARN":"',
             {
               'Fn::GetAtt': [
                 'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
@@ -1836,7 +1838,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","DisableRollback":true,"Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
