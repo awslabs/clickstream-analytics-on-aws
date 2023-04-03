@@ -158,4 +158,15 @@ export class RoleUtil {
     role.attachInlinePolicy(passRolePolicy);
     return role;
   }
+
+  public createEmrJobStateListenerLambdaRole() {
+    const role = createLambdaRole(
+      this.scope,
+      'EmrJobStateListenerLambdaRole',
+      true,
+      [],
+    );
+
+    return role;
+  }
 }

@@ -178,6 +178,7 @@ function addCfnNag(stack: Stack) {
     'partitionSyncerLambdaRole/DefaultPolicy/Resource',
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
+    'EmrJobStateListenerLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
   );

@@ -18,3 +18,7 @@ export function getSinkTableLocationPrefix(s3Prefix: string, projectId: string, 
 export function getPluginS3Prefix(pipelineS3Prefix:string, stackId: string, projectId: string, type: string = 'custom-plugins') {
   return `${pipelineS3Prefix}${stackId}/${projectId}/${type}/`;
 }
+
+export function getJobInfoKey(config: {pipelineS3Prefix: string; stackId: string; projectId: string}, jobId: string) {
+  return `${config.pipelineS3Prefix}job-info/${config.stackId}/${config.projectId}/job-${jobId}.json`;
+}

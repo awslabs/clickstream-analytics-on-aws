@@ -524,7 +524,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                     },
                     ':table/',
                     {
-                      Ref: 'GlueDatabase24880C74',
+                      Ref: Match.anyValue(),
                     },
                     '/',
                     {
@@ -604,7 +604,11 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                     {
                       Ref: Match.anyValue(),
                     },
-                    '/*',
+                    '/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '*',
                   ],
                 ],
               },
@@ -615,13 +619,6 @@ describe('DataPipelineStack Glue catalog resources test', () => {
               's3:GetObject*',
               's3:GetBucket*',
               's3:List*',
-              's3:DeleteObject*',
-              's3:PutObject',
-              's3:PutObjectLegalHold',
-              's3:PutObjectRetention',
-              's3:PutObjectTagging',
-              's3:PutObjectVersionTagging',
-              's3:Abort*',
             ],
             Effect: 'Allow',
             Resource: [
@@ -652,7 +649,11 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                     {
                       Ref: Match.anyValue(),
                     },
-                    '/*',
+                    '/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '*',
                   ],
                 ],
               },
@@ -1128,3 +1129,20 @@ test('Plugins nested stack has CopyAssetsCustomResource', ()=>{
     s3PathPluginFiles: RefAnyValue,
   });
 });
+
+
+test('AWS::Events::Rule for EMR Serverless Job Run State Change', ()=>{
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::Events::Rule', {
+    EventPattern: {
+      'source': [
+        'aws.emr-serverless',
+      ],
+      'detail-type': [
+        'EMR Serverless Job Run State Change',
+      ],
+    },
+    State: 'ENABLED',
+  });
+});
+

@@ -19,7 +19,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
-import { getSinkTableLocationPrefix } from '../../utils/utils-common';
+import { getJobInfoKey, getSinkTableLocationPrefix } from '../../utils/utils-common';
 
 const emrClient = new EMRServerlessClient({});
 
@@ -162,12 +162,8 @@ export class EMRServerlessUtil {
     startRunTime: string;
   }) {
     const bucketName = jobInfoObj.config.pipelineS3BucketName;
-    const jobKey = this.getJobInfoKey(jobInfoObj.config, jobInfoObj.jobRunId);
+    const jobKey = getJobInfoKey(jobInfoObj.config, jobInfoObj.jobRunId);
     await putStringToS3(JSON.stringify(jobInfoObj), bucketName, jobKey);
-
-    //TODO: change to write latest file when job successfully completed.
-    const latestKey = this.getJobInfoKey(jobInfoObj.config, 'latest');
-    await putStringToS3(JSON.stringify(jobInfoObj), bucketName, latestKey);
   }
 
   private static getConfig() {
@@ -198,9 +194,6 @@ export class EMRServerlessUtil {
     };
   }
 
-  private static getJobInfoKey(config: any, jobId: string) {
-    return `${config.pipelineS3Prefix}job-info/${config.stackId}/${config.projectId}/job-${jobId}.json`;
-  }
 
   /**
    *
@@ -223,7 +216,7 @@ export class EMRServerlessUtil {
       startTimestamp = getTimestampFromEvent(event.startTimestamp);
     } else {
       // get previous job info, set this.startTimestamp to previous.endTimestamp
-      const key = this.getJobInfoKey(config, 'latest');
+      const key = getJobInfoKey(config, 'latest');
       const previousTimestamp = await readS3ObjectAsJson(
         config.pipelineS3BucketName,
         key,

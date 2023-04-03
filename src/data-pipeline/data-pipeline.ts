@@ -137,6 +137,8 @@ export class DataPipelineConstruct extends Construct {
       sinkTable,
       emrServerlessApp.attrApplicationId,
     );
+
+    this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId);
   }
 
   private createGlueResources(projectId: string) {
@@ -226,5 +228,18 @@ export class DataPipelineConstruct extends Construct {
     });
 
     return serverlessApp;
+  }
+
+  private createEmrServerlessJobStateEventListener(applicationId: string) {
+    const emrJobStateListenerLambda = this.lambdaUtil.createEmrJobStateListenerLambda(
+      applicationId,
+    );
+    new Rule(this, 'EmrServerlessJobStateEventRule', {
+      eventPattern: {
+        source: ['aws.emr-serverless'],
+        detailType: ['EMR Serverless Job Run State Change'],
+      },
+      targets: [new LambdaFunction(emrJobStateListenerLambda)],
+    });
   }
 }

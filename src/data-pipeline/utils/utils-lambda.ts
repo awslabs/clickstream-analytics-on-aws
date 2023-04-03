@@ -87,8 +87,8 @@ export class LambdaUtil {
       sourceTableName,
       sinkTableName,
     );
-    this.props.sourceS3Bucket.grantReadWrite(lambdaRole);
-    this.props.sinkS3Bucket.grantReadWrite(lambdaRole);
+    this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
+    this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
 
     const lambdaSecurityGroup = this.createSecurityGroup(
       this.scope,
@@ -145,9 +145,9 @@ export class LambdaUtil {
   public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string): Function {
     const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTable, emrApplicationId);
 
-    this.props.sinkS3Bucket.grantReadWrite(lambdaRole);
-    this.props.sourceS3Bucket.grantRead(lambdaRole);
-    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole);
+    this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
+    this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
+    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
     const lambdaSecurityGroup = this.createSecurityGroup(
       this.scope,
@@ -187,6 +187,37 @@ export class LambdaUtil {
         S3_PATH_PLUGIN_FILES: this.props.s3PathPluginFiles,
         S3_PATH_ENTRY_POINT_JAR: this.props.entryPointJar,
         OUTPUT_FORMAT: this.props.outputFormat,
+        ...POWERTOOLS_ENVS,
+      },
+      ...functionSettings,
+    });
+    return fn;
+  }
+
+  public createEmrJobStateListenerLambda(emrApplicationId: string) {
+    const lambdaRole = this.roleUtil.createEmrJobStateListenerLambdaRole();
+    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
+
+    const lambdaSecurityGroup = this.createSecurityGroup(
+      this.scope,
+      this.props.vpc,
+      'EmrJobStateListenerFunctionSecurityGroup',
+      'Security Group for EMR Job State Listener',
+    );
+    const fn = new NodejsFunction(this.scope, 'EmrJobStateListenerFunction', {
+      role: lambdaRole,
+      securityGroups: [lambdaSecurityGroup],
+      vpc: this.props.vpc,
+      vpcSubnets: this.props.vpcSubnets,
+      awsSdkConnectionReuse: true,
+      entry: join(__dirname, '..', 'lambda', 'emr-job-state-listener', 'index.ts'),
+      reservedConcurrentExecutions: 1,
+      environment: {
+        EMR_SERVERLESS_APPLICATION_ID: emrApplicationId,
+        STACK_ID: getShortIdOfStack(Stack.of(this.scope)),
+        PROJECT_ID: this.props.projectId,
+        PIPELINE_S3_BUCKET_NAME: this.props.pipelineS3Bucket.bucketName,
+        PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,
