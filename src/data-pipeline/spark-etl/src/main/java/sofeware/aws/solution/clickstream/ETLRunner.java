@@ -64,7 +64,7 @@ public class ETLRunner {
                 p[0], p[1], p[2])).collect(Collectors.joining(" OR "));
         String sql = format("select * from `%s`.%s", config.database, config.sourceTable)
                 + format(" where (%s\n)", partitionsCondition)
-                + format(" AND ingest_time >= %d AND ingest_time <= %d", config.startTimestamp, config.endTimestamp);
+                + format(" AND ingest_time >= %d AND ingest_time < %d", config.startTimestamp, config.endTimestamp);
         log.info("sql: " + sql);
         return sql;
     }

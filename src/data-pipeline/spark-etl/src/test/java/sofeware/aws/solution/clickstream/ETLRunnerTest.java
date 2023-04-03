@@ -61,7 +61,7 @@ class ETLRunnerTest extends BaseSparkTest {
 
         String expectedSql= "select * from `fakeDatabase`.fakeSourceTable where (\n" +
                 "(year='2022' AND month='11' AND day='09')\n" +
-                ") AND ingest_time >= 1667963966000 AND ingest_time <= 1667969999000";
+                ") AND ingest_time >= 1667963966000 AND ingest_time < 1667969999000";
 
         assertEquals(expectedSql, sql);
         Dataset<Row> sourceDataset =
