@@ -97,11 +97,20 @@ stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
     synthesizer: synthesizer(),
   }),
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
+    useExistingOIDCProvider: true,
+    synthesizer: synthesizer(),
+  }),
 ], commonSuppresionRulesForCloudFrontS3PatternInGloabl);
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
     useCustomDomainName: true,
+    synthesizer: synthesizer(),
+  }),
+  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain-oidc', {
+    useCustomDomainName: true,
+    useExistingOIDCProvider: true,
     synthesizer: synthesizer(),
   }),
 ], [
