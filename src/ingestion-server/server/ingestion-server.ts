@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CfnCondition, Fn } from 'aws-cdk-lib';
 import {
   ISecurityGroup,
   IVpc,
@@ -21,10 +22,12 @@ import {
 import {
   ApplicationProtocol, IpAddressType,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { CfnAccelerator, CfnEndpointGroup, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
 import { IStream } from 'aws-cdk-lib/aws-kinesis';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { ITopic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
+import { createGlobalAccelerator } from './private/aga';
 import { createApplicationLoadBalancer, PROXY_PORT } from './private/alb';
 import { createECSClusterAndService } from './private/ecs-cluster';
 import { grantMskReadWrite } from './private/iam';
@@ -110,10 +113,13 @@ export interface IngestionServerProps {
   readonly notificationsTopic?: ITopic;
   readonly loadBalancerLogProps?: LogProps;
   readonly loadBalancerIpAddressType?: IpAddressType;
+  readonly enableGlobalAccelerator: string;
 }
 
 export class IngestionServer extends Construct {
-  public serverUrl: string;
+  public albUrl: string;
+  public acceleratorUrl: string;
+  public acceleratorEnableCondition: CfnCondition;
   constructor(scope: Construct, id: string, props: IngestionServerProps) {
     super(scope, id);
 
@@ -153,7 +159,7 @@ export class IngestionServer extends Construct {
     const albSg = createALBSecurityGroup(this, props.vpc, ports);
     ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
 
-    const { albUrl } = createApplicationLoadBalancer(this, {
+    const { alb, albUrl } = createApplicationLoadBalancer(this, {
       vpc: props.vpc,
       service: ecsService,
       sg: albSg,
@@ -166,6 +172,36 @@ export class IngestionServer extends Construct {
       albLogProps: props.loadBalancerLogProps,
       ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
     });
-    this.serverUrl = albUrl;
+    this.albUrl = albUrl;
+
+    const { accelerator, agListener, endpointGroup, acceleratorUrl } = createGlobalAccelerator(this, {
+      ports,
+      protocol: props.protocol,
+      alb,
+      endpointPath,
+    });
+
+    const acceleratorEnableCondition = new CfnCondition(
+      scope,
+      'acceleratorEnableCondition',
+      {
+        expression: Fn.conditionAnd(
+          Fn.conditionEquals(props.enableGlobalAccelerator, 'Yes'),
+          Fn.conditionNot(
+            Fn.conditionOr(
+              Fn.conditionEquals(Fn.ref('AWS::Region'), 'cn-north-1'),
+              Fn.conditionEquals(Fn.ref('AWS::Region'), 'cn-northwest-1'),
+            ),
+          ),
+        ),
+      },
+    );
+
+    (accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
+    (agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
+    (endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
+
+    this.acceleratorUrl = acceleratorUrl;
+    this.acceleratorEnableCondition = acceleratorEnableCondition;
   }
 }

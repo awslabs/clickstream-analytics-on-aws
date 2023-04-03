@@ -151,6 +151,17 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
+  const enableGlobalAcceleratorParam = new CfnParameter(
+    scope,
+    'EnableGlobalAccelerator',
+    {
+      description: 'Enable global accelerator',
+      type: 'String',
+      allowedValues: ['Yes', 'No'],
+      default: 'No',
+    },
+  );
+
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
       {
@@ -604,6 +615,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kafkaParams,
       s3Params,
       kinesisParams,
+      enableGlobalAcceleratorParam,
     },
   };
 }

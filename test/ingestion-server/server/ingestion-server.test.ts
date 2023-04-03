@@ -39,6 +39,11 @@ function findResources(template: Template, type: string) {
   return resources;
 }
 
+function findConditionByName(template: Template, conditionName: string) {
+  const allConditions = template.toJSON().Conditions;
+  return allConditions[conditionName];
+}
+
 test('Has one autoscaling group', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -360,7 +365,7 @@ test('Construct has property server url - https', () => {
     {},
   );
   const [https, _, path] =
-    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::Join'][1];
+    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::If'][1]['Fn::Join'][1];
   expect(https == 'https://').toBeTruthy();
   expect(path == '/test_me').toBeTruthy();
 });
@@ -377,7 +382,7 @@ test('Construct has property server url - http', () => {
     {},
   );
   const [http, _, path] =
-    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::Join'][1];
+    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::If'][1]['Fn::Join'][1];
   expect(http == 'http://').toBeTruthy();
   expect(path == '/test_me').toBeTruthy();
 });
@@ -732,5 +737,46 @@ test('ALB Listener does not have rule to check host if the protocol is HTTP', ()
 
   expect(listenerRule[0].Properties.Conditions.length == 1).toBeTruthy();
   expect(listenerRule[0].Properties.Conditions[0].PathPatternConfig.Values[0].startsWith('/test_end_point')).toBeTruthy();
+});
+
+test('Enable Global Accelerator feature', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withAccelerator: true,
+  });
+  const template = Template.fromStack(stack);
+  const accelerator = findResources(template, 'AWS::GlobalAccelerator::Accelerator');
+
+  expect(accelerator.length === 1).toBeTruthy();
+
+  const conditionName = accelerator[0].Condition;
+
+  const condition = findConditionByName(template, conditionName);
+
+  expect(condition['Fn::And'][0]).toEqual({ 'Fn::Equals': ['Yes', 'Yes'] });
+
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
+
+});
+
+test('Disable Global Accelerator feature', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+  });
+  const template = Template.fromStack(stack);
+  const accelerator = findResources(template, 'AWS::GlobalAccelerator::Accelerator');
+
+  expect(accelerator.length === 1).toBeTruthy();
+
+  const conditionName = accelerator[0].Condition;
+
+  const condition = findConditionByName(template, conditionName);
+
+  expect(condition['Fn::And'][0]).toEqual({ 'Fn::Equals': ['No', 'Yes'] });
+
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
+
 });
 

@@ -17,6 +17,7 @@ import {
   RemovalPolicy,
   Stack,
   StackProps,
+  Fn,
 } from 'aws-cdk-lib';
 import {
   FlowLogDestination,
@@ -140,6 +141,7 @@ export function createMSKSecurityGroup(
 
 export interface TestStackProps extends StackProps {
   withAlbAccessLog?: boolean;
+  withAccelerator?: boolean;
   withMskConfig?: boolean;
   withS3SinkConfig?: boolean;
   withKinesisSinkConfig?: boolean;
@@ -161,6 +163,7 @@ export class TestStack extends Stack {
       withS3SinkConfig: false,
       withKinesisSinkConfig: false,
       withAlbAccessLog: false,
+      withAccelerator: false,
       serverCorsOrigin: '*',
       domainName: 'www.example.com',
       certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
@@ -192,6 +195,11 @@ export class TestStack extends Stack {
           bucket: logS3Bucket,
         },
       };
+    }
+
+    let enableGlobalAccelerator = 'No';
+    if (props.withAccelerator) {
+      enableGlobalAccelerator = 'Yes';
     }
 
     const notificationsTopic = createSns(this);
@@ -262,6 +270,7 @@ export class TestStack extends Stack {
       ...accessLogConfig,
       s3SinkConfig,
       kinesisSinkConfig,
+      enableGlobalAccelerator,
     };
 
     const ingestionServer = new IngestionServer(
@@ -269,8 +278,14 @@ export class TestStack extends Stack {
       'IngestionServer',
       serverProps,
     );
+
+    const ingestionServerUrl = Fn.conditionIf(
+      ingestionServer.acceleratorEnableCondition.logicalId,
+      ingestionServer.acceleratorUrl,
+      ingestionServer.albUrl).toString();
+
     new CfnOutput(this, 'ingestionServerUrl', {
-      value: ingestionServer.serverUrl,
+      value: ingestionServerUrl,
       description: 'Server Url',
     });
   }

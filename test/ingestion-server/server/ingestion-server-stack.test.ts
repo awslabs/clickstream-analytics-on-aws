@@ -264,6 +264,15 @@ test('Has Parameter EnableApplicationLoadBalancerAccessLog', () => {
   });
 });
 
+test('Has Parameter EnableGlobalAccelerator', () => {
+  templates.forEach((template) => {
+    template.hasParameter('EnableGlobalAccelerator', {
+      Type: 'String',
+      Default: 'No',
+    });
+  });
+});
+
 test('Has Parameter LogS3Bucket', () => {
   templates.forEach((template) => {
     template.hasParameter('LogS3Bucket', {
@@ -531,6 +540,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'LogS3Prefix',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
+    'EnableGlobalAccelerator',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -565,8 +575,10 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'ScaleOnCpuUtilizationPercent',
     'KafkaBrokers',
     'KafkaTopic',
+    'EnableGlobalAccelerator',
   ];
 
+  console.log('');
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
       if (nestStack.Properties.Parameters[pk].Ref) {
@@ -602,6 +614,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'LogS3Prefix',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
+    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -634,6 +647,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'VpcId',
     'PublicSubnetIds',
     'ScaleOnCpuUtilizationPercent',
+    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -674,6 +688,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'S3DataPrefix',
     'S3BatchMaxBytes',
     'S3BatchTimeout',
+    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -709,6 +724,7 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'S3DataPrefix',
     'S3BatchMaxBytes',
     'S3BatchTimeout',
+    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(

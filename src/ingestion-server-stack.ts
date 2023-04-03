@@ -128,6 +128,7 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly enableApplicationLoadBalancerAccessLog?: string;
   readonly logBucketName?: string;
   readonly logPrefix?: string;
+  readonly enableGlobalAccelerator: string;
 
   // Kafka parameters
   readonly kafkaBrokers?: string;
@@ -147,7 +148,6 @@ interface IngestionServerNestStackProps extends StackProps {
 }
 
 export class IngestionServerNestedStack extends NestedStack {
-  public serverUrl: string;
   constructor(
     scope: Construct,
     id: string,
@@ -283,6 +283,7 @@ export class IngestionServerNestedStack extends NestedStack {
       kafkaSinkConfig,
       s3SinkConfig,
       kinesisSinkConfig,
+      enableGlobalAccelerator: props.enableGlobalAccelerator,
     };
 
     const ingestionServer = new IngestionServer(
@@ -290,11 +291,17 @@ export class IngestionServerNestedStack extends NestedStack {
       'IngestionServer',
       serverProps,
     );
+
+    const ingestionServerUrl = Fn.conditionIf(
+      ingestionServer.acceleratorEnableCondition.logicalId,
+      ingestionServer.acceleratorUrl,
+      ingestionServer.albUrl).toString();
+
     new CfnOutput(this, 'ingestionServerUrl', {
-      value: ingestionServer.serverUrl,
+      value: ingestionServerUrl,
       description: 'Server Url',
     });
-    this.serverUrl = ingestionServer.serverUrl;
+
     addCdkNagToStack(this);
   }
 }
@@ -346,6 +353,7 @@ export class IngestionServerStack extends Stack {
         kafkaParams,
         s3Params,
         kinesisParams,
+        enableGlobalAcceleratorParam,
       },
     } = createStackParameters(this, props);
 
@@ -373,6 +381,7 @@ export class IngestionServerStack extends Stack {
       domainName: domainNameParam.valueAsString,
       certificateArn: certificateArnParam.valueAsString,
       protocol: protocolParam.valueAsString,
+      enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
     };
 
     let nestStackProps = { ... nestStackCommonProps };
@@ -460,10 +469,12 @@ function createNestedStackWithCondition(
 
   addCfnNagToIngestionServer(ingestionServer);
 
-  const outputUrl = new CfnOutput(scope, id + 'ingestionServerUrl', {
-    value: ingestionServer.serverUrl,
+  const ingestionServerUrl = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
+
+  const output = new CfnOutput(scope, id + 'ingestionServerUrl', {
+    value: ingestionServerUrl,
     description: 'Server Url',
   });
-  outputUrl.condition = condition;
+  output.condition = condition;
   return ingestionServer;
 }
