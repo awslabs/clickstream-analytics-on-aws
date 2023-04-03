@@ -42,6 +42,7 @@ import {
   OriginProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
+import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
 import { HttpOrigin, HttpOriginProps, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { PolicyStatement, Effect, ServicePrincipal, CanonicalUserPrincipal } from 'aws-cdk-lib/aws-iam';
 
@@ -70,6 +71,7 @@ export interface DistributionProps {
   readonly enableIpv6?: boolean;
   readonly cachedMethods?: CachedMethods;
   readonly logProps?: LogProps;
+  readonly functionAssociations?: FunctionAssociation[];
 }
 
 export interface FrontendProps {
@@ -283,6 +285,7 @@ export class CloudFrontS3Portal extends Construct {
             minTtl: Duration.seconds(0),
             maxTtl: Duration.days(30),
           }),
+          functionAssociations: props.distributionProps?.functionAssociations,
         },
         defaultRootObject: 'index.html',
         priceClass: PriceClass.PRICE_CLASS_ALL,

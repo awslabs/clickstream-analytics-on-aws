@@ -12,17 +12,21 @@
  */
 
 import { join } from 'path';
-import { Stack, StackProps, CfnOutput, Fn, IAspect, CfnResource, Aspects, DockerImage, Duration } from 'aws-cdk-lib';
+import { Aspects, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   CfnDistribution,
+  FunctionCode,
+  FunctionEventType,
   OriginProtocolPolicy,
   OriginRequestCookieBehavior,
   OriginRequestPolicy,
   OriginRequestQueryStringBehavior,
+  Function,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
+import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
 import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -30,23 +34,16 @@ import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import {
-  addCfnNagToStack,
-  addCfnNagSuppressRules,
-  addCfnNagForLogRetention,
-  addCfnNagForCustomResourceProvider,
-} from './common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack } from './common/cfn-nag';
 import { LogBucket } from './common/log-bucket';
 import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
-import { CloudFrontS3Portal, DomainProps, CNCloudFrontS3PortalProps } from './control-plane/cloudfront-s3-portal';
+import { CloudFrontS3Portal, CNCloudFrontS3PortalProps, DomainProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
-import {
-  supressWarningsForCloudFrontS3Portal,
-} from './control-plane/private/nag';
+import { supressWarningsForCloudFrontS3Portal } from './control-plane/private/nag';
 import { SolutionCognito } from './control-plane/private/solution-cognito';
 import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 
@@ -132,6 +129,27 @@ export class CloudFrontControlPlaneStack extends Stack {
       }
     }
 
+    const functionAssociations: FunctionAssociation[] = [];
+    if (!props?.targetToCNRegions) {
+      functionAssociations.push({
+        function: new Function(this, 'FrontRewriteFunction', {
+          code: FunctionCode.fromInline(`function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+  if (uri.startsWith('/signin') || 
+    uri.startsWith('/projects') || 
+    uri.startsWith('/project') || 
+    uri.startsWith('/pipelines') || 
+    uri.startsWith('/plugins')) {
+      request.uri = '/index.html'; 
+  }
+  return request; 
+}`),
+        }),
+        eventType: FunctionEventType.VIEWER_REQUEST,
+      });
+    }
+
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
         assetPath: join(__dirname, '../frontend'),
@@ -153,6 +171,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           enableAccessLog: true,
           bucket: solutionBucket.bucket,
         },
+        functionAssociations: functionAssociations,
       },
     });
 
@@ -261,20 +280,22 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));
 
-    const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;
+    if (props?.targetToCNRegions) {
+      const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;
 
-    //This is a tricky to avoid 403 error when aceess paths except /index.html
-    //TODO issue #17
-    portalDist.addPropertyOverride(
-      'DistributionConfig.CustomErrorResponses',
-      [
-        {
-          ErrorCode: 403,
-          ResponseCode: 200,
-          ResponsePagePath: '/index.html',
-        },
-      ],
-    );
+      //This is a tricky to avoid 403 error when aceess paths except /index.html
+      //TODO issue #17
+      portalDist.addPropertyOverride(
+        'DistributionConfig.CustomErrorResponses',
+        [
+          {
+            ErrorCode: 403,
+            ResponseCode: 200,
+            ResponsePagePath: '/index.html',
+          },
+        ],
+      );
+    }
 
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {

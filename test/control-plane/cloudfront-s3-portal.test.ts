@@ -18,7 +18,13 @@ import {
   Template,
 } from 'aws-cdk-lib/assertions';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { OriginProtocolPolicy, OriginRequestCookieBehavior, OriginRequestPolicy, OriginRequestQueryStringBehavior } from 'aws-cdk-lib/aws-cloudfront';
+import {
+  Function, FunctionCode, FunctionEventType,
+  OriginProtocolPolicy,
+  OriginRequestCookieBehavior,
+  OriginRequestPolicy,
+  OriginRequestQueryStringBehavior,
+} from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
@@ -35,6 +41,14 @@ new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
       'echo test > /asset-output/test',
     ],
     autoInvalidFilePaths: ['/index.html'],
+  },
+  distributionProps: {
+    functionAssociations: [{
+      function: new Function(commonTestStack, 'FrontRewriteFunction', {
+        code: FunctionCode.fromInline('function handler(event) { return event; }'),
+      }),
+      eventType: FunctionEventType.VIEWER_REQUEST,
+    }],
   },
 });
 const commonTemplate = Template.fromStack(commonTestStack);
@@ -526,6 +540,55 @@ describe('CloudFrontS3Portal', () => {
             OriginPath: '/prod',
           },
         ],
+      },
+    });
+  });
+
+  test('Check cloudfront function', () => {
+    commonTemplate.hasResourceProperties('AWS::CloudFront::Function', {
+      FunctionCode: 'function handler(event) { return event; }',
+      FunctionConfig: {
+        Comment: {
+          'Fn::Join': [
+            '',
+            [
+              {
+                Ref: 'AWS::Region',
+              },
+              'comTestStackFrontRewriteFunctionD446CE04',
+            ],
+          ],
+        },
+        Runtime: 'cloudfront-js-1.0',
+      },
+      Name: {
+        'Fn::Join': [
+          '',
+          [
+            {
+              Ref: 'AWS::Region',
+            },
+            'comTestStackFrontRewriteFunctionD446CE04',
+          ],
+        ],
+      },
+      AutoPublish: true,
+    });
+    commonTemplate.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        DefaultCacheBehavior: {
+          FunctionAssociations: [
+            {
+              EventType: 'viewer-request',
+              FunctionARN: {
+                'Fn::GetAtt': [
+                  'FrontRewriteFunction560E1714',
+                  'FunctionARN',
+                ],
+              },
+            },
+          ],
+        },
       },
     });
   });
