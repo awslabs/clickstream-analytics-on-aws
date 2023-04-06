@@ -12,6 +12,7 @@
  */
 
 import { AccountClient, ListRegionsCommand } from '@aws-sdk/client-account';
+import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
 import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
@@ -19,11 +20,11 @@ import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
-import { S3Client, ListBucketsCommand, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
 import { app, server } from '../../index';
-// import { ALBLogServiceAccountMapping } from '../../common/alb-ln';
 
 const accountClientMock = mockClient(AccountClient);
 const ec2ClientMock = mockClient(EC2Client);
@@ -34,6 +35,7 @@ const quickSightClient = mockClient(QuickSightClient);
 const route53Client = mockClient(Route53Client);
 const athenaClient = mockClient(AthenaClient);
 const iamClient = mockClient(IAMClient);
+const acmClient = mockClient(ACMClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
@@ -46,6 +48,7 @@ describe('Account Env test', () => {
     route53Client.reset();
     athenaClient.reset();
     iamClient.reset();
+    acmClient.reset();
   });
   it('Get regions', async () => {
     accountClientMock.on(ListRegionsCommand).resolves({
@@ -534,119 +537,6 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Check bucket policy', async () => {
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    let res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=MOCK_NO_REGION&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::555555555555:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET1/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
-
-    s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/*"}]}',
-    });
-    res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
-  });
   it('Get MSK cluster(Provisioned)', async () => {
     kafkaClient.on(ListClustersV2Command).resolves({
       ClusterInfoList: [
@@ -1051,6 +941,86 @@ describe('Account Env test', () => {
         },
       ],
     });
+  });
+  it('Get ACM Certificates', async () => {
+    acmClient.on(ListCertificatesCommand).resolves({
+      CertificateSummaryList: [
+        {
+          CertificateArn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+          DomainName: 'example0.com',
+          ExtendedKeyUsages: [
+            'TLS_WEB_SERVER_AUTHENTICATION',
+            'TLS_WEB_CLIENT_AUTHENTICATION',
+          ],
+          HasAdditionalSubjectAlternativeNames: false,
+          InUse: true,
+          KeyAlgorithm: 'RSA-2048',
+          KeyUsages: [
+            'DIGITAL_SIGNATURE',
+            'KEY_ENCIPHERMENT',
+          ],
+          RenewalEligibility: 'ELIGIBLE',
+          Status: 'ISSUED',
+          SubjectAlternativeNameSummaries: [
+            'example0.com',
+          ],
+          Type: 'AMAZON_ISSUED',
+        },
+        {
+          CertificateArn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/7215dafa-2014-40d8-804b-c89ac8f136b4',
+          DomainName: 'example1.com',
+          ExtendedKeyUsages: [
+            'TLS_WEB_SERVER_AUTHENTICATION',
+            'TLS_WEB_CLIENT_AUTHENTICATION',
+          ],
+          HasAdditionalSubjectAlternativeNames: false,
+          InUse: false,
+          KeyAlgorithm: 'EC-prime256v1',
+          KeyUsages: [
+            'DIGITAL_SIGNATURE',
+          ],
+          RenewalEligibility: 'INELIGIBLE',
+          Status: 'ISSUED',
+          SubjectAlternativeNameSummaries: [
+            'example1.com',
+          ],
+          Type: 'AMAZON_ISSUED',
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/acm/certificates?region=ap-southeast-1');
+    expect(acmClient).toHaveReceivedCommandTimes(ListCertificatesCommand, 1);
+    expect(acmClient).toHaveReceivedCommandWith(ListCertificatesCommand, {
+      CertificateStatuses: [CertificateStatus.ISSUED],
+      Includes: {
+        keyTypes: [
+          KeyAlgorithm.EC_prime256v1,
+          KeyAlgorithm.EC_secp384r1,
+          KeyAlgorithm.EC_prime256v1,
+          KeyAlgorithm.RSA_1024,
+          KeyAlgorithm.RSA_2048,
+          KeyAlgorithm.RSA_3072,
+          KeyAlgorithm.RSA_4096,
+        ],
+      },
+    });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+          domain: 'example0.com',
+        },
+        {
+          arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/7215dafa-2014-40d8-804b-c89ac8f136b4',
+          domain: 'example1.com',
+        },
+      ],
+    });
+
   });
 
   afterAll((done) => {

@@ -12,13 +12,22 @@
  */
 
 import { join } from 'path';
-import { LogLevel } from '@aws-sdk/client-sfn';
 import { Aws, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { StateMachine, TaskInput, JsonPath, IntegrationPattern, Choice, Condition, Map as SFNMap, Pass } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+  Choice,
+  Condition,
+  IntegrationPattern,
+  JsonPath,
+  LogLevel,
+  Map as SFNMap,
+  Pass,
+  StateMachine,
+  TaskInput,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions/lib/state-machine';
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';

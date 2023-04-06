@@ -16,6 +16,7 @@ import {
   ListCertificatesCommand,
   CertificateStatus,
   CertificateSummary,
+  KeyAlgorithm,
 } from '@aws-sdk/client-acm';
 
 import { getPaginatedResults } from '../../common/paginator';
@@ -28,6 +29,17 @@ export const ListCertificates = async (region: string) => {
     const params: ListCertificatesCommand = new ListCertificatesCommand({
       NextToken: Marker,
       CertificateStatuses: [CertificateStatus.ISSUED],
+      Includes: {
+        keyTypes: [
+          KeyAlgorithm.EC_prime256v1,
+          KeyAlgorithm.EC_secp384r1,
+          KeyAlgorithm.EC_prime256v1,
+          KeyAlgorithm.RSA_1024,
+          KeyAlgorithm.RSA_2048,
+          KeyAlgorithm.RSA_3072,
+          KeyAlgorithm.RSA_4096,
+        ],
+      },
     });
     const queryResponse = await acmClient.send(params);
     return {

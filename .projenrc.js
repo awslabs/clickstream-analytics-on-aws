@@ -29,10 +29,11 @@ const commonDeps = [
 
 const commonDevDeps = [
   '@types/uuid@^9.0.0',
-  'aws-sdk-client-mock@^2.0.1',
+  'aws-sdk-client-mock@^2.1.1',
+  'aws-sdk-client-mock-jest@^2.1.1',
 ];
 
-const awsSDKVersion = '3.294.0';
+const awsSDKVersion = '3.306.0';
 const awsSDKDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
@@ -118,8 +119,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 
   devDeps: [
     ...commonDevDeps,
-    'aws-sdk-client-mock@^2.0.1',
-    'aws-sdk-client-mock-jest@^2.0.1',
     '@types/jsonpath-plus@^5.0.2',
   ],
   minNodeVersion: '16.18.0',

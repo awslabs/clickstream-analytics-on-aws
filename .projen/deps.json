@@ -36,12 +36,12 @@
     },
     {
       "name": "aws-sdk-client-mock-jest",
-      "version": "^2.0.1",
+      "version": "^2.1.1",
       "type": "build"
     },
     {
       "name": "aws-sdk-client-mock",
-      "version": "^2.0.1",
+      "version": "^2.1.1",
       "type": "build"
     },
     {
@@ -107,107 +107,107 @@
     },
     {
       "name": "@aws-sdk/client-account",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-acm",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-athena",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudformation",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-dynamodb",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ec2",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-emr-serverless",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-glue",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-iam",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafkaconnect",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-quicksight",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-data",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-serverless",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-route-53",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-s3",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sfn",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/lib-dynamodb",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/util-dynamodb",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/util-stream-node",
-      "version": "^3.294.0",
+      "version": "^3.306.0",
       "type": "runtime"
     },
     {

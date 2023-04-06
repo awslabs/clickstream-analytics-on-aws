@@ -57,8 +57,8 @@ src/control-plane/backend/lambda/api/common/constants-ln.ts:112
 src/control-plane/backend/lambda/api/common/constants-ln.ts:115
 src/control-plane/backend/lambda/api/common/constants-ln.ts:118
 src/control-plane/backend/lambda/api/common/constants-ln.ts:121
-src/control-plane/backend/lambda/api/test/api/env.test.ts:539
-src/control-plane/backend/lambda/api/test/api/env.test.ts:581
-src/control-plane/backend/lambda/api/test/api/env.test.ts:609
-src/control-plane/backend/lambda/api/test/api/env.test.ts:623
-src/control-plane/backend/lambda/api/test/api/env.test.ts:637
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:27
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:69
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:97
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:111
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:125

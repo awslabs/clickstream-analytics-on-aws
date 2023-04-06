@@ -12,7 +12,6 @@
  */
 
 import { join } from 'path';
-import { LogLevel } from '@aws-sdk/client-sfn';
 import { Aws, aws_lambda, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -20,7 +19,7 @@ import { Effect, Policy, PolicyDocument, PolicyStatement, Role, ServicePrincipal
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { StateMachine, JsonPath, Condition, Choice, WaitTime, Wait, TaskInput, Pass } from 'aws-cdk-lib/aws-stepfunctions';
+import { Choice, Condition, JsonPath, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
