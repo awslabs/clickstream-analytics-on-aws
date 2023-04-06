@@ -214,7 +214,7 @@ describe('Account Env test', () => {
           name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
           cidr: '10.255.1.0/24',
           availabilityZone: 'us-east-1b',
-          type: 'isolated',
+          type: 'public',
         },
       ],
     });
@@ -255,7 +255,7 @@ describe('Account Env test', () => {
             Main: true,
           }],
           Routes: [
-            { NatGatewayId: 'igw-xxxx' },
+            { GatewayId: 'local' },
           ],
         },
       ],
@@ -272,14 +272,14 @@ describe('Account Env test', () => {
           name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
-          type: 'public',
+          type: 'isolated',
         },
         {
           id: 'subnet-09ae522e85bbee5c5',
           name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
           cidr: '10.255.1.0/24',
           availabilityZone: 'us-east-1b',
-          type: 'private',
+          type: 'isolated',
         },
       ],
     });
@@ -308,7 +308,7 @@ describe('Account Env test', () => {
             SubnetId: 'subnet-0b9fa05e061084b37',
           }],
           Routes: [
-            { NatGatewayId: 'igw-xxxx' },
+            { GatewayId: 'igw-xxxx' },
           ],
         },
       ],

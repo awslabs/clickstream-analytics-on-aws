@@ -56,11 +56,6 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
   const ec2Client = new EC2Client({ region });
   const records = await getPaginatedResults(async (NextToken: any) => {
     let filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
-    if (type === 'public') {
-      filters.push({ Name: 'map-public-ip-on-launch', Values: ['true'] });
-    } else if (type === 'private' || type === 'isolated') {
-      filters.push({ Name: 'map-public-ip-on-launch', Values: ['false'] });
-    }
     const params: DescribeSubnetsCommand = new DescribeSubnetsCommand({
       Filters: filters,
       NextToken,
@@ -73,17 +68,20 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
   });
   let subnets: ClickStreamSubnet[] = [];
   for (let index in records as Subnet[]) {
+    let subnetType = 'isolated';
     const subnetId = records[index].SubnetId;
     const routeTable = await getSubnetRouteTable(region, vpcId, subnetId);
-    let isolated = true;
     const routes = routeTable.Routes;
     for (let route of routes as Route[]) {
+      if (route.GatewayId?.startsWith('igw-')) {
+        subnetType = 'public';
+        break;
+      }
       if (route.NatGatewayId) {
-        isolated = false;
+        subnetType = 'private';
         break;
       }
     }
-    const subnetType = records[index].MapPublicIpOnLaunch? 'public' : isolated? 'isolated' : 'private';
     const clickStreamSubnet = {
       id: subnetId,
       name: getValueFromTags('Name', records[index].Tags),
