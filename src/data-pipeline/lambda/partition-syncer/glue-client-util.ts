@@ -18,6 +18,7 @@ import {
   GlueClient,
   PartitionInput,
 } from '@aws-sdk/client-glue';
+import { PARTITION_APP } from '../../../common/constant';
 import { putStringToS3 } from '../../../common/s3';
 import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 
@@ -128,7 +129,7 @@ export class GlueClientUtil {
         ],
         StorageDescriptor: {
           Location: `s3://${s3Bucket}/${locationPrefix}` +
-          `partition_app=${appId}/partition_year=${year}/partition_month=${month}/partition_day=${day}/`,
+          `${PARTITION_APP}=${appId}/partition_year=${year}/partition_month=${month}/partition_day=${day}/`,
 
           InputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',
           OutputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',

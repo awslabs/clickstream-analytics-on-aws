@@ -767,7 +767,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Environment: {
         Variables: {
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-          POWERTOOLS_LOGGER_SAMPLE_RATE: '0.5',
           POWERTOOLS_LOGGER_LOG_EVENT: 'true',
           LOG_LEVEL: 'WARN',
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',

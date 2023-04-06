@@ -32,13 +32,7 @@ export function cloudWatchSendLogs(id: string, func: IFunction): IFunction {
     });
     lambdaPolicy.attachToRole(func.role);
 
-    addCfnNagSuppressRules(lambdaPolicy.node.defaultChild as CfnPolicy, [
-      {
-        id: 'W12',
-        reason:
-          'The lambda service writes to undetermined logs stream by design',
-      },
-    ]);
+    suppressLogsWildcardResources(lambdaPolicy);
   }
   return func;
 }
@@ -53,14 +47,26 @@ export function createENI(id: string, func: IFunction): IFunction {
     lambdaPolicy.attachToRole(func.role);
     func.node.addDependency(lambdaPolicy);
 
-    addCfnNagSuppressRules(lambdaPolicy.node.defaultChild as CfnPolicy, [
-      {
-        id: 'W12',
-        reason: 'The lambda service creates undetermined eni by design',
-      },
-    ]);
+    suppressENIWildcardResources(lambdaPolicy);
   }
   return func;
+}
+
+function suppressLogsWildcardResources(policy: Policy) {
+  suppressWildcardResources(policy, 'The lambda service writes to undetermined logs stream by design');
+}
+
+function suppressENIWildcardResources(policy: Policy) {
+  suppressWildcardResources(policy, 'The lambda service creates undetermined eni by design');
+}
+
+function suppressWildcardResources(policy: Policy, reason: string) {
+  addCfnNagSuppressRules(policy.node.defaultChild as CfnPolicy, [
+    {
+      id: 'W12',
+      reason: reason,
+    },
+  ]);
 }
 
 function getLambdaBasicPolicyStatements(inVpc: boolean, logGroupArn: string = '*') {
@@ -118,5 +124,6 @@ export function createLambdaRole(
   });
   getLambdaBasicPolicyStatements(inVpc).forEach((ps) => role.addToPolicy(ps));
   extraPolicyStatements.forEach((ps) => role.addToPolicy(ps));
+  if (inVpc) {suppressENIWildcardResources(role.node.findChild('DefaultPolicy') as Policy);} else {suppressLogsWildcardResources(role.node.findChild('DefaultPolicy') as Policy);}
   return role;
 }

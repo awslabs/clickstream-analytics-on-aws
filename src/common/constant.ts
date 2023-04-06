@@ -125,3 +125,6 @@ export const ALBLogServiceAccountMapping = {
 
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX = 'OpenID Connector Jwks Uri Suffix';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
+
+// ods data partitions
+export const PARTITION_APP = 'partition_app';

@@ -11,20 +11,17 @@
  *  and limitations under the License.
  */
 
+import { CdkCustomResourceEvent } from 'aws-lambda';
 
-export const POWERTOOLS_ENVS = {
-  POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-  POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-  POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-  LOG_LEVEL: 'WARN',
-};
-
-import {
-  Logger,
-} from '@aws-lambda-powertools/logger';
-
-const logger = new Logger();
-
-export {
-  logger,
+export const basicCloudFormationEvent: CdkCustomResourceEvent = {
+  RequestType: 'Create',
+  ServiceToken: 'ServiceToken1',
+  ResponseURL: '',
+  StackId: 'stack1',
+  RequestId: 'requestId-1',
+  LogicalResourceId: 'logicalResouceId-1',
+  ResourceType: '',
+  ResourceProperties: {
+    ServiceToken: 'ServiceToken1',
+  },
 };

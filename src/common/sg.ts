@@ -11,20 +11,17 @@
  *  and limitations under the License.
  */
 
+import { SecurityGroup, IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { Construct } from 'constructs';
+import { addCfnNagToSecurityGroup } from './cfn-nag';
 
-export const POWERTOOLS_ENVS = {
-  POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-  POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-  POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-  LOG_LEVEL: 'WARN',
-};
+export function createSGForEgressToAwsService(scope: Construct, id: string, vpc: IVpc)
+  : ISecurityGroup {
+  const sg = new SecurityGroup(scope, id, {
+    vpc,
+    allowAllOutbound: true,
+  });
+  addCfnNagToSecurityGroup(sg, ['W40', 'W5']);
 
-import {
-  Logger,
-} from '@aws-lambda-powertools/logger';
-
-const logger = new Logger();
-
-export {
-  logger,
-};
+  return sg;
+}

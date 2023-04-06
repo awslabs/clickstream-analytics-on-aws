@@ -11,20 +11,18 @@
  *  and limitations under the License.
  */
 
+export enum RedshiftMode {
+  PROVISIONED='Provisioned',
+  SERVERLESS='Serverless',
+}
 
-export const POWERTOOLS_ENVS = {
-  POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-  POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-  POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-  LOG_LEVEL: 'WARN',
-};
+export enum JobStatus {
+  JOB_NEW = 'NEW',
+  JOB_ENQUEUE = 'ENQUEUE',
+  JOB_PROCESSING = 'PROCESSING',
+}
 
-import {
-  Logger,
-} from '@aws-lambda-powertools/logger';
+export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
-const logger = new Logger();
-
-export {
-  logger,
-};
+export const REDSHIFT_ODS_TABLE_NAME = 'ods_events';
+export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days

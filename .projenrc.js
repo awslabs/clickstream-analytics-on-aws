@@ -35,6 +35,7 @@ const commonDevDeps = [
 
 const awsSDKVersion = '3.306.0';
 const awsSDKDeps = [
+  '@aws-sdk/credential-providers',
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-glue',
@@ -98,6 +99,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '*.iml',
     '*.ipr',
     '*.iws',
+    '.viperlightrc',
     'src/data-pipeline/spark-etl/.gradle',
     'src/data-pipeline/spark-etl/build',
     'src/data-pipeline/spark-etl/bin',

@@ -196,6 +196,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/credential-providers",
+      "version": "^3.306.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/lib-dynamodb",
       "version": "^3.306.0",
       "type": "runtime"

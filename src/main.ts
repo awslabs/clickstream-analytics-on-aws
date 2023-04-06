@@ -16,6 +16,7 @@ import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
+import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
@@ -150,6 +151,15 @@ new DataPipelineStack(app, 'data-pipeline-stack', {
   synthesizer: synthesizer(),
 });
 
+stackSuppressions([
+  new DataAnalyticsRedshiftStack(app, 'data-analytics-redshift-stack', {
+    synthesizer: synthesizer(),
+  }),
+], [
+  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
+  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
+  { id: 'AwsSolutions-L1', reason: 'Caused by latest Lambda Node.js 18.x runtime not available in AWS China regions' },
+]);
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {

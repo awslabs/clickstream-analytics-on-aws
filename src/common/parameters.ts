@@ -192,11 +192,13 @@ export class Parameters {
     });
   }
 
-  public static createS3PrefixParameter(scope: Construct, id: string, props: {description: string; default: string}) : CfnParameter {
+  public static createS3PrefixParameter(scope: Construct, id: string,
+    props: {description: string; default: string; allowedPattern?: string}) : CfnParameter {
+    const pattern = props.allowedPattern ?? '^(|[^/].*/)$';
     return new CfnParameter(scope, id, {
       type: 'String',
-      allowedPattern: '^(|[^/].*/)$',
-      constraintDescription: `${id} must match pattern (|[^/].*/)`,
+      allowedPattern: pattern,
+      constraintDescription: `${id} must match pattern ${pattern}.`,
       ... props,
     });
   }
@@ -428,7 +430,6 @@ export class Parameters {
       allowedPattern: `^${PROJECT_ID_PATTERN}$`,
       type: 'String',
     });
-
     const appIdsParam = new CfnParameter(scope, appIdsName, {
       description: 'App Ids, comma delimited list',
       type: 'String',
@@ -440,8 +441,6 @@ export class Parameters {
       projectIdParam,
       appIdsParam,
     };
-
   }
-
 }
 
