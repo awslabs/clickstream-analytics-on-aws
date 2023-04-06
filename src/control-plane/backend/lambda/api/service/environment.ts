@@ -20,7 +20,7 @@ import { describeVpcs, describeSubnets, listRegions } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
-import { describeRedshiftClusters } from '../store/aws/redshift';
+import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
 
@@ -100,6 +100,15 @@ export class EnvironmentServ {
     try {
       const { region, vpcId } = req.query;
       const result = await describeRedshiftClusters(region, vpcId);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listRedshiftServerlessWorkgroups(req: any, res: any, next: any) {
+    try {
+      const { region, vpcId } = req.query;
+      const result = await listRedshiftServerlessWorkgroups(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

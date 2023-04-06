@@ -12,8 +12,10 @@
  */
 
 import { RedshiftClient, DescribeClustersCommand, Cluster } from '@aws-sdk/client-redshift';
+import { RedshiftServerlessClient, ListWorkgroupsCommand, Workgroup } from '@aws-sdk/client-redshift-serverless';
+import { getSubnet } from './ec2';
 import { getPaginatedResults } from '../../common/paginator';
-import { RedshiftCluster } from '../../common/types';
+import { RedshiftCluster, RedshiftWorkgroup } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId: string) => {
   const redshiftClient = new RedshiftClient({ region });
@@ -40,4 +42,36 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
     }
   }
   return clusters;
+};
+
+export const listRedshiftServerlessWorkgroups = async (region: string, vpcId: string) => {
+  const redshiftServerlessClient = new RedshiftServerlessClient({ region });
+
+  const records = await getPaginatedResults(async (Marker: any) => {
+    const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({
+      nextToken: Marker,
+    });
+    const queryResponse = await redshiftServerlessClient.send(params);
+    return {
+      marker: queryResponse.nextToken,
+      results: queryResponse.workgroups,
+    };
+  });
+  const workgroups: RedshiftWorkgroup[] = [];
+  for (let workgroup of records as Workgroup[]) {
+    if (!workgroup.subnetIds) {
+      continue;
+    }
+    const subnet = await getSubnet(region, workgroup.subnetIds[0]);
+    if (subnet.VpcId === vpcId) {
+      workgroups.push({
+        id: workgroup.workgroupId ?? '',
+        arn: workgroup.workgroupArn ?? '',
+        name: workgroup.workgroupName ?? '',
+        namespace: workgroup.namespaceName ?? '',
+        status: workgroup.status ?? '',
+      });
+    }
+  }
+  return workgroups;
 };

@@ -13,6 +13,7 @@
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { Endpoint } from '@aws-sdk/client-redshift';
+import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 
 export class ApiResponse {
   readonly success: boolean;
@@ -170,6 +171,14 @@ export interface RedshiftCluster {
   readonly nodeType: string;
   readonly endpoint?: Endpoint;
   readonly status: string;
+}
+
+export interface RedshiftWorkgroup {
+  readonly id: string;
+  readonly arn: string;
+  readonly name: string;
+  readonly namespace: string;
+  readonly status: WorkgroupStatus | string;
 }
 
 export interface Route53HostedZone {

@@ -163,6 +163,16 @@ app.get(
   });
 
 app.get(
+  '/api/env/redshift-serverless/workgroups',
+  validate([
+    query('vpcId').custom(isValidEmpty),
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listRedshiftServerlessWorkgroups(req, res, next);
+  });
+
+app.get(
   '/api/env/quicksight/users',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),

@@ -18,6 +18,7 @@ import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
+import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -29,6 +30,7 @@ const ec2ClientMock = mockClient(EC2Client);
 const s3Client = mockClient(S3Client);
 const kafkaClient = mockClient(KafkaClient);
 const redshiftClient = mockClient(RedshiftClient);
+const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const quickSightClient = mockClient(QuickSightClient);
 const route53Client = mockClient(Route53Client);
 const athenaClient = mockClient(AthenaClient);
@@ -764,6 +766,61 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           status: 'available',
+        },
+      ],
+    });
+  });
+  it('Get Redshift workgroup', async () => {
+    redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
+      workgroups: [
+        {
+          baseCapacity: 32,
+          enhancedVpcRouting: false,
+          namespaceName: 'test-ns',
+          publiclyAccessible: false,
+          securityGroupIds: [
+            'sg-111',
+          ],
+          status: 'AVAILABLE',
+          subnetIds: [
+            'subnet-111',
+          ],
+          workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          workgroupName: 'test',
+        },
+      ],
+    });
+    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
+      Subnets: [
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: true,
+          VpcId: 'vpc-111',
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+            },
+          ],
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/redshift-serverless/workgroups?vpcId=vpc-111');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          id: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          arn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          name: 'test',
+          namespace: 'test-ns',
+          status: 'AVAILABLE',
         },
       ],
     });
