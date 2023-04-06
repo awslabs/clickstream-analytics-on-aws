@@ -21,11 +21,12 @@ import {
   Subnet,
   Route,
   DescribeRouteTablesCommandOutput,
-  RouteTable,
+  RouteTable, DescribeRegionsCommand,
+  RouteTableAssociation,
+  Region,
 } from '@aws-sdk/client-ec2';
-import { RouteTableAssociation } from '@aws-sdk/client-ec2/dist-types/models/models_2';
 import { getPaginatedResults } from '../../common/paginator';
-import { ClickStreamVpc, ClickStreamSubnet } from '../../common/types';
+import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion } from '../../common/types';
 import { getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string) => {
@@ -139,4 +140,17 @@ export const getSubnet = async (region: string, subnetId: string) => {
     return records[0] as Subnet;
   }
   return {} as Subnet;
+};
+
+export const listRegions = async () => {
+  const ec2Client = new EC2Client({});
+  const params: DescribeRegionsCommand = new DescribeRegionsCommand({});
+  const queryResponse = await ec2Client.send(params);
+  const regions: ClickStreamRegion[] = [];
+  for (let region of queryResponse.Regions as Region[]) {
+    regions.push({
+      id: region.RegionName ?? '',
+    });
+  }
+  return regions;
 };

@@ -209,7 +209,7 @@ export class ClickStreamApiConstruct extends Construct {
             's3:ListAllMyBuckets',
             'ec2:DescribeVpcs',
             'redshift:DescribeClusters',
-            'account:ListRegions',
+            'ec2:DescribeRegions',
             's3:ListBucket',
             'quicksight:ListUsers',
             'ec2:DescribeSubnets',

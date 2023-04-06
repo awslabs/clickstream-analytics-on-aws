@@ -50,7 +50,6 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-redshift',
   '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-quicksight',
-  '@aws-sdk/client-account',
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
   '@aws-sdk/client-route-53',

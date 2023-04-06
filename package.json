@@ -49,7 +49,6 @@
   "dependencies": {
     "@aws-cdk/aws-glue-alpha": "^2.67.0-alpha.0",
     "@aws-lambda-powertools/logger": "^1.5.1",
-    "@aws-sdk/client-account": "^3.306.0",
     "@aws-sdk/client-acm": "^3.306.0",
     "@aws-sdk/client-athena": "^3.306.0",
     "@aws-sdk/client-cloudformation": "^3.306.0",

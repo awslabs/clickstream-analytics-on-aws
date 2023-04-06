@@ -14,10 +14,9 @@
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
 import { ApiSuccess, Policy, PolicyStatement } from '../common/types';
 import { getRegionAccount } from '../common/utils';
-import { listRegions } from '../store/aws/account';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
-import { describeVpcs, describeSubnets } from '../store/aws/ec2';
+import { describeVpcs, describeSubnets, listRegions } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';

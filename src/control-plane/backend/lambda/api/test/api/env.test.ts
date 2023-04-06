@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
-import { AccountClient, ListRegionsCommand } from '@aws-sdk/client-account';
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
-import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
+import { EC2Client, DescribeRegionsCommand, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
@@ -26,7 +25,6 @@ import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
 import { app, server } from '../../index';
 
-const accountClientMock = mockClient(AccountClient);
 const ec2ClientMock = mockClient(EC2Client);
 const s3Client = mockClient(S3Client);
 const kafkaClient = mockClient(KafkaClient);
@@ -39,7 +37,6 @@ const acmClient = mockClient(ACMClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
-    accountClientMock.reset();
     ec2ClientMock.reset();
     s3Client.reset();
     kafkaClient.reset();
@@ -51,7 +48,7 @@ describe('Account Env test', () => {
     acmClient.reset();
   });
   it('Get regions', async () => {
-    accountClientMock.on(ListRegionsCommand).resolves({
+    ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
       ],
