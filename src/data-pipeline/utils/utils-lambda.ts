@@ -88,7 +88,7 @@ export class LambdaUtil {
       sinkTableName,
     );
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
-    this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
+    this.props.sourceS3Bucket.grantReadWrite(lambdaRole, `${this.props.sourceS3Prefix}*`);
 
     const lambdaSecurityGroup = this.createSecurityGroup(
       this.scope,
