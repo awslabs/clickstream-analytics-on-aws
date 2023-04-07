@@ -51,7 +51,6 @@ interface Props {
 const functionSettings = {
   handler: 'handler',
   runtime: Runtime.NODEJS_16_X,
-  memorySize: 256,
   timeout: Duration.minutes(15),
   logRetention: RetentionDays.ONE_WEEK,
   tracing: Tracing.ACTIVE,
@@ -122,6 +121,7 @@ export class LambdaUtil {
           ...POWERTOOLS_ENVS,
         },
         ...functionSettings,
+        memorySize: 256,
       },
     );
     return fn;
@@ -190,12 +190,13 @@ export class LambdaUtil {
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,
+      memorySize: 256,
     });
     return fn;
   }
 
   public createEmrJobStateListenerLambda(emrApplicationId: string) {
-    const lambdaRole = this.roleUtil.createEmrJobStateListenerLambdaRole();
+    const lambdaRole = this.roleUtil.createEmrJobStateListenerLambdaRole(emrApplicationId);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
     const lambdaSecurityGroup = this.createSecurityGroup(
@@ -221,6 +222,7 @@ export class LambdaUtil {
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,
+      memorySize: 1024,
     });
     return fn;
   }

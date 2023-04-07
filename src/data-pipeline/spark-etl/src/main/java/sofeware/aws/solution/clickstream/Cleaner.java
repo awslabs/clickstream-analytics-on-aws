@@ -48,10 +48,15 @@ import java.util.zip.GZIPInputStream;
 public class Cleaner {
 
     public Dataset<Row> clean(final Dataset<Row> dataset) {
+        log.info(new ETLMetric(dataset, "clean enter").toString());
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
+        log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
         Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
+        log.info(new ETLMetric(flattedDataset, "flatted source").toString());
         Dataset<Row> structuredDataset = processDataColumnSchema(flattedDataset);
+        log.info(new ETLMetric(structuredDataset, "after processDataColumnSchema").toString());
         Dataset<Row> filteredDataSet = filter(structuredDataset);
+        log.info(new ETLMetric(filteredDataSet, "after filter").toString());
         boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
         if (debugLocal) {
             decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-decodedDataset/");
@@ -73,9 +78,9 @@ public class Cleaner {
                 byte[] binGzipData = Base64.getDecoder().decode(data);
                 return decompress(binGzipData);
             }catch (Exception e) {
-                System.err.println(data);
-                e.printStackTrace();
-                return "";
+                log.error("extractData error:" + e.getMessage());
+                log.error(data);
+                return "extractData error:" + e.getMessage();
             }
         };
     }
@@ -95,7 +100,8 @@ public class Cleaner {
             }
             return outStr.toString();
         } catch (IOException e) {
-            return "";
+            log.error("decompress error:" + e.getMessage());
+            return "decompress error: " + e.getMessage();
         }
     }
 
@@ -119,49 +125,64 @@ public class Cleaner {
         options.put("mode", "PERMISSIVE");
         options.put("columnNameOfCorruptRecord", "_corrupt_record");
         Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
+        log.info(new ETLMetric(rowDataset, "after load data schema").toString());
         boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
         if (debugLocal) {
             rowDataset.write().mode(SaveMode.Overwrite)
                     .json(DEBUG_LOCAL_PATH + "/clean-schemaDataset/");
         }
-        return processCorruptRecords(rowDataset);
+        Dataset<Row> normalDataset = processCorruptRecords(rowDataset);
+        log.info(new ETLMetric(normalDataset, "after processCorruptRecords").toString());
+        return normalDataset;
     }
 
     private Dataset<Row> processCorruptRecords(final Dataset<Row> dataset) {
         Dataset<Row> corruptedDataset = dataset.filter(col("data").getItem("_corrupt_record").isNotNull());
-        if (corruptedDataset.count() > 0) {
+        long corruptedDatasetCount = corruptedDataset.count();
+        if (corruptedDatasetCount > 0) {
             String outputPath = System.getProperty("job.data.uri");
+            String corruptedOutPath =  outputPath + "/corrupted_records/";
+            log.info(new ETLMetric(corruptedDataset, "corrupted").toString());
+            log.info("corruptedDataset corruptedOutPath:" + corruptedOutPath);
             corruptedDataset.select("data")
                     .write().mode(SaveMode.Append)
-                    .json(outputPath + "/corrupted_records/");
+                    .json(corruptedOutPath);
+            log.info("write corruptedDataset to " + outputPath);
         }
-        return dataset.filter(col("data").getItem("_corrupt_record").isNull())
+        Dataset<Row> normalDataset = dataset.filter(col("data").getItem("_corrupt_record").isNull())
                 .drop(col("data").getItem("_corrupt_record"));
+        return normalDataset;
     }
 
     private Dataset<Row> filter(final Dataset<Row> dataset) {
         Dataset<Row> freshDataset = filterByDataFreshness(dataset);
+        log.info(new ETLMetric(freshDataset, "after filterByDataFreshness").toString());
+
         Dataset<Row> filteredDataset= filterByAppIds(freshDataset);
+        log.info(new ETLMetric(filteredDataset, "after filterByAppIds").toString());
         return filteredDataset;
     }
 
     private Dataset<Row> filterByDataFreshness(final Dataset<Row> dataset) {
         long dataFreshnessInHour = Long.parseLong(System.getProperty("data.freshness.hour", "72"));
-        return dataset.filter((FilterFunction<Row>) row -> {
+        log.info("dataFreshnessInHour:" + dataFreshnessInHour);
+        Dataset<Row> filteredDataset =  dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;
         });
+        return filteredDataset;
     }
 
     private Dataset<Row> filterByAppIds(final Dataset<Row> dataset) {
         String appIds = System.getProperty("app.ids");
-
+        log.info("filterByAppIds[" + appIds + "]");
         Asserts.check(!Strings.isBlank(appIds), "valid appIds [app.ids] should not be blank");
         List<String> appIdList = Lists.newArrayList(appIds.split(","));
-        return dataset.filter((FilterFunction<Row>) row -> {
+        Dataset<Row> filteredDataset = dataset.filter((FilterFunction<Row>) row -> {
             String appId = row.getStruct(row.fieldIndex("data")).getAs("app_id");
             return Strings.isNotBlank(appId) && appIdList.contains(appId);
         });
+        return filteredDataset;
     }
 }

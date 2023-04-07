@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+import { createInterface } from 'readline';
+import { Readable } from 'stream';
+import { createGunzip } from 'zlib';
 import {
   S3Client,
   PutObjectCommand,
@@ -19,7 +22,9 @@ import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
   ObjectIdentifier,
+  NoSuchKey,
 } from '@aws-sdk/client-s3';
+
 
 import { logger } from './powertools';
 
@@ -55,17 +60,41 @@ export async function readS3ObjectAsJson(bucketName: string, key: string) {
     } else {
       return;
     }
-  } catch (e: any) {
-    if (
-      e.code === 'NoSuchKey' ||
-      e.message === 'The specified key does not exist.'
-    ) {
-      logger.warn('file does not exist');
-      return;
+  } catch (e) {
+    return handleNoSuchKeyError(e);
+  }
+}
+
+export async function processS3GzipObjectLineByLine(bucketName: string, key: string,
+  lineProcess: (line: string) => void): Promise<void> {
+
+  logger.info(`processS3GzipObjectLineByLine: s3://${bucketName}/${key}`);
+  try {
+    const res = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    if (res.Body) {
+      return await new Promise((resolve, reject) => {
+        const readableStream = res.Body as Readable;
+        let lineReader = createInterface({
+          input: readableStream.pipe(createGunzip()),
+        });
+        lineReader.on('line', lineProcess);
+        lineReader.on('error', reject);
+        lineReader.on('close', ()=> {
+          logger.info('read all lines done');
+          return resolve();
+        });
+      });
+
     } else {
-      logger.error(e);
-      throw e;
+      return;
     }
+  } catch (e) {
+    return handleNoSuchKeyError(e);
   }
 }
 
@@ -134,4 +163,14 @@ export async function deleteObjectsByPrefix(
     `${delCount} objects were deleted in bucket=${bucketName}, prefix=${prefix}`,
   );
   return delCount;
+}
+
+// @ts-ignore
+function handleNoSuchKeyError(e): undefined {
+  if (e instanceof NoSuchKey) {
+    logger.warn('file does not exist');
+    return;
+  }
+  logger.error(e);
+  throw e;
 }

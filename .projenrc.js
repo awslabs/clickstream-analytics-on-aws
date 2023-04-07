@@ -13,7 +13,7 @@
 
 const { awscdk, gitlab, typescript } = require('projen');
 const version = '1.0.0';
-const cdkVersion = '2.67.0';
+const cdkVersion = '2.73.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
@@ -40,6 +40,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-s3',
   '@aws-sdk/client-glue',
   '@aws-sdk/client-redshift-data',
+  '@aws-sdk/client-cloudwatch',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [
@@ -110,6 +111,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.11',
     'jsonpath-plus@^7.2.0',
+    'readline@^1.3.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKDeps,

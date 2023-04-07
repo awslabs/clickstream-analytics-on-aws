@@ -47,8 +47,11 @@ public class ETLRunner {
     public void run() {
         String sql = configAndSQL();
         Dataset<Row> dataset = spark.sql(sql);
+        log.info(new ETLMetric(dataset, "source").toString());
         Dataset<Row> dataset2 = executeTransformers(dataset, config.transformerClassNames);
         writeResult(config.outputPath, dataset2);
+        log.info(new ETLMetric(dataset2, "sink").toString());
+
     }
 
     public String configAndSQL() {
@@ -65,7 +68,7 @@ public class ETLRunner {
         String sql = format("select * from `%s`.%s", config.database, config.sourceTable)
                 + format(" where (%s\n)", partitionsCondition)
                 + format(" AND ingest_time >= %d AND ingest_time < %d", config.startTimestamp, config.endTimestamp);
-        log.info("sql: " + sql);
+        log.info("SQL: " + sql);
         return sql;
     }
 
@@ -75,6 +78,7 @@ public class ETLRunner {
         Dataset<Row> result = dataset;
         for (String transformerClassName : transformerClassNames) {
             result = executeTransformer(result, transformerClassName);
+            log.info(new ETLMetric(result, "after " + transformerClassName).toString());
             if (result.count() == 0) {
                 break;
             }
@@ -105,12 +109,15 @@ public class ETLRunner {
             return transformedDataset;
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                  | IllegalAccessException | NoSuchMethodException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     protected void writeResult(final String outputPath, final Dataset<Row> dataset) {
         Dataset<Row> partitionedDataset = prepareForPartition(dataset);
+        log.info(new ETLMetric(partitionedDataset, "writeResult").toString());
+        log.info("outputPath: " + outputPath);
         String[] partitionBy =new String[] {"partition_app", "partition_year", "partition_month", "partition_day" };
         if ("json".equalsIgnoreCase(config.outPutFormat)) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
@@ -192,5 +199,20 @@ public class ETLRunner {
             this.endTimestamp = endTimestamp;
             this.dataFreshnessInHour = dataFreshnessInHour;
         }
+    }
+}
+
+
+class ETLMetric {
+
+    private Dataset<Row> dataset;
+    private String info;
+    ETLMetric(final Dataset<Row> dataset, final String info) {
+        this.dataset = dataset;
+        this.info = info;
+    }
+    @Override
+    public String toString() {
+        return "[ETLMetric]" + this.info + " dataset count:" + dataset.count();
     }
 }

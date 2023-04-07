@@ -61,11 +61,13 @@ export class EMRServerlessUtil {
     event: any,
     config: any,
   ) {
-    const jobName = uuid();
+
     const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
       event,
       config,
     );
+
+    const jobName =`${startTimestamp}-${uuid()}`;
 
     const sinkPrefix = getSinkTableLocationPrefix(config.sinkS3Prefix, config.projectId, config.sinkTableName);
 

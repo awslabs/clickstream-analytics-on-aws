@@ -11,76 +11,65 @@
  *  and limitations under the License.
  */
 
+import fs from 'fs';
+import { Readable } from 'stream';
+import util from 'util';
+import zlib from 'zlib';
+import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
+import { mockClient } from 'aws-sdk-client-mock';
+import { copyS3Object, deleteObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
+import 'aws-sdk-client-mock-jest';
 
-const sendMock = {
-  send: jest.fn(() => {}),
-};
+const gzip = util.promisify(zlib.gzip);
 
-const s3Mock={
-  S3Client: jest.fn(() => sendMock),
-  PutObjectCommand: jest.fn(() => {return { name: 'PutObjectCommand' };}),
-  GetObjectCommand: jest.fn(() => {return { name: 'GetObjectCommand' };}),
-  CopyObjectCommand: jest.fn(() => {return { name: 'CopyObjectCommand' };}),
-  DeleteObjectsCommand: jest.fn(()=>{return { name: 'DeleteObjectsCommand' };}),
-  ListObjectsV2Command: jest.fn(()=>{return { name: 'ListObjectsV2Command' };}),
-
-};
-jest.mock('@aws-sdk/client-s3', () => {
-  return s3Mock;
-});
-
-import { copyS3Object, deleteObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
+const s3ClientMock = mockClient(S3Client);
 
 const testBucketName = 'test-bucket';
 const testPrefix = 'test-prefix';
 
-test('putStringToS3()', async ()=> {
-  await putStringToS3('test string', testBucketName, testPrefix);
-  expect(s3Mock.PutObjectCommand.mock.calls.length).toEqual(1);
+beforeEach(() => {
+  s3ClientMock.reset();
 });
 
+test('putStringToS3()', async ()=> {
+  await putStringToS3('test string', testBucketName, testPrefix);
+  expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
+});
 
 test('readS3ObjectAsJson()', async ()=> {
   const obj = { test: 'testMe' };
-  sendMock.send = jest.fn().mockImplementation((command: any) => {
-    if (command.name == 'GetObjectCommand') {
-      return {
-        Body: {
-          transformToString: ()=> {
-            return JSON.stringify(obj);
-          },
-        },
-      };
-    }
-    return {};
 
-  });
+  const stream = new Readable();
+  stream.push(JSON.stringify(obj));
+  stream.push(null);
+  // wrap the Stream with SDK mixin
+  const sdkStream = sdkStreamMixin(stream);
+
+  s3ClientMock.on(GetObjectCommand).resolves(
+    {
+      Body: sdkStream,
+    },
+  );
+
   const readObj = await readS3ObjectAsJson(testBucketName, `${testPrefix}/test.json`);
-
   expect(readObj).toEqual(obj);
 });
 
 
 test('readS3ObjectAsJson() object not exist', async ()=> {
-  sendMock.send = jest.fn().mockImplementation((command: any) => {
-    if (command.name == 'GetObjectCommand') {
-      throw new Error('The specified key does not exist.');
-    }
-    return {};
+  // @ts-ignore
+  const err = new NoSuchKey();
 
-  });
+  s3ClientMock.on(GetObjectCommand).rejects(err);
   const readObj = await readS3ObjectAsJson(testBucketName, `${testPrefix}/test.json`);
   expect(readObj).toBeUndefined();
 });
 
 
 test('readS3ObjectAsJson() error', async ()=> {
-  sendMock.send = jest.fn().mockImplementation((command: any) => {
-    if (command.name == 'GetObjectCommand') {
-      throw new Error('Error');
-    }
-    return {};
-  });
+  const err = new Error('error');
+  s3ClientMock.on(GetObjectCommand).rejects(err);
 
   let error = false;
   try {
@@ -95,64 +84,94 @@ test('readS3ObjectAsJson() error', async ()=> {
 
 test('copyS3Object()', async ()=> {
   await copyS3Object(`s3://${testBucketName}/${testPrefix}/test-src.txt`, `s3://${testBucketName}/${testPrefix}/test-dest.txt`);
-  expect(s3Mock.CopyObjectCommand.mock.calls.length).toEqual(1);
+  expect(s3ClientMock).toHaveReceivedCommand(CopyObjectCommand);
 });
 
 
 test('deleteObjectsByPrefix()', async ()=> {
-  sendMock.send = jest.fn().mockImplementation((command: any) => {
-    if (command.name == 'ListObjectsV2Command') {
-      return {
-        Contents: [
-          {
-            Key: 'test/file.json',
-          },
-        ],
-      };
-    }
-    return {};
+  s3ClientMock.on(ListObjectsV2Command).resolvesOnce({
+    IsTruncated: false,
+    Contents: [
+      {
+        Key: 'test/file.json',
+      },
+    ],
   });
 
   await deleteObjectsByPrefix(testBucketName, testPrefix);
-  expect(s3Mock.DeleteObjectsCommand.mock.calls.length).toEqual(1);
+  expect(s3ClientMock).toHaveReceivedCommand(DeleteObjectsCommand);
 });
 
 
 test('deleteObjectsByPrefix() - NextContinuationToken', async ()=> {
-  sendMock.send = jest.fn().mockImplementationOnce((command: any) => {
-    if (command.name == 'ListObjectsV2Command') {
-      return {
-        IsTruncated: true,
-        NextContinuationToken: 'nextToken',
-        Contents: [
-          {
-            Key: 'test/file1.json',
-          },
-        ],
-
-      };
-    }
-    return {};
-  }).mockImplementation((command: any) => {
-    if (command.name == 'ListObjectsV2Command') {
-      return {
-        Contents: [
-          {
-            Key: 'test/file2.json',
-          },
-          {
-            Key: 'test/file3.json',
-          },
-        ],
-
-      };
-    }
-    return {};
-  });
+  s3ClientMock.on(ListObjectsV2Command).resolvesOnce({
+    IsTruncated: true,
+    Contents: [
+      {
+        Key: 'test/file.json',
+      },
+    ],
+  }).resolvesOnce(
+    {
+      IsTruncated: false,
+      Contents: [
+        {
+          Key: 'test/file2.json',
+        },
+        {
+          Key: 'test/file3.json',
+        },
+      ],
+    },
+  );
 
   const delCount = await deleteObjectsByPrefix(testBucketName, testPrefix);
-  expect(s3Mock.DeleteObjectsCommand.mock.calls.length).toEqual(2);
   expect(delCount).toEqual(3);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectsCommand, 2);
+
+});
+
+test('processS3GzipObjectLineByLine()', async ()=> {
+  const logText = [
+    '23/04/04 02:43:02 INFO ETLRunner: [ETLMetric]source dataset count:1',
+    '23/04/04 02:43:07 INFO Transformer: [ETLMetric]transform enter dataset count:123',
+    '23/04/04 02:43:11 INFO Cleaner: [ETLMetric]clean enter dataset count:123',
+    '23/04/04 02:43:11 INFO Cleaner: [ETLMetric]corrupted dataset count:4',
+    '23/04/04 02:43:15 INFO Cleaner: [ETLMetric]after decodeDataColumn dataset count:123',
+    '23/04/04 02:43:20 INFO Cleaner: [ETLMetric]flatted source dataset count:2',
+    '23/04/04 02:43:24 INFO Cleaner: [ETLMetric]after load data schema dataset count:123',
+    '23/04/04 02:43:33 INFO Cleaner: [ETLMetric]after processCorruptRecords dataset count:123',
+    '23/04/04 02:43:36 INFO Cleaner: [ETLMetric]after processDataColumnSchema dataset count:123',
+    '23/04/04 02:43:42 INFO Cleaner: [ETLMetric]after filterByDataFreshness dataset count:123',
+    '23/04/04 02:43:46 INFO Cleaner: [ETLMetric]after filterByAppIds dataset count:123',
+    '23/04/04 02:43:50 INFO Cleaner: [ETLMetric]after filter dataset count:123',
+    '23/04/04 02:43:54 INFO Transformer: [ETLMetric]after clean dataset count:999',
+    '23/04/04 02:43:59 INFO Transformer: [ETLMetric]transform return dataset count:123',
+    '23/04/04 02:44:05 INFO ETLRunner: [ETLMetric]after sofeware.aws.solution.clickstream.Transformer dataset count:123',
+    '23/04/04 02:44:20 INFO ETLRunner: [ETLMetric]writeResult dataset count:1000',
+    '23/04/04 02:44:32 INFO ETLRunner: [ETLMetric]sink dataset count:3',
+  ].join('\n');
+
+  const testFile = '/tmp/test-processS3GzipObjectLineByLine.gz';
+  const outStream = fs.createWriteStream(testFile);
+  const zipBuff = await gzip(logText);
+  outStream.write(zipBuff);
+  outStream.close();
+
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: fs.createReadStream(testFile),
+  } as any);
+
+  let lineCount = 0;
+  const testProcess = (line: string) => {
+    if (line.includes('ETLRunner')) {
+      lineCount++;
+    }
+  };
+  await processS3GzipObjectLineByLine(testBucketName, testPrefix, testProcess);
+  expect(lineCount).toEqual(4);
+  fs.unlinkSync(testFile);
+
 });
 
 

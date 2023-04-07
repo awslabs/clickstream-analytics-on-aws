@@ -128,3 +128,6 @@ export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
+
+// Metrics
+export const METRIC_NAMESAPCE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';

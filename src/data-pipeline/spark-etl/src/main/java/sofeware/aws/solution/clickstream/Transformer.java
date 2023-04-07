@@ -14,6 +14,7 @@
 package sofeware.aws.solution.clickstream;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -23,12 +24,15 @@ import java.util.stream.Collectors;
 
 import static org.apache.spark.sql.functions.*;
 
+@Slf4j
 public final class Transformer {
 
     private final Cleaner cleaner = new Cleaner();
 
     public Dataset<Row> transform(final Dataset<Row> dataset) {
+        log.info(new ETLMetric(dataset, "transform enter").toString());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
+        log.info(new ETLMetric(cleanedDataset, "after clean").toString());
 
         Dataset<Row> dataset1 = retrieveEventParams(cleanedDataset);
         Dataset<Row> dataset2 = convertAppInfo(dataset1);
@@ -42,6 +46,7 @@ public final class Transformer {
         Dataset<Row> dataset10 = dataset9
                 .withColumn("event_params", col("event_params_kv"))
                 .withColumn("user_properties", col("user_properties_kv"));
+        log.info(new ETLMetric(dataset10, "transform return").toString());
         return dataset10;
     }
 
