@@ -31,14 +31,14 @@ export type ODSSource = BucketInfo & {
 export type LoadWorkflowData = BucketInfo;
 
 interface RedshiftProps {
-  // readonly database: string;
+  readonly databaseName: string;
 }
 
 export interface ServerlessRedshiftProps extends RedshiftProps {
   readonly workgroupName: string;
   readonly workgroupId?: string;
   readonly namespaceId?: string;
-  readonly superUserIAMRoleArn?: string;
+  readonly dataAPIRoleArn: string;
 }
 
 export interface ProvisionedRedshiftProps extends RedshiftProps {
@@ -51,16 +51,12 @@ interface CustomProperties {
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps | undefined;
 }
 
-export type CreateDatabaseAndSchemas = Omit<CustomProperties, 'serverlessRedshiftProps'> & {
+export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly projectId: string;
   readonly appIds: string;
   readonly odsTableName: string;
   readonly databaseName: string;
-  readonly userRoleArn: string;
-
-  readonly serverlessRedshiftProps?: ServerlessRedshiftProps & {
-    readonly defaultDatabaseName: string;
-  } | undefined;
+  readonly dataAPIRole: string;
 }
 
 export type AssociateIAMRoleToRedshift = CustomProperties & {
@@ -68,16 +64,16 @@ export type AssociateIAMRoleToRedshift = CustomProperties & {
 }
 
 export interface ManifestItem {
-  url: string;
-  meta: {
-    content_length: number;
+  readonly url: string;
+  readonly meta: {
+    readonly content_length: number;
   };
 }
 
 export interface ManifestBody {
-  appId: string;
-  manifestFileName: string;
-  jobList: {
-    entries: Array<ManifestItem>;
+  readonly appId: string;
+  readonly manifestFileName: string;
+  readonly jobList: {
+    readonly entries: Array<ManifestItem>;
   };
 }

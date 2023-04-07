@@ -152,7 +152,7 @@ new DataPipelineStack(app, 'data-pipeline-stack', {
 });
 
 stackSuppressions([
-  new DataAnalyticsRedshiftStack(app, 'data-analytics-redshift-stack', {
+  new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('stackName') ?? 'data-analytics-redshift-stack', {
     synthesizer: synthesizer(),
   }),
 ], [

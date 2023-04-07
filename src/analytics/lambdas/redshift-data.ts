@@ -34,15 +34,20 @@ export function getRedshiftClient(roleArn: string) {
 
 const GET_STATUS_TIMEOUT = 150; // second
 
-export const executeStatement = async (client: RedshiftDataClient, sqlStatement: string, database: string,
-  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps) => {
-  if (serverlessRedshiftProps) {logger.info(`Execute create schemas SQL statement in ${serverlessRedshiftProps.workgroupName}.${database}`);} else if (provisionedRedshiftProps) {logger.info(`Execute create schemas SQL statement in ${provisionedRedshiftProps.clusterIdentifier}.${database}`);}
+export const executeStatement = async (client: RedshiftDataClient, sqlStatement: string,
+  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  database?: string) => {
+  if (serverlessRedshiftProps) {
+    logger.info(`Execute create schemas SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
+  } else if (provisionedRedshiftProps) {
+    logger.info(`Execute create schemas SQL statement in ${provisionedRedshiftProps.clusterIdentifier}.${provisionedRedshiftProps.databaseName}`);
+  }
   const params = new ExecuteStatementCommand({
     Sql: sqlStatement,
     WorkgroupName: serverlessRedshiftProps?.workgroupName,
     ClusterIdentifier: provisionedRedshiftProps?.clusterIdentifier,
     DbUser: provisionedRedshiftProps?.dbUser,
-    Database: database,
+    Database: database ?? (serverlessRedshiftProps?.databaseName ?? provisionedRedshiftProps?.databaseName),
     WithEvent: true,
   });
   const execResponse = await client.send(params);
@@ -52,9 +57,9 @@ export const executeStatement = async (client: RedshiftDataClient, sqlStatement:
   return queryId;
 };
 
-export const executeStatementWithWait = async (client: RedshiftDataClient, sqlStatement: string, database: string,
-  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps) => {
-  const queryId = await executeStatement(client, sqlStatement, database, serverlessRedshiftProps, provisionedRedshiftProps);
+export const executeStatementWithWait = async (client: RedshiftDataClient, sqlStatement: string,
+  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps, database?: string) => {
+  const queryId = await executeStatement(client, sqlStatement, serverlessRedshiftProps, provisionedRedshiftProps, database);
 
   const checkParams = new DescribeStatementCommand({
     Id: queryId,

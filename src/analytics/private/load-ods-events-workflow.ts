@@ -52,6 +52,8 @@ export interface LoadODSEventToRedshiftWorkflowProps {
 export class LoadODSEventToRedshiftWorkflow extends Construct {
   private readonly lambdaRootPath = __dirname + '/../lambdas/load-data-workflow';
 
+  public readonly crForModifyClusterIAMRoles: CustomResource;
+
   constructor(scope: Construct, id: string, props: LoadODSEventToRedshiftWorkflowProps) {
     super(scope, id);
 
@@ -85,7 +87,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     props.loadWorkflowData.s3Bucket.grantRead(redshiftRoleForCopyFromS3, `${props.loadWorkflowData.prefix}*`);
 
     // custom resource to associate the IAM role to redshift cluster
-    this.createCustomResourceAssociateIAMRole(props, redshiftRoleForCopyFromS3);
+    this.crForModifyClusterIAMRoles = this.createCustomResourceAssociateIAMRole(props, redshiftRoleForCopyFromS3);
 
     // create Step function workflow to orchestrate the workflow to load data from s3 to redshift
     const loadEventWorkflow = this.createWorkflow(odsEventTable, props, redshiftRoleForCopyFromS3);
@@ -158,7 +160,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     return fn;
   }
 
-  private createCustomResourceAssociateIAMRole(props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole) {
+  private createCustomResourceAssociateIAMRole(props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): CustomResource {
     const fn = new NodejsFunction(this, 'AssociateIAMRoleToRedshiftFn', {
       runtime: Runtime.NODEJS_16_X,
       entry: join(
@@ -209,7 +211,35 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
           props.serverlessRedshift.workgroupId ?? '*', fn.role!);
       }
     } else {
-      // TODO: add permission for updating redshift provisioned cluster
+      new Policy(this, 'ProvisionedRedshiftIAMPolicy', {
+        roles: [fn.role!],
+        statements: [
+          new PolicyStatement({
+            actions: [
+              'redshift:DescribeClusters',
+            ],
+            resources: [
+              Arn.format({
+                service: 'redshift',
+                resource: '*',
+              }, Stack.of(this)),
+            ],
+          }),
+          new PolicyStatement({
+            actions: [
+              'redshift:ModifyClusterIamRoles',
+            ],
+            resources: [
+              Arn.format({
+                service: 'redshift',
+                resource: 'cluster',
+                resourceName: props.provisionedRedshift!.clusterIdentifier,
+                arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+              }, Stack.of(this)),
+            ],
+          }),
+        ],
+      });
     }
 
     const provider = new Provider(
@@ -223,16 +253,11 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
     const customProps: AssociateIAMRoleToRedshift = {
       roleArn: copyRole.roleArn,
-      serverlessRedshiftProps: props.serverlessRedshift ? {
-        workgroupName: props.serverlessRedshift.workgroupName,
-      } : undefined,
-      provisionedRedshiftProps: props.provisionedRedshift ? {
-        clusterIdentifier: props.provisionedRedshift.clusterIdentifier,
-        dbUser: props.provisionedRedshift.dbUser,
-      } : undefined,
+      serverlessRedshiftProps: props.serverlessRedshift,
+      provisionedRedshiftProps: props.provisionedRedshift,
     };
 
-    new CustomResource(this, 'RedshiftAssociateIAMRoleCustomResource', {
+    return new CustomResource(this, 'RedshiftAssociateIAMRoleCustomResource', {
       serviceToken: provider.serviceToken,
       properties: customProps,
     });

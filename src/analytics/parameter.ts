@@ -28,6 +28,7 @@ export interface RedshiftAnalyticsStackProps {
   sinkS3FileSuffixParam: CfnParameter;
   loadTempBucketParam: CfnParameter;
   loadTempBucketPrefixParam: CfnParameter;
+  redshiftDefaultDatabaseParam: CfnParameter;
   redshiftServerlessWorkgroupNameParam: CfnParameter;
   redshiftServerlessWorkgroupIdParam: CfnParameter;
   redshiftServerlessNamespaceIdParam: CfnParameter;
@@ -102,7 +103,19 @@ export function createStackParameters(scope: Construct) {
   });
 
   // Set Redshift common parameters
-
+  const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
+    description: 'The name of the default database in Redshift',
+    type: 'String',
+    default: 'dev',
+    allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
+  });
+  const redshiftCommonParamsGroup = [];
+  redshiftCommonParamsGroup.push({
+    Label: { default: 'Redshift Database' },
+    Parameters: [
+      redshiftDefaultDatabaseParam.logicalId,
+    ],
+  });
   // Set Redshift serverless parameters
   const redshiftServerlessParamsGroup = [];
 
@@ -321,6 +334,7 @@ export function createStackParameters(scope: Construct) {
             loadWorkflowBucketPrefixParam.logicalId,
           ],
         },
+        ...redshiftCommonParamsGroup,
         ...redshiftServerlessParamsGroup,
         ...redshiftClusterParamsGroup,
         ...loadJobParamsGroup,
@@ -353,7 +367,7 @@ export function createStackParameters(scope: Construct) {
           default: 'S3 bucket name for load workflow data',
         },
         [loadWorkflowBucketPrefixParam.logicalId]: {
-          default: 'S3 prefix for  load workflow data',
+          default: 'S3 prefix for load workflow data',
         },
         ...redshiftServerlessParamsLabels,
         ...redshiftClusterParamsLabels,
@@ -374,6 +388,7 @@ export function createStackParameters(scope: Construct) {
       sinkS3FileSuffixParam: sinkS3FileSuffixParam,
       loadTempBucketParam: loadWorkflowBucketParam,
       loadTempBucketPrefixParam: loadWorkflowBucketPrefixParam,
+      redshiftDefaultDatabaseParam,
       ...redshiftServerlessParam,
       ...redshiftClusterParam,
       ...loadJobParam,

@@ -15,7 +15,7 @@ import {
   Stack,
   NestedStack,
   NestedStackProps,
-  Arn, ArnFormat, Aws, Token, CfnResource, CfnCondition,
+  Arn, ArnFormat, Aws,
 } from 'aws-cdk-lib';
 import {
   SubnetSelection,
@@ -24,7 +24,6 @@ import {
 import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
-import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition } from './private/condition';
 import {
   REDSHIFT_ODS_TABLE_NAME,
 } from './private/constant';
@@ -62,20 +61,18 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
-    const redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
-      assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
-    });
-    if (props.serverlessRedshiftProps) {
-      if (props.serverlessRedshiftProps.workgroupId && Token.isUnresolved(props.serverlessRedshiftProps.workgroupId)) {
-        const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(this, props.serverlessRedshiftProps.workgroupId);
-        this.createRedshiftServerlessPolicy('RedshiftServerlessPolicyForAllWorkgroup', '*',
-          redshiftDataAPIExecRole, noWorkgroupIdCondition);
+    var redshiftDataAPIExecRole: IRole;
 
-        const withWorkgroupIdCondition = getOrCreateWithWorkgroupIdCondition(this, props.serverlessRedshiftProps.workgroupId);
-        this.createRedshiftServerlessPolicy('RedshiftServerlessPolicyForSingleWorkgroup', props.serverlessRedshiftProps.workgroupId,
-          redshiftDataAPIExecRole, withWorkgroupIdCondition);
-      } else {this.createRedshiftServerlessPolicy('RedshiftServerlessPolicyFor', props.serverlessRedshiftProps.workgroupId ?? '*', redshiftDataAPIExecRole);}
+    const projectDatabaseName = props.projectId;
+    if (props.serverlessRedshiftProps) {
+      redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
+        props.serverlessRedshiftProps.dataAPIRoleArn, {
+          mutable: true,
+        });
     } else {
+      redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
+        assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
+      });
       new Policy(this, 'RedshiftClusterPolicy', {
         roles: [redshiftDataAPIExecRole],
         statements: [
@@ -92,41 +89,68 @@ export class RedshiftAnalyticsStack extends NestedStack {
           }),
           new PolicyStatement({
             actions: [
-              'redshift:GetClusterCredentialsWithIAM',
               'redshift:GetClusterCredentials',
             ],
             resources: [
               Arn.format(
                 {
-                  resource: 'cluster',
-                  resourceName: props.provisionedRedshiftProps!.clusterIdentifier,
+                  resource: 'dbuser',
+                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.dbUser}`,
+                  service: 'redshift',
+                  arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+                },
+                Stack.of(this),
+              ),
+              Arn.format(
+                {
+                  resource: 'dbname',
+                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.databaseName}`,
+                  service: 'redshift',
+                  arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+                },
+                Stack.of(this),
+              ),
+              Arn.format(
+                {
+                  resource: 'dbname',
+                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${projectDatabaseName}`,
                   service: 'redshift',
                   arnFormat: ArnFormat.COLON_RESOURCE_NAME,
                 },
                 Stack.of(this),
               ),
             ],
+            conditions: {
+              StringEquals: {
+                'redshift:DbUser': props.provisionedRedshiftProps!.dbUser,
+                'redshift:DbName': [
+                  'dev',
+                  projectDatabaseName,
+                ],
+              },
+            },
           }),
         ],
       });
+
+      (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
+        actions: ['redshift-data:DescribeStatement'],
+        resources: ['*'],
+      }));
     }
 
-    redshiftDataAPIExecRole.addToPolicy(new PolicyStatement({
-      actions: ['redshift-data:DescribeStatement'],
-      resources: ['*'],
-    }));
-
     const odsTableName = REDSHIFT_ODS_TABLE_NAME;
-    const appSchemaConstruct = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
+    const appSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
       appIds: props.appIds,
       serverlessRedshift: props.serverlessRedshiftProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
-      dataAPIRole: redshiftDataAPIExecRole,
+      databaseName: projectDatabaseName,
+      dataAPIRole: redshiftDataAPIExecRole!,
     });
 
-    new LoadODSEventToRedshiftWorkflow(this, 'LoadODSEventToRedshiftWorkflow', {
+    const loadEventsWorkflow = new LoadODSEventToRedshiftWorkflow(this, 'LoadODSEventToRedshiftWorkflow', {
       projectId: props.projectId,
       networkConfig: {
         vpc: props.vpc,
@@ -138,34 +162,13 @@ export class RedshiftAnalyticsStack extends NestedStack {
       serverlessRedshift: props.serverlessRedshiftProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
-      databaseName: appSchemaConstruct.databaseName,
-      dataAPIRole: redshiftDataAPIExecRole,
+      databaseName: projectDatabaseName,
+      dataAPIRole: redshiftDataAPIExecRole!,
     });
+
+    loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(appSchema.crForCreateSchemas);
 
     addCfnNag(this);
-  }
-
-  private createRedshiftServerlessPolicy(id: string, workgroupId: string, role: IRole, condition?: CfnCondition) {
-    const policy = new Policy(this, id, {
-      roles: [role],
-      statements: [
-        new PolicyStatement({
-          actions: [
-            'redshift-data:ExecuteStatement',
-            'redshift-serverless:GetCredentials',
-          ],
-          resources: [
-            Arn.format({
-              service: 'redshift-serverless',
-              resource: 'workgroup',
-              resourceName: workgroupId,
-              arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
-            }, Stack.of(this)),
-          ],
-        }),
-      ],
-    });
-    if (condition) {(policy.node.findChild('Resource') as CfnResource).cfnOptions.condition = condition;}
   }
 }
 

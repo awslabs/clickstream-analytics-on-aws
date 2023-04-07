@@ -63,10 +63,12 @@ async function onCreate(event: CdkCustomResourceEvent) {
 
   const props = event.ResourceProperties as ResourcePropertiesType;
   // 1. create database in Redshift
-  // FIXME: if work on redshift cluster
-  const client = getRedshiftClient(props.serverlessRedshiftProps?.superUserIAMRoleArn ?? props.userRoleArn);
-  const roleName = props.userRoleArn.split('/')[1];
-  await createDatabaseInRedshift(client, props.databaseName, `IAMR:${roleName}`, props);
+  const client = getRedshiftClient(props.dataAPIRole);
+  if (props.serverlessRedshiftProps || props.provisionedRedshiftProps) {
+    await createDatabaseInRedshift(client, props.databaseName, props);
+  } else {
+    throw new Error('Can\'t identity the mode Redshift cluster!');
+  }
 
   // 2. create schemas in Redshift for applications
   await createSchemas(props);
@@ -133,23 +135,19 @@ async function createSchemas(props: ResourcePropertiesType) {
   if (sqlStatement.length == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
   } else {
-    const redShiftClient = getRedshiftClient(props.userRoleArn);
+    const redShiftClient = getRedshiftClient(props.dataAPIRole);
     await createSchemasInRedshift(redShiftClient, sqlStatement.join(';'), props);
   }
 }
 
-const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string, owner: string,
-  props: CreateDatabaseAndSchemas) => {
+const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string,
+  props: CreateDatabaseAndSchemas, owner?: string) => {
   try {
-    await executeStatementWithWait(redshiftClient, `CREATE USER "${owner}" PASSWORD DISABLE;`,
-      props.serverlessRedshiftProps?.defaultDatabaseName ?? databaseName,
-      props.serverlessRedshiftProps, props.provisionedRedshiftProps);
-    await executeStatementWithWait(redshiftClient, `CREATE DATABASE ${databaseName} WITH OWNER "${owner}";`,
-      props.serverlessRedshiftProps?.defaultDatabaseName ?? databaseName,
+    await executeStatementWithWait(redshiftClient, `CREATE DATABASE ${databaseName}${owner ? ` WITH OWNER "${owner}"` : ''};`,
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when creating schema in serverless Redshift.', err);
+      logger.error('Error when creating database in serverless Redshift.', err);
     }
     throw err;
   }
@@ -157,8 +155,8 @@ const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, data
 
 const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatement: string, props: CreateDatabaseAndSchemas) => {
   try {
-    await executeStatementWithWait(redshiftClient, sqlStatement, props.databaseName,
-      props.serverlessRedshiftProps, props.provisionedRedshiftProps);
+    await executeStatementWithWait(redshiftClient, sqlStatement,
+      props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
   } catch (err) {
     if (err instanceof Error) {
       logger.error('Error when creating schema in serverless Redshift.', err);

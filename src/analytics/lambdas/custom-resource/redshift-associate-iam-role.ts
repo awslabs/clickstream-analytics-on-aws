@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { RedshiftClient, DescribeClustersCommand, ModifyClusterIamRolesCommand, ClusterIamRole } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, GetWorkgroupCommand, GetNamespaceCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
@@ -26,12 +27,7 @@ type ResourcePropertiesType = CustomProperties & {
   readonly ServiceToken: string;
 }
 
-interface IamRole {
-  applyStatus: string;
-  iamRoleArn: string;
-}
-
-function parseIamRole(str: string): IamRole {
+function strToIamRole(str: string): ClusterIamRole {
   const matches = str.match(/IamRole\(applyStatus=(.*), iamRoleArn=(.*)\)/);
 
   if (!matches || matches.length < 3) {
@@ -39,9 +35,33 @@ function parseIamRole(str: string): IamRole {
   }
 
   return {
-    applyStatus: matches[1],
-    iamRoleArn: matches[2],
+    ApplyStatus: matches[1] as 'in-sync' | 'removing' | 'adding',
+    IamRoleArn: matches[2],
   };
+}
+
+function iamRoleToArn(iamRoles: ClusterIamRole[]): string[] {
+  return iamRoles.filter(role => role.ApplyStatus !== 'removing').map(role => role.IamRoleArn!);
+}
+
+function getNewDefaultIAMRole(rolesToBeHaved: string[], rolesToBeAssociated?: string, roleToRemoved?: string,
+  currentDefaultRole?: string): string | undefined {
+  var defaultRole = currentDefaultRole;
+  if (currentDefaultRole == roleToRemoved) {defaultRole = '';}
+  if (!defaultRole && rolesToBeAssociated) {defaultRole = rolesToBeAssociated;}
+  if (!defaultRole) {defaultRole = rolesToBeHaved.length > 0 ? rolesToBeHaved[0] : '';}
+
+  return defaultRole;
+}
+
+function excludeToBeUnassociated(roles: string[], toBeUnasscoiated?: string): string[] {
+  if (toBeUnasscoiated) {
+    const index = roles.indexOf(toBeUnasscoiated, 0);
+    if (index > -1) {
+      roles.splice(index, 1);
+    }
+  }
+  return roles;
 }
 
 export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent) => {
@@ -81,32 +101,41 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
       });
       const getWorkspaceResp = await client.send(getWorkspace);
       const existingRoles = getWorkspaceResp.namespace!.iamRoles ?? [];
-      const roles = existingRoles.map(roleStr => parseIamRole(roleStr))
-        .filter(role => role.applyStatus !== 'removing').map(role => role.iamRoleArn);
-      if (roleToBeUnassociated) {
-        const index = roles.indexOf(roleToBeUnassociated, 0);
-        if (index > -1) {
-          roles.splice(index, 1);
-        }
-      }
+      const roles = excludeToBeUnassociated(
+        iamRoleToArn(existingRoles.map(roleStr => strToIamRole(roleStr))), roleToBeUnassociated);
       if (roleToBeAssociated) {
         roles.push(roleToBeAssociated);
       }
 
-      var defaultRole: string | undefined = getWorkspaceResp.namespace!.defaultIamRoleArn;
-      if (getWorkspaceResp.namespace!.defaultIamRoleArn == roleToBeUnassociated) {defaultRole = '';}
-      if (!defaultRole && roleToBeAssociated) {defaultRole = roleToBeAssociated;}
-      if (!defaultRole) {defaultRole = roles.length > 0 ? roles[0] : '';}
+      const defaultRole = getNewDefaultIAMRole(roles, roleToBeAssociated, roleToBeUnassociated,
+        getWorkspaceResp.namespace!.defaultIamRoleArn);
 
       const updateNamespace = new UpdateNamespaceCommand({
         namespaceName,
         iamRoles: roles,
         defaultIamRoleArn: defaultRole,
       });
-      logger.debug('Update namespace command ', { updateNamespace });
+      logger.info('Update namespace command ', { updateNamespace });
       await client.send(updateNamespace);
     } else if (resourceProps.provisionedRedshiftProps) {
-      throw new Error('Not implemented yet');
+      const client = new RedshiftClient({});
+      const getCluster = new DescribeClustersCommand({
+        ClusterIdentifier: resourceProps.provisionedRedshiftProps.clusterIdentifier,
+      });
+      const cluster = (await client.send(getCluster)).Clusters![0];
+      var defaultIAMRole = cluster.DefaultIamRoleArn;
+      const updateIAM = new ModifyClusterIamRolesCommand({
+        ClusterIdentifier: resourceProps.provisionedRedshiftProps.clusterIdentifier,
+        AddIamRoles: roleToBeAssociated ? [roleToBeAssociated] : [],
+        RemoveIamRoles: roleToBeUnassociated ? [roleToBeUnassociated] : [],
+        DefaultIamRoleArn: getNewDefaultIAMRole([
+          ...excludeToBeUnassociated(
+            iamRoleToArn(cluster.IamRoles ?? []), roleToBeUnassociated),
+          ...(roleToBeAssociated ? [roleToBeAssociated] : []),
+        ], roleToBeAssociated, roleToBeUnassociated, defaultIAMRole),
+      });
+      logger.info('Updating iam roles of Redshift cluster', { updateIAM });
+      await client.send(updateIAM);
     } else {
       const msg = 'Can\'t identity the mode Redshift cluster!';
       logger.error(msg);

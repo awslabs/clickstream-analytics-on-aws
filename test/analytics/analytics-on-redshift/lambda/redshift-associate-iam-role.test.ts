@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { RedshiftClient, DescribeClustersCommand, ModifyClusterIamRolesCommand, ClusterIamRole } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, GetWorkgroupCommand, GetNamespaceCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceCallback, CdkCustomResourceResponse, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceDeleteEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -24,6 +25,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
   const context = getMockContext();
   const callback: CdkCustomResourceCallback = async (_response) => {};
   const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
+  const redshiftMock = mockClient(RedshiftClient);
 
   const workgroupName = 'demo';
   const namespaceName = 'myNamespace';
@@ -70,6 +72,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
 
   beforeEach(() => {
     redshiftServerlessMock.reset();
+    redshiftMock.reset();
   });
 
   test('Associate to redshift serverless workgroup without existing IAM roles', async () => {
@@ -377,6 +380,312 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
       expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetWorkgroupCommand, 0);
       expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 0);
       expect(redshiftServerlessMock).toHaveReceivedCommandTimes(UpdateNamespaceCommand, 0);
+    }
+  });
+
+  const clusterId = 'cluster-111';
+  const createEventForProvisioned = {
+    ...basicCloudFormationEvent,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      roleArn: copyRole,
+      provisionedRedshiftProps: {
+        clusterIdentifier: clusterId,
+        dbUser: 'aDBUser',
+      },
+    },
+  };
+
+  const updateEventForProvisioned: CloudFormationCustomResourceUpdateEvent = {
+    ...basicCloudFormationEvent,
+    OldResourceProperties: createEventForProvisioned.ResourceProperties,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      roleArn: copyRole2,
+      provisionedRedshiftProps: {
+        clusterIdentifier: clusterId,
+        dbUser: 'aDBUser',
+      },
+    },
+    PhysicalResourceId: 'physical-resource-id',
+    RequestType: 'Update',
+  };
+
+  const deleteEventForProvisioned: CloudFormationCustomResourceDeleteEvent = {
+    ...basicCloudFormationEvent,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      roleArn: copyRole,
+      provisionedRedshiftProps: {
+        clusterIdentifier: clusterId,
+        dbUser: 'aDBUser',
+      },
+    },
+    PhysicalResourceId: 'physical-resource-id',
+    RequestType: 'Delete',
+  };
+
+  test('Associate to provisioned redshift without existing IAM roles', async () => {
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(createEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandWith(DescribeClustersCommand, {
+      ClusterIdentifier: clusterId,
+    });
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+        copyRole,
+      ],
+      RemoveIamRoles: [],
+      DefaultIamRoleArn: copyRole,
+    });
+  });
+
+  test('Associate to provisioned redshift with existing IAM roles', async () => {
+    const existingIAMRoles: ClusterIamRole[] = [
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-2',
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(createEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+        copyRole,
+      ],
+      RemoveIamRoles: [],
+      DefaultIamRoleArn: copyRole,
+    });
+  });
+
+  test('Updating the association to provisioned redshift without additional existing roles', async () => {
+    const existingIAMRoles: ClusterIamRole[] = [
+      {
+        IamRoleArn: copyRole,
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(updateEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+        copyRole2,
+      ],
+      RemoveIamRoles: [
+        copyRole,
+      ],
+      DefaultIamRoleArn: copyRole2,
+    });
+  });
+
+  test('Updating the association to provisioned redshift with existing roles, the default is old role', async () => {
+    const existingIAMRoles = [
+      {
+        IamRoleArn: copyRole,
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-2',
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+          DefaultIamRoleArn: copyRole,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(updateEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+        copyRole2,
+      ],
+      RemoveIamRoles: [
+        copyRole,
+      ],
+      DefaultIamRoleArn: copyRole2,
+    });
+  });
+
+  test('Updating the association to provisioned redshift with existing roles, the default is another role', async () => {
+    const existingIAMRoles = [
+      {
+        IamRoleArn: copyRole,
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-2',
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+          DefaultIamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-2',
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(updateEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+        copyRole2,
+      ],
+      RemoveIamRoles: [
+        copyRole,
+      ],
+      DefaultIamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-2',
+    });
+  });
+
+  test('Deleting the association to provisioned redshift without other roles', async () => {
+    const existingIAMRoles = [
+      {
+        IamRoleArn: copyRole,
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+          DefaultIamRoleArn: copyRole,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(deleteEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+      ],
+      RemoveIamRoles: [
+        copyRole,
+      ],
+      DefaultIamRoleArn: '',
+    });
+  });
+
+  test('Deleting the association to provisioned redshift with other roles', async () => {
+    const existingIAMRoles = [
+      {
+        IamRoleArn: copyRole,
+        ApplyStatus: 'in-sync',
+      },
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+        ApplyStatus: 'removing',
+      },
+      {
+        IamRoleArn: copyRole2,
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+          DefaultIamRoleArn: copyRole,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).resolvesOnce({});
+    const resp = await handler(deleteEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+    expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+      ClusterIdentifier: clusterId,
+      AddIamRoles: [
+      ],
+      RemoveIamRoles: [
+        copyRole,
+      ],
+      DefaultIamRoleArn: copyRole2,
+    });
+  });
+
+  test('Error when calling redshift API', async () => {
+    const existingIAMRoles = [
+      {
+        IamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+        ApplyStatus: 'in-sync',
+      },
+    ];
+    redshiftMock.on(DescribeClustersCommand).resolvesOnce({
+      Clusters: [
+        {
+          IamRoles: existingIAMRoles,
+          DefaultIamRoleArn: copyRole,
+        },
+      ],
+    });
+    redshiftMock.on(ModifyClusterIamRolesCommand).rejects();
+    try {
+      await handler(createEventForProvisioned, context, callback) as CdkCustomResourceResponse;
+      fail('The redshift-serverless API error was caught that is not expected behavior');
+    } catch (error) {
+      expect(redshiftMock).toHaveReceivedCommandTimes(DescribeClustersCommand, 1);
+      expect(redshiftMock).toHaveReceivedCommandWith(ModifyClusterIamRolesCommand, {
+        ClusterIdentifier: clusterId,
+        AddIamRoles: [
+          copyRole,
+        ],
+        RemoveIamRoles: [
+        ],
+        DefaultIamRoleArn: copyRole,
+      });
     }
   });
 });

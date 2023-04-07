@@ -12,8 +12,8 @@
  */
 
 import { join } from 'path';
-import { Duration, Resource, CustomResource } from 'aws-cdk-lib';
-import { IRole, Role } from 'aws-cdk-lib/aws-iam';
+import { Duration, CustomResource } from 'aws-cdk-lib';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -28,30 +28,28 @@ export interface ApplicationSchemasProps {
   readonly appIds: string;
   readonly serverlessRedshift?: ServerlessRedshiftProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
+  readonly databaseName: string;
   readonly odsTableName: string;
   readonly dataAPIRole: IRole;
 }
 
 export class ApplicationSchemas extends Construct {
-  readonly databaseName: string;
+
+  public readonly crForCreateSchemas: CustomResource;
 
   constructor(scope: Construct, id: string, props: ApplicationSchemasProps) {
     super(scope, id);
 
-    this.databaseName = `clickstream_${props.projectId}`;
     /**
      * Create database(projectId) and schemas(appIds) in Redshift using Redshift-Data API.
      */
-    this.createRedshiftSchemasCustomResource(props);
+    this.crForCreateSchemas = this.createRedshiftSchemasCustomResource(props);
   }
 
-  private createRedshiftSchemasCustomResource(props: ApplicationSchemasProps): Resource {
+  private createRedshiftSchemasCustomResource(props: ApplicationSchemasProps): CustomResource {
     const fn = this.createRedshiftSchemasLambda();
 
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
-    if (props.serverlessRedshift) {
-      Role.fromRoleArn(this, 'SuperUserRole', props.serverlessRedshift.superUserIAMRoleArn!).grantAssumeRole(fn.grantPrincipal);
-    }
 
     const provider = new Provider(
       this,
@@ -66,17 +64,10 @@ export class ApplicationSchemas extends Construct {
       projectId: props.projectId,
       appIds: props.appIds,
       odsTableName: props.odsTableName,
-      databaseName: this.databaseName,
-      userRoleArn: props.dataAPIRole.roleArn,
-      serverlessRedshiftProps: props.serverlessRedshift ? {
-        workgroupName: props.serverlessRedshift.workgroupName,
-        superUserIAMRoleArn: props.serverlessRedshift.superUserIAMRoleArn,
-        defaultDatabaseName: 'dev',
-      } : undefined,
-      provisionedRedshiftProps: props.provisionedRedshift ? {
-        clusterIdentifier: props.provisionedRedshift.clusterIdentifier,
-        dbUser: props.provisionedRedshift.dbUser,
-      } : undefined,
+      databaseName: props.databaseName,
+      dataAPIRole: props.dataAPIRole.roleArn,
+      serverlessRedshiftProps: props.serverlessRedshift,
+      provisionedRedshiftProps: props.provisionedRedshift,
     };
     const cr = new CustomResource(this, 'RedshiftSchemasCustomResource', {
       serviceToken: provider.serviceToken,

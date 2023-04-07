@@ -211,6 +211,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     expect(nestStack).toBeDefined();
 
     const exceptedParams = [
+      'RedshiftDefaultDatabase',
       'RedshiftServerlessWorkgroupId',
       'RedshiftServerlessIAMRole',
       'ProjectId',
@@ -354,10 +355,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   test('RedshiftServerlessPolicyFor props.serverlessRedshiftProps.workgroupId', () => {
     const serverlessRedshiftProps = {
+      databaseName: 'dev',
       namespaceId: 'namespace1',
       workgroupName: 'workgroup1',
       workgroupId: 'workgroupId-1',
-      superUserIAMRoleArn: 'arn:aws:iam::xxxxxxxxxxxx:role/role1',
+      dataAPIRoleArn: 'arn:aws:iam::xxxxxxxxxxxx:role/role1',
     };
     const nestStackProps = {
       vpc: vpc,

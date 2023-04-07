@@ -83,10 +83,13 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
 
   if (redshiftMode == RedshiftMode.SERVERLESS) {
     serverlessRedshiftProps = {
+      databaseName: REDSHIFT_DATABASE,
       workgroupName: process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
+      dataAPIRoleArn: REDSHIFT_DATA_API_ROLE_ARN,
     };
   } else if (redshiftMode == RedshiftMode.PROVISIONED) {
     provisionedRedshiftProps = {
+      databaseName: REDSHIFT_DATABASE,
       dbUser: process.env.REDSHIFT_DB_USER!,
       clusterIdentifier: process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
     };
@@ -115,7 +118,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     ;
 
   try {
-    const queryId = await executeStatement(redshiftDataApiClient, sqlStatement, REDSHIFT_DATABASE, serverlessRedshiftProps, provisionedRedshiftProps);
+    const queryId = await executeStatement(redshiftDataApiClient, sqlStatement, serverlessRedshiftProps, provisionedRedshiftProps);
 
     logger.info('loadFileToRedshift response:', queryId);
 

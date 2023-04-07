@@ -41,6 +41,9 @@ const awsSDKDeps = [
   '@aws-sdk/client-glue',
   '@aws-sdk/client-redshift-data',
   '@aws-sdk/client-cloudwatch',
+  '@aws-sdk/client-redshift',
+  '@aws-sdk/client-redshift-serverless',
+  '@aws-sdk/client-emr-serverless',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [

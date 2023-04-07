@@ -124,10 +124,11 @@ export function createRedshiftAnalyticsStack(
     {
       ...nestStackProps,
       serverlessRedshiftProps: {
+        databaseName: props.redshiftDefaultDatabaseParam.valueAsString,
         namespaceId: props.redshiftServerlessNamespaceIdParam.valueAsString,
         workgroupName: props.redshiftServerlessWorkgroupNameParam.valueAsString,
         workgroupId: props.redshiftServerlessWorkgroupIdParam.valueAsString,
-        superUserIAMRoleArn: props.redshiftServerlessIAMRoleParam.valueAsString,
+        dataAPIRoleArn: props.redshiftServerlessIAMRoleParam.valueAsString,
       },
     },
   );
@@ -139,6 +140,7 @@ export function createRedshiftAnalyticsStack(
     {
       ...nestStackProps,
       provisionedRedshiftProps: {
+        databaseName: props.redshiftDefaultDatabaseParam.valueAsString,
         clusterIdentifier: props.redshiftClusterIdentifierParam.valueAsString,
         dbUser: props.redshiftDbUserParam.valueAsString,
       },
