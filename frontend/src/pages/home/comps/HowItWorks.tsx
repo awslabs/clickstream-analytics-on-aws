@@ -26,7 +26,7 @@ const HowItWorks: React.FC = () => {
     <Container
       header={<Header variant="h2">{t('home:howItWorks.name')}</Header>}
     >
-      <ColumnLayout columns={3} variant="text-grid">
+      <ColumnLayout columns={2} variant="text-grid">
         <div>
           <Box variant="awsui-key-label">{t('home:howItWorks.step1')}</Box>
           <Box variant="awsui-key-label">
@@ -47,6 +47,13 @@ const HowItWorks: React.FC = () => {
             {t('home:howItWorks.step3SubTitle')}
           </Box>
           <div>{t('home:howItWorks.step3Desc')}</div>
+        </div>
+        <div>
+          <Box variant="awsui-key-label">{t('home:howItWorks.step4')}</Box>
+          <Box variant="awsui-key-label">
+            {t('home:howItWorks.step4SubTitle')}
+          </Box>
+          <div>{t('home:howItWorks.step4Desc')}</div>
         </div>
       </ColumnLayout>
     </Container>

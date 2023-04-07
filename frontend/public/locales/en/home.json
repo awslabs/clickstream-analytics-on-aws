@@ -1,37 +1,40 @@
 {
   "header": {
-    "desc": "Build a robust, cost-efffecitve, and flexible analytics platform to collect and analyze clickstream data from your websites and mobile apps, providing 100% ownership and control over data that enables you to unlock full potentials of your business. "
+    "desc": "Build a flexible, robust, and cost-efffecitve analytics platform to collect and analyze clickstream data from your websites and mobile apps, providing 100% ownership and control over data that enables you grow your business with data-driven insights. "
   },
   "benefits": {
     "name": "Benefits and features",
     "benefit1": "Easy to use",
-    "benefit1Desc": " With a few clicks on a web-base console, you can create an end-to-end analytic platform and start analyzing your data.",
+    "benefit1Desc": " With a few clicks on a web-based console, you can create an end-to-end analytic platform and start analyzing your data.",
     "benefit2": "A single pane of glass view",
-    "benefit2Desc": "Manage all resources in a single place, provides built-in monitors and alarms that gives you full visibility into your data pipelines and underlining AWS resources.",
+    "benefit2Desc": "Manage all resources in a single place, provides built-in monitoring dashboards and alarms that gives you full visibility into the underlining AWS resources within your data pipelines.",
     "benefit3": "Flexible",
-    "benefit3Desc": "Modularized components with rich customization options for you to assessemble a data pipeline that tailored to your needs.",
+    "benefit3Desc": "Modularized components with rich customization options for you to assemble a data pipeline that tailored to your needs.",
     "benefit4": "Well-architected",
-    "benefit4Desc": "The solution is built based on AWS best practices, providing you production-level scalability and cost-effitiveness."
+    "benefit4Desc": "The solution is designed based on AWS best practices, providing you production-level scalability and cost-effitiveness."
   },
   "getStarted": {
     "name": "Getting started",
-    "link1": "Amazon EC2 Fleet Functionality",
-    "link2": "Hands-on Workshop",
-    "link3": "Pipeline configuration",
-    "link4": "Use third-party SDK",
-    "link5": "Documentation"
+    "link1": "Hands-on Workshop",
+    "link2": "Out-of-the-box dashboards",
+    "link3": "Working with a third-party SDK",
+    "link4": "Working with Redshift",
+    "link5": "Working with QuickSight"
   },
   "howItWorks": {
     "name": "How it works",
     "step1": "Step 1.",
     "step1SubTitle": "Create a project",
-    "step1Desc": "A project is a container for your Apple, Android, and Web apps. Apps in the project will share the same data.",
+    "step1Desc": "A project is a container for your Apple, Android, and Web apps. Apps in the project will share the same data pipeline.",
     "step2": "Step 2.",
-    "step2SubTitle": "Create a pipeline",
-    "step2Desc": "A pipeline is a set of data processing modules that collect and transform your clickstream data into your desired format",
+    "step2SubTitle": "Create a data pipeline",
+    "step2Desc": "A data pipeline is a set of modules that collect, process, and visualize your clickstream data",
     "step3": "Step 3.",
-    "step3SubTitle": "Register apps",
-    "step3Desc": "Add apps to your project, and follow the guidance to integrate SDK into your apps"
+    "step3SubTitle": "Add apps",
+    "step3Desc": "Add apps to your project, and follow the guidance to integrate SDK into your apps",
+    "step4": "Step 4.",
+    "step4SubTitle": "View dashboards",
+    "step4Desc": "View the out-of-the-box dashboards to understand app's overall performance, create custom queries and visualization based on your business needs."
   },
   "moreResource": {
     "name": "More resource",
