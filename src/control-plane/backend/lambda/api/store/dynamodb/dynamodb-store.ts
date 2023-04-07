@@ -26,7 +26,7 @@ import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '..
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
 import { KeyVal } from '../../common/types';
-import { isEmpty } from '../../common/utils';
+import { isEmpty, tryToJson } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
 import {
@@ -757,6 +757,14 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async getPlugin(pluginId: string): Promise<Plugin | undefined> {
+    if (pluginId.startsWith('BUILDIN')) {
+      const dic = await this.getDictionary('BuildInPlugins');
+      if (dic) {
+        let buildInPlugins = tryToJson(dic.data) as Plugin[];
+        buildInPlugins = buildInPlugins.filter(p => p.id === pluginId);
+        return !isEmpty(buildInPlugins) ? buildInPlugins[0] : undefined;
+      }
+    }
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -821,6 +829,18 @@ export class DynamoDbStore implements ClickStreamStore {
       filterExpression = `${filterExpression} AND pluginType=:pluginType`;
       expressionAttributeValues.set(':pluginType', pluginType);
     }
+
+    let plugins: PluginList = { totalCount: 0, items: [] };
+    const dic = await this.getDictionary('BuildInPlugins');
+    if (dic) {
+      let buildInPlugins = tryToJson(dic.data) as Plugin[];
+      if (!isEmpty(pluginType)) {
+        buildInPlugins = buildInPlugins.filter(p => p.pluginType === pluginType);
+      }
+      plugins.items = buildInPlugins;
+      plugins.totalCount = buildInPlugins.length;
+    }
+
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
@@ -840,18 +860,16 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-
-    let plugins: PluginList = { totalCount: 0, items: [] };
-    plugins.totalCount = records?.length;
+    plugins.totalCount = plugins.totalCount + records?.length;
     if (pagination) {
       if (plugins.totalCount) {
         pageNumber = Math.min(Math.ceil(plugins.totalCount / pageSize), pageNumber);
         const startIndex = pageSize * (pageNumber - 1);
         const endIndex = Math.min(pageSize * pageNumber, plugins.totalCount);
-        plugins.items = records?.slice(startIndex, endIndex) as Plugin[];
+        plugins.items = (plugins.items as Plugin[]).concat(records as Plugin[]).slice(startIndex, endIndex);
       }
     } else {
-      plugins.items = records as Plugin[];
+      plugins.items = (plugins.items as Plugin[]).concat(records as Plugin[]);
     }
     return plugins;
   };

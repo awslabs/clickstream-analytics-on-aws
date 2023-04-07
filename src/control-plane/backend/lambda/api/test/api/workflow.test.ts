@@ -13,9 +13,9 @@
 
 import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { dictionaryMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { Pipeline } from '../../model/pipeline';
@@ -31,12 +31,7 @@ describe('Pipeline test', () => {
     kafkaMock.reset();
   });
   it('Generate Workflow ingestion-server-s3', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -217,7 +212,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-ingestion-s3-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-s3-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
                   },
                 },
                 End: true,
@@ -234,12 +229,7 @@ describe('Pipeline test', () => {
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-kafka', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -301,7 +291,7 @@ describe('Pipeline test', () => {
         },
         sinkType: 'kafka',
         sinkKafka: {
-          brokers: ['test1', 'test2', 'test3'],
+          brokers: ['test1.com:9092', 'test2.com:9092', 'test3.com:9092'],
           topic: 't1',
           mskCluster: {
             name: 'mskClusterName',
@@ -415,11 +405,11 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1,test2,test3',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
                     StackName: 'clickstream-ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-kafka-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Type: 'Stack',
@@ -464,7 +454,7 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1,test2,test3',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                       {
                         ParameterKey: 'KafkaTopic',
@@ -480,7 +470,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-kafka-connector-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/kafka-s3-sink-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -497,12 +487,7 @@ describe('Pipeline test', () => {
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-kafka msk', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{ id: 1, appId: '1' }, { id: 2, appId: '2' }],
     });
@@ -510,12 +495,12 @@ describe('Pipeline test', () => {
       NodeInfoList: [
         {
           BrokerNodeInfo: {
-            Endpoints: ['test1', 'test2'],
+            Endpoints: ['test1.com', 'test2.com'],
           },
         },
         {
           BrokerNodeInfo: {
-            Endpoints: ['test3'],
+            Endpoints: ['test3.com'],
           },
         },
       ],
@@ -694,11 +679,11 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1:9092,test2:9092,test3:9092',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
                     StackName: 'clickstream-ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-kafka-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Next: 'KafkaConnector',
@@ -743,7 +728,7 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1:9092,test2:9092,test3:9092',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                       {
                         ParameterKey: 'KafkaTopic',
@@ -759,7 +744,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-kafka-connector-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/kafka-s3-sink-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -776,12 +761,7 @@ describe('Pipeline test', () => {
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-kinesis', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -972,7 +952,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-ingestion-kinesis-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-kinesis-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
                 End: true,
@@ -989,12 +969,7 @@ describe('Pipeline test', () => {
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -1079,8 +1054,8 @@ describe('Pipeline test', () => {
           name: 'EXAMPLE_BUCKET',
           prefix: '',
         },
-        transformPlugin: '',
-        enrichPlugin: [],
+        transformPlugin: undefined,
+        enrichPlugin: ['a', 'b'],
       },
       dataModel: undefined,
       executionArn: '',
@@ -1192,7 +1167,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-ingestion-s3-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/ingestion-server-s3-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
                   },
                 },
                 End: true,
@@ -1262,15 +1237,7 @@ describe('Pipeline test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
-                      },
-                      {
-                        ParameterKey: 'S3PathPluginJars',
-                        ParameterValue: 's3://EXAMPLE_BUCKET/spark-etl-0.1.0.jar',
-                      },
-                      {
-                        ParameterKey: 'S3PathPluginFiles',
-                        ParameterValue: 's3://EXAMPLE_BUCKET/GeoLite2-City.mmdb',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -1278,7 +1245,7 @@ describe('Pipeline test', () => {
                       },
                     ],
                     StackName: 'clickstream-etl-6666-6666',
-                    TemplateURL: 'https://undefined.s3.us-east-1.amazonaws.com/undefined/undefined/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
                 End: true,
@@ -1295,29 +1262,9 @@ describe('Pipeline test', () => {
     expect(wf).toEqual(expected);
   });
   it('Pipeline template url', async () => {
-    ddbMock.on(GetCommand)
-      .resolvesOnce({
-        Item: {
-          name: 'Solution',
-          data: {
-            name: 'clickstream',
-            dist_output_bucket: 'EXAMPLE-BUCKET',
-            prefix: 'feature/main/default',
-          },
-        },
-      })
-      .resolves({
-        Item: {
-          name: 'Templates',
-          data: {
-            ingestion_kafka: 'ingestion-server-kafka-stack.template.json',
-            ingestion_kinesis: 'ingestion-server-kinesis-stack.template.json',
-            ingestion_s3: 'ingestion-server-s3-stack.template.json',
-          },
-        },
-      });
+    dictionaryMock(ddbMock);
     let templateURL = await stackManager.getTemplateUrl('ingestion_s3');
-    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream/feature/main/default/ingestion-server-s3-stack.template.json');
+    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
     templateURL = await stackManager.getTemplateUrl('ingestion_no');
     expect(templateURL).toEqual(undefined);
 

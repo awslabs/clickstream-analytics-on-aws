@@ -312,21 +312,25 @@ test('KafkaBrokers pattern', () => {
   const pattern = param.AllowedPattern;
   const regex = new RegExp(`${pattern}`);
   const validValues = [
-    'b1.test.com',
     'b1.test.com:9092',
     'b-1.test.com:9092,b-2.test.com:9092',
     'b-1.test.com:9092,b-2.test.com:9092,b-3.test.com:9092',
     '192.169.1.1:9092,192.169.1.2:9092,192.169.1.3:9092',
-    '192.169.1.1,192.169.1.2,192.169.1.3',
-    '192.169.1.1',
-    '192.169.1.1:9092,192.169.1.2',
   ];
 
   for (const v of validValues) {
     expect(v).toMatch(regex);
   }
 
-  const invalidValues = ['a', 'b1.test.com:abc'];
+  const invalidValues = [
+    'a',
+    'b1.test.com:abc',
+    'b1.test.com',
+    'b-1.test.com,b-2.test.com:9092',
+    '192.169.1.1,192.169.1.2,192.169.1.3',
+    '192.169.1.1',
+    '192.169.1.1:9092,192.169.1.2',
+  ];
   for (const v of invalidValues) {
     expect(v).not.toMatch(regex);
   }

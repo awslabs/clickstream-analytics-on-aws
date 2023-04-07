@@ -12,12 +12,12 @@
  */
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
-import { KafkaClient, ListNodesCommand, ListNodesCommandOutput } from '@aws-sdk/client-kafka';
+import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
+import { dictionaryMock, MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { WorkflowStateType } from '../../common/types';
 import { app, server } from '../../index';
@@ -35,14 +35,8 @@ describe('Pipeline test', () => {
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "xxx", "kafka-s3-sink": "yyy", "data-pipeline":"zzz"}',
-      },
-    });
-
-    const outpus: ListNodesCommandOutput = {
+    dictionaryMock(ddbMock);
+    kafkaMock.on(ListNodesCommand).resolves({
       NextToken: 'token01',
       NodeInfoList: [{
         BrokerNodeInfo: {
@@ -50,9 +44,7 @@ describe('Pipeline test', () => {
         },
       }],
       $metadata: {},
-    };
-    kafkaMock.on(ListNodesCommand).resolves(outpus);
-
+    });
     sfnMock.on(StartExecutionCommand).resolves({});
     ddbMock.on(PutCommand).resolves({});
     ddbMock.on(QueryCommand).resolves({
@@ -97,9 +89,8 @@ describe('Pipeline test', () => {
             scaleOnCpuUtilizationPercent: 50,
           },
           domain: {
-            hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'fake.example.com',
-            recordName: 'click',
+            domainName: 'fake.example.com',
+            certificateArn: 'arn:aws:acm:us-east-1:111122223333:certificate/96d69c0d-fb79-4586-a8d0-0ae1e25c44e5',
           },
           loadBalancer: {
             serverEndpointPath: '/collect',
@@ -263,12 +254,7 @@ describe('Pipeline test', () => {
   });
   it('Create pipeline with mock error', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        name: 'Templates',
-        data: '{"ingestion_s3": "xxx"}',
-      },
-    });
+    dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
@@ -305,9 +291,8 @@ describe('Pipeline test', () => {
             scaleOnCpuUtilizationPercent: 50,
           },
           domain: {
-            hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'example.com',
-            recordName: 'click',
+            domainName: 'fake.example.com',
+            certificateArn: 'arn:aws:acm:us-east-1:111122223333:certificate/96d69c0d-fb79-4586-a8d0-0ae1e25c44e5',
           },
           loadBalancer: {
             serverEndpointPath: '/collect',

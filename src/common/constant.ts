@@ -34,7 +34,7 @@ export const PARAMETER_LABEL_HOST_ZONE_NAME = 'Host Zone Name';
 export const PARAMETER_LABEL_RECORD_NAME = 'Record Name';
 export const PARAMETER_LABEL_DOMAIN_NAME = 'Domain Name';
 export const PARAMETER_LABEL_CERTIFICATE_ARN = 'Certificate ARN';
-export const KAFKA_BROKERS_PATTERN = `(((${DOMAIN_NAME_PATTERN}|${IP_PATTERN})(:[0-9]+){0,1},?)){1,3}`;
+export const KAFKA_BROKERS_PATTERN = `(((${DOMAIN_NAME_PATTERN}|${IP_PATTERN})(:[0-9]+){1},?)){1,3}`;
 export const KAFKA_TOPIC_PATTERN = '[a-zA-Z0-9_\\-\\.]+';
 export const OIDC_ISSUER_PATTERN = '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?';
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';

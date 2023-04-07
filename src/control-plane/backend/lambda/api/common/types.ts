@@ -15,6 +15,14 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { Endpoint } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 
+export class ClickStreamBadRequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ClickStreamBadRequestError';
+    this.message = message;
+  }
+}
+
 export class ApiResponse {
   readonly success: boolean;
   readonly message: string;

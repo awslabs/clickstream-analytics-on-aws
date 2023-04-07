@@ -240,9 +240,11 @@ const Content: React.FC = () => {
       );
 
       createPipelineObj.etl.transformPlugin =
-        pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
+        pipelineInfo.selectedTransformPlugins?.[0]?.mainFunction || '';
       createPipelineObj.etl.enrichPlugin =
-        pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
+        pipelineInfo.selectedEnrichPlugins.map(
+          (element) => element.mainFunction
+        );
     } else {
       createPipelineObj.etl = null;
     }

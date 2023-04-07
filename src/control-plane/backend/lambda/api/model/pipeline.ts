@@ -13,8 +13,11 @@
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { Plugin } from './plugin';
+import { DOMAIN_NAME_PATTERN, KAFKA_BROKERS_PATTERN, KAFKA_TOPIC_PATTERN, SUBNETS_PATTERN, VPC_ID_PARRERN } from '../common/constants-ln';
+import { validatePattern } from '../common/stack-params-valid';
 import { WorkflowTemplate } from '../common/types';
-import { isEmpty } from '../common/utils';
+import { isEmpty, tryToJson } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -181,6 +184,8 @@ export interface ETL {
   readonly sinkS3Bucket: S3Bucket;
   readonly pipelineBucket: S3Bucket;
   readonly outputFormat?: 'parquet' | 'json';
+  readonly transformPlugin?: string;
+  readonly enrichPlugin?: string[];
 }
 
 export interface KafkaS3Connector {
@@ -271,14 +276,17 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
 
   const parameters: Parameter[] = [];
   // VPC Information
+  validatePattern(VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
     ParameterKey: 'VpcId',
     ParameterValue: pipeline.network.vpcId,
   });
+  validatePattern(SUBNETS_PATTERN, pipeline.network.publicSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PublicSubnetIds',
     ParameterValue: pipeline.network.publicSubnetIds.join(','),
   });
+  validatePattern(SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: isEmpty(pipeline.network.privateSubnetIds) ?
@@ -286,6 +294,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   });
   // Domain Information
   if (pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
+    validatePattern(DOMAIN_NAME_PATTERN, pipeline.ingestionServer.domain?.domainName);
     parameters.push({
       ParameterKey: 'DomainName',
       ParameterValue: pipeline.ingestionServer.domain?.domainName ?? '',
@@ -374,6 +383,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
         ParameterKey: 'MskSecurityGroupId',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
       });
+      validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
       parameters.push({
         ParameterKey: 'KafkaTopic',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -382,17 +392,19 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
       if (isEmpty(kafkaBrokers)) {
         kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
       }
+      validatePattern(KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
       parameters.push({
         ParameterKey: 'KafkaBrokers',
         ParameterValue: kafkaBrokers?.join(','),
       });
 
     } else { //self hosted kafka culster
+      validatePattern(KAFKA_BROKERS_PATTERN, pipeline.ingestionServer.sinkKafka?.brokers?.join(','));
       parameters.push({
         ParameterKey: 'KafkaBrokers',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.brokers?.join(','),
       });
-
+      validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
       parameters.push({
         ParameterKey: 'KafkaTopic',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -473,10 +485,12 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
   if (isEmpty(kafkaBrokers)) {
     kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
   }
+  validatePattern(KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
   parameters.push({
     ParameterKey: 'KafkaBrokers',
     ParameterValue: kafkaBrokers?.join(','),
   });
+  validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
   parameters.push({
     ParameterKey: 'KafkaTopic',
     ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -547,14 +561,20 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
+  const buildInPluginsDic = await store.getDictionary('BuildInPlugins');
+  if (!buildInPluginsDic) {
+    throw new Error('Dictionary: BuildInPlugins is no found.');
+  }
 
   const parameters: Parameter[] = [];
 
+  validatePattern(VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
     ParameterKey: 'VpcId',
     ParameterValue: pipeline.network.vpcId,
   });
 
+  validatePattern(SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: pipeline.network.privateSubnetIds.join(','),
@@ -608,19 +628,14 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
     ParameterValue: pipeline.etl?.scheduleExpression,
   });
 
+  let buildInPlugins = tryToJson(buildInPluginsDic.data) as Plugin[];
+  const defaultTransformer = buildInPlugins.filter(p => p.name === 'Transformer')[0];
+  const transformPlugin = [pipeline.etl?.transformPlugin?? defaultTransformer.mainFunction];
+  const transformerAndEnrichClassNames = transformPlugin.concat(pipeline.etl?.enrichPlugin?? []).join(',');
+
   parameters.push({
     ParameterKey: 'TransformerAndEnrichClassNames',
-    ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
-  });
-
-  parameters.push({
-    ParameterKey: 'S3PathPluginJars',
-    ParameterValue: `s3://${pipeline.bucket.name}/spark-etl-0.1.0.jar`,
-  });
-
-  parameters.push({
-    ParameterKey: 'S3PathPluginFiles',
-    ParameterValue: `s3://${pipeline.bucket.name}/GeoLite2-City.mmdb`,
+    ParameterValue: transformerAndEnrichClassNames,
   });
 
   parameters.push({

@@ -49,13 +49,13 @@ const axios = Axios.create({
  * http request interceptor
  */
 axios.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     const user = getUser();
-    const token = user?.access_token;
+    const token = user?.id_token;
     config.headers = {
       'Content-Type': 'application/json',
       Authorization: token ? `Bearer ${token}` : undefined,
-    } as AxiosRequestHeaders;
+    } as any;
     // set x-click-stream-request-id
     if (!config.headers[REQUEST_ID_KEY]) {
       config.headers[REQUEST_ID_KEY] = requestId || generateStr(18);

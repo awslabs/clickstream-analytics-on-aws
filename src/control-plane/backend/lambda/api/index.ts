@@ -452,6 +452,9 @@ app.use((err: Error, req: express.Request, res: express.Response, _next: express
   if (err.name === 'TransactionCanceledException') {
     return res.status(400).json(new ApiFail('Update error, check version and retry.'));
   }
+  if (err.name === 'ClickStreamBadRequestError') {
+    return res.status(400).json(new ApiFail(err.message));
+  }
   return res.status(500).send(new ApiFail('Unexpected error occurred at server.', err.name));
 });
 

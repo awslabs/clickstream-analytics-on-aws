@@ -12,7 +12,7 @@
  */
 
 import { GetCommand, GetCommandInput, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { clickStreamTableName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 
 const MOCK_TOKEN = '0000-0000';
 const MOCK_PROJECT_ID = '8888-8888';
@@ -20,6 +20,7 @@ const MOCK_APP_ID = '7777-7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
 const MOCK_EXECUTION_ID = '3333-3333';
+const MOCK_BUILDIN_PLUGIN_ID = 'BUILDIN-1';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -98,6 +99,42 @@ function pluginExistedMock(ddbMock: any, existed: boolean): any {
   });
 }
 
+function dictionaryMock(ddbMock: any): any {
+  ddbMock.on(GetCommand, {
+    TableName: dictionaryTableName,
+    Key: {
+      name: 'BuildInPlugins',
+    },
+  }).resolves({
+    Item: {
+      name: 'BuildInPlugins',
+      data: '[{"id":"BUILDIN-1","type":"PLUGIN#BUILDIN-1","prefix":"PLUGIN","name":"Transformer","description":"Description of Transformer","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.Transformer","jarFile":"","bindCount":0,"pluginType":"Transform","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000001,"updateAt":1000000000001},{"id":"BUILDIN-2","type":"PLUGIN#BUILDIN-2","prefix":"PLUGIN","name":"UAEnrichment","description":"Description of UAEnrichment","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.UAEnrichment","jarFile":"","bindCount":0,"pluginType":"Enrich","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000002,"updateAt":1000000000002},{"id":"BUILDIN-3","type":"PLUGIN#BUILDIN-3","prefix":"PLUGIN","name":"UAEnrichment","description":"Description of IPEnrichment","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.IPEnrichment","jarFile":"","bindCount":0,"pluginType":"Enrich","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000003,"updateAt":1000000000003}]',
+    },
+  });
+  ddbMock.on(GetCommand, {
+    TableName: dictionaryTableName,
+    Key: {
+      name: 'Templates',
+    },
+  }).resolves({
+    Item: {
+      name: 'Templates',
+      data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
+    },
+  });
+  ddbMock.on(GetCommand, {
+    TableName: dictionaryTableName,
+    Key: {
+      name: 'Solution',
+    },
+  }).resolves({
+    Item: {
+      name: 'Solution',
+      data: '{"name": "clickstream-branch-main","dist_output_bucket": "EXAMPLE-BUCKET","prefix": "feature-rel/main/default"}',
+    },
+  });
+}
+
 export {
   MOCK_TOKEN,
   MOCK_PROJECT_ID,
@@ -105,9 +142,11 @@ export {
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,
   MOCK_EXECUTION_ID,
+  MOCK_BUILDIN_PLUGIN_ID,
   tokenMock,
   projectExistedMock,
   appExistedMock,
   pipelineExistedMock,
   pluginExistedMock,
+  dictionaryMock,
 };

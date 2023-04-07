@@ -20,7 +20,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
+import { dictionaryMock, MOCK_BUILDIN_PLUGIN_ID, MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -199,7 +199,60 @@ describe('Plugin test', () => {
       message: 'Plugin not found',
     });
   });
+  it('Get build-in plugin by ID', async () => {
+    dictionaryMock(ddbMock);
+    let res = await request(app)
+      .get(`/api/plugin/${MOCK_BUILDIN_PLUGIN_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        id: 'BUILDIN-1',
+        type: 'PLUGIN#BUILDIN-1',
+        prefix: 'PLUGIN',
+        name: 'Transformer',
+        description: 'Description of Transformer',
+        builtIn: true,
+        mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
+        jarFile: '',
+        bindCount: 0,
+        pluginType: 'Transform',
+        dependencyFiles: [],
+        operator: '',
+        deleted: false,
+        createAt: 1000000000001,
+        updateAt: 1000000000001,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(GetCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .get(`/api/plugin/${MOCK_PLUGIN_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Get non-existent build-in plugin by ID', async () => {
+    dictionaryMock(ddbMock);
+    let res = await request(app)
+      .get(`/api/plugin/${MOCK_BUILDIN_PLUGIN_ID}1`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Plugin not found',
+    });
+  });
   it('Get plugin list', async () => {
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'plugin-01' },
@@ -218,13 +271,64 @@ describe('Plugin test', () => {
       message: '',
       data: {
         items: [
+          {
+            id: 'BUILDIN-1',
+            type: 'PLUGIN#BUILDIN-1',
+            prefix: 'PLUGIN',
+            name: 'Transformer',
+            description: 'Description of Transformer',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Transform',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000001,
+            updateAt: 1000000000001,
+          },
+          {
+            id: 'BUILDIN-2',
+            type: 'PLUGIN#BUILDIN-2',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of UAEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000002,
+            updateAt: 1000000000002,
+          },
+          {
+            id: 'BUILDIN-3',
+            type: 'PLUGIN#BUILDIN-3',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of IPEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000003,
+            updateAt: 1000000000003,
+          },
           { name: 'plugin-01' },
           { name: 'plugin-02' },
           { name: 'plugin-03' },
           { name: 'plugin-04' },
           { name: 'plugin-05' },
         ],
-        totalCount: 5,
+        totalCount: 8,
       },
     });
 
@@ -242,6 +346,7 @@ describe('Plugin test', () => {
     });
   });
   it('Get plugin list with page', async () => {
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'plugin-01' },
@@ -260,19 +365,35 @@ describe('Plugin test', () => {
       message: '',
       data: {
         items: [
-          { name: 'plugin-03' },
-          { name: 'plugin-04' },
+          {
+            id: 'BUILDIN-3',
+            type: 'PLUGIN#BUILDIN-3',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of IPEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000003,
+            updateAt: 1000000000003,
+          },
+          { name: 'plugin-01' },
         ],
-        totalCount: 5,
+        totalCount: 8,
       },
     });
   });
   it('Get plugin list with type', async () => {
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'plugin-01' },
-        { name: 'plugin-02' },
-        { name: 'plugin-03' },
+        { name: 'plugin-02', pluginType: 'Enrich' },
+        { name: 'plugin-03', pluginType: 'Enrich' },
       ],
     });
     const res = await request(app)
@@ -284,15 +405,49 @@ describe('Plugin test', () => {
       message: '',
       data: {
         items: [
-          { name: 'plugin-01' },
-          { name: 'plugin-02' },
-          { name: 'plugin-03' },
+          {
+            id: 'BUILDIN-2',
+            type: 'PLUGIN#BUILDIN-2',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of UAEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000002,
+            updateAt: 1000000000002,
+          },
+          {
+            id: 'BUILDIN-3',
+            type: 'PLUGIN#BUILDIN-3',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of IPEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000003,
+            updateAt: 1000000000003,
+          },
+          { name: 'plugin-02', pluginType: 'Enrich' },
+          { name: 'plugin-03', pluginType: 'Enrich' },
         ],
-        totalCount: 3,
+        totalCount: 4,
       },
     });
   });
   it('Get plugin list with order', async () => {
+    dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'plugin-01' },
@@ -309,11 +464,62 @@ describe('Plugin test', () => {
       message: '',
       data: {
         items: [
+          {
+            id: 'BUILDIN-1',
+            type: 'PLUGIN#BUILDIN-1',
+            prefix: 'PLUGIN',
+            name: 'Transformer',
+            description: 'Description of Transformer',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Transform',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000001,
+            updateAt: 1000000000001,
+          },
+          {
+            id: 'BUILDIN-2',
+            type: 'PLUGIN#BUILDIN-2',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of UAEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000002,
+            updateAt: 1000000000002,
+          },
+          {
+            id: 'BUILDIN-3',
+            type: 'PLUGIN#BUILDIN-3',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of IPEnrichment',
+            builtIn: true,
+            mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1000000000003,
+            updateAt: 1000000000003,
+          },
           { name: 'plugin-01' },
           { name: 'plugin-02' },
           { name: 'plugin-03' },
         ],
-        totalCount: 3,
+        totalCount: 6,
       },
     });
   });

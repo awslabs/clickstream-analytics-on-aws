@@ -18,7 +18,6 @@ export interface Plugin {
 
   readonly name: string;
   readonly description: string;
-  readonly status: 'Enabled' | 'Disabled';
   readonly jarFile: string;
   readonly dependencyFiles: string[];
   readonly mainFunction: string;
@@ -38,6 +37,6 @@ export interface Plugin {
 }
 
 export interface PluginList {
-  totalCount: number | undefined;
+  totalCount: number;
   items: Plugin[];
 }

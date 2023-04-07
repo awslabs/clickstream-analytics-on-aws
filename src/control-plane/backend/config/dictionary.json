@@ -16,5 +16,61 @@
       "kafka-s3-sink": "kafka-s3-sink-stack.template.json",
       "data-pipeline": "data-pipeline-stack.template.json"
     }
+  },
+  {
+    "name": "BuildInPlugins",
+    "data": [
+      {
+        "id": "BUILDIN-1",
+        "type": "PLUGIN#BUILDIN-1",
+        "prefix": "PLUGIN",
+        "name": "Transformer",
+        "description": "Description of Transformer",
+        "builtIn": true,
+        "mainFunction": "sofeware.aws.solution.clickstream.Transformer",
+        "jarFile": "",
+        "bindCount": 0,
+        "pluginType": "Transform",
+        "dependencyFiles": [],
+        "operator": "",
+        "deleted": false,
+        "createAt": 1667355960000,
+        "updateAt": 1667355960000
+      },
+      {
+        "id": "BUILDIN-2",
+        "type": "PLUGIN#BUILDIN-2",
+        "prefix": "PLUGIN",
+        "name": "UAEnrichment",
+        "description": "Description of UAEnrichment",
+        "builtIn": true,
+        "mainFunction": "sofeware.aws.solution.clickstream.UAEnrichment",
+        "jarFile": "",
+        "bindCount": 0,
+        "pluginType": "Enrich",
+        "dependencyFiles": [],
+        "operator": "",
+        "deleted": false,
+        "createAt": 1667355960000,
+        "updateAt": 1667355960000
+      },
+      {
+        "id": "BUILDIN-3",
+        "type": "PLUGIN#BUILDIN-3",
+        "prefix": "PLUGIN",
+        "name": "IPEnrichment",
+        "description": "Description of IPEnrichment",
+        "builtIn": true,
+        "mainFunction": "sofeware.aws.solution.clickstream.IPEnrichment",
+        "jarFile": "",
+        "bindCount": 0,
+        "pluginType": "Enrich",
+        "dependencyFiles": [],
+        "operator": "",
+        "deleted": false,
+        "createAt": 1667355960000,
+        "updateAt": 1667355960000
+      }
+    ]
   }
 ]

@@ -98,13 +98,13 @@ test('S3Prefix pattern', () => {
 test('KafkaBrokers pattern', () => {
   const validValues = [
     '1.abc1.com:9092,2.abc2.com:9092,3.abc3.com:9092',
-    'abc.com',
-    'abc1.com,abc2.com,',
   ];
   const invalidValues = [
     'abc',
     'http://abc.com',
     'https://abc.com',
+    'abc.com',
+    'abc1.com,abc2.com,',
     'abc1.com:9092,abc2.com:9092,abc3.com:9092,abc4.com:9092',
   ];
   const paramNames = ['KafkaBrokers'];
