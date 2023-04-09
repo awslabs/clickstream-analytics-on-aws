@@ -11,11 +11,16 @@
  *  and limitations under the License.
  */
 
-import { IAMClient, ListRolesCommand, Role } from '@aws-sdk/client-iam';
+import {
+  IAMClient,
+  ListRolesCommand,
+  Role,
+} from '@aws-sdk/client-iam';
+import { awsRegion } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
-import { IamRole } from '../../common/types';
+import { AssumeRoleType, IamRole } from '../../common/types';
 
-export const listRoles = async (service: string) => {
+export const listRoles = async (type: AssumeRoleType, key?: string) => {
   const iamClient = new IAMClient({});
 
   const records = await getPaginatedResults(async (Marker: any) => {
@@ -30,12 +35,20 @@ export const listRoles = async (service: string) => {
   });
   const roles: IamRole[] = [];
   for (let record of records as Role[]) {
-    if (record.AssumeRolePolicyDocument && record.AssumeRolePolicyDocument.includes(`${service}.amazonaws.com`)) {
-      roles.push({
-        name: record.RoleName ?? '',
-        id: record.RoleId ?? '',
-        arn: record.Arn ?? '',
-      });
+    if (record.AssumeRolePolicyDocument && awsRegion) {
+      const assumeRolePolicyDocument = decodeURIComponent(record.AssumeRolePolicyDocument);
+      const partition = awsRegion.startsWith('cn') ? 'aws-cn' : 'aws';
+      if (
+        type === AssumeRoleType.ALL ||
+        (type === AssumeRoleType.ACCOUNT && assumeRolePolicyDocument.includes(`arn:${partition}:iam::${key}:root`)) ||
+        (type === AssumeRoleType.SERVICE && assumeRolePolicyDocument.includes(`${key}.amazonaws.com`))
+      ) {
+        roles.push({
+          name: record.RoleName ?? '',
+          id: record.RoleId ?? '',
+          arn: record.Arn ?? '',
+        });
+      }
     }
   }
   return roles;

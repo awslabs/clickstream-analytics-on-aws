@@ -219,7 +219,11 @@
     "athena": "Athena",
     "athenaDesc": "Select this option will create table schema and sample queries in Athena for you to query the processed data on S3",
     "certificate": "SSL Certificate",
-    "selectCertificate": "Choose SSL Certificate"
+    "selectCertificate": "Choose SSL Certificate",
+    "accessPermissions": "Access permissions",
+    "accessPermissionsDesc": "The solution needs permissions to access and create database in Redshift Serverless. Create or choose an Identity and Access Management (IAM) role with required permissions. Click Info to see ",
+    "permissionLink": "Permissions required to successfully create database in Redshift Serverless",
+    "findIAMRole": "Find an IAM role"
   },
   "detail": {
     "ingestionEdp": "Ingestion endpoint",

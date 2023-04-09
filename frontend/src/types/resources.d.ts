@@ -69,7 +69,15 @@ declare global {
     status: string;
   }
 
-  interface QuickSightResponse {
+  interface RedshiftServerlessResponse {
+    arn: string;
+    id: string;
+    name: string;
+    namespace: string;
+    status: string;
+  }
+
+  interface IAMRoleResponse {
     arn: string;
     id: string;
     name: string;

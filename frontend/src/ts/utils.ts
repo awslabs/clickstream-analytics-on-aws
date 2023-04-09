@@ -82,3 +82,19 @@ export const generateDataProcessingInterval = (
     return `rate(1 hour)`;
   }
 };
+
+export const generateRedshiftInterval = (value: number, unit?: string) => {
+  if (unit === 'hour') {
+    return value * 60;
+  }
+  if (unit === 'day') {
+    return value * 60 * 24;
+  }
+  return value;
+};
+
+export const extractAccountIdFromArn = (arn: string) => {
+  const regex = /^arn:aws.*:redshift-serverless:[^:]+:([0-9]{12}):/;
+  const matchResult = arn.match(regex);
+  return matchResult ? matchResult[1] : '';
+};

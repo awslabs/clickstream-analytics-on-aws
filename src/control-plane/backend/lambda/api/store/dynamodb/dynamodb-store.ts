@@ -213,7 +213,10 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-    let projects: ProjectList = { totalCount: 0, items: [] };
+    let projects: ProjectList = {
+      totalCount: 0,
+      items: [],
+    };
     projects.totalCount = records?.length;
     if (pagination) {
       if (projects.totalCount) {
@@ -239,9 +242,9 @@ export class DynamoDbStore implements ClickStreamStore {
         appId: app.appId,
         name: app.name,
         description: app.description,
-        androidPackage: app.androidPackage?? '',
-        iosBundleId: app.iosBundleId?? '',
-        iosAppStoreId: app.iosAppStoreId?? '',
+        androidPackage: app.androidPackage ?? '',
+        iosBundleId: app.iosBundleId ?? '',
+        iosAppStoreId: app.iosAppStoreId ?? '',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: '',
@@ -331,7 +334,10 @@ export class DynamoDbStore implements ClickStreamStore {
       };
     });
 
-    let apps: ApplicationList = { totalCount: 0, items: [] };
+    let apps: ApplicationList = {
+      totalCount: 0,
+      items: [],
+    };
     apps.totalCount = records?.length;
     if (pagination) {
       if (apps.totalCount) {
@@ -396,7 +402,7 @@ export class DynamoDbStore implements ClickStreamStore {
         tags: pipeline.tags ?? [],
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
-        dataModel: pipeline.dataModel,
+        dataAnalytics: pipeline.dataAnalytics,
         workflow: pipeline.workflow ?? {},
         executionName: pipeline.executionName ?? '',
         executionArn: pipeline.executionArn ?? '',
@@ -464,10 +470,7 @@ export class DynamoDbStore implements ClickStreamStore {
               tags: marshallCurPipeline.tags,
               ingestionServer: marshallCurPipeline.ingestionServer,
               etl: marshallCurPipeline.etl,
-              dataModel: marshallCurPipeline.dataModel,
-              ingestionServerRuntime: marshallCurPipeline.ingestionServerRuntime ?? { M: {} },
-              etlRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
-              dataModelRuntime: marshallCurPipeline.etlRuntime ?? { M: {} },
+              dataAnalytics: marshallCurPipeline.dataAnalytics,
               workflow: marshallCurPipeline.workflow ?? { M: {} },
               executionName: { S: curPipeline.executionName ?? '' },
               executionArn: { S: curPipeline.executionArn ?? '' },
@@ -499,10 +502,7 @@ export class DynamoDbStore implements ClickStreamStore {
               '#tags = :tags, ' +
               'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
-              'dataModel = :dataModel, ' +
-              'ingestionServerRuntime = :ingestionServerRuntime, ' +
-              'etlRuntime = :etlRuntime, ' +
-              'dataModelRuntime = :dataModelRuntime, ' +
+              'dataAnalytics = :dataAnalytics, ' +
               'workflow = :workflow, ' +
               'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
@@ -529,10 +529,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':tags': marshallPipeline.tags,
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
-              ':dataModel': marshallPipeline.dataModel,
-              ':ingestionServerRuntime': marshallPipeline.ingestionServerRuntime ?? { M: {} },
-              ':etlRuntime': marshallPipeline.etlRuntime ?? { M: {} },
-              ':dataModelRuntime': marshallPipeline.dataModelRuntime ?? { M: {} },
+              ':dataAnalytics': marshallPipeline.dataAnalytics,
               ':ConditionVersionValue': { S: pipeline.version },
               ':workflow': marshallPipeline.workflow ?? { M: {} },
               ':executionName': { S: curPipeline.executionName ?? '' },
@@ -648,7 +645,10 @@ export class DynamoDbStore implements ClickStreamStore {
       };
     });
 
-    let pipelines: PipelineList = { totalCount: 0, items: [] };
+    let pipelines: PipelineList = {
+      totalCount: 0,
+      items: [],
+    };
     pipelines.totalCount = records?.length;
     if (pagination) {
       if (pipelines.totalCount) {
@@ -860,6 +860,7 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
+
     plugins.totalCount = plugins.totalCount + records?.length;
     if (pagination) {
       if (plugins.totalCount) {

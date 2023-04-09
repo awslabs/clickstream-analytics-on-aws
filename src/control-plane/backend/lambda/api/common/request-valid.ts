@@ -14,7 +14,7 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { awsRegion } from './constants';
-import { ApiFail } from './types';
+import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -76,6 +76,22 @@ export const defaultRegionValueValid: CustomValidator = (value, { req }) => {
   if (req.query) {
     const { region } = value;
     req.query.region = isEmpty(region)? awsRegion : region;
+  }
+  return true;
+};
+
+export const defaultAssumeRoleTypeValid: CustomValidator = (value, { req }) => {
+  if (req.query) {
+    const { account, service } = value;
+    if (service) {
+      req.query.type = AssumeRoleType.SERVICE;
+      req.query.key = service;
+    } else if (account) {
+      req.query.type = AssumeRoleType.ACCOUNT;
+      req.query.key = account;
+    } else {
+      req.query.type = AssumeRoleType.ALL;
+    }
   }
   return true;
 };

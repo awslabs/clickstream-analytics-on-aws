@@ -909,7 +909,51 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Get IAM roles', async () => {
+  it('Get All IAM roles', async () => {
+    iamClient.on(ListRolesCommand).resolves({
+      Roles: [
+        {
+          Path: '/',
+          RoleName: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          RoleId: 'AROAY6VU67QTP62MJAQ3O',
+          Arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22apigateway.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D',
+          Description: '',
+          MaxSessionDuration: 3600,
+        },
+        {
+          Path: '/',
+          RoleName: 'arole',
+          RoleId: 'AROAY6VU67QTN6EXB2YM5',
+          Arn: 'arn:aws:iam::111122223333:role/arole',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Sid%22%3A%22%22%2C%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22AWS%22%3A%22arn%3Aaws%3Aiam%3A%3A691002153696%3Aroot%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%2C%22Condition%22%3A%7B%22StringEquals%22%3A%7B%22sts%3AExternalId%22%3A%22XenaAuditorRoleLkWDhzqUbFcZ%22%7D%7D%7D%5D%7D',
+          MaxSessionDuration: 3600,
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/iam/roles');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          id: 'AROAY6VU67QTP62MJAQ3O',
+          arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+        },
+        {
+          name: 'arole',
+          id: 'AROAY6VU67QTN6EXB2YM5',
+          arn: 'arn:aws:iam::111122223333:role/arole',
+        },
+      ],
+    });
+  });
+  it('Get Service IAM roles', async () => {
     iamClient.on(ListRolesCommand).resolves({
       Roles: [
         {
@@ -944,6 +988,45 @@ describe('Account Env test', () => {
           name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
           id: 'AROAY6VU67QTP62MJAQ3O',
           arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+        },
+      ],
+    });
+  });
+  it('Get Account IAM roles', async () => {
+    iamClient.on(ListRolesCommand).resolves({
+      Roles: [
+        {
+          Path: '/',
+          RoleName: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          RoleId: 'AROAY6VU67QTP62MJAQ3O',
+          Arn: 'arn:aws:iam::444455556666:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22Service%22%3A%22apigateway.amazonaws.com%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%7D%5D%7D',
+          Description: '',
+          MaxSessionDuration: 3600,
+        },
+        {
+          Path: '/',
+          RoleName: 'arole',
+          RoleId: 'AROAY6VU67QTN6EXB2YM5',
+          Arn: 'arn:aws:iam::123:role/arole',
+          CreateDate: new Date(),
+          AssumeRolePolicyDocument: '%7B%22Version%22%3A%222012-10-17%22%2C%22Statement%22%3A%5B%7B%22Sid%22%3A%22%22%2C%22Effect%22%3A%22Allow%22%2C%22Principal%22%3A%7B%22AWS%22%3A%22arn%3Aaws%3Aiam%3A%3A123%3Aroot%22%7D%2C%22Action%22%3A%22sts%3AAssumeRole%22%2C%22Condition%22%3A%7B%22StringEquals%22%3A%7B%22sts%3AExternalId%22%3A%22XenaAuditorRoleLkWDhzqUbFcZ%22%7D%7D%7D%5D%7D',
+          MaxSessionDuration: 3600,
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/iam/roles?account=123');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          name: 'arole',
+          id: 'AROAY6VU67QTN6EXB2YM5',
+          arn: 'arn:aws:iam::123:role/arole',
         },
       ],
     });

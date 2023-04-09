@@ -13,7 +13,9 @@
 
 import { ExecutionType } from '../const';
 import {
+  extractAccountIdFromArn,
   generateDataProcessingInterval,
+  generateRedshiftInterval,
   generateStr,
   validateEmails,
 } from '../utils';
@@ -135,5 +137,39 @@ describe('generateDataProcessingInterval', () => {
       );
       expect(interval).toEqual('cron(0 0 * * *)');
     });
+  });
+});
+
+describe('generateRedshiftInterval', () => {
+  it('should return value if unit is not provided', () => {
+    expect(generateRedshiftInterval(10)).toBe(10);
+  });
+
+  it('should convert hours to minutes', () => {
+    expect(generateRedshiftInterval(2, 'hour')).toBe(120);
+  });
+
+  it('should convert days to minutes', () => {
+    expect(generateRedshiftInterval(3, 'day')).toBe(4320);
+  });
+});
+
+describe('extractAccountIdFromArn', () => {
+  it('should extract account ID from valid ARN', () => {
+    const arn =
+      'arn:aws:redshift-serverless:ap-xxxx-1:111122223333:workgroup/xxxx-xxx-xxxxx-xxxxx';
+    const accountId = extractAccountIdFromArn(arn);
+    expect(accountId).toEqual('111122223333');
+  });
+
+  it('should return null for invalid ARN', () => {
+    const arn = 'invalid-arn';
+    const accountId = extractAccountIdFromArn(arn);
+    expect(accountId).toEqual('');
+  });
+
+  it('should return null for null input', () => {
+    const accountId = extractAccountIdFromArn('');
+    expect(accountId).toEqual('');
   });
 });

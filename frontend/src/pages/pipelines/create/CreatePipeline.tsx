@@ -19,13 +19,12 @@ import cloneDeep from 'lodash/cloneDeep';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ProtocalType, ResourceCreateMehod, SinkType } from 'ts/const';
 import {
-  ExecutionType,
-  ProtocalType,
-  ResourceCreateMehod,
-  SinkType,
-} from 'ts/const';
-import { generateDataProcessingInterval } from 'ts/utils';
+  extractAccountIdFromArn,
+  generateDataProcessingInterval,
+  generateRedshiftInterval,
+} from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
 import DataProcessing from './steps/DataProcessing';
@@ -137,8 +136,17 @@ const Content: React.FC = () => {
       transformPlugin: '',
       enrichPlugin: [],
     },
-    dataModel: {},
-
+    dataAnalytics: {
+      redshift: {
+        serverless: {
+          workgroupName: '',
+          iamRoleArn: '',
+        },
+      },
+      loadWorkflow: {
+        scheduleInterval: '',
+      },
+    },
     selectedRegion: null,
     selectedVPC: null,
     selectedSDK: null,
@@ -165,6 +173,7 @@ const Content: React.FC = () => {
     selectedExcutionUnit: null,
     selectedEventFreshUnit: null,
     selectedRedshiftCluster: null,
+    selectedRedshiftRole: null,
     selectedRedshiftExecutionUnit: null,
 
     selectedTransformPlugins: [],
@@ -172,6 +181,7 @@ const Content: React.FC = () => {
 
     selectedQuickSightRole: null,
     quickSightDataset: '',
+    arnAccountId: '',
   });
 
   const validateBasicInfo = () => {
@@ -239,14 +249,29 @@ const Content: React.FC = () => {
         pipelineInfo.selectedExcutionUnit
       );
 
+      // set plugin value
       createPipelineObj.etl.transformPlugin =
         pipelineInfo.selectedTransformPlugins?.[0]?.mainFunction || '';
       createPipelineObj.etl.enrichPlugin =
         pipelineInfo.selectedEnrichPlugins.map(
           (element) => element.mainFunction
         );
+
+      // set redshift schedule
+      createPipelineObj.dataAnalytics.loadWorkflow.scheduleInterval =
+        generateRedshiftInterval(
+          parseInt(pipelineInfo.redshiftExecutionValue),
+          pipelineInfo.selectedRedshiftExecutionUnit?.value
+        );
+
+      // set dataAnalytics to null when not enable Redshift
+      if (!createPipelineObj.enableRedshift) {
+        createPipelineObj.dataAnalytics = null;
+      }
     } else {
       createPipelineObj.etl = null;
+      // set dataAnalytics to null when disable data processing
+      createPipelineObj.dataAnalytics = null;
     }
 
     // set msk cluster when user selected self-hosted
@@ -282,6 +307,7 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedExcutionUnit;
     delete createPipelineObj.selectedEventFreshUnit;
     delete createPipelineObj.selectedRedshiftCluster;
+    delete createPipelineObj.selectedRedshiftRole;
     delete createPipelineObj.selectedRedshiftExecutionUnit;
     delete createPipelineObj.selectedTransformPlugins;
     delete createPipelineObj.selectedEnrichPlugins;
@@ -289,6 +315,8 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedQuickSightRole;
     delete createPipelineObj.kafkaSelfHost;
     delete createPipelineObj.kafkaBrokers;
+
+    delete createPipelineObj.arnAccountId;
 
     setLoadingCreate(true);
     try {
@@ -883,6 +911,37 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     selectedRedshiftCluster: cluster,
+                    arnAccountId: extractAccountIdFromArn(
+                      cluster.description || ''
+                    ),
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        serverless: {
+                          ...prev.dataAnalytics.redshift.serverless,
+                          workgroupName: cluster.value || '',
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSelectedRedshiftRole={(role) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedRedshiftRole: role,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        serverless: {
+                          ...prev.dataAnalytics.redshift.serverless,
+                          iamRoleArn: role.value || '',
+                        },
+                      },
+                    },
                   };
                 });
               }}

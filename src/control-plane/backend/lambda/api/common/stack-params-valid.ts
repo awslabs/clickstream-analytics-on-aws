@@ -13,14 +13,14 @@
 
 import { ClickStreamBadRequestError } from './types';
 
-export const validatePattern = (pattern: string, value: string | undefined) => {
+export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
-    throw new ClickStreamBadRequestError(`Validate error: undefined not match ${pattern}. Please check and try again.`);
+    throw new ClickStreamBadRequestError(`Validate error, ${parameter}: undefined not match ${pattern}. Please check and try again.`);
   }
   const regexp = new RegExp(pattern);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    throw new ClickStreamBadRequestError(`Validate error: ${value} not match ${pattern}. Please check and try again.`);
+    throw new ClickStreamBadRequestError(`Validate error, ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
   }
   return true;
 };

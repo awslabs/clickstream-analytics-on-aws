@@ -16,10 +16,11 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { Plugin } from './plugin';
 import { DOMAIN_NAME_PATTERN, KAFKA_BROKERS_PATTERN, KAFKA_TOPIC_PATTERN, SUBNETS_PATTERN, VPC_ID_PARRERN } from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
-import { WorkflowTemplate } from '../common/types';
+import { ClickStreamBadRequestError, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
+import { getRedshiftWorkgroupAndNamespace } from '../store/aws/redshift';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -199,7 +200,25 @@ export interface KafkaS3Connector {
   readonly customConnectorConfiguration?: string;
 }
 
-export interface DataModel {
+export interface DataAnalytics {
+  readonly ods?: {
+    readonly bucket: S3Bucket;
+    readonly fileSuffix: '.snappy' | '.parquet';
+  };
+  readonly redshift?: {
+    readonly serverless?: {
+      readonly workgroupName: string;
+      readonly iamRoleArn: string;
+    };
+    readonly provisioned?: {};
+  };
+  readonly athena?: {};
+  readonly loadWorkflow?: {
+    readonly bucket?: S3Bucket;
+    readonly scheduleInterval?: number;
+    readonly maxFilesLimit?: number;
+    readonly processingFilesLimit?: number;
+  };
 }
 
 export interface Tag {
@@ -235,7 +254,8 @@ export interface Pipeline {
   readonly bucket: S3Bucket;
   readonly ingestionServer: IngestionServer;
   readonly etl?: ETL;
-  readonly dataModel?: DataModel;
+  readonly dataAnalytics?: DataAnalytics;
+  readonly quickSightDataset?: any;
 
   status: ExecutionStatus | string;
   workflow?: WorkflowTemplate;
@@ -276,17 +296,17 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
 
   const parameters: Parameter[] = [];
   // VPC Information
-  validatePattern(VPC_ID_PARRERN, pipeline.network.vpcId);
+  validatePattern('VpcId', VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
     ParameterKey: 'VpcId',
     ParameterValue: pipeline.network.vpcId,
   });
-  validatePattern(SUBNETS_PATTERN, pipeline.network.publicSubnetIds.join(','));
+  validatePattern('PublicSubnetIds', SUBNETS_PATTERN, pipeline.network.publicSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PublicSubnetIds',
     ParameterValue: pipeline.network.publicSubnetIds.join(','),
   });
-  validatePattern(SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
+  validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: isEmpty(pipeline.network.privateSubnetIds) ?
@@ -294,7 +314,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   });
   // Domain Information
   if (pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
-    validatePattern(DOMAIN_NAME_PATTERN, pipeline.ingestionServer.domain?.domainName);
+    validatePattern('DomainName', DOMAIN_NAME_PATTERN, pipeline.ingestionServer.domain?.domainName);
     parameters.push({
       ParameterKey: 'DomainName',
       ParameterValue: pipeline.ingestionServer.domain?.domainName ?? '',
@@ -383,7 +403,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
         ParameterKey: 'MskSecurityGroupId',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
       });
-      validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
+      validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
       parameters.push({
         ParameterKey: 'KafkaTopic',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -392,19 +412,19 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
       if (isEmpty(kafkaBrokers)) {
         kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
       }
-      validatePattern(KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
+      validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
       parameters.push({
         ParameterKey: 'KafkaBrokers',
         ParameterValue: kafkaBrokers?.join(','),
       });
 
     } else { //self hosted kafka culster
-      validatePattern(KAFKA_BROKERS_PATTERN, pipeline.ingestionServer.sinkKafka?.brokers?.join(','));
+      validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, pipeline.ingestionServer.sinkKafka?.brokers?.join(','));
       parameters.push({
         ParameterKey: 'KafkaBrokers',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.brokers?.join(','),
       });
-      validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
+      validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
       parameters.push({
         ParameterKey: 'KafkaTopic',
         ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -485,12 +505,12 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
   if (isEmpty(kafkaBrokers)) {
     kafkaBrokers = await listMSKClusterBrokers(pipeline.region, pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
   }
-  validatePattern(KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
+  validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
   parameters.push({
     ParameterKey: 'KafkaBrokers',
     ParameterValue: kafkaBrokers?.join(','),
   });
-  validatePattern(KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
+  validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId);
   parameters.push({
     ParameterKey: 'KafkaTopic',
     ParameterValue: pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId,
@@ -561,6 +581,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
+  const appIds: string[] = apps.items.map(a => a.appId);
   const buildInPluginsDic = await store.getDictionary('BuildInPlugins');
   if (!buildInPluginsDic) {
     throw new Error('Dictionary: BuildInPlugins is no found.');
@@ -568,13 +589,13 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   const parameters: Parameter[] = [];
 
-  validatePattern(VPC_ID_PARRERN, pipeline.network.vpcId);
+  validatePattern('VpcId', VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
     ParameterKey: 'VpcId',
     ParameterValue: pipeline.network.vpcId,
   });
 
-  validatePattern(SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
+  validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
   parameters.push({
     ParameterKey: 'PrivateSubnetIds',
     ParameterValue: pipeline.network.privateSubnetIds.join(','),
@@ -585,7 +606,6 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
     ParameterValue: pipeline.projectId,
   });
 
-  const appIds: string[] = apps.items.map(a => a.appId);
   parameters.push({
     ParameterKey: 'AppIds',
     ParameterValue: appIds.join(','),
@@ -630,7 +650,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
   let buildInPlugins = tryToJson(buildInPluginsDic.data) as Plugin[];
   const defaultTransformer = buildInPlugins.filter(p => p.name === 'Transformer')[0];
-  const transformPlugin = [pipeline.etl?.transformPlugin?? defaultTransformer.mainFunction];
+  const transformPlugin = [!isEmpty(pipeline.etl?.transformPlugin)? pipeline.etl?.transformPlugin : defaultTransformer.mainFunction];
   const transformerAndEnrichClassNames = transformPlugin.concat(pipeline.etl?.enrichPlugin?? []).join(',');
 
   parameters.push({
@@ -643,6 +663,95 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
     ParameterValue: pipeline.etl?.outputFormat ?? 'parquet',
   });
 
+
+  return parameters;
+}
+
+export async function getDataAnalyticsStackParameters(pipeline: Pipeline) {
+  const store: ClickStreamStore = new DynamoDbStore();
+  const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
+  const appIds: string[] = apps.items.map(a => a.appId);
+  if (!pipeline.dataAnalytics?.redshift?.serverless?.workgroupName) {
+    throw new ClickStreamBadRequestError('Validate error, workgroupName cannot be undefined. Please check and try again.');
+  }
+  const workgroup = await getRedshiftWorkgroupAndNamespace(pipeline.region, pipeline.dataAnalytics?.redshift?.serverless?.workgroupName);
+  if (!workgroup) {
+    throw new ClickStreamBadRequestError('Workgroup no found. Please check and try again.');
+  }
+
+  const parameters: Parameter[] = [];
+
+  validatePattern('VpcId', VPC_ID_PARRERN, pipeline.network.vpcId);
+  parameters.push({
+    ParameterKey: 'VpcId',
+    ParameterValue: pipeline.network.vpcId,
+  });
+
+  validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, pipeline.network.privateSubnetIds.join(','));
+  parameters.push({
+    ParameterKey: 'PrivateSubnetIds',
+    ParameterValue: pipeline.network.privateSubnetIds.join(','),
+  });
+
+  parameters.push({
+    ParameterKey: 'ProjectId',
+    ParameterValue: pipeline.projectId,
+  });
+
+  parameters.push({
+    ParameterKey: 'AppIds',
+    ParameterValue: appIds.join(','),
+  });
+
+  parameters.push({
+    ParameterKey: 'ODSEventBucket',
+    ParameterValue: pipeline.dataAnalytics?.ods?.bucket.name ?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'ODSEventPrefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-ods', pipeline.dataAnalytics?.ods?.bucket.prefix),
+  });
+  parameters.push({
+    ParameterKey: 'ODSEventFileSuffix',
+    ParameterValue: pipeline.dataAnalytics?.ods?.fileSuffix ?? '.snappy',
+  });
+
+  parameters.push({
+    ParameterKey: 'LoadWorkflowBucket',
+    ParameterValue: pipeline.dataAnalytics?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
+  });
+  parameters.push({
+    ParameterKey: 'LoadWorkflowBucketPrefix',
+    ParameterValue: getBucketPrefix(pipeline, 'data-ods', pipeline.dataAnalytics?.loadWorkflow?.bucket?.prefix),
+  });
+  parameters.push({
+    ParameterKey: 'MaxFilesLimit',
+    ParameterValue: (pipeline.dataAnalytics?.loadWorkflow?.maxFilesLimit ?? 50).toString(),
+  });
+  parameters.push({
+    ParameterKey: 'ProcessingFilesLimit',
+    ParameterValue: (pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit ?? 100).toString(),
+  });
+
+  parameters.push({
+    ParameterKey: 'RedshiftServerlessNamespaceId',
+    ParameterValue: workgroup.namespaceId,
+  });
+
+  parameters.push({
+    ParameterKey: 'RedshiftServerlessWorkgroupId',
+    ParameterValue: workgroup.workgroupId,
+  });
+
+  parameters.push({
+    ParameterKey: 'RedshiftServerlessWorkgroupName',
+    ParameterValue: pipeline.dataAnalytics?.redshift?.serverless?.workgroupName,
+  });
+
+  parameters.push({
+    ParameterKey: 'RedshiftServerlessIAMRole',
+    ParameterValue: pipeline.dataAnalytics?.redshift?.serverless?.iamRoleArn,
+  });
 
   return parameters;
 }

@@ -119,7 +119,7 @@ function dictionaryMock(ddbMock: any): any {
   }).resolves({
     Item: {
       name: 'Templates',
-      data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json"}',
+      data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json","data-analytics": "data-analytics-redshift-stack.template.json"}',
     },
   });
   ddbMock.on(GetCommand, {

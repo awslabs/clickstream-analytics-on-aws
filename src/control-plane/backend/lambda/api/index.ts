@@ -22,7 +22,7 @@ import {
   isValidEmpty,
   validate,
   validMatchParamId,
-  defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid,
+  defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid, defaultAssumeRoleTypeValid,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { JWTAuthorizer } from './middle-ware/authorizer';
@@ -210,6 +210,9 @@ app.get(
 
 app.get(
   '/api/env/iam/roles',
+  validate([
+    query().custom((value, { req }) => defaultAssumeRoleTypeValid(value, { req, location: 'body', path: '' })),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRoles(req, res, next);
   });

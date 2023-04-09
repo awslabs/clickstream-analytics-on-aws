@@ -136,7 +136,7 @@ describe('Pipeline test', () => {
             },
           },
         },
-        dataModel: {},
+        dataAnalytics: {},
         workflow: {
           Version: '2022-03-15',
           Workflow: {
@@ -231,7 +231,7 @@ describe('Pipeline test', () => {
           },
         },
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
         workflow: {
           Version: '2022-03-15',
           Workflow: {
@@ -316,7 +316,7 @@ describe('Pipeline test', () => {
           },
         },
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
         workflow: {
           Version: '2022-03-15',
           Workflow: {
@@ -381,7 +381,7 @@ describe('Pipeline test', () => {
         runtime: {},
         ingestion: {},
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -412,7 +412,7 @@ describe('Pipeline test', () => {
         runtime: {},
         ingestion: {},
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -502,7 +502,7 @@ describe('Pipeline test', () => {
             prefix: 'sink',
           },
         },
-        dataModel: {},
+        dataAnalytics: {},
       },
     });
     sfnMock.on(DescribeExecutionCommand).resolves({
@@ -588,7 +588,7 @@ describe('Pipeline test', () => {
             prefix: 'sink',
           },
         },
-        dataModel: {},
+        dataAnalytics: {},
       },
     });
   });
@@ -864,7 +864,7 @@ describe('Pipeline test', () => {
         type: 'PIPELINE#1625439a-2ba8-4c10-8b21-40da07d7b121#latest',
         description: 'Update 2 Description of Pipeline-01',
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
       },
     });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
@@ -1026,7 +1026,7 @@ describe('Pipeline test', () => {
         type: 'PIPELINE#1625439a-2ba8-4c10-8b21-40da07d7b121#latest',
         description: 'Update 2 Description of Pipeline-01',
         etl: {},
-        dataModel: {},
+        dataAnalytics: {},
       },
     });
     const mockError = new Error('TransactionCanceledException');

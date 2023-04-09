@@ -100,7 +100,17 @@ declare global {
       transformPlugin: string;
       enrichPlugin: string[];
     };
-    dataModel: any;
+    dataAnalytics: {
+      redshift: {
+        serverless: {
+          workgroupName: string;
+          iamRoleArn: string;
+        };
+      };
+      loadWorkflow: {
+        scheduleInterval: string;
+      };
+    };
     status?: string;
     createAt?: string;
     updateAt?: string;
@@ -135,11 +145,13 @@ declare global {
     selectedExcutionUnit: SelectProps.Option | null;
     selectedEventFreshUnit: SelectProps.Option | null;
     selectedRedshiftCluster: SelectProps.Option | null;
+    selectedRedshiftRole: SelectProps.Option | null;
     selectedRedshiftExecutionUnit: SelectProps.Option | null;
     selectedTransformPlugins: IPlugin[];
     selectedEnrichPlugins: IPlugin[];
 
     selectedQuickSightRole: SelectProps.Option | null;
     quickSightDataset: string;
+    arnAccountId: string;
   }
 }

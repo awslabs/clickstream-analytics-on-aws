@@ -24,7 +24,10 @@ import {
   AutosuggestProps,
   SelectProps,
 } from '@cloudscape-design/components';
-import { getRedshiftCluster } from 'apis/resource';
+import {
+  getRedshiftServerlessWorkgroup,
+  getServiceRolesByAccount,
+} from 'apis/resource';
 
 import Divider from 'components/common/Divider';
 import PluginTable from 'pages/plugins/comps/PluginTable';
@@ -49,6 +52,7 @@ interface DataProcessingProps {
   changeExecutionCronExp: (cron: string) => void;
   changeEnableRedshift: (enable: boolean) => void;
   changeSelectedRedshift: (cluster: SelectProps.Option) => void;
+  changeSelectedRedshiftRole: (role: SelectProps.Option) => void;
   changeRedshiftExecutionDuration: (duration: string) => void;
   changeRedshiftExecutionUnit: (unit: SelectProps.Option) => void;
   changeEnableAthena: (enable: boolean) => void;
@@ -72,6 +76,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeExecutionCronExp,
     changeEnableRedshift,
     changeSelectedRedshift,
+    changeSelectedRedshiftRole,
     changeRedshiftExecutionDuration,
     changeRedshiftExecutionUnit,
     changeEnableAthena,
@@ -95,12 +100,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const [redshiftOptionList, setRedshiftOptionList] =
     useState<AutosuggestProps.Options>([]);
 
+  const [redshiftRoleOptions, setRedshiftRoleOptions] =
+    useState<SelectProps.Options>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+
   // get redshift clusters by region
-  const getRedshiftClusterList = async () => {
+  const getServerlessRedshiftClusterList = async () => {
     setLoadingRedshift(true);
     try {
-      const { success, data }: ApiResponse<RedshiftResponse[]> =
-        await getRedshiftCluster({
+      const { success, data }: ApiResponse<RedshiftServerlessResponse[]> =
+        await getRedshiftServerlessWorkgroup({
           vpcId: pipelineInfo.network.vpcId,
           region: pipelineInfo.region,
         });
@@ -108,7 +117,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
           label: element.name,
           value: element.name,
-          description: element.nodeType,
+          description: element.arn,
           labelTag: element.status,
         }));
         setRedshiftOptionList(mskOptions);
@@ -116,6 +125,27 @@ const DataProcessing: React.FC<DataProcessingProps> = (
       }
     } catch (error) {
       setLoadingRedshift(false);
+    }
+  };
+
+  // get redshift serverless role
+  const getServerlessRoles = async () => {
+    setLoadingRoles(true);
+    try {
+      const { success, data }: ApiResponse<IAMRoleResponse[]> =
+        await getServiceRolesByAccount({ account: pipelineInfo.arnAccountId });
+      if (success) {
+        const mskOptions: SelectProps.Options = data.map((element) => ({
+          label: element.name,
+          value: element.arn,
+          iconName: 'settings',
+          description: element.id,
+        }));
+        setRedshiftRoleOptions(mskOptions);
+        setLoadingRoles(false);
+      }
+    } catch (error) {
+      setLoadingRoles(false);
     }
   };
 
@@ -132,8 +162,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [selectedRedshiftExeUnit]);
 
   useEffect(() => {
-    getRedshiftClusterList();
+    getServerlessRedshiftClusterList();
   }, []);
+
+  useEffect(() => {
+    if (pipelineInfo.arnAccountId) {
+      getServerlessRoles();
+    }
+  }, [pipelineInfo.arnAccountId]);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -316,57 +352,87 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                 ></FormField>
               </SpaceBetween>
 
-              <FormField
-                label={t('pipeline:create.redshiftCluster')}
-                description={t('pipeline:create.redshiftClusterDesc')}
-              >
-                <Select
-                  statusType={loadingRedshift ? 'loading' : 'finished'}
-                  placeholder={
-                    t('pipeline:create.engineRedshiftClusterPlaceholder') || ''
-                  }
-                  selectedOption={pipelineInfo.selectedRedshiftCluster}
-                  onChange={({ detail }) =>
-                    changeSelectedRedshift(detail.selectedOption)
-                  }
-                  options={redshiftOptionList}
-                  filteringType="auto"
-                />
-              </FormField>
-              <FormField
-                label={t('pipeline:create.engineDataRange')}
-                description={t('pipeline:create.engineDataRangeDesc')}
-              >
-                <div className="flex">
-                  <div style={{ width: 250 }}>
-                    <div>
-                      <b>{t('pipeline:create.duration')}</b>
-                    </div>
-                    <Input
-                      placeholder={
-                        t('pipeline:create.engineDurationPlaceholder') || ''
-                      }
-                      type="number"
-                      value={pipelineInfo.redshiftExecutionValue}
-                      onChange={(e) => {
-                        changeRedshiftExecutionDuration(e.detail.value);
-                      }}
-                    />
-                  </div>
-                  <div className="ml-10">
-                    <div>
-                      <b>{t('pipeline:create.engineUnitOfTime')}</b>
-                    </div>
+              {pipelineInfo.enableRedshift && (
+                <>
+                  <FormField
+                    label={t('pipeline:create.redshiftCluster')}
+                    description={t('pipeline:create.redshiftClusterDesc')}
+                  >
                     <Select
-                      selectedOption={selectedRedshiftExeUnit}
-                      onChange={({ detail }) => {
-                        setSelectedRedshiftExeUnit(detail.selectedOption);
-                      }}
-                      options={EXCUTION_UNIT_LIST}
+                      statusType={loadingRedshift ? 'loading' : 'finished'}
+                      placeholder={
+                        t('pipeline:create.engineRedshiftClusterPlaceholder') ||
+                        ''
+                      }
+                      selectedOption={pipelineInfo.selectedRedshiftCluster}
+                      onChange={({ detail }) =>
+                        changeSelectedRedshift(detail.selectedOption)
+                      }
+                      options={redshiftOptionList}
+                      filteringType="auto"
                     />
-                  </div>
-                </div>
-              </FormField>
+                  </FormField>
+
+                  <FormField
+                    label={t('pipeline:create.accessPermissions')}
+                    description={
+                      <div>
+                        {t('pipeline:create.accessPermissionsDesc')}
+                        <Link external>
+                          {t('pipeline:create.permissionLink')}
+                        </Link>
+                      </div>
+                    }
+                  >
+                    <Select
+                      statusType={loadingRoles ? 'loading' : 'finished'}
+                      placeholder={t('pipeline:create.findIAMRole') || ''}
+                      selectedOption={pipelineInfo.selectedRedshiftRole}
+                      onChange={({ detail }) =>
+                        changeSelectedRedshiftRole(detail.selectedOption)
+                      }
+                      options={redshiftRoleOptions}
+                      filteringType="auto"
+                    />
+                  </FormField>
+
+                  <FormField
+                    label={t('pipeline:create.engineDataRange')}
+                    description={t('pipeline:create.engineDataRangeDesc')}
+                  >
+                    <div className="flex">
+                      <div style={{ width: 250 }}>
+                        <div>
+                          <b>{t('pipeline:create.duration')}</b>
+                        </div>
+                        <Input
+                          placeholder={
+                            t('pipeline:create.engineDurationPlaceholder') || ''
+                          }
+                          type="number"
+                          value={pipelineInfo.redshiftExecutionValue}
+                          onChange={(e) => {
+                            changeRedshiftExecutionDuration(e.detail.value);
+                          }}
+                        />
+                      </div>
+                      <div className="ml-10">
+                        <div>
+                          <b>{t('pipeline:create.engineUnitOfTime')}</b>
+                        </div>
+                        <Select
+                          selectedOption={selectedRedshiftExeUnit}
+                          onChange={({ detail }) => {
+                            setSelectedRedshiftExeUnit(detail.selectedOption);
+                          }}
+                          options={EXCUTION_UNIT_LIST}
+                        />
+                      </div>
+                    </div>
+                  </FormField>
+                </>
+              )}
+
               <Divider height={2} />
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox

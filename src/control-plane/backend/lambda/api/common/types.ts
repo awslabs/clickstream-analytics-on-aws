@@ -198,3 +198,9 @@ export interface ClickStreamBucket {
   readonly name: string;
   readonly location: string;
 }
+
+export enum AssumeRoleType {
+  ALL = 'All',
+  SERVICE = 'Service',
+  ACCOUNT = 'Account',
+}

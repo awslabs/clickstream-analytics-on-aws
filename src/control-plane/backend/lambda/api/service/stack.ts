@@ -25,6 +25,7 @@ import { sfnClient } from '../common/sfn';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import {
+  getDataAnalyticsStackParameters,
   getETLPipelineStackParameters,
   getIngestionStackParameters,
   getKafkaConnectorStackParameters,
@@ -59,6 +60,12 @@ export class StackManager {
         workflowTemplate.Workflow.Branches?.push(branch);
       }
     }
+    if (!isEmpty(pipeline.dataAnalytics)) {
+      const branch = await this.getStackData(pipeline, 'DataAnalytics');
+      if (branch) {
+        workflowTemplate.Workflow.Branches?.push(branch);
+      }
+    }
     return workflowTemplate;
   }
 
@@ -82,6 +89,17 @@ export class StackManager {
             p.ParameterValue = appIds.join(',');
             branch.States.ETL.Type = WorkflowStateType.STACK;
             branch.States.ETL.Data!.Input.Action = 'Update';
+            update = true;
+            break;
+          }
+        }
+      }
+      if (Object.keys(branch.States).indexOf('DataAnalytics') > -1) {
+        for (let p of branch.States.DataAnalytics.Data?.Input.Parameters as Parameter[]) {
+          if (p.ParameterKey === 'AppIds' && p.ParameterValue !== appIds.join(',')) {
+            p.ParameterValue = appIds.join(',');
+            branch.States.DataAnalytics.Type = WorkflowStateType.STACK;
+            branch.States.DataAnalytics.Data!.Input.Action = 'Update';
             update = true;
             break;
           }
@@ -233,6 +251,37 @@ export class StackManager {
         },
       };
     }
+    if (type === 'DataAnalytics') {
+      const dataAnalyticsTemplateURL = await this.getTemplateUrl('data-analytics');
+      if (!dataAnalyticsTemplateURL) {
+        throw Error('Template: data-analytics not found in dictionary.');
+      }
+
+      const dataAnalyticsStackParameters = await getDataAnalyticsStackParameters(pipeline);
+      const dataAnalyticsStackName = this.getStackName(pipeline, 'data-analytics');
+      const dataAnalyticsState: WorkflowState = {
+        Type: WorkflowStateType.STACK,
+        Data: {
+          Input: {
+            Action: 'Create',
+            StackName: dataAnalyticsStackName,
+            TemplateURL: dataAnalyticsTemplateURL,
+            Parameters: dataAnalyticsStackParameters,
+          },
+          Callback: {
+            BucketName: stackWorkflowS3Bucket,
+            BucketPrefix: `clickstream/workflow/${pipeline.executionName}/${dataAnalyticsStackName}`,
+          },
+        },
+        End: true,
+      };
+      return {
+        StartAt: 'DataAnalytics',
+        States: {
+          DataAnalytics: dataAnalyticsState,
+        },
+      };
+    }
     return undefined;
   }
 
@@ -282,6 +331,7 @@ export class StackManager {
     names.set('ingestion', `clickstream-ingestion-${pipeline.ingestionServer.sinkType}-${pipeline.pipelineId}`);
     names.set('kafka-connector', `clickstream-kafka-connector-${pipeline.pipelineId}`);
     names.set('etl', `clickstream-etl-${pipeline.pipelineId}`);
+    names.set('data-analytics', `clickstream-data-analytics-${pipeline.pipelineId}`);
     return names.get(key)?? '';
   }
 

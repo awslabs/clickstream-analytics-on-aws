@@ -53,7 +53,24 @@ const getRedshiftCluster = async (params: {
   return result;
 };
 
+const getRedshiftServerlessWorkgroup = async (params: {
+  vpcId: string;
+  region?: string;
+}) => {
+  const result: any = await apiRequest(
+    'get',
+    `/env/redshift-serverless/workgroups`,
+    params
+  );
+  return result;
+};
+
 const getServiceRoles = async (params: { service?: string }) => {
+  const result: any = await apiRequest('get', `/env/iam/roles`, params);
+  return result;
+};
+
+const getServiceRolesByAccount = async (params: { account?: string }) => {
   const result: any = await apiRequest('get', `/env/iam/roles`, params);
   return result;
 };
@@ -71,6 +88,8 @@ export {
   getS3BucketList,
   getMSKList,
   getRedshiftCluster,
+  getRedshiftServerlessWorkgroup,
   getServiceRoles,
+  getServiceRolesByAccount,
   getCertificates,
 };

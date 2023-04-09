@@ -125,8 +125,8 @@ export class EnvironmentServ {
   }
   public async listRoles(req: any, res: any, next: any) {
     try {
-      const { service } = req.query;
-      const result = await listRoles(service);
+      const { type, key } = req.query;
+      const result = await listRoles(type, key);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

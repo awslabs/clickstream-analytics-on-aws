@@ -42,13 +42,13 @@ describe('Utils test', () => {
       'vpc-0d2619f249ded4511',
       'vpc-012345678910abcde',
     ];
-    validValues.map(v => expect(validatePattern(VPC_ID_PARRERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('VpcId', VPC_ID_PARRERN, v)).toEqual(true));
     const invalidValues = [
       'vp-0d2619f249ded45111',
       'vpc0d2619f249ded45111',
       'vpc-0123456789abcdefg',
     ];
-    invalidValues.map(v => expect(() => validatePattern(VPC_ID_PARRERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('VpcId', VPC_ID_PARRERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Subnets Params valid', async () => {
@@ -57,7 +57,7 @@ describe('Utils test', () => {
       'subnet-fffff1,subnet-fffff2,subnet-fffff3',
     ];
 
-    validValues.map(v => expect(validatePattern(SUBNETS_PATTERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'subnet-a1234',
@@ -65,7 +65,7 @@ describe('Utils test', () => {
       'subnet-g1234,subnet-g1234',
       'subnet-a1234, subnet-b1234',
     ];
-    invalidValues.map(v => expect(() => validatePattern(SUBNETS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Domain Name valid', async () => {
@@ -74,13 +74,13 @@ describe('Utils test', () => {
       'example.com',
     ];
 
-    validValues.map(v => expect(validatePattern(DOMAIN_NAME_PATTERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'test',
       'net.',
     ];
-    invalidValues.map(v => expect(() => validatePattern(DOMAIN_NAME_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Kafka brokers Params valid', async () => {
@@ -92,7 +92,7 @@ describe('Utils test', () => {
       'b-1.test.com:5001,b-2.test.com:5001',
       '192.169.1.1:9092,192.169.1.2:9092,192.169.1.3:9092',
     ];
-    validValues.map(v => expect(validatePattern(KAFKA_BROKERS_PATTERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'a',
@@ -103,7 +103,7 @@ describe('Utils test', () => {
       '192.169.1.1',
       '192.169.1.1:9092,192.169.1.2',
     ];
-    invalidValues.map(v => expect(() => validatePattern(KAFKA_BROKERS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Kafka topic Params valid', async () => {
@@ -113,7 +113,7 @@ describe('Utils test', () => {
       'test_sfds124',
       'test.sfds124',
     ];
-    validValues.map(v => expect(validatePattern(KAFKA_TOPIC_PATTERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'sss*ddf',
@@ -121,7 +121,7 @@ describe('Utils test', () => {
       'a#',
       'a,b',
     ];
-    invalidValues.map(v => expect(() => validatePattern(KAFKA_TOPIC_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
 });

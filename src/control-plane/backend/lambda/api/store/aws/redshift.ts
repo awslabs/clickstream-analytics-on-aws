@@ -12,7 +12,13 @@
  */
 
 import { RedshiftClient, DescribeClustersCommand, Cluster } from '@aws-sdk/client-redshift';
-import { RedshiftServerlessClient, ListWorkgroupsCommand, Workgroup } from '@aws-sdk/client-redshift-serverless';
+import {
+  RedshiftServerlessClient,
+  ListWorkgroupsCommand,
+  GetWorkgroupCommand,
+  Workgroup,
+  GetNamespaceCommand,
+} from '@aws-sdk/client-redshift-serverless';
 import { getSubnet } from './ec2';
 import { getPaginatedResults } from '../../common/paginator';
 import { RedshiftCluster, RedshiftWorkgroup } from '../../common/types';
@@ -42,6 +48,33 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
     }
   }
   return clusters;
+};
+
+export const getRedshiftWorkgroupAndNamespace = async (region: string, name: string) => {
+  const redshiftServerlessClient = new RedshiftServerlessClient({ region });
+  const getWorkgroupCommand: GetWorkgroupCommand = new GetWorkgroupCommand({
+    workgroupName: name,
+  });
+  const getWorkgroupCommandOutput = await redshiftServerlessClient.send(getWorkgroupCommand);
+  if (getWorkgroupCommandOutput.workgroup) {
+    const workgroup: Workgroup = getWorkgroupCommandOutput.workgroup;
+    const getNamespaceCommand: GetNamespaceCommand = new GetNamespaceCommand({
+      namespaceName: workgroup.namespaceName,
+    });
+    const getNamespaceCommandOutput = await redshiftServerlessClient.send(getNamespaceCommand);
+    if (getNamespaceCommandOutput.namespace) {
+      return {
+        workgroupId: getWorkgroupCommandOutput.workgroup.workgroupId,
+        workgroupArn: getWorkgroupCommandOutput.workgroup.workgroupArn,
+        workgroupName: getWorkgroupCommandOutput.workgroup.workgroupName,
+        namespaceId: getNamespaceCommandOutput.namespace.namespaceId,
+        namespaceArn: getNamespaceCommandOutput.namespace.namespaceArn,
+        namespaceName: getNamespaceCommandOutput.namespace.namespaceName,
+      };
+    }
+  }
+
+  return undefined;
 };
 
 export const listRedshiftServerlessWorkgroups = async (region: string, vpcId: string) => {
@@ -75,3 +108,4 @@ export const listRedshiftServerlessWorkgroups = async (region: string, vpcId: st
   }
   return workgroups;
 };
+
