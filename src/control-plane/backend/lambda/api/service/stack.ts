@@ -180,7 +180,7 @@ export class StackManager {
         },
       };
 
-      if (pipeline.ingestionServer.sinkType === 'kafka') {
+      if (pipeline.ingestionServer.sinkType === 'kafka' && pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
         const kafkaConnectorTemplateURL = await this.getTemplateUrl('kafka-s3-sink');
         if (!kafkaConnectorTemplateURL) {
           throw Error('Template: kafka-s3-sink not found in dictionary.');
@@ -221,6 +221,9 @@ export class StackManager {
       };
     }
     if (type === 'ETL') {
+      if (pipeline.ingestionServer.sinkType === 'kafka' && !pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+        return undefined;
+      }
       const dataPipelineTemplateURL = await this.getTemplateUrl('data-pipeline');
       if (!dataPipelineTemplateURL) {
         throw Error('Template: data-pipeline not found in dictionary.');
@@ -252,6 +255,9 @@ export class StackManager {
       };
     }
     if (type === 'DataAnalytics') {
+      if (pipeline.ingestionServer.sinkType === 'kafka' && !pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+        return undefined;
+      }
       const dataAnalyticsTemplateURL = await this.getTemplateUrl('data-analytics');
       if (!dataAnalyticsTemplateURL) {
         throw Error('Template: data-analytics not found in dictionary.');

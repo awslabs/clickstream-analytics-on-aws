@@ -109,6 +109,9 @@ const Content: React.FC = () => {
           arn: '',
           securityGroupId: '',
         },
+        kafkaConnector: {
+          enable: false,
+        },
       },
       sinkKinesis: {
         kinesisStreamMode: '',
@@ -762,6 +765,22 @@ const Content: React.FC = () => {
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
                         topic: topic,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeEnableKafkaConnector={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        kafkaConnector: {
+                          enable: enable,
+                        },
                       },
                     },
                   };

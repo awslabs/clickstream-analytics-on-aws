@@ -21,6 +21,7 @@ import {
   Grid,
   Header,
   Input,
+  Link,
   Multiselect,
   Select,
   SelectProps,
@@ -61,6 +62,7 @@ interface ConfigIngestionProps {
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
+  changeEnableKafkaConnector: (enable: boolean) => void;
 
   changeKDSProvisionType: (provision: SelectProps.Option) => void;
   changeKDSShardNumber: (num: string) => void;
@@ -100,6 +102,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeMSKTopic,
     changeKafkaBrokers,
     changeKafkaTopic,
+    changeEnableKafkaConnector,
     changeKDSProvisionType,
     changeKDSShardNumber,
     publicSubnetError,
@@ -489,6 +492,39 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 changeKDSShardNumber(num);
               }}
             />
+          )}
+
+          {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
+            <Container
+              header={
+                <Header
+                  description={t('pipeline:create.connectorDesc')}
+                  variant="h3"
+                >
+                  {t('pipeline:create.connector')}
+                </Header>
+              }
+            >
+              <FormField>
+                <Checkbox
+                  onChange={({ detail }) =>
+                    changeEnableKafkaConnector(detail.checked)
+                  }
+                  checked={
+                    pipelineInfo.ingestionServer.sinkKafka.kafkaConnector.enable
+                  }
+                  description={
+                    <div>
+                      {t('pipeline:create.connectorCheck1')}
+                      <Link external> {t('pipeline:create.s3Connector')}</Link>
+                      {t('pipeline:create.connectorCheck2')}
+                    </div>
+                  }
+                >
+                  {t('pipeline:create.connectorCheckDesc')}
+                </Checkbox>
+              </FormField>
+            </Container>
           )}
         </SpaceBetween>
       </Container>

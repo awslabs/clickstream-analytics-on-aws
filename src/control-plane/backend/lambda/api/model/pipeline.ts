@@ -109,7 +109,7 @@ interface IngestionServerSinkKafkaProps {
   /**
    * Kafka Connector
    */
-  readonly kafkaConnector?: KafkaS3Connector;
+  readonly kafkaConnector: KafkaS3Connector;
 }
 
 interface IngestionServerSinkKinesisProps {
@@ -194,11 +194,12 @@ export interface ETL {
 }
 
 export interface KafkaS3Connector {
-  readonly sinkBucket: S3Bucket;
+  readonly enable: boolean;
+  readonly sinkBucket?: S3Bucket;
   readonly maxWorkerCount?: number;
   readonly minWorkerCount?: number;
   readonly workerMcuCount?: number;
-  readonly pluginUrl: string;
+  readonly pluginUrl?: string;
   readonly rotateIntervalMS?: number;
   readonly flushSize?: number;
   readonly customConnectorConfiguration?: string;
@@ -479,11 +480,11 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
 
   parameters.push({
     ParameterKey: 'DataS3Bucket',
-    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.name ?? pipeline.bucket.name,
+    ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? pipeline.bucket.name,
   });
   parameters.push({
     ParameterKey: 'DataS3Prefix',
-    ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkKafka?.kafkaConnector?.sinkBucket?.prefix),
+    ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix),
   });
 
   parameters.push({
@@ -533,49 +534,49 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
     ParameterValue: pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
   });
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.maxWorkerCount !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount !== undefined) {
     parameters.push({
       ParameterKey: 'MaxWorkerCount',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.maxWorkerCount?.toString(),
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount?.toString(),
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.minWorkerCount !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount !== undefined) {
     parameters.push({
       ParameterKey: 'MinWorkerCount',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.minWorkerCount?.toString(),
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount?.toString(),
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.workerMcuCount !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount !== undefined) {
     parameters.push({
       ParameterKey: 'WorkerMcuCount',
-      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector?.workerMcuCount?.toString(),
+      ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount?.toString(),
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.pluginUrl !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl !== undefined) {
     parameters.push({
       ParameterKey: 'PluginUrl',
       ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl,
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.rotateIntervalMS !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.rotateIntervalMS !== undefined) {
     parameters.push({
       ParameterKey: 'RotateIntervalMS',
       ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.rotateIntervalMS.toString(),
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.flushSize !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.flushSize !== undefined) {
     parameters.push({
       ParameterKey: 'FlushSize',
       ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.flushSize.toString(),
     });
   }
 
-  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector?.customConnectorConfiguration !== undefined) {
+  if (pipeline.ingestionServer.sinkKafka?.kafkaConnector.customConnectorConfiguration !== undefined) {
     parameters.push({
       ParameterKey: 'CustomConnectorConfiguration',
       ParameterValue: pipeline.ingestionServer.sinkKafka?.kafkaConnector.customConnectorConfiguration,

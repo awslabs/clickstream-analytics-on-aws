@@ -226,7 +226,13 @@
     "aga": " AWS Global Accelerator",
     "agaDesc": "Create an accelerator to get static IP addresses that act as a global fixed entry point to your ingestion server, which will improves the availability and performance of your ingestion server. Note that additional charges apply.",
     "enableALBLog": "Access logs",
-    "enableALBLogDesc": "Application Load Balancer support delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step."
+    "enableALBLogDesc": "Application Load Balancer support delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.",
+    "connector": "Connector",
+    "connectorDesc": "Create a Apache Kafka connector to stream data to S3.",
+    "connectorCheck1": "The solution will download the ",
+    "s3Connector": "S3 Connector",
+    "connectorCheck2": " that has the code for the Lenses Amazon S3 Sink Connector",
+    "connectorCheckDesc": "Allow solution to create a custom plugin for the connector."
   },
   "detail": {
     "ingestionEdp": "Ingestion endpoint",

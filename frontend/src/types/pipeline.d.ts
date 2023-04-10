@@ -73,6 +73,9 @@ declare global {
           arn: string;
           securityGroupId: string;
         };
+        kafkaConnector: {
+          enable: boolean;
+        };
       };
       sinkKinesis: {
         kinesisStreamMode: string;
