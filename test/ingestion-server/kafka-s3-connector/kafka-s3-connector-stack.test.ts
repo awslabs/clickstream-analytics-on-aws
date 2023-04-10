@@ -98,6 +98,9 @@ test('S3Prefix pattern', () => {
 test('KafkaBrokers pattern', () => {
   const validValues = [
     '1.abc1.com:9092,2.abc2.com:9092,3.abc3.com:9092',
+    '1.abc1.com:9092',
+    '1.abc1.com:9092,2.abc2.com:9092',
+    '1.abc1.com:9092,2.abc2.com:9092,3.abc3.com:9092,4.abc3.com:9092',
   ];
   const invalidValues = [
     'abc',
@@ -105,7 +108,6 @@ test('KafkaBrokers pattern', () => {
     'https://abc.com',
     'abc.com',
     'abc1.com,abc2.com,',
-    'abc1.com:9092,abc2.com:9092,abc3.com:9092,abc4.com:9092',
   ];
   const paramNames = ['KafkaBrokers'];
   paramNames.forEach((p) => checkPattern(p, validValues, invalidValues));
