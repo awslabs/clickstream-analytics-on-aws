@@ -50,6 +50,7 @@ public class Cleaner {
     public Dataset<Row> clean(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "clean enter").toString());
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
+        decodedDataset.cache();
         log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
         Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
         log.info(new ETLMetric(flattedDataset, "flatted source").toString());

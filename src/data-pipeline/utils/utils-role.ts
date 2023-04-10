@@ -16,7 +16,7 @@ import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Arn, ArnFormat, Aws, Stack } from 'aws-cdk-lib';
 import { CompositePrincipal, Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { METRIC_NAMESAPCE_DATAPIPELINE } from '../../common/constant';
+import { METRIC_NAMESPACE_DATAPIPELINE } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export class RoleUtil {
@@ -170,7 +170,7 @@ export class RoleUtil {
           'cloudwatch:PutMetricData',
         ],
         conditions: {
-          StringEquals: { 'cloudwatch:namespace': METRIC_NAMESAPCE_DATAPIPELINE },
+          StringEquals: { 'cloudwatch:namespace': METRIC_NAMESPACE_DATAPIPELINE },
         },
       }),
 

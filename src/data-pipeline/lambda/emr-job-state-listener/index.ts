@@ -15,7 +15,7 @@ import path from 'path';
 import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
 import { GetJobRunCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
 import { EventBridgeEvent } from 'aws-lambda';
-import { METRIC_NAMESAPCE_DATAPIPELINE } from '../../../common/constant';
+import { METRIC_NAMESPACE_DATAPIPELINE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { copyS3Object, processS3GzipObjectLineByLine } from '../../../common/s3';
 import { getJobInfoKey } from '../../utils/utils-common';
@@ -33,7 +33,7 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
   logger.info('Triggered from  event', { event });
   const jobState = event.detail.state;
   if (event.detail.applicationId != emrApplicationId) {
-    logger.info(`unkonwn applicationId ${event.detail.applicationId}, only process event from emrApplicationId: ${emrApplicationId}`);
+    logger.info(`unknown applicationId ${event.detail.applicationId}, only process event from emrApplicationId: ${emrApplicationId}`);
     return;
   }
 
@@ -120,7 +120,7 @@ async function sendMetrics(event: any) {
     }
 
     const sourceMatch = line.match(sourceRegEx);
-    const flattedSoruceMatch = line.match(flattedSourceRegEx);
+    const flattedSourceMatch = line.match(flattedSourceRegEx);
     const sinkMatch = line.match(sinkRegEx);
     const corruptedMatch = line.match(corruptedRegEx);
     if (sourceMatch) {
@@ -128,10 +128,10 @@ async function sendMetrics(event: any) {
         ...metrics,
         source: parseInt(sourceMatch[1]),
       };
-    } else if (flattedSoruceMatch) {
+    } else if (flattedSourceMatch) {
       metrics = {
         ...metrics,
-        flattedSource: parseInt(flattedSoruceMatch[1]),
+        flattedSource: parseInt(flattedSourceMatch[1]),
       };
     } else if (sinkMatch) {
       metrics = {
@@ -152,7 +152,7 @@ async function sendMetrics(event: any) {
   logger.info('metrics', { metrics });
 
   const Timestamp = new Date();
-  const Namespace = METRIC_NAMESAPCE_DATAPIPELINE;
+  const Namespace = METRIC_NAMESPACE_DATAPIPELINE;
   const Dimensions = [{
     Name: 'projectId',
     Value: `${projectId}`,

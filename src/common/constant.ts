@@ -130,4 +130,4 @@ export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const PARTITION_APP = 'partition_app';
 
 // Metrics
-export const METRIC_NAMESAPCE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
+export const METRIC_NAMESPACE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
