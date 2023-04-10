@@ -31,7 +31,7 @@ const event = {
   ResourceProperties: {
     ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
     dataS3Bucket: 'test-data-bucket',
-    dataS3Prefix: 'data',
+    dataS3Prefix: 'data/',
     pluginS3Bucket: 'test-plugin-bucket',
     pluginS3Prefix: 'plugin',
     logS3Bucket: 'test-log-bucket',
@@ -106,38 +106,39 @@ jest.mock('@aws-sdk/client-s3', () => {
   };
 });
 
+const KafkaClientMock = {
+  NotFoundException: jest.fn(() => NotFoundExceptionMock),
+  KafkaConnectClient: jest.fn(() => KafkaConnectClientMock),
+  CreateConnectorCommand: jest.fn((cmd) => {
+    return { ...cmd, command: 'CreateConnectorCommand' };
+  }),
+  CreateCustomPluginCommand: jest.fn(() => {
+    return { command: 'CreateCustomPluginCommand' };
+  }),
+  DeleteConnectorCommand: jest.fn(() => {
+    return { command: 'DeleteConnectorCommand' };
+  }),
+  DeleteCustomPluginCommand: jest.fn(() => {
+    return { command: 'DeleteCustomPluginCommand' };
+  }),
+  DescribeConnectorCommand: jest.fn(() => {
+    return { command: 'DescribeConnectorCommand' };
+  }),
+  DescribeCustomPluginCommand: jest.fn(() => {
+    return { command: 'DescribeCustomPluginCommand' };
+  }),
+  ListConnectorsCommand: jest.fn(() => {
+    return { command: 'ListConnectorsCommand' };
+  }),
+  ListCustomPluginsCommand: jest.fn(() => {
+    return { command: 'ListCustomPluginsCommand' };
+  }),
+  UpdateConnectorCommand: jest.fn(() => {
+    return { command: 'UpdateConnectorCommand' };
+  }),
+};
 jest.mock('@aws-sdk/client-kafkaconnect', () => {
-  return {
-    NotFoundException: jest.fn(() => NotFoundExceptionMock),
-    KafkaConnectClient: jest.fn(() => KafkaConnectClientMock),
-    CreateConnectorCommand: jest.fn((cmd) => {
-      return { ...cmd, command: 'CreateConnectorCommand' };
-    }),
-    CreateCustomPluginCommand: jest.fn(() => {
-      return { command: 'CreateCustomPluginCommand' };
-    }),
-    DeleteConnectorCommand: jest.fn(() => {
-      return { command: 'DeleteConnectorCommand' };
-    }),
-    DeleteCustomPluginCommand: jest.fn(() => {
-      return { command: 'DeleteCustomPluginCommand' };
-    }),
-    DescribeConnectorCommand: jest.fn(() => {
-      return { command: 'DescribeConnectorCommand' };
-    }),
-    DescribeCustomPluginCommand: jest.fn(() => {
-      return { command: 'DescribeCustomPluginCommand' };
-    }),
-    ListConnectorsCommand: jest.fn(() => {
-      return { command: 'ListConnectorsCommand' };
-    }),
-    ListCustomPluginsCommand: jest.fn(() => {
-      return { command: 'ListCustomPluginsCommand' };
-    }),
-    UpdateConnectorCommand: jest.fn(() => {
-      return { command: 'UpdateConnectorCommand' };
-    }),
-  };
+  return KafkaClientMock;
 });
 
 jest.mock('fs', () => {
@@ -201,6 +202,19 @@ test('Update s3 sink - success', async () => {
 
 test('Delete s3 sink - success', async () => {
   event.RequestType = 'Delete';
+  const response = await msk_sink_handler(
+    event as CloudFormationCustomResourceEvent,
+    c,
+  );
+  expect(response.Status).toEqual('SUCCESS');
+});
+
+test('Check the parameters into kafaka client are correct', async () => {
+  event.RequestType = 'Create';
+  KafkaClientMock.CreateConnectorCommand = jest.fn((cmd) => {
+    expect(cmd.connectorConfiguration['topics.dir']).toEqual('data');
+    return { ...cmd, command: 'CreateConnectorCommand' };
+  });
   const response = await msk_sink_handler(
     event as CloudFormationCustomResourceEvent,
     c,

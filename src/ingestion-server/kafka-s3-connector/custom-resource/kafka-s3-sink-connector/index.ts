@@ -300,7 +300,7 @@ function getConnectorConfiguration(
     'topics': `${props.kafkaTopics}`,
     's3.region': `${region}`,
     's3.bucket.name': `${props.dataS3Bucket}`,
-    'topics.dir': `${props.dataS3Prefix}`,
+    'topics.dir': `${props.dataS3Prefix.slice(0, -1)}`,
     'flush.size': `${props.flushSize}`,
     'rotate.interval.ms': `${props.rotateIntervalMS}`,
     's3.compression.type': 'gzip',
