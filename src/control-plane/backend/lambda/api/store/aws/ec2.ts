@@ -78,7 +78,7 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
         subnetType = 'public';
         break;
       }
-      if (route.NatGatewayId) {
+      if (route.DestinationCidrBlock === '0.0.0.0/0') {
         subnetType = 'private';
         break;
       }
@@ -90,7 +90,7 @@ export const describeSubnets = async (region: string, vpcId: string, type: strin
       availabilityZone: records[index].AvailabilityZone,
       type: subnetType,
     };
-    if (type === 'all' || type === subnetType) {
+    if (type === 'all' || type === subnetType || (type === 'private' && subnetType === 'isolated')) {
       subnets.push(clickStreamSubnet);
     }
   }

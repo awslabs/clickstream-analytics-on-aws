@@ -378,6 +378,82 @@ describe('Account Env test', () => {
       ],
     });
   });
+  it('Get private subnet', async () => {
+    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
+      Subnets: [
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: false,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
+            },
+          ],
+        },
+        {
+          SubnetId: 'subnet-0b9fa05e061084b38',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1b',
+          MapPublicIpOnLaunch: false,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/privateSubnet1',
+            },
+          ],
+        },
+      ],
+    });
+    ec2ClientMock.on(DescribeRouteTablesCommand).resolvesOnce({
+      RouteTables: [
+        {
+          Associations: [{
+            Main: true,
+          }],
+          Routes: [
+            { GatewayId: 'local' },
+          ],
+        },
+      ],
+    }).resolves({
+      RouteTables: [
+        {
+          Associations: [{
+            Main: true,
+          }],
+          Routes: [
+            { DestinationCidrBlock: '0.0.0.0/0', NatGatewayId: 'local' },
+          ],
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088&subnetType=private');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          id: 'subnet-0b9fa05e061084b37',
+          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
+          cidr: '10.255.0.0/24',
+          availabilityZone: 'us-east-1a',
+          type: 'isolated',
+        },
+        {
+          availabilityZone: 'us-east-1b',
+          cidr: '10.255.0.0/24',
+          id: 'subnet-0b9fa05e061084b38',
+          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/privateSubnet1',
+          type: 'private',
+        },
+      ],
+    });
+  });
   it('Get isolated subnet', async () => {
     ec2ClientMock.on(DescribeSubnetsCommand).resolves({
       Subnets: [
