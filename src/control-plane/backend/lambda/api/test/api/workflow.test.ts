@@ -92,6 +92,7 @@ describe('Workflow test', () => {
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
@@ -188,6 +189,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -290,6 +295,7 @@ describe('Workflow test', () => {
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
@@ -385,6 +391,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -562,6 +572,7 @@ describe('Workflow test', () => {
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
@@ -665,6 +676,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -828,6 +843,7 @@ describe('Workflow test', () => {
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
@@ -922,6 +938,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -1036,6 +1056,7 @@ describe('Workflow test', () => {
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
           enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
             prefix: 'logs',
@@ -1149,6 +1170,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -1356,6 +1381,7 @@ describe('Workflow test', () => {
           serverEndpointPath: '/collect',
           serverCorsOrigin: '*',
           protocol: 'HTTPS',
+          enableGlobalAccelerator: true,
           enableApplicationLoadBalancerAccessLog: true,
           logS3Bucket: {
             name: 'EXAMPLE_BUCKET',
@@ -1502,6 +1528,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'NotificationsTopicArn',
                         ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',

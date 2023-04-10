@@ -48,6 +48,7 @@ declare global {
         serverEndpointPath: string;
         serverCorsOrigin: string;
         protocol: string;
+        enableGlobalAccelerator: boolean;
         enableApplicationLoadBalancerAccessLog: boolean;
         logS3Bucket: {
           name: string;

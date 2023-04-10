@@ -68,6 +68,10 @@ interface IngestionServerLoadBalancerProps {
    */
   readonly notificationsTopicArn?: string;
   /**
+   * Enable global accelerator
+   */
+  readonly enableGlobalAccelerator: boolean;
+  /**
    * Enable application load balancer access log
    */
   readonly enableApplicationLoadBalancerAccessLog: boolean;
@@ -356,6 +360,10 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   parameters.push({
     ParameterKey: 'NotificationsTopicArn',
     ParameterValue: pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+  });
+  parameters.push({
+    ParameterKey: 'EnableGlobalAccelerator',
+    ParameterValue: pipeline.ingestionServer.loadBalancer.enableGlobalAccelerator ? 'Yes' : 'No',
   });
   // Logs
   parameters.push({

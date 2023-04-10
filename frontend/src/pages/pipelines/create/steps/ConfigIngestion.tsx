@@ -16,6 +16,7 @@ import {
   Checkbox,
   ColumnLayout,
   Container,
+  ExpandableSection,
   FormField,
   Grid,
   Header,
@@ -44,6 +45,7 @@ interface ConfigIngestionProps {
   changeWarmSize: (size: string) => void;
   changeDomainName: (name: string) => void;
   changeEnableALBAccessLog: (enable: boolean) => void;
+  changeEnableAGA: (enable: boolean) => void;
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
   changeCertificate: (cert: SelectProps.Option) => void;
@@ -83,6 +85,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeWarmSize,
     changeDomainName,
     changeEnableALBAccessLog,
+    changeEnableAGA,
     changeProtocal,
     changeServerEdp,
     changeCertificate,
@@ -280,20 +283,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           <FormField>
             <Checkbox
               onChange={({ detail }) =>
-                changeEnableALBAccessLog(detail.checked)
-              }
-              checked={
-                pipelineInfo.ingestionServer.loadBalancer
-                  .enableApplicationLoadBalancerAccessLog
-              }
-            >
-              <b>{t('pipeline:create.enableALBLog')}</b>
-            </Checkbox>
-          </FormField>
-
-          <FormField>
-            <Checkbox
-              onChange={({ detail }) =>
                 changeProtocal(
                   detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP
                 )
@@ -366,20 +355,50 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             </Grid>
           )}
 
-          <FormField
-            label={t('pipeline:create.requestPath')}
-            description={t('pipeline:create.requestPathDesc')}
-          >
-            <Input
-              placeholder={t('pipeline:create.requestPlaceholder') || ''}
-              value={
-                pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath
-              }
-              onChange={(e) => {
-                changeServerEdp(e.detail.value);
-              }}
-            />
-          </FormField>
+          <ExpandableSection headerText={t('addtionalSettings')}>
+            <SpaceBetween direction="vertical" size="l">
+              <FormField
+                label={t('pipeline:create.requestPath')}
+                description={t('pipeline:create.requestPathDesc')}
+              >
+                <Input
+                  placeholder={t('pipeline:create.requestPlaceholder') || ''}
+                  value={
+                    pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath
+                  }
+                  onChange={(e) => {
+                    changeServerEdp(e.detail.value);
+                  }}
+                />
+              </FormField>
+
+              <Checkbox
+                onChange={({ detail }) => {
+                  changeEnableAGA(detail.checked);
+                }}
+                checked={
+                  pipelineInfo.ingestionServer.loadBalancer
+                    .enableGlobalAccelerator
+                }
+                description={t('pipeline:create.agaDesc')}
+              >
+                {t('pipeline:create.aga')}
+              </Checkbox>
+
+              <Checkbox
+                onChange={({ detail }) =>
+                  changeEnableALBAccessLog(detail.checked)
+                }
+                checked={
+                  pipelineInfo.ingestionServer.loadBalancer
+                    .enableApplicationLoadBalancerAccessLog
+                }
+                description={t('pipeline:create.enableALBLogDesc')}
+              >
+                {t('pipeline:create.enableALBLog')}
+              </Checkbox>
+            </SpaceBetween>
+          </ExpandableSection>
         </SpaceBetween>
       </Container>
       <Container

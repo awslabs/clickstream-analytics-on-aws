@@ -84,7 +84,8 @@ const Content: React.FC = () => {
         serverEndpointPath: '/collect',
         serverCorsOrigin: '',
         protocol: ProtocalType.HTTPS,
-        enableApplicationLoadBalancerAccessLog: true,
+        enableGlobalAccelerator: false,
+        enableApplicationLoadBalancerAccessLog: false,
         logS3Bucket: {
           name: '',
           prefix: '',
@@ -588,6 +589,20 @@ const Content: React.FC = () => {
                       loadBalancer: {
                         ...prev.ingestionServer.loadBalancer,
                         enableApplicationLoadBalancerAccessLog: enable,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeEnableAGA={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        enableGlobalAccelerator: enable,
                       },
                     },
                   };
