@@ -12,11 +12,10 @@
  */
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { Plugin } from './plugin';
 import { DOMAIN_NAME_PATTERN, KAFKA_BROKERS_PATTERN, KAFKA_TOPIC_PATTERN, SUBNETS_PATTERN, VPC_ID_PARRERN } from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
-import { ClickStreamBadRequestError, WorkflowTemplate } from '../common/types';
+import { ClickStreamBadRequestError, PipelineStatus, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
@@ -262,7 +261,7 @@ export interface Pipeline {
   readonly dataAnalytics?: DataAnalytics;
   readonly quickSightDataset?: any;
 
-  status: ExecutionStatus | string;
+  status?: PipelineStatus;
   workflow?: WorkflowTemplate;
   executionName?: string;
   executionArn?: string;

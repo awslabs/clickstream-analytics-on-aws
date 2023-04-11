@@ -223,7 +223,15 @@
   "items": "items",
   "not": "not",
   "selected": "selected",
-  "status": "Status",
+  "status": {
+    "status": "Status",
+    "active": "Active",
+    "failed": "Failed",
+    "creating": "Creating",
+    "updating": "Updating",
+    "deleting": "Deleting",
+    "pending": "Pending"
+  },
   "nextPage": "Next page",
   "prePage": "Previous page",
   "page": "Page",

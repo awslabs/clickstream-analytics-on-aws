@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
+import { Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
 import { Endpoint } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 
@@ -29,7 +29,7 @@ export class ApiResponse {
 
   constructor(success: boolean, message?: string) {
     this.success = success;
-    this.message = message? message: '';
+    this.message = message ? message : '';
   }
 }
 
@@ -144,6 +144,7 @@ export interface ClickStreamVpc {
   readonly cidr: string;
   readonly isDefault: boolean;
 }
+
 export interface ClickStreamSubnet {
   readonly id: string;
   readonly name: string;
@@ -199,8 +200,28 @@ export interface ClickStreamBucket {
   readonly location: string;
 }
 
+export interface PipelineStatus {
+  readonly status: PipelineStatusType;
+  readonly details: PipelineStatusDetail[];
+}
+
+export interface PipelineStatusDetail {
+  readonly stackName: string;
+  readonly stackStatus: StackStatus | undefined;
+  readonly stackStatusReason: string;
+  readonly url: string;
+}
+
 export enum AssumeRoleType {
   ALL = 'All',
   SERVICE = 'Service',
   ACCOUNT = 'Account',
+}
+
+export enum PipelineStatusType {
+  ACTIVE = 'Active',
+  FAILED = 'Failed',
+  CREATING = 'Creating',
+  UPDATING = 'Updating',
+  DELETING = 'Deleting',
 }

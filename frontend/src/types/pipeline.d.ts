@@ -15,6 +15,13 @@ import { SelectProps } from '@cloudscape-design/components';
 
 export {};
 declare global {
+  interface IStackStatus {
+    stackName: string;
+    stackStatus: string;
+    stackStatusReason: string;
+    url: string;
+  }
+
   interface IPipeline {
     pipelineId?: string;
     appIds: string[];
@@ -115,7 +122,10 @@ declare global {
         scheduleInterval: string;
       };
     };
-    status?: string;
+    status?: {
+      status: string;
+      details: IStackStatus[];
+    };
     createAt?: string;
     updateAt?: string;
   }

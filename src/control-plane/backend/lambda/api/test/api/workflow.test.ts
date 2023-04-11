@@ -17,7 +17,6 @@ import {
   GetWorkgroupCommand,
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { dictionaryMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
@@ -60,7 +59,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
@@ -263,7 +261,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
@@ -529,7 +526,10 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
+      status: {
+        status: 'Active',
+        details: [],
+      },
       tags: [
         {
           key: 'name',
@@ -790,7 +790,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
@@ -1064,7 +1063,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
@@ -1277,7 +1275,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',
@@ -1603,7 +1600,6 @@ describe('Workflow test', () => {
       description: 'Description of Pipeline-01',
       region: 'us-east-1',
       dataCollectionSDK: 'Clickstream SDK',
-      status: ExecutionStatus.RUNNING,
       tags: [
         {
           key: 'name',

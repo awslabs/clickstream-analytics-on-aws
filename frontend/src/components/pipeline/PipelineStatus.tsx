@@ -16,17 +16,15 @@ import {
   StatusIndicatorProps,
 } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export enum EPipelineStatus {
-  CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS',
-  CREATE_COMPLETE = 'CREATE_COMPLETE',
-  CREATE_FAILED = 'CREATE_FAILED',
-  UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS',
-  UPDATE_COMPLETE = 'UPDATE_COMPLETE',
-  UPDATE_FAILED = 'UPDATE_FAILED',
-  DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
-  DELETE_COMPLETE = 'DELETE_COMPLETE',
-  DELETE_FAILED = 'DELETE_FAILED',
+  Active = 'Active',
+  Failed = 'Failed',
+  Creating = 'Creating',
+  Updating = 'Updating',
+  Deleting = 'Deleting',
+  Pending = 'Pending',
 }
 
 interface PipelineStatusProps {
@@ -36,32 +34,38 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
 ) => {
   const { status } = props;
+  const { t } = useTranslation();
   let indicatorType: StatusIndicatorProps.Type = 'loading';
+  let displayStatus = '';
   if (
-    status === EPipelineStatus.CREATE_IN_PROGRESS ||
-    status === EPipelineStatus.UPDATE_IN_PROGRESS ||
-    status === EPipelineStatus.DELETE_IN_PROGRESS
+    status === EPipelineStatus.Creating ||
+    status === EPipelineStatus.Updating ||
+    status === EPipelineStatus.Deleting
   ) {
     indicatorType = 'in-progress';
-  } else if (
-    status === EPipelineStatus.CREATE_FAILED ||
-    status === EPipelineStatus.UPDATE_FAILED ||
-    status === EPipelineStatus.DELETE_FAILED
-  ) {
+    if (status === EPipelineStatus.Creating) {
+      displayStatus = 'status.creating';
+    }
+    if (status === EPipelineStatus.Updating) {
+      displayStatus = 'status.updating';
+    }
+    if (status === EPipelineStatus.Deleting) {
+      displayStatus = 'status.deleting';
+    }
+  } else if (status === EPipelineStatus.Failed) {
     indicatorType = 'error';
-  } else if (
-    status === EPipelineStatus.CREATE_COMPLETE ||
-    status === EPipelineStatus.UPDATE_COMPLETE ||
-    status === EPipelineStatus.DELETE_COMPLETE
-  ) {
+    displayStatus = 'status.failed';
+  } else if (status === EPipelineStatus.Active) {
     indicatorType = 'success';
+    displayStatus = 'status.active';
   } else {
     indicatorType = 'pending';
+    displayStatus = 'status.pending';
   }
 
   return (
     <>
-      <StatusIndicator type={indicatorType}>{status}</StatusIndicator>
+      <StatusIndicator type={indicatorType}>{t(displayStatus)}</StatusIndicator>
     </>
   );
 };

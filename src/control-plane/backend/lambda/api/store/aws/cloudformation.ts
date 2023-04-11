@@ -12,15 +12,24 @@
  */
 
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { logger } from '../../common/powertools';
 
 export const describeStack = async (region: string, stackName: string) => {
-  const cloudFormationClient = new CloudFormationClient({ region });
-  const params: DescribeStacksCommand = new DescribeStacksCommand({
-    StackName: stackName,
-  });
-  const result = await cloudFormationClient.send(params);
-  if (result.Stacks) {
-    return result.Stacks[0];
+  try {
+    const cloudFormationClient = new CloudFormationClient({ region });
+    const params: DescribeStacksCommand = new DescribeStacksCommand({
+      StackName: stackName,
+    });
+    const result = await cloudFormationClient.send(params);
+    if (result.Stacks) {
+      return result.Stacks[0];
+    }
+    return undefined;
+  } catch (error) {
+    logger.warn('Unexpected error occurred at Describe Stack.', {
+      error: error,
+      stackName: stackName,
+    });
+    return undefined;
   }
-  return undefined;
 };

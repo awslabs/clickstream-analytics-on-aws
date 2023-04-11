@@ -18,7 +18,6 @@ import {
   Cards,
   Link,
   Pagination,
-  StatusIndicator,
   TextFilter,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
@@ -67,18 +66,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         id: 'projectPlatform',
         header: t('project:list.platform'),
         content: (item: IProject) => item.platform || '-',
-      },
-
-      {
-        id: 'status',
-        header: t('project:list.status'),
-        content: (item: IProject) => (
-          <StatusIndicator
-            type={item.status === 'Deactivated' ? 'error' : 'success'}
-          >
-            {item.status}
-          </StatusIndicator>
-        ),
       },
     ],
   };

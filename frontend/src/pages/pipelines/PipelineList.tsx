@@ -132,7 +132,7 @@ const Content: React.FC = () => {
             id: 'status',
             header: t('pipeline:list.status'),
             cell: (e) => {
-              return <PipelineStatus status={e.status} />;
+              return <PipelineStatus status={e.status?.status} />;
             },
           },
           {

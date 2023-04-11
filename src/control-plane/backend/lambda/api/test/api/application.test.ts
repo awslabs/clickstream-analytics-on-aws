@@ -23,6 +23,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
+import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -44,7 +45,9 @@ describe('Application test', () => {
           {
             name: 'Pipeline-01',
             pipelineId: MOCK_PROJECT_ID,
-            status: ExecutionStatus.SUCCEEDED,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
             ingestionServer: {
               sinkType: 's3',
             },
@@ -84,7 +87,9 @@ describe('Application test', () => {
         {
           name: 'Pipeline-01',
           pipelineId: MOCK_PROJECT_ID,
-          status: ExecutionStatus.SUCCEEDED,
+          status: {
+            status: PipelineStatusType.ACTIVE,
+          },
           ingestionServer: {
             sinkType: 's3',
           },
@@ -120,7 +125,9 @@ describe('Application test', () => {
         {
           name: 'Pipeline-01',
           pipelineId: MOCK_PROJECT_ID,
-          status: ExecutionStatus.RUNNING,
+          status: {
+            status: PipelineStatusType.FAILED,
+          },
           ingestionServer: {
             sinkType: 's3',
           },
@@ -620,7 +627,9 @@ describe('Application test', () => {
         {
           name: 'Pipeline-01',
           pipelineId: MOCK_PROJECT_ID,
-          status: ExecutionStatus.SUCCEEDED,
+          status: {
+            status: PipelineStatusType.ACTIVE,
+          },
           ingestionServer: {
             sinkType: 's3',
           },

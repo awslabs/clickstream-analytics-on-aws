@@ -145,7 +145,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.status')}
               </Box>
               <div>
-                <PipelineStatus status={pipelineInfo.status} />
+                <PipelineStatus status={pipelineInfo.status?.status} />
               </div>
             </div>
           </SpaceBetween>

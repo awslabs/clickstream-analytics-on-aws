@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -29,12 +28,10 @@ export class PipelineServ {
       const { pid, version, order, pageNumber, pageSize } = req.query;
       const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
       for (let pipeline of result.items as Pipeline[] ) {
-        if (pipeline.executionArn) {
-          const curStatus = await stackManager.getExecutionStatus(pipeline.executionArn) ?? ExecutionStatus.FAILED;
-          if (pipeline.status !== curStatus) {
-            pipeline.status = curStatus;
-            await store.updatePipelineStatus(pipeline, curStatus);
-          }
+        const curStatus = await stackManager.getPipelineStatus(pipeline);
+        if (pipeline.status === undefined || pipeline.status.status !== curStatus.status) {
+          pipeline.status = curStatus;
+          await store.updatePipelineStatus(pipeline, curStatus);
         }
       }
       return res.json(new ApiSuccess(result));
@@ -68,18 +65,16 @@ export class PipelineServ {
     try {
       const { id } = req.params;
       const { pid } = req.query;
-      const result = await store.getPipeline(pid, id);
-      if (!result) {
+      const pipeline = await store.getPipeline(pid, id);
+      if (!pipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      if (result.executionArn) {
-        const curStatus = await stackManager.getExecutionStatus(result.executionArn) ?? ExecutionStatus.FAILED;
-        if (result.status !== curStatus) {
-          result.status = curStatus;
-          await store.updatePipelineStatus(result, curStatus);
-        }
+      const curStatus = await stackManager.getPipelineStatus(pipeline);
+      if (pipeline.status === undefined || pipeline.status.status !== curStatus.status) {
+        pipeline.status = curStatus;
+        await store.updatePipelineStatus(pipeline, curStatus);
       }
-      return res.json(new ApiSuccess(result));
+      return res.json(new ApiSuccess(pipeline));
     } catch (error) {
       next(error);
     }

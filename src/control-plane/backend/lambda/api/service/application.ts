@@ -11,11 +11,10 @@
  *  and limitations under the License.
  */
 
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStatusType } from '../common/types';
 import { Application } from '../model/application';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -46,7 +45,7 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
       const pipeline = latestPipelines.items[0];
-      if (pipeline.status !== ExecutionStatus.SUCCEEDED) {
+      if (pipeline.status?.status !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
@@ -112,7 +111,7 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
       const pipeline = latestPipelines.items[0];
-      if (pipeline.status !== ExecutionStatus.SUCCEEDED) {
+      if (pipeline.status?.status !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 

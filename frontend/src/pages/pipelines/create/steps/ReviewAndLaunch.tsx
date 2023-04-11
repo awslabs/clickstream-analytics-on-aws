@@ -101,7 +101,7 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
             <div style={{ borderRight: '2px solid #e9ebed' }}>
               <SpaceBetween size="l" direction="vertical">
                 <div>
-                  <Box variant="awsui-key-label">{t('status')}</Box>
+                  <Box variant="awsui-key-label">{t('status.status')}</Box>
                   <div>
                     <StatusIndicator>Enabled</StatusIndicator>
                   </div>
@@ -127,7 +127,9 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
                     id: 'date',
                     header: 'Last edit date',
                     cell: (item) =>
-                      moment(item.updateAt).format(TIME_FORMAT) || '-',
+                      item.updateAt
+                        ? moment(item.updateAt).format(TIME_FORMAT)
+                        : '-',
                   },
                 ]}
                 items={pipelineInfo.selectedEnrichPlugins}

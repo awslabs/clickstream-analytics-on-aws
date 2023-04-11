@@ -68,7 +68,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <div>
                 <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
                 <div>
-                  <PipelineStatus status={pipelineInfo?.status} />
+                  <PipelineStatus status={pipelineInfo?.status?.status} />
                 </div>
               </div>
               <div>

@@ -214,8 +214,10 @@ const ApplicationDetail: React.FC = () => {
                         <PipelineStatus
                           status={applicationInfo?.pipeline?.status}
                         />{' '}
-                        {applicationInfo?.pipeline?.status ===
-                          EPipelineStatus.UPDATE_IN_PROGRESS && <Spinner />}
+                        {(applicationInfo?.pipeline?.status ===
+                          EPipelineStatus.Creating ||
+                          applicationInfo?.pipeline?.status ===
+                            EPipelineStatus.Updating) && <Spinner />}
                       </div>
                     </div>
                   </SpaceBetween>

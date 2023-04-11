@@ -11,18 +11,26 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Output } from '@aws-sdk/client-cloudformation';
+import { Output, Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
 import {
-  StartExecutionCommand,
-  StartExecutionCommandOutput,
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
   ExecutionStatus,
+  StartExecutionCommand,
+  StartExecutionCommandOutput,
 } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { sfnClient } from '../common/sfn';
-import { WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowTemplate } from '../common/types';
+import {
+  PipelineStatus,
+  PipelineStatusDetail,
+  PipelineStatusType,
+  WorkflowParallelBranch,
+  WorkflowState,
+  WorkflowStateType,
+  WorkflowTemplate,
+} from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import {
   getDataAnalyticsStackParameters,
@@ -315,6 +323,65 @@ export class StackManager {
     return undefined;
   };
 
+  public async getPipelineStatus(pipeline: Pipeline): Promise<PipelineStatus> {
+    if (!pipeline.workflow?.Workflow) {
+      return {
+        status: PipelineStatusType.ACTIVE,
+        details: [],
+      };
+    }
+    const stackNames = this.getWorkflowStacks(pipeline.workflow?.Workflow);
+    const stackStatusDetails: PipelineStatusDetail[] = [];
+    for (let stackName of stackNames as string[]) {
+      const stack = await describeStack(pipeline.region, stackName);
+      let consoleDomain = 'console.aws.amazon.com';
+      if (pipeline.region.startsWith('cn')) {
+        consoleDomain = 'console.amazonaws.cn';
+      }
+      stackStatusDetails.push({
+        stackName: stackName,
+        stackStatus: stack?.StackStatus as StackStatus,
+        stackStatusReason: stack?.StackStatusReason ?? '',
+        url: `https://${pipeline.region}.${consoleDomain}/cloudformation/home?region=${pipeline.region}#/stacks/stackinfo?stackId=${stack?.StackId}`,
+      });
+    }
+    if (!isEmpty(stackStatusDetails)) {
+      let action: string = 'CREATE';
+      let miss: boolean = false;
+      let status: string = PipelineStatusType.ACTIVE;
+      for (let s of stackStatusDetails) {
+        if (s.stackStatus === undefined) {
+          miss = true;
+        } else if (s.stackStatus.endsWith('_FAILED')) {
+          action = s.stackStatus.split('_')[0];
+          status = PipelineStatusType.FAILED;
+          break;
+        } else if (s.stackStatus.endsWith('_IN_PROGRESS')) {
+          action = s.stackStatus.split('_')[0];
+          if (action === 'CREATE') {
+            status = PipelineStatusType.CREATING;
+          } else if (action === 'DELETE') {
+            status = PipelineStatusType.DELETING;
+          } else {
+            status = PipelineStatusType.UPDATING;
+          }
+        }
+      }
+      if (miss) {
+        // If all stack complete, but some stack miss
+        status = PipelineStatusType.FAILED;
+      }
+      return {
+        status: status,
+        details: stackStatusDetails,
+      } as PipelineStatus;
+    }
+    return {
+      status: PipelineStatusType.ACTIVE,
+      details: stackStatusDetails,
+    } as PipelineStatus;
+  }
+
   public async getStackOutput(pipeline: Pipeline, key: string, outputKey: string): Promise<string | undefined> {
     const stack = await describeStack(pipeline.region, this.getStackName(pipeline, key));
     if (stack) {
@@ -327,11 +394,6 @@ export class StackManager {
     return undefined;
   }
 
-  public async getStackStatus(pipeline: Pipeline, key: string): Promise<string | undefined> {
-    const stack = await describeStack(pipeline.region, this.getStackName(pipeline, key));
-    return stack ? stack.StackStatus : undefined;
-  }
-
   public getStackName(pipeline: Pipeline, key: string): string {
     const names: Map<string, string> = new Map();
     names.set('ingestion', `clickstream-ingestion-${pipeline.ingestionServer.sinkType}-${pipeline.pipelineId}`);
@@ -342,7 +404,7 @@ export class StackManager {
   }
 
   public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {
-    if (state.Type === 'Parallel') {
+    if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
           branch.States[key] = this.setWorkflowType(branch.States[key], type);
@@ -352,6 +414,22 @@ export class StackManager {
       state.Type = type;
     }
     return state;
+  }
+
+  public getWorkflowStacks(state: WorkflowState): string[] {
+    let res: string[] = [];
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          res = res.concat(this.getWorkflowStacks(branch.States[key]));
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK) {
+      if (state.Data?.Input.StackName) {
+        res.push(state.Data?.Input.StackName);
+      }
+    }
+    return res;
   }
 
 }

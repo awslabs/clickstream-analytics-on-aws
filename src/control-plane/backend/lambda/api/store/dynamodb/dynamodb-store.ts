@@ -25,7 +25,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
-import { KeyVal } from '../../common/types';
+import { KeyVal, PipelineStatus } from '../../common/types';
 import { isEmpty, tryToJson } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
@@ -400,6 +400,8 @@ export class DynamoDbStore implements ClickStreamStore {
         dataCollectionSDK: pipeline.dataCollectionSDK,
         status: pipeline.status ?? ExecutionStatus.RUNNING,
         tags: pipeline.tags ?? [],
+        network: pipeline.network,
+        bucket: pipeline.bucket,
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataAnalytics: pipeline.dataAnalytics,
@@ -466,8 +468,10 @@ export class DynamoDbStore implements ClickStreamStore {
               description: { S: curPipeline.description },
               region: { S: curPipeline.region },
               dataCollectionSDK: { S: curPipeline.dataCollectionSDK },
-              status: { S: curPipeline.status },
+              status: marshallCurPipeline.status,
               tags: marshallCurPipeline.tags,
+              network: marshallCurPipeline.network,
+              bucket: marshallCurPipeline.bucket,
               ingestionServer: marshallCurPipeline.ingestionServer,
               etl: marshallCurPipeline.etl,
               dataAnalytics: marshallCurPipeline.dataAnalytics,
@@ -500,6 +504,8 @@ export class DynamoDbStore implements ClickStreamStore {
               'dataCollectionSDK = :dataCollectionSDK, ' +
               '#status = :status, ' +
               '#tags = :tags, ' +
+              '#network = :network, ' +
+              '#bucket = :bucket, ' +
               'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
               'dataAnalytics = :dataAnalytics, ' +
@@ -514,6 +520,8 @@ export class DynamoDbStore implements ClickStreamStore {
               '#prefix': 'prefix',
               '#pipelineName': 'name',
               '#region': 'region',
+              '#network': 'network',
+              '#bucket': 'bucket',
               '#status': 'status',
               '#tags': 'tags',
               '#pipelineOperator': 'operator',
@@ -525,8 +533,10 @@ export class DynamoDbStore implements ClickStreamStore {
               ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
-              ':status': { S: ExecutionStatus.RUNNING },
+              ':status': marshallPipeline.status,
               ':tags': marshallPipeline.tags,
+              ':network': marshallPipeline.network,
+              ':bucket': marshallPipeline.bucket,
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
               ':dataAnalytics': marshallPipeline.dataAnalytics,
@@ -546,7 +556,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async updatePipelineStatus(pipeline: Pipeline, status: ExecutionStatus | string): Promise<void> {
+  public async updatePipelineStatus(pipeline: Pipeline, status: PipelineStatus): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -830,7 +840,10 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':pluginType', pluginType);
     }
 
-    let plugins: PluginList = { totalCount: 0, items: [] };
+    let plugins: PluginList = {
+      totalCount: 0,
+      items: [],
+    };
     const dic = await this.getDictionary('BuildInPlugins');
     if (dic) {
       let buildInPlugins = tryToJson(dic.data) as Plugin[];
