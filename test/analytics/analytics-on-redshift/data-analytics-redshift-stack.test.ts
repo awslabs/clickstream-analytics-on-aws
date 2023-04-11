@@ -98,7 +98,8 @@ describe('AnalyticsHotDataStack common parameter test', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
-      '192_169_1_1',
+      'a192_169_1_1',
+      'proj',
     ];
 
     for (const v of validValues) {
@@ -110,6 +111,8 @@ describe('AnalyticsHotDataStack common parameter test', () => {
       'b-1.test.com:9092,b-2.test.com:9092',
       'b1.test.com:9092',
       'b_1.test.com',
+      '192_169_1_1',
+      'Proj',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
@@ -121,8 +124,8 @@ describe('AnalyticsHotDataStack common parameter test', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
-      '192_169_1_1',
-      '192-169-1-1',
+      'a192_169_1_1',
+      'AppId',
     ];
 
     for (const v of validValues) {
@@ -134,6 +137,7 @@ describe('AnalyticsHotDataStack common parameter test', () => {
       'b-1.test.com:9092,b-2.test.com:9092',
       'b1.test.com:9092',
       'b_1.test.com',
+      '192-169-1-1',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);

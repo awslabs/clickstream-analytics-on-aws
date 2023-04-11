@@ -15,6 +15,13 @@ import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { validateSubnetsRule } from '../rules';
+import { genString } from '../utils';
+import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
+
+const c63Str = genString(63);
+const c64Str = genString(64);
+const c127Str = genString(127);
+const c128Str = genString(128);
 
 const app = new App();
 const rootStack = new DataPipelineStack(app, 'test-stack');
@@ -108,12 +115,17 @@ describe('DataPipelineStack parameter test', () => {
 
 
   test('Should check ProjectId pattern', () => {
+
     [getParameter(template, 'ProjectId')].forEach(param => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
         'abc001',
         'abc_test',
+        'test',
+        'a001',
+        'a',
+        c127Str,
       ];
 
       for (const v of validValues) {
@@ -121,12 +133,16 @@ describe('DataPipelineStack parameter test', () => {
       }
 
       const invalidValues = [
-        'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
+        '1a',
+        'abc#test',
         'abc.test',
-        'abc-test-01',
         'ABC',
+        'abbA',
         '',
         'ab$',
+        '项目',
+        'abc-test-01',
+        c128Str,
       ];
       for (const v of invalidValues) {
         expect(v).not.toMatch(regex);
@@ -147,9 +163,10 @@ describe('DataPipelineStack parameter test', () => {
       const regex = new RegExp(`${pattern}`);
       const validValues = [
         'abc001,abc002,abc003',
-        'abc-test-01',
         'Abc_test',
         '',
+        c127Str,
+        `${c127Str},${c127Str}`,
       ];
 
       for (const v of validValues) {
@@ -157,6 +174,8 @@ describe('DataPipelineStack parameter test', () => {
       }
 
       const invalidValues = [
+        c128Str,
+        'abc-test-01',
         'abc.test',
         'abc,',
         ',abc',
@@ -196,6 +215,7 @@ describe('DataPipelineStack parameter test', () => {
         'abc',
         'abc-test',
         'abc.test',
+        c63Str,
       ];
 
       for (const v of validValues) {
@@ -207,7 +227,7 @@ describe('DataPipelineStack parameter test', () => {
         'ab_test',
         '',
         'ABC',
-        'tooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooong',
+        c64Str,
       ];
       for (const v of invalidValues) {
         expect(v).not.toMatch(regex);
@@ -398,9 +418,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: {
-          'Fn::Join': ['_', [{ Ref: Match.anyValue() }, 'source']],
-        },
+        Name: TABLE_NAME_INGESTION,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -410,9 +428,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: {
-          'Fn::Join': ['_', [{ Ref: Match.anyValue() }, 'sink']],
-        },
+        Name: TABLE_NAME_ODS_EVENT,
         TableType: 'EXTERNAL_TABLE',
       },
     });

@@ -147,6 +147,8 @@ test('lambda should record SUCCESS job state', async () => {
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 2);
   //@ts-ignore
   expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 1);
+
+  fs.unlinkSync('/tmp/test-log.gz');
 });
 
 

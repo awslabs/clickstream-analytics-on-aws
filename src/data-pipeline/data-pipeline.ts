@@ -28,6 +28,7 @@ import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagToSecurityGroup } from '../common/cfn-nag';
+import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
 
 const EMR_VERSION = 'emr-6.9.0';
@@ -142,20 +143,16 @@ export class DataPipelineConstruct extends Construct {
   }
 
   private createGlueResources(projectId: string) {
-    const stackShortId = getShortIdOfStack(Stack.of(this));
-    //If you plan to access the table from Amazon Athena,
-    //then the name should be under 256 characters and contain only lowercase letters (a-z), numbers (0-9), and underscore (_).
-    const glueDatabase = this.glueUtil.createDatabase(
-      Fn.join('_', ['clickstream', projectId, stackShortId]),
-    );
+    const databaseName = projectId;
+    const glueDatabase = this.glueUtil.createDatabase(databaseName);
     const sourceTable = this.glueUtil.createSourceTable(
       glueDatabase,
-      Fn.join('_', [projectId, 'source']),
+      TABLE_NAME_INGESTION,
     );
     const sinkTable = this.glueUtil.createSinkTable(
       glueDatabase,
       projectId,
-      Fn.join('_', [projectId, 'sink']),
+      TABLE_NAME_ODS_EVENT,
     );
 
     const partitionSyncerLambda = this.lambdaUtil.createPartitionSyncerLambda(
