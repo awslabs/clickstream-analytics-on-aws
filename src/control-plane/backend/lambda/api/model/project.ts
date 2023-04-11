@@ -17,7 +17,6 @@ export interface Project {
   readonly prefix: string;
 
   readonly name: string;
-  readonly tableName: string;
   readonly description: string;
   readonly emails: string;
   readonly platform: string;

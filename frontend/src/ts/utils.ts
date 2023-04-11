@@ -46,6 +46,14 @@ export const validateEmails = (emails: string) => {
   return true;
 };
 
+export const validateProjectId = (projectId: string) => {
+  const regex = /^[a-z_][a-z0-9_]{0,126}$/;
+  if (!regex.test(projectId)) {
+    return false;
+  }
+  return true;
+};
+
 export const generateFileDownloadLink = (fileContent: string): string => {
   // Create Blob url
   const blob = new Blob([fileContent], { type: 'text/plain' });

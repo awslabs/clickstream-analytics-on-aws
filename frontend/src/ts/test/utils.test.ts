@@ -18,6 +18,7 @@ import {
   generateRedshiftInterval,
   generateStr,
   validateEmails,
+  validateProjectId,
 } from '../utils';
 
 describe('generateStr', () => {
@@ -171,5 +172,31 @@ describe('extractAccountIdFromArn', () => {
   it('should return null for null input', () => {
     const accountId = extractAccountIdFromArn('');
     expect(accountId).toEqual('');
+  });
+});
+
+describe('validateProjectId', () => {
+  test('should return true for valid project ids', () => {
+    expect(validateProjectId('ids')).toBe(true);
+    expect(validateProjectId('ids_123')).toBe(true);
+    expect(validateProjectId('ids_name')).toBe(true);
+    expect(validateProjectId('some_id_with_underscores')).toBe(true);
+    expect(validateProjectId('id_with_numbers_123')).toBe(true);
+    expect(
+      validateProjectId(
+        'maxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlengthidmaxlen'
+      )
+    ).toBe(true);
+  });
+
+  test('should return false for invalid project ids', () => {
+    expect(validateProjectId('')).toBe(false);
+    expect(validateProjectId('1id')).toBe(false);
+    expect(validateProjectId('id-name')).toBe(false);
+    expect(
+      validateProjectId(
+        'longidnamelongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameisl'
+      )
+    ).toBe(false);
   });
 });

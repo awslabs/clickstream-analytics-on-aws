@@ -20,12 +20,11 @@ declare global {
   }
 
   interface IProject {
-    id?: string;
+    id: string;
     name: string;
     platform: string;
     environment: string;
     emails: string;
-    tableName: string;
     region: string;
     description: string;
     updateAt?: number;

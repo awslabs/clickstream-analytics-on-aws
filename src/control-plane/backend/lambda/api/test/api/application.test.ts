@@ -337,15 +337,15 @@ describe('Application test', () => {
       message: '',
       data: {
         description: 'Description of App-01',
-        appId: '7777-7777',
-        projectId: '8888-8888',
+        appId: MOCK_APP_ID,
+        projectId: MOCK_PROJECT_ID,
         name: 'App-01',
         androidPackage: 'androidPackage',
         iosAppStoreId: 'iosAppStoreId',
         iosBundleId: 'iosBundleId',
         pipeline: {
           endpoint: 'http://xxx/xxx',
-          id: '8888-8888',
+          id: MOCK_PROJECT_ID,
           name: 'Pipeline-01',
           status: 'RUNNING',
         },

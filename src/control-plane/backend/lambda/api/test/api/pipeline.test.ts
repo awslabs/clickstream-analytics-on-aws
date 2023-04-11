@@ -665,8 +665,6 @@ describe('Pipeline test', () => {
     });
   });
   it('Get pipeline list', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Pipeline-01' },

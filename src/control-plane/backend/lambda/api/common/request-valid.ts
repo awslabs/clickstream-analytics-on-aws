@@ -14,6 +14,7 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { awsRegion } from './constants';
+import { PROJECT_ID_PATTERN } from './constants-ln';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -111,9 +112,14 @@ export const defaultSubnetTypeValid: CustomValidator = (value, { req }) => {
   return true;
 };
 
-export const isProjectEmptyAndExisted: CustomValidator = value => {
+export const isProjectExisted: CustomValidator = value => {
   if (isEmpty(value)) {
     return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(PROJECT_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validate error, projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
   }
   return store.isProjectExisted(value).then(existed => {
     if (!existed) {
@@ -123,16 +129,21 @@ export const isProjectEmptyAndExisted: CustomValidator = value => {
   });
 };
 
-export const isProjectExisted: CustomValidator = value => {
-  if (!isEmpty(value)) {
-    return store.isProjectExisted(value).then(existed => {
-      if (!existed) {
-        return Promise.reject('Project resource does not exist.');
-      }
-      return true;
-    });
+export const isProjectNotExisted: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
   }
-  return true;
+  const regexp = new RegExp(PROJECT_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validate error, projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+  }
+  return store.isProjectExisted(value).then(existed => {
+    if (existed) {
+      return Promise.reject('Project resource existed.');
+    }
+    return true;
+  });
 };
 
 export const isApplicationExisted: CustomValidator = (value, { req, location, path }) => {

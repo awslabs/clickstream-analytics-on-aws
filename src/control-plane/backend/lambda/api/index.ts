@@ -17,12 +17,19 @@ import jwksClient from 'jwks-rsa';
 import { logger } from './common/powertools';
 import {
   defaultPageValueValid,
-  isApplicationExisted, isPipelineExisted, isRequestIdExisted,
-  isProjectEmptyAndExisted,
+  isApplicationExisted,
+  isPipelineExisted,
+  isRequestIdExisted,
   isValidEmpty,
   validate,
   validMatchParamId,
-  defaultRegionValueValid, defaultSubnetTypeValid, isProjectExisted, defaultOrderValueValid, isPluginIdValid, defaultAssumeRoleTypeValid,
+  defaultRegionValueValid,
+  defaultSubnetTypeValid,
+  defaultOrderValueValid,
+  isPluginIdValid,
+  defaultAssumeRoleTypeValid,
+  isProjectExisted,
+  isProjectNotExisted,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { JWTAuthorizer } from './middle-ware/authorizer';
@@ -240,7 +247,7 @@ app.get('/api/dictionary/:name', async (req: express.Request, res: express.Respo
   return dictionaryServ.details(req, res, next);
 });
 
-app.get('/api/project/verification/:tablename', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.get('/api/project/verification/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return projectServ.verification(req, res, next);
 });
 
@@ -258,6 +265,7 @@ app.post(
   '/api/project',
   validate([
     body().custom(isValidEmpty),
+    body('id').custom(isProjectNotExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -273,7 +281,7 @@ app.put(
   validate([
     body().custom(isValidEmpty),
     body('id')
-      .custom(isProjectEmptyAndExisted)
+      .custom(isProjectExisted)
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -283,7 +291,7 @@ app.put(
 app.delete(
   '/api/project/:id',
   validate([
-    param('id').custom(isProjectEmptyAndExisted),
+    param('id').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.delete(req, res, next);
@@ -292,7 +300,7 @@ app.delete(
 app.get(
   '/api/app',
   validate([
-    query('pid').custom(isProjectEmptyAndExisted),
+    query('pid').custom(isProjectExisted),
     query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
       .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
   ]),
@@ -305,7 +313,7 @@ app.post(
   validate([
     body().custom(isValidEmpty),
     body('projectId')
-      .custom(isProjectEmptyAndExisted),
+      .custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -315,7 +323,7 @@ app.post(
 app.get(
   '/api/app/:id',
   validate([
-    query('pid').custom(isProjectEmptyAndExisted),
+    query('pid').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.details(req, res, next);
@@ -328,7 +336,7 @@ app.put(
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' }))
       .custom((value, { req }) => isApplicationExisted(value, { req, location: 'body', path: 'projectId' })),
     body('projectId')
-      .custom(isProjectEmptyAndExisted),
+      .custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.update(req, res, next);
@@ -339,7 +347,7 @@ app.delete(
   validate([
     param('id').custom((value, { req }) => isApplicationExisted(value, { req, location: 'query', path: 'pid' })),
     query('pid')
-      .custom(isProjectEmptyAndExisted),
+      .custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.delete(req, res, next);
@@ -349,7 +357,7 @@ app.post(
   '/api/pipeline',
   validate([
     body().custom(isValidEmpty),
-    body('projectId').custom(isProjectEmptyAndExisted),
+    body('projectId').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -359,7 +367,6 @@ app.post(
 app.get(
   '/api/pipeline',
   validate([
-    query('pid').custom(isProjectExisted),
     query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
       .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
   ]),
@@ -370,7 +377,7 @@ app.get(
 app.get(
   '/api/pipeline/:id',
   validate([
-    query('pid').custom(isProjectEmptyAndExisted),
+    query('pid').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.details(req, res, next);
@@ -382,7 +389,7 @@ app.put(
     body('pipelineId').custom(isValidEmpty)
       .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
     body('projectId')
-      .custom(isProjectEmptyAndExisted),
+      .custom(isProjectExisted),
     body('version').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -394,7 +401,7 @@ app.delete(
   validate([
     param('id').custom((value, { req }) => isPipelineExisted(value, { req, location: 'query', path: 'pid' })),
     query('pid')
-      .custom(isProjectEmptyAndExisted),
+      .custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.delete(req, res, next);

@@ -45,4 +45,8 @@ declare global {
     project_region: string;
     solution_version: string;
   }
+
+  interface ResponseVerify {
+    exist: boolean;
+  }
 }

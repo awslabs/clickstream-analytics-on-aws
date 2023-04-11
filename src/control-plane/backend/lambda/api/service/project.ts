@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { Project } from '../model/project';
@@ -33,7 +32,6 @@ export class ProjectServ {
 
   public async create(req: any, res: any, next: any) {
     try {
-      req.body.id = uuidv4().replace(/-/g, '');
       let project: Project = req.body;
       const id = await store.createProject(project);
       return res.status(201).json(new ApiSuccess({ id }, 'Project created.'));
@@ -79,15 +77,8 @@ export class ProjectServ {
 
   public async verification(req: any, res: any, next: any) {
     try {
-      const { tablename } = req.params;
-      const result = await store.listProjects('asc', false, 1, 1);
-      let exist: boolean = false;
-      for (let index in result.items) {
-        if (result.items[index].tableName && result.items[index].tableName === tablename) {
-          exist = true;
-          break;
-        }
-      }
+      const { id } = req.params;
+      const exist = await store.isProjectExisted(id);
       return res.json(new ApiSuccess({ exist }));
     } catch (error) {
       next(error);

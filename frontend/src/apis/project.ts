@@ -41,10 +41,19 @@ const deleteProject = async (params: { id: string }) => {
   return result;
 };
 
+const verificationProjectId = async (params: { id: string }) => {
+  const result: any = await apiRequest(
+    'get',
+    `/project/verification/${params.id}`
+  );
+  return result;
+};
+
 export {
   getProjectList,
   createProject,
   updateProject,
   getProjectDetail,
   deleteProject,
+  verificationProjectId,
 };

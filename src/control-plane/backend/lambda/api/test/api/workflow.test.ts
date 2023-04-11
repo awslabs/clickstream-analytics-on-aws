@@ -19,7 +19,7 @@ import {
 } from '@aws-sdk/client-redshift-serverless';
 import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { dictionaryMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { Pipeline } from '../../model/pipeline';
@@ -447,7 +447,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -455,7 +455,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -463,7 +463,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -984,7 +984,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -992,7 +992,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -1000,7 +1000,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -1212,7 +1212,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisDataS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'KinesisStreamMode',
@@ -1257,10 +1257,10 @@ describe('Workflow test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
-        appId: '1',
+        appId: `${MOCK_APP_ID}_1`,
       }, {
         id: 2,
-        appId: '2',
+        appId: `${MOCK_APP_ID}_2`,
       }],
     });
 
@@ -1269,7 +1269,7 @@ describe('Workflow test', () => {
       prefix: 'PIPELINE',
       type: `PIPELINE#${MOCK_PIPELINE_ID}`,
       projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
+      appIds: [`${MOCK_APP_ID}_1`, `${MOCK_APP_ID}_2`],
       pipelineId: MOCK_PIPELINE_ID,
       name: 'Pipeline-01',
       description: 'Description of Pipeline-01',
@@ -1485,11 +1485,11 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ProjectId',
-                        ParameterValue: '8888-8888',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'AppIds',
-                        ParameterValue: '1,2',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
                       },
                       {
                         ParameterKey: 'SourceS3Bucket',
@@ -1497,7 +1497,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -1505,7 +1505,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -1513,7 +1513,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -1554,10 +1554,10 @@ describe('Workflow test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
-        appId: '1',
+        appId: `${MOCK_APP_ID}_1`,
       }, {
         id: 2,
-        appId: '2',
+        appId: `${MOCK_APP_ID}_2`,
       }],
     });
     kafkaMock.on(ListNodesCommand).resolves({
@@ -1594,7 +1594,7 @@ describe('Workflow test', () => {
       prefix: 'PIPELINE',
       type: `PIPELINE#${MOCK_PIPELINE_ID}`,
       projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
+      appIds: [`${MOCK_APP_ID}_1`, `${MOCK_APP_ID}_2`],
       pipelineId: MOCK_PIPELINE_ID,
       name: 'Pipeline-01',
       description: 'Description of Pipeline-01',
@@ -1836,7 +1836,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -1844,7 +1844,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -1852,7 +1852,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -1906,11 +1906,11 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ProjectId',
-                        ParameterValue: '8888-8888',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'AppIds',
-                        ParameterValue: '1,2',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
                       },
                       {
                         ParameterKey: 'SourceS3Bucket',
@@ -1918,7 +1918,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -1926,7 +1926,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -1934,7 +1934,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -1984,11 +1984,11 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ProjectId',
-                        ParameterValue: '8888-8888',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'AppIds',
-                        ParameterValue: '1,2',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
                       },
                       {
                         ParameterKey: 'ODSEventBucket',
@@ -1996,7 +1996,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -2008,7 +2008,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/8888-8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',

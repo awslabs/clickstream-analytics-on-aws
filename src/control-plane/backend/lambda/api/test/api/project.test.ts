@@ -37,8 +37,8 @@ describe('Project test', () => {
       .post('/api/project')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
+        id: MOCK_PROJECT_ID,
         name: 'Project-01',
-        tableName: 'Project-01',
         description: 'Description of Project-01',
         emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
@@ -50,6 +50,26 @@ describe('Project test', () => {
     expect(res.body.message).toEqual('Project created.');
     expect(res.body.success).toEqual(true);
   });
+  it('Create project with id exist', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(PutCommand).resolvesOnce({});
+    const res = await request(app)
+      .post('/api/project')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_PROJECT_ID,
+        name: 'Project-01',
+        description: 'Description of Project-01',
+        emails: 'u1@example.com,u2@example.com,u3@example.com',
+        platform: 'Web',
+        region: 'us-east-1',
+        environment: 'Dev',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: [{ location: 'body', msg: 'Project resource existed.', param: 'id', value: MOCK_PROJECT_ID }], message: 'Parameter verification failed.', success: false });
+  });
   it('Create project with mock error', async () => {
     projectExistedMock(ddbMock, false);
     // Mock DynamoDB error
@@ -59,8 +79,8 @@ describe('Project test', () => {
       .post('/api/project')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
+        id: MOCK_PROJECT_ID,
         name: 'Project-01',
-        tableName: 'Project-01',
         description: 'Description of Project-01',
         emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
@@ -93,6 +113,11 @@ describe('Project test', () => {
           value: {},
         },
         {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'id',
+        },
+        {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
@@ -102,12 +127,13 @@ describe('Project test', () => {
   });
   it('Create project Not Modified', async () => {
     tokenMock(ddbMock, true);
+    projectExistedMock(ddbMock, false);
     const res = await request(app)
       .post('/api/project')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
+        id: MOCK_PROJECT_ID,
         name: 'Project-01',
-        tableName: 'Project-01',
         description: 'Description of Project-01',
         emails: 'u1@example.com,u2@example.com,u3@example.com',
         platform: 'Web',
@@ -443,18 +469,10 @@ describe('Project test', () => {
       ],
     });
   });
-  it('Verification project table name existed', async () => {
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        { name: 'Project-01', tableName: 't1' },
-        { name: 'Project-02', tableName: 't2' },
-        { name: 'Project-03', tableName: 't3' },
-        { name: 'Project-04', tableName: 't4' },
-        { name: 'Project-05', tableName: 't5' },
-      ],
-    });
+  it('Verification project id existed', async () => {
+    projectExistedMock(ddbMock, true);
     const res = await request(app)
-      .get('/api/project/verification/t1');
+      .get(`/api/project/verification/${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -464,7 +482,7 @@ describe('Project test', () => {
     });
   });
   it('Verification project with mock error', async () => {
-    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(GetCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get('/api/project/verification/t1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

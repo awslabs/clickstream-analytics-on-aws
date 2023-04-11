@@ -3,7 +3,10 @@
   "valid": {
     "nameEmpty": "Please input project name.",
     "emailEmpty": "please input notification email.",
-    "emailInvalid": "Notification email invalid."
+    "emailInvalid": "Notification email invalid.",
+    "projectIdInvalid": "Project ID must start with a lowercase letter and can only support lowercase letter, number and _, maximum of 127 characters",
+    "saveFirst": "Please click save button to save project ID first.",
+    "projectIdExisting": "Project ID already exsiting."
   },
   "split": {
     "id": "Project ID",
@@ -11,8 +14,7 @@
     "platform": "App Platform",
     "created": "Creation Time",
     "notifyEmail": "Notification Email",
-    "envType": "Enviroment Type",
-    "tableName": "Table Name"
+    "envType": "Enviroment Type"
   },
   "create": {
     "createProject": "Create project (Step 1 of 3)",

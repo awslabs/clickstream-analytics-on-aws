@@ -13,10 +13,10 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { validateSubnetsRule } from '../rules';
 import { genString } from '../utils';
-import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
 
 const c63Str = genString(63);
 const c64Str = genString(64);

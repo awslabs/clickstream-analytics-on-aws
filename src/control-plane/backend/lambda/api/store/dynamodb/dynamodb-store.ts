@@ -47,7 +47,6 @@ export class DynamoDbStore implements ClickStreamStore {
         type: `METADATA#${project.id}`,
         prefix: 'METADATA',
         name: project.name,
-        tableName: project.tableName,
         description: project.description,
         emails: project.emails,
         platform: project.platform,
@@ -106,10 +105,6 @@ export class DynamoDbStore implements ClickStreamStore {
       updateExpression = `${updateExpression}, #name= :n`;
       expressionAttributeValues.set(':n', project.name);
       expressionAttributeNames['#name'] = 'name';
-    }
-    if (project.tableName) {
-      updateExpression = `${updateExpression}, tableName= :tn`;
-      expressionAttributeValues.set(':tn', project.tableName);
     }
     if (project.description) {
       updateExpression = `${updateExpression}, description= :d`;

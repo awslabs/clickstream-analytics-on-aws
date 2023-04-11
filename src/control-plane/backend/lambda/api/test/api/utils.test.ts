@@ -11,7 +11,16 @@
  *  and limitations under the License.
  */
 
-import { DOMAIN_NAME_PATTERN, KAFKA_BROKERS_PATTERN, KAFKA_TOPIC_PATTERN, SUBNETS_PATTERN, VPC_ID_PARRERN } from '../../common/constants-ln';
+import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import {
+  MUTIL_APP_ID_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  PROJECT_ID_PATTERN,
+  SUBNETS_PATTERN,
+  VPC_ID_PARRERN,
+} from '../../common/constants-ln';
 import { validatePattern } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError } from '../../common/types';
 import { isEmpty } from '../../common/utils';
@@ -34,6 +43,51 @@ describe('Utils test', () => {
     expect(isEmpty([1])).toEqual(false);
     expect(isEmpty({})).toEqual(true);
     expect(isEmpty({ data: 1 })).toEqual(false);
+  });
+
+  it('Project Id valid', async () => {
+    const validValues = [
+      'proded4511',
+      'pro_ded4511',
+      MOCK_PROJECT_ID,
+    ];
+    validValues.map(v => expect(validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
+      'abc.test',
+      'pro_DGD_d4511_',
+      'abc-test-01',
+      'ABC',
+      '',
+      'ab$',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('App Id valid', async () => {
+    const validValues = [
+      'app_01',
+      'a0d2619f249ded4511',
+      'pro_DGD_d4511_',
+      'app_01,app_02,app_03',
+      MOCK_APP_ID,
+      `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+    ];
+    validValues.map(v => expect(validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
+      'abc.test',
+      '0d2619f249ded4511',
+      'app-01',
+      '0d26-19f2-49ded4-511-01',
+      'app_01,app_02,app-03',
+      '',
+      ',',
+      ',abc',
+      'abc,',
+      'ab$',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('VPC Params valid', async () => {

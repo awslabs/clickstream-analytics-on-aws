@@ -15,8 +15,8 @@ import { GetCommand, GetCommandInput, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 
 const MOCK_TOKEN = '0000-0000';
-const MOCK_PROJECT_ID = '8888-8888';
-const MOCK_APP_ID = '7777-7777';
+const MOCK_PROJECT_ID = 'project_8888_8888';
+const MOCK_APP_ID = 'app_7777_7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
 const MOCK_EXECUTION_ID = '3333-3333';

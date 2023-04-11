@@ -23,13 +23,18 @@ import {
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { createProject } from 'apis/project';
+import { createProject, verificationProjectId } from 'apis/project';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PROJECT_STAGE_LIST } from 'ts/const';
 import { INIT_PROJECT_DATA } from 'ts/init';
-import { generateStr, validateEmails } from 'ts/utils';
+import {
+  alertMsg,
+  generateStr,
+  validateEmails,
+  validateProjectId,
+} from 'ts/utils';
 
 interface CreateProjectProps {
   openModel: boolean;
@@ -48,11 +53,13 @@ const CreateProject: React.FC<CreateProjectProps> = (
     null
   );
   const [editing, setEditing] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [curProject, setCurProject] = useState<IProject>(INIT_PROJECT_DATA);
 
   const [projectNameRequiredError, setProjectNameRequiredError] =
     useState(false);
   const [emailsInvalidError, setEmailsInvalidError] = useState(false);
+  const [projectIdInvalidError, setProjectIdInvalidError] = useState(false);
 
   const STEP_TITLE = [
     t('project:create.createProject'),
@@ -81,6 +88,23 @@ const CreateProject: React.FC<CreateProjectProps> = (
       setLoadingCreate(false);
     } catch (error) {
       setLoadingCreate(false);
+    }
+  };
+
+  const validateProjectIdExists = async () => {
+    setValidating(true);
+    try {
+      const { success, data }: ApiResponse<ResponseVerify> =
+        await verificationProjectId({ id: curProject.id });
+      if (success && data.exist) {
+        alertMsg(t('project:valid.projectIdExisting'), 'error');
+        setValidating(false);
+      } else {
+        setValidating(false);
+        setEditing(false);
+      }
+    } catch (error) {
+      setValidating(false);
     }
   };
 
@@ -120,6 +144,14 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   onClick={() => {
                     if (curStep === 0 && !curProject.name.trim()) {
                       setProjectNameRequiredError(true);
+                      return false;
+                    }
+                    if (curStep === 0 && !validateProjectId(curProject.id)) {
+                      setProjectIdInvalidError(true);
+                      return false;
+                    }
+                    if (curStep === 0 && editing) {
+                      alertMsg(t('project:valid.saveFirst'), 'error');
                       return false;
                     }
                     if (
@@ -167,51 +199,69 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   value={curProject.name}
                   onChange={(e) => {
                     setProjectNameRequiredError(false);
+                    setProjectIdInvalidError(false);
                     setCurProject((prev) => {
                       return {
                         ...prev,
                         name: e.detail.value,
-                        tableName: `${e.detail.value.replace(
-                          /\s+/g,
-                          '-'
-                        )}-${generateStr(8)}`,
+                        id: `${e.detail.value
+                          ?.toLocaleLowerCase()
+                          ?.replace(/\s+/g, '_')}_${generateStr(8)}`,
                       };
                     });
                   }}
                 />
               </SpaceBetween>
             </FormField>
-            {!editing && (
-              <div
-                onClick={() => {
-                  setEditing(true);
-                }}
-                className="project-id mt-10"
-              >
-                {curProject.tableName} <Icon name="edit" />
-              </div>
-            )}
+            <FormField
+              errorText={
+                projectIdInvalidError ? t('project:valid.projectIdInvalid') : ''
+              }
+            >
+              {!editing && (
+                <div
+                  onClick={() => {
+                    setEditing(true);
+                  }}
+                  className="project-id mt-10"
+                >
+                  {curProject.id} <Icon name="edit" />
+                </div>
+              )}
+            </FormField>
 
             {editing && (
               <>
                 <div className="mt-10">
-                  <SpaceBetween direction="horizontal" size="s">
-                    <Input
-                      value={curProject.tableName}
-                      onChange={(e) => {
-                        setCurProject((prev) => {
-                          return { ...prev, tableName: e.detail.value };
-                        });
-                      }}
-                    />
-                    <Button
-                      onClick={() => {
-                        setEditing(false);
-                      }}
-                    >
-                      {t('button.save')}
-                    </Button>
-                  </SpaceBetween>
+                  <FormField
+                    errorText={
+                      projectIdInvalidError
+                        ? t('project:valid.projectIdInvalid')
+                        : ''
+                    }
+                  >
+                    <div className="flex">
+                      <Input
+                        value={curProject.id}
+                        onChange={(e) => {
+                          setProjectIdInvalidError(false);
+                          setCurProject((prev) => {
+                            return { ...prev, id: e.detail.value };
+                          });
+                        }}
+                      />
+                      <div className="ml-10">
+                        <Button
+                          loading={validating}
+                          onClick={() => {
+                            validateProjectIdExists();
+                          }}
+                        >
+                          {t('button.save')}
+                        </Button>
+                      </div>
+                    </div>
+                  </FormField>
                 </div>
                 <div className="mt-10">
                   <Alert>{t('project:create.projectNameAlert')}</Alert>

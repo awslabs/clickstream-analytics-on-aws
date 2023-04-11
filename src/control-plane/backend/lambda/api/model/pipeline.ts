@@ -13,7 +13,15 @@
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { Plugin } from './plugin';
-import { DOMAIN_NAME_PATTERN, KAFKA_BROKERS_PATTERN, KAFKA_TOPIC_PATTERN, SUBNETS_PATTERN, VPC_ID_PARRERN } from '../common/constants-ln';
+import {
+  MUTIL_APP_ID_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  PROJECT_ID_PATTERN,
+  SUBNETS_PATTERN,
+  VPC_ID_PARRERN,
+} from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineStatus, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
@@ -299,6 +307,7 @@ export function getBucketPrefix(pipeline: Pipeline, key: string, value: string |
 export async function getIngestionStackParameters(pipeline: Pipeline) {
 
   const parameters: Parameter[] = [];
+  validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
   // VPC Information
   validatePattern('VpcId', VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
@@ -587,9 +596,13 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
 
 export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 
+  validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
   const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
+
+  validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+
   const buildInPluginsDic = await store.getDictionary('BuildInPlugins');
   if (!buildInPluginsDic) {
     throw new Error('Dictionary: BuildInPlugins is no found.');
@@ -676,9 +689,13 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
 }
 
 export async function getDataAnalyticsStackParameters(pipeline: Pipeline) {
+
+  validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
   const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
+  validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+
   if (!pipeline.dataAnalytics?.redshift?.serverless?.workgroupName) {
     throw new ClickStreamBadRequestError('Validate error, workgroupName cannot be undefined. Please check and try again.');
   }

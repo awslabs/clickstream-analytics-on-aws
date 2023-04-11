@@ -251,8 +251,6 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
               </div>
             )}
           </div>
-          <Box variant="awsui-key-label">{t('project:split.tableName')}</Box>
-          <div className="mb-10">{project.tableName}</div>
           <Box variant="awsui-key-label">{t('project:split.platform')}</Box>
           <div className="mb-10">{project.platform || '-'} </div>
         </div>
