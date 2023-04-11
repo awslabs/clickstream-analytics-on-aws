@@ -601,7 +601,9 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
 
-  validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+  if (!isEmpty(appIds)) {
+    validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+  }
 
   const buildInPluginsDic = await store.getDictionary('BuildInPlugins');
   if (!buildInPluginsDic) {
@@ -694,7 +696,10 @@ export async function getDataAnalyticsStackParameters(pipeline: Pipeline) {
   const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
-  validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+
+  if (!isEmpty(appIds)) {
+    validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+  }
 
   if (!pipeline.dataAnalytics?.redshift?.serverless?.workgroupName) {
     throw new ClickStreamBadRequestError('Validate error, workgroupName cannot be undefined. Please check and try again.');
