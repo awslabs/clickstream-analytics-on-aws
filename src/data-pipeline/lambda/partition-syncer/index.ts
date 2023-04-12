@@ -15,6 +15,7 @@
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { GlueClientUtil } from './glue-client-util';
 import { logger } from '../../../common/powertools';
+import { InitPartitionCustomResourceProps } from '../../utils/custom-resource';
 
 interface PartitionDateEvent {
   year: number;
@@ -31,7 +32,9 @@ interface EmptyEventDetail {
 
 
 type ScheduledEvent = EventBridgeEvent<'Scheduled Event', EmptyEventDetail>;
-export const handler = async (event: ScheduledEvent | PartitionDateEvent | CloudFormationCustomResourceEvent, context: Context) => {
+type EventType = ScheduledEvent | PartitionDateEvent | CloudFormationCustomResourceEvent;
+
+export const handler = async (event: EventType, context: Context) => {
   logger.info(JSON.stringify(event));
 
   const date = isAnPartitionDate(event) ? new Date(event.year, event.month - 1, event.day) : new Date();
@@ -41,12 +44,12 @@ export const handler = async (event: ScheduledEvent | PartitionDateEvent | Cloud
     Status: 'SUCCESS',
   };
 
-  if (['Delete', 'Update'].includes((event as any).RequestType)) {
+  if ('Delete' == (event as any).RequestType) {
     return response;
   }
 
   try {
-    await _handler(date, context);
+    await _handler(event, date, context);
     logger.info('=== Glue catalog add partition completed ===');
     return response;
   } catch (e: any) {
@@ -55,23 +58,45 @@ export const handler = async (event: ScheduledEvent | PartitionDateEvent | Cloud
   }
 };
 
-async function _handler(date: Date, context: Context) {
+async function _handler(event: EventType, date: Date, context: Context) {
   logger.info(`functionName: ${context.functionName}`);
-
   const glueClientUtil = new GlueClientUtil();
 
-  const sourceS3Bucket = process.env.SOURCE_S3_BUCKET_NAME!;
-  const sourceS3Prefix = process.env.SOURCE_S3_PREFIX!;
-  const databaseName = process.env.DATABASE_NAME!;
-  const sourceTableName = process.env.SOURCE_TABLE_NAME!;
+  let sourceS3Bucket = process.env.SOURCE_S3_BUCKET_NAME!;
+  let sourceS3Prefix = process.env.SOURCE_S3_PREFIX!;
+  let databaseName = process.env.DATABASE_NAME!;
+  let sourceTableName = process.env.SOURCE_TABLE_NAME!;
+  let projectId = process.env.PROJECT_ID!;
+  let appIds = process.env.APP_IDS || '';
+  let sinkS3Bucket = process.env.SINK_S3_BUCKET_NAME!;
+  let sinkS3Prefix = process.env.SINK_S3_PREFIX!;
+  let sinkTableName = process.env.SINK_TABLE_NAME!;
+
+  if ((event as any).RequestType) {
+    // update/create by custom resource
+    const cfEvent = event as CloudFormationCustomResourceEvent;
+    interface ResourcePropertiesType extends InitPartitionCustomResourceProps {
+      ServiceToken: string;
+    }
+
+    const cfProps = cfEvent.ResourceProperties as ResourcePropertiesType;
+    logger.info('triggered by custom resource', { cfProps });
+
+    sourceS3Bucket = cfProps.sourceS3BucketName;
+    sourceS3Prefix = cfProps.sourceS3Prefix;
+    databaseName = cfProps.databaseName;
+    sourceTableName = cfProps.sourceTableName;
+    projectId = cfProps.projectId;
+    appIds = cfProps.appIds;
+    sinkS3Bucket = cfProps.sinkS3BucketName;
+    sinkS3Prefix = cfProps.sinkS3Prefix;
+    sinkTableName = cfProps.sinkTableName;
+  }
+
+
   await glueClientUtil.addHourlyPartitionsForSourceTable(sourceS3Bucket, sourceS3Prefix, databaseName, sourceTableName, date);
   logger.info(`Added hourly partitions in table: ${sourceTableName} of date:${date.toISOString()}`);
 
-  const projectId = process.env.PROJECT_ID!;
-  const appIds = process.env.APP_IDS || '';
-  const sinkS3Bucket = process.env.SINK_S3_BUCKET_NAME!;
-  const sinkS3Prefix = process.env.SINK_S3_PREFIX!;
-  const sinkTableName = process.env.SINK_TABLE_NAME!;
   if (appIds.length > 0) {
     await glueClientUtil.addDailyPartitionsForSinkTable(sinkS3Bucket, sinkS3Prefix, databaseName, sinkTableName, projectId, appIds, date);
     logger.info(`Added daily partitions in table: ${sinkTableName} of date:${date.toISOString()}`);

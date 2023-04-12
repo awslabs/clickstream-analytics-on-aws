@@ -129,11 +129,27 @@ function createCopyAssetsLambda(
   return fn;
 }
 
+
+export interface InitPartitionCustomResourceProps {
+  sourceS3BucketName: string;
+  sourceS3Prefix: string;
+  sinkS3BucketName: string;
+  sinkS3Prefix: string;
+  pipelineS3BucketName: string;
+  pipelineS3Prefix: string;
+  projectId: string;
+  appIds: string;
+  databaseName: string;
+  sourceTableName: string;
+  sinkTableName: string;
+}
+
 // Custom resource to create partitions during cloudformation deployment,
 // so we do not wait the scheduled event to trigger create partitions once a day.
 export function createInitPartitionCustomResource(
   scope: Construct,
   partitionSyncerLambda: Function,
+  props: InitPartitionCustomResourceProps,
 ): CustomResource {
   const provider = new Provider(
     scope,
@@ -145,6 +161,9 @@ export function createInitPartitionCustomResource(
   );
   const cr = new CustomResource(scope, 'InitPartitionCustomResource', {
     serviceToken: provider.serviceToken,
+    properties: {
+      ... props,
+    },
   });
 
   return cr;

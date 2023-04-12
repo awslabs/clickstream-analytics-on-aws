@@ -45,8 +45,17 @@ const cloudFormationCreateEvent: CloudFormationCustomResourceEvent = {
   ResourceType: 'test',
   ResourceProperties: {
     ServiceToken: 'testtoken',
-    p1: 'test',
-    p2: 'test',
+    sourceS3BucketName: 'src-test-cf',
+    sourceS3Prefix: 'src-test-prefix-cf/',
+    sinkS3BucketName: 'sink-test-cf',
+    sinkS3Prefix: 'sink-test-prefix-cf/',
+    pipelineS3BucketName: 'etl-test-cf',
+    pipelineS3Prefix: 'etl-test-prefix-cf/',
+    projectId: 'test_proj_id_cf',
+    appIds: 'appCf1,appCf2',
+    databaseName: 'testDB_cf',
+    sourceTableName: 'ingestion_events',
+    sinkTableName: 'ods_events',
   },
 };
 
@@ -90,10 +99,11 @@ describe('Glue catalog add partition test', () => {
 
   beforeEach(() => {
     glueClientMock.reset();
+    s3ClientMock.reset();
   });
 
-  it('Should Add partition when EventBridge triggered - success', async () => {
-    process.env.APP_IDS = '';
+  it('Should Add partition both for sink and source when EventBridge triggered - success', async () => {
+    process.env.APP_IDS = 'app1';
     const response = await add_partition_handler(
       schedulerEvent as EventBridgeEvent<'Scheduled Event', any>,
       c,
@@ -107,9 +117,29 @@ describe('Glue catalog add partition test', () => {
 
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
+    expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
+  });
+
+
+  it('Should Add partition only for source table when appId is empty', async () => {
+    process.env.APP_IDS = '';
+    const response = await add_partition_handler(
+      schedulerEvent as EventBridgeEvent<'Scheduled Event', any>,
+      c,
+    );
+    s3ClientMock.on(PutObjectCommand).callsFake(input => {
+      expect(
+        (input.Key.startsWith('prefix1/year=') && input.Bucket == 'bucket1'),
+      ).toBeTruthy();
+    });
+
+    expect(response.Status).toEqual('SUCCESS');
+    // @ts-ignore
     expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 1);
     expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
+
 
   it('Should Add partition for both source and sink table when has appIds - success', async () => {
     process.env.APP_IDS = 'id1,id2';
@@ -136,7 +166,7 @@ describe('Glue catalog add partition test', () => {
   });
 
 
-  it('Should Add partition can be triggered by custom resource - create', async () => {
+  it('Add partition should be triggered by custom resource - create', async () => {
     process.env.APP_IDS = 'id1,id2';
     //@ts-ignore
     cloudFormationCreateEvent.RequestType = 'Create';
@@ -150,7 +180,7 @@ describe('Glue catalog add partition test', () => {
     expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
-  it('Should Add partition cannot be triggered by custom resource - delete', async () => {
+  it('Add partition should not be triggered by custom resource - delete', async () => {
     process.env.APP_IDS = 'id1,id2';
 
     // @ts-ignore
@@ -166,19 +196,42 @@ describe('Glue catalog add partition test', () => {
   });
 
 
-  it('Should Add partition cannot be triggered by custom resource - update', async () => {
+  it('Add partition should be triggered by custom resource - update', async () => {
     process.env.APP_IDS = 'id1,id2';
     // @ts-ignore
     cloudFormationCreateEvent.RequestType = 'Update';
+
+    const d = new Date().toISOString();
+    const yyyy = d.split('-')[0];
+    const MM = d.split('-')[1];
+    const dd = d.split('-')[2].split('T')[0];
 
     const response = await add_partition_handler(
       cloudFormationCreateEvent,
       c,
     );
+
+    s3ClientMock.on(PutObjectCommand).callsFake(input => {
+      expect(
+        input.Bucket == 'src-test-cf' || input.Bucket == 'sink-test-cf',
+      ).toBeTruthy();
+    });
+
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 0);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 2);
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 26);
+
+    expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
+      Body: '',
+      Bucket: 'src-test-cf',
+      Key: `src-test-prefix-cf/year=${yyyy}/month=${MM}/day=${dd}/hour=00/_.json`,
+    });
+
+    expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(26, PutObjectCommand, {
+      Body: '',
+      Bucket: 'sink-test-cf',
+      Key: `sink-test-prefix-cf/test_proj_id_cf/ods_events/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
+    });
   });
-
-
 });

@@ -20,6 +20,7 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
+  InitPartitionCustomResourceProps,
   createCopyAssetsCustomResource,
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
@@ -130,7 +131,7 @@ export class DataPipelineConstruct extends Construct {
 
     const emrServerlessApp = this.createEmrServerlessApplication();
     const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
-      this.props.projectId,
+      this.props,
     );
     this.createSparkJobSubmitter(
       glueDatabase,
@@ -142,8 +143,8 @@ export class DataPipelineConstruct extends Construct {
     this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId);
   }
 
-  private createGlueResources(projectId: string) {
-    const databaseName = projectId;
+  private createGlueResources(props: DataPipelineProps) {
+    const databaseName = props.projectId;
     const glueDatabase = this.glueUtil.createDatabase(databaseName);
     const sourceTable = this.glueUtil.createSourceTable(
       glueDatabase,
@@ -151,7 +152,7 @@ export class DataPipelineConstruct extends Construct {
     );
     const sinkTable = this.glueUtil.createSinkTable(
       glueDatabase,
-      projectId,
+      props.projectId,
       TABLE_NAME_ODS_EVENT,
     );
 
@@ -166,7 +167,21 @@ export class DataPipelineConstruct extends Construct {
       'cron(0 0 * * ? *)',
     );
 
-    createInitPartitionCustomResource(this, partitionSyncerLambda);
+    const initPartitionCustomResourceProps: InitPartitionCustomResourceProps = {
+      sourceS3BucketName: props.sourceS3Bucket.bucketName,
+      sourceS3Prefix: props.sourceS3Prefix,
+      sinkS3BucketName: props.sinkS3Bucket.bucketName,
+      sinkS3Prefix: props.sinkS3Prefix,
+      pipelineS3BucketName: props.pipelineS3Bucket.bucketName,
+      pipelineS3Prefix: props.pipelineS3Prefix,
+      projectId: props.projectId,
+      appIds: props.appIds,
+      databaseName: glueDatabase.databaseName,
+      sourceTableName: sourceTable.tableName,
+      sinkTableName: sinkTable.tableName,
+    };
+
+    createInitPartitionCustomResource(this, partitionSyncerLambda, initPartitionCustomResourceProps);
     return { glueDatabase, sourceTable, sinkTable };
   }
 
