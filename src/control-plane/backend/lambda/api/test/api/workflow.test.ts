@@ -1930,7 +1930,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -2431,7 +2431,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',

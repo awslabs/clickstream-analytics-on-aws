@@ -638,9 +638,15 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
     ParameterKey: 'SourceS3Bucket',
     ParameterValue: pipeline.etl?.sourceS3Bucket.name ?? pipeline.bucket.name,
   });
+
+  let sourceS3Prefix = getBucketPrefix(pipeline, 'data-buffer', pipeline.etl?.sourceS3Bucket.prefix);
+  if (pipeline.ingestionServer.sinkType === 'kafka') {
+    const kafkaTopic = pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId;
+    sourceS3Prefix = `${sourceS3Prefix}${kafkaTopic}/`;
+  }
   parameters.push({
     ParameterKey: 'SourceS3Prefix',
-    ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.etl?.sourceS3Bucket.prefix),
+    ParameterValue: sourceS3Prefix,
   });
 
   parameters.push({
