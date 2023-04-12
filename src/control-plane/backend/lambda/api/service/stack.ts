@@ -177,6 +177,7 @@ export class StackManager {
         Data: {
           Input: {
             Action: 'Create',
+            Region: pipeline.region,
             StackName: ingestionStackName,
             TemplateURL: ingestionTemplateURL,
             Parameters: ingestionStackParameters,
@@ -200,6 +201,7 @@ export class StackManager {
           Data: {
             Input: {
               Action: 'Create',
+              Region: pipeline.region,
               StackName: kafkaConnectorStackName,
               TemplateURL: kafkaConnectorTemplateURL,
               Parameters: kafkaConnectorStackParameters,
@@ -244,6 +246,7 @@ export class StackManager {
         Data: {
           Input: {
             Action: 'Create',
+            Region: pipeline.region,
             StackName: pipelineStackName,
             TemplateURL: dataPipelineTemplateURL,
             Parameters: pipelineStackParameters,
@@ -278,6 +281,7 @@ export class StackManager {
         Data: {
           Input: {
             Action: 'Create',
+            Region: pipeline.region,
             StackName: dataAnalyticsStackName,
             TemplateURL: dataAnalyticsTemplateURL,
             Parameters: dataAnalyticsStackParameters,
@@ -368,8 +372,7 @@ export class StackManager {
         }
       }
       if (miss) {
-        // If all stack complete, but some stack miss
-        status = PipelineStatusType.FAILED;
+        status = PipelineStatusType.CREATING;
       }
       return {
         status: status,

@@ -1091,6 +1091,171 @@ describe('Pipeline test', () => {
       },
     });
   });
+  it('Get pipeline list with creating status', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          name: 'Pipeline-01',
+          executionArn: 'executionArn',
+          region: 'us-east-1',
+          workflow: {
+            Version: '2022-03-15',
+            Workflow: {
+              Branches: [
+                {
+                  StartAt: 'Ingestion',
+                  States: {
+                    Ingestion: {
+                      Data: {
+                        Callback: {
+                          BucketName: 'EXAMPLE_BUCKET',
+                          BucketPrefix: '/ingestion',
+                        },
+                        Input: {
+                          Action: 'Create',
+                          Parameters: [],
+                          StackName: 'clickstream-ingestion1',
+                          TemplateURL: 'https://xxx.com',
+                        },
+                      },
+                      End: true,
+                      Type: 'Stack',
+                    },
+                  },
+                },
+                {
+                  StartAt: 'Ingestion',
+                  States: {
+                    Ingestion: {
+                      Data: {
+                        Callback: {
+                          BucketName: 'EXAMPLE_BUCKET',
+                          BucketPrefix: '/ingestion',
+                        },
+                        Input: {
+                          Action: 'Create',
+                          Parameters: [],
+                          StackName: 'clickstream-ingestion2',
+                          TemplateURL: 'https://xxx.com',
+                        },
+                      },
+                      End: true,
+                      Type: 'Stack',
+                    },
+                  },
+                },
+              ],
+              End: true,
+              Type: 'Parallel',
+            },
+          },
+        },
+      ],
+    });
+    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
+      Stacks: [{
+        StackName: 'test',
+        StackStatus: undefined,
+        StackStatusReason: '',
+        CreationTime: undefined,
+      }],
+    }).resolves({
+      Stacks: [{
+        StackName: 'test',
+        StackStatus: StackStatus.CREATE_COMPLETE,
+        StackStatusReason: '',
+        CreationTime: undefined,
+      }],
+    });
+    ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            name: 'Pipeline-01',
+            executionArn: 'executionArn',
+            region: 'us-east-1',
+            status: {
+              details: [
+                {
+                  stackName: 'clickstream-ingestion1',
+                  stackStatusReason: '',
+                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
+                },
+                {
+                  stackName: 'clickstream-ingestion2',
+                  stackStatus: 'CREATE_COMPLETE',
+                  stackStatusReason: '',
+                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
+                },
+              ],
+              status: 'Creating',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://xxx.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion2',
+                            TemplateURL: 'https://xxx.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
+          },
+        ],
+        totalCount: 1,
+      },
+    });
+  });
   it('Get pipeline list with updating status', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);

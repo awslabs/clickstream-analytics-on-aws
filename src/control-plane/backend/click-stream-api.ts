@@ -320,7 +320,7 @@ export class ClickStreamApiConstruct extends Construct {
         ],
       );
       addCfnNagSuppressRules(
-        stackActionStateMachine.callbackFunction.node.defaultChild as CfnResource,
+        stackActionStateMachine.actionFunction.node.defaultChild as CfnResource,
         [
           {
             id: 'W89', //Lambda functions should be deployed inside a VPC

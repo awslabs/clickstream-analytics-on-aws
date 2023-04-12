@@ -12,17 +12,22 @@
  */
 
 import { join } from 'path';
-import { Aws, aws_lambda, CfnResource, Duration, Stack } from 'aws-cdk-lib';
+import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Effect, Policy, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { Choice, Condition, JsonPath, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
-import { CallAwsService, LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { Choice, Condition, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
+import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
+import {
+  addCfnNagSuppressRules,
+  addCfnNagToStack,
+  ruleForLambdaVPCAndReservedConcurrentExecutions,
+  ruleRolePolicyWithWildcardResources,
+} from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -44,177 +49,161 @@ export interface StackActionStateMachineProps {
 export class StackActionStateMachine extends Construct {
 
   readonly stateMachine: StateMachine;
-  readonly callbackFunction: NodejsFunction;
+  readonly actionFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: StackActionStateMachineProps) {
     super(scope, id);
 
-    // Create a role for create stack
-    // TODO: this role grants least privilege.
-    const sfnCreateStackRole = new Role(this, 'SFNCreateStackRole', {
-      assumedBy: new ServicePrincipal('cloudformation.amazonaws.com'),
-      inlinePolicies: {
-        logs: new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: ['*'],
-              resources: ['*'],
-            }),
-          ],
-        }),
-      },
-    });
-    (sfnCreateStackRole.node.defaultChild as CfnResource).addMetadata('cfn_nag', {
-      rules_to_suppress: [
-        {
-          id: 'W11',
-          reason: 'TODO: Wait for permission confirmation this role grants least privilege.',
-        },
-        {
-          id: 'F3',
-          reason: 'TODO: Wait for permission confirmation this role grants least privilege.',
-        },
-        {
-          id: 'F38',
-          reason: 'TODO: Wait for permission confirmation this role grants least privilege.',
-        },
-      ],
-    });
-
-    const createStack = new CallAwsService(this, 'CreateStack', {
-      service: 'cloudformation',
-      action: 'createStack',
-      parameters: {
-        StackName: JsonPath.stringAt('$.Input.StackName'),
-        TemplateURL: JsonPath.stringAt('$.Input.TemplateURL'),
-        Parameters: JsonPath.stringAt('$.Input.Parameters'),
-        DisableRollback: true,
-        RoleARN: sfnCreateStackRole.roleArn,
-        Capabilities: ['CAPABILITY_IAM'],
-      },
-      resultPath: '$.Result.Stacks[0]',
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
-    });
-
-    const deleteStack = new CallAwsService(this, 'DeleteStack', {
-      service: 'cloudformation',
-      action: 'deleteStack',
-      parameters: {
-        StackName: JsonPath.stringAt('$.Input.StackName'),
-      },
-      resultPath: JsonPath.DISCARD,
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
-    });
-
-    const updateStack = new CallAwsService(this, 'UpdateStack', {
-      service: 'cloudformation',
-      action: 'updateStack',
-      parameters: {
-        StackName: JsonPath.stringAt('$.Input.StackName'),
-        TemplateURL: JsonPath.stringAt('$.Input.TemplateURL'),
-        DisableRollback: true,
-        Parameters: JsonPath.stringAt('$.Input.Parameters'),
-        Capabilities: ['CAPABILITY_IAM'],
-      },
-      resultPath: JsonPath.DISCARD,
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
-    });
-
-    const endState = new Pass(this, 'EndState');
-
-    const actionChoice = new Choice(this, 'Action')
-      .when(Condition.stringEquals('$.Input.Action', 'Create'), createStack)
-      .when(Condition.stringEquals('$.Input.Action', 'Delete'), deleteStack)
-      .when(Condition.stringEquals('$.Input.Action', 'Update'), updateStack)
-      .otherwise(endState);
-
-    const wait15 = new Wait(this, 'Wait 15 Seconds', {
-      time: WaitTime.duration(Duration.seconds(15)),
-    });
-    const wait15Too = new Wait(this, 'Wait 15 Seconds Too', {
-      time: WaitTime.duration(Duration.seconds(15)),
-    });
-
-    createStack.next(wait15);
-    deleteStack.next(wait15Too);
-    updateStack.next(wait15Too);
-
-    const describeStacksByResult = new CallAwsService(this, 'DescribeStacksByResult', {
-      service: 'cloudformation',
-      action: 'describeStacks',
-      parameters: {
-        StackName: JsonPath.stringAt('$.Result.Stacks[0].StackId'),
-      },
-      resultPath: '$.Result',
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
-    });
-
-    const describeStacksByName = new CallAwsService(this, 'DescribeStacksByName', {
-      service: 'cloudformation',
-      action: 'describeStacks',
-      parameters: {
-        StackName: JsonPath.stringAt('$.Input.StackName'),
-      },
-      resultPath: '$.Result',
-      iamResources: [`arn:${Aws.PARTITION}:cloudformation:${Aws.REGION}:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
-    });
-
-    wait15.next(describeStacksByResult);
-    wait15Too.next(describeStacksByName);
-
     // Create a role for lambda
-    const callbackFunctionRole = new Role(this, 'CallbackFunctionRole', {
+    const actionFunctionRole = new Role(this, 'ActionFunctionRole', {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
 
-    this.callbackFunction = new NodejsFunction(this, 'CallbackFunction', {
-      description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
-      entry: join(__dirname, './lambda/sfn-callback/index.ts'),
+    this.actionFunction = new NodejsFunction(this, 'ActionFunction', {
+      description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
+      entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
       runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
-      role: callbackFunctionRole,
+      role: actionFunctionRole,
       architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
+      timeout: Duration.seconds(10),
       environment: {
-        ... POWERTOOLS_ENVS,
+        ...POWERTOOLS_ENVS,
       },
       ...props.lambdaFuncProps,
     });
-    props.workflowBucket.grantWrite(this.callbackFunction, 'clickstream/*');
-    props.clickStreamTable.grantReadWriteData(this.callbackFunction);
-    cloudWatchSendLogs('callback-func-logs', this.callbackFunction);
-    createENI('callback-func-eni', this.callbackFunction);
+    cloudWatchSendLogs('action-func-logs', this.actionFunction);
+    createENI('action-func-eni', this.actionFunction);
     addCfnNagToStack(Stack.of(this), [
       ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'StackActionStateMachine/CallbackFunction/Resource',
-        'CallbackFunction',
+        'StackActionStateMachine/ActionFunction/Resource',
+        'ActionFunction',
       ),
     ]);
 
-    const saveStackRuntimeTask = new LambdaInvoke(this, 'Save Stack Runtime', {
-      lambdaFunction: this.callbackFunction,
+    // TODO: Restrict permissions
+    const actionFunctionRolePolicy = new iam.Policy(this, 'ActionFunctionRolePolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
+          actions: [
+            'cloudformation:CreateStack',
+            'cloudformation:UpdateStack',
+            'cloudformation:DeleteStack',
+            'cloudformation:DescribeStacks',
+          ],
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            'iam:PassRole',
+          ],
+          resources: ['*'],
+        }),
+        // This list of actions is to ensure the call stack can be create/update/delete successfully.
+        new iam.PolicyStatement({
+          actions: [
+            'sns:*',
+            'redshift-serverless:*',
+            's3:*',
+            'apigateway:*',
+            'logs:*',
+            'redshift:*',
+            'dynamodb:*',
+            'autoscaling:*',
+            'application-autoscaling:*',
+            'glue:*',
+            'iam:*',
+            'cloudwatch:*',
+            'emr-serverless:*',
+            'ssm:*',
+            'ecs:*',
+            'lambda:*',
+            'quicksight:*',
+            'ec2:*',
+            'events:*',
+            'elasticloadbalancing:*',
+            'kinesis:*',
+            'kafka:*',
+            'states:*',
+          ],
+          resources: ['*'],
+        }),
+      ],
+    });
+    actionFunctionRolePolicy.attachToRole(actionFunctionRole);
+    addCfnNagSuppressRules(
+      actionFunctionRolePolicy.node.defaultChild as iam.CfnPolicy,
+      [
+        {
+          id: 'F4',
+          reason:
+            'This policy requires releted actions in order to start/delete/update cloudformation stacks with many other services',
+        },
+        {
+          id: 'F39',
+          reason:
+            'When start/delete/update cloudformation stacks, we have to PassRole to existing undeterministical roles.',
+        },
+        {
+          id: 'W76',
+          reason:
+            'This policy needs to be able to execute stacks, and call other AWS service',
+        },
+        {
+          id: 'W12',
+          reason:
+            'This policy needs to be able to start/delete other cloudformation stacks of the plugin with unknown resources names',
+        },
+      ],
+    );
+
+    const executeTask = new LambdaInvoke(this, 'Execute Task', {
+      lambdaFunction: this.actionFunction,
       payload: TaskInput.fromJsonPathAt('$'),
       outputPath: '$.Payload',
     });
 
-    const progressChoiceCreate = new Choice(this, 'Create in progress?')
-      .when(Condition.stringMatches('$.Result.Stacks[0].StackStatus', '*_IN_PROGRESS'), wait15)
-      .otherwise(saveStackRuntimeTask);
+    const describeStack = new LambdaInvoke(this, 'Describe Stack', {
+      lambdaFunction: this.actionFunction,
+      payload: TaskInput.fromJsonPathAt('$'),
+      outputPath: '$.Payload',
+    });
 
-    const progressChoiceUpdate = new Choice(this, 'Update in progress?')
-      .when(Condition.stringMatches('$.Result.Stacks[0].StackStatus', '*_IN_PROGRESS'), wait15Too)
-      .otherwise(saveStackRuntimeTask);
+    const callbackTask = new LambdaInvoke(this, 'Callback Task', {
+      lambdaFunction: this.actionFunction,
+      payload: TaskInput.fromJsonPathAt('$'),
+      outputPath: '$.Payload',
+    });
 
-    describeStacksByResult.next(progressChoiceCreate);
-    describeStacksByName.next(progressChoiceUpdate);
-    saveStackRuntimeTask.next(endState);
+    const endState = new Pass(this, 'EndState');
+
+    const wait15 = new Wait(this, 'Wait 15 Seconds', {
+      time: WaitTime.duration(Duration.seconds(15)),
+    });
+
+    const endChoice = new Choice(this, 'End?')
+      .when(Condition.stringEquals('$.Action', 'End'), endState)
+      .otherwise(wait15);
+
+    executeTask.next(endChoice);
+    wait15.next(describeStack);
+
+    const progressChoice = new Choice(this, 'Stack in progress?')
+      .when(Condition.stringMatches('$.Result.StackStatus', '*_IN_PROGRESS'), wait15)
+      .otherwise(callbackTask);
+
+    describeStack.next(progressChoice);
+
+    callbackTask.next(endState);
 
     const stackActionLogGroup = createLogGroup(this, {
       prefix: '/aws/vendedlogs/states/Clickstream/StackActionLogGroup',
     });
     // Define a state machine
     this.stateMachine = new StateMachine(this, 'StackActionStateMachine', {
-      definition: actionChoice,
+      definition: executeTask,
       logs: {
         destination: stackActionLogGroup,
         level: LogLevel.ALL,
@@ -223,37 +212,24 @@ export class StackActionStateMachine extends Construct {
       timeout: Duration.minutes(30),
     });
 
-    const wildcardResources = ruleRolePolicyWithWildcardResources('StackActionStateMachine/Role/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
+    const wildcardResourcesStackActionStateMachine = ruleRolePolicyWithWildcardResources('ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
+    const wildcardResourcesActionFunctionRole = ruleRolePolicyWithWildcardResources('ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
     addCfnNagToStack(Stack.of(this), [
       {
-        paths_endswith: wildcardResources.paths_endswith,
+        paths_endswith: wildcardResourcesStackActionStateMachine.paths_endswith,
         rules_to_suppress: [
-          ...wildcardResources.rules_to_suppress,
-          {
-            id: 'W76',
-            reason: 'The state machine default policy document create by many CallAwsService.',
-          },
+          ...wildcardResourcesStackActionStateMachine.rules_to_suppress,
         ],
       },
     ]);
     addCfnNagToStack(Stack.of(this), [
-      ruleRolePolicyWithWildcardResources('CallbackFunctionRole/DefaultPolicy/Resource', 'CallbackFunInStateAction', 'xray'),
+      {
+        paths_endswith: wildcardResourcesActionFunctionRole.paths_endswith,
+        rules_to_suppress: [
+          ...wildcardResourcesActionFunctionRole.rules_to_suppress,
+        ],
+      },
     ]);
-
-
-    // Add pass role policy to sm role
-    const cloudformationPolicy = new Policy(this, 'SMCloudformationPolicy', {
-      statements: [
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          resources: [sfnCreateStackRole.roleArn],
-          actions: [
-            'iam:PassRole',
-          ],
-        }),
-      ],
-    });
-    cloudformationPolicy.attachToRole(this.stateMachine.role);
 
   }
 }

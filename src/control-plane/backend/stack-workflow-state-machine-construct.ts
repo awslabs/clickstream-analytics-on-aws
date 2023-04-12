@@ -94,6 +94,7 @@ export class StackWorkflowStateMachine extends Construct {
       stateMachine: props.stateActionMachine,
       integrationPattern: IntegrationPattern.RUN_JOB,
       input: TaskInput.fromObject({
+        Action: JsonPath.stringAt('$.Input.Action'),
         Token: JsonPath.taskToken,
         Input: JsonPath.stringAt('$.Input'),
         Callback: JsonPath.stringAt('$.Callback'),

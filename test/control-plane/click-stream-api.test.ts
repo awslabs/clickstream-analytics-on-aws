@@ -169,7 +169,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Architectures: [
         'arm64',
       ],
-      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -196,7 +196,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs16.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -263,7 +263,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
   test('Policy', () => {
     const { template } = TestEnv.newALBApiStack();
-
     // DicInitCustomResourceFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -302,7 +301,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       PolicyName: 'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionRoleDefaultPolicyE1ACA4DE',
     });
 
-    // StateMachineCallbackFunctionRoleDefaultPolicy
+    // StateMachineActionFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -314,83 +313,15 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Effect: 'Allow',
             Resource: '*',
           },
-          {
-            Action: [
-              's3:DeleteObject*',
-              's3:PutObject',
-              's3:PutObjectLegalHold',
-              's3:PutObjectRetention',
-              's3:PutObjectTagging',
-              's3:PutObjectVersionTagging',
-              's3:Abort*',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'stackWorkflowS3BucketF67B9562',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'stackWorkflowS3BucketF67B9562',
-                        'Arn',
-                      ],
-                    },
-                    '/clickstream/*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamMetadataA721B303',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineCallbackFunctionRoleDefaultPolicyFE05CE8A',
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+        },
+      ],
     });
 
     // StateMachineRoleDefaultPolicy
@@ -427,7 +358,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                   'Arn',
                 ],
               },
@@ -437,7 +368,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   [
                     {
                       'Fn::GetAtt': [
-                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                         'Arn',
                       ],
                     },
@@ -447,126 +378,15 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               },
             ],
           },
-          {
-            Action: 'cloudformation:createStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:describeStacks',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:deleteStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:updateStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
         ],
         Version: '2012-10-17',
       },
       PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
-    });
-
-    // SMCloudformationPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'iam:PassRole',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
-                'Arn',
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineSMCloudformationPolicyF657B988',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
+        },
+      ],
     });
 
     // ApiFunctionRoleDefaultPolicy
@@ -706,6 +526,80 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
     });
 
+    // ActionFunctionRolePolicy
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
+              'cloudformation:DeleteStack',
+              'cloudformation:DescribeStacks',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'sns:*',
+              'redshift-serverless:*',
+              's3:*',
+              'apigateway:*',
+              'logs:*',
+              'redshift:*',
+              'dynamodb:*',
+              'autoscaling:*',
+              'application-autoscaling:*',
+              'glue:*',
+              'iam:*',
+              'cloudwatch:*',
+              'emr-serverless:*',
+              'ssm:*',
+              'ecs:*',
+              'lambda:*',
+              'quicksight:*',
+              'ec2:*',
+              'events:*',
+              'elasticloadbalancing:*',
+              'kinesis:*',
+              'kafka:*',
+              'states:*',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+        },
+      ],
+    });
+
   });
 
   test('LogGroup', () => {
@@ -820,51 +714,45 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
   test('State Machine', () => {
     const { template } = TestEnv.newALBApiStack();
-
     template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',
           [
-            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}],"Default":"EndState"},"EndState":{"Type":"Pass","End":true},"Save Stack Runtime":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            '{"StartAt":"Execute Task","States":{"Execute Task":{"Next":"End?","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
             ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
               'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                 'Arn',
               ],
             },
-            '","Payload.$":"$"}},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 15 Seconds"},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","DisableRollback":true,"RoleARN":"',
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
               'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                 'Arn',
               ],
             },
-            '","Capabilities":["CAPABILITY_IAM"]}},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByResult"},"Create in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Save Stack Runtime"},"DescribeStacksByResult":{"Next":"Create in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            '","Payload.$":"$"}},"Callback Task":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
-              Ref: 'AWS::Partition',
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
+                'Arn',
+              ],
             },
-            ':states:::aws-sdk:cloudformation:deleteStack","Parameters":{"StackName.$":"$.Input.StackName"}},"Wait 15 Seconds Too":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByName"},"UpdateStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","DisableRollback":true,"Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Input.StackName"}}},"TimeoutSeconds":1800}',
+            '","Payload.$":"$"}},"EndState":{"Type":"Pass","End":true}},"TimeoutSeconds":1800}',
           ],
         ],
       },
@@ -889,7 +777,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Action.$":"$.Input.Action","Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
@@ -1111,7 +999,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Architectures: [
         'arm64',
       ],
-      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -1138,7 +1026,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for state machine callback of solution Clickstream Analytics on AWS',
+      Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs16.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -1210,7 +1098,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       PolicyName: 'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionRoleDefaultPolicyE1ACA4DE',
     });
 
-    // StateMachineCallbackFunctionRoleDefaultPolicy
+    // StateMachineActionFunctionRoleDefaultPolicy
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -1222,83 +1110,15 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Effect: 'Allow',
             Resource: '*',
           },
-          {
-            Action: [
-              's3:DeleteObject*',
-              's3:PutObject',
-              's3:PutObjectLegalHold',
-              's3:PutObjectRetention',
-              's3:PutObjectTagging',
-              's3:PutObjectVersionTagging',
-              's3:Abort*',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'stackWorkflowS3BucketF67B9562',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'stackWorkflowS3BucketF67B9562',
-                        'Arn',
-                      ],
-                    },
-                    '/clickstream/*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamMetadataA721B303',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineCallbackFunctionRoleDefaultPolicyFE05CE8A',
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+        },
+      ],
     });
 
     // StateMachineRoleDefaultPolicy
@@ -1335,7 +1155,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                  'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                   'Arn',
                 ],
               },
@@ -1345,7 +1165,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                   [
                     {
                       'Fn::GetAtt': [
-                        'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                        'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                         'Arn',
                       ],
                     },
@@ -1355,126 +1175,15 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               },
             ],
           },
-          {
-            Action: 'cloudformation:createStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:describeStacks',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:deleteStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'cloudformation:updateStack',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/clickstream-*',
-                ],
-              ],
-            },
-          },
         ],
         Version: '2012-10-17',
       },
       PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
-    });
-
-    // SMCloudformationPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'iam:PassRole',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
-                'Arn',
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineSMCloudformationPolicyF657B988',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
+        },
+      ],
     });
 
     // ApiFunctionRoleDefaultPolicy
@@ -1809,45 +1518,40 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         'Fn::Join': [
           '',
           [
-            '{"StartAt":"Action","States":{"Action":{"Type":"Choice","Choices":[{"Variable":"$.Input.Action","StringEquals":"Create","Next":"CreateStack"},{"Variable":"$.Input.Action","StringEquals":"Delete","Next":"DeleteStack"},{"Variable":"$.Input.Action","StringEquals":"Update","Next":"UpdateStack"}],"Default":"EndState"},"EndState":{"Type":"Pass","End":true},"Save Stack Runtime":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            '{"StartAt":"Execute Task","States":{"Execute Task":{"Next":"End?","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
             ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
               'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineCallbackFunction19A0F5E1',
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                 'Arn',
               ],
             },
-            '","Payload.$":"$"}},"CreateStack":{"Next":"Wait 15 Seconds","Type":"Task","ResultPath":"$.Result.Stacks[0]","Resource":"arn:',
+            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 15 Seconds"},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:createStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","Parameters.$":"$.Input.Parameters","DisableRollback":true,"RoleARN":"',
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
               'Fn::GetAtt': [
-                'testClickStreamALBApiStackActionStateMachineSFNCreateStackRole228C93B6',
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
                 'Arn',
               ],
             },
-            '","Capabilities":["CAPABILITY_IAM"]}},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByResult"},"Create in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Save Stack Runtime"},"DescribeStacksByResult":{"Next":"Create in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
+            '","Payload.$":"$"}},"Callback Task":{"Next":"EndState","Retry":[{"ErrorEquals":["Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Result.Stacks[0].StackId"}},"DeleteStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
+            ':states:::lambda:invoke","Parameters":{"FunctionName":"',
             {
-              Ref: 'AWS::Partition',
+              'Fn::GetAtt': [
+                'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
+                'Arn',
+              ],
             },
-            ':states:::aws-sdk:cloudformation:deleteStack","Parameters":{"StackName.$":"$.Input.StackName"}},"Wait 15 Seconds Too":{"Type":"Wait","Seconds":15,"Next":"DescribeStacksByName"},"UpdateStack":{"Next":"Wait 15 Seconds Too","Type":"Task","ResultPath":null,"Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::aws-sdk:cloudformation:updateStack","Parameters":{"StackName.$":"$.Input.StackName","TemplateURL.$":"$.Input.TemplateURL","DisableRollback":true,"Parameters.$":"$.Input.Parameters","Capabilities":["CAPABILITY_IAM"]}},"Update in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.Stacks[0].StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds Too"}],"Default":"Save Stack Runtime"},"DescribeStacksByName":{"Next":"Update in progress?","Type":"Task","ResultPath":"$.Result","Resource":"arn:',
-            {
-              Ref: 'AWS::Partition',
-            },
-            ':states:::aws-sdk:cloudformation:describeStacks","Parameters":{"StackName.$":"$.Input.StackName"}}},"TimeoutSeconds":1800}',
+            '","Payload.$":"$"}},"EndState":{"Type":"Pass","End":true}},"TimeoutSeconds":1800}',
           ],
         ],
       },
@@ -1872,7 +1576,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'AWS::Partition',
             },
-            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
+            ':states:::states:startExecution.sync:2","Parameters":{"Input":{"Action.$":"$.Input.Action","Token.$":"$$.Task.Token","Input.$":"$.Input","Callback.$":"$.Callback"},"StateMachineArn":"',
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },

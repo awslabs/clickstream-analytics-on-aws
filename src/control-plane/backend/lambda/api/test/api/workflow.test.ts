@@ -135,6 +135,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -339,6 +340,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -440,6 +442,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -650,6 +653,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -876,6 +880,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -977,6 +982,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -1137,6 +1143,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -1368,6 +1375,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -1474,6 +1482,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -1728,6 +1737,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -1829,6 +1839,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -1895,6 +1906,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -1973,6 +1985,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -2225,6 +2238,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -2326,6 +2340,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -2392,6 +2407,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -2470,6 +2486,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
@@ -2565,6 +2582,7 @@ describe('Workflow test', () => {
         Data: {
           Input: {
             Action: 'Create',
+            Region: 'us-east-1',
             StackName: 'clickstream-sigle-test2',
             TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
             Parameters: [
@@ -2590,6 +2608,7 @@ describe('Workflow test', () => {
         },
         Input: {
           Action: 'Create',
+          Region: 'us-east-1',
           Parameters: [
             {
               ParameterKey: 'QueueName',
@@ -2615,6 +2634,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   StackName: 'clickstream-test11',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -2636,6 +2656,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   StackName: 'clickstream-test33',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -2657,6 +2678,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   StackName: 'clickstream-test22',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -2691,6 +2713,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2712,6 +2735,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2733,6 +2757,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2765,6 +2790,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -2791,6 +2817,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test22',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -2817,6 +2844,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test33',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -2852,6 +2880,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2878,6 +2907,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2904,6 +2934,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -2936,6 +2967,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -2957,6 +2989,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -2983,6 +3016,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test22',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3009,6 +3043,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
+                    Region: 'us-east-1',
                     StackName: 'clickstream-test33',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3044,6 +3079,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3065,6 +3101,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3091,6 +3128,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3117,6 +3155,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
+                  Region: 'us-east-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
