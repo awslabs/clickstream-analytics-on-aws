@@ -77,7 +77,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
         roles: [redshiftDataAPIExecRole],
         statements: [
           new PolicyStatement({
-            actions: ['redshift-data:ExecuteStatement'],
+            actions: [
+              'redshift-data:ExecuteStatement',
+              'redshift-data:BatchExecuteStatement',
+            ],
             resources: [
               Arn.format({
                 service: 'redshift',

@@ -12,7 +12,7 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { ExecuteStatementCommand, ExecuteStatementCommandInput, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getMockContext } from './context';
@@ -119,7 +119,13 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
   test('Executed Redshift copy command', async () => {
     const exeuteId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).callsFakeOnce(input => {
+      if (input as ExecuteStatementCommandInput) {
+        if (input.Sql.includes(`COPY app1.${process.env.REDSHIFT_ODS_TABLE_NAME} FROM `)) {return { Id: exeuteId };}
+      }
+      throw new Error(`Sql '${input.Sql}' is not expected.`);
+    },
+    );
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
       detail: expect.objectContaining({

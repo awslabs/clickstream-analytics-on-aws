@@ -18,7 +18,7 @@ import { Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { JobStatus, RedshiftMode } from '../../private/constant';
 import { ServerlessRedshiftProps, ProvisionedRedshiftProps, ManifestBody } from '../../private/model';
-import { getRedshiftClient, executeStatement } from '../redshift-data';
+import { getRedshiftClient, executeStatements } from '../redshift-data';
 
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
@@ -62,8 +62,8 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
  * @returns The query_id and relevant properties.
  */
 export const handler = async (event: LoadManifestEvent, context: Context) => {
-  logger.info('requestJson:', JSON.stringify(event, undefined, 2));
-  logger.info(`context.awsRequestId:${context.awsRequestId}`);
+  logger.debug('requestJson:', JSON.stringify(event, undefined, 2));
+  logger.debug(`context.awsRequestId:${context.awsRequestId}`);
   var appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const jobList = event.detail.jobList;
@@ -74,7 +74,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   for (var i=0; i < appId.length; i++) {
     appId = appId.replace('.', '_').replace('-', '_');
   }
-  logger.info(`appId:${appId}`);
+  logger.debug(`appId:${appId}`);
 
   const redshiftMode = process.env.REDSHIFT_MODE!;
 
@@ -118,9 +118,9 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     ;
 
   try {
-    const queryId = await executeStatement(redshiftDataApiClient, sqlStatement, serverlessRedshiftProps, provisionedRedshiftProps);
+    const queryId = await executeStatements(redshiftDataApiClient, [sqlStatement], serverlessRedshiftProps, provisionedRedshiftProps);
 
-    logger.info('loadFileToRedshift response:', queryId);
+    logger.info('loadFileToRedshift response:', { queryId });
 
     return {
       detail: {
@@ -168,7 +168,7 @@ export const updateItem = async (
   };
   try {
     const data = await ddbClient.send(new UpdateCommand(params));
-    logger.info('Success - item update', data);
+    logger.debug('Success - item update', data);
     return data;
   } catch (err) {
     if (err instanceof Error) {

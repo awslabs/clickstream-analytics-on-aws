@@ -14,7 +14,7 @@ import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { CreateDatabaseAndSchemas } from '../../private/model';
-import { getRedshiftClient, executeStatementWithWait } from '../redshift-data';
+import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
 type ResourcePropertiesType = CreateDatabaseAndSchemas & {
   readonly ServiceToken: string;
@@ -98,9 +98,9 @@ async function createSchemas(props: ResourcePropertiesType) {
   const odsTableName = props.odsTableName;
 
   const appIds = splitString(props.appIds);
-  const sqlStatement : string[] = [];
+  const sqlStatements : string[] = [];
   appIds.forEach(app => {
-    sqlStatement.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
+    sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
     const createTblStatement = `CREATE TABLE IF NOT EXISTS ${app}.${odsTableName}(`
       + '    app_info SUPER, '
       + '    device SUPER, '
@@ -129,21 +129,21 @@ async function createSchemas(props: ResourcePropertiesType) {
       + '    user_pseudo_id VARCHAR(255)'
       + ') DISTSTYLE AUTO '
       + 'SORTKEY AUTO';
-    sqlStatement.push(createTblStatement);
+    sqlStatements.push(createTblStatement);
   });
 
-  if (sqlStatement.length == 0) {
+  if (sqlStatements.length == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatement.join(';'), props);
+    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
   }
 }
 
 const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string,
   props: CreateDatabaseAndSchemas, owner?: string) => {
   try {
-    await executeStatementWithWait(redshiftClient, `CREATE DATABASE ${databaseName}${owner ? ` WITH OWNER "${owner}"` : ''};`,
+    await executeStatementsWithWait(redshiftClient, [`CREATE DATABASE ${databaseName}${owner ? ` WITH OWNER "${owner}"` : ''};`],
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
@@ -153,9 +153,9 @@ const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, data
   }
 };
 
-const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatement: string, props: CreateDatabaseAndSchemas) => {
+const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatements: string[], props: CreateDatabaseAndSchemas) => {
   try {
-    await executeStatementWithWait(redshiftClient, sqlStatement,
+    await executeStatementsWithWait(redshiftClient, sqlStatements,
       props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
   } catch (err) {
     if (err instanceof Error) {
