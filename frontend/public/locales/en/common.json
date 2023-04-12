@@ -217,7 +217,10 @@
     "complete": "Complete",
     "downloadJSON": "Download the config json file",
     "signin": "Sign In",
-    "chooseFile": "Choose file"
+    "chooseFile": "Choose file",
+    "viewInCloudWatch": "View in CloudWatch",
+    "integrateDashboard": "Integrate Dashboard",
+    "viewAlarmInCloudWatch": "View in Alarms Group in CloudWatch"
   },
   "item": "item",
   "items": "items",
@@ -246,5 +249,9 @@
   "use": "Use",
   "learnMore": "Learn More",
   "version": "Version",
-  "copied": "Copied"
+  "copied": "Copied",
+  "yes": "Yes",
+  "no": "No",
+  "enabled": "Enabled",
+  "disabled": "Disabled"
 }

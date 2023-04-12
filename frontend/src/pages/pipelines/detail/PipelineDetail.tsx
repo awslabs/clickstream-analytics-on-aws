@@ -28,6 +28,11 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import Alarms from './comps/Alarms';
+import Ingestion from './comps/Ingestion';
+import Monitoring from './comps/Monitoring';
+import Processing from './comps/Processing';
+import Reporting from './comps/Reporting';
 import BasicInfo from '../comps/BasicInfo';
 
 const PipelineDetail: React.FC = () => {
@@ -106,29 +111,47 @@ const PipelineDetail: React.FC = () => {
                 <Tabs
                   tabs={[
                     {
-                      label: t('pipeline:detail.ingestionEdp'),
-                      id: 'endpoint',
+                      label: t('pipeline:detail.ingestion'),
+                      id: 'ingestion',
                       content: (
                         <div className="pd-20">
-                          {t('pipeline:detail.ingestionEdp')}
+                          <Ingestion pipelineInfo={projectPipeline} />
                         </div>
                       ),
                     },
                     {
-                      label: t('pipeline:detail.enrichment'),
-                      id: 'enrich',
+                      label: t('pipeline:detail.processing'),
+                      id: 'processing',
                       content: (
                         <div className="pd-20">
-                          {t('pipeline:detail.enrichment')}
+                          <Processing pipelineInfo={projectPipeline} />
                         </div>
                       ),
                     },
                     {
-                      label: t('pipeline:detail.dataModeling'),
-                      id: 'model',
+                      label: t('pipeline:detail.reporting'),
+                      id: 'reporting',
                       content: (
                         <div className="pd-20">
-                          {t('pipeline:detail.dataModeling')}
+                          <Reporting pipelineInfo={projectPipeline} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('pipeline:detail.monitoring'),
+                      id: 'monitoring',
+                      content: (
+                        <div className="pd-20">
+                          <Monitoring pipelineInfo={projectPipeline} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('pipeline:detail.alarms'),
+                      id: 'alarms',
+                      content: (
+                        <div className="pd-20">
+                          <Alarms pipelineInfo={projectPipeline} />
                         </div>
                       ),
                     },

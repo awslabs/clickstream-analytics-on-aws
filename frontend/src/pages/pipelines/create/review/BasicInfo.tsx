@@ -15,15 +15,14 @@ import {
   Box,
   ColumnLayout,
   Container,
+  FormField,
   Header,
   Link,
   SpaceBetween,
+  Table,
 } from '@cloudscape-design/components';
-import PipelineStatus from 'components/pipeline/PipelineStatus';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 
 interface BasicInfoProps {
@@ -41,55 +40,23 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
         </Header>
       }
     >
-      <ColumnLayout columns={4} variant="text-grid">
+      <ColumnLayout columns={3} variant="text-grid">
         <SpaceBetween direction="vertical" size="l">
+          <div>
+            <Box variant="awsui-key-label">{t('pipeline:name')}</Box>
+            <div>{pipelineInfo?.name}</div>
+          </div>
+          <div>
+            <Box variant="awsui-key-label">{t('pipeline:desc')}</Box>
+            <div>{pipelineInfo?.description}</div>
+          </div>
           <div>
             <Box variant="awsui-key-label">
-              {t('pipeline:detail.pipelineID')}
+              {t('pipeline:create.awsRegion')}
             </Box>
-            <div>{pipelineInfo?.pipelineId}</div>
-          </div>
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:detail.s3Bucket')}</Box>
-            <Link
-              external
-              href={buildS3Link(
-                pipelineInfo?.region || '',
-                pipelineInfo?.bucket.name || ''
-              )}
-            >
-              {pipelineInfo?.bucket.name}
-            </Link>
-          </div>
-        </SpaceBetween>
-
-        <SpaceBetween direction="vertical" size="l">
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
-            <div>
-              <PipelineStatus status={pipelineInfo?.status?.status} />
-            </div>
-          </div>
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:detail.sdk')}</Box>
-            <div>{pipelineInfo?.dataCollectionSDK}</div>
-          </div>
-        </SpaceBetween>
-
-        <SpaceBetween direction="vertical" size="l">
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:detail.region')}</Box>
             <div>{pipelineInfo?.region}</div>
           </div>
-
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:detail.cfnStack')}</Box>
-            <Link external href={pipelineInfo?.status?.details?.[0].url}>
-              {pipelineInfo?.status?.details?.[0].stackName}
-            </Link>
-          </div>
         </SpaceBetween>
-
         <SpaceBetween direction="vertical" size="l">
           <div>
             <Box variant="awsui-key-label">{t('pipeline:detail.vpc')}</Box>
@@ -103,15 +70,45 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               {pipelineInfo?.network.vpcId}
             </Link>
           </div>
-          {pipelineInfo?.pipelineId && (
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:detail.creationTime')}
-              </Box>
-              <div>{moment(pipelineInfo?.createAt).format(TIME_FORMAT)}</div>
-            </div>
-          )}
+          <div>
+            <Box variant="awsui-key-label">{t('pipeline:detail.s3Bucket')}</Box>
+            <Link
+              external
+              href={buildS3Link(
+                pipelineInfo?.region || '',
+                pipelineInfo?.bucket.name || ''
+              )}
+            >
+              {pipelineInfo?.bucket.name}
+            </Link>
+          </div>
+          <div>
+            <Box variant="awsui-key-label">{t('pipeline:detail.sdk')}</Box>
+            <div>{pipelineInfo?.dataCollectionSDK}</div>
+          </div>
         </SpaceBetween>
+        <div>
+          <FormField label={t('tag.name')} description={t('pipeline:tagDesc')}>
+            <Table
+              variant="embedded"
+              columnDefinitions={[
+                {
+                  id: 'key',
+                  header: t('tag.keyHeader'),
+                  cell: (item) => item.key || '-',
+                },
+                {
+                  id: 'value',
+                  header: t('tag.valueHeader'),
+                  cell: (item) => item.value || '-',
+                },
+              ]}
+              items={pipelineInfo?.tags || []}
+              sortingDisabled
+              empty={''}
+            />
+          </FormField>
+        </div>
       </ColumnLayout>
     </Container>
   );

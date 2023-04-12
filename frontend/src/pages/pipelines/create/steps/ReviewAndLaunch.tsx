@@ -22,11 +22,10 @@ import {
   Grid,
 } from '@cloudscape-design/components';
 import moment from 'moment';
-import BasicInfo from 'pages/pipelines/comps/BasicInfo';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SinkType, TIME_FORMAT } from 'ts/const';
-
+import BasicInfo from '../review/BasicInfo';
 interface ReviewAndLaunchProps {
   pipelineInfo: IExtPipeline;
 }

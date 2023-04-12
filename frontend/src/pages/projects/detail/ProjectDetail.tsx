@@ -60,7 +60,7 @@ const ProjectDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        setLoadingData(false);
+        getPipelineByProjectId(projectId);
       }
     } catch (error) {
       setLoadingData(false);
@@ -84,7 +84,6 @@ const ProjectDetail: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      getPipelineByProjectId(id);
       getProjectDetailById(id);
     }
   }, [id]);
