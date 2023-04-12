@@ -226,3 +226,8 @@ export enum PipelineStatusType {
   UPDATING = 'Updating',
   DELETING = 'Deleting',
 }
+
+export enum KinesisStreamMode {
+  ON_DEMAND = 'ON_DEMAND',
+  PROVISIONED = 'PROVISIONED',
+}

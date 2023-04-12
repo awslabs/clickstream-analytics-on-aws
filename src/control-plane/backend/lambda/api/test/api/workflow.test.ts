@@ -1046,7 +1046,7 @@ describe('Workflow test', () => {
 
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kinesis', async () => {
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{
@@ -1109,7 +1109,7 @@ describe('Workflow test', () => {
         },
         sinkType: 'kinesis',
         sinkKinesis: {
-          kinesisStreamMode: '',
+          kinesisStreamMode: 'ON_DEMAND',
           kinesisShardCount: 2,
           sinkBucket: {
             name: 'EXAMPLE_BUCKET',
@@ -1223,11 +1223,224 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisStreamMode',
-                        ParameterValue: '',
+                        ParameterValue: 'ON_DEMAND',
                       },
                       {
                         ParameterKey: 'KinesisShardCount',
+                        ParameterValue: '3',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataRetentionHours',
+                        ParameterValue: '24',
+                      },
+                      {
+                        ParameterKey: 'KinesisBatchSize',
+                        ParameterValue: '10000',
+                      },
+                      {
+                        ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+                        ParameterValue: '300',
+                      },
+                    ],
+                    StackName: 'clickstream-ingestion-kinesis-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        id: 1,
+        appId: '1',
+      }, {
+        id: 2,
+        appId: '2',
+      }],
+    });
+
+    const pipeline1 = {
+      id: MOCK_PROJECT_ID,
+      prefix: 'PIPELINE',
+      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
+      projectId: MOCK_PROJECT_ID,
+      appIds: ['appId1', 'appId2'],
+      pipelineId: MOCK_PIPELINE_ID,
+      name: 'Pipeline-01',
+      description: 'Description of Pipeline-01',
+      region: 'us-east-1',
+      dataCollectionSDK: 'Clickstream SDK',
+      tags: [
+        {
+          key: 'name',
+          value: 'clickstream',
+        },
+      ],
+      network: {
+        vpcId: 'vpc-0ba32b04ccc029088',
+        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
+      },
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      ingestionServer: {
+        size: {
+          serverMin: 2,
+          serverMax: 4,
+          warmPoolSize: 1,
+          scaleOnCpuUtilizationPercent: 50,
+        },
+        domain: {
+          domainName: 'click.example.com',
+          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+        },
+        loadBalancer: {
+          serverEndpointPath: '/collect',
+          serverCorsOrigin: '*',
+          protocol: 'HTTPS',
+          enableApplicationLoadBalancerAccessLog: true,
+          enableGlobalAccelerator: true,
+          logS3Bucket: {
+            name: 'EXAMPLE_BUCKET',
+            prefix: 'logs',
+          },
+          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
+        },
+        sinkType: 'kinesis',
+        sinkKinesis: {
+          kinesisStreamMode: 'PROVISIONED',
+          kinesisShardCount: 10,
+          sinkBucket: {
+            name: 'EXAMPLE_BUCKET',
+            prefix: '',
+          },
+        },
+      },
+      executionArn: '',
+      executionName: MOCK_EXECUTION_ID,
+      version: '123',
+      versionTag: 'latest',
+      createAt: 162321434322,
+      updateAt: 162321434322,
+      operator: '',
+      deleted: false,
+    };
+    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
+
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kinesis-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'us-east-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'click.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '*',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
                         ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs/',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'KinesisStreamMode',
+                        ParameterValue: 'PROVISIONED',
+                      },
+                      {
+                        ParameterKey: 'KinesisShardCount',
+                        ParameterValue: '10',
                       },
                       {
                         ParameterKey: 'KinesisDataRetentionHours',

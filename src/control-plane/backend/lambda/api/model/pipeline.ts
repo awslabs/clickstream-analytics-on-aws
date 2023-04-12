@@ -20,10 +20,10 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN,
+  VPC_ID_PARRERN, POSITIVE_INTEGERS,
 } from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
-import { ClickStreamBadRequestError, PipelineStatus, WorkflowTemplate } from '../common/types';
+import { ClickStreamBadRequestError, KinesisStreamMode, PipelineStatus, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
@@ -125,7 +125,7 @@ interface IngestionServerSinkKinesisProps {
    * allowedValues: ['ON_DEMAND', 'PROVISIONED']
    * default: 'ON_DEMAND'
    */
-  readonly kinesisStreamMode: 'ON_DEMAND' | 'PROVISIONED';
+  readonly kinesisStreamMode: KinesisStreamMode;
   /**
    * Number of Kinesis Data Stream shards, only apply for Provisioned mode
    * default: '3'
@@ -459,13 +459,20 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: getBucketPrefix(pipeline, 'data-buffer', pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
     });
+
+    const kinesisStreamMode = pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode ?? KinesisStreamMode.ON_DEMAND;
     parameters.push({
       ParameterKey: 'KinesisStreamMode',
-      ParameterValue: pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode ?? 'ON_DEMAND',
+      ParameterValue: kinesisStreamMode,
     });
+    let kinesisShardCount = '3';
+    if (kinesisStreamMode === KinesisStreamMode.PROVISIONED && pipeline.ingestionServer.sinkKinesis?.kinesisShardCount) {
+      kinesisShardCount = pipeline.ingestionServer.sinkKinesis?.kinesisShardCount.toString();
+    }
+    validatePattern('KinesisShardCount', POSITIVE_INTEGERS, kinesisShardCount);
     parameters.push({
       ParameterKey: 'KinesisShardCount',
-      ParameterValue: (pipeline.ingestionServer.sinkKinesis?.kinesisShardCount ?? 3).toString(),
+      ParameterValue: kinesisShardCount,
     });
     parameters.push({
       ParameterKey: 'KinesisDataRetentionHours',

@@ -19,7 +19,7 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN,
+  VPC_ID_PARRERN, POSITIVE_INTEGERS,
 } from '../../common/constants-ln';
 import { validatePattern } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError } from '../../common/types';
@@ -176,6 +176,26 @@ describe('Utils test', () => {
       'a,b',
     ];
     invalidValues.map(v => expect(() => validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Positive Integers valid', async () => {
+    const validValues = [
+      '1',
+      '2',
+      '11',
+      '22',
+      '99999999',
+    ];
+    validValues.map(v => expect(validatePattern('Number', POSITIVE_INTEGERS, v)).toEqual(true));
+    const invalidValues = [
+      'sfsdf',
+      '0',
+      '-1',
+      '1.1',
+      '1 ',
+      '128¥',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('Number', POSITIVE_INTEGERS, v)).toThrow(ClickStreamBadRequestError));
   });
 
 });
