@@ -867,24 +867,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
-      Subnets: [
-        {
-          SubnetId: 'subnet-0b9fa05e061084b37',
-          CidrBlock: '10.255.0.0/24',
-          AvailabilityZone: 'us-east-1a',
-          MapPublicIpOnLaunch: true,
-          VpcId: 'vpc-111',
-          Tags: [
-            {
-              Key: 'Name',
-              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-            },
-          ],
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/redshift-serverless/workgroups?vpcId=vpc-111');
+    let res = await request(app).get('/api/env/redshift-serverless/workgroups');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({

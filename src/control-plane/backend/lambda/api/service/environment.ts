@@ -107,8 +107,8 @@ export class EnvironmentServ {
   }
   public async listRedshiftServerlessWorkgroups(req: any, res: any, next: any) {
     try {
-      const { region, vpcId } = req.query;
-      const result = await listRedshiftServerlessWorkgroups(region, vpcId);
+      const { region } = req.query;
+      const result = await listRedshiftServerlessWorkgroups(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

@@ -19,7 +19,6 @@ import {
   Workgroup,
   GetNamespaceCommand,
 } from '@aws-sdk/client-redshift-serverless';
-import { getSubnet } from './ec2';
 import { getPaginatedResults } from '../../common/paginator';
 import { RedshiftCluster, RedshiftWorkgroup } from '../../common/types';
 
@@ -77,7 +76,7 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
   return undefined;
 };
 
-export const listRedshiftServerlessWorkgroups = async (region: string, vpcId: string) => {
+export const listRedshiftServerlessWorkgroups = async (region: string) => {
   const redshiftServerlessClient = new RedshiftServerlessClient({ region });
 
   const records = await getPaginatedResults(async (Marker: any) => {
@@ -92,19 +91,13 @@ export const listRedshiftServerlessWorkgroups = async (region: string, vpcId: st
   });
   const workgroups: RedshiftWorkgroup[] = [];
   for (let workgroup of records as Workgroup[]) {
-    if (!workgroup.subnetIds) {
-      continue;
-    }
-    const subnet = await getSubnet(region, workgroup.subnetIds[0]);
-    if (subnet.VpcId === vpcId) {
-      workgroups.push({
-        id: workgroup.workgroupId ?? '',
-        arn: workgroup.workgroupArn ?? '',
-        name: workgroup.workgroupName ?? '',
-        namespace: workgroup.namespaceName ?? '',
-        status: workgroup.status ?? '',
-      });
-    }
+    workgroups.push({
+      id: workgroup.workgroupId ?? '',
+      arn: workgroup.workgroupArn ?? '',
+      name: workgroup.workgroupName ?? '',
+      namespace: workgroup.namespaceName ?? '',
+      status: workgroup.status ?? '',
+    });
   }
   return workgroups;
 };

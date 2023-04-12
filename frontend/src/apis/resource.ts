@@ -53,10 +53,7 @@ const getRedshiftCluster = async (params: {
   return result;
 };
 
-const getRedshiftServerlessWorkgroup = async (params: {
-  vpcId: string;
-  region?: string;
-}) => {
+const getRedshiftServerlessWorkgroup = async (params: { region?: string }) => {
   const result: any = await apiRequest(
     'get',
     `/env/redshift-serverless/workgroups`,

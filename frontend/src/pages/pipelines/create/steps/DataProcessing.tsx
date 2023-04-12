@@ -110,7 +110,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     try {
       const { success, data }: ApiResponse<RedshiftServerlessResponse[]> =
         await getRedshiftServerlessWorkgroup({
-          vpcId: pipelineInfo.network.vpcId,
           region: pipelineInfo.region,
         });
       if (success) {
