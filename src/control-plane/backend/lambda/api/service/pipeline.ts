@@ -29,10 +29,8 @@ export class PipelineServ {
       const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
       for (let pipeline of result.items as Pipeline[] ) {
         const curStatus = await stackManager.getPipelineStatus(pipeline);
-        if (pipeline.status === undefined || pipeline.status.status !== curStatus.status) {
-          pipeline.status = curStatus;
-          await store.updatePipelineStatus(pipeline, curStatus);
-        }
+        pipeline.status = curStatus;
+        await store.updatePipelineStatus(pipeline, curStatus);
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -70,10 +68,8 @@ export class PipelineServ {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const curStatus = await stackManager.getPipelineStatus(pipeline);
-      if (pipeline.status === undefined || pipeline.status.status !== curStatus.status) {
-        pipeline.status = curStatus;
-        await store.updatePipelineStatus(pipeline, curStatus);
-      }
+      pipeline.status = curStatus;
+      await store.updatePipelineStatus(pipeline, curStatus);
       return res.json(new ApiSuccess(pipeline));
     } catch (error) {
       next(error);

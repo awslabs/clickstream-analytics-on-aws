@@ -531,7 +531,8 @@ describe('Workflow test', () => {
       dataCollectionSDK: 'Clickstream SDK',
       status: {
         status: 'Active',
-        details: [],
+        stackDetails: [],
+        executionDetail: {},
       },
       tags: [
         {

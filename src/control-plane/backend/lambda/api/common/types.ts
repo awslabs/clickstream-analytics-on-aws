@@ -14,6 +14,7 @@
 import { Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
 import { Endpoint } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 
 export class ClickStreamBadRequestError extends Error {
   constructor(message: string) {
@@ -203,7 +204,12 @@ export interface ClickStreamBucket {
 
 export interface PipelineStatus {
   readonly status: PipelineStatusType;
-  readonly details: PipelineStatusDetail[];
+  readonly stackDetails: PipelineStatusDetail[];
+  readonly executionDetail: {
+    readonly name?: string;
+    readonly status?: ExecutionStatus | string | undefined;
+    readonly output?: string;
+  };
 }
 
 export interface PipelineStatusDetail {

@@ -14,20 +14,517 @@
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
-import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { dictionaryMock, MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipelineExistedMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
-import { WorkflowStateType } from '../../common/types';
+import { KinesisStreamMode, PipelineStatusType, WorkflowStateType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { Pipeline } from '../../model/pipeline';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
 const cloudFormationClient = mockClient(CloudFormationClient);
 const kafkaMock = mockClient(KafkaClient);
+
+const DDB_PIPELINE: Pipeline = {
+  projectId: MOCK_PROJECT_ID,
+  dataAnalytics: {
+    redshift: {
+      serverless: {
+        workgroupName: 'test',
+        iamRoleArn: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+      },
+    },
+    loadWorkflow: {
+      scheduleInterval: 60,
+    },
+  },
+  dataCollectionSDK: 'clickstream',
+  updateAt: 1681353806173,
+  status: {
+    status: PipelineStatusType.ACTIVE,
+    stackDetails: [
+      {
+        stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+        stackStatus: 'CREATE_COMPLETE',
+        stackStatusReason: '',
+        url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+      },
+      {
+        stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+        stackStatus: 'CREATE_COMPLETE',
+        stackStatusReason: '',
+        url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+      },
+      {
+        stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+        stackStatus: 'CREATE_COMPLETE',
+        stackStatusReason: '',
+        url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+      },
+      {
+        stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+        stackStatus: 'CREATE_COMPLETE',
+        stackStatusReason: '',
+        url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+      },
+    ],
+    executionDetail: {
+      name: 'main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+      status: 'SUCCEEDED',
+    },
+  },
+  operator: '',
+  name: 'Pipeline01',
+  versionTag: 'latest',
+  network: {
+    publicSubnetIds: [
+      'subnet-00000000000000021',
+      'subnet-00000000000000022',
+      'subnet-00000000000000023',
+    ],
+    vpcId: 'vpc-00000000000000001',
+    privateSubnetIds: [
+      'subnet-00000000000000011',
+      'subnet-00000000000000012',
+      'subnet-00000000000000013',
+    ],
+  },
+  executionArn: 'arn:aws:states:us-east-1:01234567890:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+  ingestionServer: {
+    size: {
+      serverMax: 4,
+      warmPoolSize: 1,
+      serverMin: 2,
+      scaleOnCpuUtilizationPercent: 50,
+    },
+    loadBalancer: {
+      protocol: 'HTTPS',
+      enableApplicationLoadBalancerAccessLog: true,
+      logS3Bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      notificationsTopicArn: '',
+      enableGlobalAccelerator: true,
+      serverCorsOrigin: '',
+      serverEndpointPath: '/collect',
+    },
+    domain: {
+      certificateArn: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+      domainName: 'fake.example.com',
+    },
+    sinkKafka: {
+      kafkaConnector: {
+        enable: true,
+      },
+      topic: 'asdasd',
+      mskCluster: {
+        name: 'test',
+        arn: 'arn:aws:kafka:ap-southeast-1:01234567890:cluster/test/4665c061-166b-4de1-9d08-cf5e34146add-5',
+        securityGroupId: 'sg-0518278177ebeec12',
+      },
+      brokers: [],
+    },
+    sinkKinesis: {
+      kinesisStreamMode: KinesisStreamMode.PROVISIONED,
+      kinesisShardCount: 2,
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+    },
+    sinkType: 'kafka',
+    sinkS3: {
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      s3BatchMaxBytes: 500,
+      s3BatchTimeout: 60,
+    },
+  },
+  createAt: 1681353806173,
+  region: 'ap-southeast-1',
+  id: MOCK_PROJECT_ID,
+  tags: [],
+  workflow: {
+    Version: '2022-03-15',
+    Workflow: {
+      Type: WorkflowStateType.PARALLEL,
+      End: true,
+      Branches: [
+        {
+          States: {
+            KafkaConnector: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://aws-gcr-solutions.s3.undefined.undefined/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'DataS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/buffer/',
+                      ParameterKey: 'DataS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'LogS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/logs/kafka-connector/',
+                      ParameterKey: 'LogS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'PluginS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/runtime/ingestion/kafka-connector/plugins/',
+                      ParameterKey: 'PluginS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'subnet-077db9f4580234f6d,subnet-0fb3a453ca32d502a,subnet-0de87e35c44c21d25',
+                      ParameterKey: 'SubnetIds',
+                    },
+                    {
+                      ParameterValue: 'b-3.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092,b-1.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092,b-2.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092',
+                      ParameterKey: 'KafkaBrokers',
+                    },
+                    {
+                      ParameterValue: 'asdasd',
+                      ParameterKey: 'KafkaTopic',
+                    },
+                    {
+                      ParameterValue: 'test',
+                      ParameterKey: 'MskClusterName',
+                    },
+                    {
+                      ParameterValue: 'sg-0518278177ebeec12',
+                      ParameterKey: 'SecurityGroupId',
+                    },
+                  ],
+                  StackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+                },
+                Callback: {
+                  BucketPrefix: 'clickstream/workflow/main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807/clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+            Ingestion: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://aws-gcr-solutions.s3.undefined.undefined/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterValue: 'vpc-0d2619f249ded4511',
+                      ParameterKey: 'VpcId',
+                    },
+                    {
+                      ParameterValue: 'subnet-0f573cd921a8717eb,subnet-0a8e1d58f97c7ed21,subnet-09bb7e97b38566417',
+                      ParameterKey: 'PublicSubnetIds',
+                    },
+                    {
+                      ParameterValue: 'subnet-077db9f4580234f6d,subnet-0fb3a453ca32d502a,subnet-0de87e35c44c21d25',
+                      ParameterKey: 'PrivateSubnetIds',
+                    },
+                    {
+                      ParameterValue: 'asdas.mingfeiq.people.aws.dev',
+                      ParameterKey: 'DomainName',
+                    },
+                    {
+                      ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      ParameterKey: 'ACMCertificateArn',
+                    },
+                    {
+                      ParameterValue: 'HTTPS',
+                      ParameterKey: 'Protocol',
+                    },
+                    {
+                      ParameterValue: '/collect',
+                      ParameterKey: 'ServerEndpointPath',
+                    },
+                    {
+                      ParameterValue: '',
+                      ParameterKey: 'ServerCorsOrigin',
+                    },
+                    {
+                      ParameterValue: '4',
+                      ParameterKey: 'ServerMax',
+                    },
+                    {
+                      ParameterValue: '2',
+                      ParameterKey: 'ServerMin',
+                    },
+                    {
+                      ParameterValue: '50',
+                      ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                    },
+                    {
+                      ParameterValue: '1',
+                      ParameterKey: 'WarmPoolSize',
+                    },
+                    {
+                      ParameterValue: '',
+                      ParameterKey: 'NotificationsTopicArn',
+                    },
+                    {
+                      ParameterValue: 'Yes',
+                      ParameterKey: 'EnableGlobalAccelerator',
+                    },
+                    {
+                      ParameterValue: 'Yes',
+                      ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'LogS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/logs/alb/',
+                      ParameterKey: 'LogS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'test',
+                      ParameterKey: 'MskClusterName',
+                    },
+                    {
+                      ParameterValue: 'sg-0518278177ebeec12',
+                      ParameterKey: 'MskSecurityGroupId',
+                    },
+                    {
+                      ParameterValue: 'asdasd',
+                      ParameterKey: 'KafkaTopic',
+                    },
+                    {
+                      ParameterValue: 'b-3.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092,b-1.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092,b-2.test.3k264h.c5.kafka.ap-southeast-1.amazonaws.com:9092',
+                      ParameterKey: 'KafkaBrokers',
+                    },
+                  ],
+                  StackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+                },
+                Callback: {
+                  BucketPrefix: 'clickstream/workflow/main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807/clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              Next: 'KafkaConnector',
+            },
+          },
+          StartAt: 'Ingestion',
+        },
+        {
+          States: {
+            ETL: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://aws-gcr-solutions.s3.undefined.undefined/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterValue: 'vpc-0d2619f249ded4511',
+                      ParameterKey: 'VpcId',
+                    },
+                    {
+                      ParameterValue: 'subnet-077db9f4580234f6d,subnet-0fb3a453ca32d502a,subnet-0de87e35c44c21d25',
+                      ParameterKey: 'PrivateSubnetIds',
+                    },
+                    {
+                      ParameterValue: 'dfsd_asddfs',
+                      ParameterKey: 'ProjectId',
+                    },
+                    {
+                      ParameterValue: '',
+                      ParameterKey: 'AppIds',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'SourceS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/buffer/asdasd/',
+                      ParameterKey: 'SourceS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'SinkS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/ods/',
+                      ParameterKey: 'SinkS3Prefix',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'PipelineS3Bucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/pipeline-temp/',
+                      ParameterKey: 'PipelineS3Prefix',
+                    },
+                    {
+                      ParameterValue: '72',
+                      ParameterKey: 'DataFreshnessInHour',
+                    },
+                    {
+                      ParameterValue: 'rate(1 hour)',
+                      ParameterKey: 'ScheduleExpression',
+                    },
+                    {
+                      ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                      ParameterKey: 'TransformerAndEnrichClassNames',
+                    },
+                    {
+                      ParameterValue: 'parquet',
+                      ParameterKey: 'OutputFormat',
+                    },
+                  ],
+                  StackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+                },
+                Callback: {
+                  BucketPrefix: 'clickstream/workflow/main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807/clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+          },
+          StartAt: 'ETL',
+        },
+        {
+          States: {
+            DataAnalytics: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://aws-gcr-solutions.s3.undefined.undefined/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [
+                    {
+                      ParameterValue: 'vpc-0d2619f249ded4511',
+                      ParameterKey: 'VpcId',
+                    },
+                    {
+                      ParameterValue: 'subnet-077db9f4580234f6d,subnet-0fb3a453ca32d502a,subnet-0de87e35c44c21d25',
+                      ParameterKey: 'PrivateSubnetIds',
+                    },
+                    {
+                      ParameterValue: 'dfsd_asddfs',
+                      ParameterKey: 'ProjectId',
+                    },
+                    {
+                      ParameterValue: '',
+                      ParameterKey: 'AppIds',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'ODSEventBucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/ods/',
+                      ParameterKey: 'ODSEventPrefix',
+                    },
+                    {
+                      ParameterValue: '.snappy',
+                      ParameterKey: 'ODSEventFileSuffix',
+                    },
+                    {
+                      ParameterValue: 'EXAMPLE_BUCKET',
+                      ParameterKey: 'LoadWorkflowBucket',
+                    },
+                    {
+                      ParameterValue: 'clickstream/dfsd_asddfs/e09deecdc47f4c9e92c50be225446acc/data/ods/',
+                      ParameterKey: 'LoadWorkflowBucketPrefix',
+                    },
+                    {
+                      ParameterValue: '50',
+                      ParameterKey: 'MaxFilesLimit',
+                    },
+                    {
+                      ParameterValue: '100',
+                      ParameterKey: 'ProcessingFilesLimit',
+                    },
+                    {
+                      ParameterValue: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+                      ParameterKey: 'RedshiftServerlessNamespaceId',
+                    },
+                    {
+                      ParameterValue: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+                      ParameterKey: 'RedshiftServerlessWorkgroupId',
+                    },
+                    {
+                      ParameterValue: 'test',
+                      ParameterKey: 'RedshiftServerlessWorkgroupName',
+                    },
+                    {
+                      ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                      ParameterKey: 'RedshiftServerlessIAMRole',
+                    },
+                  ],
+                  StackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+                },
+                Callback: {
+                  BucketPrefix: 'clickstream/workflow/main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807/clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+          },
+          StartAt: 'DataAnalytics',
+        },
+      ],
+    },
+  },
+  version: '1681353806172',
+  prefix: 'PIPELINE',
+  pipelineId: 'e09deecdc47f4c9e92c50be225446acc',
+  bucket: {
+    name: 'EXAMPLE_BUCKET',
+    prefix: '',
+  },
+  executionName: 'main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+  deleted: false,
+  description: '',
+  etl: {
+    transformPlugin: '',
+    enrichPlugin: [
+      'sofeware.aws.solution.clickstream.UAEnrichment',
+      'sofeware.aws.solution.clickstream.IPEnrichment',
+    ],
+    dataFreshnessInHour: 72,
+    scheduleExpression: 'rate(1 hour)',
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+  },
+  type: 'PIPELINE#e09deecdc47f4c9e92c50be225446acc#latest',
+};
 
 describe('Pipeline test', () => {
   beforeEach(() => {
@@ -63,7 +560,6 @@ describe('Pipeline test', () => {
         prefix: 'PIPELINE',
         type: `PIPELINE#${MOCK_PIPELINE_ID}`,
         projectId: MOCK_PROJECT_ID,
-        appIds: ['appId1', 'appId2'],
         pipelineId: MOCK_PIPELINE_ID,
         name: 'Pipeline-01',
         description: 'Description of Pipeline-01',
@@ -441,78 +937,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: {
-        id: MOCK_PROJECT_ID,
-        name: 'Pipeline-01',
-        description: 'Description of Pipeline-01',
-        status: 'RUNNING',
-        ingestionServer: {
-          network: {
-            vpcId: 'vpc-0ba32b04ccc029088',
-            publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-            privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-          },
-          size: {
-            serverMin: 2,
-            serverMax: 4,
-            warmPoolSize: 1,
-            scaleOnCpuUtilizationPercent: 50,
-          },
-          domain: {
-            hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'fake.example.com',
-            recordName: 'click',
-          },
-          loadBalancer: {
-            serverEndpointPath: '/collect',
-            serverCorsOrigin: '*',
-            protocol: 'HTTPS',
-            enableApplicationLoadBalancerAccessLog: true,
-            logS3Bucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'logs',
-            },
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:1111111111111111:test',
-          },
-          sinkType: 's3',
-          sinkS3: {
-            s3DataBucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'test',
-            },
-            s3BatchMaxBytes: 50,
-            s3BatchTimeout: 30,
-          },
-          sinkKafka: {
-            selfHost: false,
-            kafkaBrokers: 'test1,test2,test3',
-            kafkaTopic: 't1',
-            mskClusterName: 'mskClusterName',
-            mskTopic: 'mskTopic',
-            mskSecurityGroupId: 'sg-0000000000002',
-          },
-          sinkKinesis: {
-            kinesisStreamMode: 'ON_DEMAND',
-            kinesisShardCount: 3,
-            kinesisDataS3Bucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'kinesis',
-            },
-          },
-        },
-        etl: {
-          appIds: ['appId1', 'appId2'],
-          sourceS3Bucket: {
-            name: 'EXAMPLE-BUCKET',
-            prefix: 'source',
-          },
-          sinkS3Bucket: {
-            name: 'EXAMPLE-BUCKET',
-            prefix: 'sink',
-          },
-        },
-        dataAnalytics: {},
-      },
+      Item: DDB_PIPELINE,
     });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
@@ -522,79 +947,7 @@ describe('Pipeline test', () => {
       success: true,
       message: '',
       data: {
-        id: MOCK_PROJECT_ID,
-        name: 'Pipeline-01',
-        description: 'Description of Pipeline-01',
-        status: {
-          status: 'Active',
-          details: [],
-        },
-        ingestionServer: {
-          network: {
-            vpcId: 'vpc-0ba32b04ccc029088',
-            publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-            privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-          },
-          size: {
-            serverMin: 2,
-            serverMax: 4,
-            warmPoolSize: 1,
-            scaleOnCpuUtilizationPercent: 50,
-          },
-          domain: {
-            hostedZoneId: 'Z000000000000000000E',
-            hostedZoneName: 'fake.example.com',
-            recordName: 'click',
-          },
-          loadBalancer: {
-            serverEndpointPath: '/collect',
-            serverCorsOrigin: '*',
-            protocol: 'HTTPS',
-            enableApplicationLoadBalancerAccessLog: true,
-            logS3Bucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'logs',
-            },
-            notificationsTopicArn: 'arn:aws:sns:us-east-1:1111111111111111:test',
-          },
-          sinkType: 's3',
-          sinkS3: {
-            s3DataBucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'test',
-            },
-            s3BatchMaxBytes: 50,
-            s3BatchTimeout: 30,
-          },
-          sinkKafka: {
-            selfHost: false,
-            kafkaBrokers: 'test1,test2,test3',
-            kafkaTopic: 't1',
-            mskClusterName: 'mskClusterName',
-            mskTopic: 'mskTopic',
-            mskSecurityGroupId: 'sg-0000000000002',
-          },
-          sinkKinesis: {
-            kinesisStreamMode: 'ON_DEMAND',
-            kinesisShardCount: 3,
-            kinesisDataS3Bucket: {
-              name: 'EXAMPLE-BUCKET',
-              prefix: 'kinesis',
-            },
-          },
-        },
-        etl: {
-          appIds: ['appId1', 'appId2'],
-          sourceS3Bucket: {
-            name: 'EXAMPLE-BUCKET',
-            prefix: 'source',
-          },
-          sinkS3Bucket: {
-            name: 'EXAMPLE-BUCKET',
-            prefix: 'sink',
-          },
-        },
-        dataAnalytics: {},
+        ...DDB_PIPELINE,
       },
     });
   });
@@ -694,35 +1047,40 @@ describe('Pipeline test', () => {
             name: 'Pipeline-01',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-02',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-03',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-04',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-05',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
         ],
@@ -768,35 +1126,40 @@ describe('Pipeline test', () => {
             name: 'Pipeline-01',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-02',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-03',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-04',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-05',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
         ],
@@ -842,35 +1205,40 @@ describe('Pipeline test', () => {
             name: 'Pipeline-01',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-02',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-03',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-04',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-05',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
         ],
@@ -916,14 +1284,16 @@ describe('Pipeline test', () => {
             name: 'Pipeline-03',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
           {
             name: 'Pipeline-04',
             status: {
               status: 'Active',
-              details: [],
+              stackDetails: [],
+              executionDetail: {},
             },
           },
         ],
@@ -931,7 +1301,473 @@ describe('Pipeline test', () => {
       },
     });
   });
-  it('Get pipeline list with fail status', async () => {
+  it('Get pipeline list with stack fail', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_FAILED,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_FAILED',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Failed',
+    });
+  });
+  it('Get pipeline list with stack creating', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Creating',
+    });
+  });
+  it('Get pipeline list with stack updating', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Updating',
+    });
+  });
+  it('Get pipeline list with stack deleting', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.DELETE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.DELETE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'DELETE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'DELETE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'DELETE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'DELETE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Deleting',
+    });
+  });
+  it('Get pipeline list with stack active', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Active',
+    });
+  });
+  it('Get pipeline list with execution fail status and all stack complate', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.FAILED,
+      output: 'error',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'error',
+        status: 'FAILED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Active',
+    });
+  });
+  it('Get pipeline list with execution fail status and miss stack', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [DDB_PIPELINE],
+    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({})
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.FAILED,
+      output: 'error',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'error',
+        status: 'FAILED',
+      },
+      stackDetails: [
+        {
+          stackName: 'clickstream-kafka-connector-e09deecdc47f4c9e92c50be225446acc',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-ingestion-kafka-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-etl-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'clickstream-data-analytics-e09deecdc47f4c9e92c50be225446acc',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Failed',
+    });
+  });
+  it('Get pipeline list with stack fail status', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
@@ -994,22 +1830,31 @@ describe('Pipeline test', () => {
         },
       ],
     });
-    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.UPDATE_IN_PROGRESS,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    }).resolves({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.UPDATE_FAILED,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    });
+    cloudFormationClient.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_FAILED,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
     ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1024,10 +1869,10 @@ describe('Pipeline test', () => {
             executionArn: 'executionArn',
             region: 'us-east-1',
             status: {
-              details: [
+              stackDetails: [
                 {
                   stackName: 'clickstream-ingestion1',
-                  stackStatus: 'UPDATE_IN_PROGRESS',
+                  stackStatus: 'CREATE_COMPLETE',
                   stackStatusReason: '',
                   url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
                 },
@@ -1038,670 +1883,12 @@ describe('Pipeline test', () => {
                   url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
                 },
               ],
+              executionDetail: {
+                name: 'exec1',
+                status: 'SUCCEEDED',
+                output: 'SUCCEEDED',
+              },
               status: 'Failed',
-            },
-            workflow: {
-              Version: '2022-03-15',
-              Workflow: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion2',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-            },
-          },
-        ],
-        totalCount: 1,
-      },
-    });
-  });
-  it('Get pipeline list with creating status', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          executionArn: 'executionArn',
-          region: 'us-east-1',
-          workflow: {
-            Version: '2022-03-15',
-            Workflow: {
-              Branches: [
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion1',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion2',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-              ],
-              End: true,
-              Type: 'Parallel',
-            },
-          },
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: undefined,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    }).resolves({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.CREATE_COMPLETE,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            name: 'Pipeline-01',
-            executionArn: 'executionArn',
-            region: 'us-east-1',
-            status: {
-              details: [
-                {
-                  stackName: 'clickstream-ingestion1',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-                {
-                  stackName: 'clickstream-ingestion2',
-                  stackStatus: 'CREATE_COMPLETE',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-              ],
-              status: 'Creating',
-            },
-            workflow: {
-              Version: '2022-03-15',
-              Workflow: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion2',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-            },
-          },
-        ],
-        totalCount: 1,
-      },
-    });
-  });
-  it('Get pipeline list with updating status', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          executionArn: 'executionArn',
-          region: 'us-east-1',
-          workflow: {
-            Version: '2022-03-15',
-            Workflow: {
-              Branches: [
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion1',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion2',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-              ],
-              End: true,
-              Type: 'Parallel',
-            },
-          },
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.UPDATE_IN_PROGRESS,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    }).resolves({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.UPDATE_COMPLETE,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            name: 'Pipeline-01',
-            executionArn: 'executionArn',
-            region: 'us-east-1',
-            status: {
-              details: [
-                {
-                  stackName: 'clickstream-ingestion1',
-                  stackStatus: 'UPDATE_IN_PROGRESS',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-                {
-                  stackName: 'clickstream-ingestion2',
-                  stackStatus: 'UPDATE_COMPLETE',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-              ],
-              status: 'Updating',
-            },
-            workflow: {
-              Version: '2022-03-15',
-              Workflow: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion2',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-            },
-          },
-        ],
-        totalCount: 1,
-      },
-    });
-  });
-  it('Get pipeline list with deleting status', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          executionArn: 'executionArn',
-          region: 'us-east-1',
-          workflow: {
-            Version: '2022-03-15',
-            Workflow: {
-              Branches: [
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion1',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion2',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-              ],
-              End: true,
-              Type: 'Parallel',
-            },
-          },
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.DELETE_IN_PROGRESS,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    }).resolves({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.DELETE_COMPLETE,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            name: 'Pipeline-01',
-            executionArn: 'executionArn',
-            region: 'us-east-1',
-            status: {
-              details: [
-                {
-                  stackName: 'clickstream-ingestion1',
-                  stackStatus: 'DELETE_IN_PROGRESS',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-                {
-                  stackName: 'clickstream-ingestion2',
-                  stackStatus: 'DELETE_COMPLETE',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-              ],
-              status: 'Deleting',
-            },
-            workflow: {
-              Version: '2022-03-15',
-              Workflow: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion2',
-                            TemplateURL: 'https://xxx.com',
-                          },
-                        },
-                        End: true,
-                        Type: 'Stack',
-                      },
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-            },
-          },
-        ],
-        totalCount: 1,
-      },
-    });
-  });
-  it('Get pipeline list with active status', async () => {
-    projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          executionArn: 'executionArn',
-          region: 'us-east-1',
-          workflow: {
-            Version: '2022-03-15',
-            Workflow: {
-              Branches: [
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion1',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-                {
-                  StartAt: 'Ingestion',
-                  States: {
-                    Ingestion: {
-                      Data: {
-                        Callback: {
-                          BucketName: 'EXAMPLE_BUCKET',
-                          BucketPrefix: '/ingestion',
-                        },
-                        Input: {
-                          Action: 'Create',
-                          Parameters: [],
-                          StackName: 'clickstream-ingestion2',
-                          TemplateURL: 'https://xxx.com',
-                        },
-                      },
-                      End: true,
-                      Type: 'Stack',
-                    },
-                  },
-                },
-              ],
-              End: true,
-              Type: 'Parallel',
-            },
-          },
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.CREATE_COMPLETE,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    }).resolves({
-      Stacks: [{
-        StackName: 'test',
-        StackStatus: StackStatus.CREATE_COMPLETE,
-        StackStatusReason: '',
-        CreationTime: undefined,
-      }],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            name: 'Pipeline-01',
-            executionArn: 'executionArn',
-            region: 'us-east-1',
-            status: {
-              details: [
-                {
-                  stackName: 'clickstream-ingestion1',
-                  stackStatus: 'CREATE_COMPLETE',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-                {
-                  stackName: 'clickstream-ingestion2',
-                  stackStatus: 'CREATE_COMPLETE',
-                  stackStatusReason: '',
-                  url: 'https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=undefined',
-                },
-              ],
-              status: 'Active',
             },
             workflow: {
               Version: '2022-03-15',

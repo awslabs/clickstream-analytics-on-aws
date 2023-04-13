@@ -15,9 +15,10 @@ import { Output, Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
-  ExecutionStatus,
   StartExecutionCommand,
   StartExecutionCommandOutput,
+  DescribeExecutionOutput,
+  ExecutionStatus,
 } from '@aws-sdk/client-sfn';
 import { v4 as uuidv4 } from 'uuid';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
@@ -300,12 +301,12 @@ export class StackManager {
     return undefined;
   }
 
-  public async getExecutionStatus(executionArn: string): Promise<ExecutionStatus | string | undefined> {
+  public async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
     const params: DescribeExecutionCommand = new DescribeExecutionCommand({
       executionArn: executionArn,
     });
     const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
-    return result.status;
+    return result;
   }
 
   public async getTemplateUrl(name: string) {
@@ -325,12 +326,14 @@ export class StackManager {
   };
 
   public async getPipelineStatus(pipeline: Pipeline): Promise<PipelineStatus> {
-    if (!pipeline.workflow?.Workflow) {
+    if (!pipeline.workflow?.Workflow || !pipeline.executionArn) {
       return {
         status: PipelineStatusType.ACTIVE,
-        details: [],
+        stackDetails: [],
+        executionDetail: {},
       };
     }
+    const executionDetail = await this.getExecutionDetail(pipeline.executionArn);
     const stackNames = this.getWorkflowStacks(pipeline.workflow?.Workflow);
     const stackStatusDetails: PipelineStatusDetail[] = [];
     for (let stackName of stackNames as string[]) {
@@ -369,16 +372,29 @@ export class StackManager {
         }
       }
       if (miss) {
-        status = PipelineStatusType.CREATING;
+        if (executionDetail?.status === ExecutionStatus.FAILED ||
+          executionDetail?.status === ExecutionStatus.TIMED_OUT ||
+          executionDetail?.status === ExecutionStatus.ABORTED) {
+          status = PipelineStatusType.FAILED;
+        } else {
+          status = PipelineStatusType.CREATING;
+        }
       }
       return {
         status: status,
-        details: stackStatusDetails,
+        stackDetails: stackStatusDetails,
+        executionDetail: {
+          name: executionDetail?.name,
+          status: executionDetail?.status,
+          output: executionDetail?.output,
+        },
       } as PipelineStatus;
     }
+
     return {
       status: PipelineStatusType.ACTIVE,
-      details: stackStatusDetails,
+      stackDetails: [],
+      executionDetail: {},
     } as PipelineStatus;
   }
 

@@ -254,7 +254,6 @@ export interface Pipeline {
   readonly prefix: string;
 
   readonly projectId: string;
-  readonly appIds: string[];
   readonly pipelineId: string;
   readonly name: string;
   readonly description: string;
