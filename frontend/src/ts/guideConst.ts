@@ -15,13 +15,12 @@ export const CLICKSTREAM_REPO_LINK =
   'https://github.com/aws-solutions/clickstream-on-aws';
 export const GUIDE_LINK_ANDROID_SDK = '/'; // TODO
 export const GUIDE_LINK_IOS_SDK = '/'; // TODO
-export const DOWNLOAD_FILENAME = 'clickstreamconfiguration.json';
+export const DOWNLOAD_FILENAME = 'amplifyconfiguration.json';
 export const TEMPLATE_APP_ID = '{{APP_ID}}';
 export const TEMPALTE_SERVER_ENDPOINT = '{{SERVER_ENDPOINT}}';
 
 // Android Guide
-export const ANDROID_CONFIG_JSON_TEMPLATE = `
-{
+export const ANDROID_CONFIG_JSON_TEMPLATE = `{
   "UserAgent": "aws-solution/clickstream",
   "Version": "1.0",
   "analytics": {
@@ -95,8 +94,7 @@ ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 `;
 
 // iOS Guide
-export const IOS_CONFIG_JSON_TEMPLATE = `
-{
+export const IOS_CONFIG_JSON_TEMPLATE = `{
   "analytics": {
     "plugins": {
       "awsClickstreamPlugin ": {
