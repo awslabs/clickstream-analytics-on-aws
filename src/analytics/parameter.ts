@@ -65,7 +65,7 @@ export function createStackParameters(scope: Construct) {
   const sinkS3FileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
     description: 'The suffix of the ODS event files on S3 to be imported.',
     type: 'String',
-    default: '.parquet.snappy',
+    default: '.snappy.parquet',
   });
 
   const loadWorkflowBucketParam = Parameters.createS3BucketParameter(scope, 'LoadWorkflowBucket', {

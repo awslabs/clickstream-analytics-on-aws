@@ -605,13 +605,6 @@ describe('Workflow test', () => {
         enrichPlugin: ['enrich1', 'enrich2'],
       },
       dataAnalytics: {
-        ods: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          fileSuffix: '.snappy',
-        },
         redshift: {
           serverless: {
             workgroupName: 'test',
@@ -1899,7 +1892,7 @@ describe('Workflow test', () => {
             name: 'EXAMPLE_BUCKET',
             prefix: '',
           },
-          fileSuffix: '.snappy',
+          fileSuffix: '.snappy.parquet',
         },
         redshift: {
           serverless: {
@@ -2227,7 +2220,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
-                        ParameterValue: '.snappy',
+                        ParameterValue: '.snappy.parquet',
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucket',
@@ -2400,7 +2393,7 @@ describe('Workflow test', () => {
             name: 'EXAMPLE_BUCKET',
             prefix: '',
           },
-          fileSuffix: '.snappy',
+          fileSuffix: '.snappy.parquet',
         },
         redshift: {
           serverless: {
@@ -2728,7 +2721,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
-                        ParameterValue: '.snappy',
+                        ParameterValue: '.snappy.parquet',
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucket',

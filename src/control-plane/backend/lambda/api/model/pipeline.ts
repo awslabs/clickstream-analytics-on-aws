@@ -755,7 +755,7 @@ export async function getDataAnalyticsStackParameters(pipeline: Pipeline) {
   });
   parameters.push({
     ParameterKey: 'ODSEventFileSuffix',
-    ParameterValue: pipeline.dataAnalytics?.ods?.fileSuffix ?? '.snappy',
+    ParameterValue: pipeline.dataAnalytics?.ods?.fileSuffix ?? '.snappy.parquet',
   });
 
   parameters.push({
