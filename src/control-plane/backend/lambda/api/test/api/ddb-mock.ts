@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { GetCommand, GetCommandInput, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 
 const MOCK_TOKEN = '0000-0000';
@@ -24,11 +24,26 @@ const MOCK_BUILDIN_PLUGIN_ID = 'BUILDIN-1';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
-    return ddbMock.on(PutCommand).resolvesOnce({});
+    return ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_TOKEN,
+        type: 'REQUESTID',
+      },
+    }, true).resolvesOnce({});
   }
-  const err = new Error('Mock Token error');
-  err.name = 'ConditionalCheckFailedException';
-  return ddbMock.on(PutCommand).rejects(err);
+  return ddbMock.on(GetCommand, {
+    TableName: clickStreamTableName,
+    Key: {
+      id: MOCK_TOKEN,
+      type: 'REQUESTID',
+    },
+  }, true).resolvesOnce({
+    Item: {
+      id: MOCK_TOKEN,
+      type: 'REQUESTID',
+    },
+  });
 }
 
 function projectExistedMock(ddbMock: any, existed: boolean): any {

@@ -97,6 +97,21 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
   return next();
 });
 
+// Implement save request id interceptor
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const originalEnd = res.end;
+  // @ts-ignore
+  res.end = async (chunk: any, encoding: BufferEncoding, cb?: () => void) => {
+    const requestId = req.get('X-Click-Stream-Request-Id');
+    if (requestId && res.statusCode >= 200 && res.statusCode <= 299) {
+      await projectServ.saveRequestId(requestId);
+    }
+    res.end = originalEnd;
+    res.end(chunk, encoding, cb);
+  };
+  next();
+});
+
 // healthcheck
 app.get('/', async (_req: express.Request, res: express.Response) => {
   res.send('OK!');

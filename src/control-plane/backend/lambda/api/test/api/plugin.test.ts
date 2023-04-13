@@ -22,6 +22,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { dictionaryMock, MOCK_BUILDIN_PLUGIN_ID, MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
+import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 
@@ -47,11 +48,12 @@ describe('Plugin test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Plugin created.');
     expect(res.body.success).toEqual(true);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create plugin with mock error', async () => {
+    tokenMock(ddbMock, false);
     // Mock DynamoDB error
-    ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));;
+    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));;
     const res = await request(app)
       .post('/api/plugin')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -70,6 +72,7 @@ describe('Plugin test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create plugin 400', async () => {
     tokenMock(ddbMock, false);
@@ -94,6 +97,7 @@ describe('Plugin test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create plugin Not Modified', async () => {
     tokenMock(ddbMock, true);
@@ -122,6 +126,7 @@ describe('Plugin test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get plugin by ID', async () => {
     ddbMock.on(GetCommand).resolves({

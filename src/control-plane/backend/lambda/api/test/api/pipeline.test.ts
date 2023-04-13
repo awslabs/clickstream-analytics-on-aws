@@ -22,6 +22,7 @@ import { dictionaryMock, MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_TOKEN, pipeline
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { WorkflowStateType } from '../../common/types';
 import { app, server } from '../../index';
+import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -161,6 +162,7 @@ describe('Pipeline test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);
@@ -182,7 +184,6 @@ describe('Pipeline test', () => {
       Item: undefined,
     });
     sfnMock.on(StartExecutionCommand).resolves({});
-    ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -254,14 +255,15 @@ describe('Pipeline test', () => {
       message: 'Unexpected error occurred at server.',
       success: false,
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create pipeline with mock error', async () => {
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
-    ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -339,6 +341,7 @@ describe('Pipeline test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline 400', async () => {
     tokenMock(ddbMock, false);
@@ -369,6 +372,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create pipeline Not Modified', async () => {
     tokenMock(ddbMock, true);
@@ -400,6 +404,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create pipeline with non-existent project', async () => {
     tokenMock(ddbMock, false);
@@ -431,6 +436,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);

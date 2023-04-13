@@ -715,24 +715,30 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async isRequestIdExisted(id: string): Promise<boolean> {
-    try {
-      const params: PutCommand = new PutCommand({
-        TableName: clickStreamTableName,
-        Item: {
-          id: id,
-          type: 'REQUESTID',
-          ttl: Date.now() / 1000 + 600,
-        },
-        ConditionExpression: 'attribute_not_exists(id)',
-      });
-      await docClient.send(params);
+    const params: GetCommand = new GetCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: id,
+        type: 'REQUESTID',
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    if (!result.Item) {
       return false;
-    } catch (error) {
-      if ((error as Error).name === 'ConditionalCheckFailedException') {
-        return true;
-      }
-      throw error;
     }
+    return true;
+  };
+
+  public async saveRequestId(id: string): Promise<void> {
+    const params: PutCommand = new PutCommand({
+      TableName: clickStreamTableName,
+      Item: {
+        id: id,
+        type: 'REQUESTID',
+        ttl: Date.now() / 1000 + 600,
+      },
+    });
+    await docClient.send(params);
   };
 
   public async addPlugin(plugin: Plugin): Promise<string> {

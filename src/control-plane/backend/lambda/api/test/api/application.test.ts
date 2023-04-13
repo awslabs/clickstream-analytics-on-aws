@@ -25,6 +25,7 @@ import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExiste
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
+import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -79,27 +80,38 @@ describe('Application test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Application created.');
     expect(res.body.success).toEqual(true);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock ddb error', async () => {
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          pipelineId: MOCK_PROJECT_ID,
-          status: {
-            status: PipelineStatusType.ACTIVE,
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
-          ingestionServer: {
-            sinkType: 's3',
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'App-01',
+            appId: MOCK_APP_ID,
           },
-          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
-        },
-      ],
-    });
+        ],
+      });
+    sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
-    ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));;
+    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));;
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -117,39 +129,36 @@ describe('Application test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create application with mock stack status error', async () => {
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          pipelineId: MOCK_PROJECT_ID,
-          status: {
-            status: PipelineStatusType.FAILED,
-          },
-          ingestionServer: {
-            sinkType: 's3',
-          },
-          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Outputs: [
-            {
-              OutputKey: 'ServerEndpointPath',
-              OutputValue: 'http://xxx/xxx',
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.FAILED,
             },
-          ],
-          StackStatus: StackStatus.CREATE_IN_PROGRESS,
-          CreationTime: new Date(),
-        },
-      ],
-    });
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'App-01',
+            appId: MOCK_APP_ID,
+          },
+        ],
+      });
+    sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
       .rejects(new Error('Mock DynamoDB error'));;
@@ -169,8 +178,10 @@ describe('Application test', () => {
       success: false,
       message: 'The pipeline current status does not allow update.',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application with mock pipeline error', async () => {
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [],
@@ -191,6 +202,7 @@ describe('Application test', () => {
       success: false,
       message: 'The latest pipeline not found.',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application 400', async () => {
     tokenMock(ddbMock, false);
@@ -222,6 +234,7 @@ describe('Application test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application Not Modified', async () => {
     tokenMock(ddbMock, true);
@@ -250,6 +263,7 @@ describe('Application test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application with non-existent project', async () => {
     tokenMock(ddbMock, false);
@@ -279,6 +293,7 @@ describe('Application test', () => {
         },
       ],
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get application by ID', async () => {
     projectExistedMock(ddbMock, true);

@@ -53,5 +53,6 @@ export interface ClickStreamStore {
   listDictionary: () => Promise<Dictionary[]>;
 
   isRequestIdExisted: (id: string) => Promise<boolean>;
+  saveRequestId: (id: string) => Promise<void>;
 
 }
