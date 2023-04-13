@@ -162,14 +162,6 @@ const ApplicationDetail: React.FC = () => {
                       <div>{applicationInfo?.iosBundleId}</div>
                     </div>
                   </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
-                    <div>
-                      <Box variant="awsui-key-label">
-                        {t('application:iosAppStoreId')}
-                      </Box>
-                      <div>{applicationInfo?.iosAppStoreId}</div>
-                    </div>
-                  </SpaceBetween>
                 </ColumnLayout>
               </Container>
 
@@ -212,11 +204,11 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <div>
                         <PipelineStatus
-                          status={applicationInfo?.pipeline?.status}
+                          status={applicationInfo?.pipeline?.status?.status}
                         />{' '}
-                        {(applicationInfo?.pipeline?.status ===
+                        {(applicationInfo?.pipeline?.status?.status ===
                           EPipelineStatus.Creating ||
-                          applicationInfo?.pipeline?.status ===
+                          applicationInfo?.pipeline?.status?.status ===
                             EPipelineStatus.Updating) && <Spinner />}
                       </div>
                     </div>

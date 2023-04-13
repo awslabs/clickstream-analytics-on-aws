@@ -1,12 +1,14 @@
 {
   "valid": {
-    "nameEmpty": "Plase input application name"
+    "nameEmpty": "Plase input application name",
+    "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters"
   },
   "appName": "App Name",
+  "appID": "App ID",
   "appDesc": "App Description",
+  "appPackageName": "App package name",
   "androidPackageName": "Android package name",
-  "iosAppBundleId": "App Bundle ID",
-  "iosAppStoreId": "App Store ID ",
+  "iosAppBundleId": "App Bundle ID (iOS)",
   "createdTime": "Created",
   "sdkGuide": {
     "registerApp": "Register App",

@@ -14,7 +14,7 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { awsRegion } from './constants';
-import { PROJECT_ID_PATTERN } from './constants-ln';
+import { APP_ID_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -108,6 +108,18 @@ export const defaultSubnetTypeValid: CustomValidator = (value, { req }) => {
         throw new Error('subnetType in query must be: \'public\', \'private\', \'isolated\' or \'all\'.');
       }
     }
+  }
+  return true;
+};
+
+export const isValidAppId: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(APP_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validate error, app name: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
   }
   return true;
 };

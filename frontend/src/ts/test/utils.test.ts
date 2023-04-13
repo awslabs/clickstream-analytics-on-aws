@@ -17,6 +17,7 @@ import {
   generateDataProcessingInterval,
   generateRedshiftInterval,
   generateStr,
+  validateAppId,
   validateEmails,
   validateProjectId,
 } from '../utils';
@@ -198,5 +199,32 @@ describe('validateProjectId', () => {
         'longidnamelongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameistoolongidnameisl'
       )
     ).toBe(false);
+  });
+});
+
+describe('validateAppId', () => {
+  it('returns true for a valid app ID', () => {
+    const validAppId = 'ValidAppId_123';
+    expect(validateAppId(validAppId)).toBe(true);
+  });
+
+  it('returns true for an app ID that is max length', () => {
+    const invalidAppId = 'a'.repeat(127); // 127 characters, maxlength the limit
+    expect(validateAppId(invalidAppId)).toBe(true);
+  });
+
+  it('returns false for an app ID that starts with a number', () => {
+    const invalidAppId = '1InvalidAppId';
+    expect(validateAppId(invalidAppId)).toBe(false);
+  });
+
+  it('returns false for an app ID that is too long', () => {
+    const invalidAppId = 'a'.repeat(128); // 128 characters, one over the limit
+    expect(validateAppId(invalidAppId)).toBe(false);
+  });
+
+  it('returns false for an app ID that contains invalid characters', () => {
+    const invalidAppId = 'InvalidAppId$';
+    expect(validateAppId(invalidAppId)).toBe(false);
   });
 });

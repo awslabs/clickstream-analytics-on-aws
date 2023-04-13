@@ -30,6 +30,7 @@ import {
   defaultAssumeRoleTypeValid,
   isProjectExisted,
   isProjectNotExisted,
+  isValidAppId,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { JWTAuthorizer } from './middle-ware/authorizer';
@@ -328,6 +329,8 @@ app.post(
     body().custom(isValidEmpty),
     body('projectId')
       .custom(isProjectExisted),
+    body('appId')
+      .custom(isValidAppId),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

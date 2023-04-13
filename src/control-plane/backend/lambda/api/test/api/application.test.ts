@@ -21,7 +21,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { appExistedMock, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
@@ -59,7 +59,7 @@ describe('Application test', () => {
       .resolvesOnce({
         Items: [
           {
-            name: 'App-01',
+            name: MOCK_APP_NAME,
             appId: MOCK_APP_ID,
           },
         ],
@@ -71,7 +71,8 @@ describe('Application test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -85,6 +86,7 @@ describe('Application test', () => {
   it('Create application with mock ddb error', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -104,20 +106,20 @@ describe('Application test', () => {
       .resolvesOnce({
         Items: [
           {
-            name: 'App-01',
+            name: MOCK_APP_NAME,
             appId: MOCK_APP_ID,
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
-    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));;
+    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -161,13 +163,14 @@ describe('Application test', () => {
     sfnMock.on(StartExecutionCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));;
+      .rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -191,7 +194,8 @@ describe('Application test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -228,6 +232,11 @@ describe('Application test', () => {
           param: 'projectId',
         },
         {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'appId',
+        },
+        {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
@@ -244,7 +253,8 @@ describe('Application test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -274,7 +284,8 @@ describe('Application test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
@@ -295,6 +306,108 @@ describe('Application test', () => {
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
+  it('Create application with error id', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: MOCK_APP_ID,
+          },
+        ],
+      });
+    sfnMock.on(StartExecutionCommand).resolves({});
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/app')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: MOCK_APP_NAME,
+        appId: `${MOCK_APP_ID}-1`,
+        description: 'Description of App-01',
+        platform: 'Web',
+        sdk: 'Clickstream SDK',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
+        {
+          location: 'body',
+          msg: 'Validate error, app name: app_7777_7777-1 not match [a-zA-Z][a-zA-Z0-9_]{0,126}. Please check and try again.',
+          param: 'appId',
+          value: 'app_7777_7777-1',
+        },
+      ],
+    });
+  });
+  it('Create application with error mutil id', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: `${MOCK_APP_ID}-1`,
+          },
+        ],
+      });
+    sfnMock.on(StartExecutionCommand).resolves({});
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/app')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
+        description: 'Description of App-01',
+        platform: 'Web',
+        sdk: 'Clickstream SDK',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Validate error, AppId: app_7777_7777-1,app_7777_7777 not match [a-zA-Z][a-zA-Z0-9_]{0,126}(,[a-zA-Z][a-zA-Z0-9_]{0,126})*. Please check and try again.',
+    });
+  });
   it('Get application by ID', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
@@ -309,7 +422,7 @@ describe('Application test', () => {
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
         id: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
         androidPackage: 'androidPackage',
         iosBundleId: 'iosBundleId',
         iosAppStoreId: 'iosAppStoreId',
@@ -354,7 +467,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         appId: MOCK_APP_ID,
         projectId: MOCK_PROJECT_ID,
-        name: 'App-01',
+        name: MOCK_APP_NAME,
         androidPackage: 'androidPackage',
         iosAppStoreId: 'iosAppStoreId',
         iosBundleId: 'iosBundleId',
@@ -637,21 +750,31 @@ describe('Application test', () => {
   it('Delete application', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          name: 'Pipeline-01',
-          pipelineId: MOCK_PROJECT_ID,
-          status: {
-            status: PipelineStatusType.ACTIVE,
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            appIds: [MOCK_APP_ID],
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
-          ingestionServer: {
-            sinkType: 's3',
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: MOCK_APP_ID,
           },
-          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
-        },
-      ],
-    });
+        ],
+      });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
@@ -662,10 +785,38 @@ describe('Application test', () => {
       success: true,
       message: 'Application deleted.',
     });
-
+  });
+  it('Delete application with mock ddb error', async () => {
+    projectExistedMock(ddbMock, true);
+    appExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            appIds: [MOCK_APP_ID],
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: MOCK_APP_ID,
+          },
+        ],
+      });
     // Mock DynamoDB error
     ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
+    const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -673,6 +824,86 @@ describe('Application test', () => {
       success: false,
       message: 'Unexpected error occurred at server.',
       error: 'Error',
+    });
+  });
+  it('Delete application that not belonging to pipeline', async () => {
+    projectExistedMock(ddbMock, true);
+    appExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            appIds: [MOCK_APP_ID],
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+        ],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    let res = await request(app)
+      .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'The app not belonging to pipeline or it is deleted.',
+    });
+  });
+  it('Delete application with error app id', async () => {
+    projectExistedMock(ddbMock, true);
+    appExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            appIds: [MOCK_APP_ID],
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: `${MOCK_APP_ID}`,
+          },
+          {
+            name: MOCK_APP_NAME,
+            appId: `${MOCK_APP_ID}-1`,
+          },
+        ],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    let res = await request(app)
+      .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Validate error, AppId: app_7777_7777-1 not match [a-zA-Z][a-zA-Z0-9_]{0,126}(,[a-zA-Z][a-zA-Z0-9_]{0,126})*. Please check and try again.',
     });
   });
   it('Delete application with error pipeline status', async () => {

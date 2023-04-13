@@ -77,14 +77,11 @@ export class StackManager {
     return workflowTemplate;
   }
 
-  public async updateETLWorkflow(pipeline: Pipeline): Promise<void> {
+  public async updateETLWorkflow(pipeline: Pipeline, appIds: string[]): Promise<void> {
     if (!pipeline.workflow) {
       return;
     }
     const curPipeline = pipeline;
-
-    const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
-    const appIds: string[] = apps.items.map(a => a.appId);
 
     let update: boolean = false;
 

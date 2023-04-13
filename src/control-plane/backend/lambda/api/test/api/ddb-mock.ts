@@ -16,6 +16,7 @@ import { clickStreamTableName, dictionaryTableName } from '../../common/constant
 
 const MOCK_TOKEN = '0000-0000';
 const MOCK_PROJECT_ID = 'project_8888_8888';
+const MOCK_APP_NAME = 'app';
 const MOCK_APP_ID = 'app_7777_7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
@@ -153,6 +154,7 @@ function dictionaryMock(ddbMock: any): any {
 export {
   MOCK_TOKEN,
   MOCK_PROJECT_ID,
+  MOCK_APP_NAME,
   MOCK_APP_ID,
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,

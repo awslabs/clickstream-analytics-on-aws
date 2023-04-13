@@ -11,10 +11,12 @@
  *  and limitations under the License.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
+import { MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
+import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStatusType } from '../common/types';
+import { isEmpty } from '../common/utils';
 import { Application } from '../model/application';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -35,9 +37,8 @@ export class ApplicationServ {
 
   public async add(req: any, res: any, next: any) {
     try {
-      const { projectId } = req.body;
+      const { projectId, appId } = req.body;
       req.body.id = projectId;
-      req.body.appId = uuidv4().replace(/-/g, '');
       let app: Application = req.body;
       // Check pipeline status
       const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
@@ -49,8 +50,13 @@ export class ApplicationServ {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
+      const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
+      const appIds: string[] = apps.items.map(a => a.appId);
+      appIds.push(appId);
+      validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+
       const id = await store.addApplication(app);
-      await stackManager.updateETLWorkflow(pipeline);
+      await stackManager.updateETLWorkflow(pipeline, appIds);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -115,8 +121,20 @@ export class ApplicationServ {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
+      const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
+      const appIds: string[] = apps.items.map(a => a.appId);
+      const index = appIds.indexOf(id);
+      if (index > -1) {
+        appIds.splice(index, 1);
+      } else {
+        return res.status(404).json(new ApiFail('The app not belonging to pipeline or it is deleted.'));
+      }
+      if (!isEmpty(appIds)) {
+        validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+      }
+
       await store.deleteApplication(pid, id);
-      await stackManager.updateETLWorkflow(pipeline);
+      await stackManager.updateETLWorkflow(pipeline, appIds);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

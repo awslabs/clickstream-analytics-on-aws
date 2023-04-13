@@ -28,7 +28,10 @@ declare global {
     pipeline?: {
       id: string;
       name: string;
-      status: string;
+      status: {
+        details: IStackStatus[];
+        status: string;
+      };
       endpoint: string;
     };
     createAt?: number;
