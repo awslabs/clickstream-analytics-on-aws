@@ -15,34 +15,7 @@ import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { TestStack } from './TestTask';
-
-function findFirstResource(template: Template, type: string) {
-  const allResources = template.toJSON().Resources;
-  for (const key of Object.keys(allResources)) {
-    const resource = allResources[key];
-    if (resource.Type == type) {
-      return { resource, key };
-    }
-  }
-  return { resource: undefined, key: undefined };
-}
-
-function findResources(template: Template, type: string) {
-  const resources: any[] = [];
-  const allResources = template.toJSON().Resources;
-  for (const key of Object.keys(allResources)) {
-    const r = allResources[key];
-    if (r.Type == type) {
-      resources.push(r);
-    }
-  }
-  return resources;
-}
-
-function findConditionByName(template: Template, conditionName: string) {
-  const allConditions = template.toJSON().Conditions;
-  return allConditions[conditionName];
-}
+import { findConditionByName, findFirstResource, findResources } from '../../utils';
 
 test('Has one autoscaling group', () => {
   const app = new App();

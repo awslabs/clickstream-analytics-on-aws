@@ -14,29 +14,7 @@ import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { IngestionServerStack } from '../../../src/ingestion-server-stack';
 import { validateSubnetsRule } from '../../rules';
-
-function findResourceByCondition(template: Template, condition: string) {
-  const allResources = template.toJSON().Resources;
-  for (const key of Object.keys(allResources)) {
-    const resource = allResources[key];
-    if (resource.Condition == condition) {
-      return resource;
-    }
-  }
-  return;
-}
-
-function getParameter(template: Template, param: string) {
-  return template.toJSON().Parameters[param];
-}
-
-function getParameterNamesFromParameterObject(paramObj: any): string[] {
-  const allParams: string[] = [];
-  for (const k of Object.keys(paramObj)) {
-    allParams.push(paramObj[k].Ref);
-  }
-  return allParams;
-}
+import { findResourceByCondition, getParameter, getParameterNamesFromParameterObject } from '../../utils';
 
 const app = new App();
 

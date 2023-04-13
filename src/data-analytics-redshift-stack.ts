@@ -30,6 +30,10 @@ import { addCfnNagForCfnResource, ruleRolePolicyWithWildcardResources } from './
 import { SolutionInfo } from './common/solution-info';
 
 export class DataAnalyticsRedshiftStack extends Stack {
+  public nestedStacks: {
+    redshiftServerlessStack: RedshiftAnalyticsStack;
+    redshiftProvisionedStack: RedshiftAnalyticsStack;
+  };
   constructor(
     scope: Construct,
     id: string,
@@ -43,7 +47,7 @@ export class DataAnalyticsRedshiftStack extends Stack {
     const p = createStackParameters(this);
     this.templateOptions.metadata = p.metadata;
 
-    createRedshiftAnalyticsStack(this, p.params);
+    this.nestedStacks = createRedshiftAnalyticsStack(this, p.params);
 
     addCfnNagForCfnResource(this, 'CDK built-in custom resource for S3 bucket notification', 'BucketNotificationsHandler[0-9a-fA-F]+',
       undefined, [ruleRolePolicyWithWildcardResources('BucketNotificationsHandler[0-9a-fA-F]+/Role/DefaultPolicy/Resource', 'CDK built-in BucketNotification', 's3')]);

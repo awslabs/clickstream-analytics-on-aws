@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Match, Template } from 'aws-cdk-lib/assertions';
 
 export function genString(length: number): string {
   let c: string[] = [];
@@ -18,4 +19,80 @@ export function genString(length: number): string {
     c.push('a');
   }
   return c.join('');
+}
+
+export const RefAnyValue = {
+  Ref: Match.anyValue(),
+};
+
+export function findResourceByCondition(template: Template, condition: string) {
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const resource = allResources[key];
+    if (resource.Condition == condition) {
+      return resource;
+    }
+  }
+  return;
+}
+
+export function findFirstResourceByKeyPrefix(
+  template: Template,
+  type: string,
+  keyPrefix: string,
+) {
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const resource = allResources[key];
+    if (resource.Type == type && key.startsWith(keyPrefix)) {
+      return {
+        resource,
+        key,
+      };
+    }
+  }
+  return {
+    resource: undefined,
+    key: undefined,
+  };
+}
+
+export function getParameter(template: Template, param: string) {
+  return template.toJSON().Parameters[param];
+}
+
+export function getParameterNamesFromParameterObject(paramObj: any): string[] {
+  const allParams: string[] = [];
+  for (const k of Object.keys(paramObj)) {
+    allParams.push(paramObj[k].Ref);
+  }
+  return allParams;
+}
+
+export function findFirstResource(template: Template, type: string) {
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const resource = allResources[key];
+    if (resource.Type == type) {
+      return { resource, key };
+    }
+  }
+  return { resource: undefined, key: undefined };
+}
+
+export function findResources(template: Template, type: string) {
+  const resources: any[] = [];
+  const allResources = template.toJSON().Resources;
+  for (const key of Object.keys(allResources)) {
+    const r = allResources[key];
+    if (r.Type == type) {
+      resources.push(r);
+    }
+  }
+  return resources;
+}
+
+export function findConditionByName(template: Template, conditionName: string) {
+  const allConditions = template.toJSON().Conditions;
+  return allConditions[conditionName];
 }
