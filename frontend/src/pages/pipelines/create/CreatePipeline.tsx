@@ -19,7 +19,12 @@ import cloneDeep from 'lodash/cloneDeep';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ProtocalType, ResourceCreateMehod, SinkType } from 'ts/const';
+import {
+  ExecutionType,
+  ProtocalType,
+  ResourceCreateMehod,
+  SinkType,
+} from 'ts/const';
 import {
   extractAccountIdFromArn,
   generateDataProcessingInterval,
@@ -51,6 +56,10 @@ const Content: React.FC = () => {
 
   const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
     useState(false);
+  const [
+    dataProcessorIntervalInvalidError,
+    setDataProcessorIntervalInvalidError,
+  ] = useState(false);
 
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>({
     projectId: projectId ?? ''.toString(),
@@ -259,6 +268,19 @@ const Content: React.FC = () => {
     return true;
   };
 
+  const validateDataProcessing = () => {
+    // check data processing interval
+    if (
+      pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
+      parseInt(pipelineInfo.excutionFixedValue) < 3 &&
+      pipelineInfo.selectedExcutionUnit?.value === 'minute'
+    ) {
+      setDataProcessorIntervalInvalidError(true);
+      return false;
+    }
+    return true;
+  };
+
   const confirmCreatePipeline = async () => {
     const createPipelineObj: any = cloneDeep(pipelineInfo);
 
@@ -376,6 +398,9 @@ const Content: React.FC = () => {
           return;
         }
         if (detail.requestedStepIndex === 2 && !validateIngestionServer()) {
+          return;
+        }
+        if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
           return;
         }
         setActiveStepIndex(detail.requestedStepIndex);
@@ -883,6 +908,9 @@ const Content: React.FC = () => {
           content: (
             <DataProcessing
               pipelineInfo={pipelineInfo}
+              dataProcessorIntervalInvalidError={
+                dataProcessorIntervalInvalidError
+              }
               changeEnableDataProcessing={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -892,6 +920,7 @@ const Content: React.FC = () => {
                 });
               }}
               changeExecutionType={(type) => {
+                setDataProcessorIntervalInvalidError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -908,6 +937,7 @@ const Content: React.FC = () => {
                 });
               }}
               changeExecutionFixedValue={(value) => {
+                setDataProcessorIntervalInvalidError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -916,6 +946,7 @@ const Content: React.FC = () => {
                 });
               }}
               changeExecutionFixedUnit={(unit) => {
+                setDataProcessorIntervalInvalidError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,

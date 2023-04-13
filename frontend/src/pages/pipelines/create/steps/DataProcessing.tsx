@@ -60,6 +60,8 @@ interface DataProcessingProps {
 
   changeTransformPlugins: (plugins: IPlugin[]) => void;
   changeEnrichPlugins: (plugins: IPlugin[]) => void;
+
+  dataProcessorIntervalInvalidError: boolean;
 }
 
 const DataProcessing: React.FC<DataProcessingProps> = (
@@ -83,6 +85,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeEnableAthena,
     changeTransformPlugins,
     changeEnrichPlugins,
+    dataProcessorIntervalInvalidError,
   } = props;
 
   const [selectedExecution, setSelectedExecution] = useState(
@@ -213,6 +216,11 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <FormField
                 label={t('pipeline:create.processInterval')}
                 description={t('pipeline:create.processIntervalDesc')}
+                errorText={
+                  dataProcessorIntervalInvalidError
+                    ? t('pipeline:valid.dataProcessorIntervalError')
+                    : ''
+                }
               >
                 <div className="flex">
                   <div style={{ width: 200 }}>

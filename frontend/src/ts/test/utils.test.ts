@@ -107,6 +107,26 @@ describe('generateDataProcessingInterval', () => {
       );
       expect(interval).toEqual('rate(1 hour)');
     });
+
+    it('should return rate with minutes when fixedValue, unit and value > 1', () => {
+      const interval = generateDataProcessingInterval(
+        ExecutionType.FIXED_RATE,
+        2,
+        '',
+        { value: 'minute', label: 'Minutes' }
+      );
+      expect(interval).toEqual('rate(2 minutes)');
+    });
+
+    it('should return rate with minutes when fixedValue, unit and value <= 1', () => {
+      const interval = generateDataProcessingInterval(
+        ExecutionType.FIXED_RATE,
+        1,
+        '',
+        { value: 'minute', label: 'Minutes' }
+      );
+      expect(interval).toEqual('rate(1 minute)');
+    });
   });
 
   describe('when type is ExecutionType.CRON_EXPRESS', () => {

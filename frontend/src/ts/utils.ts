@@ -80,6 +80,8 @@ export const generateDataProcessingInterval = (
     if (fixedValue && fixedValue > 0) {
       if (unit?.value === 'hour') {
         return `rate(${fixedValue} ${fixedValue > 1 ? 'hours' : 'hour'})`;
+      } else if (unit?.value === 'minute') {
+        return `rate(${fixedValue} ${fixedValue > 1 ? 'minutes' : 'minute'})`;
       } else if (unit?.value === 'day') {
         return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
       } else {
