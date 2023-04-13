@@ -110,7 +110,7 @@ const Content: React.FC = () => {
           securityGroupId: '',
         },
         kafkaConnector: {
-          enable: false,
+          enable: true,
         },
       },
       sinkKinesis: {
@@ -181,7 +181,28 @@ const Content: React.FC = () => {
     selectedRedshiftExecutionUnit: null,
 
     selectedTransformPlugins: [],
-    selectedEnrichPlugins: [],
+    selectedEnrichPlugins: [
+      {
+        pluginType: 'Enrich',
+        builtIn: true,
+        dependencyFiles: [],
+        description: '',
+        mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+        jarFile: '',
+        name: 'UAEnrichment',
+        id: 'BUILDIN-2',
+      },
+      {
+        pluginType: 'Enrich',
+        builtIn: true,
+        dependencyFiles: [],
+        description: '',
+        mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+        jarFile: '',
+        name: 'IPEnrichment',
+        id: 'BUILDIN-3',
+      },
+    ],
 
     selectedQuickSightRole: null,
     quickSightDataset: '',
@@ -276,6 +297,8 @@ const Content: React.FC = () => {
       createPipelineObj.etl = null;
       // set dataAnalytics to null when disable data processing
       createPipelineObj.dataAnalytics = null;
+      // kafaka connector to false
+      createPipelineObj.ingestionServer.sinkKafka.kafkaConnector.enable = false;
     }
 
     // set msk cluster when user selected self-hosted

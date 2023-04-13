@@ -124,6 +124,11 @@ export const EVENT_REFRESH_UNIT_LIST = [
   { label: 'Days', value: 'day' },
 ];
 
+export const REDSHIFT_UNIT_LIST = [
+  { label: 'Months', value: 'month' },
+  { label: 'Days', value: 'day' },
+];
+
 export const SDK_LIST: SelectProps.Option[] = [
   {
     label: 'ClickStream SDK',

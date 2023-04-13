@@ -148,11 +148,15 @@ describe('generateRedshiftInterval', () => {
   });
 
   it('should convert hours to minutes', () => {
-    expect(generateRedshiftInterval(2, 'hour')).toBe(120);
+    expect(generateRedshiftInterval(2, 'month')).toBe(86400);
   });
 
   it('should convert days to minutes', () => {
     expect(generateRedshiftInterval(3, 'day')).toBe(4320);
+  });
+
+  it('should return default value while value is null', () => {
+    expect(generateRedshiftInterval()).toBe(259200);
   });
 });
 

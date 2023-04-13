@@ -254,5 +254,6 @@
   "yes": "Yes",
   "no": "No",
   "enabled": "Enabled",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "maxmindCopyRight": "This product includes GeoLite2 data created by MaxMind, available from "
 }

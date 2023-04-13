@@ -15,6 +15,7 @@ import {
   Box,
   Button,
   Header,
+  Link,
   Pagination,
   SpaceBetween,
   Table,
@@ -150,7 +151,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
             id: 'created',
             header: t('pipeline:list.created'),
             cell: (e) => {
-              return moment(e.createAt).format(TIME_FORMAT) || '-';
+              return e.createAt ? moment(e.createAt).format(TIME_FORMAT) : '-';
             },
           },
         ]}
@@ -209,6 +210,14 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
               {title}
             </Header>
             {desc}
+            <>
+              <div className="maxmind-copyright">
+                * {t('maxmindCopyRight')}
+                <Link external href="https://www.maxmind.com">
+                  https://www.maxmind.com
+                </Link>
+              </div>
+            </>
           </>
         }
         pagination={

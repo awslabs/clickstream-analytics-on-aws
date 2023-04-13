@@ -39,6 +39,7 @@ import {
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
+  REDSHIFT_UNIT_LIST,
 } from 'ts/const';
 
 interface DataProcessingProps {
@@ -94,7 +95,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     pipelineInfo.selectedEventFreshUnit || EVENT_REFRESH_UNIT_LIST[1]
   );
   const [selectedRedshiftExeUnit, setSelectedRedshiftExeUnit] = useState(
-    pipelineInfo.selectedRedshiftExecutionUnit || EXCUTION_UNIT_LIST[0]
+    pipelineInfo.selectedRedshiftExecutionUnit || REDSHIFT_UNIT_LIST[0]
   );
   const [loadingRedshift, setLoadingRedshift] = useState(false);
   const [redshiftOptionList, setRedshiftOptionList] =
@@ -405,9 +406,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           <b>{t('pipeline:create.duration')}</b>
                         </div>
                         <Input
-                          placeholder={
-                            t('pipeline:create.engineDurationPlaceholder') || ''
-                          }
+                          placeholder="6"
                           type="number"
                           value={pipelineInfo.redshiftExecutionValue}
                           onChange={(e) => {
@@ -424,7 +423,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           onChange={({ detail }) => {
                             setSelectedRedshiftExeUnit(detail.selectedOption);
                           }}
-                          options={EXCUTION_UNIT_LIST}
+                          options={REDSHIFT_UNIT_LIST}
                         />
                       </div>
                     </div>

@@ -12,6 +12,7 @@
  */
 
 import {
+  Alert,
   Button,
   Checkbox,
   ColumnLayout,
@@ -300,6 +301,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           </FormField>
 
           {pipelineInfo.ingestionServer.loadBalancer.protocol ===
+            ProtocalType.HTTP && (
+            <Alert type="warning" header={t('pipeline:create.securityWarning')}>
+              {t('pipeline:create.securityWarningDesc')}
+            </Alert>
+          )}
+
+          {pipelineInfo.ingestionServer.loadBalancer.protocol ===
             ProtocalType.HTTPS && (
             <Grid
               gridDefinition={[{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }]}
@@ -356,6 +364,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 />
               </div>
             </Grid>
+          )}
+
+          {pipelineInfo.ingestionServer.loadBalancer.protocol ===
+            ProtocalType.HTTPS && (
+            <Alert header={t('pipeline:create.nextSteps')}>
+              {t('pipeline:create.nextStepsDesc')}
+            </Alert>
           )}
 
           <ExpandableSection headerText={t('addtionalSettings')}>

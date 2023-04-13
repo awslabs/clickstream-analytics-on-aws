@@ -99,14 +99,18 @@ export const generateDataProcessingInterval = (
   }
 };
 
-export const generateRedshiftInterval = (value: number, unit?: string) => {
-  if (unit === 'hour') {
-    return value * 60;
+export const generateRedshiftInterval = (value?: number, unit?: string) => {
+  if (value) {
+    if (unit === 'month') {
+      return value * 60 * 24 * 30;
+    }
+    if (unit === 'day') {
+      return value * 60 * 24;
+    }
+    return value;
+  } else {
+    return 6 * 60 * 24 * 30;
   }
-  if (unit === 'day') {
-    return value * 60 * 24;
-  }
-  return value;
 };
 
 export const extractAccountIdFromArn = (arn: string) => {
