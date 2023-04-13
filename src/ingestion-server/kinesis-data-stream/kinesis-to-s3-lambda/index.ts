@@ -42,7 +42,7 @@ export const handler = async (event: KinesisStreamEvent) => {
   logger.info('dataLines length: ' + dataLines.length);
   if (dataLines.length > 0) {
     const fileName = `${uuid_v4()}.gz`;
-    const key = `${s3Prefix}/${partition}/${fileName}`;
+    const key = `${s3Prefix}${partition}/${fileName}`;
     await stringToS3(dataLines, key);
   }
 };

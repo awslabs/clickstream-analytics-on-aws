@@ -86,7 +86,7 @@ const eventError: KinesisStreamEvent = {
 };
 
 process.env.S3_BUCKET = 'test-bucket';
-process.env.S3_PREFIX = 'test-prefix';
+process.env.S3_PREFIX = 'test-prefix/';
 process.env.LOG_LEVEL = 'WARN';
 
 import { KinesisStreamEvent } from 'aws-lambda';
