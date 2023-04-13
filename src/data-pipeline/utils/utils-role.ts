@@ -117,7 +117,7 @@ export class RoleUtil {
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sourceTable.tableName}`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),
         ],
-        actions: ['glue:GetDatabase', 'glue:GetTable', 'glue:GetPartitions'],
+        actions: ['glue:CreateDatabase', 'glue:GetDatabase', 'glue:GetTable', 'glue:GetPartitions'],
       }),
 
       new PolicyStatement({

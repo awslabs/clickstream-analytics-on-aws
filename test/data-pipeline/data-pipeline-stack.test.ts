@@ -921,6 +921,7 @@ describe ('ETL job submitter', () => {
           },
           {
             Action: [
+              'glue:CreateDatabase',
               'glue:GetDatabase',
               'glue:GetTable',
               'glue:GetPartitions',
