@@ -12,7 +12,7 @@
  */
 
 export const INIT_PROJECT_DATA = {
-  id: 'my_project_talbe_id',
+  id: 'my_project_id',
   name: '',
   description: '',
   emails: '',
