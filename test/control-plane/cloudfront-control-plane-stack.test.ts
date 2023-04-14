@@ -487,6 +487,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasOutput('ControlPlaneUrl', {});
     template.hasOutput('PortalBucket', {});
     template.hasOutput('LogBucket', {});
+    template.hasOutput('CloudFrontDomainName', {});
   });
 
   test('OIDC authorizer', () => {

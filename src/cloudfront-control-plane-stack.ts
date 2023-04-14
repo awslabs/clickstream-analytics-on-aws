@@ -99,12 +99,6 @@ export class CloudFrontControlPlaneStack extends Stack {
         iamCertificateId.logicalId,
         domainName.logicalId,
       );
-
-      new CfnOutput(this, 'CustomDomainName', {
-        description: 'Custom domain name',
-        value: domainName.valueAsString,
-      }).overrideLogicalId('CustomDomainName');
-
     } else {
       if (props?.useCustomDomainName) {
 
@@ -321,6 +315,13 @@ export class CloudFrontControlPlaneStack extends Stack {
       description: 'Bucket to store access log',
       value: controlPlane.logBucket.bucketName,
     }).overrideLogicalId('LogBucket');
+
+    if (cnCloudFrontS3PortalProps !== undefined) {
+      new CfnOutput(this, 'CloudFrontDomainName', {
+        description: 'CloudFront domain name',
+        value: controlPlane.distribution.distributionDomainName,
+      }).overrideLogicalId('CloudFrontDomainName');
+    }
 
     // nag
     addCfnNag(this);

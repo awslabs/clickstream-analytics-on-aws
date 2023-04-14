@@ -232,7 +232,7 @@ export class CloudFrontS3Portal extends Construct {
         ],
       );
 
-      this.controlPlaneUrl = 'https://' + this.distribution.distributionDomainName;
+      this.controlPlaneUrl = 'https://' + props.cnCloudFrontS3PortalProps.domainName;
 
     } else {
       origin = new S3Origin(portalBucket);
