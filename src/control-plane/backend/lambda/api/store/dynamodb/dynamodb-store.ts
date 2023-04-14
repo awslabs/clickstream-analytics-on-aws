@@ -26,7 +26,7 @@ import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '..
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
 import { KeyVal, PipelineStatus } from '../../common/types';
-import { isEmpty, tryToJson } from '../../common/utils';
+import { isEmpty } from '../../common/utils';
 import { Application, ApplicationList } from '../../model/application';
 import { Dictionary } from '../../model/dictionary';
 import {
@@ -771,7 +771,15 @@ export class DynamoDbStore implements ClickStreamStore {
     if (pluginId.startsWith('BUILDIN')) {
       const dic = await this.getDictionary('BuildInPlugins');
       if (dic) {
-        let buildInPlugins = tryToJson(dic.data) as Plugin[];
+        let buildInPlugins: Plugin[] = [];
+        for (let p of dic.data) {
+          p.createAt = +p.createAt;
+          p.updateAt = +p.updateAt;
+          p.bindCount = +p.bindCount;
+          p.builtIn = p.builtIn === 'true';
+          p.deleted = p.deleted === 'true';
+          buildInPlugins.push(p as Plugin);
+        }
         buildInPlugins = buildInPlugins.filter(p => p.id === pluginId);
         return !isEmpty(buildInPlugins) ? buildInPlugins[0] : undefined;
       }
@@ -847,7 +855,15 @@ export class DynamoDbStore implements ClickStreamStore {
     };
     const dic = await this.getDictionary('BuildInPlugins');
     if (dic) {
-      let buildInPlugins = tryToJson(dic.data) as Plugin[];
+      let buildInPlugins: Plugin[] = [];
+      for (let p of dic.data) {
+        p.createAt = +p.createAt;
+        p.updateAt = +p.updateAt;
+        p.bindCount = +p.bindCount;
+        p.builtIn = p.builtIn === 'true';
+        p.deleted = p.deleted === 'true';
+        buildInPlugins.push(p as Plugin);
+      }
       if (!isEmpty(pluginType)) {
         buildInPlugins = buildInPlugins.filter(p => p.pluginType === pluginType);
       }

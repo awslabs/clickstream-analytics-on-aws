@@ -124,7 +124,59 @@ function dictionaryMock(ddbMock: any): any {
   }).resolves({
     Item: {
       name: 'BuildInPlugins',
-      data: '[{"id":"BUILDIN-1","type":"PLUGIN#BUILDIN-1","prefix":"PLUGIN","name":"Transformer","description":"Description of Transformer","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.Transformer","jarFile":"","bindCount":0,"pluginType":"Transform","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000001,"updateAt":1000000000001},{"id":"BUILDIN-2","type":"PLUGIN#BUILDIN-2","prefix":"PLUGIN","name":"UAEnrichment","description":"Description of UAEnrichment","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.UAEnrichment","jarFile":"","bindCount":0,"pluginType":"Enrich","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000002,"updateAt":1000000000002},{"id":"BUILDIN-3","type":"PLUGIN#BUILDIN-3","prefix":"PLUGIN","name":"UAEnrichment","description":"Description of IPEnrichment","builtIn":true,"mainFunction":"sofeware.aws.solution.clickstream.IPEnrichment","jarFile":"","bindCount":0,"pluginType":"Enrich","dependencyFiles":[],"operator":"","deleted":false,"createAt":1000000000003,"updateAt":1000000000003}]',
+      data: [
+        {
+          id: 'BUILDIN-1',
+          type: 'PLUGIN#BUILDIN-1',
+          prefix: 'PLUGIN',
+          name: 'Transformer',
+          description: 'Description of Transformer',
+          builtIn: 'true',
+          mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
+          jarFile: '',
+          bindCount: '0',
+          pluginType: 'Transform',
+          dependencyFiles: [],
+          operator: '',
+          deleted: 'false',
+          createAt: '1667355960000',
+          updateAt: '1667355960000',
+        },
+        {
+          id: 'BUILDIN-2',
+          type: 'PLUGIN#BUILDIN-2',
+          prefix: 'PLUGIN',
+          name: 'UAEnrichment',
+          description: 'Description of UAEnrichment',
+          builtIn: 'true',
+          mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+          jarFile: '',
+          bindCount: '0',
+          pluginType: 'Enrich',
+          dependencyFiles: [],
+          operator: '',
+          deleted: 'false',
+          createAt: '1667355960000',
+          updateAt: '1667355960000',
+        },
+        {
+          id: 'BUILDIN-3',
+          type: 'PLUGIN#BUILDIN-3',
+          prefix: 'PLUGIN',
+          name: 'IPEnrichment',
+          description: 'Description of IPEnrichment',
+          builtIn: 'true',
+          mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+          jarFile: '',
+          bindCount: '0',
+          pluginType: 'Enrich',
+          dependencyFiles: [],
+          operator: '',
+          deleted: 'false',
+          createAt: '1667355960000',
+          updateAt: '1667355960000',
+        },
+      ],
     },
   });
   ddbMock.on(GetCommand, {
@@ -135,7 +187,14 @@ function dictionaryMock(ddbMock: any): any {
   }).resolves({
     Item: {
       name: 'Templates',
-      data: '{"ingestion_s3": "ingestion-server-s3-stack.template.json","ingestion_kafka": "ingestion-server-kafka-stack.template.json","ingestion_kinesis": "ingestion-server-kinesis-stack.template.json","kafka-s3-sink": "kafka-s3-sink-stack.template.json","data-pipeline": "data-pipeline-stack.template.json","data-analytics": "data-analytics-redshift-stack.template.json"}',
+      data: {
+        'ingestion_s3': 'ingestion-server-s3-stack.template.json',
+        'ingestion_kafka': 'ingestion-server-kafka-stack.template.json',
+        'ingestion_kinesis': 'ingestion-server-kinesis-stack.template.json',
+        'kafka-s3-sink': 'kafka-s3-sink-stack.template.json',
+        'data-pipeline': 'data-pipeline-stack.template.json',
+        'data-analytics': 'data-analytics-redshift-stack.template.json',
+      },
     },
   });
   ddbMock.on(GetCommand, {
@@ -146,7 +205,11 @@ function dictionaryMock(ddbMock: any): any {
   }).resolves({
     Item: {
       name: 'Solution',
-      data: '{"name": "clickstream-branch-main","dist_output_bucket": "EXAMPLE-BUCKET","prefix": "feature-rel/main/default"}',
+      data: {
+        name: 'clickstream-branch-main',
+        dist_output_bucket: 'EXAMPLE-BUCKET',
+        prefix: 'feature-rel/main/default',
+      },
     },
   });
 }

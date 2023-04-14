@@ -14,7 +14,6 @@
 import path from 'path';
 import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -22,7 +21,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { DicItem } from './click-stream-api';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { cloudWatchSendLogs } from '../../common/lambda';
+import { cloudWatchSendLogs, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface CdkCallCustomResourceProps {
@@ -36,22 +35,6 @@ export class BatchInsertDDBCustomResource extends Construct {
   constructor(scope: Construct, id: string, props: CdkCallCustomResourceProps) {
     super(scope, id);
 
-    const customResourceFunctionRole = new Role(this, 'DicInitCustomResourceFunctionRole', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-      inlinePolicies: {
-        ddb: new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: [
-                'dynamodb:BatchWriteItem',
-              ],
-              resources: [props.table.tableArn],
-            }),
-          ],
-        }),
-      },
-    });
-
     const customResourceLambda = new NodejsFunction(this, 'DicInitCustomResourceFunction', {
       description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       entry: path.join(__dirname, './lambda/batch-insert-ddb/index.ts'),
@@ -59,8 +42,9 @@ export class BatchInsertDDBCustomResource extends Construct {
       timeout: Duration.seconds(30),
       runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       memorySize: 256,
+      reservedConcurrentExecutions: 1,
+      role: createLambdaRole(this, 'DicInitCustomResourceRole', false, []),
       architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
-      role: customResourceFunctionRole,
       environment: {
         ... POWERTOOLS_ENVS,
       },

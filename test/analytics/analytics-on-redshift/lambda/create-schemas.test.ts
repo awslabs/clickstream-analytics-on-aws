@@ -13,12 +13,12 @@
 import { DescribeStatementCommand, BatchExecuteStatementCommand, BatchExecuteStatementCommandInput, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getMockContext } from './context';
-import { basicCloudFormationEvent } from './event';
 import { handler } from '../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../../../../src/analytics/private/model';
 import { TABLE_NAME_ODS_EVENT } from '../../../../src/common/constant';
+import { getMockContext } from '../../../common/lambda-context';
+import { basicCloudFormationEvent } from '../../../common/lambda-events';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 

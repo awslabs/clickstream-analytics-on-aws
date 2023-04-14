@@ -16,11 +16,11 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { ScheduledEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getMockContext } from './context';
 import { handler, ODSEventItem } from '../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
 import { JobStatus } from '../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 import { PARTITION_APP } from '../../../../src/common/constant';
+import { getMockContext } from '../../../common/lambda-context';
 
 describe('Lambda - Create manifest for Redshift COPY', () => {
 

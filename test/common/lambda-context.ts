@@ -17,9 +17,9 @@ export function getMockContext(): Context {
   const getRemainingTimeInMillis = jest.fn(() => {return 10;});
   return {
     callbackWaitsForEmptyEventLoop: true,
-    functionName: 'create-redshift-schemas',
+    functionName: 'lambda-test-func',
     functionVersion: '1.0',
-    invokedFunctionArn: 'arn:aws:lambda:us-east-2:xxxxxxxxxxxx:function:analytics-hot-data-stack-CreateRedshiftSchemas-9mIwe6o7bhNz',
+    invokedFunctionArn: 'arn:aws:lambda:us-east-2:xxxxxxxxxxxx:function:lambda-test-func-9mIwe6o7bhNz',
     memoryLimitInMB: '256',
     awsRequestId: 'request-id-1',
     logGroupName: 'logGroup1',

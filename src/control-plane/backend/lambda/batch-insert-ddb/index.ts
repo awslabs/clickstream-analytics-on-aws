@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { Logger } from '@aws-lambda-powertools/logger';
 import {
   DynamoDBClient,
   BatchWriteItemCommand,
@@ -19,27 +18,26 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import {
   DeleteCommand,
-  DynamoDBDocumentClient, ScanCommand,
+  DynamoDBDocumentClient,
+  ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
   Context,
 } from 'aws-lambda';
-
-export const POWERTOOLS_ENVS = {
-  POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-  POWERTOOLS_LOGGER_SAMPLE_RATE: '0.5',
-  POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-  LOG_LEVEL: 'WARN',
-};
-
-const logger = new Logger();
+import { logger } from '../../../../common/powertools';
 
 // Create an Amazon DynamoDB service client object.
 const ddbClient = new DynamoDBClient({});
 // Create the DynamoDB Document client.
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+interface DicItem {
+  readonly name: string;
+  readonly data: any;
+}
 
 export const handler = async (
   event: CdkCustomResourceEvent,
@@ -52,32 +50,30 @@ export const handler = async (
     RequestId: event.RequestId,
     LogicalResourceId: event.LogicalResourceId,
     PhysicalResourceId: context.logGroupName,
+    Data: {
+      TableName: event.ResourceProperties.tableName,
+    },
     Status: 'SUCCESS',
   };
 
   try {
-    switch (event.RequestType) {
-      case 'Create':
-      case 'Update':
-        await cleanData(event);
-        await batchInsert(event);
-        return response;
-      case 'Delete':
-        await cleanData(event);
-        return response;
+    await _handler(event);
+  } catch (e) {
+    if (e instanceof Error) {
+      logger.error('Batch insert error.', e);
     }
-  } catch (error) {
-    logger.error('Batch insert error.', {
-      error: error,
-      event: event,
-    });
-    throw new Error('Batch insert error.');
+    throw e;
   }
+  return response;
 };
 
-export interface DicItem {
-  readonly name: string;
-  readonly data: any;
+async function _handler(event: CdkCustomResourceEvent) {
+  const requestType = event.RequestType;
+
+  if (requestType == 'Create' || requestType == 'Update') {
+    await cleanData(event);
+    await batchInsert(event);
+  }
 }
 
 async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
@@ -85,43 +81,16 @@ async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
   const items: DicItem[] = event.ResourceProperties.items;
   const itemsAsDynamoPutRequest: any[] = [];
   items.forEach(item => {
-    if ((typeof item.data) === 'string') {
-      itemsAsDynamoPutRequest.push({
-        PutRequest: {
-          Item: {
-            name: { S: item.name },
-            data: { S: item.data },
-          },
-        },
-      });
-    } else if ((typeof item.data) === 'number') {
-      itemsAsDynamoPutRequest.push({
-        PutRequest: {
-          Item: {
-            name: { S: item.name },
-            data: { N: item.data.toString() },
-          },
-        },
-      });
-    } else if ((typeof item.data) === 'boolean') {
-      itemsAsDynamoPutRequest.push({
-        PutRequest: {
-          Item: {
-            name: { S: item.name },
-            data: { BOOL: item.data },
-          },
-        },
-      });
-    } else if ((typeof item.data) === 'object') {
-      itemsAsDynamoPutRequest.push({
-        PutRequest: {
-          Item: {
-            name: { S: item.name },
-            data: { S: JSON.stringify(item.data) },
-          },
-        },
-      });
-    }
+    const marshallItem = marshall(item, {
+      convertEmptyValues: true,
+      removeUndefinedValues: true,
+      convertClassInstanceToMap: true,
+    });
+    itemsAsDynamoPutRequest.push({
+      PutRequest: {
+        Item: marshallItem,
+      },
+    });
   });
   const input: BatchWriteItemCommandInput = {
     RequestItems: {

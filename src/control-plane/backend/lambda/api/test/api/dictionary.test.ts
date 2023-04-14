@@ -27,9 +27,16 @@ describe('Dictionary test', () => {
       Items: [
         {
           name: 'D1',
-          data: '{"solution_template_url":"https://xxxx/xxxx/......","solution_name":"click stream","solution_version":"v1.0.1"}',
+          data: {
+            name: '__SOLUTION_NAME__',
+            dist_output_bucket: '__DIST_OUTPUT_BUCKET__',
+            prefix: '__PREFIX__',
+          },
         },
         { name: 'D2', data: 'd2' },
+        { name: 'D3', data: 1 },
+        { name: 'D4', data: [1, 2, 3] },
+        { name: 'D4', data: [{ a: 1 }] },
       ],
     });
     let res = await request(app)
@@ -43,12 +50,15 @@ describe('Dictionary test', () => {
         {
           name: 'D1',
           data: {
-            solution_template_url: 'https://xxxx/xxxx/......',
-            solution_name: 'click stream',
-            solution_version: 'v1.0.1',
+            name: '__SOLUTION_NAME__',
+            dist_output_bucket: '__DIST_OUTPUT_BUCKET__',
+            prefix: '__PREFIX__',
           },
         },
         { name: 'D2', data: 'd2' },
+        { name: 'D3', data: 1 },
+        { name: 'D4', data: [1, 2, 3] },
+        { name: 'D4', data: [{ a: 1 }] },
       ],
     });
 

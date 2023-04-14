@@ -13,7 +13,6 @@
 
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { tryToJson } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -29,7 +28,6 @@ export class DictionaryServ {
         logger.warn(`No Dictionary with Name ${name} found in the databases while trying to retrieve a Dictionary`);
         return res.status(404).send(new ApiFail('Dictionary not found'));
       }
-      result.data = tryToJson(result.data);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -39,9 +37,6 @@ export class DictionaryServ {
   public async list(_req: any, res: any, next: any) {
     try {
       const result = await store.listDictionary();
-      for (var i = 0; i < result?.length; i++) {
-        result[i].data = tryToJson(result[i].data);
-      }
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
