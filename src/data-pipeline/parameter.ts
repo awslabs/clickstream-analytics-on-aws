@@ -58,6 +58,13 @@ export function createStackParameters(scope: Construct) {
     type: 'Number',
   });
 
+  const dataBufferedSecondsParam = new CfnParameter(scope, 'DataBufferedSeconds', {
+    description: 'Max time for data in buffer (time from ingestion server to S3)',
+    default: 360,
+    minValue: 30,
+    type: 'Number',
+  });
+
   const scheduleExpressionParam = new CfnParameter(scope, 'ScheduleExpression', {
     description: 'The schedule expression to run ETL job, e.g: rate(24 hours) or cron(0 1 * * ? *)',
     default: 'cron(0 1 * * ? *)',
@@ -135,6 +142,7 @@ export function createStackParameters(scope: Construct) {
           Parameters: [
             dataFreshnessInHourParam.logicalId,
             scheduleExpressionParam.logicalId,
+            dataBufferedSecondsParam.logicalId,
           ],
         },
 
@@ -187,6 +195,10 @@ export function createStackParameters(scope: Construct) {
           default: 'Data freshness',
         },
 
+        [dataBufferedSecondsParam.logicalId]: {
+          default: 'Max time for data in buffer',
+        },
+
         [scheduleExpressionParam.logicalId]: {
           default: 'Job schedule expression',
         },
@@ -224,6 +236,7 @@ export function createStackParameters(scope: Construct) {
       pipelineS3BucketParam,
       pipelineS3PrefixParam,
       dataFreshnessInHourParam,
+      dataBufferedSecondsParam,
       scheduleExpressionParam,
       transformerAndEnrichClassNamesParam,
       s3PathPluginJarsParam,

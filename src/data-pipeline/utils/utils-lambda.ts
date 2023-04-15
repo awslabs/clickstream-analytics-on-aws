@@ -20,6 +20,7 @@ import { Runtime, Tracing, Function } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
 import { RoleUtil } from './utils-role';
@@ -40,6 +41,7 @@ interface Props {
   readonly pipelineS3Bucket: IBucket;
   readonly pipelineS3Prefix: string;
   readonly dataFreshnessInHour: string;
+  readonly dataBufferedSeconds: string;
   readonly transformerAndEnrichClassNames: string;
   readonly s3PathPluginJars: string;
   readonly s3PathPluginFiles: string;
@@ -181,6 +183,7 @@ export class LambdaUtil {
         PIPELINE_S3_BUCKET_NAME: this.props.pipelineS3Bucket.bucketName,
         PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
         DATA_FRESHNESS_IN_HOUR: this.props.dataFreshnessInHour,
+        DATA_BUFFERED_SECONDS: this.props.dataBufferedSeconds,
         SCHEDULE_EXPRESSION: this.props.scheduleExpression,
         TRANSFORMER_AND_ENRICH_CLASS_NAMES: this.props.transformerAndEnrichClassNames,
         S3_PATH_PLUGIN_JARS: this.props.s3PathPluginJars,
@@ -195,8 +198,9 @@ export class LambdaUtil {
     return fn;
   }
 
-  public createEmrJobStateListenerLambda(emrApplicationId: string) {
+  public createEmrJobStateListenerLambda(emrApplicationId: string, dlSqs: Queue) {
     const lambdaRole = this.roleUtil.createEmrJobStateListenerLambdaRole(emrApplicationId);
+    dlSqs.grantSendMessages(lambdaRole);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
     const lambdaSecurityGroup = this.createSecurityGroup(
@@ -219,6 +223,7 @@ export class LambdaUtil {
         PROJECT_ID: this.props.projectId,
         PIPELINE_S3_BUCKET_NAME: this.props.pipelineS3Bucket.bucketName,
         PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
+        DL_QUEUE_URL: dlSqs.queueUrl,
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,

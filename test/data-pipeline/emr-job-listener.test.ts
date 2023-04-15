@@ -19,6 +19,7 @@ import zlib from 'zlib';
 import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
 import { EMRServerlessClient, GetJobRunCommand } from '@aws-sdk/client-emr-serverless';
 import { CopyObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { EventBridgeEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -27,22 +28,27 @@ import 'aws-sdk-client-mock-jest';
 const gzip = util.promisify(zlib.gzip);
 
 const s3ClientMock = mockClient(S3Client);
+
 //@ts-ignore
 const cwClientMock = mockClient(CloudWatchClient);
 const emrClientMock = mockClient(EMRServerlessClient);
+//@ts-ignore
+const sqsClientMock = mockClient(SQSClient);
 
 process.env.EMR_SERVERLESS_APPLICATION_ID = 'test_id';
 process.env.STACK_ID = 'test-stack-id';
 process.env.PROJECT_ID = 'project_id1';
 process.env.PIPELINE_S3_BUCKET_NAME = 'bucket1';
 process.env.PIPELINE_S3_PREFIX = 'prefix1/';
-
+process.env.DL_QUEUE_URL = 'dl_sqs_url';
 
 import { handler } from '../../src/data-pipeline/lambda/emr-job-state-listener';
 
 beforeEach(() => {
   s3ClientMock.reset();
   cwClientMock.reset();
+  emrClientMock.reset();
+  sqsClientMock.reset();
 });
 
 test('lambda should not record SUBMITTED job', async () => {
@@ -144,7 +150,7 @@ test('lambda should record SUCCESS job state', async () => {
 
   await handler(event);
 
-  expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 2);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 1);
   //@ts-ignore
   expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 1);
 
@@ -198,4 +204,44 @@ test('lambda should not record PENDING job', async () => {
   expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 0);
 
 });
+
+
+test('lambda should send FAILDE job info to dead letter queue', async () => {
+  const event: EventBridgeEvent<string, any> = {
+    'version': '0',
+    'id': '25613b91-cf44-49a4-41f8-4d4205a28994',
+    'detail-type': 'EMR Serverless Job Run State Change',
+    'source': 'aws.emr-serverless',
+    'account': 'xxxxxxxxxx',
+    'time': '2023-03-31T07:27:40Z',
+    'region': 'us-east-1',
+    'resources': [],
+    'detail': {
+      jobRunId: 'job_run_id1',
+      applicationId: 'test_id',
+      state: 'FAILED',
+    },
+  };
+
+  const jobInfoMsg = JSON.stringify({ test: 'test Info' });
+
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: {
+      transformToString: () => jobInfoMsg,
+    },
+  } as any);
+
+  await handler(event);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 1);
+  //@ts-ignore
+  expect(sqsClientMock).toHaveReceivedCommandTimes(SendMessageCommand, 1);
+
+  //@ts-ignore
+  expect(sqsClientMock).toHaveReceivedNthCommandWith(1, SendMessageCommand, {
+    QueueUrl: 'dl_sqs_url',
+    MessageBody: jobInfoMsg,
+  } as any);
+
+});
+
 

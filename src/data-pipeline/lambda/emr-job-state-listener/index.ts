@@ -14,10 +14,11 @@
 import path from 'path';
 import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
 import { GetJobRunCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { EventBridgeEvent } from 'aws-lambda';
 import { METRIC_NAMESPACE_DATAPIPELINE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-import { copyS3Object, processS3GzipObjectLineByLine } from '../../../common/s3';
+import { copyS3Object, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
 import { getJobInfoKey } from '../../utils/utils-common';
 
 const emrApplicationId = process.env.EMR_SERVERLESS_APPLICATION_ID!;
@@ -25,9 +26,11 @@ const stackId = process.env.STACK_ID!;
 const projectId = process.env.PROJECT_ID!;
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
+const dlQueueUrl = process.env.DL_QUEUE_URL!;
 
 const cwClient = new CloudWatchClient({});
 const emrClient = new EMRServerlessClient({});
+const sqsClient = new SQSClient({});
 
 export const handler = async (event: EventBridgeEvent<string, { jobRunId: string; applicationId: string; state: string }>) => {
   logger.info('Triggered from  event', { event });
@@ -43,12 +46,6 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
     projectId,
   }, event.detail.jobRunId);
 
-  const latestStateFile = getJobInfoKey({
-    pipelineS3Prefix,
-    stackId,
-    projectId,
-  }, 'latest');
-
   const jobFinishStateFile = getJobInfoKey({
     pipelineS3Prefix,
     stackId,
@@ -59,19 +56,10 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
     return `s3://${pipelineS3BucketName}/${key}`;
   };
 
-  if (jobState == 'SUCCESS') {
-    // only SUCCESS update the job state
-    await copyS3Object(buildS3Uri(jobStartStateFile), buildS3Uri(latestStateFile));
-  }
-
   // Only record SUCCESS/FAILED jobs
   const recoredStates = [
     'SUCCESS',
     'FAILED',
-    // 'SUBMITTED',
-    // 'PENDING',
-    // 'RUNNING',
-    // 'SCHEDULED',
   ];
   if (recoredStates.includes(jobState)) {
     await copyS3Object(buildS3Uri(jobStartStateFile), buildS3Uri(jobFinishStateFile));
@@ -80,7 +68,19 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
   if (jobState == 'SUCCESS') {
     await sendMetrics(event);
   }
+
+  if (jobState == 'FAILED') {
+    const jobSubmitInfo = await readS3ObjectAsJson(pipelineS3BucketName, jobStartStateFile);
+    await putFailedJobInfoToDLQueue(JSON.stringify(jobSubmitInfo));
+  }
 };
+
+async function putFailedJobInfoToDLQueue(jobSubmitInfoMessage: string) {
+  await sqsClient.send(new SendMessageCommand({
+    QueueUrl: dlQueueUrl,
+    MessageBody: jobSubmitInfoMessage,
+  }));
+}
 
 async function sendMetrics(event: any) {
 

@@ -33,7 +33,7 @@ const commonDevDeps = [
   'aws-sdk-client-mock-jest@^2.1.1',
 ];
 
-const awsSDKVersion = '3.306.0';
+const awsSDKVersion = '3.310.0';
 const awsSDKDeps = [
   '@aws-sdk/credential-providers',
   '@aws-sdk/client-kafkaconnect',
@@ -44,6 +44,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-redshift',
   '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-emr-serverless',
+  '@aws-sdk/client-sqs',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [

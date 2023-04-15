@@ -276,7 +276,7 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(16);
+    expect(paramCount).toEqual(17);
   });
 
 
@@ -300,6 +300,16 @@ describe('DataPipelineStack parameter test', () => {
       Type: 'Number',
     });
   });
+
+
+  test('Should has parameter DataBufferedSeconds', () => {
+    template.hasParameter('DataBufferedSeconds', {
+      Default: 360,
+      MinValue: 30,
+      Type: 'Number',
+    });
+  });
+
 
   test('Should has parameter ScheduleExpression', () => {
     template.hasParameter('ScheduleExpression', {
@@ -819,6 +829,7 @@ describe ('ETL job submitter', () => {
           PIPELINE_S3_BUCKET_NAME: RefAnyValue,
           PIPELINE_S3_PREFIX: RefAnyValue,
           DATA_FRESHNESS_IN_HOUR: RefAnyValue,
+          DATA_BUFFERED_SECONDS: RefAnyValue,
           SCHEDULE_EXPRESSION: RefAnyValue,
           TRANSFORMER_AND_ENRICH_CLASS_NAMES: Match.anyValue(),
           S3_PATH_PLUGIN_JARS: Match.anyValue(),

@@ -12,12 +12,14 @@
  */
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
-import { aws_lambda as lambda, Fn, Stack } from 'aws-cdk-lib';
+import { Fn, Stack, CfnResource } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { Function } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import {
   InitPartitionCustomResourceProps,
@@ -28,7 +30,7 @@ import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
-import { addCfnNagToSecurityGroup } from '../common/cfn-nag';
+import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
 import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
 
@@ -46,6 +48,7 @@ export interface DataPipelineProps {
   readonly pipelineS3Bucket: IBucket;
   readonly pipelineS3Prefix: string;
   readonly dataFreshnessInHour: string;
+  readonly dataBufferedSeconds: string;
   readonly transformerAndEnrichClassNames: string;
   readonly s3PathPluginJars?: string;
   readonly s3PathPluginFiles?: string;
@@ -62,6 +65,8 @@ export class DataPipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props: DataPipelineProps) {
     super(scope, id);
     this.props = props;
+
+    const dlQueue = this.createDLQueue();
 
     const pluginPrefix = Fn.join('', [this.props.pipelineS3Prefix, Fn.join('/', [
       'plugins',
@@ -118,6 +123,7 @@ export class DataPipelineConstruct extends Construct {
         sinkS3Prefix: this.props.sinkS3Prefix,
         appIds: this.props.appIds,
         dataFreshnessInHour: this.props.dataFreshnessInHour,
+        dataBufferedSeconds: this.props.dataBufferedSeconds,
         transformerAndEnrichClassNames:
           this.props.transformerAndEnrichClassNames,
         scheduleExpression: this.props.scheduleExpression,
@@ -140,7 +146,7 @@ export class DataPipelineConstruct extends Construct {
       emrServerlessApp.attrApplicationId,
     );
 
-    this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId);
+    this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId, dlQueue);
   }
 
   private createGlueResources(props: DataPipelineProps) {
@@ -187,7 +193,7 @@ export class DataPipelineConstruct extends Construct {
 
   private scheduleLambda(
     id: string,
-    lambdaFunction: lambda.Function,
+    lambdaFunction: Function,
     scheduleExpression: string,
   ) {
     new Rule(this, id, {
@@ -242,9 +248,10 @@ export class DataPipelineConstruct extends Construct {
     return serverlessApp;
   }
 
-  private createEmrServerlessJobStateEventListener(applicationId: string) {
+  private createEmrServerlessJobStateEventListener(applicationId: string, dlSQS: Queue) {
     const emrJobStateListenerLambda = this.lambdaUtil.createEmrJobStateListenerLambda(
       applicationId,
+      dlSQS,
     );
     new Rule(this, 'EmrServerlessJobStateEventRule', {
       eventPattern: {
@@ -253,5 +260,19 @@ export class DataPipelineConstruct extends Construct {
       },
       targets: [new LambdaFunction(emrJobStateListenerLambda)],
     });
+  }
+
+  private createDLQueue() {
+    const sqs = new Queue(this, 'ClickstreamDataPipelineDLQ', {
+      encryption: QueueEncryption.SQS_MANAGED,
+      enforceSSL: true,
+    });
+
+    addCfnNagSuppressRules((sqs.node.defaultChild as CfnResource), [{
+      id: 'W48',
+      reason: 'SQS already set SQS_MANAGED encryption',
+    }]);
+
+    return sqs;
   }
 }

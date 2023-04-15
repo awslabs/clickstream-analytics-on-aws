@@ -49,6 +49,7 @@ export class DataPipelineStack extends Stack {
         pipelineS3BucketParam,
         pipelineS3PrefixParam,
         dataFreshnessInHourParam,
+        dataBufferedSecondsParam,
         scheduleExpressionParam,
         transformerAndEnrichClassNamesParam,
         s3PathPluginJarsParam,
@@ -124,6 +125,7 @@ export class DataPipelineStack extends Stack {
       pipelineS3Bucket,
       pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
       dataFreshnessInHour: dataFreshnessInHourParam.valueAsString,
+      dataBufferedSeconds: dataBufferedSecondsParam.valueAsString,
       scheduleExpression: scheduleExpressionParam.valueAsString,
       transformerAndEnrichClassNames: transformerAndEnrichClassNamesParam.valueAsString,
       s3PathPluginJars: s3PathPluginJarsParam.valueAsString,
@@ -146,6 +148,7 @@ export class DataPipelineStack extends Stack {
       pipelineS3Bucket,
       pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
       dataFreshnessInHour: dataFreshnessInHourParam.valueAsString,
+      dataBufferedSeconds: dataBufferedSecondsParam.valueAsString,
       scheduleExpression: scheduleExpressionParam.valueAsString,
       transformerAndEnrichClassNames: transformerAndEnrichClassNamesParam.valueAsString,
       outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
@@ -198,7 +201,12 @@ function addCfnNag(stack: Stack) {
       ],
     },
   ]),
-  NagSuppressions.addStackSuppressions(stack, commonCdkNagRules);
+  NagSuppressions.addStackSuppressions(stack, [... commonCdkNagRules,
+    {
+      id: 'AwsSolutions-SQS3',
+      reason: 'The SQS is a dead-letter queue (DLQ), and does not need a DLQ enabled',
+    }]);
+
   addCfnNagForCustomResourceProvider(stack, 'CopyAssets', 'CopyAssetsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'InitPartition', 'InitPartitionCustomResourceProvider', '');
   addCfnNagForBucketDeployment(stack, 'data-pipeline');

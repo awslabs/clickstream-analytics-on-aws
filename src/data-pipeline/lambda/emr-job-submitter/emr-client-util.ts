@@ -145,7 +145,17 @@ export class EMRServerlessUtil {
       jobRunId: jobInfo.jobRunId!,
       startTimestamp,
       endTimestamp,
-      state: 'RUNNING',
+      state: 'LAMBDA-SUBMITTED',
+      startRunTime: new Date().toISOString(),
+    });
+
+    await this.recordJobInfo({
+      event,
+      config,
+      jobRunId: 'latest',
+      startTimestamp,
+      endTimestamp,
+      state: 'LAMBDA-SUBMITTED',
       startRunTime: new Date().toISOString(),
     });
 
@@ -185,6 +195,7 @@ export class EMRServerlessUtil {
       pipelineS3BucketName: process.env.PIPELINE_S3_BUCKET_NAME!,
       pipelineS3Prefix: process.env.PIPELINE_S3_PREFIX!,
       dataFreshnessInHour: process.env.DATA_FRESHNESS_IN_HOUR!,
+      dataBufferedSeconds: process.env.DATA_BUFFERED_SECONDS!,
       scheduleExpression: process.env.SCHEDULE_EXPRESSION!,
       transformerAndEnrichClassNames:
         process.env.TRANSFORMER_AND_ENRICH_CLASS_NAMES!,
@@ -195,7 +206,6 @@ export class EMRServerlessUtil {
       sinkTableName: process.env.SINK_TABLE_NAME!,
     };
   }
-
 
   /**
    *
@@ -211,9 +221,10 @@ export class EMRServerlessUtil {
    */
   private static async getJobTimestamps(event: any, config: any) {
     logger.info('getJobTimestamps enter');
+    const dataBufferedSeconds = parseInt(config.dataBufferedSeconds);
     let now = new Date();
     let startTimestamp = (new Date(now.toDateString())).getTime();
-    let endTimestamp = now.getTime();
+    let endTimestamp = now.getTime() - dataBufferedSeconds * 1000;
     if (event.startTimestamp) {
       startTimestamp = getTimestampFromEvent(event.startTimestamp);
     } else {
