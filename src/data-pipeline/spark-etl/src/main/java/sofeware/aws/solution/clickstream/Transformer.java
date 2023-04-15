@@ -104,7 +104,10 @@ public final class Transformer {
     }
 
     private static Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
-        return dataset.withColumn("event_date", regexp_replace(substring(col("date"), 0, 10), "-", ""))
+        return dataset.withColumn("event_date",
+                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000)
+                                .$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd")
+                )
                 .withColumn("ingest_timestamp", col("ingest_time"))
                 .withColumn("event_server_timestamp_offset", col("ingest_time").$minus(col("data").getItem(
                         "timestamp")))
@@ -234,7 +237,7 @@ public final class Transformer {
                         lit("").alias("mobile_os_hardware_model"),
                         (col("data").getItem("platform")).alias("operating_system"),
                         (col("data").getItem("platform_version")).alias("operating_system_version"),
-                        (col("data").getItem("zone_offset")).alias("time_zone_offset_seconds"),
+                        (col("data").getItem("zone_offset").$div(1000)).alias("time_zone_offset_seconds"),
                         (col("event_params").getItem("_ios_vendor_id")).alias("vendor_id"),
                         col("ua").alias("web_info")
 

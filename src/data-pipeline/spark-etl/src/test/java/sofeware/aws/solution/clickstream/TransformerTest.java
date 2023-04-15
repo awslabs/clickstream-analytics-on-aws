@@ -26,17 +26,23 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform() {
+        System.setProperty("app.ids", "uba-app");
         System.setProperty("project.id", "projectId1");
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> transformedDataset = transformer.transform(dataset);
-
         assertEquals(1, transformedDataset.count());
 
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
         String webInfo = device.getString(device.fieldIndex("web_info"));
         assertEquals(webInfo, "Apache-HttpClient/4.5.12 (Java/11.0.15)");
+
+        String eventDate = row.getString(row.fieldIndex("event_date"));
+        double timeZoneOffsetSeconds = device.getDouble(device.fieldIndex("time_zone_offset_seconds"));
+
+        assertEquals("20230323", eventDate);
+        assertEquals(28800, timeZoneOffsetSeconds);
         assertEquals("projectId1", row.getString(row.fieldIndex("project_id")));
     }
 }
