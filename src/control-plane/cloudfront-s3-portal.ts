@@ -54,6 +54,7 @@ import {
   Bucket,
   BucketEncryption,
   BucketAccessControl,
+  ObjectOwnership,
 } from 'aws-cdk-lib/aws-s3';
 import {
   Source,
@@ -139,6 +140,7 @@ export class CloudFrontS3Portal extends Construct {
       autoDeleteObjects: false,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       serverAccessLogsPrefix: 'log-bucket-access-log/',
+      objectOwnership: ObjectOwnership.OBJECT_WRITER,
     });
 
     const portalBucket = new Bucket(this, 'portal_bucket', {

@@ -94,6 +94,13 @@ describe('CloudFrontS3PotalStack', () => {
   test('Log bucket', () => {
     commonTemplate.hasResourceProperties('AWS::S3::Bucket', {
       AccessControl: 'LogDeliveryWrite',
+      OwnershipControls: {
+        Rules: [
+          {
+            ObjectOwnership: 'ObjectWriter',
+          },
+        ],
+      },
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [
           {
