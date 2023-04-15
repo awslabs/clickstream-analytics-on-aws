@@ -3,7 +3,7 @@ type = "http_server"
 address = "0.0.0.0:8685"
 strict_path = false
 headers = [ "X_Uri", "X_User_Agent", "X_Forwarded_For", "X_Date", "X_Request_ID", "X_Method"]
-query_parameters = [ "platform", "appId", "compression" ]
+query_parameters = [ "platform", "appId", "compression", "fakeIp" ]
 method = "POST"
 encoding = "binary"
 
@@ -14,7 +14,11 @@ source = '''
 .date = del(.X_Date)
 .uri = del(.X_Uri)
 .ua = del(.X_User_Agent)
-.ip = del(.X_Forwarded_For)
+if is_null(.fakeIp) {
+  .ip = del(.X_Forwarded_For)
+} else {
+  .ip = del(.fakeIp)
+}
 .rid = del(.X_Request_ID)
 .method = del(.X_Method)
 .data = del(.message)
