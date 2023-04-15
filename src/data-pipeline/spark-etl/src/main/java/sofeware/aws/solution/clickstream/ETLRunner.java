@@ -88,7 +88,7 @@ public class ETLRunner {
                 "event_date", "event_dimensions", "event_id", "event_name",
                 "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
                 "event_value_in_usd", "geo", "ingest_timestamp", "items",
-                "platform", "privacy_info", "stream_id", "traffic_source",
+                "platform", "privacy_info", "project_id", "traffic_source",
                 "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
                 "user_pseudo_id"
         );

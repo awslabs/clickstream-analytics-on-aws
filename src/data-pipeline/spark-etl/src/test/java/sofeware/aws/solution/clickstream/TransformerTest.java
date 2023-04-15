@@ -26,6 +26,7 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform() {
+        System.setProperty("project.id", "projectId1");
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> transformedDataset = transformer.transform(dataset);
@@ -36,5 +37,6 @@ class TransformerTest extends BaseSparkTest {
         Row device = row.getStruct(row.fieldIndex("device"));
         String webInfo = device.getString(device.fieldIndex("web_info"));
         assertEquals(webInfo, "Apache-HttpClient/4.5.12 (Java/11.0.15)");
+        assertEquals("projectId1", row.getString(row.fieldIndex("project_id")));
     }
 }

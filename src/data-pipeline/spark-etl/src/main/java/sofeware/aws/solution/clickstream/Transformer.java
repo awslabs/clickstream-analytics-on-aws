@@ -113,6 +113,8 @@ public final class Transformer {
     }
 
     private static Dataset<Row> convertEventProperties(final Dataset<Row> dataset) {
+        String projectId = System.getProperty("project.id");
+
         Column emptyValues = struct(
                 lit("0").alias("double_value"),
                 lit("0").alias("float_value"),
@@ -132,7 +134,7 @@ public final class Transformer {
                         lit("").alias("key"),
                         emptyValues
                 )))
-                .withColumn("stream_id", lit(""))
+                .withColumn("project_id", lit(projectId))
                 .withColumn("event_bundle_sequence_id", lit(0))
                 .withColumn("event_value_in_usd", lit("0"));
     }

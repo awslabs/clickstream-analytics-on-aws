@@ -120,7 +120,7 @@ async function createSchemas(props: ResourcePropertiesType) {
       + '    items SUPER,'
       + '    platform VARCHAR(255),'
       + '    privacy_info SUPER,'
-      + '    stream_id VARCHAR(255),'
+      + '    project_id VARCHAR(255),'
       + '    traffic_source SUPER,'
       + '    user_first_touch_timestamp BIGINT,'
       + '    user_id VARCHAR(255),'
