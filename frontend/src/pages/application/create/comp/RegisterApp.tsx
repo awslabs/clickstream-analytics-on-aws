@@ -84,7 +84,13 @@ const RegisterApp: React.FC = () => {
             actions={
               !appRegistered && (
                 <SpaceBetween direction="horizontal" size="xs">
-                  <Button>{t('button.cancel')}</Button>
+                  <Button
+                    onClick={() => {
+                      navigate(-1);
+                    }}
+                  >
+                    {t('button.cancel')}
+                  </Button>
                   <Button
                     loading={loadingCreate}
                     variant="primary"

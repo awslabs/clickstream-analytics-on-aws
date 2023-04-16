@@ -96,7 +96,14 @@ function Content() {
         <Form
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="link">{t('button.cancel')}</Button>
+              <Button
+                variant="link"
+                onClick={() => {
+                  navigate(-1);
+                }}
+              >
+                {t('button.cancel')}
+              </Button>
               <Button
                 variant="primary"
                 loading={loadingCreate}

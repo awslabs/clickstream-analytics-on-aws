@@ -405,6 +405,9 @@ const Content: React.FC = () => {
         }
         setActiveStepIndex(detail.requestedStepIndex);
       }}
+      onCancel={() => {
+        navigate(-1);
+      }}
       onSubmit={() => {
         if (!validateBasicInfo()) {
           setActiveStepIndex(0);
