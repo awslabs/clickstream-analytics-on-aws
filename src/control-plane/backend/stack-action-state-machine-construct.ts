@@ -105,6 +105,7 @@ export class StackActionStateMachine extends Construct {
         new iam.PolicyStatement({
           actions: [
             'sns:*',
+            'sqs:*',
             'redshift-serverless:*',
             's3:*',
             'apigateway:*',

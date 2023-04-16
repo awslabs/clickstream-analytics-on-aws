@@ -564,6 +564,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           {
             Action: [
               'sns:*',
+              'sqs:*',
               'redshift-serverless:*',
               's3:*',
               'apigateway:*',
