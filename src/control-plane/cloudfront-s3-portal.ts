@@ -153,6 +153,7 @@ export class CloudFrontS3Portal extends Construct {
       serverAccessLogsBucket: this.logBucket,
       serverAccessLogsPrefix: 'portal-bucket-access-log/',
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: ObjectOwnership.OBJECT_WRITER,
     });
 
     const distributionDescription = `CloudFront distribution for ${Stack.of(this).templateOptions.description}`;

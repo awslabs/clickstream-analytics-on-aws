@@ -140,6 +140,13 @@ describe('CloudFrontS3PotalStack', () => {
         },
         LogFilePrefix: 'portal-bucket-access-log/',
       },
+      OwnershipControls: {
+        Rules: [
+          {
+            ObjectOwnership: 'ObjectWriter',
+          },
+        ],
+      },
       PublicAccessBlockConfiguration: {
         BlockPublicAcls: true,
         BlockPublicPolicy: true,
