@@ -42,6 +42,10 @@ const CreateApplication = () => {
     },
     {
       text: projectInfo?.name || '',
+      href: `/project/detail/${id}`,
+    },
+    {
+      text: t('breadCrumb.registerApp'),
       href: '/',
     },
   ];

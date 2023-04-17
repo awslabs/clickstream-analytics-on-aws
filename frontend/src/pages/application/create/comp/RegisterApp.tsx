@@ -23,7 +23,7 @@ import {
   Tabs,
   Textarea,
 } from '@cloudscape-design/components';
-import { createApplication } from 'apis/application';
+import { createApplication, getApplicationDetail } from 'apis/application';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
 import React, { useState } from 'react';
@@ -50,6 +50,23 @@ const RegisterApp: React.FC = () => {
   const [nameEmptyError, setNameEmptyError] = useState(false);
   const [appIdInvalidError, setAppIdInvalidError] = useState(false);
 
+  const getApplicationDetailByAppId = async (appId: string) => {
+    try {
+      const { success, data }: ApiResponse<IApplication> =
+        await getApplicationDetail({
+          pid: id ?? '',
+          id: appId ?? '',
+        });
+      if (success) {
+        setApplication(data);
+        setAppRegistered(true);
+        setLoadingCreate(false);
+      }
+    } catch (error) {
+      setLoadingCreate(false);
+    }
+  };
+
   const confirmCreateApplication = async () => {
     if (!application.name.trim()) {
       setNameEmptyError(true);
@@ -64,9 +81,8 @@ const RegisterApp: React.FC = () => {
       const { success, data }: ApiResponse<ResponseCreate> =
         await createApplication(application);
       if (success && data.id) {
-        setAppRegistered(true);
+        getApplicationDetailByAppId(data.id);
       }
-      setLoadingCreate(false);
     } catch (error) {
       setLoadingCreate(false);
     }
@@ -112,6 +128,7 @@ const RegisterApp: React.FC = () => {
                 }
               >
                 <Input
+                  readOnly={appRegistered}
                   placeholder="test-app-name"
                   value={application.name}
                   onChange={(e) => {
@@ -123,7 +140,7 @@ const RegisterApp: React.FC = () => {
                         name: e.detail.value,
                         appId: `${e.detail.value?.replace(
                           /[^\w]/g,
-                          ''
+                          '_'
                         )}_${generateStr(12)}`,
                       };
                     });
@@ -138,6 +155,7 @@ const RegisterApp: React.FC = () => {
                 }
               >
                 <Input
+                  readOnly={appRegistered}
                   placeholder="test_app_id"
                   value={application.appId}
                   onChange={(e) => {
@@ -155,6 +173,7 @@ const RegisterApp: React.FC = () => {
 
               <FormField label={t('application:appDesc')}>
                 <Textarea
+                  readOnly={appRegistered}
                   placeholder={t('application:appDesc') || ''}
                   value={application.description}
                   onChange={(e) => {
@@ -175,6 +194,7 @@ const RegisterApp: React.FC = () => {
                     description={t('application:androidPackageName')}
                   >
                     <Input
+                      readOnly={appRegistered}
                       placeholder="com.example.appname"
                       value={application.androidPackage}
                       onChange={(e) => {
@@ -192,6 +212,7 @@ const RegisterApp: React.FC = () => {
                     description={t('application:iosAppBundleId')}
                   >
                     <Input
+                      readOnly={appRegistered}
                       placeholder="com.example.App"
                       value={application.iosBundleId}
                       onChange={(e) => {

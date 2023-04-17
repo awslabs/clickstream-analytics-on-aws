@@ -10,7 +10,8 @@
     "home": "Home",
     "projects": "Projects",
     "plugins": "Plugins",
-    "createPlugin": "Create Plugin"
+    "createPlugin": "Create Plugin",
+    "registerApp": "Register Application"
   },
   "nav": {
     "home": "Home",
