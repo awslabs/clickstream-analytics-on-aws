@@ -30,7 +30,6 @@ import org.apache.spark.sql.types.StructField;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Optional;
@@ -67,15 +66,16 @@ public class IPEnrichment {
                 LookupResult result = reader.get(address, LookupResult.class);
                 return Optional.ofNullable(result)
                         .map(geo -> new GenericRow(new Object[]{
-                                geo.getCity().getName(),
-                                geo.getContinent().getName(),
-                                geo.getCountry().getName(),
+                                Optional.ofNullable(geo.getCity()).map(LookupResult.City::getName).orElse(""),
+                                Optional.ofNullable(geo.getContinent()).map(LookupResult.Continent::getName).orElse(""),
+                                Optional.ofNullable(geo.getCountry()).map(LookupResult.Country::getName).orElse(""),
                                 "",
                                 "",
                                 ""
                         }))
                         .orElse(defaultRow);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                log.warn(e.getMessage());
                 return defaultRow;
             }
         };

@@ -64,4 +64,20 @@ class IPEnrichmentTest extends BaseSparkTest {
         assertEquals(geo.getString(geo.fieldIndex("continent")), "");
         assertEquals(geo.getString(geo.fieldIndex("city")), "");
     }
+
+
+    @Test
+    public void should_return_empty_when_enrich_unrecognized_ip() {
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_error_ip" +
+                ".json")).getPath());
+        Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
+
+        Row row = transformedDataset.first();
+        Row geo = row.getStruct(row.fieldIndex("geo"));
+        assertEquals(geo.getString(geo.fieldIndex("country")), "");
+        assertEquals(geo.getString(geo.fieldIndex("continent")), "");
+        assertEquals(geo.getString(geo.fieldIndex("city")), "");
+    }
 }
