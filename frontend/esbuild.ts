@@ -23,6 +23,7 @@ const path = require('path');
 // CONFIG
 const PUBLIC_DIR = './public';
 const DIST_DIR = './build';
+const ASSETS_DIR = '/assets/';
 const hash = createHash('md5')
   .update(Date.now().toString())
   .digest('hex')
@@ -31,6 +32,7 @@ const hash = createHash('md5')
 const ESBUILD_CONFIG = {
   entryPoints: ['./src/index.tsx'],
   bundle: true,
+  publicPath: `${ASSETS_DIR}`,
   plugins: [
     sassPlugin(), // add sass plugin
     inlineImage(), // add image plugin
@@ -78,7 +80,7 @@ const build = () => {
         process.env.GENERATE_SOURCEMAP !== 'false' ? 'external' : false,
       minify: true,
       write: true,
-      outfile: `${DIST_DIR}/assets/index.${hash}.js`,
+      outfile: `${DIST_DIR}${ASSETS_DIR}index.${hash}.js`,
     })
     .then(() => {
       // Copy public to build
@@ -87,11 +89,11 @@ const build = () => {
       // Replace js path
       const indexHtmlPath = path.join(`${DIST_DIR}`, 'index.html');
       const indexJsPath = fs
-        .readdirSync(`${DIST_DIR}/assets/`)
+        .readdirSync(`${DIST_DIR}${ASSETS_DIR}`)
         .find((file) => file.startsWith('index.') && file.endsWith('.js'));
 
       const indexCssPath = fs
-        .readdirSync(`${DIST_DIR}/assets/`)
+        .readdirSync(`${DIST_DIR}${ASSETS_DIR}`)
         .find((file) => file.startsWith('index.') && file.endsWith('.css'));
 
       if (!indexJsPath) {
