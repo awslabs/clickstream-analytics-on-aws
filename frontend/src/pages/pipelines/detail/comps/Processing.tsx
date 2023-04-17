@@ -19,13 +19,92 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { ExecutionType } from 'ts/const';
 
 interface TabContentProps {
-  pipelineInfo?: IPipeline;
+  pipelineInfo?: IExtPipeline;
 }
 const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
+
+  const getDataProcessingIntervalDisplay = () => {
+    if (pipelineInfo) {
+      if (pipelineInfo.selectedExcutionType) {
+        if (
+          pipelineInfo.selectedExcutionType.value === ExecutionType.FIXED_RATE
+        ) {
+          return `${pipelineInfo.excutionFixedValue} ${pipelineInfo.selectedExcutionUnit?.label} `;
+        } else {
+          return `${pipelineInfo.exeCronExp}`;
+        }
+      } else if (pipelineInfo.etl.scheduleExpression) {
+        if (pipelineInfo.etl.scheduleExpression) {
+          if (pipelineInfo.etl.scheduleExpression.startsWith('cron')) {
+            return pipelineInfo.etl.scheduleExpression;
+          } else {
+            const pattern = /rate\((\d+\s\w+)\)/;
+            const match = pipelineInfo.etl.scheduleExpression.match(pattern);
+
+            if (match) {
+              const rateValue = match[1];
+              const formattedRateValue = rateValue.replace(
+                /\b\s+(\w)/,
+                (match) => match.toUpperCase()
+              );
+              return formattedRateValue;
+            }
+          }
+        } else {
+          return '-';
+        }
+      }
+    }
+    return '-';
+  };
+
+  const getRefreshDataDisplay = () => {
+    if (pipelineInfo) {
+      if (pipelineInfo.selectedEventFreshUnit?.value) {
+        return `${pipelineInfo.eventFreshValue} ${pipelineInfo.selectedEventFreshUnit.label}`;
+      } else {
+        if (pipelineInfo.etl.dataFreshnessInHour) {
+          const hours = parseInt(pipelineInfo.etl.dataFreshnessInHour);
+          if (hours >= 24 && hours % 24 === 0) {
+            const days = hours / 24;
+            return `${days} Days`;
+          } else {
+            return `${hours} Hours`;
+          }
+        } else {
+          return '3 Days';
+        }
+      }
+    }
+    return '-';
+  };
+
+  const getRedshiftDataRangeDisplay = () => {
+    if (pipelineInfo) {
+      if (pipelineInfo.selectedRedshiftExecutionUnit?.value) {
+        return `${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit.label}`;
+      } else {
+        const minutes = parseInt(
+          pipelineInfo.dataAnalytics.loadWorkflow.scheduleInterval
+        );
+        if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
+          const months = minutes / (60 * 24 * 30);
+          return `${months} Months`;
+        } else if (minutes >= 60 * 24 && minutes % (60 * 24) === 0) {
+          const days = minutes / (60 * 24);
+          return `${days} Days`;
+        } else {
+          return `${minutes} Minutes`;
+        }
+      }
+    }
+  };
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
@@ -44,23 +123,14 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
           <Box variant="awsui-key-label">
             {t('pipeline:detail.dataProcesingInt')}
           </Box>
-          <div>{pipelineInfo?.etl.scheduleExpression || '-'}</div>
+          <div>{getDataProcessingIntervalDisplay()}</div>
         </div>
 
         <div>
           <Box variant="awsui-key-label">
             {t('pipeline:detail.eventFreshness')}
           </Box>
-          <div>
-            {pipelineInfo?.etl.dataFreshnessInHour ? (
-              <div>
-                {pipelineInfo?.etl.dataFreshnessInHour}{' '}
-                {t('pipeline:detail.hours')}
-              </div>
-            ) : (
-              '-'
-            )}
-          </div>
+          <div>{getRefreshDataDisplay()}</div>
         </div>
 
         <div>
@@ -99,17 +169,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.dataRange')}</Box>
-          <div>
-            {pipelineInfo?.dataAnalytics?.loadWorkflow?.scheduleInterval ? (
-              <div>
-                {pipelineInfo?.dataAnalytics?.loadWorkflow?.scheduleInterval ||
-                  '-'}{' '}
-                {t('pipeline:detail.minutes')}
-              </div>
-            ) : (
-              '-'
-            )}
-          </div>
+          <div>{getRedshiftDataRangeDisplay()}</div>
         </div>
       </SpaceBetween>
 

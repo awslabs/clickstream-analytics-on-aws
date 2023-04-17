@@ -41,14 +41,14 @@ const PipelineDetail: React.FC = () => {
 
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
-  const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
+  const [projectPipeline, setProjectPipeline] = useState<IExtPipeline>();
 
   const getProjectPipelineDetail = async () => {
-    setLoadingData(true);
-    const { success, data }: ApiResponse<IPipeline> = await getPipelineDetail({
-      id: id ?? '',
-      pid: pid ?? '',
-    });
+    const { success, data }: ApiResponse<IExtPipeline> =
+      await getPipelineDetail({
+        id: id ?? '',
+        pid: pid ?? '',
+      });
     if (success) {
       setProjectPipeline(data);
       setLoadingData(false);
@@ -63,7 +63,7 @@ const PipelineDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        setLoadingData(false);
+        getProjectPipelineDetail();
       }
     } catch (error) {
       setLoadingData(false);

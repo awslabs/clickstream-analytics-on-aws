@@ -11,21 +11,14 @@
  *  and limitations under the License.
  */
 
-import {
-  SpaceBetween,
-  Header,
-  Container,
-  ColumnLayout,
-  Box,
-  Table,
-  StatusIndicator,
-  Grid,
-} from '@cloudscape-design/components';
-import moment from 'moment';
+import { SpaceBetween, Header, Container } from '@cloudscape-design/components';
+import Ingestion from 'pages/pipelines/detail/comps/Ingestion';
+import Processing from 'pages/pipelines/detail/comps/Processing';
+import Reporting from 'pages/pipelines/detail/comps/Reporting';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SinkType, TIME_FORMAT } from 'ts/const';
 import BasicInfo from '../review/BasicInfo';
+
 interface ReviewAndLaunchProps {
   pipelineInfo: IExtPipeline;
 }
@@ -48,140 +41,25 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
           </Header>
         }
       >
-        <ColumnLayout columns={2} variant="text-grid">
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.domainName')}
-              </Box>
-              <div>{pipelineInfo.ingestionServer.domain.domainName}</div>
-            </div>
-          </SpaceBetween>
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.requestPath')}
-              </Box>
-              <div>
-                {pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath}
-              </div>
-            </div>
-          </SpaceBetween>
-        </ColumnLayout>
-        <SpaceBetween direction="vertical" size="l">
-          <div className="mt-10">
-            <Box variant="awsui-key-label">{t('pipeline:create.dataSink')}</Box>
-            {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
-              <div>
-                MSK ({pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn})
-              </div>
-            )}
-            {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
-              <div>
-                S3 ({pipelineInfo.ingestionServer.sinkS3.sinkBucket.name})
-              </div>
-            )}
-            {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (
-              <div>KDS</div>
-            )}
-          </div>
-        </SpaceBetween>
+        <Ingestion pipelineInfo={pipelineInfo} />
       </Container>
 
-      {pipelineInfo.selectedEnrichPlugins.length > 0 && (
+      {pipelineInfo.enableDataProcessing && (
         <Container
           header={
             <Header variant="h2" description="">
-              {t('pipeline:create.enrichPlugins')}
+              {t('pipeline:create.dataProcessing')}
             </Header>
           }
         >
-          <Grid gridDefinition={[{ colspan: 4 }, { colspan: 8 }]}>
-            <div style={{ borderRight: '2px solid #e9ebed' }}>
-              <SpaceBetween size="l" direction="vertical">
-                <div>
-                  <Box variant="awsui-key-label">{t('status.status')}</Box>
-                  <div>
-                    <StatusIndicator>Enabled</StatusIndicator>
-                  </div>
-                </div>
-              </SpaceBetween>
-            </div>
-
-            <div>
-              <Table
-                variant="embedded"
-                columnDefinitions={[
-                  {
-                    id: 'name',
-                    header: t('plugin:list.name'),
-                    cell: (item) => item.name || '-',
-                  },
-                  {
-                    id: 'description',
-                    header: t('plugin:list.desc'),
-                    cell: (item) => item.description || '-',
-                  },
-                  {
-                    id: 'date',
-                    header: 'Last edit date',
-                    cell: (item) =>
-                      item.updateAt
-                        ? moment(item.updateAt).format(TIME_FORMAT)
-                        : '-',
-                  },
-                ]}
-                items={pipelineInfo.selectedEnrichPlugins}
-                sortingDisabled
-                empty={''}
-                header={
-                  <Header variant="h3">
-                    {t('pipeline:create.enrichPlugins')}
-                  </Header>
-                }
-              />
-            </div>
-          </Grid>
+          <Processing pipelineInfo={pipelineInfo} />
         </Container>
       )}
 
       <Container
-        header={
-          <Header variant="h2">{t('pipeline:create.dataProcessor')}</Header>
-        }
+        header={<Header variant="h2">{t('pipeline:create.reporting')}</Header>}
       >
-        <ColumnLayout columns={2} variant="text-grid">
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.modelEngine')}
-              </Box>
-              <div>
-                Redshift ({pipelineInfo.selectedRedshiftCluster?.label})
-              </div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.engineDataRange')}
-              </Box>
-              <div>{`${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit?.label} `}</div>
-            </div>
-          </SpaceBetween>
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.quickSightAccount')}
-              </Box>
-              <div>{pipelineInfo.selectedQuickSightRole?.label}</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.datasetName')}
-              </Box>
-              <div>{pipelineInfo.quickSightDataset}</div>
-            </div>
-          </SpaceBetween>
-        </ColumnLayout>
+        <Reporting pipelineInfo={pipelineInfo} />
       </Container>
     </SpaceBetween>
   );

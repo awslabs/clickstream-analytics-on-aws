@@ -165,6 +165,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [selectedRedshiftExeUnit]);
 
   useEffect(() => {
+    changeEventFreshUnit(selectedEventFreshUnit);
+  }, [selectedEventFreshUnit]);
+
+  useEffect(() => {
     getServerlessRedshiftClusterList();
   }, []);
 
@@ -292,7 +296,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       selectedOption={selectedEventFreshUnit}
                       onChange={({ detail }) => {
                         setSelectedEventFreshUnit(detail.selectedOption);
-                        changeEventFreshUnit(detail.selectedOption);
                       }}
                       options={EVENT_REFRESH_UNIT_LIST}
                     />

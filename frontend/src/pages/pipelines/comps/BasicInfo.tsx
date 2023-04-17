@@ -84,9 +84,13 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
 
           <div>
             <Box variant="awsui-key-label">{t('pipeline:detail.cfnStack')}</Box>
-            <Link external href={pipelineInfo?.status?.details?.[0].url}>
-              {pipelineInfo?.status?.details?.[0].stackName}
-            </Link>
+            {pipelineInfo?.status?.details?.[0] ? (
+              <Link external href={pipelineInfo?.status?.details?.[0]?.url}>
+                {pipelineInfo?.status?.details?.[0]?.stackName}
+              </Link>
+            ) : (
+              '-'
+            )}
           </div>
         </SpaceBetween>
 
