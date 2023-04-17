@@ -237,3 +237,10 @@ export enum KinesisStreamMode {
   ON_DEMAND = 'ON_DEMAND',
   PROVISIONED = 'PROVISIONED',
 }
+
+export enum ProjectEnvironment {
+  DEV = 'Dev',
+  TEST = 'Test',
+  PROD = 'Prod',
+}
+

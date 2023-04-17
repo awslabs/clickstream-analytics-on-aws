@@ -25,7 +25,7 @@ import {
 } from '@cloudscape-design/components';
 import { updateProject } from 'apis/project';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROJECT_STAGE_LIST, TIME_FORMAT } from 'ts/const';
 import { validateEmails } from 'ts/utils';
@@ -114,6 +114,11 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     }
   };
 
+  useEffect(() => {
+    setIsEditingEmail(false);
+    setIsEditingEvn(false);
+  }, [project.id]);
+
   return (
     <SplitPanel header={project.name} i18nStrings={SPLIT_PANEL_I18NSTRINGS}>
       <ColumnLayout columns={2} variant="text-grid">
@@ -200,7 +205,13 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
           <div className="mb-10">
             {!isEditingEvn && (
               <div className="flex align-center">
-                <Badge>{prevEnvOption.label}</Badge>
+                <Badge>
+                  {project.environment
+                    ? PROJECT_STAGE_LIST.find(
+                        (ele) => ele.value === project.environment
+                      )?.label
+                    : t('project:create.unspecified')}
+                </Badge>
                 <Button
                   onClick={() => {
                     setIsEditingEvn(true);

@@ -129,6 +129,7 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly logBucketName?: string;
   readonly logPrefix?: string;
   readonly enableGlobalAccelerator: string;
+  readonly devMode: string;
 
   // Kafka parameters
   readonly kafkaBrokers?: string;
@@ -284,6 +285,7 @@ export class IngestionServerNestedStack extends NestedStack {
       s3SinkConfig,
       kinesisSinkConfig,
       enableGlobalAccelerator: props.enableGlobalAccelerator,
+      devMode: props.devMode,
     };
 
     const ingestionServer = new IngestionServer(
@@ -354,6 +356,7 @@ export class IngestionServerStack extends Stack {
         s3Params,
         kinesisParams,
         enableGlobalAcceleratorParam,
+        devModeParam,
       },
     } = createStackParameters(this, props);
 
@@ -382,6 +385,7 @@ export class IngestionServerStack extends Stack {
       certificateArn: certificateArnParam.valueAsString,
       protocol: protocolParam.valueAsString,
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
+      devMode: devModeParam.valueAsString,
     };
 
     let nestStackProps = { ... nestStackCommonProps };

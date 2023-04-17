@@ -1,3 +1,5 @@
+import { ProjectEnvironment } from '../common/types';
+
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -21,7 +23,7 @@ export interface Project {
   readonly emails: string;
   readonly platform: string;
   readonly region: string;
-  readonly environment: string;
+  readonly environment: ProjectEnvironment | string;
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;

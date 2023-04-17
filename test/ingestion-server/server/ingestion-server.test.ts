@@ -661,6 +661,7 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
+    withDevMode: true,
     withKinesisSinkConfig: true,
     withS3SinkConfig: true,
   });
@@ -682,6 +683,9 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   expect(prefixValue).toEqual('test-s3-data');
   const streamValue = vector.Environment.filter((e: any) => e.Name == 'AWS_KINESIS_STREAM_NAME')[0].Value;
   expect(streamValue).not.toEqual('__NOT_SET__');
+  const devModeValue = vector.Environment.filter((e: any) => e.Name == 'DEV_MODE')[0].Value;
+  expect(devModeValue).not.toEqual('__NOT_SET__');
+  expect(devModeValue).toEqual('Yes');
 
 });
 

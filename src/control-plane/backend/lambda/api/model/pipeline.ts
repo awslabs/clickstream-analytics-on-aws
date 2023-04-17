@@ -23,7 +23,7 @@ import {
   VPC_ID_PARRERN, POSITIVE_INTEGERS,
 } from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
-import { ClickStreamBadRequestError, KinesisStreamMode, PipelineStatus, WorkflowTemplate } from '../common/types';
+import { ClickStreamBadRequestError, KinesisStreamMode, PipelineStatus, ProjectEnvironment, WorkflowTemplate } from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
@@ -307,6 +307,9 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
 
   const parameters: Parameter[] = [];
   validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
+  const store: ClickStreamStore = new DynamoDbStore();
+  const project = await store.getProject(pipeline.projectId);
+
   // VPC Information
   validatePattern('VpcId', VPC_ID_PARRERN, pipeline.network.vpcId);
   parameters.push({
@@ -372,6 +375,10 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   parameters.push({
     ParameterKey: 'EnableGlobalAccelerator',
     ParameterValue: pipeline.ingestionServer.loadBalancer.enableGlobalAccelerator ? 'Yes' : 'No',
+  });
+  parameters.push({
+    ParameterKey: 'DevMode',
+    ParameterValue: project?.environment === ProjectEnvironment.DEV ? 'Yes' : 'No',
   });
   // Logs
   parameters.push({

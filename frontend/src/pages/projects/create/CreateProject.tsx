@@ -79,7 +79,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = selectedEnv?.value || 'Unspecified';
+      curProject.environment = selectedEnv?.value || '';
       const { success, data }: ApiResponse<ResponseCreate> =
         await createProject(curProject);
       if (success && data.id) {

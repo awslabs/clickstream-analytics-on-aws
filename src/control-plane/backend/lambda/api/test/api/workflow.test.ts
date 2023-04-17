@@ -17,10 +17,11 @@ import {
   GetWorkgroupCommand,
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
-import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
+import { clickStreamTableName } from '../../common/constants';
+import { ProjectEnvironment, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { Pipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
@@ -47,6 +48,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -194,6 +202,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -250,6 +262,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -399,6 +418,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -517,6 +540,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -706,6 +736,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -762,6 +796,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
@@ -933,6 +974,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -1051,6 +1096,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -1196,6 +1248,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -1264,6 +1320,13 @@ describe('Workflow test', () => {
         appId: '2',
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -1409,6 +1472,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -1477,6 +1544,13 @@ describe('Workflow test', () => {
         appId: `${MOCK_APP_ID}_2`,
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
 
     const pipeline1 = {
       id: MOCK_PROJECT_ID,
@@ -1641,6 +1715,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'Yes',
                       },
                       {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
                         ParameterValue: 'Yes',
                       },
@@ -1776,6 +1854,13 @@ describe('Workflow test', () => {
         appId: `${MOCK_APP_ID}_2`,
       }],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
@@ -2000,6 +2085,10 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
                       },
                       {
@@ -2277,6 +2366,13 @@ describe('Workflow test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [],
     });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
@@ -2501,6 +2597,10 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
                       },
                       {

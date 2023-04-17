@@ -142,6 +142,7 @@ export function createMSKSecurityGroup(
 export interface TestStackProps extends StackProps {
   withAlbAccessLog?: boolean;
   withAccelerator?: boolean;
+  withDevMode?: boolean;
   withMskConfig?: boolean;
   withS3SinkConfig?: boolean;
   withKinesisSinkConfig?: boolean;
@@ -200,6 +201,11 @@ export class TestStack extends Stack {
     let enableGlobalAccelerator = 'No';
     if (props.withAccelerator) {
       enableGlobalAccelerator = 'Yes';
+    }
+
+    let devMode = 'No';
+    if (props.withDevMode) {
+      devMode = 'Yes';
     }
 
     const notificationsTopic = createSns(this);
@@ -271,6 +277,7 @@ export class TestStack extends Stack {
       s3SinkConfig,
       kinesisSinkConfig,
       enableGlobalAccelerator,
+      devMode,
     };
 
     const ingestionServer = new IngestionServer(

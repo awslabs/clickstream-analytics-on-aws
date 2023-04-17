@@ -14,10 +14,10 @@ source = '''
 .date = del(.X_Date)
 .uri = del(.X_Uri)
 .ua = del(.X_User_Agent)
-if is_null(.fakeIp) {
-  .ip = del(.X_Forwarded_For)
-} else {
+if get_env_var!("DEV_MODE") == "Yes" && !is_null(.fakeIp) {
   .ip = del(.fakeIp)
+} else {
+  .ip = del(.X_Forwarded_For)
 }
 .rid = del(.X_Request_ID)
 .method = del(.X_Method)

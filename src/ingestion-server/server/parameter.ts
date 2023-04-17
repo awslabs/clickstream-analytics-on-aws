@@ -94,6 +94,17 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
+  const devModeParam = new CfnParameter(
+    scope,
+    'DevMode',
+    {
+      description: 'Enable dev mode',
+      type: 'String',
+      allowedValues: ['Yes', 'No'],
+      default: 'No',
+    },
+  );
+
   const logS3BucketParam = Parameters.createS3BucketParameter(scope, 'LogS3Bucket', {
     description: 'S3 bucket name to save log (optional)',
     default: '',
@@ -616,6 +627,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       s3Params,
       kinesisParams,
       enableGlobalAcceleratorParam,
+      devModeParam,
     },
   };
 }

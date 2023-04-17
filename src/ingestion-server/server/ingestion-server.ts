@@ -114,6 +114,7 @@ export interface IngestionServerProps {
   readonly loadBalancerLogProps?: LogProps;
   readonly loadBalancerIpAddressType?: IpAddressType;
   readonly enableGlobalAccelerator: string;
+  readonly devMode: string;
 }
 
 export class IngestionServer extends Construct {
