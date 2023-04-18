@@ -412,7 +412,7 @@ export class GlueUtil {
           ]),
         },
         {
-          name: 'stream_id',
+          name: 'project_id',
           type: Schema.STRING,
         },
         {

@@ -15,6 +15,7 @@ package sofeware.aws.solution.clickstream;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -109,9 +110,9 @@ public final class Transformer {
                                 .$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd")
                 )
                 .withColumn("ingest_timestamp", col("ingest_time"))
-                .withColumn("event_server_timestamp_offset", col("ingest_time").$minus(col("data").getItem(
-                        "timestamp")))
-                .withColumn("event_previous_timestamp", lit(0))
+                .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem(
+                        "timestamp"))).cast(DataTypes.LongType))
+                .withColumn("event_previous_timestamp", lit(0).cast(DataTypes.LongType))
                 .withColumn("platform", col("data").getItem("platform"));
     }
 
@@ -237,7 +238,8 @@ public final class Transformer {
                         lit("").alias("mobile_os_hardware_model"),
                         (col("data").getItem("platform")).alias("operating_system"),
                         (col("data").getItem("platform_version")).alias("operating_system_version"),
-                        (col("data").getItem("zone_offset").$div(1000)).alias("time_zone_offset_seconds"),
+                        (col("data").getItem("zone_offset").$div(1000))
+                            .cast(DataTypes.LongType).alias("time_zone_offset_seconds"),
                         (col("event_params").getItem("_ios_vendor_id")).alias("vendor_id"),
                         col("ua").alias("web_info")
 

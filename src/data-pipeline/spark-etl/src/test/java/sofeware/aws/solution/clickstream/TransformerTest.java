@@ -39,10 +39,12 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(webInfo, "Apache-HttpClient/4.5.12 (Java/11.0.15)");
 
         String eventDate = row.getString(row.fieldIndex("event_date"));
-        double timeZoneOffsetSeconds = device.getDouble(device.fieldIndex("time_zone_offset_seconds"));
-
+        long eventServerTimestampOffset = row.getLong(row.fieldIndex("event_server_timestamp_offset"));
+        long timeZoneOffsetSeconds = device.getLong(device.fieldIndex("time_zone_offset_seconds"));
+        
         assertEquals("20230323", eventDate);
         assertEquals(28800, timeZoneOffsetSeconds);
         assertEquals("projectId1", row.getString(row.fieldIndex("project_id")));
+        assertEquals(-6, eventServerTimestampOffset);
     }
 }
