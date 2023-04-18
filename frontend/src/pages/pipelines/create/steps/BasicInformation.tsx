@@ -14,6 +14,7 @@
 import {
   Autosuggest,
   AutosuggestProps,
+  Button,
   Container,
   FormField,
   Header,
@@ -204,6 +205,16 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         <FormField
           label={t('pipeline:create.vpc')}
           description={t('pipeline:create.vpcDesc')}
+          secondaryControl={
+            <Button
+              disabled={!pipelineInfo.region}
+              loading={loadingVPC}
+              iconName="refresh"
+              onClick={() => {
+                getVPCListByRegion(pipelineInfo.region);
+              }}
+            />
+          }
           errorText={vpcEmptyError ? t('pipeline:valid.vpcEmpty') : ''}
         >
           <Select
@@ -237,6 +248,16 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         <FormField
           label={t('pipeline:create.s3Assets')}
           constraintText={t('pipeline:create.s3AssetsDesc')}
+          secondaryControl={
+            <Button
+              disabled={!pipelineInfo.region}
+              loading={loadingBucket}
+              iconName="refresh"
+              onClick={() => {
+                getAllS3BucketList(pipelineInfo.region);
+              }}
+            />
+          }
           errorText={
             assetsS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
           }

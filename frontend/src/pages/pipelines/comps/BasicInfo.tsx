@@ -13,6 +13,7 @@
 
 import {
   Box,
+  Button,
   ColumnLayout,
   Container,
   Header,
@@ -28,15 +29,29 @@ import { buildS3Link, buildVPCLink } from 'ts/url';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
+  loadingRefresh: boolean;
+  reloadPipeline: () => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
-  const { pipelineInfo } = props;
+  const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
   return (
     <Container
       header={
-        <Header variant="h2" description="Container description">
+        <Header
+          actions={
+            <Button
+              iconName="refresh"
+              loading={loadingRefresh}
+              onClick={() => {
+                reloadPipeline();
+              }}
+            />
+          }
+          variant="h2"
+          description="Container description"
+        >
           {t('pipeline:basic')}
         </Header>
       }
@@ -67,7 +82,11 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
           <div>
             <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
             <div>
-              <PipelineStatus status={pipelineInfo?.status?.status} />
+              <PipelineStatus
+                pipelineId={pipelineInfo?.pipelineId}
+                projectId={pipelineInfo?.projectId}
+                status={pipelineInfo?.status?.status}
+              />
             </div>
           </div>
           <div>

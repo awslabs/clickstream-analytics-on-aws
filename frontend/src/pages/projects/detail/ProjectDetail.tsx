@@ -34,12 +34,13 @@ const ProjectDetail: React.FC = () => {
 
   const { id } = useParams();
 
+  const [loadingPipeline, setLoadingPipeline] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
   const [projectInfo, setProjectInfo] = useState<IProject>();
 
   const getPipelineByProjectId = async (projectId: string) => {
-    setLoadingData(true);
+    setLoadingPipeline(true);
     const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
       await getPipelineByProject({
         pid: projectId,
@@ -48,6 +49,7 @@ const ProjectDetail: React.FC = () => {
       if (data.items.length > 0) {
         setProjectPipeline(data.items[0]);
       }
+      setLoadingPipeline(false);
       setLoadingData(false);
     }
   };
@@ -107,7 +109,13 @@ const ProjectDetail: React.FC = () => {
           ) : !projectPipeline?.projectId ? (
             <NonePipeline projectId={id?.toString()} />
           ) : (
-            <ProjectPipeline pipelineInfo={projectPipeline} />
+            <ProjectPipeline
+              loadingRefresh={loadingPipeline}
+              reloadPipeline={() => {
+                getPipelineByProjectId(id ?? '');
+              }}
+              pipelineInfo={projectPipeline}
+            />
           )}
         </ContentLayout>
       }

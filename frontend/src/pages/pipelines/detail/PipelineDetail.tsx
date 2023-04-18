@@ -42,16 +42,23 @@ const PipelineDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
   const [projectPipeline, setProjectPipeline] = useState<IExtPipeline>();
+  const [loadingPipeline, setLoadingPipeline] = useState(false);
 
   const getProjectPipelineDetail = async () => {
-    const { success, data }: ApiResponse<IExtPipeline> =
-      await getPipelineDetail({
-        id: id ?? '',
-        pid: pid ?? '',
-      });
-    if (success) {
-      setProjectPipeline(data);
-      setLoadingData(false);
+    try {
+      setLoadingPipeline(true);
+      const { success, data }: ApiResponse<IExtPipeline> =
+        await getPipelineDetail({
+          id: id ?? '',
+          pid: pid ?? '',
+        });
+      if (success) {
+        setProjectPipeline(data);
+        setLoadingData(false);
+        setLoadingPipeline(false);
+      }
+    } catch (error) {
+      setLoadingPipeline(false);
     }
   };
 
@@ -106,7 +113,13 @@ const PipelineDetail: React.FC = () => {
             <Loading />
           ) : (
             <SpaceBetween direction="vertical" size="l">
-              <BasicInfo pipelineInfo={projectPipeline} />
+              <BasicInfo
+                pipelineInfo={projectPipeline}
+                loadingRefresh={loadingPipeline}
+                reloadPipeline={() => {
+                  getProjectPipelineDetail();
+                }}
+              />
               <Container disableContentPaddings>
                 <Tabs
                   tabs={[

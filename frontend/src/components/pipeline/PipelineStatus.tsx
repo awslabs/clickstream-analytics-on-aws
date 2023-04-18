@@ -15,7 +15,8 @@ import {
   StatusIndicator,
   StatusIndicatorProps,
 } from '@cloudscape-design/components';
-import React from 'react';
+import { getPipelineDetail } from 'apis/pipeline';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export enum EPipelineStatus {
@@ -27,41 +28,83 @@ export enum EPipelineStatus {
   Pending = 'Pending',
 }
 
+const CHECK_TIME_INTERVAL = 5000;
+
 interface PipelineStatusProps {
+  projectId?: string;
+  pipelineId?: string;
   status?: string;
 }
 const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
 ) => {
-  const { status } = props;
+  const { status, projectId, pipelineId } = props;
   const { t } = useTranslation();
+  let intervalId: any = 0;
+  const [updatedStatus, setUpdatedStatus] = useState(status);
   let indicatorType: StatusIndicatorProps.Type = 'loading';
   let displayStatus = '';
   if (
-    status === EPipelineStatus.Creating ||
-    status === EPipelineStatus.Updating ||
-    status === EPipelineStatus.Deleting
+    updatedStatus === EPipelineStatus.Creating ||
+    updatedStatus === EPipelineStatus.Updating ||
+    updatedStatus === EPipelineStatus.Deleting
   ) {
-    indicatorType = 'in-progress';
-    if (status === EPipelineStatus.Creating) {
+    indicatorType = 'loading';
+    if (updatedStatus === EPipelineStatus.Creating) {
       displayStatus = 'status.creating';
     }
-    if (status === EPipelineStatus.Updating) {
+    if (updatedStatus === EPipelineStatus.Updating) {
       displayStatus = 'status.updating';
     }
-    if (status === EPipelineStatus.Deleting) {
+    if (updatedStatus === EPipelineStatus.Deleting) {
       displayStatus = 'status.deleting';
     }
-  } else if (status === EPipelineStatus.Failed) {
+  } else if (updatedStatus === EPipelineStatus.Failed) {
     indicatorType = 'error';
     displayStatus = 'status.failed';
-  } else if (status === EPipelineStatus.Active) {
+  } else if (updatedStatus === EPipelineStatus.Active) {
     indicatorType = 'success';
     displayStatus = 'status.active';
   } else {
     indicatorType = 'pending';
     displayStatus = 'status.pending';
   }
+
+  const checkStatus = async () => {
+    try {
+      const { success, data }: ApiResponse<IExtPipeline> =
+        await getPipelineDetail({
+          id: pipelineId ?? '',
+          pid: projectId ?? '',
+        });
+      if (success) {
+        setUpdatedStatus(data.status?.status);
+        if (
+          data.status?.status === EPipelineStatus.Active ||
+          data.status?.status === EPipelineStatus.Failed
+        ) {
+          window.clearInterval(intervalId);
+        }
+      }
+    } catch (error) {
+      window.clearInterval(intervalId);
+    }
+  };
+
+  useEffect(() => {
+    intervalId = setInterval(() => {
+      checkStatus();
+    }, CHECK_TIME_INTERVAL);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (status) {
+      setUpdatedStatus(status);
+    }
+  }, [status]);
 
   return (
     <>

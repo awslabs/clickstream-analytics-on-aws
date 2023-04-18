@@ -13,6 +13,7 @@
 
 import {
   AutosuggestProps,
+  Button,
   Container,
   FormField,
   Input,
@@ -122,17 +123,32 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                     {pipelineInfo.mskCreateMethod ===
                       ResourceCreateMehod.EXSITING && (
                       <FormField>
-                        <Select
-                          placeholder={t('pipeline:create.msk.selectMSK') || ''}
-                          statusType={loadingMSK ? 'loading' : 'finished'}
-                          selectedOption={pipelineInfo.selectedMSK}
-                          onChange={({ detail }) =>
-                            changeSelectedMSK(detail.selectedOption)
-                          }
-                          options={mskOptionList}
-                          filteringType="auto"
-                          selectedAriaLabel="Selected"
-                        />
+                        <div className="flex">
+                          <div className="flex-1">
+                            <Select
+                              placeholder={
+                                t('pipeline:create.msk.selectMSK') || ''
+                              }
+                              statusType={loadingMSK ? 'loading' : 'finished'}
+                              selectedOption={pipelineInfo.selectedMSK}
+                              onChange={({ detail }) =>
+                                changeSelectedMSK(detail.selectedOption)
+                              }
+                              options={mskOptionList}
+                              filteringType="auto"
+                              selectedAriaLabel="Selected"
+                            />
+                          </div>
+                          <div className="ml-20">
+                            <Button
+                              loading={loadingMSK}
+                              iconName="refresh"
+                              onClick={() => {
+                                getAllMSKClusterList();
+                              }}
+                            />
+                          </div>
+                        </div>
                       </FormField>
                     )}
                     <FormField

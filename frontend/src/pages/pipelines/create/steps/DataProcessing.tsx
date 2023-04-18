@@ -23,6 +23,7 @@ import {
   Checkbox,
   AutosuggestProps,
   SelectProps,
+  Button,
 } from '@cloudscape-design/components';
 import {
   getRedshiftServerlessWorkgroup,
@@ -368,6 +369,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                   <FormField
                     label={t('pipeline:create.redshiftCluster')}
                     description={t('pipeline:create.redshiftClusterDesc')}
+                    secondaryControl={
+                      <Button
+                        loading={loadingRedshift}
+                        iconName="refresh"
+                        onClick={() => {
+                          getServerlessRedshiftClusterList();
+                        }}
+                      />
+                    }
                   >
                     <Select
                       statusType={loadingRedshift ? 'loading' : 'finished'}
@@ -393,6 +403,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           {t('pipeline:create.permissionLink')}
                         </Link>
                       </div>
+                    }
+                    secondaryControl={
+                      <Button
+                        loading={loadingRoles}
+                        iconName="refresh"
+                        onClick={() => {
+                          getServerlessRoles();
+                        }}
+                      />
                     }
                   >
                     <Select

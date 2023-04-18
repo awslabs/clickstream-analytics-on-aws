@@ -36,6 +36,8 @@ import { TIME_FORMAT } from 'ts/const';
 
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;
+  loadingRefresh: boolean;
+  reloadPipeline: () => void;
 }
 
 const ProjectPipeline: React.FC<ProjectPipelineProps> = (
@@ -43,7 +45,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
 ) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { pipelineInfo } = props;
+  const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
   const [selectedItems, setSelectedItems] = useState<IApplication[]>([]);
   const [loadingApp, setLoadingApp] = useState(false);
   const [pageSize] = useState(10);
@@ -51,7 +53,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const [totalCount, setTotalCount] = useState(0);
   const [applicationList, setApplicationList] = useState<IApplication[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
-
   const goToCreateApplication = () => {
     navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
@@ -108,14 +109,23 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             variant="h2"
             description={t('project:pipeline.healthDesc')}
             actions={
-              <Button
-                href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
-                iconAlign="right"
-                iconName="external"
-                target="_blank"
-              >
-                {t('button.viewDetails')}
-              </Button>
+              <SpaceBetween direction="horizontal" size="xs">
+                <Button
+                  iconName="refresh"
+                  loading={loadingRefresh}
+                  onClick={() => {
+                    reloadPipeline();
+                  }}
+                />
+                <Button
+                  href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
+                  iconAlign="right"
+                  iconName="external"
+                  target="_blank"
+                >
+                  {t('button.viewDetails')}
+                </Button>
+              </SpaceBetween>
             }
           >
             {t('project:pipeline.health')}
@@ -145,7 +155,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.status')}
               </Box>
               <div>
-                <PipelineStatus status={pipelineInfo.status?.status} />
+                <PipelineStatus
+                  pipelineId={pipelineInfo.pipelineId}
+                  projectId={pipelineInfo.projectId}
+                  status={pipelineInfo.status?.status}
+                />
               </div>
             </div>
           </SpaceBetween>
