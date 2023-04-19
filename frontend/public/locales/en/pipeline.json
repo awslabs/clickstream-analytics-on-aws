@@ -18,7 +18,8 @@
     "privateSubnetEmpty": "Please select private subnets",
     "domainNameEmpty": "Please input domain name",
     "certificateEmpty": "Please select SSL certificate",
-    "dataProcessorIntervalError": "Data processing interval could not be less than 3 minutes"
+    "dataProcessorIntervalError": "Data processing interval could not be less than 3 minutes",
+    "acknowledgeHTTPSecurity": "Please click acknowledge button to continue."
   },
   "create": {
     "basicInfo": "Basic information",

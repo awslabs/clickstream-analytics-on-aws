@@ -61,6 +61,9 @@ const Content: React.FC = () => {
     setDataProcessorIntervalInvalidError,
   ] = useState(false);
 
+  const [acknowledgedHTTPSecurity, setAcknowledgedHTTPSecurity] =
+    useState(true);
+
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>({
     projectId: projectId ?? ''.toString(),
     appIds: [],
@@ -264,6 +267,13 @@ const Content: React.FC = () => {
         setBufferS3BucketEmptyError(true);
         return false;
       }
+    }
+    if (
+      pipelineInfo.ingestionServer.loadBalancer.protocol ===
+        ProtocalType.HTTP &&
+      !acknowledgedHTTPSecurity
+    ) {
+      return false;
     }
     return true;
   };
@@ -547,6 +557,7 @@ const Content: React.FC = () => {
               domainNameEmptyError={domainNameEmptyError}
               certificateEmptyError={certificateEmptyError}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
+              acknowledgedHTTPSecurity={acknowledgedHTTPSecurity}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
@@ -663,6 +674,9 @@ const Content: React.FC = () => {
                 });
               }}
               changeProtocal={(protocal) => {
+                if (protocal === ProtocalType.HTTP) {
+                  setAcknowledgedHTTPSecurity(false);
+                }
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -675,6 +689,9 @@ const Content: React.FC = () => {
                     },
                   };
                 });
+              }}
+              changeAckownledge={() => {
+                setAcknowledgedHTTPSecurity(true);
               }}
               changeServerEdp={(endpoint) => {
                 setPipelineInfo((prev) => {

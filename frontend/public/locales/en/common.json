@@ -222,7 +222,8 @@
     "viewInCloudWatch": "View in CloudWatch",
     "integrateDashboard": "Integrate Dashboard",
     "viewAlarmInCloudWatch": "View in Alarms Group in CloudWatch",
-    "registerAndGenerate": "Register App & Generate SDK instructions"
+    "registerAndGenerate": "Register App & Generate SDK instructions",
+    "acknowledge": "Acknowledge"
   },
   "item": "item",
   "items": "items",

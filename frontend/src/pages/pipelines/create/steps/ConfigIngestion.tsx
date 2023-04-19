@@ -68,11 +68,14 @@ interface ConfigIngestionProps {
   changeKDSProvisionType: (provision: SelectProps.Option) => void;
   changeKDSShardNumber: (num: string) => void;
 
+  changeAckownledge: () => void;
+
   publicSubnetError: boolean;
   privateSubnetError: boolean;
   domainNameEmptyError: boolean;
   certificateEmptyError: boolean;
   bufferS3BucketEmptyError: boolean;
+  acknowledgedHTTPSecurity: boolean;
 }
 
 const ConfigIngestion: React.FC<ConfigIngestionProps> = (
@@ -106,11 +109,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeEnableKafkaConnector,
     changeKDSProvisionType,
     changeKDSShardNumber,
+    changeAckownledge,
     publicSubnetError,
     privateSubnetError,
     domainNameEmptyError,
     certificateEmptyError,
     bufferS3BucketEmptyError,
+    acknowledgedHTTPSecurity,
   } = props;
   const [loadingSubnet, setLoadingSubnet] = useState(false);
   const [loadingCertificate, setLoadingCertificate] = useState(false);
@@ -302,9 +307,33 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           {pipelineInfo.ingestionServer.loadBalancer.protocol ===
             ProtocalType.HTTP && (
-            <Alert type="warning" header={t('pipeline:create.securityWarning')}>
-              {t('pipeline:create.securityWarningDesc')}
-            </Alert>
+            <FormField
+              stretch
+              errorText={
+                !acknowledgedHTTPSecurity &&
+                t('pipeline:valid.acknowledgeHTTPSecurity')
+              }
+            >
+              <div className="mb-5">
+                <Alert
+                  type="warning"
+                  action={
+                    !acknowledgedHTTPSecurity && (
+                      <Button
+                        onClick={() => {
+                          changeAckownledge();
+                        }}
+                      >
+                        {t('button.acknowledge')}
+                      </Button>
+                    )
+                  }
+                  header={t('pipeline:create.securityWarning')}
+                >
+                  {t('pipeline:create.securityWarningDesc')}
+                </Alert>
+              </div>
+            </FormField>
           )}
 
           {pipelineInfo.ingestionServer.loadBalancer.protocol ===
