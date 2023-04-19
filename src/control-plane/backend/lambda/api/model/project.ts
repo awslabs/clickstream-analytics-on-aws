@@ -13,7 +13,7 @@ import { ProjectEnvironment } from '../common/types';
  *  and limitations under the License.
  */
 
-export interface Project {
+export interface IProject {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -31,7 +31,7 @@ export interface Project {
   readonly deleted: boolean;
 }
 
-export interface ProjectList {
+export interface IProjectList {
   totalCount: number | undefined;
-  items: Project[];
+  items: IProject[];
 }

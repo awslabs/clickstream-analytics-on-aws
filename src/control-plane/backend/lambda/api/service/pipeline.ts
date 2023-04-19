@@ -14,23 +14,21 @@
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { Pipeline } from '../model/pipeline';
+import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 
 const store: ClickStreamStore = new DynamoDbStore();
-const stackManager: StackManager = new StackManager();
 
 export class PipelineServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { pid, version, order, pageNumber, pageSize } = req.query;
       const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
-      for (let pipeline of result.items as Pipeline[] ) {
-        const curStatus = await stackManager.getPipelineStatus(pipeline);
-        pipeline.status = curStatus;
-        await store.updatePipelineStatus(pipeline, curStatus);
+      for (let item of result.items as IPipeline[] ) {
+        const pipeline = new CPipeline(item);
+        await pipeline.refreshStatus();
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -44,11 +42,12 @@ export class PipelineServ {
       const { projectId } = req.body;
       req.body.id = projectId;
       req.body.pipelineId = uuidv4().replace(/-/g, '');
-      let pipeline: Pipeline = req.body;
+      let pipeline: IPipeline = req.body;
 
       // state machine
+      const stackManager: StackManager = new StackManager(pipeline);
       pipeline.executionName = `main-${uuidv4()}`;
-      pipeline.workflow = await stackManager.generateWorkflow(pipeline);
+      pipeline.workflow = await stackManager.generateWorkflow();
       pipeline.executionArn = await stackManager.execute(pipeline.workflow, pipeline.executionName);
 
       // save metadata
@@ -67,9 +66,9 @@ export class PipelineServ {
       if (!pipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const curStatus = await stackManager.getPipelineStatus(pipeline);
-      pipeline.status = curStatus;
-      await store.updatePipelineStatus(pipeline, curStatus);
+      const stackManager: StackManager = new StackManager(pipeline);
+      pipeline.status = await stackManager.getPipelineStatus();
+      await store.updatePipelineAtCurrentVersion(pipeline);
       return res.json(new ApiSuccess(pipeline));
     } catch (error) {
       next(error);
@@ -80,7 +79,7 @@ export class PipelineServ {
     try {
       const { projectId } = req.body;
       req.body.id = projectId;
-      let pipeline: Pipeline = req.body;
+      let pipeline: IPipeline = req.body;
       // Read current version from db
       const curPipeline = await store.getPipeline(pipeline.id, pipeline.pipelineId);
       if (!curPipeline) {
@@ -97,8 +96,31 @@ export class PipelineServ {
     try {
       const { id } = req.params;
       const { pid } = req.query;
+      const ddbPipeline = await store.getPipeline(pid, id);
+      if (!ddbPipeline) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const pipeline = new CPipeline(ddbPipeline);
+      await pipeline.delete();
+      // TODO: Asynchronize
       await store.deletePipeline(pid, id);
       return res.status(200).send(new ApiSuccess(null, 'Pipeline deleted.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async retry(req: any, res: any, next: any) {
+    try {
+      const { id } = req.params;
+      const { pid, type } = req.query;
+      const ddbPipeline = await store.getPipeline(pid, id);
+      if (!ddbPipeline) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const pipeline = new CPipeline(ddbPipeline);
+      await pipeline.retry(type);
+      return res.status(201).send(new ApiSuccess(null, 'Pipeline retry.'));
     } catch (error) {
       next(error);
     }

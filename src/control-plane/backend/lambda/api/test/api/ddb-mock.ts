@@ -20,7 +20,7 @@ const MOCK_APP_NAME = 'app';
 const MOCK_APP_ID = 'app_7777_7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
-const MOCK_EXECUTION_ID = '3333-3333';
+const MOCK_EXECUTION_ID = 'main-3333-3333';
 const MOCK_BUILDIN_PLUGIN_ID = 'BUILDIN-1';
 
 function tokenMock(ddbMock: any, expect: boolean): any {

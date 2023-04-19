@@ -11,46 +11,45 @@
  *  and limitations under the License.
  */
 
-import { PipelineStatus } from '../common/types';
-import { Application, ApplicationList } from '../model/application';
-import { Dictionary } from '../model/dictionary';
-import { Pipeline, PipelineList } from '../model/pipeline';
-import { Plugin, PluginList } from '../model/plugin';
-import { Project, ProjectList } from '../model/project';
+import { IApplication, IApplicationList } from '../model/application';
+import { IDictionary } from '../model/dictionary';
+import { IPipeline, IPipelineList } from '../model/pipeline';
+import { IPlugin, IPluginList } from '../model/plugin';
+import { IProject, IProjectList } from '../model/project';
 
 export interface ClickStreamStore {
-  createProject: (project: Project) => Promise<string>;
-  getProject: (id: string) => Promise<Project | undefined>;
-  updateProject: (project: Project) => Promise<void>;
-  listProjects: (order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<ProjectList>;
+  createProject: (project: IProject) => Promise<string>;
+  getProject: (id: string) => Promise<IProject | undefined>;
+  updateProject: (project: IProject) => Promise<void>;
+  listProjects: (order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IProjectList>;
   deleteProject: (id: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
-  addApplication: (app: Application) => Promise<string>;
-  getApplication: (projectId: string, appId: string) => Promise<Application | undefined>;
-  updateApplication: (app: Application) => Promise<void>;
-  listApplication: (projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<ApplicationList>;
+  addApplication: (app: IApplication) => Promise<string>;
+  getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
+  updateApplication: (app: IApplication) => Promise<void>;
+  listApplication: (projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IApplicationList>;
   deleteApplication: (projectId: string, appId: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 
-  addPipeline: (pipeline: Pipeline) => Promise<string>;
-  getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<Pipeline | undefined>;
-  updatePipeline: (pipeline: Pipeline, curPipeline: Pipeline) => Promise<void>;
-  updatePipelineStatus: (pipeline: Pipeline, status: PipelineStatus) => Promise<void>;
+  addPipeline: (pipeline: IPipeline) => Promise<string>;
+  getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<IPipeline | undefined>;
+  updatePipeline: (pipeline: IPipeline, curPipeline: IPipeline) => Promise<void>;
+  updatePipelineAtCurrentVersion: (pipeline: IPipeline) => Promise<void>;
   listPipeline: (projectId: string, version: string, order: string,
-    pagination: boolean, pageSize: number, pageNumber: number) => Promise<PipelineList>;
+    pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPipelineList>;
   deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 
-  addPlugin: (plugin: Plugin) => Promise<string>;
-  getPlugin: (pluginId: string) => Promise<Plugin | undefined>;
-  updatePlugin: (plugin: Plugin) => Promise<void>;
-  listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<PluginList>;
+  addPlugin: (plugin: IPlugin) => Promise<string>;
+  getPlugin: (pluginId: string) => Promise<IPlugin | undefined>;
+  updatePlugin: (plugin: IPlugin) => Promise<void>;
+  listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPluginList>;
   deletePlugin: (pluginId: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
 
-  getDictionary: (name: string) => Promise<Dictionary | undefined>;
-  listDictionary: () => Promise<Dictionary[]>;
+  getDictionary: (name: string) => Promise<IDictionary | undefined>;
+  listDictionary: () => Promise<IDictionary[]>;
 
   isRequestIdExisted: (id: string) => Promise<boolean>;
   saveRequestId: (id: string) => Promise<void>;

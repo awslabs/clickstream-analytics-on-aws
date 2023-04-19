@@ -52,6 +52,36 @@ describe('Application test', () => {
             ingestionServer: {
               sinkType: 's3',
             },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://xxx.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
             executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
         ],
@@ -763,6 +793,36 @@ describe('Application test', () => {
             ingestionServer: {
               sinkType: 's3',
             },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://xxx.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
             executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
         ],
@@ -776,6 +836,7 @@ describe('Application test', () => {
         ],
       });
     ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

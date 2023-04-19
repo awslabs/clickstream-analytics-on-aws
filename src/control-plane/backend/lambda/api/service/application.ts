@@ -15,14 +15,13 @@ import { StackManager } from './stack';
 import { MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
-import { ApiFail, ApiSuccess, PipelineStatusType } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
 import { isEmpty } from '../common/utils';
-import { Application } from '../model/application';
+import { IApplication } from '../model/application';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
-const stackManager: StackManager = new StackManager();
 
 export class ApplicationServ {
   public async list(req: any, res: any, next: any) {
@@ -39,7 +38,7 @@ export class ApplicationServ {
     try {
       const { projectId, appId } = req.body;
       req.body.id = projectId;
-      let app: Application = req.body;
+      let app: IApplication = req.body;
       // Check pipeline status
       const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
       if (latestPipelines.totalCount === 0) {
@@ -56,7 +55,8 @@ export class ApplicationServ {
       validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
 
       const id = await store.addApplication(app);
-      await stackManager.updateETLWorkflow(pipeline, appIds);
+      const stackManager: StackManager = new StackManager(pipeline);
+      await stackManager.updateETLWorkflow(appIds);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -76,7 +76,8 @@ export class ApplicationServ {
       if (latestPipeline.totalCount === 0) {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
-      const outputValue = await stackManager.getStackOutput(latestPipeline.items[0], 'ingestion', 'ingestionServerUrl');
+      const stackManager: StackManager = new StackManager(latestPipeline.items[0]);
+      const outputValue = await stackManager.getStackOutput(PipelineStackType.INGESTION, 'ingestionServerUrl');
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -99,7 +100,7 @@ export class ApplicationServ {
 
   public async update(req: any, res: any, next: any) {
     try {
-      let app: Application = req.body as Application;
+      let app: IApplication = req.body as IApplication;
       await store.updateApplication(app);
       return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
     } catch (error) {
@@ -134,7 +135,8 @@ export class ApplicationServ {
       }
 
       await store.deleteApplication(pid, id);
-      await stackManager.updateETLWorkflow(pipeline, appIds);
+      const stackManager: StackManager = new StackManager(pipeline);
+      await stackManager.updateETLWorkflow(appIds);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

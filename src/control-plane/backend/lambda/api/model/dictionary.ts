@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-export interface Dictionary {
+export interface IDictionary {
   name: string;
   data: any;
 }

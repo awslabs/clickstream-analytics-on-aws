@@ -14,7 +14,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { Plugin } from '../model/plugin';
+import { IPlugin } from '../model/plugin';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -34,7 +34,7 @@ export class PluginServ {
   public async add(req: any, res: any, next: any) {
     try {
       req.body.id = uuidv4().replace(/-/g, '');
-      const plugin: Plugin = req.body;
+      const plugin: IPlugin = req.body;
       const id = await store.addPlugin(plugin);
       return res.status(201).json(new ApiSuccess({ id }, 'Plugin created.'));
     } catch (error) {
@@ -58,7 +58,7 @@ export class PluginServ {
 
   public async update(req: any, res: any, next: any) {
     try {
-      let plugin: Plugin = req.body as Plugin;
+      let plugin: IPlugin = req.body as IPlugin;
       await store.updatePlugin(plugin);
       return res.status(201).json(new ApiSuccess(null, 'Plugin updated.'));
     } catch (error) {

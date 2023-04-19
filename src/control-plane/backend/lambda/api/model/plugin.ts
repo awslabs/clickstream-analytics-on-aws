@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-export interface Plugin {
+export interface IPlugin {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -36,7 +36,7 @@ export interface Plugin {
   readonly deleted: boolean;
 }
 
-export interface PluginList {
+export interface IPluginList {
   totalCount: number;
-  items: Plugin[];
+  items: IPlugin[];
 }

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-export interface Application {
+export interface IApplication {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -30,7 +30,7 @@ export interface Application {
   readonly deleted: boolean;
 }
 
-export interface ApplicationList {
+export interface IApplicationList {
   totalCount: number | undefined;
-  items: Application[];
+  items: IApplication[];
 }

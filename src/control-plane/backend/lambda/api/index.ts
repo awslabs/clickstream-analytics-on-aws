@@ -381,6 +381,16 @@ app.post(
     return pipelineServ.add(req, res, next);
   });
 
+app.post(
+  '/api/pipeline/:id/retry',
+  validate([
+    query('pid').custom(isProjectExisted),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pipelineServ.retry(req, res, next);
+  });
+
 app.get(
   '/api/pipeline',
   validate([

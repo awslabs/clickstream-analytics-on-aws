@@ -13,7 +13,7 @@
 
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { Project } from '../model/project';
+import { IProject } from '../model/project';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -32,7 +32,7 @@ export class ProjectServ {
 
   public async create(req: any, res: any, next: any) {
     try {
-      let project: Project = req.body;
+      let project: IProject = req.body;
       const id = await store.createProject(project);
       return res.status(201).json(new ApiSuccess({ id }, 'Project created.'));
     } catch (error) {
@@ -56,7 +56,7 @@ export class ProjectServ {
 
   public async update(req: any, res: any, next: any) {
     try {
-      const project: Project = req.body as Project;
+      const project: IProject = req.body as IProject;
       await store.updateProject(project);
       return res.status(201).json(new ApiSuccess(null, 'Project updated.'));
     } catch (error) {

@@ -17,37 +17,44 @@ import {
   GetWorkgroupCommand,
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
+import {
+  StartExecutionCommand,
+  SFNClient,
+} from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import {
+  KAFKA_INGESTION_PIPELINE,
+  KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
+  KINESIS_ETL_REDSHIFT_PIPELINE,
+  KINESIS_ON_DEMAND_INGESTION_PIPELINE,
+  KINESIS_PROVISIONED_INGESTION_PIPELINE,
+  MSK_ETL_REDSHIFT_PIPELINE,
+  MSK_WITH_CONNECTOR_INGESTION_PIPELINE, RETRY_PIPELINE_WITH_WORKFLOW,
+  S3_ETL_PIPELINE,
+  S3_INGESTION_PIPELINE,
+} from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { ProjectEnvironment, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
-import { Pipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
-const stackManager: StackManager = new StackManager();
+const sfnClient = mockClient(SFNClient);
 
 describe('Workflow test', () => {
   beforeEach(() => {
     ddbMock.reset();
     kafkaMock.reset();
     redshiftServerlessClient.reset();
+    sfnClient.reset();
   });
+
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -55,79 +62,8 @@ describe('Workflow test', () => {
         type: `METADATA#${MOCK_PROJECT_ID}`,
       },
     }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 's3',
-        sinkS3: {
-          sinkBucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'test',
-          },
-          s3BatchMaxBytes: 50,
-          s3BatchTimeout: 30,
-        },
-      },
-      etl: undefined,
-      dataAnalytics: undefined,
-      executionArn: '',
-      executionName: 'executionName',
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -139,31 +75,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -175,7 +111,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -223,18 +159,18 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'S3DataPrefix',
-                        ParameterValue: 'test/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'S3BatchMaxBytes',
-                        ParameterValue: '50',
+                        ParameterValue: '500',
                       },
                       {
                         ParameterKey: 'S3BatchTimeout',
-                        ParameterValue: '30',
+                        ParameterValue: '60',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-s3-6666-6666',
+                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
                   },
                 },
@@ -248,20 +184,10 @@ describe('Workflow test', () => {
         Type: 'Parallel',
       },
     };
-
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kafka', async () => {
+  it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -269,81 +195,8 @@ describe('Workflow test', () => {
         type: `METADATA#${MOCK_PROJECT_ID}`,
       },
     }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kafka',
-        sinkKafka: {
-          brokers: ['test1.com:9092', 'test2.com:9092', 'test3.com:9092'],
-          topic: 't1',
-          mskCluster: {
-            name: 'mskClusterName',
-            arn: 'mskClusterArn',
-            securityGroupId: 'sg-0000000000002',
-          },
-          kafkaConnector: {
-            enable: true,
-          },
-        },
-      },
-      executionArn: '',
-      executionName: 'executionName',
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(KAFKA_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -355,31 +208,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -391,7 +244,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -450,7 +303,140 @@ describe('Workflow test', () => {
                         ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kafka-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Type: 'Stack',
+                End: true,
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-kafka with connector', async () => {
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
+    const stackManager: StackManager = new StackManager(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs/',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'mskClusterName',
+                      },
+                      {
+                        ParameterKey: 'MskSecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
@@ -461,11 +447,11 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -493,7 +479,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -512,7 +498,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'sg-0000000000002',
                       },
                     ],
-                    StackName: 'clickstream-kafka-connector-6666-6666',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
@@ -529,273 +515,8 @@ describe('Workflow test', () => {
 
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kafka no connector', async () => {
+  it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      status: {
-        status: 'Active',
-        stackDetails: [],
-        executionDetail: {},
-      },
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kafka',
-        sinkKafka: {
-          brokers: ['test1.com:9092', 'test2.com:9092', 'test3.com:9092'],
-          topic: 't1',
-          mskCluster: {
-            name: 'mskClusterName',
-            arn: 'mskClusterArn',
-            securityGroupId: 'sg-0000000000002',
-          },
-          kafkaConnector: {
-            enable: false,
-          },
-        },
-      },
-      etl: {
-        dataFreshnessInHour: 7,
-        scheduleExpression: 'hour',
-        sourceS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        sinkS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        pipelineBucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        transformPlugin: 'transform',
-        enrichPlugin: ['enrich1', 'enrich2'],
-      },
-      dataAnalytics: {
-        redshift: {
-          serverless: {
-            workgroupName: 'test',
-            iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
-          },
-        },
-        loadWorkflow: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          scheduleInterval: 180,
-          maxFilesLimit: 50,
-          processingFilesLimit: 50,
-        },
-      },
-      executionArn: '',
-      executionName: 'executionName',
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
-    const expected = {
-      Version: '2022-03-15',
-      Workflow: {
-        Branches: [
-          {
-            StartAt: 'Ingestion',
-            States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/executionName/clickstream-ingestion-kafka-6666-6666',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'us-east-1',
-                    Parameters: [
-                      {
-                        ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
-                      },
-                      {
-                        ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
-                      },
-                      {
-                        ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
-                      },
-                      {
-                        ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
-                      },
-                      {
-                        ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-                      },
-                      {
-                        ParameterKey: 'Protocol',
-                        ParameterValue: 'HTTPS',
-                      },
-                      {
-                        ParameterKey: 'ServerEndpointPath',
-                        ParameterValue: '/collect',
-                      },
-                      {
-                        ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
-                      },
-                      {
-                        ParameterKey: 'ServerMax',
-                        ParameterValue: '4',
-                      },
-                      {
-                        ParameterKey: 'ServerMin',
-                        ParameterValue: '2',
-                      },
-                      {
-                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
-                        ParameterValue: '50',
-                      },
-                      {
-                        ParameterKey: 'WarmPoolSize',
-                        ParameterValue: '1',
-                      },
-                      {
-                        ParameterKey: 'NotificationsTopicArn',
-                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
-                      },
-                      {
-                        ParameterKey: 'EnableGlobalAccelerator',
-                        ParameterValue: 'Yes',
-                      },
-                      {
-                        ParameterKey: 'DevMode',
-                        ParameterValue: 'Yes',
-                      },
-                      {
-                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
-                        ParameterValue: 'Yes',
-                      },
-                      {
-                        ParameterKey: 'LogS3Bucket',
-                        ParameterValue: 'EXAMPLE_BUCKET',
-                      },
-                      {
-                        ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'logs/',
-                      },
-                      {
-                        ParameterKey: 'MskClusterName',
-                        ParameterValue: 'mskClusterName',
-                      },
-                      {
-                        ParameterKey: 'MskSecurityGroupId',
-                        ParameterValue: 'sg-0000000000002',
-                      },
-                      {
-                        ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
-                      },
-                      {
-                        ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
-                      },
-                    ],
-                    StackName: 'clickstream-ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
-                  },
-                },
-                Type: 'Stack',
-                End: true,
-              },
-            },
-          },
-        ],
-        End: true,
-        Type: 'Parallel',
-      },
-    };
-
-    expect(wf).toEqual(expected);
-  });
-  it('Generate Workflow ingestion-server-kafka msk', async () => {
-    dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -817,89 +538,8 @@ describe('Workflow test', () => {
         },
       ],
     });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kafka',
-        sinkKafka: {
-          brokers: [],
-          topic: 't1',
-          mskCluster: {
-            name: 'mskClusterName',
-            arn: 'mskClusterArn',
-            securityGroupId: 'sg-0000000000002',
-          },
-          kafkaConnector: {
-            enable: true,
-          },
-        },
-      },
-      workflow: {
-        Version: '2022-03-15',
-        Workflow: {
-          Type: WorkflowStateType.PASS,
-          End: true,
-          Branches: [],
-        },
-      },
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -911,31 +551,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -947,7 +587,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -1006,7 +646,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kafka-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
@@ -1017,11 +657,11 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -1049,7 +689,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -1068,7 +708,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'sg-0000000000002',
                       },
                     ],
-                    StackName: 'clickstream-kafka-connector-6666-6666',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
@@ -1087,15 +727,6 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -1103,77 +734,8 @@ describe('Workflow test', () => {
         type: `METADATA#${MOCK_PROJECT_ID}`,
       },
     }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kinesis',
-        sinkKinesis: {
-          kinesisStreamMode: 'ON_DEMAND',
-          kinesisShardCount: 2,
-          sinkBucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-        },
-      },
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1185,31 +747,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1221,7 +783,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -1292,7 +854,7 @@ describe('Workflow test', () => {
                         ParameterValue: '300',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kinesis-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
@@ -1306,20 +868,10 @@ describe('Workflow test', () => {
         Type: 'Parallel',
       },
     };
-
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: '1',
-      }, {
-        id: 2,
-        appId: '2',
-      }],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -1327,77 +879,8 @@ describe('Workflow test', () => {
         type: `METADATA#${MOCK_PROJECT_ID}`,
       },
     }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: ['appId1', 'appId2'],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kinesis',
-        sinkKinesis: {
-          kinesisStreamMode: 'PROVISIONED',
-          kinesisShardCount: 10,
-          sinkBucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-        },
-      },
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(KINESIS_PROVISIONED_INGESTION_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1409,31 +892,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1445,7 +928,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -1501,7 +984,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisShardCount',
-                        ParameterValue: '10',
+                        ParameterValue: '2',
                       },
                       {
                         ParameterKey: 'KinesisDataRetentionHours',
@@ -1516,7 +999,7 @@ describe('Workflow test', () => {
                         ParameterValue: '300',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kinesis-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
@@ -1530,11 +1013,17 @@ describe('Workflow test', () => {
         Type: 'Parallel',
       },
     };
-
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
     dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -1544,103 +1033,8 @@ describe('Workflow test', () => {
         appId: `${MOCK_APP_ID}_2`,
       }],
     });
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: [`${MOCK_APP_ID}_1`, `${MOCK_APP_ID}_2`],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableApplicationLoadBalancerAccessLog: true,
-          enableGlobalAccelerator: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 's3',
-        sinkS3: {
-          sinkBucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'test',
-          },
-          s3BatchMaxBytes: 50,
-          s3BatchTimeout: 30,
-        },
-      },
-      etl: {
-        dataFreshnessInHour: 7,
-        scheduleExpression: 'hour',
-        sourceS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        sinkS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        pipelineBucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        transformPlugin: undefined,
-        enrichPlugin: ['a', 'b'],
-      },
-      dataAnalytics: undefined,
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(S3_ETL_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1652,31 +1046,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-s3-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1688,7 +1082,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -1736,18 +1130,18 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'S3DataPrefix',
-                        ParameterValue: 'test/',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
                       },
                       {
                         ParameterKey: 'S3BatchMaxBytes',
-                        ParameterValue: '50',
+                        ParameterValue: '500',
                       },
                       {
                         ParameterKey: 'S3BatchTimeout',
-                        ParameterValue: '30',
+                        ParameterValue: '60',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-s3-6666-6666',
+                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
                   },
                 },
@@ -1763,19 +1157,19 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-etl-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -1826,7 +1220,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'parquet',
                       },
                     ],
-                    StackName: 'clickstream-etl-6666-6666',
+                    StackName: 'Clickstream-ETL-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -1840,11 +1234,17 @@ describe('Workflow test', () => {
         Type: 'Parallel',
       },
     };
-
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow kafka msk + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         id: 1,
@@ -1854,13 +1254,6 @@ describe('Workflow test', () => {
         appId: `${MOCK_APP_ID}_2`,
       }],
     });
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
@@ -1889,131 +1282,8 @@ describe('Workflow test', () => {
         namespaceName: 'test-ns',
       },
     });
-
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: [`${MOCK_APP_ID}_1`, `${MOCK_APP_ID}_2`],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableGlobalAccelerator: true,
-          enableApplicationLoadBalancerAccessLog: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kafka',
-        sinkKafka: {
-          brokers: [],
-          topic: 't1',
-          mskCluster: {
-            name: 'mskClusterName',
-            arn: 'mskClusterArn',
-            securityGroupId: 'sg-0000000000002',
-          },
-          kafkaConnector: {
-            enable: true,
-          },
-        },
-      },
-      etl: {
-        dataFreshnessInHour: 7,
-        scheduleExpression: 'hour',
-        sourceS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        sinkS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        pipelineBucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        transformPlugin: 'transform',
-        enrichPlugin: ['enrich1', 'enrich2'],
-      },
-      dataAnalytics: {
-        ods: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          fileSuffix: '.snappy.parquet',
-        },
-        redshift: {
-          serverless: {
-            workgroupName: 'test',
-            iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
-          },
-        },
-        loadWorkflow: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          scheduleInterval: 180,
-          maxFilesLimit: 50,
-          processingFilesLimit: 50,
-        },
-      },
-      workflow: {
-        Version: '2022-03-15',
-        Workflow: {
-          Type: WorkflowStateType.PASS,
-          End: true,
-          Branches: [],
-        },
-      },
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(MSK_ETL_REDSHIFT_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -2025,31 +1295,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -2061,7 +1331,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -2120,7 +1390,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kafka-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
@@ -2131,11 +1401,11 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -2163,7 +1433,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -2182,7 +1452,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'sg-0000000000002',
                       },
                     ],
-                    StackName: 'clickstream-kafka-connector-6666-6666',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
@@ -2198,19 +1468,19 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-etl-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -2254,14 +1524,14 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'transform,enrich1,enrich2',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
                       },
                       {
                         ParameterKey: 'OutputFormat',
                         ParameterValue: 'parquet',
                       },
                     ],
-                    StackName: 'clickstream-etl-6666-6666',
+                    StackName: 'Clickstream-ETL-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -2277,19 +1547,19 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-data-analytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -2344,7 +1614,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
                       },
                     ],
-                    StackName: 'clickstream-data-analytics-6666-6666',
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
@@ -2358,14 +1628,354 @@ describe('Workflow test', () => {
         Type: 'Parallel',
       },
     };
-
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + redshift', async () => {
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `METADATA#${MOCK_PROJECT_ID}`,
+      },
+    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        id: 1,
+        appId: `${MOCK_APP_ID}_1`,
+      }, {
+        id: 2,
+        appId: `${MOCK_APP_ID}_2`,
+      }],
+    });
+    kafkaMock.on(ListNodesCommand).resolves({
+      NodeInfoList: [
+        {
+          BrokerNodeInfo: {
+            Endpoints: ['test1.com', 'test2.com'],
+          },
+        },
+        {
+          BrokerNodeInfo: {
+            Endpoints: ['test3.com'],
+          },
+        },
+      ],
+    });
+    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
+      workgroup: {
+        workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+        workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
+        workgroupName: 'test-wg',
+      },
+    });
+    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
+      namespace: {
+        namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+        namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+        namespaceName: 'test-ns',
+      },
+    });
+    const stackManager: StackManager = new StackManager(KINESIS_ETL_REDSHIFT_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs/',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'KinesisStreamMode',
+                        ParameterValue: 'ON_DEMAND',
+                      },
+                      {
+                        ParameterKey: 'KinesisShardCount',
+                        ParameterValue: '3',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataRetentionHours',
+                        ParameterValue: '24',
+                      },
+                      {
+                        ParameterKey: 'KinesisBatchSize',
+                        ParameterValue: '10000',
+                      },
+                      {
+                        ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+                        ParameterValue: '300',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '7',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: 'hour',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
+                      },
+                    ],
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'ODSEventBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'ODSEventPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'ODSEventFileSuffix',
+                        ParameterValue: '.snappy.parquet',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucketPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'MaxFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'ProcessingFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessNamespaceId',
+                        ParameterValue: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupId',
+                        ParameterValue: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessIAMRole',
+                        ParameterValue: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
+                      },
+                    ],
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
     expect(wf).toEqual(expected);
   });
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [],
-    });
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -2373,6 +1983,9 @@ describe('Workflow test', () => {
         type: `METADATA#${MOCK_PROJECT_ID}`,
       },
     }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [],
+    });
     kafkaMock.on(ListNodesCommand).resolves({
       NodeInfoList: [
         {
@@ -2402,130 +2015,8 @@ describe('Workflow test', () => {
       },
     });
 
-    const pipeline1 = {
-      id: MOCK_PROJECT_ID,
-      prefix: 'PIPELINE',
-      type: `PIPELINE#${MOCK_PIPELINE_ID}`,
-      projectId: MOCK_PROJECT_ID,
-      appIds: [],
-      pipelineId: MOCK_PIPELINE_ID,
-      name: 'Pipeline-01',
-      description: 'Description of Pipeline-01',
-      region: 'us-east-1',
-      dataCollectionSDK: 'Clickstream SDK',
-      tags: [
-        {
-          key: 'name',
-          value: 'clickstream',
-        },
-      ],
-      network: {
-        vpcId: 'vpc-0ba32b04ccc029088',
-        publicSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-        privateSubnetIds: ['subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5', 'subnet-09ae522e85bbee5c5'],
-      },
-      bucket: {
-        name: 'EXAMPLE_BUCKET',
-        prefix: '',
-      },
-      ingestionServer: {
-        size: {
-          serverMin: 2,
-          serverMax: 4,
-          warmPoolSize: 1,
-          scaleOnCpuUtilizationPercent: 50,
-        },
-        domain: {
-          domainName: 'click.example.com',
-          certificateArn: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
-        },
-        loadBalancer: {
-          serverEndpointPath: '/collect',
-          serverCorsOrigin: '*',
-          protocol: 'HTTPS',
-          enableGlobalAccelerator: true,
-          enableApplicationLoadBalancerAccessLog: true,
-          logS3Bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: 'logs',
-          },
-          notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
-        },
-        sinkType: 'kafka',
-        sinkKafka: {
-          brokers: [],
-          topic: 't1',
-          mskCluster: {
-            name: 'mskClusterName',
-            arn: 'mskClusterArn',
-            securityGroupId: 'sg-0000000000002',
-          },
-          kafkaConnector: {
-            enable: true,
-          },
-        },
-      },
-      etl: {
-        dataFreshnessInHour: 7,
-        scheduleExpression: 'hour',
-        sourceS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        sinkS3Bucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        pipelineBucket: {
-          name: 'EXAMPLE_BUCKET',
-          prefix: '',
-        },
-        transformPlugin: 'transform',
-        enrichPlugin: ['enrich1', 'enrich2'],
-      },
-      dataAnalytics: {
-        ods: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          fileSuffix: '.snappy.parquet',
-        },
-        redshift: {
-          serverless: {
-            workgroupName: 'test',
-            iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
-          },
-        },
-        loadWorkflow: {
-          bucket: {
-            name: 'EXAMPLE_BUCKET',
-            prefix: '',
-          },
-          scheduleInterval: 180,
-          maxFilesLimit: 50,
-          processingFilesLimit: 50,
-        },
-      },
-      workflow: {
-        Version: '2022-03-15',
-        Workflow: {
-          Type: WorkflowStateType.PASS,
-          End: true,
-          Branches: [],
-        },
-      },
-      executionArn: '',
-      executionName: MOCK_EXECUTION_ID,
-      version: '123',
-      versionTag: 'latest',
-      createAt: 162321434322,
-      updateAt: 162321434322,
-      operator: '',
-      deleted: false,
-    };
-    const wf = await stackManager.generateWorkflow(pipeline1 as Pipeline);
-
+    const stackManager: StackManager = new StackManager(MSK_ETL_REDSHIFT_PIPELINE);
+    const wf = await stackManager.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -2537,31 +2028,31 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PublicSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'DomainName',
-                        ParameterValue: 'click.example.com',
+                        ParameterValue: 'fake.example.com',
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:us-east-1:555555555555:certificate/E1WG1ZNPRXT0D4',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -2573,7 +2064,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ServerCorsOrigin',
-                        ParameterValue: '*',
+                        ParameterValue: '',
                       },
                       {
                         ParameterKey: 'ServerMax',
@@ -2632,7 +2123,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                     ],
-                    StackName: 'clickstream-ingestion-kafka-6666-6666',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
@@ -2643,11 +2134,11 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-kafka-connector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'DataS3Bucket',
@@ -2675,7 +2166,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -2694,7 +2185,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'sg-0000000000002',
                       },
                     ],
-                    StackName: 'clickstream-kafka-connector-6666-6666',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
@@ -2710,19 +2201,19 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-etl-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -2766,14 +2257,14 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'transform,enrich1,enrich2',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
                       },
                       {
                         ParameterKey: 'OutputFormat',
                         ParameterValue: 'parquet',
                       },
                     ],
-                    StackName: 'clickstream-etl-6666-6666',
+                    StackName: 'Clickstream-ETL-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -2789,19 +2280,19 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/3333-3333/clickstream-data-analytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     Parameters: [
                       {
                         ParameterKey: 'VpcId',
-                        ParameterValue: 'vpc-0ba32b04ccc029088',
+                        ParameterValue: 'vpc-00000000000000001',
                       },
                       {
                         ParameterKey: 'PrivateSubnetIds',
-                        ParameterValue: 'subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5,subnet-09ae522e85bbee5c5',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
                         ParameterKey: 'ProjectId',
@@ -2856,7 +2347,7 @@ describe('Workflow test', () => {
                         ParameterValue: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
                       },
                     ],
-                    StackName: 'clickstream-data-analytics-6666-6666',
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
@@ -2873,8 +2364,703 @@ describe('Workflow test', () => {
 
     expect(wf).toEqual(expected);
   });
+  it('Generate Retry Workflow', async () => {
+    dictionaryMock(ddbMock);
+    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
+    await stackManager.retryWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/alb/',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'MskSecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Next: 'KafkaConnector',
+                Type: 'Pass',
+              },
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Update',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'DataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                      },
+                      {
+                        ParameterKey: 'SubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'SecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                    ],
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '72',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: 'rate(1 hour)',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
+                      },
+                    ],
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ODSEventBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'ODSEventPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'ODSEventFileSuffix',
+                        ParameterValue: '.snappy.parquet',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucketPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'MaxFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'ProcessingFilesLimit',
+                        ParameterValue: '100',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessNamespaceId',
+                        ParameterValue: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupId',
+                        ParameterValue: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessIAMRole',
+                        ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                      },
+                    ],
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(stackManager.getExecWorkflow()).toEqual(expected);
+  });
+  it('Generate Delete Workflow', async () => {
+    dictionaryMock(ddbMock);
+    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
+    await stackManager.deleteWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/alb/',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'MskSecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Next: 'KafkaConnector',
+                Type: 'Stack',
+              },
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'DataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PluginS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                      },
+                      {
+                        ParameterKey: 'SubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                      },
+                      {
+                        ParameterKey: 'KafkaTopic',
+                        ParameterValue: 't1',
+                      },
+                      {
+                        ParameterKey: 'MskClusterName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'SecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
+                      },
+                    ],
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '72',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: 'rate(1 hour)',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
+                      },
+                    ],
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ODSEventBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'ODSEventPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'ODSEventFileSuffix',
+                        ParameterValue: '.snappy.parquet',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucketPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'MaxFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'ProcessingFilesLimit',
+                        ParameterValue: '100',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessNamespaceId',
+                        ParameterValue: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupId',
+                        ParameterValue: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessWorkgroupName',
+                        ParameterValue: 'test',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessIAMRole',
+                        ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                      },
+                    ],
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(stackManager.getExecWorkflow()).toEqual(expected);
+  });
   it('Pipeline template url', async () => {
     dictionaryMock(ddbMock);
+    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
     let templateURL = await stackManager.getTemplateUrl('ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
     templateURL = await stackManager.getTemplateUrl('ingestion_no');
@@ -2889,7 +3075,7 @@ describe('Workflow test', () => {
         Data: {
           Input: {
             Action: 'Create',
-            Region: 'us-east-1',
+            Region: 'ap-southeast-1',
             StackName: 'clickstream-sigle-test2',
             TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
             Parameters: [
@@ -2906,6 +3092,7 @@ describe('Workflow test', () => {
         },
       },
     };
+    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
     let res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Data: {
@@ -2915,7 +3102,7 @@ describe('Workflow test', () => {
         },
         Input: {
           Action: 'Create',
-          Region: 'us-east-1',
+          Region: 'ap-southeast-1',
           Parameters: [
             {
               ParameterKey: 'QueueName',
@@ -2941,7 +3128,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   StackName: 'clickstream-test11',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -2963,7 +3150,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   StackName: 'clickstream-test33',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -2985,7 +3172,7 @@ describe('Workflow test', () => {
               Data: {
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   StackName: 'clickstream-test22',
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
@@ -3020,7 +3207,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3042,7 +3229,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3064,7 +3251,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3097,7 +3284,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3124,7 +3311,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test22',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3151,7 +3338,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test33',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3187,7 +3374,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3214,7 +3401,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3241,7 +3428,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3274,7 +3461,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3296,7 +3483,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3323,7 +3510,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test22',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3350,7 +3537,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Action: 'Create',
-                    Region: 'us-east-1',
+                    Region: 'ap-southeast-1',
                     StackName: 'clickstream-test33',
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
@@ -3386,7 +3573,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3408,7 +3595,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3435,7 +3622,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',
@@ -3462,7 +3649,7 @@ describe('Workflow test', () => {
                 },
                 Input: {
                   Action: 'Create',
-                  Region: 'us-east-1',
+                  Region: 'ap-southeast-1',
                   Parameters: [
                     {
                       ParameterKey: 'QueueName',

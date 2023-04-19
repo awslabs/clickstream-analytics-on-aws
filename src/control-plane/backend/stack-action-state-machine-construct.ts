@@ -87,7 +87,7 @@ export class StackActionStateMachine extends Construct {
       statements: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/clickstream-*`],
+          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
           actions: [
             'cloudformation:CreateStack',
             'cloudformation:UpdateStack',

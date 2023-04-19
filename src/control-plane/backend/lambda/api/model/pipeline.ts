@@ -12,7 +12,7 @@
  */
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
-import { Plugin } from './plugin';
+import { IPlugin } from './plugin';
 import {
   MUTIL_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
@@ -23,13 +23,23 @@ import {
   VPC_ID_PARRERN, POSITIVE_INTEGERS,
 } from '../common/constants-ln';
 import { validatePattern } from '../common/stack-params-valid';
-import { ClickStreamBadRequestError, KinesisStreamMode, PipelineStatus, ProjectEnvironment, WorkflowTemplate } from '../common/types';
+import {
+  ClickStreamBadRequestError,
+  KinesisStreamMode,
+  PipelineServerProtocol,
+  PipelineSinkType, PipelineStackType,
+  PipelineStatus,
+  ProjectEnvironment, WorkflowTemplate,
+} from '../common/types';
 import { isEmpty, tryToJson } from '../common/utils';
+import { StackManager } from '../service/stack';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { getRedshiftWorkgroupAndNamespace } from '../store/aws/redshift';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+
+const store: ClickStreamStore = new DynamoDbStore();
 
 interface IngestionServerSizeProps {
   /**
@@ -69,7 +79,7 @@ interface IngestionServerLoadBalancerProps {
    * Server protocol
    * allowedValues: ['HTTP', 'HTTPS']
    */
-  readonly protocol: 'HTTP' | 'HTTPS';
+  readonly protocol: PipelineServerProtocol;
   /**
    * AutoScaling group notifications SNS topic arn (optional)
    */
@@ -183,7 +193,7 @@ interface IngestionServer {
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
-  readonly sinkType: 's3' | 'kafka' | 'kinesis';
+  readonly sinkType: PipelineSinkType;
   readonly sinkS3?: IngestionServerSinkS3Props;
   readonly sinkKafka?: IngestionServerSinkKafkaProps;
   readonly sinkKinesis?: IngestionServerSinkKinesisProps;
@@ -215,7 +225,7 @@ export interface KafkaS3Connector {
 export interface DataAnalytics {
   readonly ods?: {
     readonly bucket: S3Bucket;
-    readonly fileSuffix: '.snappy' | '.parquet';
+    readonly fileSuffix: string;
   };
   readonly redshift?: {
     readonly serverless?: {
@@ -248,7 +258,7 @@ interface mskClusterProps {
   readonly securityGroupId: string;
 }
 
-export interface Pipeline {
+export interface IPipeline {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -281,12 +291,36 @@ export interface Pipeline {
   readonly deleted: boolean;
 }
 
-export interface PipelineList {
+export interface IPipelineList {
   totalCount: number | undefined;
-  items: Pipeline[];
+  items: IPipeline[];
 }
 
-export function getBucketPrefix(pipeline: Pipeline, key: string, value: string | undefined): string {
+export class CPipeline {
+  private pipeline: IPipeline;
+  private stackManager: StackManager;
+
+  constructor(pipeline: IPipeline) {
+    this.pipeline = pipeline;
+    this.stackManager = new StackManager(pipeline);
+  }
+
+  public async refreshStatus(): Promise<void> {
+    this.pipeline.status = await this.stackManager.getPipelineStatus();
+    await store.updatePipelineAtCurrentVersion(this.pipeline);
+  }
+
+  public async delete(): Promise<void> {
+    await this.stackManager.deleteWorkflow();
+  }
+
+  public async retry(type?: PipelineStackType): Promise<void> {
+    await this.stackManager.retryWorkflow(type);
+  }
+
+}
+
+export function getBucketPrefix(pipeline: IPipeline, key: string, value: string | undefined): string {
   if (value === undefined || value === '' || value === '/') {
     const prefixs: Map<string, string> = new Map();
     prefixs.set('logs-alb', `clickstream/${pipeline.projectId}/${pipeline.pipelineId}/logs/alb/`);
@@ -303,11 +337,10 @@ export function getBucketPrefix(pipeline: Pipeline, key: string, value: string |
   return value;
 }
 
-export async function getIngestionStackParameters(pipeline: Pipeline) {
+export async function getIngestionStackParameters(pipeline: IPipeline) {
 
   const parameters: Parameter[] = [];
   validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
-  const store: ClickStreamStore = new DynamoDbStore();
   const project = await store.getProject(pipeline.projectId);
 
   // VPC Information
@@ -395,7 +428,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   });
 
   // S3 sink
-  if (pipeline.ingestionServer.sinkType === 's3') {
+  if (pipeline.ingestionServer.sinkType === PipelineSinkType.S3) {
     parameters.push({
       ParameterKey: 'S3DataBucket',
       ParameterValue: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
@@ -416,7 +449,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   }
 
   // Kafka sink
-  if (pipeline.ingestionServer.sinkType === 'kafka') {
+  if (pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA) {
     if (!isEmpty(pipeline.ingestionServer.sinkKafka?.mskCluster)) { //MSK
       parameters.push({
         ParameterKey: 'MskClusterName',
@@ -456,7 +489,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
 
   }
   // Kinesis sink
-  if (pipeline.ingestionServer.sinkType === 'kinesis') {
+  if (pipeline.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
     parameters.push({
       ParameterKey: 'KinesisDataS3Bucket',
       ParameterValue: pipeline.ingestionServer.sinkKinesis?.sinkBucket.name ?? pipeline.bucket.name,
@@ -496,7 +529,7 @@ export async function getIngestionStackParameters(pipeline: Pipeline) {
   return parameters;
 }
 
-export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
+export async function getKafkaConnectorStackParameters(pipeline: IPipeline) {
   const parameters: Parameter[] = [];
 
   parameters.push({
@@ -607,10 +640,9 @@ export async function getKafkaConnectorStackParameters(pipeline: Pipeline) {
   return parameters;
 }
 
-export async function getETLPipelineStackParameters(pipeline: Pipeline) {
+export async function getETLPipelineStackParameters(pipeline: IPipeline) {
 
   validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
-  const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
 
@@ -653,7 +685,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
   });
 
   let sourceS3Prefix = getBucketPrefix(pipeline, 'data-buffer', pipeline.etl?.sourceS3Bucket.prefix);
-  if (pipeline.ingestionServer.sinkType === 'kafka') {
+  if (pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA) {
     const kafkaTopic = pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId;
     sourceS3Prefix = `${sourceS3Prefix}${kafkaTopic}/`;
   }
@@ -690,7 +722,7 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
     ParameterValue: pipeline.etl?.scheduleExpression,
   });
 
-  let buildInPlugins = tryToJson(buildInPluginsDic.data) as Plugin[];
+  let buildInPlugins = tryToJson(buildInPluginsDic.data) as IPlugin[];
   const defaultTransformer = buildInPlugins.filter(p => p.name === 'Transformer')[0];
   const transformPlugin = [!isEmpty(pipeline.etl?.transformPlugin)? pipeline.etl?.transformPlugin : defaultTransformer.mainFunction];
   const transformerAndEnrichClassNames = transformPlugin.concat(pipeline.etl?.enrichPlugin?? []).join(',');
@@ -709,10 +741,9 @@ export async function getETLPipelineStackParameters(pipeline: Pipeline) {
   return parameters;
 }
 
-export async function getDataAnalyticsStackParameters(pipeline: Pipeline) {
+export async function getDataAnalyticsStackParameters(pipeline: IPipeline) {
 
   validatePattern('ProjectId', PROJECT_ID_PATTERN, pipeline.projectId);
-  const store: ClickStreamStore = new DynamoDbStore();
   const apps = await store.listApplication('asc', pipeline.projectId, false, 1, 1);
   const appIds: string[] = apps.items.map(a => a.appId);
 

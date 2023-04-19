@@ -25,21 +25,21 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { getPaginatedResults } from '../../common/paginator';
-import { KeyVal, PipelineStatus } from '../../common/types';
+import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
-import { Application, ApplicationList } from '../../model/application';
-import { Dictionary } from '../../model/dictionary';
+import { IApplication, IApplicationList } from '../../model/application';
+import { IDictionary } from '../../model/dictionary';
 import {
-  Pipeline,
-  PipelineList,
+  IPipeline,
+  IPipelineList,
 } from '../../model/pipeline';
-import { Plugin, PluginList } from '../../model/plugin';
-import { Project, ProjectList } from '../../model/project';
+import { IPlugin, IPluginList } from '../../model/plugin';
+import { IProject, IProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
 
-  public async createProject(project: Project): Promise<string> {
+  public async createProject(project: IProject): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -63,7 +63,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return project.id;
   };
 
-  public async getProject(id: string): Promise<Project | undefined> {
+  public async getProject(id: string): Promise<IProject | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -75,7 +75,7 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const project: Project = result.Item as Project;
+    const project: IProject = result.Item as IProject;
     return !project.deleted ? project : undefined;
   };
 
@@ -91,11 +91,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const project: Project = result.Item as Project;
+    const project: IProject = result.Item as IProject;
     return project && !project.deleted;
   };
 
-  public async updateProject(project: Project): Promise<void> {
+  public async updateProject(project: IProject): Promise<void> {
     let updateExpression = 'SET #updateAt= :u';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -166,7 +166,7 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-    const projects = records as Project[];
+    const projects = records as IProject[];
     for (let index in projects) {
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
@@ -185,7 +185,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listProjects(order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ProjectList> {
+  public async listProjects(order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IProjectList> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
@@ -208,7 +208,7 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-    let projects: ProjectList = {
+    let projects: IProjectList = {
       totalCount: 0,
       items: [],
     };
@@ -218,15 +218,15 @@ export class DynamoDbStore implements ClickStreamStore {
         pageNumber = Math.min(Math.ceil(projects.totalCount / pageSize), pageNumber);
         const startIndex = pageSize * (pageNumber - 1);
         const endIndex = Math.min(pageSize * pageNumber, projects.totalCount);
-        projects.items = records?.slice(startIndex, endIndex) as Project[];
+        projects.items = records?.slice(startIndex, endIndex) as IProject[];
       }
     } else {
-      projects.items = records as Project[];
+      projects.items = records as IProject[];
     }
     return projects;
   };
 
-  public async addApplication(app: Application): Promise<string> {
+  public async addApplication(app: IApplication): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -250,7 +250,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return app.appId;
   };
 
-  public async getApplication(projectId: string, appId: string): Promise<Application | undefined> {
+  public async getApplication(projectId: string, appId: string): Promise<IApplication | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -262,11 +262,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const app: Application = result.Item as Application;
+    const app: IApplication = result.Item as IApplication;
     return !app.deleted ? app : undefined;
   };
 
-  public async updateApplication(app: Application): Promise<void> {
+  public async updateApplication(app: IApplication): Promise<void> {
     let updateExpression = 'SET #updateAt= :u';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -304,7 +304,7 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listApplication(
-    projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<ApplicationList> {
+    projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IApplicationList> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const params: QueryCommand = new QueryCommand({
         TableName: clickStreamTableName,
@@ -329,7 +329,7 @@ export class DynamoDbStore implements ClickStreamStore {
       };
     });
 
-    let apps: ApplicationList = {
+    let apps: IApplicationList = {
       totalCount: 0,
       items: [],
     };
@@ -339,10 +339,10 @@ export class DynamoDbStore implements ClickStreamStore {
         pageNumber = Math.min(Math.ceil(apps.totalCount / pageSize), pageNumber);
         const startIndex = pageSize * (pageNumber - 1);
         const endIndex = Math.min(pageSize * pageNumber, apps.totalCount);
-        apps.items = records?.slice(startIndex, endIndex) as Application[];
+        apps.items = records?.slice(startIndex, endIndex) as IApplication[];
       }
     } else {
-      apps.items = records as Application[];
+      apps.items = records as IApplication[];
     }
     return apps;
   };
@@ -376,11 +376,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const app: Application = result.Item as Application;
+    const app: IApplication = result.Item as IApplication;
     return app && !app.deleted;
   };
 
-  public async addPipeline(pipeline: Pipeline): Promise<string> {
+  public async addPipeline(pipeline: IPipeline): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -415,7 +415,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return pipeline.pipelineId;
   };
 
-  public async getPipeline(projectId: string, pipelineId: string, version?: string | undefined): Promise<Pipeline | undefined> {
+  public async getPipeline(projectId: string, pipelineId: string, version?: string | undefined): Promise<IPipeline | undefined> {
     let skVersion: string = version ?? 'latest';
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
@@ -428,11 +428,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const pipeline: Pipeline = result.Item as Pipeline;
+    const pipeline: IPipeline = result.Item as IPipeline;
     return !pipeline.deleted ? pipeline : undefined;
   };
 
-  public async updatePipeline(pipeline: Pipeline, curPipeline: Pipeline): Promise<void> {
+  public async updatePipeline(pipeline: IPipeline, curPipeline: IPipeline): Promise<void> {
     // Update new pipeline && Backup the current pipeline
     const marshallCurPipeline = marshall(curPipeline, {
       convertEmptyValues: true,
@@ -551,20 +551,57 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async updatePipelineStatus(pipeline: Pipeline, status: PipelineStatus): Promise<void> {
+  public async updatePipelineAtCurrentVersion(pipeline: IPipeline): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
         id: pipeline.projectId,
         type: pipeline.type,
       },
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET #status =:status',
+      UpdateExpression: 'SET ' +
+        '#pipelineName = :name, ' +
+        'description = :description, ' +
+        'dataCollectionSDK = :dataCollectionSDK, ' +
+        '#status = :status, ' +
+        '#tags = :tags, ' +
+        '#network = :network, ' +
+        '#bucket = :bucket, ' +
+        'ingestionServer = :ingestionServer, ' +
+        'etl = :etl, ' +
+        'dataAnalytics = :dataAnalytics, ' +
+        'workflow = :workflow, ' +
+        'executionName = :executionName, ' +
+        'executionArn = :executionArn, ' +
+        'updateAt = :updateAt, ' +
+        '#pipelineOperator = :operator ',
       ExpressionAttributeNames: {
+        '#pipelineName': 'name',
         '#status': 'status',
+        '#tags': 'tags',
+        '#network': 'network',
+        '#bucket': 'bucket',
+        '#pipelineOperator': 'operator',
+        '#ConditionVersion': 'version',
       },
       ExpressionAttributeValues: {
-        ':status': status,
+        ':name': pipeline.name,
+        ':description': pipeline.description,
+        ':dataCollectionSDK': pipeline.dataCollectionSDK,
+        ':status': pipeline.status,
+        ':tags': pipeline.tags,
+        ':network': pipeline.network,
+        ':bucket': pipeline.bucket,
+        ':ingestionServer': pipeline.ingestionServer,
+        ':etl': pipeline.etl,
+        ':dataAnalytics': pipeline.dataAnalytics,
+        ':ConditionVersionValue': pipeline.version,
+        ':workflow': pipeline.workflow ?? {},
+        ':executionName': pipeline.executionName ?? '',
+        ':executionArn': pipeline.executionArn ?? '',
+        ':updateAt': Date.now().toString(),
+        ':operator': pipeline.operator,
       },
       ReturnValues: 'ALL_NEW',
     });
@@ -593,8 +630,12 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-    const pipelines = records as Pipeline[];
+    const pipelines = records as IPipeline[];
     for (let index in pipelines) {
+      const status = pipelines[index].status;
+      if (status) {
+        status.status = PipelineStatusType.DELETING;
+      }
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
         Key: {
@@ -608,7 +649,7 @@ export class DynamoDbStore implements ClickStreamStore {
         },
         ExpressionAttributeValues: {
           ':d': true,
-          ':status': ExecutionStatus.RUNNING,
+          ':status': status,
         },
         ReturnValues: 'ALL_NEW',
       });
@@ -617,7 +658,7 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listPipeline(
-    projectId: string, version: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PipelineList> {
+    projectId: string, version: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IPipelineList> {
     let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
     expressionAttributeValues.set(':d', false);
@@ -650,7 +691,7 @@ export class DynamoDbStore implements ClickStreamStore {
       };
     });
 
-    let pipelines: PipelineList = {
+    let pipelines: IPipelineList = {
       totalCount: 0,
       items: [],
     };
@@ -660,10 +701,10 @@ export class DynamoDbStore implements ClickStreamStore {
         pageNumber = Math.min(Math.ceil(pipelines.totalCount / pageSize), pageNumber);
         const startIndex = pageSize * (pageNumber - 1);
         const endIndex = Math.min(pageSize * pageNumber, pipelines.totalCount);
-        pipelines.items = records?.slice(startIndex, endIndex) as Pipeline[];
+        pipelines.items = records?.slice(startIndex, endIndex) as IPipeline[];
       }
     } else {
-      pipelines.items = records as Pipeline[];
+      pipelines.items = records as IPipeline[];
     }
     return pipelines;
   };
@@ -680,11 +721,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const pipeline: Pipeline = result.Item as Pipeline;
+    const pipeline: IPipeline = result.Item as IPipeline;
     return pipeline && !pipeline.deleted;
   };
 
-  public async getDictionary(name: string): Promise<Dictionary | undefined> {
+  public async getDictionary(name: string): Promise<IDictionary | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: dictionaryTableName,
       Key: {
@@ -695,10 +736,10 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    return result.Item as Dictionary;
+    return result.Item as IDictionary;
   };
 
-  public async listDictionary(): Promise<Dictionary[]> {
+  public async listDictionary(): Promise<IDictionary[]> {
     const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
       const params: ScanCommand = new ScanCommand({
         TableName: dictionaryTableName,
@@ -711,7 +752,7 @@ export class DynamoDbStore implements ClickStreamStore {
         results: queryResponse.Items,
       };
     });
-    return records as Dictionary[];
+    return records as IDictionary[];
   };
 
   public async isRequestIdExisted(id: string): Promise<boolean> {
@@ -741,7 +782,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async addPlugin(plugin: Plugin): Promise<string> {
+  public async addPlugin(plugin: IPlugin): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -767,18 +808,18 @@ export class DynamoDbStore implements ClickStreamStore {
     return plugin.id;
   };
 
-  public async getPlugin(pluginId: string): Promise<Plugin | undefined> {
+  public async getPlugin(pluginId: string): Promise<IPlugin | undefined> {
     if (pluginId.startsWith('BUILDIN')) {
       const dic = await this.getDictionary('BuildInPlugins');
       if (dic) {
-        let buildInPlugins: Plugin[] = [];
+        let buildInPlugins: IPlugin[] = [];
         for (let p of dic.data) {
           p.createAt = +p.createAt;
           p.updateAt = +p.updateAt;
           p.bindCount = +p.bindCount;
           p.builtIn = p.builtIn === 'true';
           p.deleted = p.deleted === 'true';
-          buildInPlugins.push(p as Plugin);
+          buildInPlugins.push(p as IPlugin);
         }
         buildInPlugins = buildInPlugins.filter(p => p.id === pluginId);
         return !isEmpty(buildInPlugins) ? buildInPlugins[0] : undefined;
@@ -795,11 +836,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const plugin: Plugin = result.Item as Plugin;
+    const plugin: IPlugin = result.Item as IPlugin;
     return !plugin.deleted ? plugin : undefined;
   };
 
-  public async updatePlugin(plugin: Plugin): Promise<void> {
+  public async updatePlugin(plugin: IPlugin): Promise<void> {
     let updateExpression = 'SET #updateAt= :u';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -839,7 +880,7 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listPlugin(
-    pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<PluginList> {
+    pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IPluginList> {
     let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
     expressionAttributeValues.set(':d', false);
@@ -849,20 +890,20 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':pluginType', pluginType);
     }
 
-    let plugins: PluginList = {
+    let plugins: IPluginList = {
       totalCount: 0,
       items: [],
     };
     const dic = await this.getDictionary('BuildInPlugins');
     if (dic) {
-      let buildInPlugins: Plugin[] = [];
+      let buildInPlugins: IPlugin[] = [];
       for (let p of dic.data) {
         p.createAt = +p.createAt;
         p.updateAt = +p.updateAt;
         p.bindCount = +p.bindCount;
         p.builtIn = p.builtIn === 'true';
         p.deleted = p.deleted === 'true';
-        buildInPlugins.push(p as Plugin);
+        buildInPlugins.push(p as IPlugin);
       }
       if (!isEmpty(pluginType)) {
         buildInPlugins = buildInPlugins.filter(p => p.pluginType === pluginType);
@@ -897,10 +938,10 @@ export class DynamoDbStore implements ClickStreamStore {
         pageNumber = Math.min(Math.ceil(plugins.totalCount / pageSize), pageNumber);
         const startIndex = pageSize * (pageNumber - 1);
         const endIndex = Math.min(pageSize * pageNumber, plugins.totalCount);
-        plugins.items = (plugins.items as Plugin[]).concat(records as Plugin[]).slice(startIndex, endIndex);
+        plugins.items = (plugins.items as IPlugin[]).concat(records as IPlugin[]).slice(startIndex, endIndex);
       }
     } else {
-      plugins.items = (plugins.items as Plugin[]).concat(records as Plugin[]);
+      plugins.items = (plugins.items as IPlugin[]).concat(records as IPlugin[]);
     }
     return plugins;
   };
@@ -936,7 +977,7 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const plugin: Plugin = result.Item as Plugin;
+    const plugin: IPlugin = result.Item as IPlugin;
     return plugin && !plugin.deleted;
   };
 }

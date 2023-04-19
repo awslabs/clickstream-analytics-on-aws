@@ -203,7 +203,7 @@ export interface ClickStreamBucket {
 }
 
 export interface PipelineStatus {
-  readonly status: PipelineStatusType;
+  status: PipelineStatusType;
   readonly stackDetails: PipelineStatusDetail[];
   readonly executionDetail: {
     readonly name?: string;
@@ -214,6 +214,7 @@ export interface PipelineStatus {
 
 export interface PipelineStatusDetail {
   readonly stackName: string;
+  readonly stackType: PipelineStackType;
   readonly stackStatus: StackStatus | undefined;
   readonly stackStatusReason: string;
   readonly url: string;
@@ -223,6 +224,13 @@ export enum AssumeRoleType {
   ALL = 'All',
   SERVICE = 'Service',
   ACCOUNT = 'Account',
+}
+
+export enum PipelineStackType {
+  INGESTION = 'Ingestion',
+  KAFKA_CONNECTOR = 'KafkaConnector',
+  ETL = 'ETL',
+  DATA_ANALYTICS = 'DataAnalytics',
 }
 
 export enum PipelineStatusType {
@@ -236,6 +244,21 @@ export enum PipelineStatusType {
 export enum KinesisStreamMode {
   ON_DEMAND = 'ON_DEMAND',
   PROVISIONED = 'PROVISIONED',
+}
+
+export enum WorkflowVersion {
+  V20220315 = '2022-03-15',
+}
+
+export enum PipelineSinkType {
+  S3 = 's3',
+  KAFKA = 'kafka',
+  KINESIS = 'kinesis',
+}
+
+export enum PipelineServerProtocol {
+  HTTP = 'HTTP',
+  HTTPS = 'HTTPS',
 }
 
 export enum ProjectEnvironment {

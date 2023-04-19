@@ -551,7 +551,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':stack/clickstream-*',
+                  ':stack/Clickstream-*',
                 ],
               ],
             },
