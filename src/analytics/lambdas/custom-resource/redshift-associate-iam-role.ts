@@ -16,6 +16,7 @@ import { RedshiftServerlessClient, GetWorkgroupCommand, GetNamespaceCommand, Upd
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../../private/model';
+import { Sleep } from '../redshift-data';
 
 interface CustomProperties {
   readonly roleArn: string;
@@ -96,19 +97,14 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
       });
       const workgroupResp = await client.send(getWorkgroup);
       const namespaceName = workgroupResp.workgroup!.namespaceName!;
-      const getWorkspace = new GetNamespaceCommand({
-        namespaceName,
-      });
-      const getWorkspaceResp = await client.send(getWorkspace);
-      const existingRoles = getWorkspaceResp.namespace!.iamRoles ?? [];
+      const [iamRoles, defaultRoleArn] = await getRedshiftServerlessIAMRoles(namespaceName, client);
       const roles = excludeToBeUnassociated(
-        iamRoleToArn(existingRoles.map(roleStr => strToIamRole(roleStr))), roleToBeUnassociated);
+        iamRoleToArn(iamRoles), roleToBeUnassociated);
       if (roleToBeAssociated) {
         roles.push(roleToBeAssociated);
       }
 
-      const defaultRole = getNewDefaultIAMRole(roles, roleToBeAssociated, roleToBeUnassociated,
-        getWorkspaceResp.namespace!.defaultIamRoleArn);
+      const defaultRole = getNewDefaultIAMRole(roles, roleToBeAssociated, roleToBeUnassociated, defaultRoleArn);
 
       const updateNamespace = new UpdateNamespaceCommand({
         namespaceName,
@@ -117,6 +113,8 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
       });
       logger.info('Update namespace command ', { updateNamespace });
       await client.send(updateNamespace);
+
+      if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client);}
     } else if (resourceProps.provisionedRedshiftProps) {
       const client = new RedshiftClient({});
       const getCluster = new DescribeClustersCommand({
@@ -155,3 +153,26 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
   };
   return response;
 };
+
+async function getRedshiftServerlessIAMRoles(
+  namespaceName: string, client: RedshiftServerlessClient): Promise<[ClusterIamRole[], string | undefined]> {
+  const getWorkspace = new GetNamespaceCommand({
+    namespaceName,
+  });
+  const getWorkspaceResp = await client.send(getWorkspace);
+  const existingRoles = getWorkspaceResp.namespace!.iamRoles ?? [];
+  const iamRoles = existingRoles.map(roleStr => strToIamRole(roleStr));
+  logger.info(`Got IAM roles of namespace ${namespaceName}`, { iamRoles });
+  return [iamRoles, getWorkspaceResp.namespace!.defaultIamRoleArn];
+}
+
+async function waitForRedshiftServerlessIAMRolesUpdating(
+  namespaceName: string, client: RedshiftServerlessClient) {
+  for (const _i of Array(10).keys()) {
+    const [iamRoles] = await getRedshiftServerlessIAMRoles(namespaceName, client);
+    if (iamRoles.every(iamRole => iamRole.ApplyStatus === 'in-sync')) {
+      return;
+    }
+    await Sleep(5000);
+  }
+}

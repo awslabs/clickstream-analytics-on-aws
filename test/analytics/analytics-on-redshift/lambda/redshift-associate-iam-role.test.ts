@@ -90,12 +90,22 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
         namespaceName,
         iamRoles: [],
       },
+    }).resolvesOnce({
+      namespace: {
+        namespaceName,
+        iamRoles: [`IamRole(applyStatus=adding, iamRoleArn=${copyRole})`],
+      },
+    }).resolvesOnce({
+      namespace: {
+        namespaceName,
+        iamRoles: [`IamRole(applyStatus=in-sync, iamRoleArn=${copyRole})`],
+      },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
     const resp = await handler(createEventForServerless, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetWorkgroupCommand, 1);
-    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 1);
+    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 3);
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(UpdateNamespaceCommand, {
       namespaceName,
       iamRoles: [
@@ -103,7 +113,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
       ],
       defaultIamRoleArn: copyRole,
     });
-  });
+  }, 20000);
 
   test('Associate to redshift serverless workgroup with existing IAM roles', async () => {
     const existingIAMRoles = [
@@ -124,12 +134,17 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
         iamRoles: existingIAMRoles.map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
         defaultIamRoleArn: existingIAMRoles[1],
       },
+    }).resolvesOnce({
+      namespace: {
+        iamRoles: [...existingIAMRoles, copyRole].map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
+        defaultIamRoleArn: existingIAMRoles[1],
+      },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
     const resp = await handler(createEventForServerless, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetWorkgroupCommand, 1);
-    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 1);
+    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 2);
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(UpdateNamespaceCommand, {
       namespaceName: namespaceName,
       iamRoles: [
@@ -153,6 +168,10 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
       namespace: {
         iamRoles: existingIAMRoles.map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
       },
+    }).resolvesOnce({
+      namespace: {
+        iamRoles: [...existingIAMRoles, copyRole].map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
+      },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
     const resp = await handler(updateEventForServerless, context, callback) as CdkCustomResourceResponse;
@@ -160,6 +179,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetWorkgroupCommand, {
       workgroupName,
     });
+    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 2);
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetNamespaceCommand, {
       namespaceName,
     });
@@ -188,6 +208,11 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
         iamRoles: existingIAMRoles.map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
         defaultIamRoleArn: copyRole,
       },
+    }).resolvesOnce({
+      namespace: {
+        iamRoles: [...existingIAMRoles, copyRole].map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
+        defaultIamRoleArn: copyRole,
+      },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
     const resp = await handler(updateEventForServerless, context, callback) as CdkCustomResourceResponse;
@@ -195,6 +220,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetWorkgroupCommand, {
       workgroupName,
     });
+    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 2);
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetNamespaceCommand, {
       namespaceName,
     });
@@ -225,6 +251,11 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
         iamRoles: existingIAMRoles.map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
         defaultIamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
       },
+    }).resolvesOnce({
+      namespace: {
+        iamRoles: [...existingIAMRoles, copyRole2].map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
+        defaultIamRoleArn: 'arn:aws:iam::1234567890:role/redshift-role-1',
+      },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
     const resp = await handler(updateEventForServerless, context, callback) as CdkCustomResourceResponse;
@@ -232,6 +263,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetWorkgroupCommand, {
       workgroupName,
     });
+    expect(redshiftServerlessMock).toHaveReceivedCommandTimes(GetNamespaceCommand, 2);
     expect(redshiftServerlessMock).toHaveReceivedCommandWith(GetNamespaceCommand, {
       namespaceName,
     });
