@@ -366,6 +366,8 @@ describe('DataPipelineStack parameter test', () => {
     const validValues = [
       's3://abc/abc.jar',
       's3://abc/abc/test.jar',
+      's3://abc/abc/test.jar,s3://abc/abc/test2.jar',
+      '',
     ];
 
     for (const v of validValues) {
@@ -394,6 +396,8 @@ describe('DataPipelineStack parameter test', () => {
     const validValues = [
       's3://abc/abc.txt',
       's3://abc/abc/test.txt',
+      's3://abc/abc/test.txt,s3://abc/abc/test2.txt',
+      '',
     ];
 
     for (const v of validValues) {

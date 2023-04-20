@@ -13,7 +13,7 @@
 
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN } from '../common/constant';
+import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -82,14 +82,14 @@ export function createStackParameters(scope: Construct) {
   const s3PathPluginJarsParam = new CfnParameter(scope, 'S3PathPluginJars', {
     description: 'The java jars of custom plugins to transform or enrich data',
     default: '',
-    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?)?$`,
+    allowedPattern: S3_PATH_PLUGIN_JARS_PATTERN,
     type: 'String',
   });
 
   const s3PathPluginFilesParam = new CfnParameter(scope, 'S3PathPluginFiles', {
     description: 'The files of custom plugins to transform or enrich data',
     default: '',
-    allowedPattern: `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?)?$`,
+    allowedPattern: S3_PATH_PLUGIN_FILES_PATTERN,
     type: 'String',
   });
 
