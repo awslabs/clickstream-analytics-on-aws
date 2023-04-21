@@ -47,6 +47,12 @@ public class ETLRunner {
     public void run() {
         String sql = configAndSQL();
         Dataset<Row> dataset = spark.sql(sql);
+        int inputDataPartitions = dataset.rdd().getNumPartitions();
+        if (config.rePartitions < inputDataPartitions) {
+            log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.rePartitions);
+            dataset = dataset.repartition(config.rePartitions);
+        }
+        log.info("NumPartitions: " + dataset.rdd().getNumPartitions());
         log.info(new ETLMetric(dataset, "source").toString());
         Dataset<Row> dataset2 = executeTransformers(dataset, config.transformerClassNames);
         writeResult(config.outputPath, dataset2);
@@ -60,6 +66,7 @@ public class ETLRunner {
         System.setProperty("app.ids", config.validAppIds);
         System.setProperty("output.path", config.outputPath);
         System.setProperty("data.freshness.hour", String.valueOf(config.dataFreshnessInHour));
+        System.setProperty("output.coalesce.partitions", config.outPartitions + "");
 
         List<String[]> partitions = getSourcePartition(config.startTimestamp, config.endTimestamp);
         String partitionsCondition = partitions.stream()
@@ -122,6 +129,13 @@ public class ETLRunner {
         if ("json".equalsIgnoreCase(config.outPutFormat)) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
         } else {
+            int outPartitions = Integer.parseInt(System.getProperty("output.coalesce.partitions", "-1"));
+            int numPartitions = partitionedDataset.rdd().getNumPartitions();
+            log.info("outPartitions:" + outPartitions);
+            log.info("partitionedDataset.NumPartitions: " + numPartitions);
+            if (outPartitions > 0 && numPartitions > outPartitions) {
+                partitionedDataset = partitionedDataset.coalesce(outPartitions);
+            }
             partitionedDataset.write()
                     .option("compression", "snappy")
                     .partitionBy(partitionBy).mode(SaveMode.Append).parquet(outputPath);
@@ -175,6 +189,10 @@ public class ETLRunner {
         private final Long endTimestamp;
         @NotNull
         private final Long dataFreshnessInHour;
+        @NotNull
+        private final int outPartitions;
+        @NotNull
+        private final int rePartitions;
 
         public ETLRunnerConfig(@NotEmpty final String database,
                                @NotEmpty final String sourceTable,
@@ -186,7 +204,9 @@ public class ETLRunner {
                                @NotNull final String outPutFormat,
                                @NotNull final Long startTimestamp,
                                @NotNull final Long endTimestamp,
-                               @NotNull final Long dataFreshnessInHour) {
+                               @NotNull final Long dataFreshnessInHour,
+                               @NotNull final int outPartitions,
+                               @NotNull final int rePartitions) {
             this.database = database;
             this.sourceTable = sourceTable;
             this.jobDataUri = jobDataUri;
@@ -198,6 +218,8 @@ public class ETLRunner {
             this.startTimestamp = startTimestamp;
             this.endTimestamp = endTimestamp;
             this.dataFreshnessInHour = dataFreshnessInHour;
+            this.outPartitions = outPartitions;
+            this.rePartitions = rePartitions;
         }
     }
 }

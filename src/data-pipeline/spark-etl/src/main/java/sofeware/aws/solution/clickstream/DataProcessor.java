@@ -17,6 +17,8 @@ import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.SparkSession;
 
+import java.util.Arrays;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 
@@ -41,15 +43,20 @@ public final class DataProcessor {
      * args[8] means valid app_ids .
      * args[9] means dataFreshnessInHour.
      * args[10] means outputFormat.
-     *
+     * args[11] means outputPartitions.
+     * args[12] means rePartitions.
      * @param args input arguments
      */
     public static void main(final String[] args) {
-        Preconditions.checkArgument(args.length == 11, "This job can only accept input argument with length 11");
+        Preconditions.checkArgument(args.length == 13, "This job can only accept input argument with length 13");
 
         SparkSession spark = SparkSession.builder().config("spark.hadoop.hive.metastore.client.factory.class",
                 "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
                 .enableHiveSupport().appName(APP_NAME).getOrCreate();
+
+        Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
+            log.info(c._1 + " -> " + c._2);
+        });
 
 
         String database = args[0];
@@ -63,11 +70,15 @@ public final class DataProcessor {
         String startTimestamp = args[2];
         String endTimestamp = args[3];
         String dataFreshnessInHour = args[9];
+        String outputPartitions = args[11];
+        String rePartitions = args[12];
 
         ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
                 newArrayList(transformerClassNames.split(",")),
                 outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour));
+                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour),
+                Integer.valueOf(outputPartitions), Integer.valueOf(rePartitions)
+                );
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();

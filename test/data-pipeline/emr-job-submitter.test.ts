@@ -60,7 +60,8 @@ process.env.S3_PATH_PLUGIN_JARS = 's3://test/test1.jar,s3://test/test2.jar';
 process.env.S3_PATH_PLUGIN_FILES = 's3://test/test1.txt,s3://test/test2.txt';
 process.env.S3_PATH_ENTRY_POINT_JAR = 's3://test/main.jar';
 process.env.OUTPUT_FORMAT = 'json';
-
+process.env.OUTPUT_PARTITIONS ='128';
+process.env.RE_PARTITIONS ='96';
 
 test('start ETL job', async () => {
   await EMRServerlessUtil.start({});
@@ -94,6 +95,8 @@ test('start ETL job with timestamp - string', async () => {
           'app1,app2',
           '24',
           'json',
+          '128',
+          '96'
         ],
         sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

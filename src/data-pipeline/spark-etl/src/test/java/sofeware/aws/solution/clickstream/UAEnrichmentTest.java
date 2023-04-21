@@ -26,34 +26,51 @@ class UAEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_enrich_ua() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
 
         Dataset<Row> transformedDataset = uaEnrichment.transform(dataset);
 
+        transformedDataset.printSchema();
+
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        String web_info = device.getString(device.fieldIndex("web_info"));
-        String browser =  device.getString(device.fieldIndex("browser"));
-        String browser_version =  device.getString(device.fieldIndex("browser_version"));
+        String browser =  device.getString(device.fieldIndex("ua_browser"));
+        String browser_version =  device.getString(device.fieldIndex("ua_browser_version"));
 
-        assertEquals(web_info, "Apache-HttpClient/4.5.12 (Java/11.0.15)");
-        assertEquals(browser, "Apache-HttpClient");
-        assertEquals(browser_version, "4.5.12");
+        assertEquals("Apache-HttpClient", browser);
+        assertEquals("4.4.12", browser_version);
+
+        String os =  device.getString(device.fieldIndex("ua_os"));
+        String osVersion =  device.getString(device.fieldIndex("ua_os_version"));
+
+        assertEquals( "Other", os);
+        assertEquals("", osVersion);
+
+        String deviceCategory =  device.getString(device.fieldIndex("ua_device_category"));
+        String uaDevice =  device.getString(device.fieldIndex("ua_device"));
+        assertEquals( "Other", uaDevice);
+        assertEquals("", deviceCategory);
     }
 
     @Test
     public void should_return_empty_when_enrich_invalid_ua_value() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
         Dataset<Row> dataset =
-                spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_error.json")).getPath());
+                spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_ua_error.json")).getPath());
 
         Dataset<Row> transformedDataset = uaEnrichment.transform(dataset);
 
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        String browser =  device.getString(device.fieldIndex("browser"));
-        String browser_version =  device.getString(device.fieldIndex("browser_version"));
+        String browser =  device.getString(device.fieldIndex("ua_browser"));
+        String browser_version =  device.getString(device.fieldIndex("ua_browser_version"));
 
-        assertEquals(browser, "");
-        assertEquals(browser_version, "");
+        assertEquals("Other", browser);
+        assertEquals("", browser_version);
     }
 }

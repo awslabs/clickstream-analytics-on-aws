@@ -84,7 +84,9 @@ export class EMRServerlessUtil {
       config.projectId, // [7] projectId
       config.appIds, // [8] app_ids
       `${config.dataFreshnessInHour}`, // [9] dataFreshnessInHour,
-      config.outputFormat, // [10] outputFormat
+      config.outputFormat, // [10] outputFormat,
+      config.outputPartitions,// [11] outputPartitions
+      config.rePartitions, // [12] rePartitions.
     ];
 
     const jars = Array.from(
@@ -204,6 +206,8 @@ export class EMRServerlessUtil {
       entryPointJar: process.env.S3_PATH_ENTRY_POINT_JAR!,
       outputFormat: process.env.OUTPUT_FORMAT!,
       sinkTableName: process.env.SINK_TABLE_NAME!,
+      outputPartitions: process.env.OUTPUT_PARTITIONS || '-1',
+      rePartitions: process.env.RE_PARTITIONS || '200',
     };
   }
 

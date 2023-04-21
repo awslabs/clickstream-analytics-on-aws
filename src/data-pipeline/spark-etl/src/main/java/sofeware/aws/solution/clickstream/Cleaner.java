@@ -60,9 +60,9 @@ public class Cleaner {
         log.info(new ETLMetric(filteredDataSet, "after filter").toString());
         boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
         if (debugLocal) {
-            decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-decodedDataset/");
-            flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-flattedDataset/");
-            structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH +  "/clean-structuredDataset/");
+            decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-0-decodedDataset/");
+            flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-flattedDataset/");
+            structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH +  "/clean-2-structuredDataset/");
         }
         return filteredDataSet;
     }
@@ -127,7 +127,7 @@ public class Cleaner {
         options.put("columnNameOfCorruptRecord", "_corrupt_record");
         Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
         log.info(new ETLMetric(rowDataset, "after load data schema").toString());
-        boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
+        boolean debugLocal= Boolean.parseBoolean(System.getProperty("debug.local"));
         if (debugLocal) {
             rowDataset.write().mode(SaveMode.Overwrite)
                     .json(DEBUG_LOCAL_PATH + "/clean-schemaDataset/");

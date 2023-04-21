@@ -17,6 +17,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,24 +29,52 @@ class TransformerTest extends BaseSparkTest {
     @Test
     public void should_transform() {
         System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "projectId1");
+        System.setProperty("project.id", "test_project_id_01");
+
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> transformedDataset = transformer.transform(dataset);
-        assertEquals(1, transformedDataset.count());
+
+        assertEquals(2, transformedDataset.count());
+
+        transformedDataset.printSchema();
 
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        String webInfo = device.getString(device.fieldIndex("web_info"));
-        assertEquals(webInfo, "Apache-HttpClient/4.5.12 (Java/11.0.15)");
+        assertEquals("Brand HUAWEI", device.getString(device.fieldIndex("mobile_brand_name")));
+        assertEquals(28800, device.getLong(device.fieldIndex("time_zone_offset_seconds")));
 
-        String eventDate = row.getString(row.fieldIndex("event_date"));
-        long eventServerTimestampOffset = row.getLong(row.fieldIndex("event_server_timestamp_offset"));
-        long timeZoneOffsetSeconds = device.getLong(device.fieldIndex("time_zone_offset_seconds"));
-        
-        assertEquals("20230323", eventDate);
-        assertEquals(28800, timeZoneOffsetSeconds);
-        assertEquals("projectId1", row.getString(row.fieldIndex("project_id")));
-        assertEquals(-6, eventServerTimestampOffset);
+        assertEquals(-17, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
+
+        assertEquals("", device.getString(device.fieldIndex("ua_browser")));
+
+        Row geo_for_enrich = row.getStruct(row.fieldIndex("geo_for_enrich"));
+        assertEquals("13.212.229.59", geo_for_enrich.getString(geo_for_enrich.fieldIndex("ip")));
+        assertEquals("zh_CN_#Hans", geo_for_enrich.getString(geo_for_enrich.fieldIndex("locale")));
+
+        String ua = row.getString(row.fieldIndex("ua"));
+        assertEquals("Apache-HttpClient/4.5.12 (Java/11.0.15)", ua);
+
+        assertEquals(111, row.getLong(row.fieldIndex("event_bundle_sequence_id")));
+        assertEquals("test_project_id_01", row.getString(row.fieldIndex("project_id")));
+
     }
+
+
+    @Test
+    public void should_transform_with_no_seq_id() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_without_seq_id.json")).getPath());
+        Dataset<Row> transformedDataset = transformer.transform(dataset);
+
+        List<Row> rows = transformedDataset.takeAsList(3);
+        assertEquals(0, rows.get(0).getLong(rows.get(0).fieldIndex("event_bundle_sequence_id")));
+        assertEquals(0, rows.get(1).getLong(rows.get(1).fieldIndex("event_bundle_sequence_id")));
+        assertEquals(123456, rows.get(2).getLong(rows.get(2).fieldIndex("event_bundle_sequence_id")));
+
+    }
+
 }

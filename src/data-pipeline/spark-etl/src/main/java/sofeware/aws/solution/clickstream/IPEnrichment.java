@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkFiles;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.api.java.UDF2;
 import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
@@ -29,6 +30,8 @@ import org.apache.spark.sql.types.StructField;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
+import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+
 import java.io.File;
 import java.net.InetAddress;
 import java.util.Map;
@@ -46,20 +49,25 @@ public class IPEnrichment {
                         DataTypes.createStructField("metro", DataTypes.StringType, true),
                         DataTypes.createStructField("region", DataTypes.StringType, true),
                         DataTypes.createStructField("sub_continent", DataTypes.StringType, true),
+                        DataTypes.createStructField("locale", DataTypes.StringType, true),
                 }
         ));
-        return dataset.withColumn("geo",
+        Dataset<Row> ipEnrichDataset =  dataset.withColumn("geo",
                 udfEnrichIP.apply(
                         col("geo_for_enrich").getItem("ip"),
                         col("geo_for_enrich").getItem("locale")
-                )
-        );
+                ));
+        boolean debugLocal = Boolean.parseBoolean(System.getProperty("debug.local"));
+        if (debugLocal) {
+            ipEnrichDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ip-Dataset/");
+        }
+        return ipEnrichDataset.drop("geo_for_enrich");
     }
 
     private UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
             GenericRow defaultRow = new GenericRow(
-                    new Object[]{"", "", "", "", "", ""}
+                    new Object[]{"", "", "", "", "", "", localeValue}
             );
             try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")))) {
                 InetAddress address = InetAddress.getByName(ipValue);
@@ -71,7 +79,8 @@ public class IPEnrichment {
                                 Optional.ofNullable(geo.getCountry()).map(LookupResult.Country::getName).orElse(""),
                                 "",
                                 "",
-                                ""
+                                "",
+                                localeValue
                         }))
                         .orElse(defaultRow);
             } catch (Exception e) {

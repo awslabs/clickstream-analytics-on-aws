@@ -1,0 +1,106 @@
+{
+    "app_info": {
+        "id": "com.xiaowei.demoapplication",
+        "app_id": "uba-app",
+        "install_source": "C001",
+        "version": "1.0"
+    },
+    "device": {
+        "mobile_brand_name": "Brand HUAWEI",
+        "mobile_model_name": "HUAWEI-P10",
+        "manufacturer": "Make HUAWEI",
+        "screen_width": 1080,
+        "screen_height": 2259,
+        "carrier": "CDMA",
+        "network_type": "Mobile",
+        "operating_system_version": "os-v1.0",
+        "operating_system": "ANDROID",
+        "ua_browser": "Apache-HttpClient",
+        "ua_browser_version": "4.4.12",
+        "ua_os": "Other",
+        "ua_os_version": "",
+        "ua_device": "Other",
+        "ua_device_category": "",
+        "system_language": "zh",
+        "time_zone_offset_seconds": 28800.0,
+        "vendor_id": "deviceid-1681373017090",
+        "advertising_id": "uf24bec657ea8eff7"
+    },
+    "ecommerce": {},
+    "event_bundle_sequence_id": "111",
+    "event_date": "20230413",
+    "event_dimensions": [],
+    "event_id": "7c426550-1be0-42d5-a218-6147f25c12800",
+    "event_name": "PageView2",
+    "event_params": [
+        {
+            "key": "_session_duration",
+            "value": {
+                "int_value": 690000
+            }
+        },
+        {
+            "key": "_session_id",
+            "value": {
+                "string_value": "see000201912dk-23u92-1df0020"
+            }
+        },
+        {
+            "key": "_session_start_timestamp",
+            "value": {
+                "double_value": 1667963966697
+            }
+        },
+        {
+            "key": "_session_stop_timestamp",
+            "value": {}
+        }
+    ],
+    "event_previous_timestamp": 0,
+    "event_server_timestamp_offset": -17,
+    "event_timestamp": 1681373017090,
+    "event_value_in_usd": "0",
+    "geo": {
+        "city": "Singapore",
+        "continent": "Asia",
+        "country": "Singapore",
+        "metro": "",
+        "region": "",
+        "sub_continent": "",
+        "locale": "zh_CN_#Hans"
+    },
+    "ingest_timestamp": 1681373017073,
+    "platform": "ANDROID",
+    "privacy_info": {
+        "ads_storage": "PIAS",
+        "analytics_storage": "PIAAS",
+        "uses_transient_token": "PIUTT"
+    },
+    "project_id": "projectId1",
+    "traffic_source": {
+        "medium": "TSM",
+        "name": "TSN",
+        "source": "TSS"
+    },
+    "user_first_touch_timestamp": 1681373017090,
+    "user_id": "uid-1681373017090-0",
+    "user_ltv": {
+        "revenue": 10,
+        "currency": "USD"
+    },
+    "user_properties": [
+        {
+            "key": "_user_name",
+            "value": {
+                "string_value": "uname-1681373017090-0"
+            }
+        },
+        {
+            "key": "_user_age",
+            "value": {
+                "int_value": 39
+            }
+        }
+    ],
+    "user_pseudo_id": "249c14bb-5d0e-4398-9764-2a053978bf3e0"
+}

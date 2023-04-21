@@ -13,17 +13,15 @@
 
 package sofeware.aws.solution.clickstream;
 
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.types.DataTypes;
 
-import java.util.stream.Collectors;
-
 import static org.apache.spark.sql.functions.*;
+import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public final class Transformer {
@@ -44,172 +42,156 @@ public final class Transformer {
         Dataset<Row> dataset7 = convertEventProperties(dataset6);
         Dataset<Row> dataset8 = convertDateProperties(dataset7);
         Dataset<Row> dataset9 = convertUserProperties(dataset8);
-        Dataset<Row> dataset10 = dataset9
-                .withColumn("event_params", col("event_params_kv"))
-                .withColumn("user_properties", col("user_properties_kv"));
+        Dataset<Row> dataset10 = convertUri(dataset9);
+
         log.info(new ETLMetric(dataset10, "transform return").toString());
+        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
+        if (debugLocal) {
+            dataset10.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/transformed/");
+        }
         return dataset10;
     }
 
-    private static Dataset<Row> convertUserProperties(final Dataset<Row> dataset) {
-        Dataset<Row> userDataset =  dataset.withColumn("user_id", col("data").getItem("user").getItem("_user_id"))
-                .withColumn("user_first_touch_timestamp", col("data").getItem("user").getItem(
-                        "_user_first_touch_timestamp"))
-                .withColumn("user_pseudo_id", col("data").getItem("unique_id"))
-                .withColumn("user_ltv",
-                        concat(
-                                (col("data").getItem("user").getItem("_user_Itv_revenue")),
-                                lit(" "),
-                                (col("data").getItem("user").getItem("_user_Itv_currency"))
-                        ));
-
-        String[][] attrNameTypeMapping = new String[][] {
-                new String[] {"_user_id", "string_value"},
-                new String[] {"_user_Itv_revenue", "float_value"},
-                new String[] {"_user_Itv_currency", "string_value"},
-                new String[] {"_user_name", "string_value"},
-                new String[] {"_user_age", "int_value"},
-                new String[] {"_user_first_touch_timestamp", "double_value"},
-        };
-        Column[] usersKV = buildKVColumns("user", attrNameTypeMapping);
-
-        userDataset = userDataset.withColumn("user_properties", col("data").getItem("user"));
-        userDataset = userDataset.withColumn("user_properties_kv", array(usersKV));
+    private Dataset<Row> convertUri(final Dataset<Row> dataset) {
+        Dataset<Row> userDataset = dataset.withColumn("event_bundle_sequence_id_str",
+                       regexp_extract(col("uri"), "event_bundle_sequence_id=(\\d+)", 1)
+                       )
+                .withColumn("event_bundle_sequence_id",
+                         expr("if (event_bundle_sequence_id_str = '', 0, event_bundle_sequence_id_str)")
+                         .cast(DataTypes.LongType))
+                .drop("event_bundle_sequence_id_str");
         return userDataset;
     }
 
-    private static Column[] buildKVColumns(final String colName, final String[][] attrNameTypeMapping) {
-        String[] valueKeys = new String[] {
-                "double_value",
-                "float_value",
-                "int_value",
-                "string_value",
-        };
+    private static Dataset<Row> convertUserProperties(final Dataset<Row> dataset) {
+        Dataset<Row> userDataset = dataset
+                .withColumn("user_id", col("data").getField("user").getItem("_user_id"))
+                .withColumn("user_first_touch_timestamp", col("data").getField("user").getItem("_user_first_touch_timestamp"))
+                .withColumn("user_pseudo_id", col("data").getItem("unique_id"))
+                .withColumn("user_ltv",
+                        struct(
+                                (col("data").getField("user").getItem("_user_ltv_revenue")).cast(DataTypes.DoubleType).alias("revenue"),
+                                (col("data").getField("user").getItem("_user_ltv_currency")).alias("currency")));
 
-        Column[] newKvAttributes =  Lists.newArrayList(attrNameTypeMapping).stream().map(attAndType -> {
-            String attName = attAndType[0];
-            String attType = attAndType[1];
-            Column[] kvArrayColumn = Lists.newArrayList(valueKeys).stream().map(kk -> {
-                if (kk.equals(attType)) {
-                    return col("data").getItem(colName).getItem(attName).cast(DataTypes.StringType).alias(attType);
-                }
-                return lit("").alias(kk);
-            }).collect(Collectors.toList()).toArray(new Column[] {lit("")});
-
-            return struct(
-                    lit(attName).alias("key"),
-                    struct(kvArrayColumn).alias("value")
-            );
-        }).collect(Collectors.toList()).toArray(new Column[]{lit("")});
-        return newKvAttributes;
+        userDataset = userDataset.withColumn("user_properties", array(
+                struct(
+                        lit("_user_name").alias("key"),
+                        struct(
+                                lit("").alias("double_value"),
+                                lit("").alias("float_value"),
+                                lit("").alias("int_value"),
+                                col("data").getField("user").getItem("_user_name").alias("string_value"),
+                                lit(0L).alias("set_timestamp_micros")
+                        ).alias("value")),
+                struct(
+                        lit("_user_age").alias("key"),
+                        struct(
+                                lit("").alias("double_value"),
+                                lit("").alias("float_value"),
+                                col("data").getField("user").getItem("_user_age").cast(DataTypes.StringType).alias("int_value"),
+                                lit("").alias("string_value"),
+                                lit(0L).alias("set_timestamp_micros")
+                        ).alias("value"))));
+        return userDataset;
     }
 
     private static Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
         return dataset.withColumn("event_date",
-                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000)
-                                .$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd")
-                )
-                .withColumn("ingest_timestamp", col("ingest_time"))
-                .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem(
-                        "timestamp"))).cast(DataTypes.LongType))
+                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000).$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd"))
+                .withColumn("ingest_timestamp", col("ingest_time").cast(DataTypes.LongType))
+                .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem("timestamp"))).cast(DataTypes.LongType))
+
                 .withColumn("event_previous_timestamp", lit(0).cast(DataTypes.LongType))
                 .withColumn("platform", col("data").getItem("platform"));
     }
 
     private static Dataset<Row> convertEventProperties(final Dataset<Row> dataset) {
         String projectId = System.getProperty("project.id");
-
-        Column emptyValues = struct(
-                lit("0").alias("double_value"),
-                lit("0").alias("float_value"),
-                lit("0").alias("int_value"),
-                lit("").alias("string_value")
-        ).alias("value");
-
         return dataset.withColumn("event_id", col("data").getItem(("event_id")))
                 .withColumn("event_name", col("data").getItem("event_type"))
                 .withColumn("event_timestamp", col("data").getItem("timestamp"))
-                .withColumn("ecommerce", array(struct(
+                .withColumn("ecommerce", col("data").getField("ecommerce"))
+                .withColumn("event_dimensions", array(struct(
                         lit("").alias("key"),
-                        emptyValues
+                        struct(
+                                lit("").alias("double_value"),
+                                lit("").alias("float_value"),
+                                lit("").alias("int_value"),
+                                lit("").alias("string_value")
+                        ).alias("value")
                 )))
-                .withColumn("event_dimensions", lit(""))
-                .withColumn("items", array(struct(
-                        lit("").alias("key"),
-                        emptyValues
-                )))
+                .withColumn("items", col("data").getField("items"))
                 .withColumn("project_id", lit(projectId))
-                .withColumn("event_bundle_sequence_id", lit(0))
                 .withColumn("event_value_in_usd", lit("0"));
     }
 
     private static Dataset<Row> convertGeo(final Dataset<Row> dataset) {
         return dataset.withColumn("geo",
-                struct(
-                        lit("").alias("city"),
-                        lit("").alias("continent"),
-                        lit("").alias("country"),
-                        lit("").alias("metro"),
-                        lit("").alias("region"),
-                        lit("").alias("sub_continent")
-
-                )).withColumn("geo_for_enrich",
-                struct(
-                        col("ip"),
-                        col("data").getItem("locale").alias("locale")
-                ));
+                        struct(
+                                lit("").alias("country"),
+                                lit("").alias("continent"),
+                                lit("").alias("sub_continent"),
+                                col("data").getItem("locale").alias("locale"),
+                                lit("").alias("region"),
+                                lit("").alias("metro"),
+                                lit("").alias("city")))
+                .withColumn("geo_for_enrich", struct(col("ip"), col("data").getItem("locale").alias("locale")));
     }
 
     private static Dataset<Row> convertPrivacyInfo(final Dataset<Row> dataset) {
         return dataset.withColumn("privacy_info",
                 struct(
-                        (col("event_params").getItem("_privacy_info_ads_storage")).alias("ads_storage"),
-                        (col("event_params").getItem("_privacy_info_analytics_storage")).alias(
-                                "analytics_storage"),
-                        (col("event_params").getItem("_privacy_info_uses_transient_token")).alias(
-                                "uses_transient_token")
-                ));
+                        (col("data").getField("attributes").getItem("_privacy_info_ads_storage")).alias("ads_storage"),
+                        (col("data").getField("attributes").getItem("_privacy_info_analytics_storage")).alias("analytics_storage"),
+                        (col("data").getField("attributes").getItem("_privacy_info_uses_transient_token")).alias("uses_transient_token")));
     }
 
     private static Dataset<Row> convertTrafficSource(final Dataset<Row> dataset) {
         return dataset.withColumn("traffic_source",
                 struct(
-                        (col("event_params").getItem("_traffic_source_medium")).alias("medium"),
-                        (col("event_params").getItem("_traffic_source_name")).alias("name"),
-                        (col("event_params").getItem("_traffic_source_source")).alias("source")
-                ));
+                        (col("data").getField("attributes").getItem("_traffic_source_medium")).alias("medium"),
+                        (col("data").getField("attributes").getItem("_traffic_source_name")).alias("name"),
+                        (col("data").getField("attributes").getItem("_traffic_source_source")).alias("source")));
     }
 
     private static Dataset<Row> retrieveEventParams(final Dataset<Row> dataset) {
+        Dataset<Row> datasetTransformed = dataset.withColumn("event_params", array(
+                struct(
+                        lit("_session_duration").alias("key"),
+                        struct(
+                                lit("").alias("double_value"),
+                                lit("").alias("float_value"),
+                                col("data").getField("attributes").getItem("_session_duration").cast(DataTypes.StringType).alias("int_value"),
+                                lit("").alias("string_value")
+                                ).alias("value")),
 
-       String[][] attrNameTypeMapping = new String[][] {
-               new String[] {"Channel", "string_value"},
-               new String[] {"Price", "float_value"},
-               new String[] {"ProcessDuration", "int_value"},
-               new String[] {"Successful", "string_value"},
-               new String[] {"_channel", "string_value"},
-               new String[] {"_error_attribute_name", "string_value"},
-               new String[] {"_error_attribute_value", "string_value"},
-               new String[] {"_install_time", "double_value"},
-               new String[] {"_ios_advertising_id", "string_value"},
-               new String[] {"_ios_vendor_id", "string_value"},
-               new String[] {"_is_first_day", "string_value"},
-               new String[] {"_is_first_time", "string_value"},
-               new String[] {"_privacy_info_ads_storage", "string_value"},
-               new String[] {"_privacy_info_analytics_storage", "string_value"},
-               new String[] {"_privacy_info_uses_transient_token", "string_value"},
-               new String[] {"_session_duration", "int_value"},
-               new String[] {"_session_id", "string_value"},
-               new String[] {"_session_start_timestamp", "double_value"},
-               new String[] {"_traffic_source_medium", "string_value"},
-               new String[] {"_traffic_source_name", "string_value"},
-               new String[] {"_traffic_source_source", "string_value"},
-       };
+                struct(
+                        lit("_session_id").alias("key"),
+                        struct(
+                                lit("").alias("double_value"),
+                                lit("").alias("float_value"),
+                                lit("").alias("int_value"),
+                                col("data").getField("attributes").getItem("_session_id").alias("string_value")
+                        ).alias("value")),
 
-        Column[] newKvAttributes = buildKVColumns("attributes", attrNameTypeMapping);
-        Dataset<Row> datasetTransformed = dataset.withColumn("event_params", col("data").getItem("attributes"));
-        datasetTransformed = datasetTransformed.withColumn("event_params_kv", array(newKvAttributes));
+                struct(
+                        lit("_session_start_timestamp").alias("key"),
+                        struct(
+                                col("data").getField("attributes").getItem("_session_start_timestamp").cast(DataTypes.StringType).alias("double_value"),
+                                lit("").alias("float_value"),
+                                lit("").alias("int_value"),
+                                lit("").alias("string_value")
+                        ).alias("value")),
 
+                struct(
+                        lit("_session_stop_timestamp").alias("key"),
+                        struct(
+                                col("data").getField("attributes").getItem("_session_stop_timestamp").cast(DataTypes.StringType).alias("double_value"),
+                                lit("").alias("float_value"),
+                                lit("").alias("int_value"),
+                                lit("").alias("string_value")
+                        ).alias("value")
+                )));
         return datasetTransformed;
     }
 
@@ -217,33 +199,37 @@ public final class Transformer {
         return dataset.withColumn("app_info",
                 struct(
                         (col("data").getItem("app_id")).alias("app_id"),
-                        (col("event_params").getItem("_channel")).alias("install_source"),
-                        lit("").alias("install_store"),
-                        (col("data").getItem("app_version_name")).alias("version")
-                ));
+                        (col("data").getItem("app_package_name")).alias("id"),
+                        (col("data").getField("attributes").getItem("_channel")).alias("install_source"),
+                        (col("data").getItem("app_version")).alias("version")));
     }
 
     private static Dataset<Row> convertDevice(final Dataset<Row> dataset) {
         return dataset.withColumn("device",
                 struct(
-                        (col("event_params").getItem("_ios_advertising_id")).alias("advertising_id"),
-                        lit("").alias("browser"),
-                        lit("").alias("browser_version"),
-                        lit("").alias("category"),
-                        lit("").alias("is_limited_ad_tracking"),
-                        (col("data").getItem("system_language")).alias("language"),
                         (col("data").getItem("brand")).alias("mobile_brand_name"),
-                        lit("").alias("mobile_marketing_name"),
                         (col("data").getItem("model")).alias("mobile_model_name"),
-                        lit("").alias("mobile_os_hardware_model"),
+                        (col("data").getItem("make")).alias("manufacturer"),
+                        (col("data").getItem("screen_width")).alias("screen_width"),
+                        (col("data").getItem("screen_height")).alias("screen_height"),
+                        (col("data").getItem("carrier")).alias("carrier"),
+                        (col("data").getItem("network_type")).alias("network_type"),
+                        (col("data").getItem("os_version")).alias("operating_system_version"),
                         (col("data").getItem("platform")).alias("operating_system"),
-                        (col("data").getItem("platform_version")).alias("operating_system_version"),
-                        (col("data").getItem("zone_offset").$div(1000))
-                            .cast(DataTypes.LongType).alias("time_zone_offset_seconds"),
-                        (col("event_params").getItem("_ios_vendor_id")).alias("vendor_id"),
-                        col("ua").alias("web_info")
 
-                        //(col("ua")).alias("user_agent")
+                        // placeholder for ua enrich fields
+                        lit("").alias("ua_browser"),
+                        lit("").alias("ua_browser_version"),
+                        lit("").alias("ua_os"),
+                        lit("").alias("ua_os_version"),
+                        lit("").alias("ua_device"),
+                        lit("").alias("ua_device_category"),
+
+                        (col("data").getItem("system_language")).alias("system_language"),
+                        (col("data").getItem("zone_offset").$div(1000)).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),
+                        (col("data").getItem("device_id")).alias("vendor_id"),
+                        (col("data").getItem("device_unique_id")).alias("advertising_id")
+
                 ));
     }
 }

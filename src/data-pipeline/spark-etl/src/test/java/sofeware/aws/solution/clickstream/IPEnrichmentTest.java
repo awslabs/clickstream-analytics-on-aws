@@ -26,6 +26,9 @@ class IPEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_enrich_ip() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
@@ -40,6 +43,9 @@ class IPEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_return_empty_when_enrich_ip_with_no_db_file() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
 
@@ -51,27 +57,10 @@ class IPEnrichmentTest extends BaseSparkTest {
     }
 
     @Test
-    public void should_return_empty_when_enrich_invalid_ip() {
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
-
-        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_error" +
-                ".json")).getPath());
-        Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
-
-        Row row = transformedDataset.first();
-        Row geo = row.getStruct(row.fieldIndex("geo"));
-        assertEquals(geo.getString(geo.fieldIndex("country")), "");
-        assertEquals(geo.getString(geo.fieldIndex("continent")), "");
-        assertEquals(geo.getString(geo.fieldIndex("city")), "");
-    }
-
-
-    @Test
     public void should_return_empty_when_enrich_unrecognized_ip() {
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
-        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_error_ip" +
-                ".json")).getPath());
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_ip_error.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
 
         Row row = transformedDataset.first();

@@ -145,11 +145,11 @@ export class GlueUtil {
               type: Schema.STRING,
             },
             {
-              name: 'install_source',
+              name: 'id',
               type: Schema.STRING,
             },
             {
-              name: 'install_store',
+              name: 'install_source',
               type: Schema.STRING,
             },
             {
@@ -163,35 +163,7 @@ export class GlueUtil {
           name: 'device',
           type: Schema.struct([
             {
-              name: 'advertising_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'browser',
-              type: Schema.STRING,
-            },
-            {
-              name: 'browser_version',
-              type: Schema.STRING,
-            },
-            {
-              name: 'category',
-              type: Schema.STRING,
-            },
-            {
-              name: 'is_limited_ad_tracking',
-              type: Schema.STRING,
-            },
-            {
-              name: 'language',
-              type: Schema.STRING,
-            },
-            {
               name: 'mobile_brand_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'mobile_marketing_name',
               type: Schema.STRING,
             },
             {
@@ -199,7 +171,27 @@ export class GlueUtil {
               type: Schema.STRING,
             },
             {
-              name: 'mobile_os_hardware_model',
+              name: 'manufacturer',
+              type: Schema.STRING,
+            },
+            {
+              name: 'screen_width',
+              type: Schema.BIG_INT,
+            },
+            {
+              name: 'screen_height',
+              type: Schema.BIG_INT,
+            },
+            {
+              name: 'carrier',
+              type: Schema.STRING,
+            },
+            {
+              name: 'network_type',
+              type: Schema.STRING,
+            },
+            {
+              name: 'operating_system_version',
               type: Schema.STRING,
             },
             {
@@ -207,7 +199,31 @@ export class GlueUtil {
               type: Schema.STRING,
             },
             {
-              name: 'operating_system_version',
+              name: 'ua_browser',
+              type: Schema.STRING,
+            },
+            {
+              name: 'ua_browser_version',
+              type: Schema.STRING,
+            },
+            {
+              name: 'ua_os',
+              type: Schema.STRING,
+            },
+            {
+              name: 'ua_os_version',
+              type: Schema.STRING,
+            },
+            {
+              name: 'ua_device',
+              type: Schema.STRING,
+            },
+            {
+              name: 'ua_device_category',
+              type: Schema.STRING,
+            },
+            {
+              name: 'system_language',
               type: Schema.STRING,
             },
             {
@@ -219,7 +235,7 @@ export class GlueUtil {
               type: Schema.STRING,
             },
             {
-              name: 'web_info',
+              name: 'advertising_id',
               type: Schema.STRING,
             },
           ],
@@ -227,6 +243,63 @@ export class GlueUtil {
         },
         {
           name: 'ecommerce',
+          type: Schema.struct([
+            {
+              name: 'total_item_quantity',
+              type: Schema.BIG_INT,
+            },
+            {
+              name: 'purchase_revenue_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'purchase_revenue',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'refund_value_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'refund_value',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'shipping_value_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'shipping_value',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'tax_value_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'tax_value',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'transaction_id',
+              type: Schema.STRING,
+            },
+            {
+              name: 'unique_items',
+              type: Schema.BIG_INT,
+            },
+          ]),
+        },
+        {
+          name: 'event_bundle_sequence_id',
+          type: Schema.BIG_INT,
+        },
+        {
+          name: 'event_date',
+          type: Schema.STRING,
+        },
+        {
+          name: 'event_dimensions',
           type: Schema.array(
             Schema.struct([
               {
@@ -256,18 +329,6 @@ export class GlueUtil {
               },
             ]),
           ),
-        },
-        {
-          name: 'event_bundle_sequence_id',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'event_date',
-          type: Schema.STRING,
-        },
-        {
-          name: 'event_dimensions',
-          type: Schema.STRING,
         },
         {
           name: 'event_id',
@@ -352,6 +413,10 @@ export class GlueUtil {
               name: 'sub_continent',
               type: Schema.STRING,
             },
+            {
+              name: 'locale',
+              type: Schema.STRING,
+            },
           ]),
         },
         {
@@ -360,35 +425,112 @@ export class GlueUtil {
         },
         {
           name: 'items',
-          type: Schema.array(
-            Schema.struct([
-              {
-                name: 'key',
-                type: Schema.STRING,
-              },
-              {
-                name: 'value',
-                type: Schema.struct([
-                  {
-                    name: 'double_value',
-                    type: Schema.STRING,
-                  },
-                  {
-                    name: 'float_value',
-                    type: Schema.STRING,
-                  },
-                  {
-                    name: 'int_value',
-                    type: Schema.STRING,
-                  },
-                  {
-                    name: 'string_value',
-                    type: Schema.STRING,
-                  },
-                ]),
-              },
-            ]),
-          ),
+          type: Schema.struct([
+            {
+              name: 'item_id',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_name',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_brand',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_variant',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_category',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_category2',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_category3',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_category4',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_category5',
+              type: Schema.STRING,
+            },
+            {
+              name: 'price_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'price',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'quantity',
+              type: Schema.BIG_INT,
+            },
+            {
+              name: 'item_revenue_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'item_revenue',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'item_refund_in_usd',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'item_refund',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'coupon',
+              type: Schema.STRING,
+            },
+            {
+              name: 'affiliation',
+              type: Schema.STRING,
+            },
+            {
+              name: 'location_id',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_list_id',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_list_name',
+              type: Schema.STRING,
+            },
+            {
+              name: 'item_list_index',
+              type: Schema.STRING,
+            },
+            {
+              name: 'promotion_id',
+              type: Schema.STRING,
+            },
+            {
+              name: 'promotion_name',
+              type: Schema.STRING,
+            },
+            {
+              name: 'creative_name',
+              type: Schema.STRING,
+            },
+            {
+              name: 'creative_slot',
+              type: Schema.STRING,
+            },
+          ]),
         },
         {
           name: 'platform',
@@ -442,7 +584,16 @@ export class GlueUtil {
         },
         {
           name: 'user_ltv',
-          type: Schema.STRING,
+          type: Schema.struct([
+            {
+              name: 'revenue',
+              type: Schema.DOUBLE,
+            },
+            {
+              name: 'currency',
+              type: Schema.STRING,
+            },
+          ]),
         },
         {
           name: 'user_properties',
@@ -471,6 +622,10 @@ export class GlueUtil {
                     name: 'string_value',
                     type: Schema.STRING,
                   },
+                  {
+                    name: 'set_timestamp_micros',
+                    type: Schema.BIG_INT,
+                  }
                 ]),
               },
             ]),

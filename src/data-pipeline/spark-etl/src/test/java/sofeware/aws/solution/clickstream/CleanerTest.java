@@ -30,7 +30,7 @@ class CleanerTest extends BaseSparkTest {
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
 
-        assertEquals(1, cleanedDataset.count());
+        assertEquals(2, cleanedDataset.count());
     }
 
     @Test
@@ -43,6 +43,6 @@ class CleanerTest extends BaseSparkTest {
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
 
-        assertEquals(1, cleanedDataset.count());
+        assertEquals(0, cleanedDataset.count());
     }
 }
