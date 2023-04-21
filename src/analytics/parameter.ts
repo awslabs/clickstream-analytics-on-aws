@@ -12,41 +12,71 @@
  */
 
 import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
+import { IVpc, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { RedshiftMode } from './private/constant';
-import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN } from '../common/constant';
+import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export interface RedshiftAnalyticsStackProps {
-  redshiftModeParam: CfnParameter;
-  vpcIdParam: CfnParameter;
-  privateSubnetIdsParam: CfnParameter;
-  projectIdParam: CfnParameter;
-  appIdsParam: CfnParameter;
-  sinkS3BucketParam: CfnParameter;
-  sinkS3PrefixParam: CfnParameter;
-  sinkS3FileSuffixParam: CfnParameter;
-  loadTempBucketParam: CfnParameter;
-  loadTempBucketPrefixParam: CfnParameter;
-  redshiftDefaultDatabaseParam: CfnParameter;
-  redshiftServerlessWorkgroupNameParam: CfnParameter;
-  redshiftServerlessWorkgroupIdParam: CfnParameter;
-  redshiftServerlessNamespaceIdParam: CfnParameter;
-  redshiftServerlessIAMRoleParam: CfnParameter;
-  redshiftClusterIdentifierParam: CfnParameter;
-  redshiftDbUserParam: CfnParameter;
-  loadJobScheduleIntervalParam: CfnParameter;
-  maxFilesLimitParam: CfnParameter;
-  processingFilesLimitParam: CfnParameter;
-  upsertUsersWorkflowScheduleExpressionParam: CfnParameter;
+  network: {
+    vpc: IVpc;
+    subnetSelection: SubnetSelection;
+  };
+  projectId: string;
+  appIds: string;
+  odsEvents: {
+    bucket: IBucket;
+    prefix: string;
+    fileSuffix: string;
+  };
+  loadConfiguration: {
+    workdir: {
+      bucket: IBucket;
+      prefix: string;
+    };
+    loadJobScheduleIntervalInMinutes: number;
+    maxFilesLimit: number;
+    processingFilesLimit: number;
+  };
+  upsertUsersConfiguration: {
+    scheduleExpression: string;
+  };
+  redshift: {
+    mode: string;
+    defaultDtabaseName: string;
+    newServerless?: {
+      vpcId: string;
+      subnetIds: string;
+      securityGroupIds: string;
+      workgroupName: string;
+      baseCapacity: number;
+    };
+    existingServerless?: {
+      workgroupName: string;
+      workgroupId?: string;
+      namespaceId?: string;
+      iamRole: string;
+    };
+    provisioned?: {
+      clusterIdentifier: string;
+      dbUser: string;
+    };
+  };
 }
 
-export function createStackParameters(scope: Construct) {
+export function createStackParameters(scope: Construct): {
+  metadata: {
+    [key: string]: any;
+  };
+  params: RedshiftAnalyticsStackProps;
+} {
   const redshiftModeParam = new CfnParameter(scope, 'RedshiftMode', {
     description: 'Select Redshift cluster mode',
     type: 'String',
-    default: RedshiftMode.SERVERLESS,
-    allowedValues: [RedshiftMode.SERVERLESS, RedshiftMode.PROVISIONED],
+    default: RedshiftMode.NEW_SERVERLESS,
+    allowedValues: [RedshiftMode.NEW_SERVERLESS, RedshiftMode.SERVERLESS, RedshiftMode.PROVISIONED],
   });
 
   const networkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
@@ -63,7 +93,7 @@ export function createStackParameters(scope: Construct) {
     default: '',
   });
 
-  const sinkS3FileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
+  const odsEventFileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
     description: 'The suffix of the ODS event files on S3 to be imported.',
     type: 'String',
     default: '.snappy.parquet',
@@ -117,15 +147,95 @@ export function createStackParameters(scope: Construct) {
       redshiftDefaultDatabaseParam.logicalId,
     ],
   });
-  // Set Redshift serverless parameters
-  const redshiftServerlessParamsGroup = [];
 
-  const redshiftServerlessWorkgroupNameParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupName', {
-    description: 'The name of the workgroup in Redshift serverless.',
-    type: 'String',
-    default: 'default',
-    allowedPattern: '^([a-z0-9-]{3,64})?$',
+  // Set new Redshift serverless parameters
+  const redshiftServerlessWorkgroupName = createWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
+  const redshiftServerlessRPU = new CfnParameter(scope, 'RedshiftServerlessRPU', {
+    description: 'Redshift processing units (RPUs) used to process your workload.',
+    constraintDescription: 'Range must be 8-512 in increments of 8.',
+    type: 'Number',
+    default: 16,
+    maxValue: 512,
+    minValue: 8,
   });
+  const redshiftServerlessVPCId = Parameters.createVpcIdParameter(scope, 'RedshiftServerlessVPCId', {
+    allowedPattern: `(${VPC_ID_PARRERN})?`,
+    default: '',
+    type: 'String',
+  });
+  const subnetsPattern = `(^${SUBNETS_THREE_AZ_PATTERN}$)?`;
+  const redshiftServerlessSubnets = Parameters.createPrivateSubnetParameter(scope, 'RedshiftServerlessSubnets',
+    SubnetParameterType.String, {
+      allowedPattern: subnetsPattern,
+      constraintDescription: `The subnets of Redshift Serverless workgroup must have at least threee subnets crossing three AZs and match pattern ${subnetsPattern}`,
+      default: '',
+    });
+  const redshiftServerlessSGs = Parameters.createSecurityGroupIdsParameter(scope, 'RedshiftServerlessSGs', true, {
+    description: 'Choose security groups for Redshift Serverless workgroup',
+    default: '',
+  });
+  const redshiftServerlessParamsGroup = [{
+    Label: { default: 'Provision new Redshift Serverless' },
+    Parameters: [
+      redshiftServerlessWorkgroupName.logicalId,
+      redshiftServerlessVPCId.logicalId,
+      redshiftServerlessSubnets.logicalId,
+      redshiftServerlessSGs.logicalId,
+      redshiftServerlessRPU.logicalId,
+    ],
+  }];
+
+  const redshiftServerlessParamsLabels = {
+    [redshiftServerlessWorkgroupName.logicalId]: {
+      default: 'Workgroup Name',
+    },
+    [redshiftServerlessVPCId.logicalId]: {
+      default: 'Redshift Serverless VPC Id',
+    },
+    [redshiftServerlessSubnets.logicalId]: {
+      default: 'Redshift Serverless subnets',
+    },
+    [redshiftServerlessSGs.logicalId]: {
+      default: 'Redshift Serverless security groups',
+    },
+    [redshiftServerlessRPU.logicalId]: {
+      default: 'Redshift Serverless RPU capacity',
+    },
+  };
+
+  new CfnRule(scope, 'NewRedshiftServerlessParameters', {
+    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, RedshiftMode.NEW_SERVERLESS),
+    assertions: [
+      {
+        assert: Fn.conditionAnd(
+          Fn.conditionNot(
+            Fn.conditionEquals(redshiftServerlessWorkgroupName.valueAsString, ''),
+          ),
+          Fn.conditionNot(
+            Fn.conditionEquals(redshiftServerlessVPCId.valueAsString, ''),
+          ),
+          Fn.conditionNot(
+            Fn.conditionEquals(redshiftServerlessSubnets.valueAsString, ''),
+          ),
+          Fn.conditionNot(
+            Fn.conditionEquals(redshiftServerlessSGs.valueAsString, ''),
+          ),
+        ),
+        assertDescription:
+            'Workgroup, VpcID, Subnets, and Security groups are required for provisioning new Redshift Serverless.',
+      },
+      {
+        assert: Fn.conditionEachMemberIn(Fn.valueOfAll('AWS::EC2::Subnet::Id', 'VpcId'), Fn.refAll('AWS::EC2::VPC::Id')),
+        assertDescription:
+          'All subnets of Redshift Serverless must be in the VPC',
+      },
+    ],
+  });
+
+  // Set existing Redshift serverless parameters
+  const existingRedshiftServerlessParamsGroup = [];
+
+  const redshiftServerlessWorkgroupNameParam = createWorkgroupParameter(scope, 'RedshiftServerlessWorkgroupName');
 
   const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
     description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
@@ -148,15 +258,8 @@ export function createStackParameters(scope: Construct) {
     allowedPattern: '^(arn:(aws|aws-cn):iam::[0-9]{12}:role/.*)?$',
   });
 
-  const redshiftServerlessParam = {
-    redshiftServerlessNamespaceIdParam,
-    redshiftServerlessWorkgroupNameParam,
-    redshiftServerlessWorkgroupIdParam,
-    redshiftServerlessIAMRoleParam,
-  };
-
-  redshiftServerlessParamsGroup.push({
-    Label: { default: 'Redshift Serverless' },
+  existingRedshiftServerlessParamsGroup.push({
+    Label: { default: 'Specify existing Redshift Serverless' },
     Parameters: [
       redshiftServerlessNamespaceIdParam.logicalId,
       redshiftServerlessWorkgroupNameParam.logicalId,
@@ -165,7 +268,7 @@ export function createStackParameters(scope: Construct) {
     ],
   });
 
-  const redshiftServerlessParamsLabels = {
+  const existingRedshiftServerlessParamsLabels = {
     [redshiftServerlessWorkgroupNameParam.logicalId]: {
       default: 'Workgroup Name',
     },
@@ -180,7 +283,7 @@ export function createStackParameters(scope: Construct) {
     },
   };
 
-  new CfnRule(scope, 'RedshiftServerlessParameters', {
+  new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, RedshiftMode.SERVERLESS),
     assertions: [
       {
@@ -193,7 +296,7 @@ export function createStackParameters(scope: Construct) {
           ),
         ),
         assertDescription:
-            'Namespace, Workgroup and Role Arn are required when using Redshift Serverless.',
+            'Namespace, Workgroup and Role Arn are required for using existing Redshift Serverless.',
       },
     ],
   });
@@ -214,11 +317,6 @@ export function createStackParameters(scope: Construct) {
     allowedPattern: '^([a-z0-9-]{1,63})?$',
     default: '',
   });
-
-  const redshiftClusterParam = {
-    redshiftClusterIdentifierParam,
-    redshiftDbUserParam,
-  };
 
   redshiftClusterParamsGroup.push({
     Label: { default: 'Provisioned Redshift Cluster' },
@@ -276,12 +374,6 @@ export function createStackParameters(scope: Construct) {
     default: 100,
   });
 
-  const loadJobParam = {
-    loadJobScheduleIntervalParam,
-    maxFilesLimitParam,
-    processingFilesLimitParam,
-  };
-
   loadJobParamsGroup.push({
     Label: { default: 'Load job' },
     Parameters: [
@@ -314,10 +406,6 @@ export function createStackParameters(scope: Construct) {
     constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
     default: 'cron(0 1 * * ? *)',
   });
-
-  const upsertUsersWorkflowParam = {
-    upsertUsersWorkflowScheduleExpressionParam,
-  };
 
   upsertUsersWorkflowParamsGroup.push({
     Label: { default: 'Upsert users job' },
@@ -359,13 +447,14 @@ export function createStackParameters(scope: Construct) {
           Parameters: [
             odsEventBucketParam.logicalId,
             odsEventBucketPrefixParam.logicalId,
-            sinkS3FileSuffixParam.logicalId,
+            odsEventFileSuffixParam.logicalId,
             loadWorkflowBucketParam.logicalId,
             loadWorkflowBucketPrefixParam.logicalId,
           ],
         },
         ...redshiftCommonParamsGroup,
         ...redshiftServerlessParamsGroup,
+        ...existingRedshiftServerlessParamsGroup,
         ...redshiftClusterParamsGroup,
         ...loadJobParamsGroup,
         ...upsertUsersWorkflowParamsGroup,
@@ -391,7 +480,7 @@ export function createStackParameters(scope: Construct) {
         [odsEventBucketPrefixParam.logicalId]: {
           default: 'S3 prefix for ODS Event',
         },
-        [sinkS3FileSuffixParam.logicalId]: {
+        [odsEventFileSuffixParam.logicalId]: {
           default: 'File suffix for ODS Event',
         },
         [loadWorkflowBucketParam.logicalId]: {
@@ -401,30 +490,84 @@ export function createStackParameters(scope: Construct) {
           default: 'S3 prefix for load workflow data',
         },
         ...redshiftServerlessParamsLabels,
+        ...existingRedshiftServerlessParamsLabels,
         ...redshiftClusterParamsLabels,
         ...loadJobParamsLabels,
         ...upsertUsersWorkflowParamsLabels,
       },
     },
   };
+  const vpc = Vpc.fromVpcAttributes(scope, 'vpc-for-analytics-in-redshift', {
+    vpcId: networkProps.vpcId.valueAsString,
+    availabilityZones: Fn.getAzs(),
+    privateSubnetIds: Fn.split(',', networkProps.privateSubnets.valueAsString),
+  });
   return {
     metadata,
     params: {
-      redshiftModeParam: redshiftModeParam,
-      vpcIdParam: networkProps.vpcId,
-      privateSubnetIdsParam: networkProps.privateSubnets,
-      projectIdParam: projectIdParam,
-      appIdsParam: appIdsParam,
-      sinkS3BucketParam: odsEventBucketParam,
-      sinkS3PrefixParam: odsEventBucketPrefixParam,
-      sinkS3FileSuffixParam: sinkS3FileSuffixParam,
-      loadTempBucketParam: loadWorkflowBucketParam,
-      loadTempBucketPrefixParam: loadWorkflowBucketPrefixParam,
-      redshiftDefaultDatabaseParam,
-      ...redshiftServerlessParam,
-      ...redshiftClusterParam,
-      ...loadJobParam,
-      ...upsertUsersWorkflowParam,
+      network: {
+        vpc,
+        subnetSelection: {
+          subnets: vpc.privateSubnets,
+        },
+      },
+      projectId: projectIdParam.valueAsString,
+      appIds: appIdsParam.valueAsString,
+      odsEvents: {
+        bucket: Bucket.fromBucketName(
+          scope,
+          'pipeline-ods-events-bucket',
+          odsEventBucketParam.valueAsString,
+        ),
+        prefix: odsEventBucketPrefixParam.valueAsString,
+        fileSuffix: odsEventFileSuffixParam.valueAsString,
+      },
+      loadConfiguration: {
+        workdir: {
+          bucket: Bucket.fromBucketName(
+            scope,
+            'load-workflow-working-bucket',
+            loadWorkflowBucketParam.valueAsString,
+          ),
+          prefix: loadWorkflowBucketPrefixParam.valueAsString,
+        },
+        loadJobScheduleIntervalInMinutes: loadJobScheduleIntervalParam.valueAsNumber,
+        maxFilesLimit: maxFilesLimitParam.valueAsNumber,
+        processingFilesLimit: processingFilesLimitParam.valueAsNumber,
+      },
+      upsertUsersConfiguration: {
+        scheduleExpression: upsertUsersWorkflowScheduleExpressionParam.valueAsString,
+      },
+      redshift: {
+        mode: redshiftModeParam.valueAsString,
+        defaultDtabaseName: redshiftDefaultDatabaseParam.valueAsString,
+        newServerless: {
+          vpcId: redshiftServerlessVPCId.valueAsString,
+          subnetIds: redshiftServerlessSubnets.valueAsString,
+          securityGroupIds: redshiftServerlessSGs.valueAsString,
+          workgroupName: redshiftServerlessWorkgroupName.valueAsString,
+          baseCapacity: redshiftServerlessRPU.valueAsNumber,
+        },
+        existingServerless: {
+          workgroupName: redshiftServerlessWorkgroupNameParam.valueAsString,
+          workgroupId: redshiftServerlessWorkgroupIdParam.valueAsString,
+          namespaceId: redshiftServerlessNamespaceIdParam.valueAsString,
+          iamRole: redshiftServerlessIAMRoleParam.valueAsString,
+        },
+        provisioned: {
+          dbUser: redshiftDbUserParam.valueAsString,
+          clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
+        },
+      },
     },
   };
+}
+
+function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
+  return new CfnParameter(scope, id, {
+    description: 'The name of the Redshift serverless workgroup.',
+    type: 'String',
+    default: 'default',
+    allowedPattern: '^([a-z0-9-]{3,64})?$',
+  });
 }

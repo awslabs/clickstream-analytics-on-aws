@@ -16,9 +16,9 @@ import { DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws
 import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler, CheckLoadStatusEvent } from '../../../../src/analytics/lambdas/load-data-workflow/check-load-status';
-import { RedshiftMode } from '../../../../src/analytics/private/constant';
-import { getMockContext } from '../../../common/lambda-context';
+import { handler, CheckLoadStatusEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/check-load-status';
+import { RedshiftMode } from '../../../../../src/analytics/private/constant';
+import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
 const loadStatusEvent: CheckLoadStatusEvent = {

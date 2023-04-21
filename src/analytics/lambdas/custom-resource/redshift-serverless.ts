@@ -11,21 +11,13 @@
  *  and limitations under the License.
  */
 
-export enum RedshiftMode {
-  PROVISIONED='Provisioned',
-  SERVERLESS='Serverless',
-  NEW_SERVERLESS='New_Serverless',
+import { GetNamespaceCommand, Namespace, RedshiftServerlessClient } from '@aws-sdk/client-redshift-serverless';
+
+export async function getRedshiftServerlessNamespace(
+  client: RedshiftServerlessClient, namespaceName: string): Promise<Namespace | undefined> {
+  const getWorkspace = new GetNamespaceCommand({
+    namespaceName,
+  });
+  const getWorkspaceResp = await client.send(getWorkspace);
+  return getWorkspaceResp.namespace;
 }
-
-export enum JobStatus {
-  JOB_NEW = 'NEW',
-  JOB_ENQUEUE = 'ENQUEUE',
-  JOB_PROCESSING = 'PROCESSING',
-}
-
-export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
-
-export const REDSHIFT_ODS_TABLE_NAME = 'ods_events';
-export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
-
-export const SP_UPSERT_USERS = 'sp_upsert_users';

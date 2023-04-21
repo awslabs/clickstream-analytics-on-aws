@@ -12,15 +12,16 @@
  */
 
 import { RedshiftClient, DescribeClustersCommand, ModifyClusterIamRolesCommand, ClusterIamRole } from '@aws-sdk/client-redshift';
-import { RedshiftServerlessClient, GetWorkgroupCommand, GetNamespaceCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
+import { RedshiftServerlessClient, GetWorkgroupCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
+import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { logger } from '../../../common/powertools';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../../private/model';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from '../../private/model';
 import { Sleep } from '../redshift-data';
 
 interface CustomProperties {
   readonly roleArn: string;
-  readonly serverlessRedshiftProps?: ServerlessRedshiftProps | undefined;
+  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessProps | undefined;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps | undefined;
 }
 
@@ -156,14 +157,11 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
 
 async function getRedshiftServerlessIAMRoles(
   namespaceName: string, client: RedshiftServerlessClient): Promise<[ClusterIamRole[], string | undefined]> {
-  const getWorkspace = new GetNamespaceCommand({
-    namespaceName,
-  });
-  const getWorkspaceResp = await client.send(getWorkspace);
-  const existingRoles = getWorkspaceResp.namespace!.iamRoles ?? [];
+  const namespace = (await getRedshiftServerlessNamespace(client, namespaceName))!;
+  const existingRoles = namespace.iamRoles ?? [];
   const iamRoles = existingRoles.map(roleStr => strToIamRole(roleStr));
   logger.info(`Got IAM roles of namespace ${namespaceName}`, { iamRoles });
-  return [iamRoles, getWorkspaceResp.namespace!.defaultIamRoleArn];
+  return [iamRoles, namespace.defaultIamRoleArn];
 }
 
 async function waitForRedshiftServerlessIAMRolesUpdating(

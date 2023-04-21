@@ -18,7 +18,7 @@ import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { RedshiftAnalyticsStack } from '../../../src/analytics/analytics-on-redshift';
+import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME, RedshiftMode } from '../../../src/analytics/private/constant';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { CFN_FN } from '../../constants';
@@ -256,9 +256,10 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
   test('RedshiftMode allowedValues', () => {
     const param = template.toJSON().Parameters.RedshiftMode;
     const allowedValues = param.AllowedValues;
-    expect(allowedValues.length).toEqual(2);
+    expect(allowedValues.length).toEqual(3);
     for (const v of allowedValues) {
-      expect(v == RedshiftMode.SERVERLESS || v == RedshiftMode.PROVISIONED).toBeTruthy();
+      expect(v == RedshiftMode.SERVERLESS || v == RedshiftMode.PROVISIONED
+        || v == RedshiftMode.NEW_SERVERLESS).toBeTruthy();
     };
   });
 
@@ -303,14 +304,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(19);
+    expect(paramCount).toEqual(24);
   });
 
-  test('Conditions are created as expected', () => {
+  test('Conditions for nested redshift stacks are created as expected', () => {
     const conditionObj = template.toJSON().Conditions;
-    logger.info(JSON.stringify(conditionObj));
     const allConditions = Object.keys(conditionObj)
-      .filter((ck) => ck.startsWith('redshift'))
       .map((ck) => {
         logger.info(conditionObj[ck][CFN_FN.EQUALS]);
         return {
@@ -320,18 +319,15 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
           cKey: ck,
         };
       });
-    logger.info('allConditions:'+JSON.stringify(allConditions));
     var conditionNum = 0;
     for (const c of allConditions) {
-      if ((c.cKey as string) == 'redshiftServerless') {
+      if ((c.cKey as string).endsWith('RedshiftServerless')) {
         conditionNum++;
       } else if ((c.cKey as string) == 'redshiftProvisioned') {
         conditionNum++;
-      } else {
-        conditionNum;
       }
     };
-    expect(conditionNum).toEqual(2);
+    expect(conditionNum).toEqual(3);
   });
 
   test('Check UpsertUsersScheduleExpression pattern', () => {
@@ -398,10 +394,10 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   beforeEach(() => {
   });
 
-  test('Check parameters for serverless nested stack - has all parameters', () => {
+  test('Check parameters for existing serverless nested stack - has all parameters', () => {
     const nestStack = findResourceByCondition(
       template,
-      'redshiftServerless',
+      'existingRedshiftServerless',
     );
     expect(nestStack).toBeDefined();
 
@@ -439,6 +435,32 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       expect(templateParams.includes(ep)).toBeTruthy();
     }
     expect(templateParams.length).toEqual(exceptedParams.length);
+  });
+
+  test('Check parameters for new serverless nested stack - has expected parameters for new redshift serverless', () => {
+    const nestStack = findResourceByCondition(
+      template,
+      'newRedshiftServerless',
+    );
+    expect(nestStack).toBeDefined();
+
+    const exceptedParams = [
+      'NewRedshiftServerlessWorkgroupName',
+      'RedshiftServerlessSubnets',
+      'RedshiftServerlessSGs',
+      'RedshiftServerlessRPU',
+    ];
+    const templateParams = Object.keys(nestStack.Properties.Parameters).map(
+      (pk) => {
+        if (nestStack.Properties.Parameters[pk].Ref) {
+          return nestStack.Properties.Parameters[pk].Ref;
+        }
+      },
+    );
+
+    for (const ep of exceptedParams) {
+      expect(templateParams.includes(ep)).toBeTruthy();
+    }
   });
 
   test('RedshiftServerlessWorkgroupName allowedPattern', () => {
@@ -516,18 +538,28 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     }
   });
 
-  test('Should has Rules RedshiftServerlessParameters', () => {
-    const rule = template.toJSON().Rules.RedshiftServerlessParameters;
-    logger.info(`RedshiftServerlessParameters:${JSON.stringify(rule.Assertions[0].Assert[CFN_FN.AND])}`);
+  test('Should has Rules for existing RedshiftServerless', () => {
+    const rule = template.toJSON().Rules.ExistingRedshiftServerlessParameters;
+    logger.info(`ExistingRedshiftServerlessParameters:${JSON.stringify(rule.Assertions[0].Assert[CFN_FN.AND])}`);
     for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
       expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessWorkgroupName' ||
         e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessIAMRole').toBeTruthy();
-      // logger.info(`RedshiftServerlessParameters.Ref:${JSON.stringify(e['Fn::Not'][0]['Fn::Equals'][0].Ref)}`);
     }
   });
 
-  test('Must specify either Serverless Redshift or Provisioned Redshift - all undefined', () => {
-    const nestStackProps = {
+  test('Should has Rules for new RedshiftServerless', () => {
+    const rule = template.toJSON().Rules.NewRedshiftServerlessParameters;
+    expect(rule.RuleCondition[CFN_FN.EQUALS][1]).toEqual(RedshiftMode.NEW_SERVERLESS);
+    for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
+      expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'NewRedshiftServerlessWorkgroupName' ||
+        e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessVPCId' ||
+        e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessSubnets' ||
+        e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessSGs').toBeTruthy();
+    }
+  });
+
+  test('Only specify one of new Serverless Redshift, existing Serverless and Provisioned Redshift - all undefined', () => {
+    const nestStackProps: RedshiftAnalyticsStackProps = {
       vpc: vpc,
       subnetSelection: subnetSelection,
       projectId: 'project1',
@@ -546,7 +578,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
-      serverlessRedshiftProps: undefined,
+      newRedshiftServerlessProps: undefined,
+      existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
@@ -562,19 +595,20 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     expect(error).toBeTruthy();
   });
 
-  test('Must specify either Serverless Redshift or Provisioned Redshift - all defined', () => {
+  test('Only specify one of new Serverless Redshift, existing Serverless and Provisioned Redshift - all defined', () => {
     const serverlessRedshiftProps = {
       databaseName: 'dev',
       namespaceId: 'namespace1',
       workgroupName: 'workgroup1',
       dataAPIRoleArn: 'arn:aws:iam::xxxxxxxxxxxx:role/role1',
+      createdInStack: false,
     };
     const provisionedRedshiftProps = {
       databaseName: 'dev',
       clusterIdentifier: 'clusterIdentifier1',
       dbUser: 'dbUser1',
     };
-    const nestStackProps = {
+    const nestStackProps: RedshiftAnalyticsStackProps = {
       vpc: vpc,
       subnetSelection: subnetSelection,
       projectId: 'project1',
@@ -593,7 +627,15 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
-      serverlessRedshiftProps: serverlessRedshiftProps,
+      newRedshiftServerlessProps: {
+        vpcId: 'vpc-id',
+        subnetIds: 'subnet-1,subnet-2',
+        securityGroupIds: 'sg-1,sg-2',
+        workgroupName: 'default',
+        baseCapacity: 8,
+        databaseName: 'dev',
+      },
+      existingRedshiftServerlessProps: serverlessRedshiftProps,
       provisionedRedshiftProps: provisionedRedshiftProps,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
@@ -616,8 +658,9 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       workgroupName: 'workgroup1',
       workgroupId: 'workgroupId-1',
       dataAPIRoleArn: 'arn:aws:iam::xxxxxxxxxxxx:role/role1',
+      createdInStack: false,
     };
-    const nestStackProps = {
+    const nestStackProps: RedshiftAnalyticsStackProps = {
       vpc: vpc,
       subnetSelection: subnetSelection,
       projectId: 'project1',
@@ -636,7 +679,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
-      serverlessRedshiftProps: serverlessRedshiftProps,
+      existingRedshiftServerlessProps: serverlessRedshiftProps,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
@@ -3104,6 +3147,77 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
       });
     }
   });
+});
 
+describe('DataAnalyticsRedshiftStack tests for new Redshift workgroup and namespace', () => {
+  const app = new App();
+  const stack = new DataAnalyticsRedshiftStack(app, 'redshiftserverlessstack', {});
+  const template = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
 
+  test('Redshift data API role and admin role has trust relation to the same account.', () => {
+    const roles = [
+      findFirstResourceByKeyPrefix(template, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessClickstreamWorkgroupAdminRole'),
+      findFirstResourceByKeyPrefix(template, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRole'),
+    ];
+    for (const role of roles) {
+      expect(role.resource.Properties.AssumeRolePolicyDocument.Statement[0].Action).toEqual('sts:AssumeRole');
+      expect(role.resource.Properties.AssumeRolePolicyDocument.Statement[0].Principal.AWS).toEqual({
+        'Fn::Join': [
+          '',
+          [
+            'arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':iam::',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':root',
+          ],
+        ],
+      });
+    }
+  });
+
+  test('custom resource for creating redshift serverless namespace', () => {
+    template.resourceCountIs('AWS::RedshiftServerless::Namespace', 0);
+    const customResource = findFirstResourceByKeyPrefix(template, 'AWS::CloudFormation::CustomResource', 'RedshiftServerelssWorkgroupCreateRedshiftServerlessNamespaceCustomResource');
+    expect(customResource.resource.Properties.adminRoleArn).toBeDefined();
+    expect(customResource.resource.Properties.namespaceName).toBeDefined();
+    expect(customResource.resource.Properties.databaseName).toBeDefined();
+  });
+
+  test('Cfn workgroup defined as expect', () => {
+    template.resourceCountIs('AWS::RedshiftServerless::Workgroup', 1);
+    template.hasResourceProperties('AWS::RedshiftServerless::Workgroup', {
+      WorkgroupName: RefAnyValue,
+      BaseCapacity: RefAnyValue,
+      EnhancedVpcRouting: false,
+      NamespaceName: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'NamespaceName',
+        ],
+      },
+      PubliclyAccessible: false,
+      SecurityGroupIds: {
+        'Fn::Split': [
+          ',',
+          RefAnyValue,
+        ],
+      },
+      SubnetIds: {
+        'Fn::Split': [
+          ',',
+          RefAnyValue,
+        ],
+      },
+    });
+  });
+
+  test('Resources order - custom resource for creating database must depend on creating db user', () => {
+    const customResource = findFirstResourceByKeyPrefix(template, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource');
+    expect(customResource.resource.DependsOn[0]).toContain('RedshiftServerelssWorkgroupCreateRedshiftServerlessMappingUserCustomResource');
+  });
 });

@@ -10,10 +10,10 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand } from '@aws-sdk/client-redshift-data';
+import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { logger } from '../../common/powertools';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../private/model';
+import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';
 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
@@ -35,7 +35,7 @@ export function getRedshiftClient(roleArn: string) {
 const GET_STATUS_TIMEOUT = 150; // second
 
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
   database?: string) => {
   if (serverlessRedshiftProps) {
     logger.info(`Execute SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
@@ -76,7 +76,7 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
 };
 
 export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps, database?: string) => {
+  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps, database?: string) => {
   const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database);
 
   const checkParams = new DescribeStatementCommand({
@@ -85,13 +85,13 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   var response = await client.send(checkParams);
   logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
   var count = 0;
-  while (response.Status != 'FINISHED' && response.Status != 'FAILED' && count < GET_STATUS_TIMEOUT) {
+  while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
     await Sleep(1000);
     count++;
     response = await client.send(checkParams);
     logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
   }
-  if (response.Status == 'FAILED') {
+  if (response.Status == StatusString.FAILED) {
     logger.error('Error: '+ response.Status, JSON.stringify(response));
     throw new Error(JSON.stringify(response));
   }
@@ -113,7 +113,7 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
   });
   try {
     const response = await client.send(params);
-    if (response.Status == 'FAILED') {
+    if (response.Status == StatusString.FAILED) {
       logger.error(`Get load status: ${response.Status}`, JSON.stringify(response));
     } else {
       logger.info(`Get load status: ${response.Status}`, JSON.stringify(response));

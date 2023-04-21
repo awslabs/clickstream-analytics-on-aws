@@ -158,7 +158,7 @@ stackSuppressions([
 ], [
   { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
   { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
-  { id: 'AwsSolutions-L1', reason: 'Caused by latest Lambda Node.js 18.x runtime not available in AWS China regions' },
+  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));

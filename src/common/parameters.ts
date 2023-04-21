@@ -131,12 +131,14 @@ export class Parameters {
     });
   }
 
-  public static createVpcIdParameter(scope: Construct, id?: string) : CfnParameter {
+  public static createVpcIdParameter(scope: Construct, id?: string, props: ParameterProps = {}) : CfnParameter {
+    const allowedPattern = props.allowedPattern ?? `^${VPC_ID_PARRERN}$`;
     return new CfnParameter(scope, id ?? 'VpcId', {
       description: 'Select the virtual private cloud (VPC).',
       type: 'AWS::EC2::VPC::Id',
-      allowedPattern: `^${VPC_ID_PARRERN}$`,
-      constraintDescription: `VPC id must match pattern ${VPC_ID_PARRERN}`,
+      allowedPattern: allowedPattern,
+      constraintDescription: `VPC id must match pattern ${allowedPattern}`,
+      ...props,
     });
   }
 
@@ -157,19 +159,22 @@ export class Parameters {
     }
   }
 
-  public static createPrivateSubnetParameter(scope: Construct, id?: string, type: SubnetParameterType = SubnetParameterType.List) : CfnParameter {
-
+  public static createPrivateSubnetParameter(scope: Construct, id?: string,
+    type: SubnetParameterType = SubnetParameterType.List, props: ParameterProps = {}) : CfnParameter {
     if (type === SubnetParameterType.List) {
       return new CfnParameter(scope, id ?? 'PrivateSubnets', {
         description: 'Select at least one private subnet in each Availability Zone.',
         type: 'List<AWS::EC2::Subnet::Id>',
+        ...props,
       });
     } else {
-      return new CfnParameter(scope, 'PrivateSubnetIds', {
+      const allowedPattern = props.allowedPattern ?? `^${SUBNETS_PATTERN}$`;
+      return new CfnParameter(scope, id ?? 'PrivateSubnetIds', {
         description: 'Comma delimited private subnet ids.',
         type: 'String',
-        allowedPattern: `^${SUBNETS_PATTERN}$`,
-        constraintDescription: `Private subnet ids must have at least 2 subnets and match pattern ${SUBNETS_PATTERN}`,
+        constraintDescription: `Private subnet ids must have at least 2 subnets and match pattern ${allowedPattern}`,
+        ...props,
+        allowedPattern: allowedPattern,
       });
     }
   }
@@ -214,7 +219,7 @@ export class Parameters {
     const labels: any = paramLabels ?? {};
     const res: any[] = [];
 
-    const vpcId = this.createVpcIdParameter(scope, customId ?? undefined);
+    const vpcId = this.createVpcIdParameter(scope, customId);
     labels[vpcId.logicalId] = {
       default: PARAMETER_LABEL_VPCID,
     };
@@ -222,14 +227,14 @@ export class Parameters {
 
     let publicSubnets: CfnParameter | undefined;
     if (needPublicSubnets) {
-      publicSubnets = this.createPublicSubnetParameter(scope, customId ?? undefined, subnetParameterType ?? SubnetParameterType.List);
+      publicSubnets = this.createPublicSubnetParameter(scope, customId, subnetParameterType ?? SubnetParameterType.List);
       labels[publicSubnets.logicalId] = {
         default: PARAMETER_LABEL_PUBLIC_SUBNETS,
       };
       res.push(publicSubnets.logicalId);
     }
 
-    const privateSubnets = this.createPrivateSubnetParameter(scope, customId ?? undefined, subnetParameterType ?? SubnetParameterType.List);
+    const privateSubnets = this.createPrivateSubnetParameter(scope, customId, subnetParameterType ?? SubnetParameterType.List);
     labels[privateSubnets.logicalId] = {
       default: PARAMETER_LABEL_PRIVATE_SUBNETS,
     };
@@ -406,16 +411,29 @@ export class Parameters {
     allowEmpty: boolean = false,
     props: ParameterProps = {},
   ) {
-    let allowedPattern = 'sg-[a-f0-9]+';
+    return Parameters.createSecurityGroupIdsParameter(scope, id, allowEmpty, {
+      description: 'Amazon managed streaming for apache kafka (Amazon MSK) security group id',
+      ...props,
+    });
+  }
+
+  public static createSecurityGroupIdsParameter(
+    scope: IConstruct,
+    id: string = 'SecurityGroupIds',
+    allowEmpty: boolean = false,
+    props: ParameterProps = {},
+  ) {
+    const singleSGPattern = 'sg-[a-f0-9]+';
+    var allowedPattern = `${singleSGPattern}(,${singleSGPattern})*`;
     if (allowEmpty) {
       allowedPattern = `(${allowedPattern})?`;
     }
     const securityGroupIdParam = new CfnParameter(scope, id, {
       description:
-        'Amazon managed streaming for apache kafka (Amazon MSK) security group id',
+        'Choose security groups',
       type: 'String',
       allowedPattern: `^${allowedPattern}$`,
-      constraintDescription: `KafkaTopic must match pattern ${allowedPattern}`,
+      constraintDescription: `Security group must match pattern ${allowedPattern}`,
       ...props,
     });
 

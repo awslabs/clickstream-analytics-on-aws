@@ -13,12 +13,12 @@
 import { DescribeStatementCommand, BatchExecuteStatementCommand, BatchExecuteStatementCommandInput, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler } from '../../../../src/analytics/lambdas/custom-resource/create-schemas';
+import { handler } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../../../../src/analytics/private/model';
-import { TABLE_NAME_ODS_EVENT } from '../../../../src/common/constant';
-import { getMockContext } from '../../../common/lambda-context';
-import { basicCloudFormationEvent } from '../../../common/lambda-events';
+import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
+import { TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
+import { getMockContext } from '../../../../common/lambda-context';
+import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
@@ -42,17 +42,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   const workgroupName = 'demo';
   const defaultDBName = 'defaultDB';
-  const serverlessRedshiftProps: ServerlessRedshiftProps = {
-    workgroupName: workgroupName,
-    databaseName: defaultDBName,
-    dataAPIRoleArn: 'arn:aws:iam::1234567890:role/RedshiftDBUserRole',
-  };
   const createServerlessEvent = {
     ...basicEvent,
     ResourceProperties: {
       ...basicEvent.ResourceProperties,
       appIds: 'app1',
-      serverlessRedshiftProps,
+      serverlessRedshiftProps: {
+        workgroupName: workgroupName,
+        databaseName: defaultDBName,
+        dataAPIRoleArn: 'arn:aws:iam::1234567890:role/RedshiftDBUserRole',
+      },
     },
   };
 

@@ -15,9 +15,9 @@ import { RedshiftClient, DescribeClustersCommand, ModifyClusterIamRolesCommand, 
 import { RedshiftServerlessClient, GetWorkgroupCommand, GetNamespaceCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceCallback, CdkCustomResourceResponse, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceDeleteEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler } from '../../../../src/analytics/lambdas/custom-resource/redshift-associate-iam-role';
-import { getMockContext } from '../../../common/lambda-context';
-import { basicCloudFormationEvent } from '../../../common/lambda-events';
+import { handler } from '../../../../../src/analytics/lambdas/custom-resource/redshift-associate-iam-role';
+import { getMockContext } from '../../../../common/lambda-context';
+import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 import 'aws-sdk-client-mock-jest';
 
 describe('Custom resource - Associate IAM role to redshift cluster', () => {

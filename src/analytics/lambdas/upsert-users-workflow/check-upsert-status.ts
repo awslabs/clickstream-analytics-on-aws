@@ -14,7 +14,7 @@
 import { StatusString } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
 import { RedshiftMode, SP_UPSERT_USERS } from '../../private/constant';
-import { CheckUpsertStatusEventDetail, ProvisionedRedshiftProps, ServerlessRedshiftProps } from '../../private/model';
+import { CheckUpsertStatusEventDetail, ProvisionedRedshiftProps, ExistingRedshiftServerlessCustomProps } from '../../private/model';
 import { describeStatement, executeStatementsWithWait, getRedshiftClient, getStatementResult } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -77,7 +77,7 @@ export const handler = async (event: CheckUpsertStatusEvent) => {
 export const queryUpsertLog = async (appId: string) => {
   const redshiftMode = process.env.REDSHIFT_MODE!;
 
-  var serverlessRedshiftProps: ServerlessRedshiftProps | undefined,
+  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
   if (redshiftMode == RedshiftMode.SERVERLESS) {

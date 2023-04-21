@@ -131,6 +131,8 @@ export const POSITIVE_INTEGERS = '^[1-9]\\d*';
 export const S3_PATH_PLUGIN_JARS_PATTERN =`^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
 
+export const SUBNETS_THREE_AZ_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?){2,}';
+
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_ODS_EVENT = 'ods_events';

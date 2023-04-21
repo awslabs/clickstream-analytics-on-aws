@@ -15,11 +15,12 @@ import {
   Stack,
   NestedStack,
   NestedStackProps,
-  Arn, ArnFormat, Aws,
+  Arn, ArnFormat, Aws, Fn, CustomResource,
 } from 'aws-cdk-lib';
 import {
   SubnetSelection,
   IVpc,
+  Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
@@ -28,19 +29,21 @@ import {
   REDSHIFT_ODS_TABLE_NAME,
 } from './private/constant';
 import { LoadODSEventToRedshiftWorkflow } from './private/load-ods-events-workflow';
-import { ODSSource, LoadDataProps, ServerlessRedshiftProps, ProvisionedRedshiftProps, LoadWorkflowData, UpsertUsersWorkflowData } from './private/model';
+import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData } from './private/model';
+import { RedshiftServerless } from './private/redshift-serverless';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { SolutionInfo } from '../common/solution-info';
 
-interface RedshiftAnalyticsStackProps extends NestedStackProps {
+export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly vpc: IVpc;
   readonly subnetSelection: SubnetSelection;
   readonly projectId: string;
   readonly appIds: string;
   readonly odsSource: ODSSource;
   readonly loadWorkflowData: LoadWorkflowData;
-  readonly serverlessRedshiftProps?: ServerlessRedshiftProps;
+  readonly newRedshiftServerlessProps?: NewRedshiftServerlessProps;
+  readonly existingRedshiftServerlessProps?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
   readonly loadDataProps: LoadDataProps;
   readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
@@ -53,9 +56,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
     props: RedshiftAnalyticsStackProps,
   ) {
     super(scope, id, props);
-    if ((props.serverlessRedshiftProps && props.provisionedRedshiftProps)
-      || (!props.serverlessRedshiftProps && !props.provisionedRedshiftProps)) {
-      throw new Error('Must specify either Serverless Redshift or Provioned Redshift');
+
+    if ((props.existingRedshiftServerlessProps && props.provisionedRedshiftProps)
+      || (props.existingRedshiftServerlessProps && props.newRedshiftServerlessProps)
+      || (props.newRedshiftServerlessProps && props.provisionedRedshiftProps)
+      || (!props.existingRedshiftServerlessProps && !props.provisionedRedshiftProps && !props.newRedshiftServerlessProps)) {
+      throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provioned Redshift.');
     }
 
     const featureName = `Analytics-${id}`;
@@ -63,14 +69,42 @@ export class RedshiftAnalyticsStack extends NestedStack {
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
     var redshiftDataAPIExecRole: IRole;
+    var existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
 
     const projectDatabaseName = props.projectId;
-    if (props.serverlessRedshiftProps) {
+    var redshiftUserCR: CustomResource | undefined;
+    if (props.newRedshiftServerlessProps) {
+      const redshiftVpc = Vpc.fromVpcAttributes(scope, 'vpc-for-redshift-serverless-workgroup', {
+        vpcId: props.newRedshiftServerlessProps.vpcId,
+        availabilityZones: Fn.getAzs(),
+        privateSubnetIds: Fn.split(',', props.newRedshiftServerlessProps.subnetIds),
+      });
+      const redshiftServerlessWorkgroup = new RedshiftServerless(this, 'RedshiftServerelssWorkgroup', {
+        vpc: redshiftVpc,
+        subnetSelection: {
+          subnets: redshiftVpc.privateSubnets,
+        },
+        securityGroupIds: props.newRedshiftServerlessProps.securityGroupIds,
+        baseCapacity: props.newRedshiftServerlessProps.baseCapacity,
+        databaseName: props.newRedshiftServerlessProps.databaseName,
+        workgroupName: props.newRedshiftServerlessProps.workgroupName,
+      });
+      redshiftDataAPIExecRole = redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
+      existingRedshiftServerlessProps = {
+        createdInStack: true,
+        workgroupId: redshiftServerlessWorkgroup.workgroupId,
+        workgroupName: redshiftServerlessWorkgroup.workgroupName,
+        namespaceId: redshiftServerlessWorkgroup.namespaceId,
+        dataAPIRoleArn: redshiftDataAPIExecRole.roleArn,
+        databaseName: redshiftServerlessWorkgroup.databaseName,
+      };
+      redshiftUserCR = redshiftServerlessWorkgroup.redshiftUserCR;
+    } else if (props.existingRedshiftServerlessProps) {
       redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
-        props.serverlessRedshiftProps.dataAPIRoleArn, {
+        props.existingRedshiftServerlessProps.dataAPIRoleArn, {
           mutable: true,
         });
-    } else {
+    } else if (props.provisionedRedshiftProps) {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
       });
@@ -147,12 +181,15 @@ export class RedshiftAnalyticsStack extends NestedStack {
     const appSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
       appIds: props.appIds,
-      serverlessRedshift: props.serverlessRedshiftProps,
+      serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
       databaseName: projectDatabaseName,
       dataAPIRole: redshiftDataAPIExecRole!,
     });
+    if (redshiftUserCR) {
+      appSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
+    }
 
     const loadEventsWorkflow = new LoadODSEventToRedshiftWorkflow(this, 'LoadODSEventToRedshiftWorkflow', {
       projectId: props.projectId,
@@ -163,7 +200,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       odsSource: props.odsSource,
       loadDataProps: props.loadDataProps,
       loadWorkflowData: props.loadWorkflowData,
-      serverlessRedshift: props.serverlessRedshiftProps,
+      serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
       databaseName: projectDatabaseName,
@@ -178,7 +215,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
-      serverlessRedshift: props.serverlessRedshiftProps,
+      serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
       dataAPIRole: redshiftDataAPIExecRole!,

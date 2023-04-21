@@ -19,14 +19,14 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps, CreateDatabaseAndSchemas } from './model';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, CreateDatabaseAndSchemas } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface ApplicationSchemasProps {
   readonly projectId: string;
   readonly appIds: string;
-  readonly serverlessRedshift?: ServerlessRedshiftProps;
+  readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
   readonly odsTableName: string;

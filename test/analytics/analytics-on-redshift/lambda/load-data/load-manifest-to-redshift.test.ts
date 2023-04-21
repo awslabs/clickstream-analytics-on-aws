@@ -15,9 +15,9 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { ExecuteStatementCommand, ExecuteStatementCommandInput, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler, LoadManifestEvent } from '../../../../src/analytics/lambdas/load-data-workflow/load-manifest-to-redshift';
-import { RedshiftMode } from '../../../../src/analytics/private/constant';
-import { getMockContext } from '../../../common/lambda-context';
+import { handler, LoadManifestEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/load-manifest-to-redshift';
+import { RedshiftMode } from '../../../../../src/analytics/private/constant';
+import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
 const loadManifestEvent: LoadManifestEvent = {

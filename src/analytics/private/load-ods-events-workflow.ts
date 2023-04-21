@@ -27,7 +27,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition, getOrCreateNoNamespaceIdCondition, getOrCreateWithNamespaceIdCondition } from './condition';
 import { DYNAMODB_TABLE_INDEX_NAME, RedshiftMode } from './constant';
-import { ODSSource, ServerlessRedshiftProps, ProvisionedRedshiftProps, LoadDataProps, LoadWorkflowData, AssociateIAMRoleToRedshift } from './model';
+import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadDataProps, LoadWorkflowData, AssociateIAMRoleToRedshift } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -42,7 +42,7 @@ export interface LoadODSEventToRedshiftWorkflowProps {
   readonly odsSource: ODSSource;
   readonly loadWorkflowData: LoadWorkflowData;
   readonly loadDataProps: LoadDataProps;
-  readonly serverlessRedshift?: ServerlessRedshiftProps;
+  readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly odsTableName: string;
   readonly databaseName: string;
@@ -185,8 +185,29 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       },
     });
 
+    const provider = new Provider(
+      this,
+      'RedshiftAssociateIAMRoleCustomResourceProvider',
+      {
+        onEventHandler: fn,
+        logRetention: RetentionDays.FIVE_DAYS,
+      },
+    );
+
+    const customProps: AssociateIAMRoleToRedshift = {
+      roleArn: copyRole.roleArn,
+      serverlessRedshiftProps: props.serverlessRedshift,
+      provisionedRedshiftProps: props.provisionedRedshift,
+    };
+
+    const cr = new CustomResource(this, 'RedshiftAssociateIAMRoleCustomResource', {
+      serviceToken: provider.serviceToken,
+      properties: customProps,
+    });
+
     if (props.serverlessRedshift) {
-      if (props.serverlessRedshift.workgroupId && Token.isUnresolved(props.serverlessRedshift.workgroupId)) {
+      if (props.serverlessRedshift.workgroupId && Token.isUnresolved(props.serverlessRedshift.workgroupId) &&
+        !props.serverlessRedshift.createdInStack) {
         const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(this, props.serverlessRedshift.workgroupId);
         this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
           fn.role!, noWorkgroupIdCondition);
@@ -195,10 +216,11 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
         this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessSingleWorkgroupPolicy', props.serverlessRedshift.workgroupId,
           fn.role!, withWorkgroupIdCondition);
       } else {
-        this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
-          props.serverlessRedshift.workgroupId ?? '*', fn.role!);
+        cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
+          props.serverlessRedshift.workgroupId ?? '*', fn.role!));
       }
-      if (props.serverlessRedshift.namespaceId && Token.isUnresolved(props.serverlessRedshift.namespaceId)) {
+      if (props.serverlessRedshift.namespaceId && Token.isUnresolved(props.serverlessRedshift.namespaceId) &&
+        !props.serverlessRedshift.createdInStack) {
         const noNamespaceIdCondition = getOrCreateNoNamespaceIdCondition(this, props.serverlessRedshift.namespaceId);
         this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
           fn.role!, noNamespaceIdCondition);
@@ -207,11 +229,11 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
         this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessSingleNamespacePolicy', props.serverlessRedshift.namespaceId,
           fn.role!, withNamespaceIdCondition);
       } else {
-        this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
-          props.serverlessRedshift.workgroupId ?? '*', fn.role!);
+        cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
+          props.serverlessRedshift.namespaceId ?? '*', fn.role!));
       }
     } else {
-      new Policy(this, 'ProvisionedRedshiftIAMPolicy', {
+      cr.node.addDependency(new Policy(this, 'ProvisionedRedshiftIAMPolicy', {
         roles: [fn.role!],
         statements: [
           new PolicyStatement({
@@ -239,31 +261,12 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
             ],
           }),
         ],
-      });
+      }));
     }
-
-    const provider = new Provider(
-      this,
-      'RedshiftAssociateIAMRoleCustomResourceProvider',
-      {
-        onEventHandler: fn,
-        logRetention: RetentionDays.FIVE_DAYS,
-      },
-    );
-
-    const customProps: AssociateIAMRoleToRedshift = {
-      roleArn: copyRole.roleArn,
-      serverlessRedshiftProps: props.serverlessRedshift,
-      provisionedRedshiftProps: props.provisionedRedshift,
-    };
-
-    return new CustomResource(this, 'RedshiftAssociateIAMRoleCustomResource', {
-      serviceToken: provider.serviceToken,
-      properties: customProps,
-    });
+    return cr;
   }
 
-  private createRedshiftServerlessWorkgroupPolicy(id: string, workgroupId: string, role: IRole, condition?: CfnCondition) {
+  private createRedshiftServerlessWorkgroupPolicy(id: string, workgroupId: string, role: IRole, condition?: CfnCondition): Policy {
     const policy = new Policy(this, id, {
       roles: [role],
       statements: [
@@ -283,9 +286,10 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       ],
     });
     if (condition) {(policy.node.findChild('Resource') as CfnResource).cfnOptions.condition = condition;}
+    return policy;
   }
 
-  private createRedshiftServerlessNamespacePolicy(id: string, namespaceId: string, role: IRole, condition?: CfnCondition) {
+  private createRedshiftServerlessNamespacePolicy(id: string, namespaceId: string, role: IRole, condition?: CfnCondition): Policy {
     const policy = new Policy(this, id, {
       roles: [role],
       statements: [
@@ -306,6 +310,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       ],
     });
     if (condition) {(policy.node.findChild('Resource') as CfnResource).cfnOptions.condition = condition;}
+    return policy;
   }
 
   private createWorkflow(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): IStateMachine {

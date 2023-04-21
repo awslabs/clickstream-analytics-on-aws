@@ -17,7 +17,7 @@ import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { JobStatus, RedshiftMode } from '../../private/constant';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps, ManifestBody } from '../../private/model';
+import { ProvisionedRedshiftProps, ManifestBody, ExistingRedshiftServerlessCustomProps } from '../../private/model';
 import { getRedshiftClient, executeStatements } from '../redshift-data';
 
 // Set the AWS Region.
@@ -78,7 +78,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
 
   const redshiftMode = process.env.REDSHIFT_MODE!;
 
-  var serverlessRedshiftProps: ServerlessRedshiftProps | undefined,
+  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
   if (redshiftMode == RedshiftMode.SERVERLESS) {

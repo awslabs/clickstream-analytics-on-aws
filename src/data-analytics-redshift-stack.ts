@@ -18,8 +18,6 @@ import {
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
-import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
-import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
 import {
@@ -30,9 +28,10 @@ import { addCfnNagForCfnResource, ruleRolePolicyWithWildcardResources } from './
 import { SolutionInfo } from './common/solution-info';
 
 export class DataAnalyticsRedshiftStack extends Stack {
-  public nestedStacks: {
-    redshiftServerlessStack: RedshiftAnalyticsStack;
-    redshiftProvisionedStack: RedshiftAnalyticsStack;
+  public readonly nestedStacks: {
+    readonly redshiftServerlessStack: RedshiftAnalyticsStack;
+    readonly redshiftProvisionedStack: RedshiftAnalyticsStack;
+    readonly newRedshiftServerlessStack: RedshiftAnalyticsStack;
   };
   constructor(
     scope: Construct,
@@ -59,59 +58,46 @@ export function createRedshiftAnalyticsStack(
   props: RedshiftAnalyticsStackProps,
 ) {
   // Vpc
-  const vpc = Vpc.fromVpcAttributes(scope, 'from-vpc-for-redshift', {
-    vpcId: props.vpcIdParam.valueAsString,
-    availabilityZones: Fn.getAzs(),
-    privateSubnetIds: Fn.split(',', props.privateSubnetIdsParam.valueAsString),
-  });
-
-  const subnetSelection: SubnetSelection = {
-    subnets: vpc.privateSubnets,
-  };
-
-  const sinkS3Bucket = Bucket.fromBucketName(
-    scope,
-    'redshift-from-pipeline-sinkS3Bucket',
-    props.sinkS3BucketParam.valueAsString,
-  );
-
-  const loadWorkflowS3Bucket = Bucket.fromBucketName(
-    scope,
-    'redshift-from-pipeline-loadWorkflowBucket',
-    props.loadTempBucketParam.valueAsString,
-  );
 
   const nestStackProps = {
-    vpc: vpc,
-    subnetSelection: subnetSelection,
-    projectId: props.projectIdParam.valueAsString,
-    appIds: props.appIdsParam.valueAsString,
+    vpc: props.network.vpc,
+    subnetSelection: props.network.subnetSelection,
+    projectId: props.projectId,
+    appIds: props.appIds,
     odsSource: {
-      s3Bucket: sinkS3Bucket,
-      prefix: props.sinkS3PrefixParam.valueAsString,
-      fileSuffix: props.sinkS3FileSuffixParam.valueAsString,
+      s3Bucket: props.odsEvents.bucket,
+      prefix: props.odsEvents.prefix,
+      fileSuffix: props.odsEvents.fileSuffix,
     },
     loadWorkflowData: {
-      s3Bucket: loadWorkflowS3Bucket,
-      prefix: props.loadTempBucketPrefixParam.valueAsString,
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix,
     },
     loadDataProps: {
-      scheduleInterval: props.loadJobScheduleIntervalParam.valueAsNumber,
-      maxFilesLimit: props.maxFilesLimitParam.valueAsNumber,
-      processingFilesLimit: props.processingFilesLimitParam.valueAsNumber,
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+      processingFilesLimit: props.loadConfiguration.processingFilesLimit,
     },
     upsertUsersWorkflowData: {
-      scheduleExpression: props.upsertUsersWorkflowScheduleExpressionParam.valueAsString,
+      scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,
     },
   };
 
-  sinkS3Bucket.enableEventBridgeNotification();
+  props.odsEvents.bucket.enableEventBridgeNotification();
 
-  const redshiftModeStr = props.redshiftModeParam.valueAsString;
+  const redshiftModeStr = props.redshift.mode;
 
-  const isRedshiftServerless = new CfnCondition(
+  const isNewRedshiftServerless = new CfnCondition(
     scope,
-    'redshiftServerless',
+    'newRedshiftServerless',
+    {
+      expression:
+        Fn.conditionEquals(redshiftModeStr, RedshiftMode.NEW_SERVERLESS),
+    },
+  );
+  const isExistingRedshiftServerless = new CfnCondition(
+    scope,
+    'existingRedshiftServerless',
     {
       expression:
         Fn.conditionEquals(redshiftModeStr, RedshiftMode.SERVERLESS),
@@ -125,21 +111,34 @@ export function createRedshiftAnalyticsStack(
         Fn.conditionEquals(redshiftModeStr, RedshiftMode.PROVISIONED),
     },
   );
-  const redshiftServerlessStack = new RedshiftAnalyticsStack(
+
+  const newRedshiftServerlessStack = new RedshiftAnalyticsStack(
+    scope,
+    RedshiftMode.NEW_SERVERLESS + ' Redshift',
+    {
+      ...nestStackProps,
+      newRedshiftServerlessProps: {
+        ...props.redshift.newServerless!,
+        databaseName: props.redshift.defaultDtabaseName,
+      },
+    },
+  );
+  (newRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isNewRedshiftServerless;
+
+  const redshiftExistingServerlessStack = new RedshiftAnalyticsStack(
     scope,
     RedshiftMode.SERVERLESS + ' Redshift',
     {
       ...nestStackProps,
-      serverlessRedshiftProps: {
-        databaseName: props.redshiftDefaultDatabaseParam.valueAsString,
-        namespaceId: props.redshiftServerlessNamespaceIdParam.valueAsString,
-        workgroupName: props.redshiftServerlessWorkgroupNameParam.valueAsString,
-        workgroupId: props.redshiftServerlessWorkgroupIdParam.valueAsString,
-        dataAPIRoleArn: props.redshiftServerlessIAMRoleParam.valueAsString,
+      existingRedshiftServerlessProps: {
+        createdInStack: false,
+        databaseName: props.redshift.defaultDtabaseName,
+        ...props.redshift.existingServerless!,
+        dataAPIRoleArn: props.redshift.existingServerless!.iamRole,
       },
     },
   );
-  (redshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftServerless;
+  (redshiftExistingServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
 
   const redshiftProvisionedStack = new RedshiftAnalyticsStack(
     scope,
@@ -147,15 +146,15 @@ export function createRedshiftAnalyticsStack(
     {
       ...nestStackProps,
       provisionedRedshiftProps: {
-        databaseName: props.redshiftDefaultDatabaseParam.valueAsString,
-        clusterIdentifier: props.redshiftClusterIdentifierParam.valueAsString,
-        dbUser: props.redshiftDbUserParam.valueAsString,
+        databaseName: props.redshift.defaultDtabaseName,
+        ...props.redshift.provisioned!,
       },
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
   return {
-    redshiftServerlessStack,
+    redshiftServerlessStack: redshiftExistingServerlessStack,
+    newRedshiftServerlessStack,
     redshiftProvisionedStack,
   };
 }

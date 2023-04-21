@@ -24,7 +24,7 @@ import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succe
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { RedshiftMode } from './constant';
-import { ServerlessRedshiftProps, ProvisionedRedshiftProps, UpsertUsersWorkflowData } from './model';
+import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, UpsertUsersWorkflowData } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -36,7 +36,7 @@ export interface UpsertUsersWorkflowProps {
     readonly vpc: IVpc;
     readonly vpcSubnets: SubnetSelection;
   };
-  readonly serverlessRedshift?: ServerlessRedshiftProps;
+  readonly serverlessRedshift?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
   readonly dataAPIRole: IRole;

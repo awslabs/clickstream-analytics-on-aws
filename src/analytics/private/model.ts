@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 
 export interface LoadDataProps {
@@ -38,11 +39,21 @@ interface RedshiftProps {
   readonly databaseName: string;
 }
 
-export interface ServerlessRedshiftProps extends RedshiftProps {
+export interface RedshiftServerlessProps extends RedshiftProps {
   readonly workgroupName: string;
+}
+
+export interface NewRedshiftServerlessProps extends RedshiftServerlessProps {
+  readonly vpcId: string;
+  readonly subnetIds: string;
+  readonly securityGroupIds: string;
+  readonly baseCapacity: number;
+}
+export interface ExistingRedshiftServerlessProps extends RedshiftServerlessProps {
   readonly workgroupId?: string;
   readonly namespaceId?: string;
   readonly dataAPIRoleArn: string;
+  readonly createdInStack: boolean;
 }
 
 export interface ProvisionedRedshiftProps extends RedshiftProps {
@@ -50,8 +61,9 @@ export interface ProvisionedRedshiftProps extends RedshiftProps {
   readonly dbUser: string;
 }
 
+export type ExistingRedshiftServerlessCustomProps = Omit<ExistingRedshiftServerlessProps, 'createdInStack'>;
 interface CustomProperties {
-  readonly serverlessRedshiftProps?: ServerlessRedshiftProps | undefined;
+  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps | undefined;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps | undefined;
 }
 
@@ -62,9 +74,33 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly databaseName: string;
   readonly dataAPIRole: string;
 }
+export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
+  readonly dataRoleName: string;
+}
 
 export type AssociateIAMRoleToRedshift = CustomProperties & {
   readonly roleArn: string;
+}
+
+export interface NewWorkgroupProperties {
+  readonly workgroupName: string;
+  readonly baseCapacity: number;
+  readonly namespaceName: string;
+  readonly securityGroupIds: string[];
+  readonly subnetIds: string[];
+  readonly publiclyAccessible: false;
+}
+export interface RedshiftServerlessWorkgroupProps {
+  readonly vpc: IVpc;
+  readonly subnetSelection: SubnetSelection;
+  readonly securityGroupIds: string;
+  readonly baseCapacity: number;
+  readonly workgroupName: string;
+  readonly databaseName: string;
+}
+export type NewNamespaceCustomProperties = RedshiftProps & {
+  readonly adminRoleArn: string;
+  readonly namespaceName: string;
 }
 
 export interface ManifestItem {

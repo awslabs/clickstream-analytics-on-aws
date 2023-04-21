@@ -13,7 +13,7 @@
 
 import { logger } from '../../../common/powertools';
 import { RedshiftMode } from '../../private/constant';
-import { ProvisionedRedshiftProps, ServerlessRedshiftProps, UpsertUsersBody } from '../../private/model';
+import { ProvisionedRedshiftProps, ExistingRedshiftServerlessCustomProps, UpsertUsersBody } from '../../private/model';
 import { getRedshiftClient, executeStatements } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -39,7 +39,7 @@ export interface UpsertUsersEvent {
 export const handler = async (event: UpsertUsersEvent) => {
   const redshiftMode = process.env.REDSHIFT_MODE!;
 
-  var serverlessRedshiftProps: ServerlessRedshiftProps | undefined,
+  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
   if (redshiftMode == RedshiftMode.SERVERLESS) {

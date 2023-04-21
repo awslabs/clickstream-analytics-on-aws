@@ -15,7 +15,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, S3ObjectCreatedNotificationEventDetail } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler } from '../../../../src/analytics/lambdas/load-data-workflow/put-ods-source-to-store';
+import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/put-ods-source-to-store';
 import 'aws-sdk-client-mock-jest';
 
 describe('Lambda - put ODS event to DDB store', () => {
