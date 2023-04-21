@@ -587,6 +587,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'kinesis:*',
               'kafka:*',
               'states:*',
+              'globalaccelerator:*'
             ],
             Effect: 'Allow',
             Resource: '*',
