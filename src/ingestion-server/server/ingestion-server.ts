@@ -115,6 +115,7 @@ export interface IngestionServerProps {
   readonly loadBalancerIpAddressType?: IpAddressType;
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
+  readonly authenticationSecretArn?: string;
 }
 
 export class IngestionServer extends Construct {
@@ -157,7 +158,7 @@ export class IngestionServer extends Construct {
       https: 443,
     };
     const endpointPath = props.serverEndpointPath;
-    const albSg = createALBSecurityGroup(this, props.vpc, ports);
+    const albSg = createALBSecurityGroup(this, props.vpc, ports, props.authenticationSecretArn);
     ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
 
     const { alb, albUrl } = createApplicationLoadBalancer(this, {
@@ -171,6 +172,7 @@ export class IngestionServer extends Construct {
       domainName: props.domainName || '',
       protocol: props.protocol,
       albLogProps: props.loadBalancerLogProps,
+      authenticationSecretArn: props.authenticationSecretArn,
       ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
     });
     this.albUrl = albUrl;

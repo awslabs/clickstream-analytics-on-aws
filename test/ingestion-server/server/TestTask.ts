@@ -146,12 +146,14 @@ export interface TestStackProps extends StackProps {
   withMskConfig?: boolean;
   withS3SinkConfig?: boolean;
   withKinesisSinkConfig?: boolean;
+  withAuthentication?: boolean;
   serverEndpointPath?: string;
   serverCorsOrigin?: string;
   warmPoolSize?: number;
   withWarmPoolSizeParameter?: boolean;
   domainName?: string;
   certificateArn?: string;
+  authenticationSecretArn?: string;
   protocol?: ApplicationProtocol;
 }
 
@@ -168,9 +170,11 @@ export class TestStack extends Stack {
       serverCorsOrigin: '*',
       domainName: 'www.example.com',
       certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+      authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
       protocol: ApplicationProtocol.HTTP,
       warmPoolSize: 0,
       withWarmPoolSizeParameter: false,
+      withAuthentication: false,
     },
   ) {
     super(scope, id, props);
@@ -195,6 +199,16 @@ export class TestStack extends Stack {
           enableAccessLog: true,
           bucket: logS3Bucket,
         },
+      };
+    }
+
+    let authenticationConfig = {
+      authenticationSecretArn: '',
+    };
+
+    if (props.withAuthentication) {
+      authenticationConfig = {
+        authenticationSecretArn: props.authenticationSecretArn || 'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
       };
     }
 
@@ -274,6 +288,7 @@ export class TestStack extends Stack {
       certificateArn: props.certificateArn || 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
       ...mskSink,
       ...accessLogConfig,
+      ...authenticationConfig,
       s3SinkConfig,
       kinesisSinkConfig,
       enableGlobalAccelerator,

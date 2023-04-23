@@ -16,13 +16,31 @@ import { Aws, CfnMapping } from 'aws-cdk-lib';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AccountPrincipal, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { ALBLogServiceAccountMapping } from './constant';
+import { AuthenticationProps } from './model';
 
 export interface LogProps {
   readonly enableAccessLog: boolean;
   readonly bucket?: IBucket;
   readonly prefix?: string;
+}
+
+export function createAuthenticationPropsFromSecretArn(
+  scope: Construct,
+  authenticationSecretArn: string,
+) {
+  const authSecret = Secret.fromSecretCompleteArn(scope, 'ImportedSecret', authenticationSecretArn);
+  const authenticationProps : AuthenticationProps = {
+    issuer: authSecret.secretValueFromJson('issuer').toString(),
+    userEndpoint: authSecret.secretValueFromJson('userEndpoint').toString(),
+    authorizationEndpoint: authSecret.secretValueFromJson('authorizationEndpoint').toString(),
+    tokenEndpoint: authSecret.secretValueFromJson('tokenEndpoint').toString(),
+    appClientId: authSecret.secretValueFromJson('appClientId').toString(),
+    appClientSecret: authSecret.secretValueFromJson('appClientSecret').toString(),
+  };
+  return authenticationProps;
 }
 
 export function setAccessLogForApplicationLoadBalancer(

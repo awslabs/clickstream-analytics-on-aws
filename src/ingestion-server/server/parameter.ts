@@ -173,6 +173,30 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
+  const enableAuthenticationParam = new CfnParameter(
+    scope,
+    'EnableAuthentication',
+    {
+      description: 'Enable authentication feature for ingestion server',
+      type: 'String',
+      allowedValues: ['Yes', 'No'],
+      default: 'No',
+    },
+  );
+
+  const authenticationSecretArnParam = new CfnParameter(
+    scope,
+    'AuthenticationSecretArn',
+    {
+      description: 'The AuthenticationSecretArn of OIDC provider',
+      type: 'String',
+      default: '',
+      allowedPattern: '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$',
+      constraintDescription:
+      'AuthenticationSecretArn must match pattern ^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$',
+    },
+  );
+
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
       {
@@ -197,6 +221,33 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         ),
         assertDescription:
           'logS3Bucket and logS3Prefix cannot be empty when enableApplicationLoadBalancerAccessLog=Yes',
+      },
+    ],
+  });
+
+  new CfnRule(scope, 'enableAuthenticationRule', {
+    assertions: [
+      {
+        assert: Fn.conditionOr(
+          Fn.conditionAnd(
+            Fn.conditionEquals(
+              enableAuthenticationParam.valueAsString,
+              'Yes',
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(authenticationSecretArnParam.valueAsString, ''),
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(protocolParam.valueAsString, 'HTTP'),
+            ),
+          ),
+          Fn.conditionEquals(
+            enableAuthenticationParam.valueAsString,
+            'No',
+          ),
+        ),
+        assertDescription:
+          'AuthenticationSecretArn cannot be empty or Protocol cannot be HTTP when EnableAuthentication=Yes',
       },
     ],
   });
@@ -628,6 +679,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kinesisParams,
       enableGlobalAcceleratorParam,
       devModeParam,
+      enableAuthenticationParam,
+      authenticationSecretArnParam,
     },
   };
 }

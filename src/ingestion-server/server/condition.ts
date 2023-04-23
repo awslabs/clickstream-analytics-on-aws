@@ -30,6 +30,8 @@ export function createCommonConditions(
     protocolParam: CfnParameter;
     domainNameParam: CfnParameter;
     certificateArnParam: CfnParameter;
+    enableAuthenticationParam: CfnParameter;
+    authenticationSecretArnParam: CfnParameter;
   },
 ) {
   // ALB enableAccessLogCondition
@@ -39,6 +41,18 @@ export function createCommonConditions(
     {
       expression: Fn.conditionEquals(
         props.enableApplicationLoadBalancerAccessLogParam.valueAsString,
+        'Yes',
+      ),
+    },
+  );
+
+  // ALB enableAuthentication
+  const enableAuthenticationCondition = new CfnCondition(
+    scope,
+    'enableAuthenticationCondition',
+    {
+      expression: Fn.conditionEquals(
+        props.enableAuthenticationParam.valueAsString,
         'Yes',
       ),
     },
@@ -77,6 +91,12 @@ export function createCommonConditions(
     scope,
     'enableAccessLogConditionNeg',
     enableAccessLogCondition,
+  );
+
+  const enableAuthenticationConditionNeg = createNegCondition(
+    scope,
+    'enableAuthenticationConditionNeg',
+    enableAuthenticationCondition,
   );
 
   const notificationsTopicArnConditionNeg = createNegCondition(
@@ -121,6 +141,22 @@ export function createCommonConditions(
     },
 
     {
+      condition: enableAuthenticationCondition,
+      serverProps: {
+        enableAuthentication: 'Yes',
+        authenticationSecretArn: props.authenticationSecretArnParam.valueAsString,
+      },
+    },
+
+    {
+      condition: enableAuthenticationConditionNeg,
+      serverProps: {
+        enableAuthentication: 'No',
+        authenticationSecretArn: undefined,
+      },
+    },
+
+    {
       condition: notificationsTopicArnCondition,
       serverProps: {
         notificationsTopicArn: props.notificationsTopicArnParam.valueAsString,
@@ -142,9 +178,16 @@ export function createCommonConditions(
       1: notificationsTopicArnCondition,
       0: notificationsTopicArnConditionNeg,
     },
+    {
+      1: enableAuthenticationCondition,
+      0: enableAuthenticationConditionNeg,
+    },
   ];
 
-  const commonConditions = genAllConditions('C', conditionBits);
+  //Need to filter out the cases that both http protocol and enable authentication.
+  const filterOutConditionBits = ['0001', '1001', '0011', '1011'];
+
+  const commonConditions = genAllConditions('C', conditionBits, filterOutConditionBits);
 
   return {
     serverPropsConfig: conditionServerPopsConfig,
@@ -235,7 +278,7 @@ export function createMskConditions(
     { 1: mskSecurityGroupIdCondition, 0: mskSecurityGroupIdConditionNeg },
   ];
 
-  const mskConditions = genAllConditions('M', conditionBits);
+  const mskConditions = genAllConditions('M', conditionBits, []);
 
   return {
     serverPropsConfig: mskConditionServerPopsConfig,
@@ -393,6 +436,7 @@ interface CfnConditionBit {
 function genAllConditions(
   idPrefix: string,
   conditions: CfnConditionBit[],
+  filterOut: string[],
 ): GenAllConditionsRetValueItem[] {
   const bitLen = conditions.map((x) => Object.keys(x).length - 1);
   const allConditionBits = genAllConditionBits(bitLen);
@@ -416,11 +460,13 @@ function genAllConditions(
         );
       }
     }
-    retConditions.push({
-      conditions: conditionsForBinStr,
-      binStr,
-      name: `${idPrefix}${binStr}`,
-    });
+    if (!filterOut.includes(binStr)) {
+      retConditions.push({
+        conditions: conditionsForBinStr,
+        binStr,
+        name: `${idPrefix}${binStr}`,
+      });
+    }
   }
   return retConditions;
 }

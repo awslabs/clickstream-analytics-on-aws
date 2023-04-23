@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
+import { CfnResource, Duration, Stack, SecretValue } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Ec2Service } from 'aws-cdk-lib/aws-ecs';
 import {
@@ -26,21 +26,24 @@ import {
   IpAddressType,
   SslPolicy,
   CfnListener,
+  UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
-import { LogProps, setAccessLogForApplicationLoadBalancer } from '../../../common/alb';
+import { LogProps, setAccessLogForApplicationLoadBalancer, createAuthenticationPropsFromSecretArn } from '../../../common/alb';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
 
 function addECSTargetsToListener(
+  scope: Construct,
   service: Ec2Service,
   listener: ApplicationListener,
   endpointPath: string,
   proxyContainerName: string,
   protocol: ApplicationProtocol,
   domainName: string,
+  authenticationSecretArn?: string,
 ) {
   const targetGroup = listener.addTargets('ECS', {
     protocol: ApplicationProtocol.HTTP,
@@ -63,25 +66,73 @@ function addECSTargetsToListener(
     },
   });
 
-  addActionRules(listener, endpointPath, targetGroup, 'forwardToECS', protocol, domainName);
+  addActionRules(scope, listener, endpointPath, targetGroup, 'forwardToECS', protocol, domainName, authenticationSecretArn);
 }
 
 function addActionRules(
+  scope: Construct,
   listener: ApplicationListener,
   endpointPath: string,
   targetGroup: ApplicationTargetGroup,
   forwardRuleName: string,
   protocol: ApplicationProtocol,
   domainName: string,
+  authenticationSecretArn?: string,
 ) {
-  listener.addAction(forwardRuleName, {
-    priority: 1,
-    conditions: [
-      ListenerCondition.pathPatterns([`${endpointPath}*`]),
-      ...(protocol === ApplicationProtocol.HTTPS ? [ListenerCondition.hostHeaders([domainName])] : []),
-    ],
-    action: ListenerAction.forward([targetGroup]),
-  });
+  if (authenticationSecretArn) {
+    if (protocol === ApplicationProtocol.HTTPS) {
+      const authenticationProps = createAuthenticationPropsFromSecretArn(scope, authenticationSecretArn);
+      listener.addAction(`${forwardRuleName}-auth`, {
+        priority: 2,
+        conditions: [
+          ListenerCondition.httpRequestMethods(['GET']),
+          ListenerCondition.pathPatterns(['/login']),
+        ],
+        action: ListenerAction.authenticateOidc({
+          authorizationEndpoint: authenticationProps.authorizationEndpoint,
+          clientId: authenticationProps.appClientId,
+          clientSecret: SecretValue.unsafePlainText(authenticationProps.appClientSecret),
+          issuer: authenticationProps.issuer,
+          tokenEndpoint: authenticationProps.tokenEndpoint,
+          userInfoEndpoint: authenticationProps.userEndpoint,
+          onUnauthenticatedRequest: UnauthenticatedAction.AUTHENTICATE,
+          next: ListenerAction.fixedResponse(200, {
+            contentType: 'text/plain',
+            messageBody: 'Authenticated',
+          }),
+        }),
+      });
+
+      listener.addAction(forwardRuleName, {
+        priority: 1,
+        conditions: [
+          ListenerCondition.pathPatterns([`${endpointPath}*`]),
+          ...(protocol === ApplicationProtocol.HTTPS ? [ListenerCondition.hostHeaders([domainName])] : []),
+        ],
+        action: ListenerAction.authenticateOidc({
+          authorizationEndpoint: authenticationProps.authorizationEndpoint,
+          clientId: authenticationProps.appClientId,
+          clientSecret: SecretValue.unsafePlainText(authenticationProps.appClientSecret),
+          issuer: authenticationProps.issuer,
+          tokenEndpoint: authenticationProps.tokenEndpoint,
+          userInfoEndpoint: authenticationProps.userEndpoint,
+          onUnauthenticatedRequest: UnauthenticatedAction.DENY,
+          next: ListenerAction.forward([targetGroup]),
+        }),
+      });
+    } else {
+      throw Error('Cannot enable ALB authentication feature when protocol is HTTP');
+    }
+  } else {
+    listener.addAction(forwardRuleName, {
+      priority: 1,
+      conditions: [
+        ListenerCondition.pathPatterns([`${endpointPath}*`]),
+        ...(protocol === ApplicationProtocol.HTTPS ? [ListenerCondition.hostHeaders([domainName])] : []),
+      ],
+      action: ListenerAction.forward([targetGroup]),
+    });
+  }
 
   listener.addAction('DefaultAction', {
     action: ListenerAction.fixedResponse(403, {
@@ -107,6 +158,7 @@ export interface ApplicationLoadBalancerProps {
     https: number;
   };
   albLogProps?: LogProps;
+  authenticationSecretArn?: string;
 }
 
 export function createApplicationLoadBalancer(
@@ -163,12 +215,14 @@ export function createApplicationLoadBalancer(
       ListenerCertificate.fromArn(props.certificateArn),
     ]);
     addECSTargetsToListener(
+      scope,
       props.service,
       httpsListener,
       endpointPath,
       httpContainerName,
       props.protocol,
       props.domainName,
+      props.authenticationSecretArn,
     );
 
     albUrl = getAlbUrl(alb, 'https', httpsPort, endpointPath);
@@ -201,12 +255,14 @@ export function createApplicationLoadBalancer(
       port: httpPort,
     });
     addECSTargetsToListener(
+      scope,
       props.service,
       httpListener,
       endpointPath,
       httpContainerName,
       props.protocol,
       props.domainName,
+      props.authenticationSecretArn,
     );
 
     addCfnNagSuppressRules(

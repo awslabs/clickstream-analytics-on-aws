@@ -251,6 +251,23 @@ test('Has Parameter EnableGlobalAccelerator', () => {
   });
 });
 
+test('Has Parameter EnableAuthentication', () => {
+  templates.forEach((template) => {
+    template.hasParameter('EnableAuthentication', {
+      Type: 'String',
+      Default: 'No',
+    });
+  });
+});
+
+test('Has Parameter AuthenticationSecretArn', () => {
+  templates.forEach((template) => {
+    template.hasParameter('AuthenticationSecretArn', {
+      Type: 'String',
+    });
+  });
+});
+
 test('Has Parameter LogS3Bucket', () => {
   templates.forEach((template) => {
     template.hasParameter('LogS3Bucket', {
@@ -499,7 +516,7 @@ test('Has ParameterGroups', () => {
 test('Check parameters for Kafka nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     kafkaTemplate,
-    'IngestionServerM11C111Condition',
+    'IngestionServerM11C1111Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -524,6 +541,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'ScaleOnCpuUtilizationPercent',
     'EnableGlobalAccelerator',
     'DevMode',
+    'AuthenticationSecretArn',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -542,7 +560,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
 test('Check parameters for Kafka nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
     kafkaTemplate,
-    'IngestionServerM00C000Condition',
+    'IngestionServerM00C0000Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -579,7 +597,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
 test('Check parameters for Kinesis nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     kinesisTemplate,
-    'IngestionServerK1C111Condition',
+    'IngestionServerK1C1111Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -600,6 +618,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'ScaleOnCpuUtilizationPercent',
     'EnableGlobalAccelerator',
     'DevMode',
+    'AuthenticationSecretArn',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -618,7 +637,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
 test('Check parameters for Kinesis nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
     kinesisTemplate,
-    'IngestionServerK2C000Condition',
+    'IngestionServerK2C0000Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -652,7 +671,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
 test('Check parameters for S3 nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     s3Template,
-    'IngestionServerC111Condition',
+    'IngestionServerC1111Condition',
   );
   expect(nestStack).toBeDefined();
   const exceptedParams = [
@@ -676,6 +695,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'S3BatchTimeout',
     'EnableGlobalAccelerator',
     'DevMode',
+    'AuthenticationSecretArn',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -694,7 +714,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
 test('Check parameters for S3 nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
     s3Template,
-    'IngestionServerC000Condition',
+    'IngestionServerC0000Condition',
   );
   expect(nestStack).toBeDefined();
   const exceptedParams = [
@@ -820,6 +840,72 @@ test('Rule logS3BucketAndEnableLogRule', () => {
           eq: [
             {
               Ref: 'EnableApplicationLoadBalancerAccessLog',
+            },
+            'No',
+          ],
+        },
+      ],
+    };
+
+    expect(JSON.parse(assertStr)).toEqual(expectedAssert);
+  });
+});
+
+test('Rule enableAuthenticationRule', () => {
+  templates.forEach((template) => {
+    const assert =
+      template.toJSON().Rules.enableAuthenticationRule.Assertions[0].Assert;
+
+    let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
+    assertStr = assertStr.replace(/Fn::And/g, 'and');
+    assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
+    assertStr = assertStr.replace(/Fn::Not/g, 'not');
+
+    const expectedAssert = {
+      or: [
+        {
+          and: [
+            {
+              eq: [
+                {
+                  Ref: 'EnableAuthentication',
+                },
+                'Yes',
+              ],
+            },
+
+            {
+              not: [
+                {
+                  eq: [
+                    {
+                      Ref: 'AuthenticationSecretArn',
+                    },
+                    '',
+                  ],
+                },
+              ],
+            },
+
+            {
+              not: [
+                {
+                  eq: [
+                    {
+                      Ref: 'Protocol',
+                    },
+                    'HTTP',
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+
+        {
+          eq: [
+            {
+              Ref: 'EnableAuthentication',
             },
             'No',
           ],
@@ -1057,6 +1143,27 @@ test('check ACMCertificateArn pattern', () => {
       expect(v).toMatch(regex);
     }
     const invalidValues = ['abc', 'arn:aws-cx:acm:us-east-1:111111111111:certificate/fake', 'arn:aws:acme:us-east-1:111111111111:certificate/fake'];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+});
+
+test('check AuthenticationSecretArn pattern', () => {
+  templates.forEach((template) => {
+    const param = getParameter(template, 'AuthenticationSecretArn');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      '',
+      'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
+      'arn:aws-cn:secretsmanager:cn-northwest-1:111111111111:secret:fake-xxxxxx',
+      'arn:aws-us-gov:secretsmanager:us-gov-west-1:111111111111:secret:fake-xxxxxx',
+    ];
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+    const invalidValues = ['abc', 'arn:aws-cx:secretsmanager:us-east-1:111111111111:secret:fake', 'arn:aws:secretsmanagers:us-east-1:111111111111:certificate/fake-xxxxxx'];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }

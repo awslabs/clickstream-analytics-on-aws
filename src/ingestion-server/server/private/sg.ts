@@ -29,6 +29,7 @@ export function createALBSecurityGroup(
     http: number;
     https: number;
   },
+  authenticationSecretArn?: string,
 ): SecurityGroup {
   const albSg = new SecurityGroup(scope, `${RESOURCE_ID_PREFIX}alb-sg`, {
     description: 'ALB security group',
@@ -39,6 +40,9 @@ export function createALBSecurityGroup(
   albSg.addIngressRule(Peer.anyIpv4(), Port.tcp(port.http));
   albSg.addIngressRule(Peer.anyIpv6(), Port.tcp(port.https));
   albSg.addIngressRule(Peer.anyIpv6(), Port.tcp(port.http));
+  if (authenticationSecretArn) {
+    albSg.addEgressRule(Peer.anyIpv4(), Port.allTcp());
+  }
 
   addCfnNagSuppressRules(albSg.node.defaultChild as CfnResource, [
     {
@@ -48,6 +52,14 @@ export function createALBSecurityGroup(
     {
       id: 'W2',
       reason: 'Design intent: Security Groups found with cidr open to world on ingress',
+    },
+    {
+      id: 'W29',
+      reason: 'Design intent: allow all egress traffic, alb need to access OIDC endpoint',
+    },
+    {
+      id: 'W5',
+      reason: 'Design intent: Security Groups found with cidr open to world on egress',
     },
   ]);
 

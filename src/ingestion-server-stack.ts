@@ -131,6 +131,10 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
 
+  // authentication parameters
+  readonly enableAuthentication?: string;
+  readonly authenticationSecretArn?: string;
+
   // Kafka parameters
   readonly kafkaBrokers?: string;
   readonly kafkaTopic?: string;
@@ -230,6 +234,11 @@ export class IngestionServerNestedStack extends NestedStack {
       };
     }
 
+    let authenticationSecretArn;
+    if (props.enableAuthentication == 'Yes') {
+      authenticationSecretArn = props.authenticationSecretArn;
+    }
+
     let s3SinkConfig: S3SinkConfig | undefined = undefined;
     if (props.s3BucketName && props.s3Prefix && props.batchMaxBytes && props.batchTimeout) {
       const s3Bucket = Bucket.fromBucketName(
@@ -286,6 +295,7 @@ export class IngestionServerNestedStack extends NestedStack {
       kinesisSinkConfig,
       enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
+      authenticationSecretArn,
     };
 
     const ingestionServer = new IngestionServer(
@@ -357,6 +367,8 @@ export class IngestionServerStack extends Stack {
         kinesisParams,
         enableGlobalAcceleratorParam,
         devModeParam,
+        enableAuthenticationParam,
+        authenticationSecretArnParam,
       },
     } = createStackParameters(this, props);
 
@@ -408,6 +420,8 @@ export class IngestionServerStack extends Stack {
       protocolParam,
       domainNameParam,
       certificateArnParam,
+      enableAuthenticationParam,
+      authenticationSecretArnParam,
     });
     let stackConditionsAndProps = commonConditionsAndProps;
 
