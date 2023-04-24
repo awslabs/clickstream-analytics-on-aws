@@ -27,12 +27,30 @@
   "app_package_name": "com.xiaowei.demoapplication",
   "app_title": "test-title-0-5",
   "user": {
-    "_user_ltv_currency": "USD",
-    "_user_ltv_revenue": 10,
-    "_user_age": 39,
-    "_user_first_touch_timestamp": 1681373017090,
-    "_user_id": "uid-1681373017090-0",
-    "_user_name": "uname-1681373017090-0"
+    "_user_id": {
+      "value":"312121",
+      "set_timestamp": 1667877566697
+    },
+    "_user_name": {
+      "value":"xiaowei",
+      "set_timestamp": 1667877566697
+    },
+    "_user_age": {
+      "value":20,
+      "set_timestamp": 1667877566697
+    },
+    "_user_first_touch_timestamp": {
+      "value":1667877267895,
+      "set_timestamp": 1667877566697
+    },
+    "_user_ltv_currency": {
+      "value":"USD",
+      "set_timestamp": 1667877566697
+    },
+    "_user_ltv_revenue": {
+      "value":123.45,
+      "set_timestamp": 1667877566697
+    }
   },
   "attributes": {
     "_traffic_source_medium": "TSM",

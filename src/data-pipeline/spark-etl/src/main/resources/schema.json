@@ -169,174 +169,17 @@
       "nullable": true,
       "metadata": {}
     },
+
     {
       "name": "user",
-      "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "name": "_user_ltv_currency",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_user_ltv_revenue",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_user_age",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_user_first_touch_timestamp",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_user_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_user_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          }
-        ]
-      },
+      "type": "string",
       "nullable": true,
       "metadata": {}
     },
+
     {
       "name": "attributes",
-      "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "name": "_traffic_source_medium",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_traffic_source_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_traffic_source_source",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_privacy_info_ads_storage",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_privacy_info_analytics_storage",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_privacy_info_uses_transient_token",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_channel",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_device_vendor_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_device_advertising_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_error_name_invalid",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_error_name_length_exceed",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_error_value_length_exceed",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_error_attribute_size_exceed",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_is_first_time",
-            "type": "boolean",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_is_first_day",
-            "type": "boolean",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_session_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_session_start_timestamp",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_session_duration",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "_session_stop_timestamp",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          }
-
-        ]
-      },
+      "type": "string",
       "nullable": true,
       "metadata": {}
     },
@@ -406,6 +249,14 @@
       "nullable": true,
       "metadata": {}
     },
+
+    {
+      "name": "event_dimensions",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+
     {
       "name": "ecommerce",
       "type": {

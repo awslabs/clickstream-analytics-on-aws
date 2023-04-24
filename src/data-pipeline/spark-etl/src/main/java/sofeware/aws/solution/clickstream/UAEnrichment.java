@@ -26,7 +26,8 @@ import ua_parser.Parser;
 
 import java.util.Optional;
 
-import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.udf;
 import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 public class UAEnrichment {
@@ -36,19 +37,19 @@ public class UAEnrichment {
     private static UDF1<String, Row> enrich() {
         return value -> {
             Client client = UA_PARSER.parse(value);
-            String uaBrowser =  Optional.ofNullable(client.userAgent).map(a -> a.family).orElse("");
+            String uaBrowser = Optional.ofNullable(client.userAgent).map(a -> a.family).orElse("");
             String uaBrowserVersion = Optional.ofNullable(client.userAgent)
-               .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
+                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
 
-            String  uaOs = Optional.ofNullable(client.os).map(a -> a.family).orElse("");
-            String  uaOsVersion =  Optional.ofNullable(client.os)
-               .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
+            String uaOs = Optional.ofNullable(client.os).map(a -> a.family).orElse("");
+            String uaOsVersion = Optional.ofNullable(client.os)
+                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
 
-            String  uaDevice = Optional.ofNullable(client.device).map(a -> a.family).orElse("");
-            String  uaDeviceCategory = ""; // PC|Tablet|Mobile|Bot|Other
+            String uaDevice = Optional.ofNullable(client.device).map(a -> a.family).orElse("");
+            String uaDeviceCategory = ""; // PC|Tablet|Mobile|Bot|Other
             return new GenericRow(
-                   new String[]{uaBrowser, uaBrowserVersion, uaOs, uaOsVersion, uaDevice, uaDeviceCategory}
-                   );
+                    new String[]{uaBrowser, uaBrowserVersion, uaOs, uaOsVersion, uaDevice, uaDeviceCategory}
+            );
         };
     }
 
@@ -76,12 +77,12 @@ public class UAEnrichment {
         Dataset<Row> datasetUa = dataset.withColumn("ua_enrich", udfEnrichUserAgent.apply(col("ua")));
 
         Dataset<Row> enrichedDataset = datasetUa.withColumn("device", datasetUa.col("device")
-                        .withField("ua_browser", col("ua_enrich").getField("ua_browser"))
-                        .withField("ua_browser_version", col("ua_enrich").getField("ua_browser_version"))
-                        .withField("ua_os", col("ua_enrich").getField("ua_os"))
-                        .withField("ua_os_version", col("ua_enrich").getField("ua_os_version"))
-                        .withField("ua_device", col("ua_enrich").getField("ua_device"))
-                        .withField("ua_device_category", col("ua_enrich").getField("ua_device_category"))
+                .withField("ua_browser", col("ua_enrich").getField("ua_browser"))
+                .withField("ua_browser_version", col("ua_enrich").getField("ua_browser_version"))
+                .withField("ua_os", col("ua_enrich").getField("ua_os"))
+                .withField("ua_os_version", col("ua_enrich").getField("ua_os_version"))
+                .withField("ua_device", col("ua_enrich").getField("ua_device"))
+                .withField("ua_device_category", col("ua_enrich").getField("ua_device_category"))
         ).drop("ua_enrich");
 
         boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package sofeware.aws.solution.clickstream;
 
 import com.google.common.base.Preconditions;
@@ -51,7 +52,7 @@ public final class DataProcessor {
         Preconditions.checkArgument(args.length == 13, "This job can only accept input argument with length 13");
 
         SparkSession spark = SparkSession.builder().config("spark.hadoop.hive.metastore.client.factory.class",
-                "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
+                        "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
                 .enableHiveSupport().appName(APP_NAME).getOrCreate();
 
         Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
@@ -78,7 +79,7 @@ public final class DataProcessor {
                 outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
                 Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour),
                 Integer.valueOf(outputPartitions), Integer.valueOf(rePartitions)
-                );
+        );
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();

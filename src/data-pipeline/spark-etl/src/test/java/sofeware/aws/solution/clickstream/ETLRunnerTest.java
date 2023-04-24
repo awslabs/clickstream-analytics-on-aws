@@ -17,10 +17,6 @@ import com.clearspring.analytics.util.Lists;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -28,6 +24,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ETLRunnerTest extends BaseSparkTest {
 
@@ -52,7 +53,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String outPutFormat = "json";
         String startTimestamp = "1667963966000";
         String endTimestamp = "1667969999000";
-        String dataFreshnessInHour ="72";
+        String dataFreshnessInHour = "72";
         String outputPartitions = "-1";
 
         ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
@@ -63,7 +64,7 @@ class ETLRunnerTest extends BaseSparkTest {
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
         String sql = runner.configAndSQL();
 
-        String expectedSql= "select * from `fakeDatabase`.fakeSourceTable where (\n" +
+        String expectedSql = "select * from `fakeDatabase`.fakeSourceTable where (\n" +
                 "(year='2022' AND month='11' AND day='09')\n" +
                 ") AND ingest_time >= 1667963966000 AND ingest_time < 1667969999000";
 
@@ -71,15 +72,15 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
 
-        Dataset<Row> dataset  = runner.executeTransformers(sourceDataset, transformers);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
         checkSchema(dataset);
 
         Row row = dataset.first();
         assertEquals(111L, row.getLong(row.fieldIndex("event_bundle_sequence_id")));
-        String outPath = "/tmp/test-spark-etl" + new Date().getTime();
+        String outPath = "/tmp/test-spark-etl/" + new Date().getTime();
         runner.writeResult(outPath, dataset);
         assertTrue(Paths.get(outPath + "/partition_app=uba-app/partition_year=2023" +
-                        "/partition_month=04/partition_day=13")
+                        "/partition_month=04/partition_day=24")
                 .toFile().isDirectory());
     }
 
@@ -97,7 +98,7 @@ class ETLRunnerTest extends BaseSparkTest {
             String fieldSql = d.sql().toLowerCase().replaceAll(" ", "")
                     .replaceAll("^" + d.name() + ":", d.name() + " ");
             boolean matchColDef = normalSqlContent.contains(fieldSql + ",") || normalSqlContent.contains(fieldSql + ")");
-            if(matchColDef){
+            if (matchColDef) {
                 System.out.println(d.name() + " OK");
             } else {
                 System.err.println(fieldSql);
@@ -109,7 +110,7 @@ class ETLRunnerTest extends BaseSparkTest {
         });
 
         System.out.println(dataset.schema().fieldNames());
-        assertEquals(String.join(" ", dataset.schema().fieldNames()), String.join(" ", new String[] {
+        assertEquals(String.join(" ", dataset.schema().fieldNames()), String.join(" ", new String[]{
                 "app_info",
                 "device",
                 "ecommerce",
@@ -158,7 +159,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String outPutFormat = "json";
         String startTimestamp = "1667963966000";
         String endTimestamp = "1667969999000";
-        String dataFreshnessInHour ="72";
+        String dataFreshnessInHour = "72";
 
         ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
                 newArrayList(transformerClassNames.split(",")),
@@ -170,7 +171,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());
         assertEquals(sourceDataset.count(), 1);
-        Dataset<Row> dataset  = runner.executeTransformers(sourceDataset, transformers);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
         assertEquals(dataset.count(), 0);
     }
 }

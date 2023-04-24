@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package sofeware.aws.solution.clickstream;
 
 import com.google.common.base.Charsets;
@@ -30,10 +31,6 @@ import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataType;
 import org.jetbrains.annotations.NotNull;
 
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
-import static java.util.Objects.requireNonNull;
-import static org.apache.spark.sql.functions.*;
-import static org.apache.spark.sql.types.DataTypes.StringType;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,28 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.types.DataTypes.StringType;
+import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+
 @Slf4j
 public class Cleaner {
-
-    public Dataset<Row> clean(final Dataset<Row> dataset) {
-        log.info(new ETLMetric(dataset, "clean enter").toString());
-        Dataset<Row> decodedDataset = decodeDataColumn(dataset);
-        decodedDataset.cache();
-        log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
-        Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
-        log.info(new ETLMetric(flattedDataset, "flatted source").toString());
-        Dataset<Row> structuredDataset = processDataColumnSchema(flattedDataset);
-        log.info(new ETLMetric(structuredDataset, "after processDataColumnSchema").toString());
-        Dataset<Row> filteredDataSet = filter(structuredDataset);
-        log.info(new ETLMetric(filteredDataSet, "after filter").toString());
-        boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
-        if (debugLocal) {
-            decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-0-decodedDataset/");
-            flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-flattedDataset/");
-            structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH +  "/clean-2-structuredDataset/");
-        }
-        return filteredDataSet;
-    }
 
     private static Dataset<Row> decodeDataColumn(final Dataset<Row> dataset) {
         UserDefinedFunction udfExtractData = udf(extractData(), StringType);
@@ -74,11 +56,11 @@ public class Cleaner {
 
     @NotNull
     private static UDF1<String, String> extractData() {
-        return data ->  {
+        return data -> {
             try {
                 byte[] binGzipData = Base64.getDecoder().decode(data);
                 return decompress(binGzipData);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error("extractData error:" + e.getMessage());
                 log.error(data);
                 return "extractData error:" + e.getMessage();
@@ -113,6 +95,26 @@ public class Cleaner {
                 .drop("data").withColumnRenamed("exploded_data", "data");
     }
 
+    public Dataset<Row> clean(final Dataset<Row> dataset) {
+        log.info(new ETLMetric(dataset, "clean enter").toString());
+        Dataset<Row> decodedDataset = decodeDataColumn(dataset);
+        decodedDataset.cache();
+        log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
+        Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
+        log.info(new ETLMetric(flattedDataset, "flatted source").toString());
+        Dataset<Row> structuredDataset = processDataColumnSchema(flattedDataset);
+        log.info(new ETLMetric(structuredDataset, "after processDataColumnSchema").toString());
+        Dataset<Row> filteredDataSet = filter(structuredDataset);
+        log.info(new ETLMetric(filteredDataSet, "after filter").toString());
+        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
+        if (debugLocal) {
+            decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-0-decodedDataset/");
+            flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-flattedDataset/");
+            structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-2-structuredDataset/");
+        }
+        return filteredDataSet;
+    }
+
     private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset) {
         String schemaString;
         try {
@@ -127,13 +129,14 @@ public class Cleaner {
         options.put("columnNameOfCorruptRecord", "_corrupt_record");
         Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
         log.info(new ETLMetric(rowDataset, "after load data schema").toString());
-        boolean debugLocal= Boolean.parseBoolean(System.getProperty("debug.local"));
+        boolean debugLocal = Boolean.parseBoolean(System.getProperty("debug.local"));
         if (debugLocal) {
             rowDataset.write().mode(SaveMode.Overwrite)
                     .json(DEBUG_LOCAL_PATH + "/clean-schemaDataset/");
         }
         Dataset<Row> normalDataset = processCorruptRecords(rowDataset);
         log.info(new ETLMetric(normalDataset, "after processCorruptRecords").toString());
+
         return normalDataset;
     }
 
@@ -142,7 +145,7 @@ public class Cleaner {
         long corruptedDatasetCount = corruptedDataset.count();
         if (corruptedDatasetCount > 0) {
             String outputPath = System.getProperty("job.data.uri");
-            String corruptedOutPath =  outputPath + "/corrupted_records/";
+            String corruptedOutPath = outputPath + "/corrupted_records/";
             log.info(new ETLMetric(corruptedDataset, "corrupted").toString());
             log.info("corruptedDataset corruptedOutPath:" + corruptedOutPath);
             corruptedDataset.select("data")
@@ -159,7 +162,7 @@ public class Cleaner {
         Dataset<Row> freshDataset = filterByDataFreshness(dataset);
         log.info(new ETLMetric(freshDataset, "after filterByDataFreshness").toString());
 
-        Dataset<Row> filteredDataset= filterByAppIds(freshDataset);
+        Dataset<Row> filteredDataset = filterByAppIds(freshDataset);
         log.info(new ETLMetric(filteredDataset, "after filterByAppIds").toString());
         return filteredDataset;
     }
@@ -167,7 +170,7 @@ public class Cleaner {
     private Dataset<Row> filterByDataFreshness(final Dataset<Row> dataset) {
         long dataFreshnessInHour = Long.parseLong(System.getProperty("data.freshness.hour", "72"));
         log.info("dataFreshnessInHour:" + dataFreshnessInHour);
-        Dataset<Row> filteredDataset =  dataset.filter((FilterFunction<Row>) row -> {
+        Dataset<Row> filteredDataset = dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;

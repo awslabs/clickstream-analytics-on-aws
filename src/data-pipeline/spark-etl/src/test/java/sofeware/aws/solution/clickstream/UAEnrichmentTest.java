@@ -37,21 +37,21 @@ class UAEnrichmentTest extends BaseSparkTest {
 
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        String browser =  device.getString(device.fieldIndex("ua_browser"));
-        String browser_version =  device.getString(device.fieldIndex("ua_browser_version"));
+        String browser = device.getString(device.fieldIndex("ua_browser"));
+        String browser_version = device.getString(device.fieldIndex("ua_browser_version"));
 
         assertEquals("Apache-HttpClient", browser);
         assertEquals("4.4.12", browser_version);
 
-        String os =  device.getString(device.fieldIndex("ua_os"));
-        String osVersion =  device.getString(device.fieldIndex("ua_os_version"));
+        String os = device.getString(device.fieldIndex("ua_os"));
+        String osVersion = device.getString(device.fieldIndex("ua_os_version"));
 
-        assertEquals( "Other", os);
+        assertEquals("Other", os);
         assertEquals("", osVersion);
 
-        String deviceCategory =  device.getString(device.fieldIndex("ua_device_category"));
-        String uaDevice =  device.getString(device.fieldIndex("ua_device"));
-        assertEquals( "Other", uaDevice);
+        String deviceCategory = device.getString(device.fieldIndex("ua_device_category"));
+        String uaDevice = device.getString(device.fieldIndex("ua_device"));
+        assertEquals("Other", uaDevice);
         assertEquals("", deviceCategory);
     }
 
@@ -67,8 +67,8 @@ class UAEnrichmentTest extends BaseSparkTest {
 
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        String browser =  device.getString(device.fieldIndex("ua_browser"));
-        String browser_version =  device.getString(device.fieldIndex("ua_browser_version"));
+        String browser = device.getString(device.fieldIndex("ua_browser"));
+        String browser_version = device.getString(device.fieldIndex("ua_browser_version"));
 
         assertEquals("Other", browser);
         assertEquals("", browser_version);

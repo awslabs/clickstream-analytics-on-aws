@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package sofeware.aws.solution.clickstream;
 
 import com.maxmind.db.MaxMindDbConstructor;
@@ -28,14 +29,14 @@ import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.udf;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
-
 import java.io.File;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.udf;
+import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class IPEnrichment {
@@ -52,7 +53,7 @@ public class IPEnrichment {
                         DataTypes.createStructField("locale", DataTypes.StringType, true),
                 }
         ));
-        Dataset<Row> ipEnrichDataset =  dataset.withColumn("geo",
+        Dataset<Row> ipEnrichDataset = dataset.withColumn("geo",
                 udfEnrichIP.apply(
                         col("geo_for_enrich").getItem("ip"),
                         col("geo_for_enrich").getItem("locale")
@@ -91,6 +92,26 @@ public class IPEnrichment {
     }
 
     public static class LookupResult {
+
+        @Getter
+        private final Country country;
+        @Getter
+        private final Continent continent;
+        @Getter
+        private final City city;
+        @Getter
+        private final Location location;
+
+        @MaxMindDbConstructor
+        public LookupResult(final @MaxMindDbParameter(name = "country") Country country,
+                            final @MaxMindDbParameter(name = "continent") Continent continent,
+                            final @MaxMindDbParameter(name = "city") City city,
+                            final @MaxMindDbParameter(name = "location") Location location) {
+            this.country = country;
+            this.continent = continent;
+            this.city = city;
+            this.location = location;
+        }
 
         public static class Country {
             private final String name;
@@ -144,26 +165,6 @@ public class IPEnrichment {
                 this.latitude = latitude;
                 this.longitude = longitude;
             }
-        }
-
-        @Getter
-        private final Country country;
-        @Getter
-        private final Continent continent;
-        @Getter
-        private final City city;
-        @Getter
-        private final Location location;
-
-        @MaxMindDbConstructor
-        public LookupResult(final @MaxMindDbParameter(name = "country") Country country,
-                            final @MaxMindDbParameter(name = "continent") Continent continent,
-                            final @MaxMindDbParameter(name = "city") City city,
-                            final @MaxMindDbParameter(name = "location") Location location) {
-            this.country = country;
-            this.continent = continent;
-            this.city = city;
-            this.location = location;
         }
     }
 }

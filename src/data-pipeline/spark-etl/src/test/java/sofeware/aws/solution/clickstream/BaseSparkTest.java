@@ -41,7 +41,7 @@ public class BaseSparkTest {
                 .getParent() + "/GeoLite2-City.mmdb";
         System.out.println(dbFile);
         try (
-                FileOutputStream fs = new FileOutputStream(dbFile);
+                FileOutputStream fs = new FileOutputStream(dbFile)
         ) {
             URL url = new URL(urlStr);
             URLConnection conn = url.openConnection();
@@ -69,6 +69,7 @@ public class BaseSparkTest {
                 .config("spark.driver.bindAddress", "127.0.0.1")
                 .getOrCreate();
     }
+
     @AfterEach
     public void clear() {
         spark.stop();

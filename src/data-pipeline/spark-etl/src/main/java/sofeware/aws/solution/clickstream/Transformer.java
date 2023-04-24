@@ -14,7 +14,7 @@
 package sofeware.aws.solution.clickstream;
 
 import lombok.extern.slf4j.Slf4j;
-
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
@@ -27,6 +27,8 @@ import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 public final class Transformer {
 
     private final Cleaner cleaner = new Cleaner();
+    private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
+    private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
 
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "transform enter").toString());
@@ -54,48 +56,23 @@ public final class Transformer {
 
     private Dataset<Row> convertUri(final Dataset<Row> dataset) {
         Dataset<Row> userDataset = dataset.withColumn("event_bundle_sequence_id_str",
-                       regexp_extract(col("uri"), "event_bundle_sequence_id=(\\d+)", 1)
-                       )
+                        regexp_extract(col("uri"), "event_bundle_sequence_id=(\\d+)", 1)
+                )
                 .withColumn("event_bundle_sequence_id",
-                         expr("if (event_bundle_sequence_id_str = '', 0, event_bundle_sequence_id_str)")
-                         .cast(DataTypes.LongType))
+                        expr("if (event_bundle_sequence_id_str = '', 0, event_bundle_sequence_id_str)")
+                                .cast(DataTypes.LongType))
                 .drop("event_bundle_sequence_id_str");
         return userDataset;
     }
 
-    private static Dataset<Row> convertUserProperties(final Dataset<Row> dataset) {
+    private Dataset<Row> convertUserProperties(final Dataset<Row> dataset) {
         Dataset<Row> userDataset = dataset
-                .withColumn("user_id", col("data").getField("user").getItem("_user_id"))
-                .withColumn("user_first_touch_timestamp", col("data").getField("user").getItem("_user_first_touch_timestamp"))
-                .withColumn("user_pseudo_id", col("data").getItem("unique_id"))
-                .withColumn("user_ltv",
-                        struct(
-                                (col("data").getField("user").getItem("_user_ltv_revenue")).cast(DataTypes.DoubleType).alias("revenue"),
-                                (col("data").getField("user").getItem("_user_ltv_currency")).alias("currency")));
-
-        userDataset = userDataset.withColumn("user_properties", array(
-                struct(
-                        lit("_user_name").alias("key"),
-                        struct(
-                                lit("").alias("double_value"),
-                                lit("").alias("float_value"),
-                                lit("").alias("int_value"),
-                                col("data").getField("user").getItem("_user_name").alias("string_value"),
-                                lit(0L).alias("set_timestamp_micros")
-                        ).alias("value")),
-                struct(
-                        lit("_user_age").alias("key"),
-                        struct(
-                                lit("").alias("double_value"),
-                                lit("").alias("float_value"),
-                                col("data").getField("user").getItem("_user_age").cast(DataTypes.StringType).alias("int_value"),
-                                lit("").alias("string_value"),
-                                lit(0L).alias("set_timestamp_micros")
-                        ).alias("value"))));
+                .withColumn("user_pseudo_id", col("data").getItem("unique_id"));
+        userDataset = this.userPropertiesConverter.transform(userDataset);
         return userDataset;
     }
 
-    private static Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
+    private Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
         return dataset.withColumn("event_date",
                         date_format(from_unixtime(col("data").getItem("timestamp").$div(1000).$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd"))
                 .withColumn("ingest_timestamp", col("ingest_time").cast(DataTypes.LongType))
@@ -105,27 +82,20 @@ public final class Transformer {
                 .withColumn("platform", col("data").getItem("platform"));
     }
 
-    private static Dataset<Row> convertEventProperties(final Dataset<Row> dataset) {
+    private Dataset<Row> convertEventProperties(final Dataset<Row> dataset) {
         String projectId = System.getProperty("project.id");
-        return dataset.withColumn("event_id", col("data").getItem(("event_id")))
+        Dataset<Row> dataset1 = dataset.withColumn("event_id", col("data").getItem(("event_id")))
                 .withColumn("event_name", col("data").getItem("event_type"))
                 .withColumn("event_timestamp", col("data").getItem("timestamp"))
                 .withColumn("ecommerce", col("data").getField("ecommerce"))
-                .withColumn("event_dimensions", array(struct(
-                        lit("").alias("key"),
-                        struct(
-                                lit("").alias("double_value"),
-                                lit("").alias("float_value"),
-                                lit("").alias("int_value"),
-                                lit("").alias("string_value")
-                        ).alias("value")
-                )))
                 .withColumn("items", col("data").getField("items"))
                 .withColumn("project_id", lit(projectId))
                 .withColumn("event_value_in_usd", lit("0"));
+
+        return new KvConverter().transform(dataset1, "event_dimensions", "event_dimensions");
     }
 
-    private static Dataset<Row> convertGeo(final Dataset<Row> dataset) {
+    private Dataset<Row> convertGeo(final Dataset<Row> dataset) {
         return dataset.withColumn("geo",
                         struct(
                                 lit("").alias("country"),
@@ -138,73 +108,45 @@ public final class Transformer {
                 .withColumn("geo_for_enrich", struct(col("ip"), col("data").getItem("locale").alias("locale")));
     }
 
-    private static Dataset<Row> convertPrivacyInfo(final Dataset<Row> dataset) {
+    private Dataset<Row> convertPrivacyInfo(final Dataset<Row> dataset) {
+        Column attributesCol = col("data").getField("attributes");
+
         return dataset.withColumn("privacy_info",
                 struct(
-                        (col("data").getField("attributes").getItem("_privacy_info_ads_storage")).alias("ads_storage"),
-                        (col("data").getField("attributes").getItem("_privacy_info_analytics_storage")).alias("analytics_storage"),
-                        (col("data").getField("attributes").getItem("_privacy_info_uses_transient_token")).alias("uses_transient_token")));
+                        get_json_object(attributesCol, "$._privacy_info_ads_storage").alias("ads_storage"),
+                        get_json_object(attributesCol, "$._privacy_info_analytics_storage").alias("analytics_storage"),
+                        get_json_object(attributesCol, "$._privacy_info_uses_transient_token").alias("uses_transient_token")
+                )
+        );
     }
 
-    private static Dataset<Row> convertTrafficSource(final Dataset<Row> dataset) {
+    private Dataset<Row> convertTrafficSource(final Dataset<Row> dataset) {
+        Column attributesCol = col("data").getField("attributes");
         return dataset.withColumn("traffic_source",
                 struct(
-                        (col("data").getField("attributes").getItem("_traffic_source_medium")).alias("medium"),
-                        (col("data").getField("attributes").getItem("_traffic_source_name")).alias("name"),
-                        (col("data").getField("attributes").getItem("_traffic_source_source")).alias("source")));
+                        get_json_object(attributesCol, "$._traffic_source_medium").alias("medium"),
+                        get_json_object(attributesCol, "$._traffic_source_name").alias("name"),
+                        get_json_object(attributesCol, "$._traffic_source_source").alias("source")
+                )
+        );
     }
 
-    private static Dataset<Row> retrieveEventParams(final Dataset<Row> dataset) {
-        Dataset<Row> datasetTransformed = dataset.withColumn("event_params", array(
-                struct(
-                        lit("_session_duration").alias("key"),
-                        struct(
-                                lit("").alias("double_value"),
-                                lit("").alias("float_value"),
-                                col("data").getField("attributes").getItem("_session_duration").cast(DataTypes.StringType).alias("int_value"),
-                                lit("").alias("string_value")
-                                ).alias("value")),
-
-                struct(
-                        lit("_session_id").alias("key"),
-                        struct(
-                                lit("").alias("double_value"),
-                                lit("").alias("float_value"),
-                                lit("").alias("int_value"),
-                                col("data").getField("attributes").getItem("_session_id").alias("string_value")
-                        ).alias("value")),
-
-                struct(
-                        lit("_session_start_timestamp").alias("key"),
-                        struct(
-                                col("data").getField("attributes").getItem("_session_start_timestamp").cast(DataTypes.StringType).alias("double_value"),
-                                lit("").alias("float_value"),
-                                lit("").alias("int_value"),
-                                lit("").alias("string_value")
-                        ).alias("value")),
-
-                struct(
-                        lit("_session_stop_timestamp").alias("key"),
-                        struct(
-                                col("data").getField("attributes").getItem("_session_stop_timestamp").cast(DataTypes.StringType).alias("double_value"),
-                                lit("").alias("float_value"),
-                                lit("").alias("int_value"),
-                                lit("").alias("string_value")
-                        ).alias("value")
-                )));
-        return datasetTransformed;
+    private Dataset<Row> retrieveEventParams(final Dataset<Row> dataset) {
+        return eventParamsConverter.transform(dataset);
     }
 
-    private static Dataset<Row> convertAppInfo(final Dataset<Row> dataset) {
+    private Dataset<Row> convertAppInfo(final Dataset<Row> dataset) {
+        Column attributesCol = col("data").getField("attributes");
+
         return dataset.withColumn("app_info",
                 struct(
                         (col("data").getItem("app_id")).alias("app_id"),
                         (col("data").getItem("app_package_name")).alias("id"),
-                        (col("data").getField("attributes").getItem("_channel")).alias("install_source"),
+                        get_json_object(attributesCol, "$._channel").alias("install_source"),
                         (col("data").getItem("app_version")).alias("version")));
     }
 
-    private static Dataset<Row> convertDevice(final Dataset<Row> dataset) {
+    private Dataset<Row> convertDevice(final Dataset<Row> dataset) {
         return dataset.withColumn("device",
                 struct(
                         (col("data").getItem("brand")).alias("mobile_brand_name"),

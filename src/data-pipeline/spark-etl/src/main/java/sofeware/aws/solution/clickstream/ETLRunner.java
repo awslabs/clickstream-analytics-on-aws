@@ -38,8 +38,8 @@ import static org.apache.spark.sql.functions.substring;
 @Slf4j
 @AllArgsConstructor
 public class ETLRunner {
-    private static final String TRANSFORM_METHOD_NAME = "transform";
     public static final String DEBUG_LOCAL_PATH = "/tmp/etl-debug";
+    private static final String TRANSFORM_METHOD_NAME = "transform";
     private final SparkSession spark;
     private final ETLRunnerConfig config;
 
@@ -66,12 +66,12 @@ public class ETLRunner {
         System.setProperty("app.ids", config.validAppIds);
         System.setProperty("output.path", config.outputPath);
         System.setProperty("data.freshness.hour", String.valueOf(config.dataFreshnessInHour));
-        System.setProperty("output.coalesce.partitions", config.outPartitions + "");
+        System.setProperty("output.coalesce.partitions", String.valueOf(config.outPartitions));
 
         List<String[]> partitions = getSourcePartition(config.startTimestamp, config.endTimestamp);
         String partitionsCondition = partitions.stream()
                 .map(p -> format("\n(year='%s' AND month='%s' AND day='%s')",
-                p[0], p[1], p[2])).collect(Collectors.joining(" OR "));
+                        p[0], p[1], p[2])).collect(Collectors.joining(" OR "));
         String sql = format("select * from `%s`.%s", config.database, config.sourceTable)
                 + format(" where (%s\n)", partitionsCondition)
                 + format(" AND ingest_time >= %d AND ingest_time < %d", config.startTimestamp, config.endTimestamp);
@@ -91,7 +91,7 @@ public class ETLRunner {
             }
         }
         return result.select(
-                "app_info", "device", "ecommerce" , "event_bundle_sequence_id",
+                "app_info", "device", "ecommerce", "event_bundle_sequence_id",
                 "event_date", "event_dimensions", "event_id", "event_name",
                 "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
                 "event_value_in_usd", "geo", "ingest_timestamp", "items",
@@ -108,7 +108,7 @@ public class ETLRunner {
             Object instance = aClass.getDeclaredConstructor().newInstance();
             Method transform = aClass.getMethod(TRANSFORM_METHOD_NAME, Dataset.class);
             Dataset<Row> transformedDataset = (Dataset<Row>) transform.invoke(instance, dataset);
-            boolean debugLocal= Boolean.valueOf(System.getProperty("debug.local"));
+            boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
             if (debugLocal) {
                 transformedDataset.write().mode(SaveMode.Overwrite)
                         .json(DEBUG_LOCAL_PATH + "/" + transformerClassName + "/");
@@ -125,7 +125,7 @@ public class ETLRunner {
         Dataset<Row> partitionedDataset = prepareForPartition(dataset);
         log.info(new ETLMetric(partitionedDataset, "writeResult").toString());
         log.info("outputPath: " + outputPath);
-        String[] partitionBy =new String[] {"partition_app", "partition_year", "partition_month", "partition_day" };
+        String[] partitionBy = new String[]{"partition_app", "partition_year", "partition_month", "partition_day"};
         if ("json".equalsIgnoreCase(config.outPutFormat)) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
         } else {
@@ -227,12 +227,14 @@ public class ETLRunner {
 
 class ETLMetric {
 
-    private Dataset<Row> dataset;
-    private String info;
+    private final Dataset<Row> dataset;
+    private final String info;
+
     ETLMetric(final Dataset<Row> dataset, final String info) {
         this.dataset = dataset;
         this.info = info;
     }
+
     @Override
     public String toString() {
         return "[ETLMetric]" + this.info + " dataset count:" + dataset.count();

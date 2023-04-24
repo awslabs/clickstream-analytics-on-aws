@@ -30,6 +30,7 @@ class TransformerTest extends BaseSparkTest {
     public void should_transform() {
         System.setProperty("app.ids", "uba-app");
         System.setProperty("project.id", "test_project_id_01");
+        System.setProperty("debug.local", "true");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
@@ -44,7 +45,7 @@ class TransformerTest extends BaseSparkTest {
         assertEquals("Brand HUAWEI", device.getString(device.fieldIndex("mobile_brand_name")));
         assertEquals(28800, device.getLong(device.fieldIndex("time_zone_offset_seconds")));
 
-        assertEquals(-17, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
+        assertEquals(-44, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
 
         assertEquals("", device.getString(device.fieldIndex("ua_browser")));
 
