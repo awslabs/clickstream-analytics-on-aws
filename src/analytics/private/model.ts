@@ -30,6 +30,10 @@ export type ODSSource = BucketInfo & {
 
 export type LoadWorkflowData = BucketInfo;
 
+export type UpsertUsersWorkflowData = {
+  readonly scheduleExpression: string;
+}
+
 interface RedshiftProps {
   readonly databaseName: string;
 }
@@ -76,4 +80,14 @@ export interface ManifestBody {
   readonly jobList: {
     readonly entries: Array<ManifestItem>;
   };
+}
+
+export interface UpsertUsersBody {
+  readonly appId: string;
+}
+
+export type CheckUpsertStatusEventDetail = {
+  id: string;
+  appId: string;
+  status: string;
 }

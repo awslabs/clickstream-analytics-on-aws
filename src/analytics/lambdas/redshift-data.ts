@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
+import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { logger } from '../../common/powertools';
 import { ServerlessRedshiftProps, ProvisionedRedshiftProps } from '../private/model';
@@ -38,9 +38,9 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
   serverlessRedshiftProps?: ServerlessRedshiftProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
   database?: string) => {
   if (serverlessRedshiftProps) {
-    logger.info(`Execute create schemas SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
+    logger.info(`Execute SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
   } else if (provisionedRedshiftProps) {
-    logger.info(`Execute create schemas SQL statement in ${provisionedRedshiftProps.clusterIdentifier}.${provisionedRedshiftProps.databaseName}`);
+    logger.info(`Execute SQL statement in ${provisionedRedshiftProps.clusterIdentifier}.${provisionedRedshiftProps.databaseName}`);
   }
   if (sqlStatements.length == 0) {
     logger.warn('No SQL statement to execute.');
@@ -83,17 +83,47 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
     Id: queryId,
   });
   var response = await client.send(checkParams);
-  logger.info(`Get create schemas status: ${response.Status}`, JSON.stringify(response));
+  logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
   var count = 0;
   while (response.Status != 'FINISHED' && response.Status != 'FAILED' && count < GET_STATUS_TIMEOUT) {
     await Sleep(1000);
     count++;
     response = await client.send(checkParams);
-    logger.info(`Get create schemas status: ${response.Status}`, JSON.stringify(response));
+    logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
   }
   if (response.Status == 'FAILED') {
     logger.error('Error: '+ response.Status, JSON.stringify(response));
     throw new Error(JSON.stringify(response));
+  }
+  return queryId;
+};
+
+export const getStatementResult = async (client: RedshiftDataClient, queryId: string) => {
+  const checkParams = new GetStatementResultCommand({
+    Id: queryId,
+  });
+  var response = await client.send(checkParams);
+  logger.info(`Get statement result: ${response.TotalNumRows}`, JSON.stringify(response));
+  return response;
+};
+
+export const describeStatement = async (client: RedshiftDataClient, queryId: string) => {
+  const params = new DescribeStatementCommand({
+    Id: queryId,
+  });
+  try {
+    const response = await client.send(params);
+    if (response.Status == 'FAILED') {
+      logger.error(`Get load status: ${response.Status}`, JSON.stringify(response));
+    } else {
+      logger.info(`Get load status: ${response.Status}`, JSON.stringify(response));
+    }
+    return response;
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error('Error when checking status of loading job.', err);
+    }
+    throw err;
   }
 };
 

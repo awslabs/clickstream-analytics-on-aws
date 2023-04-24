@@ -136,7 +136,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     const fnSG = createSGForEgressToAwsService(this, 'ODSEventProcessorLambdaSg', props.networkConfig.vpc);
 
     const fn = new NodejsFunction(this, 'ODSEventProcessorFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'put-ods-source-to-store.ts',
@@ -162,7 +162,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
   private createCustomResourceAssociateIAMRole(props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): CustomResource {
     const fn = new NodejsFunction(this, 'AssociateIAMRoleToRedshiftFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         __dirname + '/../lambdas/custom-resource',
         'redshift-associate-iam-role.ts',
@@ -407,7 +407,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     const fnSG = createSGForEgressToAwsService(this, 'CreateLoadManifestFnSG', props.networkConfig.vpc);
 
     const fn = new NodejsFunction(this, 'CreateLoadManifestFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'create-load-manifest.ts',
@@ -445,7 +445,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     const fnSG = createSGForEgressToAwsService(this, 'LoadManifestToRedshiftFnSG', props.networkConfig.vpc);
 
     const fn = new NodejsFunction(this, 'LoadManifestToRedshiftFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'load-manifest-to-redshift.ts',
@@ -492,7 +492,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     const fnSG = createSGForEgressToAwsService(this, 'CheckLoadJobStatusFnSG', props.networkConfig.vpc);
 
     const fn = new NodejsFunction(this, 'CheckLoadJobStatusFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-load-status.ts',

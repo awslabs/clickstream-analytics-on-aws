@@ -38,6 +38,7 @@ export interface RedshiftAnalyticsStackProps {
   loadJobScheduleIntervalParam: CfnParameter;
   maxFilesLimitParam: CfnParameter;
   processingFilesLimitParam: CfnParameter;
+  upsertUsersWorkflowScheduleExpressionParam: CfnParameter;
 }
 
 export function createStackParameters(scope: Construct) {
@@ -302,6 +303,35 @@ export function createStackParameters(scope: Construct) {
     },
   };
 
+  // Set upsert users job parameters
+  const upsertUsersWorkflowParamsGroup = [];
+
+  const upsertUsersWorkflowScheduleExpressionParam = new CfnParameter(scope, 'UpsertUsersScheduleExpression', {
+    description: 'The schedule expression at which the upsert users job runs regularly. in days.',
+    type: 'String',
+    // allowedPattern: '^cron\\(([0-5]?[0-9])\\s([01]?[0-9]|2[0-3])\\s\\*\\s\\*\\s\\?\\s\\*\\)$',
+    allowedPattern: '^cron\\((([0-5]?[0-9])|0/[0-5]?[0-9])\\s([01]?[0-9]|2[0-3]|\\*/([01]?[0-9]|2[0-3])|\\*)\\s\\*\\s\\*\\s\\?\\s\\*\\)$',
+    constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
+    default: 'cron(0 1 * * ? *)',
+  });
+
+  const upsertUsersWorkflowParam = {
+    upsertUsersWorkflowScheduleExpressionParam,
+  };
+
+  upsertUsersWorkflowParamsGroup.push({
+    Label: { default: 'Upsert users job' },
+    Parameters: [
+      upsertUsersWorkflowScheduleExpressionParam.logicalId,
+    ],
+  });
+
+  const upsertUsersWorkflowParamsLabels = {
+    [upsertUsersWorkflowScheduleExpressionParam.logicalId]: {
+      default: 'Upsert users schedule expression',
+    },
+  };
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -338,6 +368,7 @@ export function createStackParameters(scope: Construct) {
         ...redshiftServerlessParamsGroup,
         ...redshiftClusterParamsGroup,
         ...loadJobParamsGroup,
+        ...upsertUsersWorkflowParamsGroup,
       ],
       ParameterLabels: {
         [networkProps.vpcId.logicalId]: {
@@ -372,6 +403,7 @@ export function createStackParameters(scope: Construct) {
         ...redshiftServerlessParamsLabels,
         ...redshiftClusterParamsLabels,
         ...loadJobParamsLabels,
+        ...upsertUsersWorkflowParamsLabels,
       },
     },
   };
@@ -392,6 +424,7 @@ export function createStackParameters(scope: Construct) {
       ...redshiftServerlessParam,
       ...redshiftClusterParam,
       ...loadJobParam,
+      ...upsertUsersWorkflowParam,
     },
   };
 }

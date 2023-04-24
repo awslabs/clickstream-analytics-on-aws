@@ -26,3 +26,5 @@ export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
 export const REDSHIFT_ODS_TABLE_NAME = 'ods_events';
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
+
+export const SP_UPSERT_USERS = 'sp_upsert_users';

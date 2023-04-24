@@ -80,7 +80,7 @@ export class ApplicationSchemas extends Construct {
   private createRedshiftSchemasLambda(): Function {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
     const fn = new NodejsFunction(this, 'CreateSchemaForApplicationsFn', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       entry: join(
         lambdaRootPath,
         'create-schemas.ts',

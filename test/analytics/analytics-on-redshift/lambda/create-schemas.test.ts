@@ -126,7 +126,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
-        if (input.Sqls.length == 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
+        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
         && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)) {
           return { Id: 'Id-1' };
         }
@@ -187,7 +187,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Created schemas only in Redshift serverless in update stack', async () => {
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
-        if (input.Sqls.length == 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
         && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
           return { Id: 'Id-1' };
         }
@@ -262,9 +262,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock
       .callsFake(input => {
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length == 4 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
+          if (input.Sqls.length >= 4 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
           && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)
-          && input.Sqls[2].includes('CREATE SCHEMA IF NOT EXISTS app2')) {
+          && input.Sqls[5].includes('CREATE SCHEMA IF NOT EXISTS app2')) {
             return { Id: 'Id-1' };
           }
         }

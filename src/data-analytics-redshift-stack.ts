@@ -100,6 +100,9 @@ export function createRedshiftAnalyticsStack(
       maxFilesLimit: props.maxFilesLimitParam.valueAsNumber,
       processingFilesLimit: props.processingFilesLimitParam.valueAsNumber,
     },
+    upsertUsersWorkflowData: {
+      scheduleExpression: props.upsertUsersWorkflowScheduleExpressionParam.valueAsString,
+    },
   };
 
   sinkS3Bucket.enableEventBridgeNotification();

@@ -28,7 +28,8 @@ import {
   REDSHIFT_ODS_TABLE_NAME,
 } from './private/constant';
 import { LoadODSEventToRedshiftWorkflow } from './private/load-ods-events-workflow';
-import { ODSSource, LoadDataProps, ServerlessRedshiftProps, ProvisionedRedshiftProps, LoadWorkflowData } from './private/model';
+import { ODSSource, LoadDataProps, ServerlessRedshiftProps, ProvisionedRedshiftProps, LoadWorkflowData, UpsertUsersWorkflowData } from './private/model';
+import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { SolutionInfo } from '../common/solution-info';
 
@@ -42,6 +43,7 @@ interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly serverlessRedshiftProps?: ServerlessRedshiftProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
   readonly loadDataProps: LoadDataProps;
+  readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -51,7 +53,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     props: RedshiftAnalyticsStackProps,
   ) {
     super(scope, id, props);
-
     if ((props.serverlessRedshiftProps && props.provisionedRedshiftProps)
       || (!props.serverlessRedshiftProps && !props.provisionedRedshiftProps)) {
       throw new Error('Must specify either Serverless Redshift or Provioned Redshift');
@@ -137,7 +138,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       });
 
       (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
-        actions: ['redshift-data:DescribeStatement'],
+        actions: ['redshift-data:DescribeStatement', 'redshift-data:GetStatementResult'],
         resources: ['*'],
       }));
     }
@@ -171,6 +172,19 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(appSchema.crForCreateSchemas);
 
+    new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
+      appId: props.appIds,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: props.serverlessRedshiftProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: redshiftDataAPIExecRole!,
+      upsertUsersWorkflowData: props.upsertUsersWorkflowData,
+    });
+
     addCfnNag(this);
   }
 }
@@ -184,6 +198,9 @@ function addCfnNag(stack: Stack) {
     ruleRolePolicyWithWildcardResources(
       'LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource',
       'LoadODSEventToRedshiftWorkflow', 'logs/xray'),
+    ruleRolePolicyWithWildcardResources(
+      'UpsertUsersWorkflow/UpsertUsersStateMachine/Role/DefaultPolicy/Resource',
+      'UpsertUsersWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
       'RedshiftDataExecRole/DefaultPolicy/Resource',
       'RedshiftDataExecRole', 'redshift-data'),
