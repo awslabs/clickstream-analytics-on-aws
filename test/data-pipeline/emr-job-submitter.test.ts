@@ -96,7 +96,7 @@ test('start ETL job with timestamp - string', async () => {
           '24',
           'json',
           '128',
-          '96'
+          '96',
         ],
         sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

@@ -37,18 +37,14 @@ export function createGlobalAccelerator(
   props: GlobalAcceleratorProps,
 ) {
   const portRanges: PortRange[] = [];
-  let urlPort = 0;
   if (props.protocol === ApplicationProtocol.HTTPS) {
     portRanges.push({ fromPort: props.ports.https });
     portRanges.push({ fromPort: props.ports.http });
-    urlPort = props.ports.https;
   } else {
     portRanges.push({ fromPort: props.ports.http });
-    urlPort = props.ports.http;
   }
   const { accelerator, agListener, endpointGroup } = createAccelerator(scope, props.alb, portRanges);
-  const acceleratorUrl = getAcceleratorUrl(accelerator, props.protocol, urlPort, props.endpointPath);
-  return { accelerator, agListener, endpointGroup, acceleratorUrl };
+  return { accelerator, agListener, endpointGroup };
 }
 
 function createAccelerator(
@@ -70,27 +66,3 @@ function createAccelerator(
   return { accelerator, agListener, endpointGroup };
 }
 
-function getAcceleratorUrl(
-  accelerator: Accelerator,
-  protocol: string,
-  httpPort: number,
-  endpointPath: string,
-): string {
-  let acceleratorUrl = '';
-
-  if (protocol == 'HTTP') {
-    if (httpPort != 80) {
-      acceleratorUrl = `http://${accelerator.dnsName}:${httpPort}${endpointPath}`;
-    } else {
-      acceleratorUrl = `http://${accelerator.dnsName}${endpointPath}`;
-    }
-  } else {
-    // https
-    if (httpPort != 443) {
-      acceleratorUrl = `https://${accelerator.dnsName}:${httpPort}${endpointPath}`;
-    } else {
-      acceleratorUrl = `https://${accelerator.dnsName}${endpointPath}`;
-    }
-  }
-  return acceleratorUrl;
-}

@@ -85,7 +85,7 @@ export class EMRServerlessUtil {
       config.appIds, // [8] app_ids
       `${config.dataFreshnessInHour}`, // [9] dataFreshnessInHour,
       config.outputFormat, // [10] outputFormat,
-      config.outputPartitions,// [11] outputPartitions
+      config.outputPartitions, // [11] outputPartitions
       config.rePartitions, // [12] rePartitions.
     ];
 

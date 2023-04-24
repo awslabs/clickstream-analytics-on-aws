@@ -625,7 +625,7 @@ export class GlueUtil {
                   {
                     name: 'set_timestamp_micros',
                     type: Schema.BIG_INT,
-                  }
+                  },
                 ]),
               },
             ]),

@@ -33,6 +33,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { INGESTION_SERVER_DNS_SUFFIX, INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
@@ -304,10 +305,22 @@ export class IngestionServerNestedStack extends NestedStack {
       serverProps,
     );
 
-    const ingestionServerUrl = Fn.conditionIf(
+    const ingestionServerDNS = Fn.conditionIf(
       ingestionServer.acceleratorEnableCondition.logicalId,
-      ingestionServer.acceleratorUrl,
-      ingestionServer.albUrl).toString();
+      ingestionServer.acceleratorDNS,
+      ingestionServer.albDNS).toString();
+
+    new CfnOutput(this, 'ingestionServerDNS', {
+      value: ingestionServerDNS,
+      description: 'Server DNS',
+    });
+
+    let ingestionServerUrl;
+    if (props.protocol === ApplicationProtocol.HTTPS) {
+      ingestionServerUrl = `https://${props.domainName}${props.serverEndpointPath}`;
+    } else {
+      ingestionServerUrl = `http://${ingestionServerDNS}${props.serverEndpointPath}`;
+    }
 
     new CfnOutput(this, 'ingestionServerUrl', {
       value: ingestionServerUrl,
@@ -487,12 +500,19 @@ function createNestedStackWithCondition(
 
   addCfnNagToIngestionServer(ingestionServer);
 
+  const ingestionServerDNS = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerDNS').toString();
   const ingestionServerUrl = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
 
-  const output = new CfnOutput(scope, id + 'ingestionServerUrl', {
-    value: ingestionServerUrl,
-    description: 'Server Url',
+  const serverDNSOutput = new CfnOutput(scope, id + INGESTION_SERVER_DNS_SUFFIX, {
+    value: ingestionServerDNS,
+    description: 'Server DNS',
   });
-  output.condition = condition;
+  serverDNSOutput.condition = condition;
+
+  const serverURLOutput = new CfnOutput(scope, id + INGESTION_SERVER_URL_SUFFIX, {
+    value: ingestionServerUrl,
+    description: 'Server URL',
+  });
+  serverURLOutput.condition = condition;
   return ingestionServer;
 }

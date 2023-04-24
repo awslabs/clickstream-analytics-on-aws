@@ -128,7 +128,7 @@ export class StackActionStateMachine extends Construct {
             'kinesis:*',
             'kafka:*',
             'states:*',
-            'globalaccelerator:*'
+            'globalaccelerator:*',
           ],
           resources: ['*'],
         }),

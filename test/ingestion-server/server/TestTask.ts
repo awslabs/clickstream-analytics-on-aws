@@ -301,10 +301,22 @@ export class TestStack extends Stack {
       serverProps,
     );
 
-    const ingestionServerUrl = Fn.conditionIf(
+    const ingestionServerDNS = Fn.conditionIf(
       ingestionServer.acceleratorEnableCondition.logicalId,
-      ingestionServer.acceleratorUrl,
-      ingestionServer.albUrl).toString();
+      ingestionServer.acceleratorDNS,
+      ingestionServer.albDNS).toString();
+
+    new CfnOutput(this, 'ingestionServerDNS', {
+      value: ingestionServerDNS,
+      description: 'Server DNS',
+    });
+
+    let ingestionServerUrl;
+    if (props.protocol === ApplicationProtocol.HTTPS) {
+      ingestionServerUrl = `https://${props.domainName}${props.serverEndpointPath}`;
+    } else {
+      ingestionServerUrl = `http://${ingestionServerDNS}${props.serverEndpointPath}`;
+    }
 
     new CfnOutput(this, 'ingestionServerUrl', {
       value: ingestionServerUrl,

@@ -137,3 +137,6 @@ export const TABLE_NAME_ODS_EVENT = 'ods_events';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
 // Metrics
 export const METRIC_NAMESPACE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
+
+export const INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
+export const INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';

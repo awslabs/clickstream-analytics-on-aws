@@ -203,8 +203,6 @@ export function createApplicationLoadBalancer(
     );
   }
 
-  let albUrl = '';
-
   if (props.protocol === ApplicationProtocol.HTTPS) {
     const httpsListener = alb.addListener('HTTPSListener', {
       protocol: ApplicationProtocol.HTTPS,
@@ -224,8 +222,6 @@ export function createApplicationLoadBalancer(
       props.domainName,
       props.authenticationSecretArn,
     );
-
-    albUrl = getAlbUrl(alb, 'https', httpsPort, endpointPath);
 
     const HttpRedirectListener = alb.addListener('HttpRedirectListener', {
       protocol: ApplicationProtocol.HTTP,
@@ -275,34 +271,6 @@ export function createApplicationLoadBalancer(
         },
       ],
     );
-
-    albUrl = getAlbUrl(alb, 'http', httpPort, endpointPath);
   }
-  return { alb, albUrl };
-}
-
-
-function getAlbUrl(
-  alb: ApplicationLoadBalancer,
-  schema: string,
-  httpPort: number,
-  endpointPath: string,
-): string {
-  let albUrl = '';
-
-  if (schema == 'http') {
-    if (httpPort != 80) {
-      albUrl = `http://${alb.loadBalancerDnsName}:${httpPort}${endpointPath}`;
-    } else {
-      albUrl = `http://${alb.loadBalancerDnsName}${endpointPath}`;
-    }
-  } else {
-    // https
-    if (httpPort != 443) {
-      albUrl = `https://${alb.loadBalancerDnsName}:${httpPort}${endpointPath}`;
-    } else {
-      albUrl = `https://${alb.loadBalancerDnsName}${endpointPath}`;
-    }
-  }
-  return albUrl;
+  return alb;
 }

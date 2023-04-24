@@ -119,8 +119,8 @@ export interface IngestionServerProps {
 }
 
 export class IngestionServer extends Construct {
-  public albUrl: string;
-  public acceleratorUrl: string;
+  public albDNS: string;
+  public acceleratorDNS: string;
   public acceleratorEnableCondition: CfnCondition;
   constructor(scope: Construct, id: string, props: IngestionServerProps) {
     super(scope, id);
@@ -161,7 +161,7 @@ export class IngestionServer extends Construct {
     const albSg = createALBSecurityGroup(this, props.vpc, ports, props.authenticationSecretArn);
     ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
 
-    const { alb, albUrl } = createApplicationLoadBalancer(this, {
+    const alb = createApplicationLoadBalancer(this, {
       vpc: props.vpc,
       service: ecsService,
       sg: albSg,
@@ -175,9 +175,9 @@ export class IngestionServer extends Construct {
       authenticationSecretArn: props.authenticationSecretArn,
       ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
     });
-    this.albUrl = albUrl;
+    this.albDNS = alb.loadBalancerDnsName;
 
-    const { accelerator, agListener, endpointGroup, acceleratorUrl } = createGlobalAccelerator(this, {
+    const { accelerator, agListener, endpointGroup } = createGlobalAccelerator(this, {
       ports,
       protocol: props.protocol,
       alb,
@@ -204,7 +204,7 @@ export class IngestionServer extends Construct {
     (agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
     (endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
 
-    this.acceleratorUrl = acceleratorUrl;
+    this.acceleratorDNS = accelerator.dnsName;
     this.acceleratorEnableCondition = acceleratorEnableCondition;
   }
 }

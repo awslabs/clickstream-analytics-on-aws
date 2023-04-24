@@ -323,6 +323,24 @@ test('Http is redirected to Https if hosted zone is set', () => {
   });
 });
 
+test('Construct has property server dns - https', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    serverEndpointPath: '/test_me',
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTPS,
+  });
+  const template = Template.fromStack(stack);
+  const ingestionServerDnsOutput = template.findOutputs(
+    'ingestionServerDNS',
+    {},
+  );
+  expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
+    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] });
+});
+
 test('Construct has property server url - https', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -337,10 +355,7 @@ test('Construct has property server url - https', () => {
     'ingestionServerUrl',
     {},
   );
-  const [https, _, path] =
-    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::If'][1]['Fn::Join'][1];
-  expect(https == 'https://').toBeTruthy();
-  expect(path == '/test_me').toBeTruthy();
+  expect(ingestionServerUrlOutput.ingestionServerUrl.Value).toEqual('https://www.example.com/test_me');
 });
 
 test('Construct has property server url - http', () => {
@@ -348,16 +363,32 @@ test('Construct has property server url - http', () => {
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
     serverEndpointPath: '/test_me',
+    domainName: 'www.example.com',
+    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    protocol: ApplicationProtocol.HTTP,
   });
   const template = Template.fromStack(stack);
   const ingestionServerUrlOutput = template.findOutputs(
     'ingestionServerUrl',
     {},
   );
-  const [http, _, path] =
-    ingestionServerUrlOutput.ingestionServerUrl.Value['Fn::If'][1]['Fn::Join'][1];
-  expect(http == 'http://').toBeTruthy();
-  expect(path == '/test_me').toBeTruthy();
+  expect(ingestionServerUrlOutput.ingestionServerUrl.Value)
+    .toEqual({ 'Fn::Join': ['', ['http://', { 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] }, '/test_me']] });
+});
+
+test('Construct has property server dns - http', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    serverEndpointPath: '/test_me',
+  });
+  const template = Template.fromStack(stack);
+  const ingestionServerDnsOutput = template.findOutputs(
+    'ingestionServerDNS',
+    {},
+  );
+  expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
+    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] });
 });
 
 test('Server endpoint path can be configured in nginx task', () => {

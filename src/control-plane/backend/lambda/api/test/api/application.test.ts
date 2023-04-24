@@ -477,8 +477,12 @@ describe('Application test', () => {
           StackName: 'xxx',
           Outputs: [
             {
-              OutputKey: 'IngestionServerC000ingestionServerUrl',
+              OutputKey: 'IngestionServerC000IngestionServerURL',
               OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
             },
           ],
           StackStatus: StackStatus.CREATE_COMPLETE,
@@ -503,6 +507,7 @@ describe('Application test', () => {
         iosBundleId: 'iosBundleId',
         pipeline: {
           endpoint: 'http://xxx/xxx',
+          dns: 'http://yyy/yyy',
           id: MOCK_PROJECT_ID,
           name: 'Pipeline-01',
           status: 'RUNNING',

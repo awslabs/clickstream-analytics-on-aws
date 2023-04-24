@@ -12,7 +12,7 @@
  */
 
 import { StackManager } from './stack';
-import { MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
+import { INGESTION_SERVER_DNS_SUFFIX, INGESTION_SERVER_URL_SUFFIX, MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
@@ -77,7 +77,8 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
       const stackManager: StackManager = new StackManager(latestPipeline.items[0]);
-      const outputValue = await stackManager.getStackOutput(PipelineStackType.INGESTION, 'ingestionServerUrl');
+      const ingestionServerUrl = await stackManager.getStackOutput(PipelineStackType.INGESTION, INGESTION_SERVER_URL_SUFFIX);
+      const ingestionServerDNS = await stackManager.getStackOutput(PipelineStackType.INGESTION, INGESTION_SERVER_DNS_SUFFIX);
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -90,7 +91,8 @@ export class ApplicationServ {
           id: latestPipeline.items[0].pipelineId,
           name: latestPipeline.items[0].name,
           status: latestPipeline.items[0].status,
-          endpoint: outputValue,
+          endpoint: ingestionServerUrl,
+          dns: ingestionServerDNS,
         },
       }));
     } catch (error) {
