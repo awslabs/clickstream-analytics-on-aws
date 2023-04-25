@@ -50,8 +50,8 @@ export class PipelineServ {
       const pipeline = new CPipeline(body);
       await pipeline.create();
       // save metadata
-      await store.addPipeline(body);
-      return res.status(201).json(new ApiSuccess({ projectId }, 'Pipeline added.'));
+      const id = await store.addPipeline(body);
+      return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
     } catch (error) {
       next(error);
     }
