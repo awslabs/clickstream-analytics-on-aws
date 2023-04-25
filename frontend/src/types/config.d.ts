@@ -42,8 +42,11 @@ declare global {
     oidc_client_id: string;
     oidc_redirect_url: string;
     oidc_logout_endpoint: string;
-    project_region: string;
     solution_version: string;
+    solution_cognito_idp: string;
+    solution_region: string;
+    solution_data_bucket: string;
+    solution_plugin_prefix: string;
   }
 
   interface ResponseVerify {

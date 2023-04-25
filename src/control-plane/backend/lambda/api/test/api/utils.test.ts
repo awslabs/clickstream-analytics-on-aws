@@ -19,7 +19,10 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN, POSITIVE_INTEGERS,
+  VPC_ID_PARRERN,
+  POSITIVE_INTEGERS,
+  S3_PATH_PLUGIN_JARS_PATTERN,
+  S3_PATH_PLUGIN_FILES_PATTERN,
 } from '../../common/constants-ln';
 import { validatePattern } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError } from '../../common/types';
@@ -196,6 +199,38 @@ describe('Utils test', () => {
       '128¥',
     ];
     invalidValues.map(v => expect(() => validatePattern('Number', POSITIVE_INTEGERS, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('s3 path plugin jars valid', async () => {
+    const validValues = [
+      's3://some-bucket/spark-etl-0.1.0.jar',
+      's3://some-bucket/spark-etl-0.1.0.jar,s3://some-bucket/spark-etl-0.1.0.jar',
+    ];
+    validValues.map(v => expect(validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      's3://some-bucket(&%^/spark-etl-0.1.0.jar',
+      'abc/abc.jar',
+      's3://abc/abc.txt',
+      ',',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('s3 path plugin files valid', async () => {
+    const validValues = [
+      's3://abc/abc.txt',
+      's3://abc/abc/test.txt',
+      's3://abc/abc/test.txt,s3://abc/abc/test2.txt',
+    ];
+    validValues.map(v => expect(validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'abc/abc.txt',
+      's3://abc_abc/abc/test.txt',
+      's3://Abc/abc/test.txt',
+      ',',
+      '',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
 });

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -21,14 +22,17 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
+const sfnMock = mockClient(SFNClient);
 
 describe('Project test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    sfnMock.reset();
   });
   it('Create project', async () => {
     tokenMock(ddbMock, false);
@@ -431,6 +435,10 @@ describe('Project test', () => {
         { type: 'project-01' },
       ],
     });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}`);

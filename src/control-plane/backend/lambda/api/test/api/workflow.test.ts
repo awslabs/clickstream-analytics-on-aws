@@ -11,19 +11,17 @@
  *  and limitations under the License.
  */
 
-import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
+import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
-  GetNamespaceCommand,
-  GetWorkgroupCommand,
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import {
   StartExecutionCommand,
   SFNClient,
 } from '@aws-sdk/client-sfn';
-import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, projectExistedMock, stackParameterMock } from './ddb-mock';
 import {
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
@@ -35,9 +33,9 @@ import {
   S3_ETL_PIPELINE,
   S3_INGESTION_PIPELINE,
 } from './pipeline-mock';
-import { clickStreamTableName } from '../../common/constants';
-import { ProjectEnvironment, WorkflowStateType, WorkflowTemplate } from '../../common/types';
+import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
+import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -55,15 +53,9 @@ describe('Workflow test', () => {
 
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -188,15 +180,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    const stackManager: StackManager = new StackManager(KAFKA_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(KAFKA_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -321,15 +307,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka with connector', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    const stackManager: StackManager = new StackManager(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -517,29 +497,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    kafkaMock.on(ListNodesCommand).resolves({
-      NodeInfoList: [
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test1.com', 'test2.com'],
-          },
-        },
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test3.com'],
-          },
-        },
-      ],
-    });
-    const stackManager: StackManager = new StackManager(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -727,15 +687,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    const stackManager: StackManager = new StackManager(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -872,15 +826,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    const stackManager: StackManager = new StackManager(KINESIS_PROVISIONED_INGESTION_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(KINESIS_PROVISIONED_INGESTION_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1017,24 +965,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: `${MOCK_APP_ID}_1`,
-      }, {
-        id: 2,
-        appId: `${MOCK_APP_ID}_2`,
-      }],
-    });
-    const stackManager: StackManager = new StackManager(S3_ETL_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(S3_ETL_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1213,7 +1146,15 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
+                        ParameterValue: 'test.aws.solution.main,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-transformer-0.1.0.jar,s3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data1.mmdb,s3://example-bucket/pipeline/files/data2.mmdb,s3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -1238,52 +1179,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow kafka msk + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: `${MOCK_APP_ID}_1`,
-      }, {
-        id: 2,
-        appId: `${MOCK_APP_ID}_2`,
-      }],
-    });
-    kafkaMock.on(ListNodesCommand).resolves({
-      NodeInfoList: [
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test1.com', 'test2.com'],
-          },
-        },
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test3.com'],
-          },
-        },
-      ],
-    });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupName: 'test-wg',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceName: 'test-ns',
-      },
-    });
-    const stackManager: StackManager = new StackManager(MSK_ETL_REDSHIFT_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(MSK_ETL_REDSHIFT_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1524,7 +1422,15 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -1632,52 +1538,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 1,
-        appId: `${MOCK_APP_ID}_1`,
-      }, {
-        id: 2,
-        appId: `${MOCK_APP_ID}_2`,
-      }],
-    });
-    kafkaMock.on(ListNodesCommand).resolves({
-      NodeInfoList: [
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test1.com', 'test2.com'],
-          },
-        },
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test3.com'],
-          },
-        },
-      ],
-    });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupName: 'test-wg',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceName: 'test-ns',
-      },
-    });
-    const stackManager: StackManager = new StackManager(KINESIS_ETL_REDSHIFT_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_REDSHIFT_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1868,7 +1731,15 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -1976,47 +1847,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `METADATA#${MOCK_PROJECT_ID}`,
-      },
-    }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [],
-    });
-    kafkaMock.on(ListNodesCommand).resolves({
-      NodeInfoList: [
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test1.com', 'test2.com'],
-          },
-        },
-        {
-          BrokerNodeInfo: {
-            Endpoints: ['test3.com'],
-          },
-        },
-      ],
-    });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
-        workgroupName: 'test-wg',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-        namespaceName: 'test-ns',
-      },
-    });
-
-    const stackManager: StackManager = new StackManager(MSK_ETL_REDSHIFT_PIPELINE);
-    const wf = await stackManager.generateWorkflow();
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, { noApp: true });
+    const pipeline: CPipeline = new CPipeline(MSK_ETL_REDSHIFT_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -2257,7 +2090,15 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,a,b',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -3059,11 +2900,18 @@ describe('Workflow test', () => {
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
   it('Pipeline template url', async () => {
+    projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
-    let templateURL = await stackManager.getTemplateUrl('ingestion_s3');
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { id: 1, appId: `${MOCK_APP_ID}_1` },
+        { id: 2, appId: `${MOCK_APP_ID}_2` },
+      ],
+    });
+    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    let templateURL = await pipeline.getTemplateUrl('ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
-    templateURL = await stackManager.getTemplateUrl('ingestion_no');
+    templateURL = await pipeline.getTemplateUrl('ingestion_no');
     expect(templateURL).toEqual(undefined);
 
   });
@@ -3670,6 +3518,7 @@ describe('Workflow test', () => {
     });
 
   });
+
   afterAll((done) => {
     server.close();
     done();

@@ -13,7 +13,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStatusType } from '../common/types';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -42,17 +42,16 @@ export class PipelineServ {
       const { projectId } = req.body;
       req.body.id = projectId;
       req.body.pipelineId = uuidv4().replace(/-/g, '');
-      let pipeline: IPipeline = req.body;
-
-      // state machine
-      const stackManager: StackManager = new StackManager(pipeline);
-      pipeline.executionName = `main-${uuidv4()}`;
-      pipeline.workflow = await stackManager.generateWorkflow();
-      pipeline.executionArn = await stackManager.execute(pipeline.workflow, pipeline.executionName);
-
+      const result = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
+      if (result.totalCount && result.totalCount > 0) {
+        return res.status(400).send(new ApiFail('Pipeline already exists.'));
+      }
+      const body: IPipeline = req.body;
+      const pipeline = new CPipeline(body);
+      await pipeline.create();
       // save metadata
-      const id = await store.addPipeline(pipeline);
-      return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
+      await store.addPipeline(body);
+      return res.status(201).json(new ApiSuccess({ projectId }, 'Pipeline added.'));
     } catch (error) {
       next(error);
     }
@@ -117,6 +116,10 @@ export class PipelineServ {
       const ddbPipeline = await store.getPipeline(pid, id);
       if (!ddbPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      // Check pipeline status
+      if (ddbPipeline.status?.status !== PipelineStatusType.FAILED) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow retry.'));
       }
       const pipeline = new CPipeline(ddbPipeline);
       await pipeline.retry(type);

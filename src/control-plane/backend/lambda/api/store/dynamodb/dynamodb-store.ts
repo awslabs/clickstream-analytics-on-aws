@@ -12,7 +12,6 @@
  */
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import {
   GetCommand,
   GetCommandOutput,
@@ -393,7 +392,7 @@ export class DynamoDbStore implements ClickStreamStore {
         description: pipeline.description,
         region: pipeline.region,
         dataCollectionSDK: pipeline.dataCollectionSDK,
-        status: pipeline.status ?? ExecutionStatus.RUNNING,
+        status: pipeline.status,
         tags: pipeline.tags ?? [],
         network: pipeline.network,
         bucket: pipeline.bucket,
@@ -877,6 +876,29 @@ export class DynamoDbStore implements ClickStreamStore {
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
+  };
+
+  public async bindPlugins(pluginIds: string[], count: number): Promise<void> {
+    for (let pluginId of pluginIds) {
+      const params: UpdateCommand = new UpdateCommand({
+        TableName: clickStreamTableName,
+        Key: {
+          id: pluginId,
+          type: `PLUGIN#${pluginId}`,
+        },
+        // Define expressions for the new or updated attributes
+        UpdateExpression: 'SET bindCount = bindCount + :b, #updateAt= :u',
+        ExpressionAttributeNames: {
+          '#updateAt': 'updateAt',
+        },
+        ExpressionAttributeValues: {
+          ':b': count,
+          ':u': Date.now(),
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      await docClient.send(params);
+    }
   };
 
   public async listPlugin(

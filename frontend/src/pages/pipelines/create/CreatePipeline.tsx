@@ -308,11 +308,9 @@ const Content: React.FC = () => {
 
       // set plugin value
       createPipelineObj.etl.transformPlugin =
-        pipelineInfo.selectedTransformPlugins?.[0]?.mainFunction || '';
+        pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
       createPipelineObj.etl.enrichPlugin =
-        pipelineInfo.selectedEnrichPlugins.map(
-          (element) => element.mainFunction
-        );
+        pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
 
       // set redshift schedule
       createPipelineObj.dataAnalytics.loadWorkflow.scheduleInterval =
@@ -397,9 +395,9 @@ const Content: React.FC = () => {
         collapsedStepsLabel: (stepNumber, stepsCount) =>
           `${t('step')} ${stepNumber} ${t('of')} ${stepsCount}`,
         navigationAriaLabel: t('steps') || 'Steps',
-        cancelButton: t('button.cancel'),
-        previousButton: t('button.previous'),
-        nextButton: t('button.next'),
+        cancelButton: t('button.cancel') || '',
+        previousButton: t('button.previous') || '',
+        nextButton: t('button.next') || '',
         submitButton: t('button.create'),
         optional: t('optional') || 'optional',
       }}

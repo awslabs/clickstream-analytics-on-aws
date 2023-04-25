@@ -270,6 +270,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       redirectUrl: controlPlane.controlPlaneUrl,
       solutionVersion: process.env.BUILD_VERSION || 'v1',
       cotrolPlaneMode: 'CLOUDFRONT',
+      solutionBucket: solutionBucket.bucket.bucketName,
     });
 
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));

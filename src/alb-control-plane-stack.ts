@@ -235,6 +235,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       redirectUrl: controlPlane.controlPlaneUrl,
       solutionVersion: process.env.BUILD_VERSION || 'v1',
       cotrolPlaneMode: 'ALB',
+      solutionBucket: solutionBucket.bucket.bucketName,
     });
 
     controlPlane.addFixedResponse('aws-exports', {

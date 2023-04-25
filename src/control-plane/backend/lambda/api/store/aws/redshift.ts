@@ -20,7 +20,7 @@ import {
   GetNamespaceCommand,
 } from '@aws-sdk/client-redshift-serverless';
 import { getPaginatedResults } from '../../common/paginator';
-import { RedshiftCluster, RedshiftWorkgroup } from '../../common/types';
+import { RedshiftCluster, RedshiftServerlessWorkgroup, RedshiftWorkgroup } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId: string) => {
   const redshiftClient = new RedshiftClient({ region });
@@ -69,7 +69,7 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
         namespaceId: getNamespaceCommandOutput.namespace.namespaceId,
         namespaceArn: getNamespaceCommandOutput.namespace.namespaceArn,
         namespaceName: getNamespaceCommandOutput.namespace.namespaceName,
-      };
+      } as RedshiftServerlessWorkgroup;
     }
   }
 

@@ -82,12 +82,20 @@ describe('Pipeline test', () => {
       },
     });
     ddbMock.on(PutCommand).resolves({});
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        { id: 1, appId: `${MOCK_APP_ID}_1` },
-        { id: 2, appId: `${MOCK_APP_ID}_2` },
-      ],
-    });
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({ Items: [] })
+      .resolves({
+        Items: [
+          {
+            id: 1,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+          {
+            id: 2,
+            appId: `${MOCK_APP_ID}_2`,
+          },
+        ],
+      });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -103,14 +111,33 @@ describe('Pipeline test', () => {
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
-      Key: {
-        name: 'Templates',
-      },
-    }).resolves({
-      Item: undefined,
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          id: 1,
+          appId: `${MOCK_APP_ID}_1`,
+        },
+        {
+          id: 2,
+          appId: `${MOCK_APP_ID}_2`,
+        },
+      ],
     });
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({ Items: [] })
+      .resolves({
+        Items: [
+          {
+            id: 1,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+          {
+            id: 2,
+            appId: `${MOCK_APP_ID}_2`,
+          },
+        ],
+      });
+    dictionaryMock(ddbMock, 'BuildInPlugins');
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
       Key: {
@@ -119,7 +146,14 @@ describe('Pipeline test', () => {
     }).resolves({
       Item: undefined,
     });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Templates',
+      },
+    }).resolves({
+      Item: undefined,
+    });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -137,7 +171,44 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
+    kafkaMock.on(ListNodesCommand).resolves({
+      NextToken: 'token01',
+      NodeInfoList: [{
+        BrokerNodeInfo: {
+          Endpoints: ['node1,node2'],
+        },
+      }],
+      $metadata: {},
+    });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
+      workgroup: {
+        workgroupId: 'workgroupId',
+        workgroupArn: 'workgroupArn',
+        workgroupName: 'workgroupName',
+      },
+    });
+    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
+      namespace: {
+        namespaceId: 'namespaceId',
+        namespaceArn: 'namespaceArn',
+        namespaceName: 'namespaceName',
+      },
+    });
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({ Items: [] })
+      .resolves({
+        Items: [
+          {
+            id: 1,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+          {
+            id: 2,
+            appId: `${MOCK_APP_ID}_2`,
+          },
+        ],
+      });
     // Mock DynamoDB error
     ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)

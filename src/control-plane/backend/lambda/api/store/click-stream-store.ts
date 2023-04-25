@@ -47,6 +47,7 @@ export interface ClickStreamStore {
   listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPluginList>;
   deletePlugin: (pluginId: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
+  bindPlugins: (pluginIds: string[], count: number) => Promise<void>;
 
   getDictionary: (name: string) => Promise<IDictionary | undefined>;
   listDictionary: () => Promise<IDictionary[]>;

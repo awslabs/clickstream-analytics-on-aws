@@ -11,8 +11,11 @@
  *  and limitations under the License.
  */
 
-import { GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
+import { ListNodesCommand } from '@aws-sdk/client-kafka';
+import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
+import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
+import { ProjectEnvironment } from '../../common/types';
 
 const MOCK_TOKEN = '0000-0000';
 const MOCK_PROJECT_ID = 'project_8888_8888';
@@ -115,101 +118,200 @@ function pluginExistedMock(ddbMock: any, existed: boolean): any {
   });
 }
 
-function dictionaryMock(ddbMock: any): any {
+function dictionaryMock(ddbMock: any, name?: string): any {
+  if (!name || name === 'BuildInPlugins') {
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'BuildInPlugins',
+      },
+    }).resolves({
+      Item: {
+        name: 'BuildInPlugins',
+        data: [
+          {
+            id: 'BUILDIN-1',
+            type: 'PLUGIN#BUILDIN-1',
+            prefix: 'PLUGIN',
+            name: 'Transformer',
+            description: 'Description of Transformer',
+            builtIn: 'true',
+            mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
+            jarFile: '',
+            bindCount: '0',
+            pluginType: 'Transform',
+            dependencyFiles: [],
+            operator: '',
+            deleted: 'false',
+            createAt: '1667355960000',
+            updateAt: '1667355960000',
+          },
+          {
+            id: 'BUILDIN-2',
+            type: 'PLUGIN#BUILDIN-2',
+            prefix: 'PLUGIN',
+            name: 'UAEnrichment',
+            description: 'Description of UAEnrichment',
+            builtIn: 'true',
+            mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
+            jarFile: '',
+            bindCount: '0',
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: 'false',
+            createAt: '1667355960000',
+            updateAt: '1667355960000',
+          },
+          {
+            id: 'BUILDIN-3',
+            type: 'PLUGIN#BUILDIN-3',
+            prefix: 'PLUGIN',
+            name: 'IPEnrichment',
+            description: 'Description of IPEnrichment',
+            builtIn: 'true',
+            mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
+            jarFile: '',
+            bindCount: '0',
+            pluginType: 'Enrich',
+            dependencyFiles: [],
+            operator: '',
+            deleted: 'false',
+            createAt: '1667355960000',
+            updateAt: '1667355960000',
+          },
+        ],
+      },
+    });
+  }
+  if (!name || name === 'Templates') {
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Templates',
+      },
+    }).resolves({
+      Item: {
+        name: 'Templates',
+        data: {
+          'ingestion_s3': 'ingestion-server-s3-stack.template.json',
+          'ingestion_kafka': 'ingestion-server-kafka-stack.template.json',
+          'ingestion_kinesis': 'ingestion-server-kinesis-stack.template.json',
+          'kafka-s3-sink': 'kafka-s3-sink-stack.template.json',
+          'data-pipeline': 'data-pipeline-stack.template.json',
+          'data-analytics': 'data-analytics-redshift-stack.template.json',
+        },
+      },
+    });
+  }
+  if (!name || name === 'Solution') {
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Solution',
+      },
+    }).resolves({
+      Item: {
+        name: 'Solution',
+        data: {
+          name: 'clickstream-branch-main',
+          dist_output_bucket: 'EXAMPLE-BUCKET',
+          prefix: 'feature-rel/main/default',
+        },
+      },
+    });
+  }
+}
+
+function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClient: any, props?: any): any {
+  // project
   ddbMock.on(GetCommand, {
-    TableName: dictionaryTableName,
+    TableName: clickStreamTableName,
     Key: {
-      name: 'BuildInPlugins',
+      id: MOCK_PROJECT_ID,
+      type: `METADATA#${MOCK_PROJECT_ID}`,
     },
-  }).resolves({
-    Item: {
-      name: 'BuildInPlugins',
-      data: [
-        {
-          id: 'BUILDIN-1',
-          type: 'PLUGIN#BUILDIN-1',
-          prefix: 'PLUGIN',
-          name: 'Transformer',
-          description: 'Description of Transformer',
-          builtIn: 'true',
-          mainFunction: 'sofeware.aws.solution.clickstream.Transformer',
-          jarFile: '',
-          bindCount: '0',
-          pluginType: 'Transform',
-          dependencyFiles: [],
-          operator: '',
-          deleted: 'false',
-          createAt: '1667355960000',
-          updateAt: '1667355960000',
+  }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
+  // apps
+  if (props?.noApp) {
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [],
+      })
+      .resolves({
+        Items: [
+          {
+            id: `${MOCK_PLUGIN_ID}_1`,
+            pluginType: 'Transform',
+            mainFunction: 'test.aws.solution.main',
+            jarFile: 's3://example-bucket/pipeline/jars/test-transformer-0.1.0.jar',
+            dependencyFiles: ['s3://example-bucket/pipeline/files/data1.mmdb', 's3://example-bucket/pipeline/files/data2.mmdb'],
+          },
+          {
+            id: `${MOCK_PLUGIN_ID}_2`,
+            pluginType: 'Enrich',
+            mainFunction: 'test.aws.solution.main',
+            jarFile: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+            dependencyFiles: ['s3://example-bucket/pipeline/files/data3.mmdb', 's3://example-bucket/pipeline/files/data4.mmdb'],
+          },
+        ],
+      });
+  } else {
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [{
+          id: 1,
+          appId: `${MOCK_APP_ID}_1`,
+        }, {
+          id: 2,
+          appId: `${MOCK_APP_ID}_2`,
+        }],
+      })
+      .resolves({
+        Items: [
+          {
+            id: `${MOCK_PLUGIN_ID}_1`,
+            pluginType: 'Transform',
+            mainFunction: 'test.aws.solution.main',
+            jarFile: 's3://example-bucket/pipeline/jars/test-transformer-0.1.0.jar',
+            dependencyFiles: ['s3://example-bucket/pipeline/files/data1.mmdb', 's3://example-bucket/pipeline/files/data2.mmdb'],
+          },
+          {
+            id: `${MOCK_PLUGIN_ID}_2`,
+            pluginType: 'Enrich',
+            mainFunction: 'test.aws.solution.main',
+            jarFile: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+            dependencyFiles: ['s3://example-bucket/pipeline/files/data3.mmdb', 's3://example-bucket/pipeline/files/data4.mmdb'],
+          },
+        ],
+      });
+  }
+  kafkaMock.on(ListNodesCommand).resolves({
+    NodeInfoList: [
+      {
+        BrokerNodeInfo: {
+          Endpoints: ['test1.com', 'test2.com'],
         },
-        {
-          id: 'BUILDIN-2',
-          type: 'PLUGIN#BUILDIN-2',
-          prefix: 'PLUGIN',
-          name: 'UAEnrichment',
-          description: 'Description of UAEnrichment',
-          builtIn: 'true',
-          mainFunction: 'sofeware.aws.solution.clickstream.UAEnrichment',
-          jarFile: '',
-          bindCount: '0',
-          pluginType: 'Enrich',
-          dependencyFiles: [],
-          operator: '',
-          deleted: 'false',
-          createAt: '1667355960000',
-          updateAt: '1667355960000',
+      },
+      {
+        BrokerNodeInfo: {
+          Endpoints: ['test3.com'],
         },
-        {
-          id: 'BUILDIN-3',
-          type: 'PLUGIN#BUILDIN-3',
-          prefix: 'PLUGIN',
-          name: 'IPEnrichment',
-          description: 'Description of IPEnrichment',
-          builtIn: 'true',
-          mainFunction: 'sofeware.aws.solution.clickstream.IPEnrichment',
-          jarFile: '',
-          bindCount: '0',
-          pluginType: 'Enrich',
-          dependencyFiles: [],
-          operator: '',
-          deleted: 'false',
-          createAt: '1667355960000',
-          updateAt: '1667355960000',
-        },
-      ],
+      },
+    ],
+  });
+  redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
+    workgroup: {
+      workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+      workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
+      workgroupName: 'test-wg',
     },
   });
-  ddbMock.on(GetCommand, {
-    TableName: dictionaryTableName,
-    Key: {
-      name: 'Templates',
-    },
-  }).resolves({
-    Item: {
-      name: 'Templates',
-      data: {
-        'ingestion_s3': 'ingestion-server-s3-stack.template.json',
-        'ingestion_kafka': 'ingestion-server-kafka-stack.template.json',
-        'ingestion_kinesis': 'ingestion-server-kinesis-stack.template.json',
-        'kafka-s3-sink': 'kafka-s3-sink-stack.template.json',
-        'data-pipeline': 'data-pipeline-stack.template.json',
-        'data-analytics': 'data-analytics-redshift-stack.template.json',
-      },
-    },
-  });
-  ddbMock.on(GetCommand, {
-    TableName: dictionaryTableName,
-    Key: {
-      name: 'Solution',
-    },
-  }).resolves({
-    Item: {
-      name: 'Solution',
-      data: {
-        name: 'clickstream-branch-main',
-        dist_output_bucket: 'EXAMPLE-BUCKET',
-        prefix: 'feature-rel/main/default',
-      },
+  redshiftServerlessClient.on(GetNamespaceCommand).resolves({
+    namespace: {
+      namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+      namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
+      namespaceName: 'test-ns',
     },
   });
 }
@@ -229,4 +331,5 @@ export {
   pipelineExistedMock,
   pluginExistedMock,
   dictionaryMock,
+  stackParameterMock,
 };

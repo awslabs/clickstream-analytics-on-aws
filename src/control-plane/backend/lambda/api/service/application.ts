@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
-import { StackManager } from './stack';
 import { INGESTION_SERVER_DNS_SUFFIX, INGESTION_SERVER_URL_SUFFIX, MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
 import { isEmpty } from '../common/utils';
 import { IApplication } from '../model/application';
+import { CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -44,19 +44,20 @@ export class ApplicationServ {
       if (latestPipelines.totalCount === 0) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const pipeline = latestPipelines.items[0];
-      if (pipeline.status?.status !== PipelineStatusType.ACTIVE) {
+      const latestPipeline = latestPipelines.items[0];
+      if (latestPipeline.status?.status !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
-      const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
+      const apps = await store.listApplication(latestPipeline.projectId, 'asc', false, 1, 1);
       const appIds: string[] = apps.items.map(a => a.appId);
       appIds.push(appId);
       validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
 
       const id = await store.addApplication(app);
-      const stackManager: StackManager = new StackManager(pipeline);
-      await stackManager.updateETLWorkflow(appIds);
+
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.updateETL(appIds);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -72,13 +73,13 @@ export class ApplicationServ {
         logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
         return res.status(404).json(new ApiFail('Application not found'));
       }
-      const latestPipeline = await store.listPipeline(result.id, 'latest', 'asc', false, 1, 1);
-      if (latestPipeline.totalCount === 0) {
+      const latestPipelines = await store.listPipeline(result.id, 'latest', 'asc', false, 1, 1);
+      if (latestPipelines.totalCount === 0) {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
-      const stackManager: StackManager = new StackManager(latestPipeline.items[0]);
-      const ingestionServerUrl = await stackManager.getStackOutput(PipelineStackType.INGESTION, INGESTION_SERVER_URL_SUFFIX);
-      const ingestionServerDNS = await stackManager.getStackOutput(PipelineStackType.INGESTION, INGESTION_SERVER_DNS_SUFFIX);
+      const pipeline = new CPipeline(latestPipelines.items[0]);
+      const ingestionServerUrl = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, INGESTION_SERVER_URL_SUFFIX);
+      const ingestionServerDNS = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, INGESTION_SERVER_DNS_SUFFIX);
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -88,9 +89,9 @@ export class ApplicationServ {
         iosBundleId: result.iosBundleId,
         iosAppStoreId: result.iosAppStoreId,
         pipeline: {
-          id: latestPipeline.items[0].pipelineId,
-          name: latestPipeline.items[0].name,
-          status: latestPipeline.items[0].status,
+          id: latestPipelines.items[0].pipelineId,
+          name: latestPipelines.items[0].name,
+          status: latestPipelines.items[0].status,
           endpoint: ingestionServerUrl,
           dns: ingestionServerDNS,
         },
@@ -119,12 +120,12 @@ export class ApplicationServ {
       if (latestPipelines.totalCount === 0) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const pipeline = latestPipelines.items[0];
-      if (pipeline.status?.status !== PipelineStatusType.ACTIVE) {
+      const latestPipeline = latestPipelines.items[0];
+      if (latestPipeline.status?.status !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
-      const apps = await store.listApplication(pipeline.projectId, 'asc', false, 1, 1);
+      const apps = await store.listApplication(latestPipeline.projectId, 'asc', false, 1, 1);
       const appIds: string[] = apps.items.map(a => a.appId);
       const index = appIds.indexOf(id);
       if (index > -1) {
@@ -137,8 +138,9 @@ export class ApplicationServ {
       }
 
       await store.deleteApplication(pid, id);
-      const stackManager: StackManager = new StackManager(pipeline);
-      await stackManager.updateETLWorkflow(appIds);
+
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.updateETL(appIds);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

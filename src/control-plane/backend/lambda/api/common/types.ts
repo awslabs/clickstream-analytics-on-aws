@@ -261,9 +261,23 @@ export enum PipelineServerProtocol {
   HTTPS = 'HTTPS',
 }
 
+export enum PluginType {
+  TRANSFORM = 'Transform',
+  ENRICH = 'Enrich',
+}
+
 export enum ProjectEnvironment {
   DEV = 'Dev',
   TEST = 'Test',
   PROD = 'Prod',
+}
+
+export interface RedshiftServerlessWorkgroup {
+  readonly workgroupId: string;
+  readonly workgroupArn: string;
+  readonly workgroupName: string;
+  readonly namespaceId: string;
+  readonly namespaceArn: string;
+  readonly namespaceName: string;
 }
 

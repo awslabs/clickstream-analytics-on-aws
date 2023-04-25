@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { PluginType } from '../common/types';
 
 export interface IPlugin {
   readonly id: string;
@@ -21,7 +22,7 @@ export interface IPlugin {
   readonly jarFile: string;
   readonly dependencyFiles: string[];
   readonly mainFunction: string;
-  readonly pluginType: 'Transform' | 'Enrich';
+  readonly pluginType: PluginType;
   readonly builtIn: boolean;
   /**
    * Record the binding count of plugin.

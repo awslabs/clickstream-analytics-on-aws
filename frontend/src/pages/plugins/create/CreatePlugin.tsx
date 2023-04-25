@@ -16,34 +16,70 @@ import {
   Button,
   Container,
   ContentLayout,
+  FileUpload,
   Form,
   FormField,
   Header,
   Input,
+  ProgressBar,
+  RadioGroup,
   SpaceBetween,
+  StatusIndicator,
   Textarea,
-  Select,
-  SelectProps,
 } from '@cloudscape-design/components';
 import { createPlugin } from 'apis/plugin';
+import { Auth, Storage } from 'aws-amplify';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import React, { useState } from 'react';
+import { AppContext } from 'context/AppContext';
+import { result } from 'lodash';
+import moment from 'moment';
+import { User } from 'oidc-client-ts';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PLUGIN_TYPE_LIST } from 'ts/const';
+import { PLUGIN_TYPE_LIST, PROJECT_CONFIG_JSON } from 'ts/const';
+import { alertMsg } from 'ts/utils';
+
+function getUser() {
+  const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
+    ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
+    : {};
+  const oidcStorage = localStorage.getItem(
+    `oidc.user:${configJSONObj.oidc_provider}:${configJSONObj.oidc_client_id}`
+  );
+  if (!oidcStorage) {
+    return null;
+  }
+  return User.fromStorageString(oidcStorage);
+}
 
 function Content() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const appConfig = useContext(AppContext);
   const [loadingCreate, setLoadingCreate] = useState(false);
-  const [selectedType, setSelectedType] = useState<SelectProps.Option | null>(
-    null
-  );
 
+  const [jarFiles, setJarFiles] = React.useState<File[]>([]);
+  const [dependenciesFiles, setDependenciesFiles] = useState<File[]>([]);
   const [nameEmptypError, setNameEmptypError] = useState(false);
   const [typeEmptyError, setTypeEmptyError] = useState(false);
   const [mainFuncEmptyError, setMainFuncEmptyError] = useState(false);
+  const [uploadJarProgress, setUploadJarProgress] = useState(0);
+  const [uploadDependenciesProgress, setUploadDependenciesProgress] =
+    useState(0);
+  const [showUploadJarSuccess, setShowUploadJarSuccess] = useState(false);
+  const [showUploadDependenciesSuccess, setShowUploadDependenciesSuccess] =
+    useState(false);
+  const [dependenciesUploadingArr, setDependenciesUploadingArr] = useState<
+    IPluginFile[]
+  >([]);
+  const [uploadedDependencyFiles, setUploadedDependencyFiles] = useState<
+    File[]
+  >([]);
+  const [dependeciesS3FileKeys, setdependeciesS3FileKeys] = useState<string[]>(
+    []
+  );
 
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
     name: '',
@@ -53,6 +89,32 @@ function Content() {
     jarFile: '',
     dependencyFiles: [],
   });
+
+  const splitFileNameWithSuffix = (str: string, substring: string) => {
+    const lastIndex = str.lastIndexOf(substring);
+    const before = str.slice(0, lastIndex);
+    const after = str.slice(lastIndex + 1);
+    return [before, after];
+  };
+
+  const areFilesEqual = (file1: File, file2: File) => {
+    return (
+      file1.name === file2.name &&
+      file1.size === file2.size &&
+      file1.type === file2.type &&
+      file1.lastModified === file2.lastModified
+    );
+  };
+
+  const getMissingFiles = (files: File[], reference: File[]) => {
+    return files.filter(
+      (file) => !reference.some((ref) => areFilesEqual(file, ref))
+    );
+  };
+
+  const buildS3Path = (key: string) => {
+    return `s3://${appConfig?.solution_data_bucket}/${appConfig?.solution_plugin_prefix}${key}`;
+  };
 
   const validPluginInput = () => {
     if (!curPlugin.name.trim()) {
@@ -75,6 +137,7 @@ function Content() {
       return;
     }
     setLoadingCreate(true);
+    curPlugin.dependencyFiles = dependeciesS3FileKeys;
     try {
       const { success, data }: ApiResponse<ResponseCreate> = await createPlugin(
         curPlugin
@@ -87,6 +150,168 @@ function Content() {
       setLoadingCreate(false);
     }
   };
+
+  const signInIdpWithOIDCAuthentication = async () => {
+    const user = getUser();
+    const idToken = user?.id_token || '';
+    await Auth.federatedSignIn(
+      appConfig?.oidc_provider?.split('//')?.[1] || '',
+      {
+        token: idToken,
+        expires_at: user?.expires_at || new Date().getTime() + 10 * 60 * 1000,
+      },
+      {
+        name: user?.profile.email || '',
+      }
+    )
+      .then(() => {
+        // If success, you will get the AWS credentials
+        return Auth.currentAuthenticatedUser();
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  const uploadJarFile = async () => {
+    setShowUploadJarSuccess(false);
+    try {
+      const [name, suffiex] = splitFileNameWithSuffix(jarFiles[0]?.name, '.');
+      const uploadRes = await Storage.put(
+        `${name}_${moment(new Date()).format('YYYYMMDDHHmmss')}.${suffiex}`,
+        jarFiles[0],
+        {
+          level: 'public',
+          customPrefix: {
+            public: appConfig?.solution_plugin_prefix,
+          },
+          progressCallback(progress) {
+            setUploadJarProgress(
+              Math.ceil((progress.loaded / progress.total) * 100)
+            );
+            if (Math.ceil((progress.loaded / progress.total) * 100) >= 100) {
+              setUploadJarProgress(0);
+              setShowUploadJarSuccess(true);
+            }
+          },
+        }
+      );
+      setCurPlugin((prev) => {
+        return {
+          ...prev,
+          jarFile: buildS3Path(uploadRes.key),
+        };
+      });
+    } catch (error) {
+      alertMsg(t('upload.uploadFailed'), 'error');
+      console.error(error);
+    }
+  };
+
+  const uploadDependeciesFiles = async (readyToUploadFiles: File[]) => {
+    setShowUploadDependenciesSuccess(false);
+    try {
+      (async () => {
+        const results = await Promise.all(
+          readyToUploadFiles.map(async (element) => {
+            dependenciesUploadingArr.push({
+              name: element.name,
+              loaded: 0,
+              total: 0,
+              isUploaded: false,
+            });
+            const [name, suffiex] = splitFileNameWithSuffix(element?.name, '.');
+            const result = await Storage.put(
+              `${name}_${moment(new Date()).format(
+                'YYYYMMDDHHmmss'
+              )}.${suffiex}`,
+              element,
+              {
+                level: 'public',
+                customPrefix: {
+                  public: appConfig?.solution_plugin_prefix,
+                },
+                progressCallback(progress) {
+                  if (
+                    progress.loaded > 0 &&
+                    progress.loaded === progress.total
+                  ) {
+                    setUploadedDependencyFiles((prev) => {
+                      return [...prev, element];
+                    });
+                  }
+                  const tmpArr: any = JSON.parse(
+                    JSON.stringify(dependenciesUploadingArr)
+                  );
+                  if (tmpArr) {
+                    tmpArr.find(
+                      (item: any) => item.name === element.name
+                    ).loaded = progress.loaded;
+                    tmpArr.find(
+                      (item: any) => item.name === element.name
+                    ).total = progress.total;
+                    setDependenciesUploadingArr(tmpArr);
+                  }
+                },
+              }
+            );
+            return result;
+          })
+        );
+        if (results && result.length > 0) {
+          setdependeciesS3FileKeys((prev) => {
+            return [
+              ...prev,
+              ...results.map((element) => buildS3Path(element.key)),
+            ];
+          });
+        }
+        setUploadDependenciesProgress(0);
+        setShowUploadDependenciesSuccess(true);
+        setDependenciesUploadingArr([]);
+      })();
+    } catch (error) {
+      alertMsg(t('upload.uploadFailed'), 'error');
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (jarFiles && jarFiles.length > 0) {
+      uploadJarFile();
+    } else {
+      setShowUploadJarSuccess(false);
+    }
+  }, [jarFiles]);
+
+  useEffect(() => {
+    setShowUploadDependenciesSuccess(false);
+    if (dependenciesFiles && dependenciesFiles.length > 0) {
+      const missingFiles = getMissingFiles(
+        dependenciesFiles,
+        uploadedDependencyFiles
+      );
+      uploadDependeciesFiles(missingFiles);
+    }
+  }, [dependenciesFiles]);
+
+  useEffect(() => {
+    const loaded = dependenciesUploadingArr.reduce(
+      (acc, curr) => acc + curr.loaded,
+      0
+    );
+    const total = dependenciesUploadingArr.reduce(
+      (acc, curr) => acc + curr.total,
+      0
+    );
+    if (total && total > loaded) {
+      setUploadDependenciesProgress(Math.ceil((loaded / total) * 100));
+    }
+  }, [dependenciesUploadingArr]);
+
+  useEffect(() => {
+    signInIdpWithOIDCAuthentication();
+  }, []);
 
   return (
     <ContentLayout
@@ -162,23 +387,20 @@ function Content() {
 
               <FormField
                 label={t('plugin:create.type')}
-                description={t('plugin:create.typeDesc')}
                 errorText={typeEmptyError ? t('plugin:valid.typeEmpty') : ''}
               >
-                <Select
-                  selectedOption={selectedType}
+                <RadioGroup
                   onChange={({ detail }) => {
                     setTypeEmptyError(false);
-                    setSelectedType(detail.selectedOption);
                     setCurPlugin((prev) => {
                       return {
                         ...prev,
-                        pluginType: detail.selectedOption.value || '',
+                        pluginType: detail.value || '',
                       };
                     });
                   }}
-                  options={PLUGIN_TYPE_LIST}
-                  selectedAriaLabel="Selected"
+                  value={curPlugin.pluginType}
+                  items={PLUGIN_TYPE_LIST}
                 />
               </FormField>
 
@@ -186,14 +408,78 @@ function Content() {
                 label={t('plugin:create.uploadJar')}
                 description={t('plugin:create.uploadJarDesc')}
               >
-                <Button iconName="upload">{t('button.chooseFile')}</Button>
+                <>
+                  <FileUpload
+                    onChange={({ detail }) => {
+                      setJarFiles(detail.value);
+                    }}
+                    value={jarFiles}
+                    i18nStrings={{
+                      uploadButtonText: (e) =>
+                        e ? t('button.chooseFiles') : t('button.chooseFile'),
+                      dropzoneText: (e) =>
+                        e
+                          ? t('upload.dropFilesToUpload')
+                          : t('upload.dropFileToUpload'),
+                      removeFileAriaLabel: (e) =>
+                        `${t('upload.removeFile')} ${e + 1}`,
+                      limitShowFewer: t('upload.limitShowFewer'),
+                      limitShowMore: t('upload.limitShowMore'),
+                      errorIconAriaLabel: t('upload.errorIconAriaLabel'),
+                    }}
+                    showFileLastModified
+                    showFileSize
+                    showFileThumbnail
+                  />
+                  {uploadJarProgress > 0 && !showUploadJarSuccess && (
+                    <ProgressBar value={uploadJarProgress} />
+                  )}
+                  {showUploadJarSuccess && (
+                    <StatusIndicator type="success">
+                      {t('upload.uploadSuccess')}
+                    </StatusIndicator>
+                  )}
+                </>
               </FormField>
 
               <FormField
                 label={t('plugin:create.uploadFile')}
                 description={t('plugin:create.uploadFileDesc')}
               >
-                <Button iconName="upload">{t('button.chooseFile')}</Button>
+                <>
+                  <FileUpload
+                    onChange={({ detail }) => {
+                      setDependenciesFiles(detail.value);
+                    }}
+                    value={dependenciesFiles}
+                    i18nStrings={{
+                      uploadButtonText: (e) =>
+                        e ? t('button.chooseFiles') : t('button.chooseFile'),
+                      dropzoneText: (e) =>
+                        e
+                          ? t('upload.dropFilesToUpload')
+                          : t('upload.dropFileToUpload'),
+                      removeFileAriaLabel: (e) =>
+                        `${t('upload.removeFile')} ${e + 1}`,
+                      limitShowFewer: t('upload.limitShowFewer'),
+                      limitShowMore: t('upload.limitShowMore'),
+                      errorIconAriaLabel: t('upload.errorIconAriaLabel'),
+                    }}
+                    multiple
+                    showFileLastModified
+                    showFileSize
+                    showFileThumbnail
+                  />
+                  {uploadDependenciesProgress > 0 &&
+                    !showUploadDependenciesSuccess && (
+                      <ProgressBar value={uploadDependenciesProgress} />
+                    )}
+                  {showUploadDependenciesSuccess && (
+                    <StatusIndicator type="success">
+                      {t('upload.uploadSuccess')}
+                    </StatusIndicator>
+                  )}
+                </>
               </FormField>
 
               <FormField

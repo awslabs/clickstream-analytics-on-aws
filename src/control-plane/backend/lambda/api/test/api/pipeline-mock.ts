@@ -13,7 +13,7 @@
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import {
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -219,8 +219,8 @@ export const S3_ETL_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: undefined,
-    enrichPlugin: ['a', 'b'],
+    transformPlugin: `${MOCK_PLUGIN_ID}_1`,
+    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
   },
 };
 
@@ -242,7 +242,7 @@ export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
       prefix: '',
     },
     transformPlugin: undefined,
-    enrichPlugin: ['a', 'b'],
+    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {
     ods: {
@@ -287,8 +287,8 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: undefined,
-    enrichPlugin: ['a', 'b'],
+    transformPlugin: 'BUILDIN_1',
+    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {
     ods: {

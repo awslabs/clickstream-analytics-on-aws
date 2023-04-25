@@ -13,6 +13,7 @@
 
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { CPipeline } from '../model/pipeline';
 import { IProject } from '../model/project';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -67,8 +68,14 @@ export class ProjectServ {
   public async delete(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
+      // Delete pipeline stacks
+      const latestPipelines = await store.listPipeline(id, 'latest', 'asc', false, 1, 1);
+      if (latestPipelines.totalCount && latestPipelines.totalCount > 0) {
+        const latestPipeline = latestPipelines.items[0];
+        const pipeline = new CPipeline(latestPipeline);
+        await pipeline.delete();
+      }
       await store.deleteProject(id);
-      // TODO：Delete pipeline stacks
       return res.json(new ApiSuccess(null, 'Project deleted.'));
     } catch (error) {
       next(error);

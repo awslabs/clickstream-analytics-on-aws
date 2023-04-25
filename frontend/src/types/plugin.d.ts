@@ -30,4 +30,11 @@ declare global {
     createAt?: number;
     updateAt?: string;
   }
+
+  interface IPluginFile {
+    name: string;
+    loaded: number;
+    total: number;
+    isUploaded: boolean;
+  }
 }

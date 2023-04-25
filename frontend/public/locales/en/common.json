@@ -219,6 +219,7 @@
     "downloadJSON": "Download the config json file",
     "signin": "Sign In",
     "chooseFile": "Choose file",
+    "chooseFiles": "Choose files",
     "viewInCloudWatch": "View in CloudWatch",
     "integrateDashboard": "Integrate Dashboard",
     "viewAlarmInCloudWatch": "View in Alarms Group in CloudWatch",
@@ -237,6 +238,16 @@
     "updating": "Updating",
     "deleting": "Deleting",
     "pending": "Pending"
+  },
+  "upload": {
+    "dropFileToUpload": "Drop file to upload",
+    "dropFilesToUpload": "Drop files to upload",
+    "removeFile": "Remove file ",
+    "limitShowFewer": "Show fewer files",
+    "limitShowMore": "Show more files",
+    "errorIconAriaLabel": "Error",
+    "uploadSuccess": "Uploaded successfully",
+    "uploadFailed": "Upload failed."
   },
   "nextPage": "Next page",
   "prePage": "Previous page",

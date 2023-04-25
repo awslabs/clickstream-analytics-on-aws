@@ -30,8 +30,18 @@ export const PROJECT_STAGE_LIST = [
 ];
 
 export const PLUGIN_TYPE_LIST = [
-  { label: 'Enrich', value: 'Enrich' },
-  { label: 'Transform', value: 'Transform' },
+  {
+    label: 'Enrichment',
+    value: 'Enrich',
+    description:
+      'Plugin to add fields into event data collected by SDK (both Clickstream SDK or third-party SDK)',
+  },
+  {
+    label: 'Transformation',
+    value: 'Transform',
+    description:
+      'A plugin used to transform a third-party SDK’s raw data into solution built-in schema.',
+  },
 ];
 
 export const PLUGINS_LIST = [

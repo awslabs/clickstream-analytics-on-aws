@@ -20,6 +20,7 @@ export interface SolutionConfigProps {
   readonly redirectUrl: string;
   readonly solutionVersion: string;
   readonly cotrolPlaneMode: 'ALB' | 'CLOUDFRONT';
+  readonly solutionBucket: string;
 }
 
 export function generateSolutionConfig(props: SolutionConfigProps ) {
