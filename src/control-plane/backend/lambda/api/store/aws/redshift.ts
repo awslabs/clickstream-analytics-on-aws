@@ -56,12 +56,12 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
     const getNamespaceCommandOutput = await redshiftServerlessClient.send(getNamespaceCommand);
     if (getNamespaceCommandOutput.namespace) {
       return {
-        workgroupId: getWorkgroupCommandOutput.workgroup.workgroupId,
-        workgroupArn: getWorkgroupCommandOutput.workgroup.workgroupArn,
-        workgroupName: getWorkgroupCommandOutput.workgroup.workgroupName,
-        namespaceId: getNamespaceCommandOutput.namespace.namespaceId,
-        namespaceArn: getNamespaceCommandOutput.namespace.namespaceArn,
-        namespaceName: getNamespaceCommandOutput.namespace.namespaceName,
+        workgroupId: getWorkgroupCommandOutput.workgroup.workgroupId ?? '',
+        workgroupArn: getWorkgroupCommandOutput.workgroup.workgroupArn ?? '',
+        workgroupName: getWorkgroupCommandOutput.workgroup.workgroupName ?? '',
+        namespaceId: getNamespaceCommandOutput.namespace.namespaceId ?? '',
+        namespaceArn: getNamespaceCommandOutput.namespace.namespaceArn ?? '',
+        namespaceName: getNamespaceCommandOutput.namespace.namespaceName ?? '',
       } as RedshiftServerlessWorkgroup;
     }
   }

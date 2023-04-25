@@ -66,6 +66,7 @@
     "@aws-sdk/client-redshift-serverless": "^3.310.0",
     "@aws-sdk/client-route-53": "^3.310.0",
     "@aws-sdk/client-s3": "^3.310.0",
+    "@aws-sdk/client-secrets-manager": "^3.310.0",
     "@aws-sdk/client-sfn": "^3.310.0",
     "@aws-sdk/client-sqs": "^3.310.0",
     "@aws-sdk/credential-providers": "^3.310.0",

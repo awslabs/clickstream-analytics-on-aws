@@ -23,6 +23,7 @@ import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
+import { listSecrets } from '../store/aws/secretsmanager';
 
 export class EnvironmentServ {
 
@@ -180,6 +181,15 @@ export class EnvironmentServ {
     try {
       const { region } = req.query;
       const result = await ListCertificates(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listSecrets(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await listSecrets(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

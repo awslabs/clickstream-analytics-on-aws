@@ -87,4 +87,9 @@ declare global {
     arn: string;
     domain: string;
   }
+
+  interface SSMSecretRepoose {
+    name: string;
+    arn: string;
+  }
 }

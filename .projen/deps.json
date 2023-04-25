@@ -191,6 +191,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-secrets-manager",
+      "version": "^3.310.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sfn",
       "version": "^3.310.0",
       "type": "runtime"

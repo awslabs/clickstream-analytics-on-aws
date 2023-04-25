@@ -220,6 +220,11 @@ export interface PipelineStatusDetail {
   readonly url: string;
 }
 
+export interface SSMSecret {
+  readonly name: string;
+  readonly arn: string;
+}
+
 export enum AssumeRoleType {
   ALL = 'All',
   SERVICE = 'Service',

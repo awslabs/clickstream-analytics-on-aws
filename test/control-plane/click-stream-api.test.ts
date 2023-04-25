@@ -517,6 +517,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'states:DescribeExecution',
               'acm:ListCertificates',
               'cloudformation:DescribeStacks',
+              'secretsmanager:ListSecrets',
+              'secretsmanager:GetSecretValue',
             ],
             Effect: 'Allow',
             Resource: '*',

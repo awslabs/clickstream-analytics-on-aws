@@ -227,6 +227,8 @@
     "findIAMRole": "Find an IAM role",
     "aga": " AWS Global Accelerator",
     "agaDesc": "Create an accelerator to get static IP addresses that act as a global fixed entry point to your ingestion server, which will improves the availability and performance of your ingestion server. Note that additional charges apply.",
+    "auth": "Authentication",
+    "authDesc": "You can use OpenID Connector (OIDC) provider to authenticate the request sent to your ingestion server. If you plan to enable it, please create an OIDC client in the OIDC provider then create a secret in AWS Secret Manager with information “issuer”, “token endpoint”, User endpoint”, “Authorization endpoint”, “App client ID”, and “App Client Secret”.",
     "enableALBLog": "Access logs",
     "enableALBLogDesc": "Application Load Balancer support delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.",
     "connector": "Connector",
@@ -239,7 +241,9 @@
     "securityWarningDesc": "Using HTTP protocol is not secure, data will be sent without any encryption, there are high risks of data being leaked or tampered during transmission, please acknowledge the risk before proceed.",
     "nextSteps": "Next steps",
     "nextStepsDesc": "Once you create your domain, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.",
-    "dataProcessing": "Data processing"
+    "dataProcessing": "Data processing",
+    "secret": "Secret",
+    "selectSecret": "Select a secret"
   },
   "detail": {
     "ingestion": "Ingestion",

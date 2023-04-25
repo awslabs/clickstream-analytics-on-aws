@@ -254,6 +254,15 @@ app.get(
     return environmentServ.listCertificates(req, res, next);
   });
 
+app.get(
+  '/api/env/ssm/secrets',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.listSecrets(req, res, next);
+  });
+
 app.get('/api/dictionary', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return dictionaryServ.list(req, res, next);
 });

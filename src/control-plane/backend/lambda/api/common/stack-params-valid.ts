@@ -25,4 +25,24 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
   return true;
 };
 
+export const validateSecretModel = (secretValue: string|undefined) => {
+  try {
+    if (!secretValue) {
+      throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret is undefined. Please check and try again.');
+    }
+    const secret = JSON.parse(secretValue);
+    const keys = secret.issuer &&
+      secret.userEndpoint &&
+      secret.authorizationEndpoint &&
+      secret.tokenEndpoint &&
+      secret.appClientId &&
+      secret.appClientSecret;
+    if (!keys) {
+      throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret format mismatch. Please check and try again.');
+    }
+  } catch (err) {
+    throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret format mismatch. Please check and try again.');
+  }
+};
+
 

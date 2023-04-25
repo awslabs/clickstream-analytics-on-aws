@@ -57,6 +57,7 @@ declare global {
         protocol: string;
         enableGlobalAccelerator: boolean;
         enableApplicationLoadBalancerAccessLog: boolean;
+        authenticationSecretArn: string;
         logS3Bucket: {
           name: string;
           prefix: string;
@@ -136,8 +137,10 @@ declare global {
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
     selectedPublicSubnet: OptionDefinition[];
+
     selectedPrivateSubnet: OptionDefinition[];
     selectedCertificate: SelectProps.Option | null;
+    selectedSecret: SelectProps.Option | null;
     mskCreateMethod: string;
     selectedMSK: SelectProps.Option | null;
     seledtedKDKProvisionType: SelectProps.Option | null;
@@ -167,5 +170,6 @@ declare global {
     selectedQuickSightRole: SelectProps.Option | null;
     quickSightDataset: string;
     arnAccountId: string;
+    enableAuthentication: boolean;
   }
 }

@@ -15,6 +15,7 @@ import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
+import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import {
   StartExecutionCommand,
   SFNClient,
@@ -42,6 +43,7 @@ const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const sfnClient = mockClient(SFNClient);
+const secretsManagerClient = mockClient(SecretsManagerClient);
 
 describe('Workflow test', () => {
   beforeEach(() => {
@@ -49,11 +51,15 @@ describe('Workflow test', () => {
     kafkaMock.reset();
     redshiftServerlessClient.reset();
     sfnClient.reset();
+    secretsManagerClient.reset();
   });
 
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -91,7 +97,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -131,6 +137,14 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'AuthenticationSecretArn',
+                        ParameterValue: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
                         ParameterValue: 'Yes',
                       },
                       {
@@ -181,6 +195,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(KAFKA_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -218,7 +235,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -259,6 +276,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -308,6 +329,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka with connector', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -345,7 +369,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -386,6 +410,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -498,6 +526,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -535,7 +566,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -576,6 +607,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -688,6 +723,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -725,7 +763,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -766,6 +804,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -827,6 +869,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_PROVISIONED_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -864,7 +909,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -905,6 +950,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -966,6 +1015,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(S3_ETL_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1003,7 +1055,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1043,6 +1095,14 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'AuthenticationSecretArn',
+                        ParameterValue: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
                         ParameterValue: 'Yes',
                       },
                       {
@@ -1180,6 +1240,9 @@ describe('Workflow test', () => {
   it('Generate Workflow kafka msk + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(MSK_ETL_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1217,7 +1280,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1258,6 +1321,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -1539,6 +1606,9 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1576,7 +1646,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1617,6 +1687,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -1848,6 +1922,9 @@ describe('Workflow test', () => {
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, { noApp: true });
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(MSK_ETL_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1885,7 +1962,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -1926,6 +2003,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'DevMode',
                         ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
                       },
                       {
                         ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
@@ -2245,7 +2326,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -2533,7 +2614,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'RedshiftServerlessIAMRole',
-                        ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                        ParameterValue: 'arn:aws:iam::111122223333:role/MyRedshiftServerlessDataRole',
                       },
                     ],
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
@@ -2592,7 +2673,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ACMCertificateArn',
-                        ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       },
                       {
                         ParameterKey: 'Protocol',
@@ -2880,7 +2961,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'RedshiftServerlessIAMRole',
-                        ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                        ParameterValue: 'arn:aws:iam::111122223333:role/MyRedshiftServerlessDataRole',
                       },
                     ],
                     StackName: 'Clickstream-DataAnalytics-6666-6666',

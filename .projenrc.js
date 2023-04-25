@@ -61,6 +61,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-athena',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
+  '@aws-sdk/client-secrets-manager',
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',

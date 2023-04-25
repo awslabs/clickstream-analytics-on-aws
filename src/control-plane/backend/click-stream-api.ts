@@ -225,6 +225,8 @@ export class ClickStreamApiConstruct extends Construct {
             'states:DescribeExecution',
             'acm:ListCertificates',
             'cloudformation:DescribeStacks',
+            'secretsmanager:ListSecrets',
+            'secretsmanager:GetSecretValue',
           ],
         }),
       ],
@@ -235,6 +237,11 @@ export class ClickStreamApiConstruct extends Construct {
         id: 'W12',
         reason:
           'The lambda need to be queried all resources under the current account by design',
+      },
+      {
+        id: 'W76',
+        reason:
+          'This policy needs to be able to call other AWS service by design',
       },
     ]);
 

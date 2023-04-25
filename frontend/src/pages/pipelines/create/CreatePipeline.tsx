@@ -98,6 +98,7 @@ const Content: React.FC = () => {
         protocol: ProtocalType.HTTPS,
         enableGlobalAccelerator: false,
         enableApplicationLoadBalancerAccessLog: false,
+        authenticationSecretArn: '',
         logS3Bucket: {
           name: '',
           prefix: '',
@@ -169,6 +170,7 @@ const Content: React.FC = () => {
     selectedPublicSubnet: [],
     selectedPrivateSubnet: [],
     selectedCertificate: null,
+    selectedSecret: null,
     mskCreateMethod: ResourceCreateMehod.EXSITING,
     selectedMSK: null,
     seledtedKDKProvisionType: null,
@@ -219,6 +221,7 @@ const Content: React.FC = () => {
     selectedQuickSightRole: null,
     quickSightDataset: '',
     arnAccountId: '',
+    enableAuthentication: false,
   });
 
   const validateBasicInfo = () => {
@@ -336,6 +339,12 @@ const Content: React.FC = () => {
       createPipelineObj.ingestionServer.sinkKafka.mskCluster = null;
     }
 
+    // set authenticationSecretArn empty when not enable authentication
+    if (!createPipelineObj.enableAuthentication) {
+      createPipelineObj.ingestionServer.loadBalancer.authenticationSecretArn =
+        null;
+    }
+
     // remove temporary properties
     delete createPipelineObj.selectedRegion;
     delete createPipelineObj.selectedVPC;
@@ -368,6 +377,7 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedRedshiftExecutionUnit;
     delete createPipelineObj.selectedTransformPlugins;
     delete createPipelineObj.selectedEnrichPlugins;
+    delete createPipelineObj.selectedSecret;
 
     delete createPipelineObj.selectedQuickSightRole;
     delete createPipelineObj.kafkaSelfHost;
@@ -657,6 +667,14 @@ const Content: React.FC = () => {
                   };
                 });
               }}
+              changeEnableALBAuthentication={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableAuthentication: enable,
+                  };
+                });
+              }}
               changeEnableAGA={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -716,6 +734,21 @@ const Content: React.FC = () => {
                       domain: {
                         ...prev.ingestionServer.domain,
                         certificateArn: cert.value || '',
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSSMSecret={(secret) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedSecret: secret,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        authenticationSecretArn: secret?.value || '',
                       },
                     },
                   };

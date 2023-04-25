@@ -77,16 +77,22 @@ const getCertificates = async (params: { region: string }) => {
   return result;
 };
 
+const getSSMSecrets = async (params: { region: string }) => {
+  const result: any = await apiRequest('get', '/env/ssm/secrets', params);
+  return result;
+};
+
 export {
-  getRegionList,
-  getVPCList,
-  getSubnetList,
+  getCertificates,
   getHostedZoneList,
-  getS3BucketList,
   getMSKList,
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
+  getRegionList,
+  getS3BucketList,
+  getSSMSecrets,
   getServiceRoles,
   getServiceRolesByAccount,
-  getCertificates,
+  getSubnetList,
+  getVPCList,
 };

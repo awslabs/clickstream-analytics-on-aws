@@ -24,11 +24,11 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN, POSITIVE_INTEGERS,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
+  VPC_ID_PARRERN, POSITIVE_INTEGERS, SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
-import { validatePattern } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
   KinesisStreamMode,
@@ -43,6 +43,7 @@ import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { getRedshiftWorkgroupAndNamespace } from '../store/aws/redshift';
+import { getSecretValue } from '../store/aws/secretsmanager';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -103,6 +104,7 @@ interface IngestionServerLoadBalancerProps {
    * S3 bucket to save log (optional)
    */
   readonly logS3Bucket?: S3Bucket;
+  readonly authenticationSecretArn?: string;
 }
 
 interface IngestionServerSinkS3Props {
@@ -719,6 +721,24 @@ export class CPipeline {
       ParameterKey: 'DevMode',
       ParameterValue: this.project?.environment === ProjectEnvironment.DEV ? 'Yes' : 'No',
     });
+    let enableAuthentication = 'No';
+    if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
+      validatePattern('AuthenticationSecretArn', SECRETS_MANAGER_ARN_PATTERN,
+        this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn);
+      const secretContent = await getSecretValue(this.pipeline.region,
+        this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn);
+      validateSecretModel(secretContent);
+      enableAuthentication = 'Yes';
+      parameters.push({
+        ParameterKey: 'AuthenticationSecretArn',
+        ParameterValue: this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn,
+      });
+    }
+    parameters.push({
+      ParameterKey: 'EnableAuthentication',
+      ParameterValue: enableAuthentication,
+    });
+
     // Logs
     parameters.push({
       ParameterKey: 'EnableApplicationLoadBalancerAccessLog',

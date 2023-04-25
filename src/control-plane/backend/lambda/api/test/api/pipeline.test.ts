@@ -19,6 +19,7 @@ import {
   GetWorkgroupCommand,
   GetNamespaceCommand,
 } from '@aws-sdk/client-redshift-serverless';
+import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -43,6 +44,7 @@ const sfnMock = mockClient(SFNClient);
 const cloudFormationClient = mockClient(CloudFormationClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
+const secretsManagerClient = mockClient(SecretsManagerClient);
 
 
 describe('Pipeline test', () => {
@@ -52,6 +54,7 @@ describe('Pipeline test', () => {
     cloudFormationClient.reset();
     kafkaMock.reset();
     redshiftServerlessClient.reset();
+    secretsManagerClient.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
@@ -182,6 +185,9 @@ describe('Pipeline test', () => {
       $metadata: {},
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
       workgroup: {
         workgroupId: 'workgroupId',

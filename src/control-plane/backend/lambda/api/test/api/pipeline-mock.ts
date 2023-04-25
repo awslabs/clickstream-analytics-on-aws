@@ -55,7 +55,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
       'subnet-00000000000000013',
     ],
   },
-  executionArn: 'arn:aws:states:us-east-1:01234567890:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+  executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
   tags: [],
   bucket: {
     name: 'EXAMPLE_BUCKET',
@@ -69,7 +69,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
       scaleOnCpuUtilizationPercent: 50,
     },
     domain: {
-      certificateArn: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+      certificateArn: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
       domainName: 'fake.example.com',
     },
     loadBalancer: {
@@ -114,6 +114,10 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
       },
       s3BatchMaxBytes: 500,
       s3BatchTimeout: 60,
+    },
+    loadBalancer: {
+      ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+      authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
     },
   },
 };
@@ -454,7 +458,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'DomainName',
                     },
                     {
-                      ParameterValue: 'arn:aws:acm:ap-southeast-1:01234567890:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
                       ParameterKey: 'ACMCertificateArn',
                     },
                     {
@@ -680,7 +684,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'RedshiftServerlessWorkgroupName',
                     },
                     {
-                      ParameterValue: 'arn:aws:iam::01234567890:role/MyRedshiftServerlessDataRole',
+                      ParameterValue: 'arn:aws:iam::111122223333:role/MyRedshiftServerlessDataRole',
                       ParameterKey: 'RedshiftServerlessIAMRole',
                     },
                   ],

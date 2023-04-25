@@ -30,7 +30,7 @@ import {
   Tiles,
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { getCertificates, getSubnetList } from 'apis/resource';
+import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
@@ -51,6 +51,7 @@ interface ConfigIngestionProps {
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
   changeCertificate: (cert: SelectProps.Option) => void;
+  changeSSMSecret: (secret: SelectProps.Option) => void;
   changeBufferType: (type: string) => void;
   changeBufferS3Bucket: (s3: string) => void;
   changeBufferS3Prefix: (prefix: string) => void;
@@ -67,7 +68,7 @@ interface ConfigIngestionProps {
 
   changeKDSProvisionType: (provision: SelectProps.Option) => void;
   changeKDSShardNumber: (num: string) => void;
-
+  changeEnableALBAuthentication: (enable: boolean) => void;
   changeAckownledge: () => void;
 
   publicSubnetError: boolean;
@@ -95,6 +96,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeProtocal,
     changeServerEdp,
     changeCertificate,
+    changeSSMSecret,
     changeBufferType,
     changeBufferS3Bucket,
     changeBufferS3Prefix,
@@ -110,6 +112,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeKDSProvisionType,
     changeKDSShardNumber,
     changeAckownledge,
+    changeEnableALBAuthentication,
     publicSubnetError,
     privateSubnetError,
     domainNameEmptyError,
@@ -119,11 +122,14 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   } = props;
   const [loadingSubnet, setLoadingSubnet] = useState(false);
   const [loadingCertificate, setLoadingCertificate] = useState(false);
+  const [loadingSecret, setLoadingSecret] = useState(false);
   const [publicSubnetOptionList, setPublicSubnetOptionList] =
     useState<SelectProps.Options>([]);
   const [privateSubnetOptionList, setPrivateSubnetOptionList] =
     useState<SelectProps.Options>([]);
   const [certificateOptionList, setCertificateOptionList] =
+    useState<SelectProps.Options>([]);
+  const [ssmSecretOptionList, setSsmSecretOptionList] =
     useState<SelectProps.Options>([]);
 
   // get subnet list
@@ -180,6 +186,25 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     }
   };
 
+  // get ssm secret list
+  const getSSMSecretListByReion = async () => {
+    setLoadingSecret(true);
+    try {
+      const { success, data }: ApiResponse<SSMSecretRepoose[]> =
+        await getSSMSecrets({ region: pipelineInfo.region });
+      if (success) {
+        const secretOptions: SelectProps.Options = data.map((element) => ({
+          label: element.name,
+          value: element.arn,
+        }));
+        setSsmSecretOptionList(secretOptions);
+        setLoadingSecret(false);
+      }
+    } catch (error) {
+      setLoadingSecret(false);
+    }
+  };
+
   useEffect(() => {
     if (pipelineInfo.selectedRegion && pipelineInfo.selectedVPC) {
       getSubnetListByRegionAndVPC(
@@ -191,6 +216,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
   useEffect(() => {
     getCetificateListByRegion();
+    getSSMSecretListByReion();
   }, []);
 
   return (
@@ -429,8 +455,35 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 }
                 description={t('pipeline:create.agaDesc')}
               >
-                {t('pipeline:create.aga')}
+                <b>{t('pipeline:create.aga')}</b>
               </Checkbox>
+
+              <div>
+                <Checkbox
+                  onChange={({ detail }) =>
+                    changeEnableALBAuthentication(detail.checked)
+                  }
+                  checked={pipelineInfo.enableAuthentication}
+                  description={t('pipeline:create.authDesc')}
+                >
+                  <b>{t('pipeline:create.auth')}</b>
+                </Checkbox>
+                <div className="plr-20">
+                  {pipelineInfo.enableAuthentication && (
+                    <FormField label={t('pipeline:create.secret')}>
+                      <Select
+                        statusType={loadingSecret ? 'loading' : 'finished'}
+                        placeholder={t('pipeline:create.selectSecret') || ''}
+                        selectedOption={pipelineInfo.selectedSecret}
+                        options={ssmSecretOptionList}
+                        onChange={(e) => {
+                          changeSSMSecret(e.detail.selectedOption);
+                        }}
+                      />
+                    </FormField>
+                  )}
+                </div>
+              </div>
 
               <Checkbox
                 onChange={({ detail }) =>
@@ -442,7 +495,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 }
                 description={t('pipeline:create.enableALBLogDesc')}
               >
-                {t('pipeline:create.enableALBLog')}
+                <b>{t('pipeline:create.enableALBLog')}</b>
               </Checkbox>
             </SpaceBetween>
           </ExpandableSection>
