@@ -13,8 +13,8 @@
 
 import {
   EC2Client,
-  DescribeVpcsCommand,
-  DescribeSubnetsCommand,
+  paginateDescribeVpcs,
+  paginateDescribeSubnets,
   DescribeRouteTablesCommand,
   Vpc,
   Filter,
@@ -25,29 +25,22 @@ import {
   RouteTableAssociation,
   Region,
 } from '@aws-sdk/client-ec2';
-import { getPaginatedResults } from '../../common/paginator';
 import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion } from '../../common/types';
 import { getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string) => {
   const ec2Client = new EC2Client({ region });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: DescribeVpcsCommand = new DescribeVpcsCommand({
-      NextToken,
-    });
-    const queryResponse = await ec2Client.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.Vpcs,
-    };
-  });
+  const records: Vpc[] = [];
+  for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
+    records.push(...page.Vpcs as Vpc[]);
+  }
   const vpcs: ClickStreamVpc[] = [];
-  for (let index in records as Vpc[]) {
+  for (let vpc of records as Vpc[]) {
     vpcs.push({
-      id: records[index].VpcId,
-      name: getValueFromTags('Name', records[index].Tags),
-      cidr: records[index].CidrBlock,
-      isDefault: records[index].IsDefault,
+      id: vpc.VpcId ?? '',
+      name: getValueFromTags('Name', vpc.Tags!),
+      cidr: vpc.CidrBlock ?? '',
+      isDefault: vpc.IsDefault ?? false,
     });
   }
   return vpcs;
@@ -55,43 +48,38 @@ export const describeVpcs = async (region: string) => {
 
 export const describeSubnets = async (region: string, vpcId: string, type: string) => {
   const ec2Client = new EC2Client({ region });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    let filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
-    const params: DescribeSubnetsCommand = new DescribeSubnetsCommand({
-      Filters: filters,
-      NextToken,
-    });
-    const queryResponse = await ec2Client.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.Subnets,
-    };
-  });
+  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
+  const records: Subnet[] = [];
+  for await (const page of paginateDescribeSubnets({ client: ec2Client }, { Filters: filters })) {
+    records.push(...page.Subnets as Subnet[]);
+  }
   let subnets: ClickStreamSubnet[] = [];
-  for (let index in records as Subnet[]) {
+  for (let subnet of records as Subnet[]) {
     let subnetType = 'isolated';
-    const subnetId = records[index].SubnetId;
-    const routeTable = await getSubnetRouteTable(region, vpcId, subnetId);
-    const routes = routeTable.Routes;
-    for (let route of routes as Route[]) {
-      if (route.GatewayId?.startsWith('igw-')) {
-        subnetType = 'public';
-        break;
+    const subnetId = subnet.SubnetId;
+    if (subnetId) {
+      const routeTable = await getSubnetRouteTable(region, vpcId, subnetId);
+      const routes = routeTable.Routes;
+      for (let route of routes as Route[]) {
+        if (route.GatewayId?.startsWith('igw-')) {
+          subnetType = 'public';
+          break;
+        }
+        if (route.DestinationCidrBlock === '0.0.0.0/0') {
+          subnetType = 'private';
+          break;
+        }
       }
-      if (route.DestinationCidrBlock === '0.0.0.0/0') {
-        subnetType = 'private';
-        break;
+      const clickStreamSubnet = {
+        id: subnetId,
+        name: getValueFromTags('Name', subnet.Tags!),
+        cidr: subnet.CidrBlock ?? '',
+        availabilityZone: subnet.AvailabilityZone ?? '',
+        type: subnetType,
+      };
+      if (type === 'all' || type === subnetType || (type === 'private' && subnetType === 'isolated')) {
+        subnets.push(clickStreamSubnet);
       }
-    }
-    const clickStreamSubnet = {
-      id: subnetId,
-      name: getValueFromTags('Name', records[index].Tags),
-      cidr: records[index].CidrBlock,
-      availabilityZone: records[index].AvailabilityZone,
-      type: subnetType,
-    };
-    if (type === 'all' || type === subnetType || (type === 'private' && subnetType === 'isolated')) {
-      subnets.push(clickStreamSubnet);
     }
   }
   return subnets;
@@ -125,17 +113,10 @@ export const getSubnetRouteTable = async (region: string, vpcId: string, subnetI
 
 export const getSubnet = async (region: string, subnetId: string) => {
   const ec2Client = new EC2Client({ region });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: DescribeSubnetsCommand = new DescribeSubnetsCommand({
-      SubnetIds: [subnetId],
-      NextToken,
-    });
-    const queryResponse = await ec2Client.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.Subnets,
-    };
-  });
+  const records: Subnet[] = [];
+  for await (const page of paginateDescribeSubnets({ client: ec2Client }, { SubnetIds: [subnetId] })) {
+    records.push(...page.Subnets as Subnet[]);
+  }
   if (records) {
     return records[0] as Subnet;
   }

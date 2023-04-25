@@ -11,23 +11,15 @@
  *  and limitations under the License.
  */
 
-import { AthenaClient, ListWorkGroupsCommand, WorkGroupSummary } from '@aws-sdk/client-athena';
-import { getPaginatedResults } from '../../common/paginator';
+import { AthenaClient, paginateListWorkGroups, ListWorkGroupsCommand, WorkGroupSummary } from '@aws-sdk/client-athena';
 import { WorkGroup } from '../../common/types';
 
 export const listWorkGroups = async (region: string) => {
   const athenaClient = new AthenaClient({ region });
-
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: ListWorkGroupsCommand = new ListWorkGroupsCommand({
-      NextToken,
-    });
-    const queryResponse = await athenaClient.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.WorkGroups,
-    };
-  });
+  const records: WorkGroupSummary[] = [];
+  for await (const page of paginateListWorkGroups({ client: athenaClient }, {})) {
+    records.push(...page.WorkGroups as WorkGroupSummary[]);
+  }
   const workGroups: WorkGroup[] = [];
   for (let record of records as WorkGroupSummary[]) {
     workGroups.push({

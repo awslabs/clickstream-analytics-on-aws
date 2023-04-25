@@ -32,13 +32,13 @@ export const listQuickSightUsers = async (region: string) => {
     };
   });
   const users: QuickSightUser[] = [];
-  for (let index in records as User[]) {
+  for (let user of records as User[]) {
     users.push({
-      userName: records[index].UserName,
-      arn: records[index].Arn,
-      email: records[index].Email,
-      role: records[index].Role,
-      active: records[index].Active,
+      userName: user.UserName ?? '',
+      arn: user.Arn ?? '',
+      email: user.Email ?? '',
+      role: user.Role ?? '',
+      active: user.Active ?? false,
     });
   }
   return users;

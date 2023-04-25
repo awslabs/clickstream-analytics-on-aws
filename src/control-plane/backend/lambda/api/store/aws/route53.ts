@@ -11,29 +11,24 @@
  *  and limitations under the License.
  */
 
-import { Route53Client, ListHostedZonesCommand, HostedZone } from '@aws-sdk/client-route-53';
-import { getPaginatedResults } from '../../common/paginator';
+import { Route53Client, paginateListHostedZones, HostedZone } from '@aws-sdk/client-route-53';
 import { Route53HostedZone } from '../../common/types';
 
 export const listHostedZones = async () => {
   const route53Client = new Route53Client({});
-  const records = await getPaginatedResults(async (Marker: any) => {
-    const params: ListHostedZonesCommand = new ListHostedZonesCommand({
-      Marker,
-    });
-    const queryResponse = await route53Client.send(params);
-    return {
-      marker: queryResponse.Marker,
-      results: queryResponse.HostedZones,
-    };
-  });
+  const records: HostedZone[] = [];
+  for await (const page of paginateListHostedZones({ client: route53Client }, {})) {
+    records.push(...page.HostedZones as HostedZone[]);
+  }
   const hostedZones: Route53HostedZone[] = [];
   if (records) {
-    for (let index in records as HostedZone[]) {
-      hostedZones.push({
-        id: records[index].Id.split('/')[2],
-        name: records[index].Name,
-      });
+    for (let hostedZone of records as HostedZone[]) {
+      if (hostedZone.Id) {
+        hostedZones.push({
+          id: hostedZone.Id?.split('/')[2],
+          name: hostedZone.Name ?? '',
+        });
+      }
     }
   }
   return hostedZones;

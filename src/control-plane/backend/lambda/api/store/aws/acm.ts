@@ -13,40 +13,34 @@
 
 import {
   ACMClient,
-  ListCertificatesCommand,
+  paginateListCertificates,
   CertificateStatus,
   CertificateSummary,
   KeyAlgorithm,
 } from '@aws-sdk/client-acm';
 
-import { getPaginatedResults } from '../../common/paginator';
 import { Certificate } from '../../common/types';
 
 export const ListCertificates = async (region: string) => {
   const certificates: Certificate[] = [];
   const acmClient = new ACMClient({ region });
-  const records = await getPaginatedResults(async (Marker: any) => {
-    const params: ListCertificatesCommand = new ListCertificatesCommand({
-      NextToken: Marker,
-      CertificateStatuses: [CertificateStatus.ISSUED],
-      Includes: {
-        keyTypes: [
-          KeyAlgorithm.EC_prime256v1,
-          KeyAlgorithm.EC_secp384r1,
-          KeyAlgorithm.EC_prime256v1,
-          KeyAlgorithm.RSA_1024,
-          KeyAlgorithm.RSA_2048,
-          KeyAlgorithm.RSA_3072,
-          KeyAlgorithm.RSA_4096,
-        ],
-      },
-    });
-    const queryResponse = await acmClient.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.CertificateSummaryList,
-    };
-  });
+  const records: CertificateSummary[] = [];
+  for await (const page of paginateListCertificates({ client: acmClient }, {
+    CertificateStatuses: [CertificateStatus.ISSUED],
+    Includes: {
+      keyTypes: [
+        KeyAlgorithm.EC_prime256v1,
+        KeyAlgorithm.EC_secp384r1,
+        KeyAlgorithm.EC_prime256v1,
+        KeyAlgorithm.RSA_1024,
+        KeyAlgorithm.RSA_2048,
+        KeyAlgorithm.RSA_3072,
+        KeyAlgorithm.RSA_4096,
+      ],
+    },
+  })) {
+    records.push(...page.CertificateSummaryList as CertificateSummary[]);
+  }
   for (let cert of records as CertificateSummary[]) {
     if (cert.CertificateArn) {
       certificates.push({

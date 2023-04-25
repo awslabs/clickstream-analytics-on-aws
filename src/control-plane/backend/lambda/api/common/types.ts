@@ -173,7 +173,7 @@ export interface QuickSightUser {
   readonly userName: string;
   readonly role: string;
   readonly arn: string;
-  readonly active: string;
+  readonly active: boolean;
   readonly email: string;
 }
 

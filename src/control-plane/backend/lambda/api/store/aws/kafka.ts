@@ -11,23 +11,16 @@
  *  and limitations under the License.
  */
 
-import { Cluster, ClusterType, KafkaClient, ListClustersV2Command, ListNodesCommand, NodeInfo } from '@aws-sdk/client-kafka';
+import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, ListClustersV2Command, paginateListNodes, NodeInfo } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
-import { getPaginatedResults } from '../../common/paginator';
 import { MSKCluster } from '../../common/types';
 
 export const listMSKCluster = async (region: string, vpcId: string) => {
   const kafkaClient = new KafkaClient({ region });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: ListClustersV2Command = new ListClustersV2Command({
-      NextToken,
-    });
-    const queryResponse = await kafkaClient.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.ClusterInfoList,
-    };
-  });
+  const records: Cluster[] = [];
+  for await (const page of paginateListClustersV2({ client: kafkaClient }, {})) {
+    records.push(...page.ClusterInfoList as Cluster[]);
+  }
 
   const clusters: MSKCluster[] = [];
   for (let cluster of records as Cluster[]) {
@@ -74,17 +67,10 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
     return nodeEndpoints;
   }
   const kafkaClient = new KafkaClient({ region });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: ListNodesCommand = new ListNodesCommand({
-      NextToken,
-      ClusterArn: clusterArn,
-    });
-    const queryResponse = await kafkaClient.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.NodeInfoList,
-    };
-  });
+  const records: NodeInfo[] = [];
+  for await (const page of paginateListNodes({ client: kafkaClient }, { ClusterArn: clusterArn })) {
+    records.push(...page.NodeInfoList as NodeInfo[]);
+  }
 
   for (let nodeInfo of records as NodeInfo[]) {
     if (nodeInfo.BrokerNodeInfo !== undefined && nodeInfo.BrokerNodeInfo.Endpoints !== undefined) {

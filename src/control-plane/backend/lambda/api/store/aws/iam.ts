@@ -13,26 +13,18 @@
 
 import {
   IAMClient,
-  ListRolesCommand,
+  paginateListRoles,
   Role,
 } from '@aws-sdk/client-iam';
 import { awsRegion } from '../../common/constants';
-import { getPaginatedResults } from '../../common/paginator';
 import { AssumeRoleType, IamRole } from '../../common/types';
 
 export const listRoles = async (type: AssumeRoleType, key?: string) => {
   const iamClient = new IAMClient({});
-
-  const records = await getPaginatedResults(async (Marker: any) => {
-    const params: ListRolesCommand = new ListRolesCommand({
-      Marker,
-    });
-    const queryResponse = await iamClient.send(params);
-    return {
-      marker: queryResponse.Marker,
-      results: queryResponse.Roles,
-    };
-  });
+  const records: Role[] = [];
+  for await (const page of paginateListRoles({ client: iamClient }, {})) {
+    records.push(...page.Roles as Role[]);
+  }
   const roles: IamRole[] = [];
   for (let record of records as Role[]) {
     if (record.AssumeRolePolicyDocument && awsRegion) {

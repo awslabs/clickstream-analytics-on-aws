@@ -16,14 +16,15 @@ import {
   GetCommand,
   GetCommandOutput,
   PutCommand,
-  ScanCommand,
-  QueryCommand,
   UpdateCommand,
+  ScanCommandInput,
+  QueryCommandInput,
+  paginateScan,
+  paginateQuery,
 } from '@aws-sdk/lib-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { marshall, NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
-import { getPaginatedResults } from '../../common/paginator';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication, IApplicationList } from '../../model/application';
@@ -37,6 +38,21 @@ import { IProject, IProjectList } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
+
+  private async query(input: QueryCommandInput) {
+    const records: Record<string, NativeAttributeValue>[] = [];
+    for await (const page of paginateQuery({ client: docClient }, input)) {
+      records.push(...page.Items as Record<string, NativeAttributeValue>[]);
+    }
+    return records;
+  }
+  private async scan(input: ScanCommandInput) {
+    const records: Record<string, NativeAttributeValue>[] = [];
+    for await (const page of paginateScan({ client: docClient }, input)) {
+      records.push(...page.Items as Record<string, NativeAttributeValue>[]);
+    }
+    return records;
+  }
 
   public async createProject(project: IProject): Promise<string> {
     const params: PutCommand = new PutCommand({
@@ -149,22 +165,15 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async deleteProject(id: string): Promise<void> {
     // Scan all project versions
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const scan_params: ScanCommand = new ScanCommand({
-        TableName: clickStreamTableName,
-        FilterExpression: 'id = :p AND deleted = :d',
-        ExpressionAttributeValues: {
-          ':p': id,
-          ':d': false,
-        },
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(scan_params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: ScanCommandInput = {
+      TableName: clickStreamTableName,
+      FilterExpression: 'id = :p AND deleted = :d',
+      ExpressionAttributeValues: {
+        ':p': id,
+        ':d': false,
+      },
+    };
+    const records = await this.scan(input);
     const projects = records as IProject[];
     for (let index in projects) {
       const params: UpdateCommand = new UpdateCommand({
@@ -185,28 +194,21 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listProjects(order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IProjectList> {
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: QueryCommand = new QueryCommand({
-        TableName: clickStreamTableName,
-        IndexName: prefixTimeGSIName,
-        KeyConditionExpression: '#prefix= :prefix',
-        FilterExpression: 'deleted = :d',
-        ExpressionAttributeNames: {
-          '#prefix': 'prefix',
-        },
-        ExpressionAttributeValues: {
-          ':d': false,
-          ':prefix': 'METADATA',
-        },
-        ScanIndexForward: order === 'asc',
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'METADATA',
+      },
+      ScanIndexForward: order === 'asc',
+    };
+    const records = await this.query(input);
     let projects: IProjectList = {
       totalCount: 0,
       items: [],
@@ -304,29 +306,22 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async listApplication(
     projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IApplicationList> {
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: QueryCommand = new QueryCommand({
-        TableName: clickStreamTableName,
-        IndexName: prefixTimeGSIName,
-        KeyConditionExpression: '#prefix= :prefix',
-        FilterExpression: 'projectId = :p AND deleted = :d',
-        ExpressionAttributeNames: {
-          '#prefix': 'prefix',
-        },
-        ExpressionAttributeValues: {
-          ':p': projectId,
-          ':d': false,
-          ':prefix': 'APP',
-        },
-        ScanIndexForward: order === 'asc',
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'projectId = :p AND deleted = :d',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':p': projectId,
+        ':d': false,
+        ':prefix': 'APP',
+      },
+      ScanIndexForward: order === 'asc',
+    };
+    const records = await this.query(input);
 
     let apps: IApplicationList = {
       totalCount: 0,
@@ -609,26 +604,19 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async deletePipeline(projectId: string, pipelineId: string): Promise<void> {
     // Scan all pipeline versions
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const scan_params: ScanCommand = new ScanCommand({
-        TableName: clickStreamTableName,
-        FilterExpression: 'id = :p AND begins_with(#type, :t) AND deleted = :d',
-        ExpressionAttributeNames: {
-          '#type': 'type',
-        },
-        ExpressionAttributeValues: {
-          ':p': projectId,
-          ':t': `PIPELINE#${pipelineId}`,
-          ':d': false,
-        },
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(scan_params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: ScanCommandInput = {
+      TableName: clickStreamTableName,
+      FilterExpression: 'id = :p AND begins_with(#type, :t) AND deleted = :d',
+      ExpressionAttributeNames: {
+        '#type': 'type',
+      },
+      ExpressionAttributeValues: {
+        ':p': projectId,
+        ':t': `PIPELINE#${pipelineId}`,
+        ':d': false,
+      },
+    };
+    const records = await this.scan(input);
     const pipelines = records as IPipeline[];
     for (let index in pipelines) {
       const status = pipelines[index].status;
@@ -670,25 +658,18 @@ export class DynamoDbStore implements ClickStreamStore {
       filterExpression = `${filterExpression} AND id = :p`;
       expressionAttributeValues.set(':p', projectId);
     }
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: QueryCommand = new QueryCommand({
-        TableName: clickStreamTableName,
-        IndexName: prefixTimeGSIName,
-        KeyConditionExpression: '#prefix= :prefix',
-        FilterExpression: filterExpression,
-        ExpressionAttributeNames: {
-          '#prefix': 'prefix',
-        },
-        ExpressionAttributeValues: expressionAttributeValues,
-        ScanIndexForward: order === 'asc',
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: filterExpression,
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: expressionAttributeValues,
+      ScanIndexForward: order === 'asc',
+    };
+    const records = await this.query(input);
 
     let pipelines: IPipelineList = {
       totalCount: 0,
@@ -739,18 +720,10 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listDictionary(): Promise<IDictionary[]> {
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: ScanCommand = new ScanCommand({
-        TableName: dictionaryTableName,
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(params);
-
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: ScanCommandInput = {
+      TableName: dictionaryTableName,
+    };
+    const records = await this.scan(input);
     return records as IDictionary[];
   };
 
@@ -934,25 +907,18 @@ export class DynamoDbStore implements ClickStreamStore {
       plugins.totalCount = buildInPlugins.length;
     }
 
-    const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-      const params: QueryCommand = new QueryCommand({
-        TableName: clickStreamTableName,
-        IndexName: prefixTimeGSIName,
-        KeyConditionExpression: '#prefix= :prefix',
-        FilterExpression: filterExpression,
-        ExpressionAttributeNames: {
-          '#prefix': 'prefix',
-        },
-        ExpressionAttributeValues: expressionAttributeValues,
-        ScanIndexForward: order === 'asc',
-        ExclusiveStartKey,
-      });
-      const queryResponse = await docClient.send(params);
-      return {
-        marker: queryResponse.LastEvaluatedKey,
-        results: queryResponse.Items,
-      };
-    });
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: filterExpression,
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: expressionAttributeValues,
+      ScanIndexForward: order === 'asc',
+    };
+    const records = await this.query(input);
 
     plugins.totalCount = plugins.totalCount + records?.length;
     if (pagination) {

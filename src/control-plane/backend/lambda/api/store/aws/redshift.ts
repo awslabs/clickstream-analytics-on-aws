@@ -11,30 +11,23 @@
  *  and limitations under the License.
  */
 
-import { RedshiftClient, DescribeClustersCommand, Cluster } from '@aws-sdk/client-redshift';
+import { RedshiftClient, paginateDescribeClusters, Cluster } from '@aws-sdk/client-redshift';
 import {
   RedshiftServerlessClient,
-  ListWorkgroupsCommand,
   GetWorkgroupCommand,
   Workgroup,
   GetNamespaceCommand,
+  paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
-import { getPaginatedResults } from '../../common/paginator';
 import { RedshiftCluster, RedshiftServerlessWorkgroup, RedshiftWorkgroup } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId: string) => {
   const redshiftClient = new RedshiftClient({ region });
+  const records: Cluster[] = [];
+  for await (const page of paginateDescribeClusters({ client: redshiftClient }, {})) {
+    records.push(...page.Clusters as Cluster[]);
+  }
 
-  const records = await getPaginatedResults(async (Marker: any) => {
-    const params: DescribeClustersCommand = new DescribeClustersCommand({
-      Marker,
-    });
-    const queryResponse = await redshiftClient.send(params);
-    return {
-      marker: queryResponse.Marker,
-      results: queryResponse.Clusters,
-    };
-  });
   const clusters: RedshiftCluster[] = [];
   for (let cluster of records as Cluster[]) {
     if (cluster.VpcId === vpcId) {
@@ -78,17 +71,11 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
 
 export const listRedshiftServerlessWorkgroups = async (region: string) => {
   const redshiftServerlessClient = new RedshiftServerlessClient({ region });
+  const records: Workgroup[] = [];
+  for await (const page of paginateListWorkgroups({ client: redshiftServerlessClient }, {})) {
+    records.push(...page.workgroups as Workgroup[]);
+  }
 
-  const records = await getPaginatedResults(async (Marker: any) => {
-    const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({
-      nextToken: Marker,
-    });
-    const queryResponse = await redshiftServerlessClient.send(params);
-    return {
-      marker: queryResponse.nextToken,
-      results: queryResponse.workgroups,
-    };
-  });
   const workgroups: RedshiftWorkgroup[] = [];
   for (let workgroup of records as Workgroup[]) {
     workgroups.push({
