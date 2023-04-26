@@ -951,6 +951,34 @@ describe('Account Env test', () => {
     quickSightClient.on(CreateAccountSubscriptionCommand).resolves({
       SignupResponse: { accountName: 'Clickstream-ssxs' },
     });
+    quickSightClient.on(DescribeAccountSubscriptionCommand)
+      .resolvesOnce({
+        AccountInfo: {
+          AccountName: 'Clickstream-xsxs',
+          Edition: 'ENTERPRISE',
+          NotificationEmail: 'fake@example.com',
+          AuthenticationType: 'IDENTITY_POOL',
+          AccountSubscriptionStatus: 'SUBSCRIPTION_IN_PROGRESS',
+        },
+      })
+      .resolvesOnce({
+        AccountInfo: {
+          AccountName: 'Clickstream-xsxs',
+          Edition: 'ENTERPRISE',
+          NotificationEmail: 'fake@example.com',
+          AuthenticationType: 'IDENTITY_POOL',
+          AccountSubscriptionStatus: 'SUBSCRIPTION_IN_PROGRESS',
+        },
+      })
+      .resolvesOnce({
+        AccountInfo: {
+          AccountName: 'Clickstream-xsxs',
+          Edition: 'ENTERPRISE',
+          NotificationEmail: 'fake@example.com',
+          AuthenticationType: 'IDENTITY_POOL',
+          AccountSubscriptionStatus: 'ACCOUNT_CREATED',
+        },
+      });
     let res = await request(app)
       .post('/api/env/quicksight/subscription')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -967,6 +995,8 @@ describe('Account Env test', () => {
         vpcConnectionsUrl: 'https://us-east-1.quicksight.aws.amazon.com/sn/admin#vpc-connections',
       },
     });
+    expect(quickSightClient).toHaveReceivedCommandTimes(CreateAccountSubscriptionCommand, 1);
+    expect(quickSightClient).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 3);
   });
   it('UnSubscription QuickSight', async () => {
     tokenMock(ddbMock, false);

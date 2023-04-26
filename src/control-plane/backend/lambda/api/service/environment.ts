@@ -21,7 +21,8 @@ import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
   createAccountSubscription,
-  deleteAccountSubscription, describeAccountSubscription,
+  deleteAccountSubscription,
+  describeClickstreamAccountSubscription,
   listQuickSightUsers,
   quickSightPing,
   registerQuickSightUser,
@@ -192,7 +193,7 @@ export class EnvironmentServ {
   }
   public async describeAccountSubscription(_req: any, res: any, next: any) {
     try {
-      const result = await describeAccountSubscription();
+      const result = await describeClickstreamAccountSubscription();
       if (!result) {
         return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
       }

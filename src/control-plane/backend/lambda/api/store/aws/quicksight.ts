@@ -24,6 +24,7 @@ import {
   Edition,
   IdentityType,
   UserRole,
+  DescribeAccountSubscriptionCommandOutput,
 } from '@aws-sdk/client-quicksight';
 import { awsAccountId } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
@@ -36,6 +37,7 @@ const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_ACCOUNT = `${QUICKSIGHT_PREFIX}-${generateRandomStr(8)}`;
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
+const ACCOUNT_SUBSCRIPTION_TIMEOUT = 20;
 export const listQuickSightUsers = async () => {
   const users: QuickSightUser[] = [];
   try {
@@ -90,7 +92,7 @@ export const quickSightPing = async (): Promise<boolean> => {
   });
   try {
     const response = await quickSightClient.send(command);
-    if (response.AccountInfo?.AccountSubscriptionStatus === 'UNSUBSCRIBED') {
+    if (response.AccountInfo?.AccountSubscriptionStatus?.startsWith('UNSUBSCRIBED')) {
       return false;
     }
   } catch (err) {
@@ -102,13 +104,17 @@ export const quickSightPing = async (): Promise<boolean> => {
   return true;
 };
 
-export const describeAccountSubscription = async (): Promise<QuickSightAccountInfo | undefined> => {
+export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {
   const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
   const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
     AwsAccountId: awsAccountId,
   });
+  return quickSightClient.send(command);
+};
+
+export const describeClickstreamAccountSubscription = async (): Promise<QuickSightAccountInfo | undefined> => {
   try {
-    const response = await quickSightClient.send(command);
+    const response = await describeAccountSubscription();
     if (response.AccountInfo?.AccountSubscriptionStatus === 'UNSUBSCRIBED') {
       return undefined;
     }
@@ -132,19 +138,36 @@ export const describeAccountSubscription = async (): Promise<QuickSightAccountIn
 };
 
 export const createAccountSubscription = async (email: string, accountName: string) => {
-  const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
-  const command: CreateAccountSubscriptionCommand = new CreateAccountSubscriptionCommand({
-    AccountName: accountName ?? QUICKSIGHT_DEFAULT_ACCOUNT,
-    AuthenticationMethod: AuthenticationMethodOption.IAM_AND_QUICKSIGHT,
-    AwsAccountId: awsAccountId,
-    Edition: Edition.ENTERPRISE,
-    NotificationEmail: email,
-  });
-  const response = await quickSightClient.send(command);
-  return {
-    ...response.SignupResponse,
-    vpcConnectionsUrl: `https://${QUICKSIGHT_CONTROL_PLANE_REGION}.quicksight.aws.amazon.com/sn/admin#vpc-connections`,
-  };
+  try {
+    const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+    const command: CreateAccountSubscriptionCommand = new CreateAccountSubscriptionCommand({
+      AccountName: accountName ? `${QUICKSIGHT_PREFIX}-${accountName}` : QUICKSIGHT_DEFAULT_ACCOUNT,
+      AuthenticationMethod: AuthenticationMethodOption.IAM_AND_QUICKSIGHT,
+      AwsAccountId: awsAccountId,
+      Edition: Edition.ENTERPRISE,
+      NotificationEmail: email,
+    });
+    const createResponse = await quickSightClient.send(command);
+    await Sleep(1000);
+    let count = 1;
+    let describeResponse = await describeAccountSubscription();
+    while (describeResponse.AccountInfo?.AccountSubscriptionStatus != 'ACCOUNT_CREATED' && count < ACCOUNT_SUBSCRIPTION_TIMEOUT) {
+      await Sleep(1000);
+      count++;
+      describeResponse = await describeAccountSubscription();
+    }
+    if (describeResponse.AccountInfo?.AccountSubscriptionStatus != 'ACCOUNT_CREATED') {
+      logger.error('Account Subscription Failed.', { describeResponse });
+      throw new Error('Account Subscription Failed.');
+    }
+
+    return {
+      ...createResponse.SignupResponse,
+      vpcConnectionsUrl: `https://${QUICKSIGHT_CONTROL_PLANE_REGION}.quicksight.aws.amazon.com/sn/admin#vpc-connections`,
+    };
+  } catch (err) {
+    throw err;
+  }
 };
 
 export const deleteAccountSubscription = async () => {
@@ -162,4 +185,6 @@ export const deleteAccountSubscription = async () => {
   await quickSightClient.send(command);
 };
 
-
+export const Sleep = (ms: number) => {
+  return new Promise(resolve=>setTimeout(resolve, ms));
+};
