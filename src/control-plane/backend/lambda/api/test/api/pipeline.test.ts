@@ -478,13 +478,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [
-        { name: 'Pipeline-01' },
-        { name: 'Pipeline-02' },
-        { name: 'Pipeline-03' },
-        { name: 'Pipeline-04' },
-        { name: 'Pipeline-05' },
-      ],
+      Items: [S3_INGESTION_PIPELINE],
     });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
@@ -497,47 +491,91 @@ describe('Pipeline test', () => {
       data: {
         items: [
           {
-            name: 'Pipeline-01',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: 'example/',
             },
-          },
-          {
-            name: 'Pipeline-02',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            createAt: 1681353806173,
+            dataCollectionSDK: 'clickstream',
+            deleted: false,
+            description: 'Pipeline01 Description',
+            executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+            executionName: 'main-3333-3333',
+            id: 'project_8888_8888',
+            ingestionServer: {
+              domain: {
+                certificateArn: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                domainName: 'fake.example.com',
+              },
+              loadBalancer: {
+                authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+                enableApplicationLoadBalancerAccessLog: true,
+                enableGlobalAccelerator: true,
+                logS3Bucket: {
+                  name: 'EXAMPLE_BUCKET',
+                  prefix: 'logs/',
+                },
+                notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test',
+                protocol: 'HTTPS',
+                serverCorsOrigin: '',
+                serverEndpointPath: '/collect',
+              },
+              sinkS3: {
+                s3BatchMaxBytes: 500,
+                s3BatchTimeout: 60,
+                sinkBucket: {
+                  name: 'EXAMPLE_BUCKET',
+                  prefix: '',
+                },
+              },
+              sinkType: 's3',
+              size: {
+                scaleOnCpuUtilizationPercent: 50,
+                serverMax: 4,
+                serverMin: 2,
+                warmPoolSize: 1,
+              },
             },
-          },
-          {
-            name: 'Pipeline-03',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            name: 'Pipeline01',
+            network: {
+              privateSubnetIds: [
+                'subnet-00000000000000011',
+                'subnet-00000000000000012',
+                'subnet-00000000000000013',
+              ],
+              publicSubnetIds: [
+                'subnet-00000000000000021',
+                'subnet-00000000000000022',
+                'subnet-00000000000000023',
+              ],
+              vpcId: 'vpc-00000000000000001',
             },
-          },
-          {
-            name: 'Pipeline-04',
+            operator: '',
+            pipelineId: '6666-6666',
+            prefix: 'PIPELINE',
+            projectId: 'project_8888_8888',
+            region: 'ap-southeast-1',
             status: {
-              status: 'Active',
-              stackDetails: [],
               executionDetail: {},
+              stackDetails: [],
+              status: 'Active',
             },
-          },
-          {
-            name: 'Pipeline-05',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            tags: [],
+            type: 'PIPELINE#6666-6666#latest',
+            updateAt: 1681353806173,
+            version: '1681353806172',
+            versionTag: 'latest',
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [],
+                End: true,
+                Type: 'Parallel',
+              },
             },
           },
         ],
-        totalCount: 5,
+        totalCount: 1,
       },
     });
 
