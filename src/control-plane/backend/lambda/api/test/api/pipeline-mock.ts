@@ -384,7 +384,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'DataS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/buffer/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/buffer/`,
                       ParameterKey: 'DataS3Prefix',
                     },
                     {
@@ -392,7 +392,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'LogS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/logs/kafka-connector/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/logs/kafka-connector/`,
                       ParameterKey: 'LogS3Prefix',
                     },
                     {
@@ -400,7 +400,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'PluginS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/runtime/ingestion/kafka-connector/plugins/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/runtime/ingestion/kafka-connector/plugins/`,
                       ParameterKey: 'PluginS3Prefix',
                     },
                     {
@@ -506,7 +506,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'LogS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/logs/alb/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/logs/alb/`,
                       ParameterKey: 'LogS3Prefix',
                     },
                     {
@@ -569,7 +569,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'SourceS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/buffer/t1/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/buffer/t1/`,
                       ParameterKey: 'SourceS3Prefix',
                     },
                     {
@@ -577,7 +577,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'SinkS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/ods/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
                       ParameterKey: 'SinkS3Prefix',
                     },
                     {
@@ -585,7 +585,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'PipelineS3Bucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/pipeline-temp/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/pipeline-temp/`,
                       ParameterKey: 'PipelineS3Prefix',
                     },
                     {
@@ -648,7 +648,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'ODSEventBucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/ods/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
                       ParameterKey: 'ODSEventPrefix',
                     },
                     {
@@ -660,7 +660,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'LoadWorkflowBucket',
                     },
                     {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/${MOCK_PIPELINE_ID}/data/ods/`,
+                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
                       ParameterKey: 'LoadWorkflowBucketPrefix',
                     },
                     {

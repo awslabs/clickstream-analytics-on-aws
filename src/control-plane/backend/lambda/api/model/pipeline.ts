@@ -456,12 +456,12 @@ export class CPipeline {
   private getBucketPrefix(key: string, value: string | undefined): string {
     if (value === undefined || value === '' || value === '/') {
       const prefixs: Map<string, string> = new Map();
-      prefixs.set('logs-alb', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/logs/alb/`);
-      prefixs.set('logs-kafka-connector', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/logs/kafka-connector/`);
-      prefixs.set('data-buffer', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/data/buffer/`);
-      prefixs.set('data-ods', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/data/ods/`);
-      prefixs.set('data-pipeline-temp', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/data/pipeline-temp/`);
-      prefixs.set('kafka-connector-plugin', `clickstream/${this.pipeline.projectId}/${this.pipeline.pipelineId}/runtime/ingestion/kafka-connector/plugins/`);
+      prefixs.set('logs-alb', `clickstream/${this.pipeline.projectId}/logs/alb/`);
+      prefixs.set('logs-kafka-connector', `clickstream/${this.pipeline.projectId}/logs/kafka-connector/`);
+      prefixs.set('data-buffer', `clickstream/${this.pipeline.projectId}/data/buffer/`);
+      prefixs.set('data-ods', `clickstream/${this.pipeline.projectId}/data/ods/`);
+      prefixs.set('data-pipeline-temp', `clickstream/${this.pipeline.projectId}/data/pipeline-temp/`);
+      prefixs.set('kafka-connector-plugin', `clickstream/${this.pipeline.projectId}/runtime/ingestion/kafka-connector/plugins/`);
       return prefixs.get(key) ?? '';
     }
     if (!value.endsWith('/')) {

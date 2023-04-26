@@ -165,7 +165,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'S3DataPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'S3BatchMaxBytes',
@@ -467,7 +467,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -475,7 +475,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -483,7 +483,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -664,7 +664,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -672,7 +672,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -680,7 +680,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -827,7 +827,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisDataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'KinesisStreamMode',
@@ -973,7 +973,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisDataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'KinesisStreamMode',
@@ -1123,7 +1123,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'S3DataPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'S3BatchMaxBytes',
@@ -1178,7 +1178,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -1186,7 +1186,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -1194,7 +1194,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -1378,7 +1378,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -1386,7 +1386,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -1394,7 +1394,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -1461,7 +1461,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -1469,7 +1469,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -1477,7 +1477,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -1548,7 +1548,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -1560,7 +1560,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',
@@ -1710,7 +1710,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisDataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'KinesisStreamMode',
@@ -1777,7 +1777,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -1785,7 +1785,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -1793,7 +1793,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -1864,7 +1864,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -1876,7 +1876,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',
@@ -2060,7 +2060,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -2068,7 +2068,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -2076,7 +2076,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -2143,7 +2143,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -2151,7 +2151,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -2159,7 +2159,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -2230,7 +2230,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -2242,7 +2242,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',
@@ -2374,7 +2374,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/alb/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/alb/',
                       },
                       {
                         ParameterKey: 'MskClusterName',
@@ -2416,7 +2416,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -2424,7 +2424,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -2432,7 +2432,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -2499,7 +2499,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -2507,7 +2507,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -2515,7 +2515,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -2578,7 +2578,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -2590,7 +2590,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',
@@ -2721,7 +2721,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/alb/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/alb/',
                       },
                       {
                         ParameterKey: 'MskClusterName',
@@ -2763,7 +2763,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'DataS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
                       },
                       {
                         ParameterKey: 'LogS3Bucket',
@@ -2771,7 +2771,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LogS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/logs/kafka-connector/',
+                        ParameterValue: 'clickstream/project_8888_8888/logs/kafka-connector/',
                       },
                       {
                         ParameterKey: 'PluginS3Bucket',
@@ -2779,7 +2779,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PluginS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/runtime/ingestion/kafka-connector/plugins/',
+                        ParameterValue: 'clickstream/project_8888_8888/runtime/ingestion/kafka-connector/plugins/',
                       },
                       {
                         ParameterKey: 'SubnetIds',
@@ -2846,7 +2846,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -2854,7 +2854,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SinkS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'PipelineS3Bucket',
@@ -2862,7 +2862,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'PipelineS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/pipeline-temp/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
                       },
                       {
                         ParameterKey: 'DataFreshnessInHour',
@@ -2925,7 +2925,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'ODSEventPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'ODSEventFileSuffix',
@@ -2937,7 +2937,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadWorkflowBucketPrefix',
-                        ParameterValue: 'clickstream/project_8888_8888/6666-6666/data/ods/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
                       },
                       {
                         ParameterKey: 'MaxFilesLimit',
