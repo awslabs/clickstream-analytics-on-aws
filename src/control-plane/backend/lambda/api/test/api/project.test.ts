@@ -123,6 +123,11 @@ describe('Project test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
+          param: 'emails',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
           param: 'id',
         },
         {

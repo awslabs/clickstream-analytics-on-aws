@@ -123,6 +123,13 @@ declare global {
         scheduleInterval: string;
       };
     };
+    report: {
+      quickSight: {
+        accountName: string;
+        user: string;
+        vpcConnection: string;
+      };
+    };
     status?: {
       status: string;
       details: IStackStatus[];
@@ -167,8 +174,10 @@ declare global {
     selectedTransformPlugins: IPlugin[];
     selectedEnrichPlugins: IPlugin[];
 
-    selectedQuickSightRole: SelectProps.Option | null;
-    quickSightDataset: string;
+    enableReporting: boolean;
+    selectedQuickSightUser: SelectProps.Option | null;
+    dataConnectionType: string;
+    quickSightVpcConnection: string;
     arnAccountId: string;
     enableAuthentication: boolean;
   }

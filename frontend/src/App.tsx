@@ -27,6 +27,7 @@ import PluginList from 'pages/plugins/PluginList';
 import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
+import QuickSight from 'pages/quicksight/QuickSight';
 import React, { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
@@ -109,6 +110,7 @@ const SignedInPage: React.FC = () => {
                   path="/project/:pid/application/detail/:id"
                   element={<ApplicationDetail />}
                 />
+                <Route path="/quicksight" element={<QuickSight />} />
               </Routes>
             </div>
           </Suspense>

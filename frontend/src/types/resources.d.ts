@@ -88,8 +88,31 @@ declare global {
     domain: string;
   }
 
+  interface QuickSightUserResponse {
+    active: boolean;
+    arn: string;
+    email: string;
+    role: string;
+    userName: string;
+  }
+
+  interface SubscribeQuickSightResponse {
+    IAMUser: boolean;
+    accountName: string;
+    directoryType: string;
+    vpcConnectionsUrl: string;
+  }
+
   interface SSMSecretRepoose {
     name: string;
     arn: string;
+  }
+
+  interface QuickSightDetailResponse {
+    accountName: string;
+    accountSubscriptionStatus: string;
+    authenticationType: string;
+    edition: string;
+    notificationEmail: string;
   }
 }

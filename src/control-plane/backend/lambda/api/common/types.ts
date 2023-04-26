@@ -177,11 +177,20 @@ export interface QuickSightUser {
   readonly email: string;
 }
 
+export interface QuickSightAccountInfo {
+  readonly accountName?: string;
+  readonly edition?: string;
+  readonly notificationEmail?: string;
+  readonly authenticationType?: string;
+  readonly accountSubscriptionStatus?: string;
+}
+
 export interface RedshiftCluster {
   readonly name: string;
   readonly nodeType: string;
   readonly endpoint?: Endpoint;
   readonly status: string;
+  readonly publiclyAccessible: boolean;
 }
 
 export interface RedshiftWorkgroup {
@@ -236,6 +245,7 @@ export enum PipelineStackType {
   KAFKA_CONNECTOR = 'KafkaConnector',
   ETL = 'ETL',
   DATA_ANALYTICS = 'DataAnalytics',
+  REPORT = 'Report',
 }
 
 export enum PipelineStatusType {

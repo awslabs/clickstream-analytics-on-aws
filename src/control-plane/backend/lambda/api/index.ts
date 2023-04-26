@@ -30,7 +30,7 @@ import {
   defaultAssumeRoleTypeValid,
   isProjectExisted,
   isProjectNotExisted,
-  isValidAppId,
+  isValidAppId, isEmails,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { JWTAuthorizer } from './middle-ware/authorizer';
@@ -196,20 +196,46 @@ app.get(
 
 app.get(
   '/api/env/quicksight/users',
-  validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
-  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listQuickSightUsers(req, res, next);
   });
 
-app.get(
-  '/api/env/quicksight/ping',
+app.post(
+  '/api/env/quicksight/user',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    body('email').isEmail(),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.registerQuickSightUser(req, res, next);
+  });
+
+app.get(
+  '/api/env/quicksight/ping',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.quicksightPing(req, res, next);
+  });
+
+app.get(
+  '/api/env/quicksight/describe',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeAccountSubscription(req, res, next);
+  });
+
+app.post(
+  '/api/env/quicksight/subscription',
+  validate([
+    body('email').isEmail(),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.createAccountSubscription(req, res, next);
+  });
+
+app.post(
+  '/api/env/quicksight/unsubscription',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.deleteAccountSubscription(req, res, next);
   });
 
 app.get(
@@ -289,6 +315,7 @@ app.post(
   '/api/project',
   validate([
     body().custom(isValidEmpty),
+    body('emails').custom(isEmails),
     body('id').custom(isProjectNotExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),

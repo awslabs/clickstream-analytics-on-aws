@@ -24,9 +24,13 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
+  VPC_ID_PARRERN,
+  POSITIVE_INTEGERS,
+  QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN,
+  QUICKSIGHT_NAMESPACE_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
-  VPC_ID_PARRERN, POSITIVE_INTEGERS, SECRETS_MANAGER_ARN_PATTERN,
+  SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
 import { validatePattern, validateSecretModel } from '../common/stack-params-valid';
 import {
@@ -35,7 +39,13 @@ import {
   PipelineServerProtocol,
   PipelineSinkType, PipelineStackType,
   PipelineStatus,
-  ProjectEnvironment, RedshiftServerlessWorkgroup, WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowTemplate, WorkflowVersion,
+  ProjectEnvironment,
+  RedshiftServerlessWorkgroup,
+  WorkflowParallelBranch,
+  WorkflowState,
+  WorkflowStateType,
+  WorkflowTemplate,
+  WorkflowVersion,
 } from '../common/types';
 import { isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -252,6 +262,14 @@ export interface DataAnalytics {
   };
 }
 
+export interface Report {
+  readonly quickSight?: {
+    readonly accountName: string;
+    readonly user: string;
+    readonly namespace?: string;
+    readonly vpcConnection?: string;
+  };
+}
 export interface Tag {
   [key: string]: string;
 }
@@ -285,7 +303,7 @@ export interface IPipeline {
   readonly ingestionServer: IngestionServer;
   readonly etl?: ETL;
   readonly dataAnalytics?: DataAnalytics;
-  readonly quickSightDataset?: any;
+  readonly report?: Report;
 
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
@@ -1191,4 +1209,33 @@ export class CPipeline {
     }
     return undefined;
   }
+}
+
+export async function getReportStackParameters(pipeline: IPipeline) {
+  const parameters: Parameter[] = [];
+
+  validatePattern('QuickSightAccountName', QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN, pipeline.report?.quickSight?.accountName);
+  parameters.push({
+    ParameterKey: 'QuickSightAccountNameParam',
+    ParameterValue: pipeline.report?.quickSight?.accountName,
+  });
+
+  validatePattern('QuickSightUser', QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN, pipeline.report?.quickSight?.user);
+  parameters.push({
+    ParameterKey: 'QuickSightUserParam',
+    ParameterValue: pipeline.report?.quickSight?.user,
+  });
+
+  validatePattern('QuickSightNamespace', QUICKSIGHT_NAMESPACE_PATTERN, pipeline.report?.quickSight?.namespace?? 'default');
+  parameters.push({
+    ParameterKey: 'QuickSightNamespaceParam',
+    ParameterValue: pipeline.report?.quickSight?.namespace?? 'default',
+  });
+
+  parameters.push({
+    ParameterKey: 'QuickSightVpcConnectionParam',
+    ParameterValue: pipeline.report?.quickSight?.vpcConnection,
+  });
+
+  return parameters;
 }

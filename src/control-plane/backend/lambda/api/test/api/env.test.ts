@@ -16,16 +16,26 @@ import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
 import { EC2Client, DescribeRegionsCommand, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
-import { QuickSightClient, ListUsersCommand } from '@aws-sdk/client-quicksight';
+import {
+  QuickSightClient,
+  ListUsersCommand,
+  RegisterUserCommand,
+  CreateAccountSubscriptionCommand,
+  UpdateAccountSettingsCommand, DeleteAccountSubscriptionCommand, DescribeAccountSubscriptionCommand,
+} from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
+import { MOCK_TOKEN, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
 
+
+const ddbMock = mockClient(DynamoDBDocumentClient);
 const ec2ClientMock = mockClient(EC2Client);
 const s3Client = mockClient(S3Client);
 const kafkaClient = mockClient(KafkaClient);
@@ -39,6 +49,7 @@ const acmClient = mockClient(ACMClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
+    ddbMock.reset();
     ec2ClientMock.reset();
     s3Client.reset();
     kafkaClient.reset();
@@ -807,6 +818,7 @@ describe('Account Env test', () => {
             Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5439,
           },
+          publiclyAccessible: false,
           status: 'available',
         },
       ],
@@ -841,6 +853,7 @@ describe('Account Env test', () => {
             Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5439,
           },
+          publiclyAccessible: false,
           status: 'available',
         },
       ],
@@ -884,7 +897,7 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Get QuickSight Account', async () => {
+  it('List QuickSight Users', async () => {
     quickSightClient.on(ListUsersCommand).resolves({
       UserList: [
         {
@@ -913,10 +926,91 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Ping QuickSight', async () => {
-    quickSightClient.on(ListUsersCommand).resolves({
-      UserList: [],
+  it('Create QuickSight User', async () => {
+    tokenMock(ddbMock, false);
+    quickSightClient.on(RegisterUserCommand).resolves({
+      UserInvitationUrl: 'http://xxx',
     });
+    let res = await request(app)
+      .post('/api/env/quicksight/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        email: 'fake@example.com',
+        username: 'Clickstream-User-xxx',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: 'http://xxx',
+    });
+  });
+  it('Subscription QuickSight', async () => {
+    tokenMock(ddbMock, false);
+    quickSightClient.on(CreateAccountSubscriptionCommand).resolves({
+      SignupResponse: { accountName: 'Clickstream-ssxs' },
+    });
+    let res = await request(app)
+      .post('/api/env/quicksight/subscription')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        email: 'fake@example.com',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        accountName: 'Clickstream-ssxs',
+        vpcConnectionsUrl: 'https://us-east-1.quicksight.aws.amazon.com/sn/admin#vpc-connections',
+      },
+    });
+  });
+  it('UnSubscription QuickSight', async () => {
+    tokenMock(ddbMock, false);
+    quickSightClient.on(UpdateAccountSettingsCommand).resolves({});
+    quickSightClient.on(DeleteAccountSubscriptionCommand).resolves({});
+    let res = await request(app)
+      .post('/api/env/quicksight/unsubscription')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+    });
+    expect(quickSightClient).toHaveReceivedCommandTimes(UpdateAccountSettingsCommand, 1);
+    expect(quickSightClient).toHaveReceivedCommandTimes(DeleteAccountSubscriptionCommand, 1);
+  });
+  it('Describe QuickSight', async () => {
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
+      AccountInfo: {
+        AccountName: 'Clickstream-xsxs',
+        Edition: 'ENTERPRISE',
+        NotificationEmail: 'fake@example.com',
+        AuthenticationType: 'IDENTITY_POOL',
+        AccountSubscriptionStatus: 'ACCOUNT_CREATED',
+      },
+    });
+    const res = await request(app).get('/api/env/quicksight/describe');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        accountName: 'Clickstream-xsxs',
+        accountSubscriptionStatus: 'ACCOUNT_CREATED',
+        authenticationType: 'IDENTITY_POOL',
+        edition: 'ENTERPRISE',
+        notificationEmail: 'fake@example.com',
+      },
+    });
+  });
+  it('Ping QuickSight', async () => {
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({});
     let res = await request(app).get('/api/env/quicksight/ping');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -926,8 +1020,8 @@ describe('Account Env test', () => {
       data: true,
     });
     const mockError = new Error('Mock DynamoDB error');
-    mockError.name = 'UnrecognizedClientException';
-    quickSightClient.on(ListUsersCommand).rejects(mockError);
+    mockError.name = 'ResourceNotFoundException';
+    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
     res = await request(app).get('/api/env/quicksight/ping');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);

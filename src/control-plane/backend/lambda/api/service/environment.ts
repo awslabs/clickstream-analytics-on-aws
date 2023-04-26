@@ -12,14 +12,20 @@
  */
 
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
-import { ApiSuccess, Policy, PolicyStatement } from '../common/types';
+import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
 import { getRegionAccount } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
 import { describeVpcs, describeSubnets, listRegions } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
-import { listQuickSightUsers, quickSightPing } from '../store/aws/quicksight';
+import {
+  createAccountSubscription,
+  deleteAccountSubscription, describeAccountSubscription,
+  listQuickSightUsers,
+  quickSightPing,
+  registerQuickSightUser,
+} from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
@@ -115,15 +121,6 @@ export class EnvironmentServ {
       next(error);
     }
   }
-  public async listQuickSightUsers(req: any, res: any, next: any) {
-    try {
-      const { region } = req.query;
-      const result = await listQuickSightUsers(region);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
   public async listRoles(req: any, res: any, next: any) {
     try {
       const { type, key } = req.query;
@@ -168,10 +165,54 @@ export class EnvironmentServ {
       next(error);
     }
   }
-  public async quicksightPing(req: any, res: any, next: any) {
+  public async quicksightPing(_req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await quickSightPing(region);
+      const result = await quickSightPing();
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async listQuickSightUsers(_req: any, res: any, next: any) {
+    try {
+      const result = await listQuickSightUsers();
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async registerQuickSightUser(req: any, res: any, next: any) {
+    try {
+      const { email, username } = req.body;
+      const result = await registerQuickSightUser(email, username);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async describeAccountSubscription(_req: any, res: any, next: any) {
+    try {
+      const result = await describeAccountSubscription();
+      if (!result) {
+        return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
+      }
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async createAccountSubscription(req: any, res: any, next: any) {
+    try {
+      const { email, accountName } = req.body;
+      const result = await createAccountSubscription(email, accountName);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async deleteAccountSubscription(_req: any, res: any, next: any) {
+    try {
+      const result = await deleteAccountSubscription();
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

@@ -12,57 +12,181 @@
  */
 
 import {
-  SpaceBetween,
-  Header,
+  Alert,
+  Box,
+  Button,
   Container,
   FormField,
-  Toggle,
-  Select,
+  Header,
   Input,
+  Link,
+  Modal,
+  RadioGroup,
+  Select,
   SelectProps,
+  SpaceBetween,
+  Spinner,
+  Toggle,
 } from '@cloudscape-design/components';
-import { getServiceRoles } from 'apis/resource';
+import {
+  createQuickSightUser,
+  getQuickSightDetail,
+  getQuickSightStatus,
+  getQuickSightUsers,
+  subscribQuickSight,
+} from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ReportingProps {
   pipelineInfo: IExtPipeline;
-  changeQuickSightSelectedRole: (role: SelectProps.Option) => void;
-  changeDatasetName: (name: string) => void;
+  changeEnableReporting: (enable: boolean) => void;
+  changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
+  changeQuickSightVpcConnection: (connection: string) => void;
+  changeQuickSightConnectionType: (type: string) => void;
+  changeQuickSightAccountName: (accountName: string) => void;
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const { t } = useTranslation();
-  const { pipelineInfo, changeQuickSightSelectedRole, changeDatasetName } =
-    props;
-  const [createDashboard, setCreateDashboard] = useState(true);
+  const {
+    pipelineInfo,
+    changeEnableReporting,
+    changeQuickSightSelectedUser,
+    changeQuickSightVpcConnection,
+    changeQuickSightConnectionType,
+    changeQuickSightAccountName,
+  } = props;
   const [quickSightRoleOptions, setQuickSightRoleOptions] =
     useState<SelectProps.Options>([]);
-  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
-  // get msk clusters by region
-  const getQuickSightRoles = async () => {
-    setLoadingRoles(true);
+  const [loadingQuickSight, setLoadingQuickSight] = useState(false);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
+  const [loadingCreateUser, setLoadingCreateUser] = useState(false);
+  const [quickSightEnabled, setQuickSightEnabled] = useState(false);
+  const [userActiveLink, setUserActiveLink] = useState('');
+
+  const [showSubQuickSight, setShowSubQuickSight] = useState(false);
+  const [subscriptionAccountName, setSubscriptionAccountName] = useState('');
+  const [subscriptionEmail, setSubscriptionEmail] = useState('');
+
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [showCreateUser, setShowCreateUser] = useState(false);
+
+  // get quicksight details
+  const getTheQuickSightDetail = async () => {
     try {
-      const { success, data }: ApiResponse<IAMRoleResponse[]> =
-        await getServiceRoles({ service: 'quicksight' });
-      if (success) {
-        const mskOptions: SelectProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.arn,
-          iconName: 'settings',
-          description: element.id,
-        }));
-        setQuickSightRoleOptions(mskOptions);
-        setLoadingRoles(false);
+      const { success, data }: ApiResponse<QuickSightDetailResponse> =
+        await getQuickSightDetail();
+      if (success && data) {
+        setLoadingQuickSight(false);
+        changeQuickSightAccountName(data.accountName);
       }
     } catch (error) {
-      setLoadingRoles(false);
+      setLoadingQuickSight(false);
     }
   };
 
+  // get quicksight users
+  const checkTheQuickSightStatus = async () => {
+    setLoadingQuickSight(true);
+    try {
+      const { success, data }: ApiResponse<boolean> =
+        await getQuickSightStatus();
+      if (success && data) {
+        setQuickSightEnabled(true);
+        getTheQuickSightDetail();
+      } else {
+        setLoadingQuickSight(false);
+      }
+    } catch (error) {
+      setLoadingQuickSight(false);
+    }
+  };
+
+  // get quicksight users
+  const getQuickSightUserList = async () => {
+    setLoadingUsers(true);
+    try {
+      const { success, data }: ApiResponse<QuickSightUserResponse[]> =
+        await getQuickSightUsers();
+      if (success) {
+        const mskOptions: SelectProps.Options = data.map((element) => ({
+          label: element.email,
+          value: element.userName,
+          description: element.userName,
+          labelTag: element.role,
+        }));
+        setQuickSightRoleOptions(mskOptions);
+        setLoadingUsers(false);
+      }
+    } catch (error) {
+      setLoadingUsers(false);
+    }
+  };
+
+  // create quicksight user
+  const createNewQuickSightUser = async () => {
+    setLoadingCreateUser(true);
+    try {
+      const { success, data }: ApiResponse<string> = await createQuickSightUser(
+        {
+          email: newUserEmail,
+          accountName: pipelineInfo.report.quickSight.accountName,
+        }
+      );
+      setLoadingCreateUser(false);
+      if (success && data) {
+        setNewUserEmail('');
+        setUserActiveLink(data);
+      }
+    } catch (error) {
+      setLoadingCreateUser(false);
+    }
+  };
+
+  // subscribe quicksight
+  const subscribTheQuickSight = async () => {
+    setLoadingSubscription(true);
+    try {
+      const { success, data }: ApiResponse<SubscribeQuickSightResponse> =
+        await subscribQuickSight({
+          email: subscriptionEmail,
+          accountName: subscriptionAccountName,
+        });
+      if (success && data) {
+        // Set QuickSight Account Name
+        setQuickSightEnabled(true);
+        setShowSubQuickSight(false);
+        changeQuickSightAccountName(data.accountName);
+        getQuickSightUserList();
+      }
+    } catch (error) {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const closeNewUserModal = () => {
+    setUserActiveLink('');
+    setShowCreateUser(false);
+  };
+
+  const closeSubQuickSightModal = () => {
+    setSubscriptionAccountName('');
+    setSubscriptionEmail('');
+    setShowSubQuickSight(false);
+  };
+
   useEffect(() => {
-    getQuickSightRoles();
+    console.info('quickSightEnabled:', quickSightEnabled);
+    if (quickSightEnabled) {
+      getQuickSightUserList();
+    }
+  }, [quickSightEnabled]);
+
+  useEffect(() => {
+    checkTheQuickSightStatus();
   }, []);
 
   return (
@@ -79,46 +203,232 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       <SpaceBetween direction="vertical" size="l">
         <FormField>
           <Toggle
-            onChange={({ detail }) => setCreateDashboard(detail.checked)}
-            checked={createDashboard}
+            onChange={({ detail }) => changeEnableReporting(detail.checked)}
+            checked={pipelineInfo.enableReporting}
+            description={t('pipeline:create.createSampleQuickSightDesc')}
           >
             <b>{t('pipeline:create.createSampleQuickSight')}</b>
           </Toggle>
         </FormField>
 
-        {createDashboard && (
-          <>
-            <FormField
-              label={t('pipeline:create.quickSightAccount')}
-              description={t('pipeline:create.quickSightAccountDesc')}
-            >
-              <Select
-                statusType={loadingRoles ? 'loading' : 'finished'}
-                placeholder={t('pipeline:create.quickSIghtPlaceholder') || ''}
-                selectedOption={pipelineInfo.selectedQuickSightRole}
-                onChange={({ detail }) =>
-                  changeQuickSightSelectedRole(detail.selectedOption)
-                }
-                options={quickSightRoleOptions}
-                filteringType="auto"
-              />
-            </FormField>
+        {pipelineInfo.enableReporting &&
+          (loadingQuickSight ? (
+            <Spinner />
+          ) : (
+            <>
+              {!quickSightEnabled && (
+                <Alert
+                  type="warning"
+                  action={
+                    <SpaceBetween size="xs" direction="horizontal">
+                      <Button
+                        loading={loadingSubscription}
+                        onClick={() => {
+                          setShowSubQuickSight(true);
+                        }}
+                      >
+                        {t('button.subscribe')}
+                      </Button>
+                    </SpaceBetween>
+                  }
+                  header={t('pipeline:create.quickSightNotSub')}
+                >
+                  {t('pipeline:create.quickSightNotSubDesc')}
+                </Alert>
+              )}
 
-            <FormField
-              label={t('pipeline:create.datasetName')}
-              description={t('pipeline:create.datasetNameDesc')}
-            >
+              <FormField
+                label={t('pipeline:create.quickSightUser')}
+                description={t('pipeline:create.quickSightUserDesc')}
+              >
+                <div className="flex">
+                  <div className="flex-1">
+                    <Select
+                      statusType={loadingUsers ? 'loading' : 'finished'}
+                      placeholder={
+                        t('pipeline:create.quickSIghtPlaceholder') || ''
+                      }
+                      selectedOption={pipelineInfo.selectedQuickSightUser}
+                      onChange={({ detail }) =>
+                        changeQuickSightSelectedUser(detail.selectedOption)
+                      }
+                      options={quickSightRoleOptions}
+                      filteringType="auto"
+                    />
+                  </div>
+                  <div className="ml-10">
+                    <Button
+                      loading={loadingUsers}
+                      onClick={() => {
+                        getQuickSightUserList();
+                      }}
+                      iconName="refresh"
+                    />
+                  </div>
+                  <div className="ml-10">
+                    <Button
+                      onClick={() => {
+                        setShowCreateUser(true);
+                      }}
+                    >
+                      {t('button.createNew')}
+                    </Button>
+                  </div>
+                </div>
+              </FormField>
+
+              <FormField
+                label={t('pipeline:create.dataConnectionType')}
+                description={t('pipeline:create.dataConnectionTypeDesc')}
+              >
+                <>
+                  <RadioGroup
+                    onChange={({ detail }) =>
+                      changeQuickSightConnectionType(detail.value)
+                    }
+                    value={pipelineInfo.dataConnectionType}
+                    items={[
+                      {
+                        value: 'public',
+                        label: t('pipeline:create.publicNetwork'),
+                        description: t('pipeline:create.publicNetworkDesc'),
+                      },
+                      {
+                        value: 'vpcconnection',
+                        label: t('pipeline:create.vpcConnection'),
+                        description: t('pipeline:create.vpcConnectionDesc'),
+                      },
+                    ]}
+                  />
+                  <div className="mt-10">
+                    <Input
+                      onChange={({ detail }) =>
+                        changeQuickSightVpcConnection(detail.value)
+                      }
+                      value={pipelineInfo.quickSightVpcConnection}
+                    />
+                  </div>
+                </>
+              </FormField>
+            </>
+          ))}
+      </SpaceBetween>
+
+      {/* Subscription Modal */}
+      <Modal
+        onDismiss={() => {
+          closeSubQuickSightModal();
+        }}
+        visible={showSubQuickSight}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                variant="link"
+                onClick={() => {
+                  closeSubQuickSightModal();
+                }}
+              >
+                {t('button.close')}
+              </Button>
+
+              <Button
+                loading={loadingSubscription}
+                onClick={() => {
+                  subscribTheQuickSight();
+                }}
+              >
+                {t('button.subscribe')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('pipeline:create.createQSSub')}
+      >
+        <FormField
+          label={t('pipeline:create.qsAccountName')}
+          description={t('pipeline:create.qsAccountNameDesc')}
+        >
+          <Input
+            placeholder="my-quicksight"
+            value={subscriptionAccountName}
+            onChange={(e) => {
+              setSubscriptionAccountName(e.detail.value);
+            }}
+          />
+        </FormField>
+        <FormField
+          label={t('pipeline:create.qsUserEmail')}
+          description={t('pipeline:create.qsUserEmailDesc')}
+        >
+          <Input
+            placeholder="email@example.com"
+            value={subscriptionEmail}
+            onChange={(e) => {
+              setSubscriptionEmail(e.detail.value);
+            }}
+          />
+        </FormField>
+      </Modal>
+
+      {/* Create User Modal */}
+      <Modal
+        onDismiss={() => {
+          closeNewUserModal();
+        }}
+        visible={showCreateUser}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                variant="link"
+                onClick={() => {
+                  closeNewUserModal();
+                }}
+              >
+                {t('button.close')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('pipeline:create.createQSUser')}
+      >
+        <FormField
+          label={t('pipeline:create.qsUserEmail')}
+          description={t('pipeline:create.qsCreateUserDesc')}
+        >
+          <div className="flex">
+            <div className="flex-1">
               <Input
-                placeholder="my-dataset"
-                value={pipelineInfo.quickSightDataset}
+                placeholder="email@example.com"
+                value={newUserEmail}
                 onChange={(e) => {
-                  changeDatasetName(e.detail.value);
+                  setNewUserEmail(e.detail.value);
                 }}
               />
-            </FormField>
-          </>
-        )}
-      </SpaceBetween>
+            </div>
+            <div className="ml-10">
+              <Button
+                loading={loadingCreateUser}
+                onClick={() => {
+                  createNewQuickSightUser();
+                }}
+              >
+                {t('button.create')}
+              </Button>
+            </div>
+          </div>
+          <div className="mt-10">
+            {userActiveLink && (
+              <Alert header={t('pipeline:create.qsUserActive')}>
+                <Link external href={userActiveLink}>
+                  {userActiveLink}
+                </Link>
+              </Alert>
+            )}
+          </div>
+        </FormField>
+      </Modal>
     </Container>
   );
 };

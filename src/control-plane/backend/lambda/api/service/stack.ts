@@ -33,9 +33,7 @@ import {
   WorkflowTemplate,
 } from '../common/types';
 import { isEmpty } from '../common/utils';
-import {
-  IPipeline,
-} from '../model/pipeline';
+import { IPipeline } from '../model/pipeline';
 import { describeStack } from '../store/aws/cloudformation';
 
 

@@ -394,6 +394,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ingestionServer: pipeline.ingestionServer,
         etl: pipeline.etl,
         dataAnalytics: pipeline.dataAnalytics,
+        report: pipeline.report,
         workflow: pipeline.workflow ?? {},
         executionName: pipeline.executionName ?? '',
         executionArn: pipeline.executionArn ?? '',
@@ -464,6 +465,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ingestionServer: marshallCurPipeline.ingestionServer,
               etl: marshallCurPipeline.etl,
               dataAnalytics: marshallCurPipeline.dataAnalytics,
+              report: marshallCurPipeline.report,
               workflow: marshallCurPipeline.workflow ?? { M: {} },
               executionName: { S: curPipeline.executionName ?? '' },
               executionArn: { S: curPipeline.executionArn ?? '' },
@@ -498,6 +500,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'ingestionServer = :ingestionServer, ' +
               'etl = :etl, ' +
               'dataAnalytics = :dataAnalytics, ' +
+              'report = :report, ' +
               'workflow = :workflow, ' +
               'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
@@ -529,6 +532,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':ingestionServer': marshallPipeline.ingestionServer,
               ':etl': marshallPipeline.etl,
               ':dataAnalytics': marshallPipeline.dataAnalytics,
+              ':report': marshallPipeline.report,
               ':ConditionVersionValue': { S: pipeline.version },
               ':workflow': marshallPipeline.workflow ?? { M: {} },
               ':executionName': { S: curPipeline.executionName ?? '' },
@@ -565,6 +569,7 @@ export class DynamoDbStore implements ClickStreamStore {
         'ingestionServer = :ingestionServer, ' +
         'etl = :etl, ' +
         'dataAnalytics = :dataAnalytics, ' +
+        'report = :report, ' +
         'workflow = :workflow, ' +
         'executionName = :executionName, ' +
         'executionArn = :executionArn, ' +
@@ -590,6 +595,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':ingestionServer': pipeline.ingestionServer,
         ':etl': pipeline.etl,
         ':dataAnalytics': pipeline.dataAnalytics,
+        ':report': pipeline.report,
         ':ConditionVersionValue': pipeline.version,
         ':workflow': pipeline.workflow ?? {},
         ':executionName': pipeline.executionName ?? '',

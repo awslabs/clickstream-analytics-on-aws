@@ -77,15 +77,62 @@ const getCertificates = async (params: { region: string }) => {
   return result;
 };
 
+const getQuickSightDetail = async () => {
+  const result: any = await apiRequest('get', `/env/quicksight/describe`);
+  return result;
+};
+
+const getQuickSightStatus = async () => {
+  const result: any = await apiRequest('get', `/env/quicksight/ping`);
+  return result;
+};
+
+const getQuickSightUsers = async () => {
+  const result: any = await apiRequest('get', `/env/quicksight/users`);
+  return result;
+};
+
+const unsubscribQuickSight = async () => {
+  const result: any = await apiRequest(
+    'post',
+    `/env/quicksight/unsubscription`
+  );
+  return result;
+};
+
+const subscribQuickSight = async (params: {
+  email: string;
+  accountName: string;
+}) => {
+  const result: any = await apiRequest(
+    'post',
+    `/env/quicksight/subscription`,
+    params
+  );
+  return result;
+};
+
+const createQuickSightUser = async (params: {
+  email: string;
+  accountName: string;
+}) => {
+  const result: any = await apiRequest('post', `/env/quicksight/user`, params);
+  return result;
+};
+
 const getSSMSecrets = async (params: { region: string }) => {
   const result: any = await apiRequest('get', '/env/ssm/secrets', params);
   return result;
 };
 
 export {
+  createQuickSightUser,
   getCertificates,
   getHostedZoneList,
   getMSKList,
+  getQuickSightDetail,
+  getQuickSightStatus,
+  getQuickSightUsers,
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
   getRegionList,
@@ -95,4 +142,6 @@ export {
   getServiceRolesByAccount,
   getSubnetList,
   getVPCList,
+  subscribQuickSight,
+  unsubscribQuickSight,
 };

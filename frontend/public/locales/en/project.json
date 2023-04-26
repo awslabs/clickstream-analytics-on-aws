@@ -24,8 +24,8 @@
     "inputNamePlaceholder": "e.g. my project",
     "projectNameAlert": "Your project's globally unique identifier, used in your database as database name. You cannot change your project ID after project creation.",
     "inputEmail": "Please the email address(es) to received notifications from this project ",
-    "inputEmailPlaceholder": "e.g. example@example.com; example-2@example.com",
-    "inputEmailAlert": "Use column to seperate the emails if you want to add multiple email addresses",
+    "inputEmailPlaceholder": "e.g. example@example.com, example-2@example.com",
+    "inputEmailAlert": "Use comma to seperate the emails if you want to add multiple email addresses",
     "inputEnv": "Please specify the environment type for your project",
     "inputEnvAlert": "This setting customizes your project for different stages of the app lifecycle. Tagging your project as an environment type has no effect on how your project works or its features. However, the tagging can help you and your team manage your various projects for the app lifecycle.",
     "unspecified": "Unspecified"

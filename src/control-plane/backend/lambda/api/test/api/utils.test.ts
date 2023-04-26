@@ -21,6 +21,7 @@ import {
   SUBNETS_PATTERN,
   VPC_ID_PARRERN,
   POSITIVE_INTEGERS,
+  MUTIL_EMAIL_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
 } from '../../common/constants-ln';
@@ -231,6 +232,21 @@ describe('Utils test', () => {
       '',
     ];
     invalidValues.map(v => expect(() => validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Emails valid', async () => {
+    const validValues = [
+      'fake@example.com',
+      'fake1@example.com,fake2@example.com',
+    ];
+    validValues.map(v => expect(validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'a.com',
+      '@example.com',
+      'fake@example.com,',
+      '',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
 });

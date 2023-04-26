@@ -41,6 +41,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       defaultExpanded: true,
       items: [
         { type: 'link', text: t('nav.plugin'), href: '/plugins' },
+        { type: 'link', text: t('nav.quickSight'), href: '/quicksight' },
         { type: 'link', text: t('nav.sdkIntegration'), href: '#/skd' },
       ],
     },

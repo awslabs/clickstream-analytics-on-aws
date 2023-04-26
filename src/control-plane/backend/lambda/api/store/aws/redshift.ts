@@ -36,6 +36,7 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
         nodeType: cluster.NodeType ?? '',
         endpoint: cluster.Endpoint,
         status: cluster.ClusterStatus ?? '',
+        publiclyAccessible: cluster.PubliclyAccessible ?? false,
       });
     }
   }

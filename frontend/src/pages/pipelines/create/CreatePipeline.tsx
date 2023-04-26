@@ -217,10 +217,18 @@ const Content: React.FC = () => {
         id: 'BUILDIN-3',
       },
     ],
-
-    selectedQuickSightRole: null,
-    quickSightDataset: '',
+    enableReporting: true,
+    selectedQuickSightUser: null,
+    dataConnectionType: '',
+    quickSightVpcConnection: '',
     arnAccountId: '',
+    report: {
+      quickSight: {
+        accountName: '',
+        user: '',
+        vpcConnection: '',
+      },
+    },
     enableAuthentication: false,
   });
 
@@ -345,6 +353,13 @@ const Content: React.FC = () => {
         null;
     }
 
+    if (createPipelineObj.dataConnectionType === 'public') {
+      createPipelineObj.report.quickSight.vpcConnection = 'public';
+    } else {
+      createPipelineObj.report.quickSight.vpcConnection =
+        pipelineInfo.quickSightVpcConnection;
+    }
+
     // remove temporary properties
     delete createPipelineObj.selectedRegion;
     delete createPipelineObj.selectedVPC;
@@ -379,11 +394,15 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedEnrichPlugins;
     delete createPipelineObj.selectedSecret;
 
-    delete createPipelineObj.selectedQuickSightRole;
     delete createPipelineObj.kafkaSelfHost;
     delete createPipelineObj.kafkaBrokers;
 
     delete createPipelineObj.arnAccountId;
+    delete createPipelineObj.enableReporting;
+    delete createPipelineObj.selectedQuickSightUser;
+    delete createPipelineObj.dataConnectionType;
+    delete createPipelineObj.quickSightVpcConnection;
+    delete createPipelineObj.enableAuthentication;
 
     setLoadingCreate(true);
     try {
@@ -1116,19 +1135,56 @@ const Content: React.FC = () => {
           content: (
             <Reporting
               pipelineInfo={pipelineInfo}
-              changeQuickSightSelectedRole={(role) => {
+              changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    selectedQuickSightRole: role,
+                    enableReporting: enable,
                   };
                 });
               }}
-              changeDatasetName={(name) => {
+              changeQuickSightSelectedUser={(user) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    quickSightDataset: name,
+                    selectedQuickSightUser: user,
+                    report: {
+                      ...prev.report,
+                      quickSight: {
+                        ...prev.report.quickSight,
+                        user: user.value || '',
+                      },
+                    },
+                  };
+                });
+              }}
+              changeQuickSightConnectionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    dataConnectionType: type,
+                  };
+                });
+              }}
+              changeQuickSightVpcConnection={(connection) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    quickSightVpcConnection: connection,
+                  };
+                });
+              }}
+              changeQuickSightAccountName={(name) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    report: {
+                      ...prev.report,
+                      quickSight: {
+                        ...prev.report.quickSight,
+                        accountName: name,
+                      },
+                    },
                   };
                 });
               }}

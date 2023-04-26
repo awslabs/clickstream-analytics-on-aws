@@ -24,7 +24,7 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { createProject, verificationProjectId } from 'apis/project';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PROJECT_STAGE_LIST } from 'ts/const';
@@ -58,6 +58,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
 
   const [projectNameRequiredError, setProjectNameRequiredError] =
     useState(false);
+  const [emailsEmptyError, setEmailsEmptyError] = useState(false);
   const [emailsInvalidError, setEmailsInvalidError] = useState(false);
   const [projectIdInvalidError, setProjectIdInvalidError] = useState(false);
 
@@ -154,11 +155,11 @@ const CreateProject: React.FC<CreateProjectProps> = (
                       alertMsg(t('project:valid.saveFirst'), 'error');
                       return false;
                     }
-                    if (
-                      curStep === 1 &&
-                      curProject.emails &&
-                      !validateEmails(curProject.emails)
-                    ) {
+                    if (curStep === 1 && !curProject.emails.trim()) {
+                      setEmailsEmptyError(true);
+                      return false;
+                    }
+                    if (curStep === 1 && !validateEmails(curProject.emails)) {
                       setEmailsInvalidError(true);
                       return false;
                     }
@@ -277,13 +278,18 @@ const CreateProject: React.FC<CreateProjectProps> = (
               label={t('project:create.inputEmail')}
               stretch
               errorText={
-                emailsInvalidError ? t('project:valid.emailInvalid') : ''
+                emailsEmptyError
+                  ? t('project:valid.emailEmpty')
+                  : emailsInvalidError
+                  ? t('project:valid.emailInvalid')
+                  : ''
               }
             >
               <Input
                 placeholder={t('project:create.inputEmailPlaceholder') || ''}
                 value={curProject.emails}
                 onChange={(e) => {
+                  setEmailsEmptyError(false);
                   setEmailsInvalidError(false);
                   setCurProject((prev) => {
                     return {
