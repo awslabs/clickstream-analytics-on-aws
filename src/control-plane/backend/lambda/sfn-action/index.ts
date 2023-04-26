@@ -76,7 +76,7 @@ export const createStack = async (event: SfnStackEvent) => {
       TemplateURL: event.Input.TemplateURL,
       Parameters: event.Input.Parameters,
       DisableRollback: true,
-      Capabilities: ['CAPABILITY_IAM'],
+      Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
     });
     const result = await cloudFormationClient.send(params);
     return {
@@ -101,11 +101,10 @@ export const updateStack = async (event: SfnStackEvent) => {
     const cloudFormationClient = new CloudFormationClient({ region: event.Input.Region });
     const params: UpdateStackCommand = new UpdateStackCommand({
       StackName: event.Input.StackName,
-      TemplateURL: event.Input.TemplateURL,
       Parameters: event.Input.Parameters,
       DisableRollback: true,
-      Capabilities: ['CAPABILITY_IAM'],
-
+      UsePreviousTemplate: true,
+      Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
     });
     const result = await cloudFormationClient.send(params);
     return {
