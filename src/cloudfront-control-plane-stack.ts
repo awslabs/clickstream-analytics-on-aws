@@ -134,7 +134,8 @@ export class CloudFrontControlPlaneStack extends Stack {
     uri.startsWith('/projects') || 
     uri.startsWith('/project') || 
     uri.startsWith('/pipelines') || 
-    uri.startsWith('/plugins')) {
+    uri.startsWith('/plugins') || 
+    uri.startsWith('/quicksight')) {
       request.uri = '/index.html'; 
   }
   return request; 
