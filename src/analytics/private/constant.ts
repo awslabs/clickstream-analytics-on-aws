@@ -11,12 +11,6 @@
  *  and limitations under the License.
  */
 
-export enum RedshiftMode {
-  PROVISIONED='Provisioned',
-  SERVERLESS='Serverless',
-  NEW_SERVERLESS='New_Serverless',
-}
-
 export enum JobStatus {
   JOB_NEW = 'NEW',
   JOB_ENQUEUE = 'ENQUEUE',

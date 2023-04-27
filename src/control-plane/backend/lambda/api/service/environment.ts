@@ -16,7 +16,7 @@ import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
 import { getRegionAccount } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
-import { describeVpcs, describeSubnets, listRegions } from '../store/aws/ec2';
+import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeSecurityGroups } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
@@ -51,10 +51,28 @@ export class EnvironmentServ {
       next(error);
     }
   }
+  public async describeVpcs3AZ(req: any, res: any, next: any) {
+    try {
+      const { region } = req.query;
+      const result = await describeVpcs3AZ(region);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
   public async describeSubnets(req: any, res: any, next: any) {
     try {
       const { region, vpcId, subnetType } = req.query;
-      const result = await describeSubnets(region, vpcId, subnetType);
+      const result = await describeSubnetsWithType(region, vpcId, subnetType);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+  public async describeSecurityGroups(req: any, res: any, next: any) {
+    try {
+      const { region, vpcId } = req.query;
+      const result = await describeSecurityGroups(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

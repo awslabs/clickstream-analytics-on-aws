@@ -19,7 +19,8 @@ import { Match, Template } from 'aws-cdk-lib/assertions';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
-import { REDSHIFT_ODS_TABLE_NAME, RedshiftMode } from '../../../src/analytics/private/constant';
+import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
+import { REDSHIFT_MODE } from '../../../src/common/constant';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
@@ -258,8 +259,8 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     const allowedValues = param.AllowedValues;
     expect(allowedValues.length).toEqual(3);
     for (const v of allowedValues) {
-      expect(v == RedshiftMode.SERVERLESS || v == RedshiftMode.PROVISIONED
-        || v == RedshiftMode.NEW_SERVERLESS).toBeTruthy();
+      expect(v == REDSHIFT_MODE.SERVERLESS || v == REDSHIFT_MODE.PROVISIONED
+        || v == REDSHIFT_MODE.NEW_SERVERLESS).toBeTruthy();
     };
   });
 
@@ -549,7 +550,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   test('Should has Rules for new RedshiftServerless', () => {
     const rule = template.toJSON().Rules.NewRedshiftServerlessParameters;
-    expect(rule.RuleCondition[CFN_FN.EQUALS][1]).toEqual(RedshiftMode.NEW_SERVERLESS);
+    expect(rule.RuleCondition[CFN_FN.EQUALS][1]).toEqual(REDSHIFT_MODE.NEW_SERVERLESS);
     for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
       expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'NewRedshiftServerlessWorkgroupName' ||
         e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessVPCId' ||
@@ -1930,7 +1931,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             QUERY_RESULT_LIMIT: RefAnyValue,
             PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
-            REDSHIFT_MODE: RedshiftMode.SERVERLESS,
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
@@ -1995,7 +1996,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             QUERY_RESULT_LIMIT: RefAnyValue,
             PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
-            REDSHIFT_MODE: RedshiftMode.PROVISIONED,
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2278,7 +2279,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
-            REDSHIFT_MODE: RedshiftMode.SERVERLESS,
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2335,7 +2336,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
-            REDSHIFT_MODE: RedshiftMode.PROVISIONED,
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2595,7 +2596,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
         },
         Environment: {
           Variables: {
-            REDSHIFT_MODE: RedshiftMode.SERVERLESS,
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2649,7 +2650,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
         },
         Environment: {
           Variables: {
-            REDSHIFT_MODE: RedshiftMode.PROVISIONED,
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2823,7 +2824,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
         },
         Environment: {
           Variables: {
-            REDSHIFT_MODE: RedshiftMode.SERVERLESS,
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
@@ -2877,7 +2878,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
         },
         Environment: {
           Variables: {
-            REDSHIFT_MODE: RedshiftMode.PROVISIONED,
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,

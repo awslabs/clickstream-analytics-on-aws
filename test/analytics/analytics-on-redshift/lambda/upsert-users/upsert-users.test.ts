@@ -14,8 +14,8 @@
 import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, UpsertUsersEvent } from '../../../../../src/analytics/lambdas/upsert-users-workflow/upsert-users';
-import { RedshiftMode } from '../../../../../src/analytics/private/constant';
 import { UpsertUsersBody } from '../../../../../src/analytics/private/model';
+import { REDSHIFT_MODE } from '../../../../../src/common/constant';
 import 'aws-sdk-client-mock-jest';
 
 const upsertUsersBody: UpsertUsersBody = {
@@ -36,7 +36,7 @@ describe('Lambda - do upsert users in Redshift Serverless', () => {
     redshiftDataMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.SERVERLESS;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
@@ -78,7 +78,7 @@ describe('Lambda - do upsert users in Redshift Provisioned', () => {
     redshiftDataMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.PROVISIONED;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.PROVISIONED;
     process.env.REDSHIFT_CLUSTER_IDENTIFIER = clusterIdentifier;
     process.env.REDSHIFT_DB_USER = dbUser;
   });

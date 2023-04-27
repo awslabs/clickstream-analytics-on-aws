@@ -14,8 +14,8 @@
 import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckUpsertStatusEvent } from '../../../../../src/analytics/lambdas/upsert-users-workflow/check-upsert-status';
-import { RedshiftMode } from '../../../../../src/analytics/private/constant';
 import { CheckUpsertStatusEventDetail } from '../../../../../src/analytics/private/model';
+import { REDSHIFT_MODE } from '../../../../../src/common/constant';
 import 'aws-sdk-client-mock-jest';
 
 const checkUpsertStatusEventDetail: CheckUpsertStatusEventDetail = {
@@ -38,7 +38,7 @@ describe('Lambda - check the upsert status in Redshift Serverless', () => {
     redshiftDataMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.SERVERLESS;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
@@ -140,7 +140,7 @@ describe('Lambda - check the upsert status in Redshift Provisioned', () => {
     redshiftDataMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.PROVISIONED;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.PROVISIONED;
     process.env.REDSHIFT_CLUSTER_IDENTIFIER = clusterIdentifier;
     process.env.REDSHIFT_DB_USER = dbUser;
   });

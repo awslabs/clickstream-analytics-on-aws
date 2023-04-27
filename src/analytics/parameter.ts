@@ -15,8 +15,10 @@ import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { RedshiftMode } from './private/constant';
-import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN } from '../common/constant';
+import {
+  PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
+  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN,
+} from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export interface RedshiftAnalyticsStackProps {
@@ -75,8 +77,8 @@ export function createStackParameters(scope: Construct): {
   const redshiftModeParam = new CfnParameter(scope, 'RedshiftMode', {
     description: 'Select Redshift cluster mode',
     type: 'String',
-    default: RedshiftMode.NEW_SERVERLESS,
-    allowedValues: [RedshiftMode.NEW_SERVERLESS, RedshiftMode.SERVERLESS, RedshiftMode.PROVISIONED],
+    default: REDSHIFT_MODE.NEW_SERVERLESS,
+    allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
   });
 
   const networkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
@@ -204,7 +206,7 @@ export function createStackParameters(scope: Construct): {
   };
 
   new CfnRule(scope, 'NewRedshiftServerlessParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, RedshiftMode.NEW_SERVERLESS),
+    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.NEW_SERVERLESS),
     assertions: [
       {
         assert: Fn.conditionAnd(
@@ -284,7 +286,7 @@ export function createStackParameters(scope: Construct): {
   };
 
   new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, RedshiftMode.SERVERLESS),
+    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
     assertions: [
       {
         assert: Fn.conditionAnd(
@@ -336,7 +338,7 @@ export function createStackParameters(scope: Construct): {
   };
 
   new CfnRule(scope, 'RedshiftProvisionedParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, RedshiftMode.PROVISIONED),
+    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
     assertions: [
       {
         assert: Fn.conditionAnd(

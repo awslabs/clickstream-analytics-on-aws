@@ -113,14 +113,27 @@ declare global {
       enrichPlugin: string[];
     };
     dataAnalytics: {
+      athena: boolean;
       redshift: {
-        serverless: {
-          workgroupName: string;
-          iamRoleArn: string;
+        dataRange: string;
+        provisioned: {
+          clusterIdentifier: string;
+          dbUser: string;
+        };
+        newServerless: {
+          network: {
+            vpcId: sring;
+            subnetIds: string[];
+            securityGroups: string[];
+          };
+          baseCapacity: string;
         };
       };
       loadWorkflow: {
-        scheduleInterval: string;
+        loadJobScheduleIntervalInMinutes: string;
+      };
+      upsertUsers: {
+        scheduleExpression: string;
       };
     };
     report: {
@@ -180,5 +193,15 @@ declare global {
     quickSightVpcConnection: string;
     arnAccountId: string;
     enableAuthentication: boolean;
+
+    redshiftType: string; // 'provisioned' | 'serverless';
+    redshiftServerlessVPC: SelectProps.Option | null;
+    redshiftBaseCapacity: SelectProps.Option | null;
+    redshiftServerlessSG: OptionDefinition[];
+    redshiftServerlessSubnets: OptionDefinition[];
+    redshiftDataLoadValue: string;
+    redshiftDataLoadUnit: SelectProps.Option | null;
+    redshiftUpsertFreqValue: string;
+    redshiftUpsertFreqUnit: SelectProps.Option | null;
   }
 }

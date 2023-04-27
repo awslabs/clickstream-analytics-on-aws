@@ -140,7 +140,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
       MemorySize: 512,
       PackageType: 'Image',
-      ReservedConcurrentExecutions: 3,
       Timeout: 30,
       VpcConfig: {
         SecurityGroupIds: [
@@ -500,6 +499,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'kafka:ListNodes',
               's3:ListAllMyBuckets',
               'ec2:DescribeVpcs',
+              'ec2:DescribeSecurityGroups',
               'redshift:DescribeClusters',
               'redshift-serverless:ListWorkgroups',
               'redshift-serverless:GetWorkgroup',
@@ -971,7 +971,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       },
       MemorySize: 512,
       PackageType: 'Image',
-      ReservedConcurrentExecutions: 3,
       Timeout: 30,
     });
     template.hasResource('AWS::Lambda::Function', {

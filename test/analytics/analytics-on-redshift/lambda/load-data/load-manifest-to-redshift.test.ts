@@ -16,7 +16,7 @@ import { ExecuteStatementCommand, ExecuteStatementCommandInput, RedshiftDataClie
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, LoadManifestEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/load-manifest-to-redshift';
-import { RedshiftMode } from '../../../../../src/analytics/private/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
@@ -50,7 +50,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     dynamoDBClientMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.SERVERLESS;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
@@ -111,7 +111,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
     dynamoDBClientMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.PROVISIONED;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.PROVISIONED;
     process.env.REDSHIFT_CLUSTER_IDENTIFIER = clusterIdentifier;
     process.env.REDSHIFT_DB_USER = dbUser;
   });

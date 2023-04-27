@@ -12,9 +12,9 @@
  */
 
 import {
+  Box,
   ColumnLayout,
   SpaceBetween,
-  Box,
   StatusIndicator,
 } from '@cloudscape-design/components';
 import React from 'react';
@@ -90,7 +90,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return `${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit.label}`;
       } else {
         const minutes = parseInt(
-          pipelineInfo.dataAnalytics.loadWorkflow.scheduleInterval
+          pipelineInfo.dataAnalytics.loadWorkflow
+            .loadJobScheduleIntervalInMinutes
         );
         if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
           const months = minutes / (60 * 24 * 30);
@@ -152,8 +153,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.anlyEngine')}</Box>
           <div>
-            {pipelineInfo?.dataAnalytics?.redshift?.serverless?.workgroupName ||
-              '-'}
+            {pipelineInfo?.dataAnalytics?.redshift?.provisioned
+              ?.clusterIdentifier || 'New Serverless'}
           </div>
         </div>
 
@@ -162,8 +163,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
             {t('pipeline:detail.redshiftPermission')}
           </Box>
           <div>
-            {pipelineInfo?.dataAnalytics?.redshift?.serverless?.iamRoleArn ||
-              '-'}
+            {pipelineInfo?.dataAnalytics?.redshift?.provisioned?.dbUser || '-'}
           </div>
         </div>
 

@@ -191,6 +191,7 @@ export interface RedshiftCluster {
   readonly nodeType: string;
   readonly endpoint?: Endpoint;
   readonly status: string;
+  readonly masterUsername: string;
   readonly publiclyAccessible: boolean;
 }
 
@@ -210,6 +211,12 @@ export interface Route53HostedZone {
 export interface ClickStreamBucket {
   readonly name: string;
   readonly location: string;
+}
+
+export interface ClickStreamSecurityGroup {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
 }
 
 export interface PipelineStatus {

@@ -208,6 +208,7 @@ export class ClickStreamApiConstruct extends Construct {
             'kafka:ListNodes',
             's3:ListAllMyBuckets',
             'ec2:DescribeVpcs',
+            'ec2:DescribeSecurityGroups',
             'redshift:DescribeClusters',
             'redshift-serverless:ListWorkgroups',
             'redshift-serverless:GetWorkgroup',
@@ -281,7 +282,6 @@ export class ClickStreamApiConstruct extends Construct {
       },
       architecture: Architecture.X86_64,
       timeout: Duration.seconds(30),
-      reservedConcurrentExecutions: 3,
       memorySize: 512,
       role: clickStreamApiFunctionRole,
       ...apiFunctionProps,
@@ -291,6 +291,13 @@ export class ClickStreamApiConstruct extends Construct {
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
+
+    addCfnNagSuppressRules(this.clickStreamApiFunction.node.defaultChild as CfnResource, [
+      {
+        id: 'W92',
+        reason: 'TODO: will revisit it based on T-shirt size of workload',
+      },
+    ]);
 
     if (props.fronting === 'cloudfront') {
       if (!props.apiGateway) {
@@ -336,6 +343,10 @@ export class ClickStreamApiConstruct extends Construct {
           {
             id: 'W89', //Lambda functions should be deployed inside a VPC
             reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
+          },
+          {
+            id: 'W92',
+            reason: 'TODO: will revisit it based on T-shirt size of workload',
           },
         ],
       );

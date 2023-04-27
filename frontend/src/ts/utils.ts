@@ -115,6 +115,39 @@ export const generateRedshiftInterval = (value?: number, unit?: string) => {
   }
 };
 
+export const generateUpsertFrequencyExpression = (
+  fixedValue: number,
+  unit: SelectProps.Option | null
+) => {
+  if (fixedValue && fixedValue > 0) {
+    if (unit?.value === 'hour') {
+      return `rate(${fixedValue} ${fixedValue > 1 ? 'hours' : 'hour'})`;
+    } else if (unit?.value === 'minute') {
+      return `rate(${fixedValue} ${fixedValue > 1 ? 'minutes' : 'minute'})`;
+    } else if (unit?.value === 'day') {
+      return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
+    } else {
+      return `rate(5 minutes)`;
+    }
+  } else {
+    return `rate(5 minutes)`;
+  }
+};
+
+export const generateDataLoadFreqency = (value?: number, unit?: string) => {
+  if (value) {
+    if (unit === 'day') {
+      return value * 60 * 24;
+    }
+    if (unit === 'hour') {
+      return value * 60;
+    }
+    return value;
+  } else {
+    return 5;
+  }
+};
+
 export const extractAccountIdFromArn = (arn: string) => {
   const regex = /^arn:aws.*:redshift-serverless:[^:]+:([0-9]{12}):/;
   const matchResult = arn.match(regex);

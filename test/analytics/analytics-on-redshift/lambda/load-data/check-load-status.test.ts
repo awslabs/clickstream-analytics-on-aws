@@ -17,7 +17,7 @@ import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckLoadStatusEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/check-load-status';
-import { RedshiftMode } from '../../../../../src/analytics/private/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
@@ -54,7 +54,7 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     s3ClientMock.reset();
 
     // set the env before loading the source
-    process.env.REDSHIFT_MODE = RedshiftMode.SERVERLESS;
+    process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 

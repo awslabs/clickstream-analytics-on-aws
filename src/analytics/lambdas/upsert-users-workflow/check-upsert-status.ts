@@ -12,8 +12,9 @@
  */
 
 import { StatusString } from '@aws-sdk/client-redshift-data';
+import { REDSHIFT_MODE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-import { RedshiftMode, SP_UPSERT_USERS } from '../../private/constant';
+import { SP_UPSERT_USERS } from '../../private/constant';
 import { CheckUpsertStatusEventDetail, ProvisionedRedshiftProps, ExistingRedshiftServerlessCustomProps } from '../../private/model';
 import { describeStatement, executeStatementsWithWait, getRedshiftClient, getStatementResult } from '../redshift-data';
 
@@ -80,13 +81,13 @@ export const queryUpsertLog = async (appId: string) => {
   var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
-  if (redshiftMode == RedshiftMode.SERVERLESS) {
+  if (redshiftMode == REDSHIFT_MODE.SERVERLESS) {
     serverlessRedshiftProps = {
       databaseName: REDSHIFT_DATABASE,
       workgroupName: process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
       dataAPIRoleArn: REDSHIFT_DATA_API_ROLE_ARN,
     };
-  } else if (redshiftMode == RedshiftMode.PROVISIONED) {
+  } else if (redshiftMode == REDSHIFT_MODE.PROVISIONED) {
     provisionedRedshiftProps = {
       databaseName: REDSHIFT_DATABASE,
       dbUser: process.env.REDSHIFT_DB_USER!,

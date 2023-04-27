@@ -12,22 +12,30 @@
  */
 
 import {
-  Container,
-  Header,
-  Link,
-  SpaceBetween,
-  Toggle,
-  FormField,
-  Select,
-  Input,
-  Checkbox,
   AutosuggestProps,
-  SelectProps,
   Button,
+  Checkbox,
+  Container,
+  ExpandableSection,
+  FormField,
+  Header,
+  Input,
+  Link,
+  Multiselect,
+  Select,
+  SelectProps,
+  SpaceBetween,
+  Tiles,
+  Toggle,
 } from '@cloudscape-design/components';
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import {
+  get3AZVPCList,
+  getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
+  getSecurityGroups,
   getServiceRolesByAccount,
+  getSubnetList,
 } from 'apis/resource';
 
 import Divider from 'components/common/Divider';
@@ -40,7 +48,10 @@ import {
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
+  REDSHIFT_CAPACITY_LIST,
+  REDSHIFT_FREQUENCY_UNIT,
   REDSHIFT_UNIT_LIST,
+  SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
 } from 'ts/const';
 
 interface DataProcessingProps {
@@ -61,6 +72,17 @@ interface DataProcessingProps {
 
   changeTransformPlugins: (plugins: IPlugin[]) => void;
   changeEnrichPlugins: (plugins: IPlugin[]) => void;
+
+  changeRedshiftType: (type: string) => void;
+  changeServerlessRedshiftVPC: (vpc: SelectProps.Option) => void;
+  changeSecurityGroup: (sg: OptionDefinition[]) => void;
+  changeReshiftSubnets: (subnets: OptionDefinition[]) => void;
+  changeBaseCapacity: (capacity: SelectProps.Option) => void;
+  changeDataLoadValue: (value: string) => void;
+  changeDataLoadUnit: (unit: SelectProps.Option) => void;
+  changeUpsertUserValue: (value: string) => void;
+  changeUpsertUserUnit: (unit: SelectProps.Option) => void;
+  changeDBUser: (user: string) => void;
 
   dataProcessorIntervalInvalidError: boolean;
 }
@@ -86,6 +108,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeEnableAthena,
     changeTransformPlugins,
     changeEnrichPlugins,
+    changeRedshiftType,
+    changeServerlessRedshiftVPC,
+    changeSecurityGroup,
+    changeReshiftSubnets,
+    changeBaseCapacity,
+    changeDataLoadValue,
+    changeDataLoadUnit,
+    changeUpsertUserValue,
+    changeUpsertUserUnit,
+    changeDBUser,
     dataProcessorIntervalInvalidError,
   } = props;
 
@@ -102,12 +134,36 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     pipelineInfo.selectedRedshiftExecutionUnit || REDSHIFT_UNIT_LIST[0]
   );
   const [loadingRedshift, setLoadingRedshift] = useState(false);
+  const [loading3AZVpc, setLoading3AZVpc] = useState(false);
+  const [loadingSG, setLoadingSG] = useState(false);
+  const [loadingSubnets, setLoadingSubnets] = useState(false);
+
   const [redshiftOptionList, setRedshiftOptionList] =
+    useState<AutosuggestProps.Options>([]);
+
+  const [provisionedRedshiftOptionList, setProvisionedRedshiftOptionList] =
     useState<AutosuggestProps.Options>([]);
 
   const [redshiftRoleOptions, setRedshiftRoleOptions] =
     useState<SelectProps.Options>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
+
+  const [redshiftCapacity, setRedshiftCapacity] = useState(
+    pipelineInfo.redshiftBaseCapacity || REDSHIFT_CAPACITY_LIST[0]
+  );
+  const [threeAZVPCOptionList, setThreeAZVPCOptionList] =
+    useState<SelectProps.Options>([]);
+  const [vpcSGOptionList, setVpcSGOptionList] = useState<SelectProps.Options>(
+    []
+  );
+  const [vpcThreeAZSubnetsOptionList, setVpcThreeAZSubnetsOptionList] =
+    useState<SelectProps.Options>([]);
+  const [dataLoadUnit, setDataLoadUnit] = useState(
+    pipelineInfo.redshiftDataLoadUnit || REDSHIFT_FREQUENCY_UNIT[0]
+  );
+  const [upsertUserUnit, setUpsertUserUnit] = useState(
+    pipelineInfo.redshiftUpsertFreqUnit || REDSHIFT_FREQUENCY_UNIT[0]
+  );
 
   // get redshift clusters by region
   const getServerlessRedshiftClusterList = async () => {
@@ -118,13 +174,41 @@ const DataProcessing: React.FC<DataProcessingProps> = (
           region: pipelineInfo.region,
         });
       if (success) {
-        const mskOptions: AutosuggestProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.name,
-          description: element.arn,
-          labelTag: element.status,
-        }));
-        setRedshiftOptionList(mskOptions);
+        const serverlessOptions: AutosuggestProps.Options = data.map(
+          (element) => ({
+            label: element.name,
+            value: element.name,
+            description: element.arn,
+            labelTag: element.status,
+          })
+        );
+        setRedshiftOptionList(serverlessOptions);
+        setLoadingRedshift(false);
+      }
+    } catch (error) {
+      setLoadingRedshift(false);
+    }
+  };
+
+  // get provisioned redshift clusters by region
+  const getProvisionedRedshiftClusterList = async () => {
+    setLoadingRedshift(true);
+    try {
+      const { success, data }: ApiResponse<RedshiftResponse[]> =
+        await getRedshiftCluster({
+          region: pipelineInfo.region,
+          vpcId: pipelineInfo.selectedVPC?.value || '',
+        });
+      if (success) {
+        const provisionedOptions: AutosuggestProps.Options = data.map(
+          (element) => ({
+            label: element.name,
+            value: element.name,
+            description: element.endpoint.Address,
+            labelTag: element.status,
+          })
+        );
+        setProvisionedRedshiftOptionList(provisionedOptions);
         setLoadingRedshift(false);
       }
     } catch (error) {
@@ -153,6 +237,82 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     }
   };
 
+  // get 3 AZ vpc list
+  const getVPCListByRegion = async () => {
+    setLoading3AZVpc(true);
+    try {
+      const { success, data }: ApiResponse<VPCResponse[]> = await get3AZVPCList(
+        {
+          region: pipelineInfo.region,
+        }
+      );
+      if (success) {
+        const vpcOptions: SelectProps.Options = data.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: element.cidr,
+        }));
+        setThreeAZVPCOptionList(vpcOptions);
+        setLoading3AZVpc(false);
+      }
+    } catch (error) {
+      setLoading3AZVpc(false);
+    }
+  };
+
+  // get Security Groups By VPC
+  const getSecurityGroupByVPC = async (vpcId: string) => {
+    setLoadingSG(true);
+    try {
+      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+        await getSecurityGroups({
+          region: pipelineInfo.region,
+          vpcId: vpcId,
+        });
+      if (success) {
+        const sgOptions: SelectProps.Options = data.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: element.description,
+        }));
+        setVpcSGOptionList(sgOptions);
+      }
+      setLoadingSG(false);
+    } catch (error) {
+      setLoadingSG(false);
+    }
+  };
+
+  // get Subnets by redshift VPC
+  const getSubnetsByRedshiftVPC = async (vpcId: string) => {
+    setLoadingSubnets(true);
+    try {
+      const { success, data }: ApiResponse<SubnetResponse[]> =
+        await getSubnetList({
+          region: pipelineInfo.region,
+          vpcId: vpcId,
+        });
+      if (success && data) {
+        const privateSubnetOptions = data.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: `${element.availabilityZone}:${element.cidr}(${element.type})`,
+        }));
+        setVpcThreeAZSubnetsOptionList(privateSubnetOptions);
+      }
+      setLoadingSubnets(false);
+    } catch (error) {
+      setLoadingSubnets(false);
+    }
+  };
+
+  useEffect(() => {
+    if (pipelineInfo.redshiftServerlessVPC?.value) {
+      getSecurityGroupByVPC(pipelineInfo.redshiftServerlessVPC.value);
+      getSubnetsByRedshiftVPC(pipelineInfo.redshiftServerlessVPC.value);
+    }
+  }, [pipelineInfo.redshiftServerlessVPC?.value]);
+
   useEffect(() => {
     changeExecutionType(selectedExecution);
   }, [selectedExecution]);
@@ -170,8 +330,34 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [selectedEventFreshUnit]);
 
   useEffect(() => {
-    getServerlessRedshiftClusterList();
+    changeBaseCapacity(redshiftCapacity);
+  }, [redshiftCapacity]);
+
+  useEffect(() => {
+    changeDataLoadUnit(dataLoadUnit);
+  }, [dataLoadUnit]);
+
+  useEffect(() => {
+    changeUpsertUserUnit(upsertUserUnit);
+  }, [upsertUserUnit]);
+
+  useEffect(() => {
+    changeEventFreshUnit(selectedEventFreshUnit);
+  }, [selectedEventFreshUnit]);
+
+  useEffect(() => {
+    getVPCListByRegion();
+    if (SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS) {
+      getServerlessRedshiftClusterList();
+    }
+    getVPCListByRegion();
   }, []);
+
+  useEffect(() => {
+    if (pipelineInfo.redshiftType === 'provisioned') {
+      getProvisionedRedshiftClusterList();
+    }
+  }, [pipelineInfo.redshiftType]);
 
   useEffect(() => {
     if (pipelineInfo.arnAccountId) {
@@ -366,65 +552,253 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
               {pipelineInfo.enableRedshift && (
                 <>
-                  <FormField
-                    label={t('pipeline:create.redshiftCluster')}
-                    description={t('pipeline:create.redshiftClusterDesc')}
-                    secondaryControl={
-                      <Button
-                        loading={loadingRedshift}
-                        iconName="refresh"
-                        onClick={() => {
-                          getServerlessRedshiftClusterList();
-                        }}
-                      />
-                    }
-                  >
-                    <Select
-                      statusType={loadingRedshift ? 'loading' : 'finished'}
-                      placeholder={
-                        t('pipeline:create.engineRedshiftClusterPlaceholder') ||
-                        ''
-                      }
-                      selectedOption={pipelineInfo.selectedRedshiftCluster}
-                      onChange={({ detail }) =>
-                        changeSelectedRedshift(detail.selectedOption)
-                      }
-                      options={redshiftOptionList}
-                      filteringType="auto"
-                    />
-                  </FormField>
+                  <Tiles
+                    onChange={({ detail }) => {
+                      changeRedshiftType(detail.value);
+                    }}
+                    value={pipelineInfo.redshiftType}
+                    items={[
+                      {
+                        label: t('pipeline:create.redshiftServerless'),
+                        description: t(
+                          'pipeline:create.redshiftServerlessDesc'
+                        ),
+                        value: 'serverless',
+                      },
+                      {
+                        label: t('pipeline:create.redshiftProvisioned'),
+                        description: t(
+                          'pipeline:create.redshiftProvisionedDesc'
+                        ),
+                        value: 'provisioned',
+                      },
+                    ]}
+                  />
 
-                  <FormField
-                    label={t('pipeline:create.accessPermissions')}
-                    description={
-                      <div>
-                        {t('pipeline:create.accessPermissionsDesc')}
-                        <Link external>
-                          {t('pipeline:create.permissionLink')}
-                        </Link>
-                      </div>
-                    }
-                    secondaryControl={
-                      <Button
-                        loading={loadingRoles}
-                        iconName="refresh"
-                        onClick={() => {
-                          getServerlessRoles();
-                        }}
-                      />
-                    }
-                  >
-                    <Select
-                      statusType={loadingRoles ? 'loading' : 'finished'}
-                      placeholder={t('pipeline:create.findIAMRole') || ''}
-                      selectedOption={pipelineInfo.selectedRedshiftRole}
-                      onChange={({ detail }) =>
-                        changeSelectedRedshiftRole(detail.selectedOption)
-                      }
-                      options={redshiftRoleOptions}
-                      filteringType="auto"
-                    />
-                  </FormField>
+                  {pipelineInfo.redshiftType === 'serverless' && (
+                    <>
+                      {SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS ? (
+                        <>
+                          <FormField
+                            label={t('pipeline:create.redshiftCluster')}
+                            description={t(
+                              'pipeline:create.redshiftClusterDesc'
+                            )}
+                            secondaryControl={
+                              <Button
+                                loading={loadingRedshift}
+                                iconName="refresh"
+                                onClick={() => {
+                                  getServerlessRedshiftClusterList();
+                                }}
+                              />
+                            }
+                          >
+                            <Select
+                              statusType={
+                                loadingRedshift ? 'loading' : 'finished'
+                              }
+                              placeholder={
+                                t(
+                                  'pipeline:create.engineRedshiftClusterPlaceholder'
+                                ) || ''
+                              }
+                              selectedOption={
+                                pipelineInfo.selectedRedshiftCluster
+                              }
+                              onChange={({ detail }) =>
+                                changeSelectedRedshift(detail.selectedOption)
+                              }
+                              options={redshiftOptionList}
+                              filteringType="auto"
+                            />
+                          </FormField>
+                          <FormField
+                            label={t('pipeline:create.accessPermissions')}
+                            description={
+                              <div>
+                                {t('pipeline:create.accessPermissionsDesc')}
+                                <Link external>
+                                  {t('pipeline:create.permissionLink')}
+                                </Link>
+                              </div>
+                            }
+                            secondaryControl={
+                              <Button
+                                loading={loadingRoles}
+                                iconName="refresh"
+                                onClick={() => {
+                                  getServerlessRoles();
+                                }}
+                              />
+                            }
+                          >
+                            <Select
+                              statusType={loadingRoles ? 'loading' : 'finished'}
+                              placeholder={
+                                t('pipeline:create.findIAMRole') || ''
+                              }
+                              selectedOption={pipelineInfo.selectedRedshiftRole}
+                              onChange={({ detail }) =>
+                                changeSelectedRedshiftRole(
+                                  detail.selectedOption
+                                )
+                              }
+                              options={redshiftRoleOptions}
+                              filteringType="auto"
+                            />
+                          </FormField>
+                        </>
+                      ) : (
+                        <>
+                          <FormField
+                            label={t('pipeline:create.redshiftBaseCapacity')}
+                            description={t('pipeline:create.redshiftBaseCapacityDesc')}
+                          >
+                            <Select
+                              selectedOption={redshiftCapacity}
+                              onChange={({ detail }) =>
+                                setRedshiftCapacity(detail.selectedOption)
+                              }
+                              options={REDSHIFT_CAPACITY_LIST}
+                              selectedAriaLabel="Selected"
+                            />
+                          </FormField>
+
+                          <FormField
+                            label={t('pipeline:create.redshiftVpc')}
+                            description={t('pipeline:create.redshiftVpcDesc')}
+                          >
+                            <Select
+                              placeholder={
+                                t('pipeline:create.vpcPlaceholder') || ''
+                              }
+                              selectedOption={
+                                pipelineInfo.redshiftServerlessVPC
+                              }
+                              options={threeAZVPCOptionList}
+                              selectedAriaLabel="Selected"
+                              statusType={
+                                loading3AZVpc ? 'loading' : 'finished'
+                              }
+                              onChange={(e) => {
+                                changeServerlessRedshiftVPC(
+                                  e.detail.selectedOption
+                                );
+                              }}
+                            />
+                          </FormField>
+
+                          <FormField
+                            label={t('pipeline:create.redshiftSecurityGroup')}
+                            description={t('pipeline:create.redshiftSecurityGroupDesc')}
+                          >
+                            <Multiselect
+                              selectedOptions={
+                                pipelineInfo.redshiftServerlessSG
+                              }
+                              tokenLimit={2}
+                              deselectAriaLabel={(e) =>
+                                `${t('remove')} ${e.label}`
+                              }
+                              options={vpcSGOptionList}
+                              placeholder={
+                                t('pipeline:create.redshiftSecurityGroupPlaceholder') || ''
+                              }
+                              selectedAriaLabel="Selected"
+                              statusType={loadingSG ? 'loading' : 'finished'}
+                              onChange={(e) => {
+                                changeSecurityGroup(
+                                  e.detail.selectedOptions as any
+                                );
+                              }}
+                            />
+                          </FormField>
+
+                          <FormField
+                            label={t('pipeline:create.redshiftSubnet')}
+                            description={t('pipeline:create.redshiftSubnetDesc')}
+                          >
+                            <Multiselect
+                              selectedOptions={
+                                pipelineInfo.redshiftServerlessSubnets
+                              }
+                              tokenLimit={4}
+                              deselectAriaLabel={(e) =>
+                                `${t('remove')} ${e.label}`
+                              }
+                              options={vpcThreeAZSubnetsOptionList}
+                              placeholder={
+                                t('pipeline:create.subnetPlaceholder') || ''
+                              }
+                              selectedAriaLabel="Selected"
+                              statusType={
+                                loadingSubnets ? 'loading' : 'finished'
+                              }
+                              onChange={(e) => {
+                                changeReshiftSubnets(
+                                  e.detail.selectedOptions as any
+                                );
+                              }}
+                            />
+                          </FormField>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {pipelineInfo.redshiftType === 'provisioned' && (
+                    <>
+                      <FormField
+                        label={t('pipeline:create.redshiftCluster')}
+                        description={t('pipeline:create.redshiftClusterDesc')}
+                        secondaryControl={
+                          <Button
+                            loading={loadingRedshift}
+                            iconName="refresh"
+                            onClick={() => {
+                              getProvisionedRedshiftClusterList();
+                            }}
+                          />
+                        }
+                      >
+                        <Select
+                          statusType={loadingRedshift ? 'loading' : 'finished'}
+                          placeholder={
+                            t(
+                              'pipeline:create.engineRedshiftClusterPlaceholder'
+                            ) || ''
+                          }
+                          selectedOption={pipelineInfo.selectedRedshiftCluster}
+                          onChange={({ detail }) =>
+                            changeSelectedRedshift(detail.selectedOption)
+                          }
+                          options={provisionedRedshiftOptionList}
+                          filteringType="auto"
+                        />
+                      </FormField>
+
+                      <FormField
+                        label={t('pipeline:create.redshiftDatabaseUser')}
+                        description={t('pipeline:create.redshiftDatabaseUserDesc')}
+                      >
+                        <Input
+                          placeholder={
+                            t(
+                              'pipeline:create.redshiftDatabaseUserPlaceholder'
+                            ) || ''
+                          }
+                          value={
+                            pipelineInfo.dataAnalytics.redshift.provisioned
+                              .dbUser
+                          }
+                          onChange={(e) => {
+                            changeDBUser(e.detail.value);
+                          }}
+                        />
+                      </FormField>
+                    </>
+                  )}
 
                   <FormField
                     label={t('pipeline:create.engineDataRange')}
@@ -458,6 +832,63 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       </div>
                     </div>
                   </FormField>
+
+                  <ExpandableSection headerText={t('pipeline:create.redshiftAdditionalSettings')}>
+                    <SpaceBetween direction="vertical" size="s">
+                      <FormField
+                        label={t('pipeline:create.redshiftDataLoadFrequency')}
+                        description={t('pipeline:create.redshiftDataLoadFrequencyDesc')}
+                      >
+                        <div className="flex">
+                          <div style={{ width: 250 }}>
+                            <Input
+                              type="number"
+                              placeholder="5"
+                              value={pipelineInfo.redshiftDataLoadValue}
+                              onChange={(e) => {
+                                changeDataLoadValue(e.detail.value);
+                              }}
+                            />
+                          </div>
+                          <div className="ml-10">
+                            <Select
+                              selectedOption={dataLoadUnit}
+                              onChange={({ detail }) => {
+                                setDataLoadUnit(detail.selectedOption);
+                              }}
+                              options={REDSHIFT_FREQUENCY_UNIT}
+                            />
+                          </div>
+                        </div>
+                      </FormField>
+                      <FormField
+                        label={t('pipeline:create.redshiftUserTableUpsertFrequency')}
+                        description={t('pipeline:create.redshiftUserTableUpsertFrequencyDesc')}
+                      >
+                        <div className="flex">
+                          <div style={{ width: 250 }}>
+                            <Input
+                              type="number"
+                              placeholder="5"
+                              value={pipelineInfo.redshiftUpsertFreqValue}
+                              onChange={(e) => {
+                                changeUpsertUserValue(e.detail.value);
+                              }}
+                            />
+                          </div>
+                          <div className="ml-10">
+                            <Select
+                              selectedOption={upsertUserUnit}
+                              onChange={({ detail }) => {
+                                setUpsertUserUnit(detail.selectedOption);
+                              }}
+                              options={REDSHIFT_FREQUENCY_UNIT}
+                            />
+                          </div>
+                        </div>
+                      </FormField>
+                    </SpaceBetween>
+                  </ExpandableSection>
                 </>
               )}
 

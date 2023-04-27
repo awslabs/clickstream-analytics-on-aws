@@ -62,7 +62,6 @@ declare global {
       Address: string;
       Port: string;
     };
-    Address: string;
     Port: string;
     name: string;
     nodeType: string;
@@ -114,5 +113,11 @@ declare global {
     authenticationType: string;
     edition: string;
     notificationEmail: string;
+  }
+
+  interface SecurityGroupResponse {
+    description: string;
+    id: string;
+    name: string;
   }
 }

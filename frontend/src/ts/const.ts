@@ -12,6 +12,7 @@ import { SelectProps } from '@cloudscape-design/components';
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const CONFIG_URL = '/aws-exports.json';
 export const COMMON_ALERT_TYPE = {
@@ -137,6 +138,20 @@ export const EVENT_REFRESH_UNIT_LIST = [
 export const REDSHIFT_UNIT_LIST = [
   { label: 'Months', value: 'month' },
   { label: 'Days', value: 'day' },
+];
+
+export const REDSHIFT_FREQUENCY_UNIT = [
+  { label: 'Minutes', value: 'minute' },
+  { label: 'Hours', value: 'hour' },
+  { label: 'Days', value: 'day' },
+];
+
+export const REDSHIFT_CAPACITY_LIST = [
+  { label: '8', value: '8' },
+  { label: '16', value: '16' },
+  { label: '32', value: '32' },
+  { label: '40', value: '40' },
+  { label: '48', value: '48' },
 ];
 
 export const SDK_LIST: SelectProps.Option[] = [

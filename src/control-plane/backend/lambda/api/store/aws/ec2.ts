@@ -15,6 +15,7 @@ import {
   EC2Client,
   paginateDescribeVpcs,
   paginateDescribeSubnets,
+  paginateDescribeSecurityGroups,
   DescribeRouteTablesCommand,
   Vpc,
   Filter,
@@ -25,7 +26,8 @@ import {
   RouteTableAssociation,
   Region,
 } from '@aws-sdk/client-ec2';
-import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion } from '../../common/types';
+import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
+import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup } from '../../common/types';
 import { getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string) => {
@@ -46,13 +48,45 @@ export const describeVpcs = async (region: string) => {
   return vpcs;
 };
 
-export const describeSubnets = async (region: string, vpcId: string, type: string) => {
+export const describeVpcs3AZ = async (region: string) => {
   const ec2Client = new EC2Client({ region });
-  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
+  const records: Vpc[] = [];
+  for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
+    records.push(...page.Vpcs as Vpc[]);
+  }
+  const vpcs: ClickStreamVpc[] = [];
+  for (let vpc of records as Vpc[]) {
+    const subnets = await describeSubnets(region, vpc.VpcId!);
+    const azSet = new Set();
+    for (let subnet of subnets) {
+      if (subnet.AvailabilityZone) {
+        azSet.add(subnet.AvailabilityZone);
+      }
+    }
+    if (azSet.size >= 3) {
+      vpcs.push({
+        id: vpc.VpcId ?? '',
+        name: getValueFromTags('Name', vpc.Tags!),
+        cidr: vpc.CidrBlock ?? '',
+        isDefault: vpc.IsDefault ?? false,
+      });
+    }
+  }
+  return vpcs;
+};
+
+export const describeSubnets = async (region: string, vpcId: string) => {
+  const ec2Client = new EC2Client({ region });
   const records: Subnet[] = [];
+  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
   for await (const page of paginateDescribeSubnets({ client: ec2Client }, { Filters: filters })) {
     records.push(...page.Subnets as Subnet[]);
   }
+  return records;
+};
+
+export const describeSubnetsWithType = async (region: string, vpcId: string, type: string) => {
+  const records = await describeSubnets(region, vpcId);
   let subnets: ClickStreamSubnet[] = [];
   for (let subnet of records as Subnet[]) {
     let subnetType = 'isolated';
@@ -134,4 +168,24 @@ export const listRegions = async () => {
     });
   }
   return regions;
+};
+
+export const describeSecurityGroups = async (region: string, vpcId: string) => {
+  const ec2Client = new EC2Client({ region });
+  const records: SecurityGroup[] = [];
+  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
+  for await (const page of paginateDescribeSecurityGroups({ client: ec2Client }, {
+    Filters: filters,
+  })) {
+    records.push(...page.SecurityGroups as SecurityGroup[]);
+  }
+  const securityGroups: ClickStreamSecurityGroup[] = [];
+  for (let sg of records as SecurityGroup[]) {
+    securityGroups.push({
+      id: sg.GroupId ?? '',
+      name: sg.GroupName ?? '',
+      description: sg.Description ?? '',
+    });
+  }
+  return securityGroups;
 };

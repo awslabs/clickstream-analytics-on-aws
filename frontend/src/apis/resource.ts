@@ -23,6 +23,11 @@ const getVPCList = async (params: { region?: string }) => {
   return result;
 };
 
+const get3AZVPCList = async (params: { region?: string }) => {
+  const result: any = await apiRequest('get', `/env/vpc3az`, params);
+  return result;
+};
+
 const getSubnetList = async (params: { region: string; vpcId: string }) => {
   const result: any = await apiRequest('get', `/env/vpc/subnet`, params);
   return result;
@@ -125,8 +130,18 @@ const getSSMSecrets = async (params: { region: string }) => {
   return result;
 };
 
+const getSecurityGroups = async (params: { region: string; vpcId: string }) => {
+  const result: any = await apiRequest(
+    'get',
+    '/env/vpc/securitygroups',
+    params
+  );
+  return result;
+};
+
 export {
   createQuickSightUser,
+  get3AZVPCList,
   getCertificates,
   getHostedZoneList,
   getMSKList,
@@ -138,6 +153,7 @@ export {
   getRegionList,
   getS3BucketList,
   getSSMSecrets,
+  getSecurityGroups,
   getServiceRoles,
   getServiceRolesByAccount,
   getSubnetList,

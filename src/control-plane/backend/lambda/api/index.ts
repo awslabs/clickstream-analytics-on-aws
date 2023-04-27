@@ -138,6 +138,15 @@ app.get(
   });
 
 app.get(
+  '/api/env/vpc3az',
+  validate([
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeVpcs3AZ(req, res, next);
+  });
+
+app.get(
   '/api/env/vpc/subnet',
   validate([
     query('vpcId').custom(isValidEmpty),
@@ -146,6 +155,16 @@ app.get(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeSubnets(req, res, next);
+  });
+
+app.get(
+  '/api/env/vpc/securitygroups',
+  validate([
+    query('vpcId').custom(isValidEmpty),
+    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.describeSecurityGroups(req, res, next);
   });
 
 app.get(

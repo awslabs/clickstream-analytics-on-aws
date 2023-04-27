@@ -27,8 +27,10 @@ import {
 } from 'ts/const';
 import {
   extractAccountIdFromArn,
+  generateDataLoadFreqency,
   generateDataProcessingInterval,
   generateRedshiftInterval,
+  generateUpsertFrequencyExpression,
 } from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
@@ -69,7 +71,7 @@ const Content: React.FC = () => {
     appIds: [],
     name: '',
     description: '',
-    region: '',
+    region: 'us-east-1',
     dataCollectionSDK: '',
     tags: [],
     network: {
@@ -154,14 +156,27 @@ const Content: React.FC = () => {
       enrichPlugin: [],
     },
     dataAnalytics: {
+      athena: false,
       redshift: {
-        serverless: {
-          workgroupName: '',
-          iamRoleArn: '',
+        dataRange: '',
+        provisioned: {
+          clusterIdentifier: '',
+          dbUser: '',
+        },
+        newServerless: {
+          network: {
+            vpcId: '',
+            subnetIds: [],
+            securityGroups: [],
+          },
+          baseCapacity: '',
         },
       },
       loadWorkflow: {
-        scheduleInterval: '',
+        loadJobScheduleIntervalInMinutes: '',
+      },
+      upsertUsers: {
+        scheduleExpression: '',
       },
     },
     selectedRegion: null,
@@ -230,6 +245,15 @@ const Content: React.FC = () => {
       },
     },
     enableAuthentication: false,
+    redshiftType: 'serverless',
+    redshiftBaseCapacity: null,
+    redshiftServerlessVPC: null,
+    redshiftServerlessSG: [],
+    redshiftServerlessSubnets: [],
+    redshiftDataLoadValue: '',
+    redshiftDataLoadUnit: null,
+    redshiftUpsertFreqValue: '',
+    redshiftUpsertFreqUnit: null,
   });
 
   const validateBasicInfo = () => {
@@ -304,7 +328,6 @@ const Content: React.FC = () => {
 
   const confirmCreatePipeline = async () => {
     const createPipelineObj: any = cloneDeep(pipelineInfo);
-
     if (createPipelineObj.enableDataProcessing) {
       createPipelineObj.etl.dataFreshnessInHour =
         pipelineInfo.selectedEventFreshUnit?.value === 'day'
@@ -324,15 +347,39 @@ const Content: React.FC = () => {
         pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
 
       // set redshift schedule
-      createPipelineObj.dataAnalytics.loadWorkflow.scheduleInterval =
+      createPipelineObj.dataAnalytics.redshift.dataRange =
         generateRedshiftInterval(
           parseInt(pipelineInfo.redshiftExecutionValue),
           pipelineInfo.selectedRedshiftExecutionUnit?.value
         );
 
+      // set redshift dataload frequency
+      createPipelineObj.dataAnalytics.loadWorkflow.loadJobScheduleIntervalInMinutes =
+        generateDataLoadFreqency(
+          parseInt(pipelineInfo.redshiftDataLoadValue),
+          pipelineInfo.redshiftDataLoadUnit?.value
+        );
+
+      // set redshift upsert frequency express
+      createPipelineObj.dataAnalytics.upsertUsers.scheduleExpression =
+        generateUpsertFrequencyExpression(
+          parseInt(pipelineInfo.redshiftUpsertFreqValue),
+          pipelineInfo.redshiftUpsertFreqUnit
+        );
+
       // set dataAnalytics to null when not enable Redshift
-      if (!createPipelineObj.enableRedshift) {
+      if (!pipelineInfo.enableRedshift) {
         createPipelineObj.dataAnalytics = null;
+      }
+
+      // set serverless to null when user select provisioned
+      if (pipelineInfo.redshiftType === 'provisioned') {
+        createPipelineObj.dataAnalytics.redshift.newServerless = null;
+      }
+
+      // set provisioned to null when user select serverless
+      if (pipelineInfo.redshiftType === 'serverless') {
+        createPipelineObj.dataAnalytics.redshift.provisioned = null;
       }
     } else {
       createPipelineObj.etl = null;
@@ -403,6 +450,16 @@ const Content: React.FC = () => {
     delete createPipelineObj.dataConnectionType;
     delete createPipelineObj.quickSightVpcConnection;
     delete createPipelineObj.enableAuthentication;
+
+    delete createPipelineObj.redshiftType;
+    delete createPipelineObj.redshiftServerlessVPC;
+    delete createPipelineObj.redshiftBaseCapacity;
+    delete createPipelineObj.redshiftServerlessSG;
+    delete createPipelineObj.redshiftServerlessSubnets;
+    delete createPipelineObj.redshiftDataLoadValue;
+    delete createPipelineObj.redshiftDataLoadUnit;
+    delete createPipelineObj.redshiftUpsertFreqValue;
+    delete createPipelineObj.redshiftUpsertFreqUnit;
 
     setLoadingCreate(true);
     try {
@@ -1076,9 +1133,9 @@ const Content: React.FC = () => {
                       ...prev.dataAnalytics,
                       redshift: {
                         ...prev.dataAnalytics.redshift,
-                        serverless: {
-                          ...prev.dataAnalytics.redshift.serverless,
-                          workgroupName: cluster.value || '',
+                        provisioned: {
+                          ...prev.dataAnalytics.redshift.provisioned,
+                          clusterIdentifier: cluster.value || '',
                         },
                       },
                     },
@@ -1090,16 +1147,6 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     selectedRedshiftRole: role,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
-                      redshift: {
-                        ...prev.dataAnalytics.redshift,
-                        serverless: {
-                          ...prev.dataAnalytics.redshift.serverless,
-                          iamRoleArn: role.value || '',
-                        },
-                      },
-                    },
                   };
                 });
               }}
@@ -1124,6 +1171,155 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     enableAthena: enable,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      athena: enable,
+                    },
+                  };
+                });
+              }}
+              changeRedshiftType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftType: type,
+                  };
+                });
+              }}
+              changeDBUser={(user) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        provisioned: {
+                          ...prev.dataAnalytics.redshift.provisioned,
+                          dbUser: user,
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeBaseCapacity={(capacity) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftBaseCapacity: capacity,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        newServerless: {
+                          ...prev.dataAnalytics.redshift.newServerless,
+                          baseCapacity: capacity.value || '',
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeServerlessRedshiftVPC={(vpc) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftServerlessVPC: vpc,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        newServerless: {
+                          ...prev.dataAnalytics.redshift.newServerless,
+                          network: {
+                            ...prev.dataAnalytics.redshift.newServerless
+                              .network,
+                            vpcId: vpc.value || '',
+                          },
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSecurityGroup={(sg) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftServerlessSG: sg,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        newServerless: {
+                          ...prev.dataAnalytics.redshift.newServerless,
+                          network: {
+                            ...prev.dataAnalytics.redshift.newServerless
+                              .network,
+                            securityGroups: sg.map(
+                              (element) => element.value || ''
+                            ),
+                          },
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeReshiftSubnets={(subnets) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftServerlessSubnets: subnets,
+                    dataAnalytics: {
+                      ...prev.dataAnalytics,
+                      redshift: {
+                        ...prev.dataAnalytics.redshift,
+                        newServerless: {
+                          ...prev.dataAnalytics.redshift.newServerless,
+                          network: {
+                            ...prev.dataAnalytics.redshift.newServerless
+                              .network,
+                            subnetIds: subnets.map(
+                              (element) => element.value || ''
+                            ),
+                          },
+                        },
+                      },
+                    },
+                  };
+                });
+              }}
+              changeDataLoadValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftDataLoadValue: value,
+                  };
+                });
+              }}
+              changeDataLoadUnit={(unit) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftDataLoadUnit: unit,
+                  };
+                });
+              }}
+              changeUpsertUserValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftUpsertFreqValue: value,
+                  };
+                });
+              }}
+              changeUpsertUserUnit={(unit) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    redshiftUpsertFreqUnit: unit,
                   };
                 });
               }}

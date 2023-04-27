@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { RedshiftClient, paginateDescribeClusters, Cluster } from '@aws-sdk/client-redshift';
+import { RedshiftClient, Cluster, paginateDescribeClusters } from '@aws-sdk/client-redshift';
 import {
   RedshiftServerlessClient,
   GetWorkgroupCommand,
@@ -36,6 +36,7 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
         nodeType: cluster.NodeType ?? '',
         endpoint: cluster.Endpoint,
         status: cluster.ClusterStatus ?? '',
+        masterUsername: cluster.MasterUsername ?? '',
         publiclyAccessible: cluster.PubliclyAccessible ?? false,
       });
     }
@@ -76,7 +77,6 @@ export const listRedshiftServerlessWorkgroups = async (region: string) => {
   for await (const page of paginateListWorkgroups({ client: redshiftServerlessClient }, {})) {
     records.push(...page.workgroups as Workgroup[]);
   }
-
   const workgroups: RedshiftWorkgroup[] = [];
   for (let workgroup of records as Workgroup[]) {
     workgroups.push({

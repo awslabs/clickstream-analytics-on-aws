@@ -31,6 +31,7 @@ import {
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
+  REDSHIFT_MODE, SUBNETS_THREE_AZ_PATTERN,
 } from '../common/constants-ln';
 import { validatePattern, validateSecretModel } from '../common/stack-params-valid';
 import {
@@ -209,6 +210,12 @@ interface NetworkProps {
   readonly privateSubnetIds: string[];
 }
 
+interface RedshiftNetworkProps {
+  readonly vpcId: string;
+  readonly securityGroups: string[];
+  readonly subnetIds: string[];
+}
+
 interface IngestionServer {
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
@@ -248,18 +255,29 @@ export interface DataAnalytics {
     readonly fileSuffix: string;
   };
   readonly redshift?: {
-    readonly serverless?: {
+    readonly dataRange: string;
+    readonly newServerless?: {
+      readonly baseCapacity: number;
+      readonly network: RedshiftNetworkProps;
+    };
+    readonly existingServerless?: {
       readonly workgroupName: string;
       readonly iamRoleArn: string;
     };
-    readonly provisioned?: {};
+    readonly provisioned?: {
+      readonly clusterIdentifier: string;
+      readonly dbUser: string;
+    };
   };
-  readonly athena?: {};
-  readonly loadWorkflow?: {
+  readonly athena: boolean;
+  readonly loadWorkflow: {
     readonly bucket?: S3Bucket;
-    readonly scheduleInterval?: number;
+    readonly loadJobScheduleIntervalInMinutes: number;
     readonly maxFilesLimit?: number;
     readonly processingFilesLimit?: number;
+  };
+  readonly upsertUsers: {
+    readonly scheduleExpression: string;
   };
 }
 
@@ -442,9 +460,9 @@ export class CPipeline {
       this.mskBrokers = await listMSKClusterBrokers(this.pipeline.region, this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
     }
 
-    if (!this.workgroup && this.pipeline.dataAnalytics?.redshift?.serverless?.workgroupName) {
+    if (!this.workgroup && this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName) {
       const workgroup = await getRedshiftWorkgroupAndNamespace(
-        this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.serverless?.workgroupName);
+        this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName);
       if (!workgroup) {
         throw new ClickStreamBadRequestError('Workgroup no found. Please check and try again.');
       }
@@ -1218,25 +1236,75 @@ export class CPipeline {
       ParameterValue: (this.pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit ?? 100).toString(),
     });
 
-    parameters.push({
-      ParameterKey: 'RedshiftServerlessNamespaceId',
-      ParameterValue: this.workgroup?.namespaceId,
-    });
+    if (this.pipeline.dataAnalytics?.redshift?.provisioned) {
+      parameters.push({
+        ParameterKey: 'RedshiftMode',
+        ParameterValue: REDSHIFT_MODE.PROVISIONED,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftClusterIdentifier',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftDbUser',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.provisioned.dbUser,
+      });
+    } else if (this.pipeline.dataAnalytics?.redshift?.newServerless) {
+      parameters.push({
+        ParameterKey: 'RedshiftMode',
+        ParameterValue: REDSHIFT_MODE.NEW_SERVERLESS,
+      });
+      let workgroupName = `clickstream-${this.project?.id.replace(/_/g, '-')}`;
+      if (workgroupName.length > 120) {
+        workgroupName = workgroupName.substring(0, 120);
+      }
+      parameters.push({
+        ParameterKey: 'NewRedshiftServerlessWorkgroupName',
+        ParameterValue: workgroupName,
+      });
 
-    parameters.push({
-      ParameterKey: 'RedshiftServerlessWorkgroupId',
-      ParameterValue: this.workgroup?.workgroupId,
-    });
+      validatePattern('VpcId', VPC_ID_PARRERN, this.pipeline.dataAnalytics?.redshift?.newServerless.network.vpcId);
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessVPCId',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.vpcId,
+      });
 
-    parameters.push({
-      ParameterKey: 'RedshiftServerlessWorkgroupName',
-      ParameterValue: this.pipeline.dataAnalytics?.redshift?.serverless?.workgroupName,
-    });
-
-    parameters.push({
-      ParameterKey: 'RedshiftServerlessIAMRole',
-      ParameterValue: this.pipeline.dataAnalytics?.redshift?.serverless?.iamRoleArn,
-    });
+      validatePattern('RedshiftServerlessSubnets', SUBNETS_THREE_AZ_PATTERN,
+        this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','));
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessSubnets',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','),
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessSGs',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups.join(','),
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessRPU',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.baseCapacity.toString(),
+      });
+    } else if (this.pipeline.dataAnalytics?.redshift?.existingServerless) {
+      parameters.push({
+        ParameterKey: 'RedshiftMode',
+        ParameterValue: REDSHIFT_MODE.SERVERLESS,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessNamespaceId',
+        ParameterValue: this.workgroup?.namespaceId,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessWorkgroupId',
+        ParameterValue: this.workgroup?.workgroupId,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessWorkgroupName',
+        ParameterValue: this.workgroup?.workgroupName,
+      });
+      parameters.push({
+        ParameterKey: 'RedshiftServerlessIAMRole',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift?.existingServerless?.iamRoleArn,
+      });
+    }
 
     return parameters;
   }

@@ -148,5 +148,11 @@ export const REDSHIFT_USER_NAME_PATTERN = '^([a-z0-9-]{1,63})?$';
 export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
 export const INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
 export const INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
+
+export enum REDSHIFT_MODE {
+  PROVISIONED='Provisioned',
+  SERVERLESS='Serverless',
+  NEW_SERVERLESS='New_Serverless',
+}
 export const EMAIL_PATTERN = '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
 export const MUTIL_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;

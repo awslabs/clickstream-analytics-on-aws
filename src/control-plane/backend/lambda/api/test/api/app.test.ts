@@ -26,7 +26,7 @@ describe('App test', () => {
     let res = await request(app)
       .get('/');
     expect(res.headers['x-click-stream-response-time']).toBeDefined();
-  })
+  });
   afterAll((done) => {
     server.close();
     done();

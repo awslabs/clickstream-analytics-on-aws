@@ -23,9 +23,9 @@ import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
 import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
-import { RedshiftMode } from './analytics/private/constant';
 import { addCfnNagForCfnResource, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
+import { REDSHIFT_MODE } from '../src/common/constant';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -92,7 +92,7 @@ export function createRedshiftAnalyticsStack(
     'newRedshiftServerless',
     {
       expression:
-        Fn.conditionEquals(redshiftModeStr, RedshiftMode.NEW_SERVERLESS),
+        Fn.conditionEquals(redshiftModeStr, REDSHIFT_MODE.NEW_SERVERLESS),
     },
   );
   const isExistingRedshiftServerless = new CfnCondition(
@@ -100,7 +100,7 @@ export function createRedshiftAnalyticsStack(
     'existingRedshiftServerless',
     {
       expression:
-        Fn.conditionEquals(redshiftModeStr, RedshiftMode.SERVERLESS),
+        Fn.conditionEquals(redshiftModeStr, REDSHIFT_MODE.SERVERLESS),
     },
   );
   const isRedshiftProvisioned = new CfnCondition(
@@ -108,13 +108,13 @@ export function createRedshiftAnalyticsStack(
     'redshiftProvisioned',
     {
       expression:
-        Fn.conditionEquals(redshiftModeStr, RedshiftMode.PROVISIONED),
+        Fn.conditionEquals(redshiftModeStr, REDSHIFT_MODE.PROVISIONED),
     },
   );
 
   const newRedshiftServerlessStack = new RedshiftAnalyticsStack(
     scope,
-    RedshiftMode.NEW_SERVERLESS + ' Redshift',
+    REDSHIFT_MODE.NEW_SERVERLESS + ' Redshift',
     {
       ...nestStackProps,
       newRedshiftServerlessProps: {
@@ -127,7 +127,7 @@ export function createRedshiftAnalyticsStack(
 
   const redshiftExistingServerlessStack = new RedshiftAnalyticsStack(
     scope,
-    RedshiftMode.SERVERLESS + ' Redshift',
+    REDSHIFT_MODE.SERVERLESS + ' Redshift',
     {
       ...nestStackProps,
       existingRedshiftServerlessProps: {
@@ -142,7 +142,7 @@ export function createRedshiftAnalyticsStack(
 
   const redshiftProvisionedStack = new RedshiftAnalyticsStack(
     scope,
-    RedshiftMode.PROVISIONED + ' Redshift',
+    REDSHIFT_MODE.PROVISIONED + ' Redshift',
     {
       ...nestStackProps,
       provisionedRedshiftProps: {

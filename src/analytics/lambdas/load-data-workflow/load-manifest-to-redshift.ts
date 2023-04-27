@@ -15,8 +15,9 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 import { Context } from 'aws-lambda';
+import { REDSHIFT_MODE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-import { JobStatus, RedshiftMode } from '../../private/constant';
+import { JobStatus } from '../../private/constant';
 import { ProvisionedRedshiftProps, ManifestBody, ExistingRedshiftServerlessCustomProps } from '../../private/model';
 import { getRedshiftClient, executeStatements } from '../redshift-data';
 
@@ -81,13 +82,13 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
-  if (redshiftMode == RedshiftMode.SERVERLESS) {
+  if (redshiftMode == REDSHIFT_MODE.SERVERLESS) {
     serverlessRedshiftProps = {
       databaseName: REDSHIFT_DATABASE,
       workgroupName: process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
       dataAPIRoleArn: REDSHIFT_DATA_API_ROLE_ARN,
     };
-  } else if (redshiftMode == RedshiftMode.PROVISIONED) {
+  } else if (redshiftMode == REDSHIFT_MODE.PROVISIONED) {
     provisionedRedshiftProps = {
       databaseName: REDSHIFT_DATABASE,
       dbUser: process.env.REDSHIFT_DB_USER!,

@@ -13,7 +13,14 @@
 
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
-import { EC2Client, DescribeRegionsCommand, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeRouteTablesCommand } from '@aws-sdk/client-ec2';
+import {
+  EC2Client,
+  DescribeRegionsCommand,
+  DescribeVpcsCommand,
+  DescribeSubnetsCommand,
+  DescribeRouteTablesCommand,
+  DescribeSecurityGroupsCommand,
+} from '@aws-sdk/client-ec2';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import {
@@ -163,6 +170,31 @@ describe('Account Env test', () => {
           name: '',
           cidr: '172.31.0.0/16',
           isDefault: true,
+        },
+      ],
+    });
+  });
+  it('Get securitygroups from default region', async () => {
+    ec2ClientMock.on(DescribeSecurityGroupsCommand).resolves({
+      SecurityGroups: [
+        {
+          GroupId: 'sg-043f6a0f412c93545',
+          GroupName: 'msk',
+          Description: 'msk',
+        },
+      ],
+    });
+    let res = await request(app).get('/api/env/vpc/securitygroups?vpcId=vpc-0ba32b04ccc029088');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          id: 'sg-043f6a0f412c93545',
+          name: 'msk',
+          description: 'msk',
         },
       ],
     });
@@ -791,6 +823,7 @@ describe('Account Env test', () => {
           },
           ClusterStatus: 'available',
           VpcId: 'vpc-111',
+          MasterUsername: 'click',
         },
         {
           ClusterIdentifier: 'redshift-cluster-1',
@@ -801,6 +834,7 @@ describe('Account Env test', () => {
           },
           ClusterStatus: 'available',
           VpcId: 'vpc-222',
+          MasterUsername: 'click',
         },
       ],
     });
@@ -819,6 +853,7 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           publiclyAccessible: false,
+          masterUsername: 'click',
           status: 'available',
         },
       ],
@@ -836,6 +871,7 @@ describe('Account Env test', () => {
           },
           ClusterStatus: 'available',
           VpcId: 'vpc-111',
+          MasterUsername: 'click',
         },
       ],
     });
@@ -854,6 +890,7 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           publiclyAccessible: false,
+          masterUsername: 'click',
           status: 'available',
         },
       ],

@@ -259,8 +259,10 @@ export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
       },
       fileSuffix: '.snappy.parquet',
     },
+    athena: true,
     redshift: {
-      serverless: {
+      dataRange: 'rate(6 months)',
+      existingServerless: {
         workgroupName: 'test',
         iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
       },
@@ -270,9 +272,12 @@ export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      scheduleInterval: 180,
+      loadJobScheduleIntervalInMinutes: 180,
       maxFilesLimit: 50,
       processingFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
     },
   },
 };
@@ -305,10 +310,23 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE: IPipeline = {
       },
       fileSuffix: '.snappy.parquet',
     },
+    athena: true,
     redshift: {
-      serverless: {
-        workgroupName: 'test',
-        iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
+      dataRange: 'rate(6 months)',
+      newServerless: {
+        network: {
+          vpcId: 'vpc-00000000000000001',
+          subnetIds: [
+            'subnet-00000000000000011',
+            'subnet-00000000000000012',
+            'subnet-00000000000000013',
+          ],
+          securityGroups: [
+            'sg-00000000000000030',
+            'sg-00000000000000031',
+          ],
+        },
+        baseCapacity: 8,
       },
     },
     loadWorkflow: {
@@ -316,9 +334,63 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      scheduleInterval: 180,
+      loadJobScheduleIntervalInMinutes: 180,
       maxFilesLimit: 50,
       processingFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+};
+
+export const KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = {
+  ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
+  etl: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'hour',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: 'BUILDIN_1',
+    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataAnalytics: {
+    ods: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      fileSuffix: '.snappy.parquet',
+    },
+    athena: true,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      provisioned: {
+        clusterIdentifier: 'redshift-cluster-1',
+        dbUser: 'clickstream',
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      loadJobScheduleIntervalInMinutes: 180,
+      maxFilesLimit: 50,
+      processingFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
     },
   },
 };

@@ -23,8 +23,8 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { RedshiftMode } from './constant';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, UpsertUsersWorkflowData } from './model';
+import { REDSHIFT_MODE } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -183,7 +183,7 @@ export class UpsertUsersWorkflow extends Construct {
     [key: string]: string;
   } {
     return {
-      REDSHIFT_MODE: props.serverlessRedshift ? RedshiftMode.SERVERLESS : RedshiftMode.PROVISIONED,
+      REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
       REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
       REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
       REDSHIFT_DATABASE: props.databaseName,
