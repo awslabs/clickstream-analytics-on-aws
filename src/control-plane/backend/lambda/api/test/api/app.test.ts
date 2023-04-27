@@ -22,6 +22,11 @@ describe('App test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.text).toEqual('OK!');
   });
+  it('response headers contain X-Click-Stream-Response-Time', async () => {
+    let res = await request(app)
+      .get('/');
+    expect(res.headers['x-click-stream-response-time']).toBeDefined();
+  })
   afterAll((done) => {
     server.close();
     done();

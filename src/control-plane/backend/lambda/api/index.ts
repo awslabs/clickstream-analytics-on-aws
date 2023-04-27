@@ -101,12 +101,16 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
 // Implement save request id interceptor
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const originalEnd = res.end;
+  let duration = 0;
+  const start = Date.now();
   // @ts-ignore
   res.end = async (chunk: any, encoding: BufferEncoding, cb?: () => void) => {
     const requestId = req.get('X-Click-Stream-Request-Id');
     if (requestId && res.statusCode >= 200 && res.statusCode <= 299) {
       await projectServ.saveRequestId(requestId);
     }
+    duration = Date.now() - start;
+    res.setHeader('X-Click-Stream-Response-Time', duration);
     res.end = originalEnd;
     res.end(chunk, encoding, cb);
   };
