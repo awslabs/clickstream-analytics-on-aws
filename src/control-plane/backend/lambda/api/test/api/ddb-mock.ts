@@ -216,7 +216,9 @@ function dictionaryMock(ddbMock: any, name?: string): any {
         data: {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
-          prefix: 'feature-rel/main/default',
+          target: 'feature-rel/main',
+          prefix: 'default',
+          version: 'v1.0.0',
         },
       },
     });
@@ -231,7 +233,7 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
       id: MOCK_PROJECT_ID,
       type: `METADATA#${MOCK_PROJECT_ID}`,
     },
-  }).resolves({ Item: { environment: ProjectEnvironment.DEV } });
+  }).resolves({ Item: { id: MOCK_PROJECT_ID, environment: ProjectEnvironment.DEV } });
   // apps
   if (props?.noApp) {
     ddbMock.on(QueryCommand)

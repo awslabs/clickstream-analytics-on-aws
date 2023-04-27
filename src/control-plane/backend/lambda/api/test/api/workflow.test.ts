@@ -20,7 +20,7 @@ import {
   StartExecutionCommand,
   SFNClient,
 } from '@aws-sdk/client-sfn';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, projectExistedMock, stackParameterMock } from './ddb-mock';
 import {
@@ -34,16 +34,41 @@ import {
   S3_ETL_PIPELINE,
   S3_INGESTION_PIPELINE,
 } from './pipeline-mock';
+import { dictionaryTableName } from '../../common/constants';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
+import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const sfnClient = mockClient(SFNClient);
 const secretsManagerClient = mockClient(SecretsManagerClient);
+
+const Tags = [
+  {
+    Key: 'customerKey1',
+    Value: 'tagValue1',
+  },
+  {
+    Key: 'customerKey2',
+    Value: 'tagValue2',
+  },
+  {
+    Key: 'aws-solution',
+    Value: 'clickstream-branch-main',
+  },
+  {
+    Key: 'aws-solution-version',
+    Value: 'v1.0.0',
+  },
+  {
+    Key: 'clickstream-project',
+    Value: MOCK_PROJECT_ID,
+  },
+];
 
 describe('Workflow test', () => {
   beforeEach(() => {
@@ -177,7 +202,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-s3-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                   },
                 },
                 End: true,
@@ -311,7 +337,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Type: 'Stack',
@@ -445,7 +472,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Type: 'Stack',
@@ -507,7 +535,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -642,7 +671,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Next: 'KafkaConnector',
@@ -704,7 +734,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -851,7 +882,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
                 End: true,
@@ -997,7 +1029,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
                 End: true,
@@ -1135,7 +1168,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-s3-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                   },
                 },
                 End: true,
@@ -1222,7 +1256,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-ETL-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
                 End: true,
@@ -1356,7 +1391,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Next: 'KafkaConnector',
@@ -1418,7 +1454,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -1505,7 +1542,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-ETL-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
                 End: true,
@@ -1588,7 +1626,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 End: true,
@@ -1734,7 +1773,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                   },
                 },
                 End: true,
@@ -1821,7 +1861,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-ETL-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
                 End: true,
@@ -1904,7 +1945,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 End: true,
@@ -2038,7 +2080,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Next: 'KafkaConnector',
@@ -2100,7 +2143,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
@@ -2187,7 +2231,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-ETL-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
                 End: true,
@@ -2270,7 +2315,8 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 End: true,
@@ -2980,13 +3026,57 @@ describe('Workflow test', () => {
     };
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
-  it('Pipeline template url', async () => {
+  it('Pipeline template url with version', async () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { id: 1, appId: `${MOCK_APP_ID}_1` },
-        { id: 2, appId: `${MOCK_APP_ID}_2` },
+        {
+          id: 1,
+          appId: `${MOCK_APP_ID}_1`,
+        },
+        {
+          id: 2,
+          appId: `${MOCK_APP_ID}_2`,
+        },
+      ],
+    });
+    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    let templateURL = await pipeline.getTemplateUrl('ingestion_s3');
+    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json');
+    templateURL = await pipeline.getTemplateUrl('ingestion_no');
+    expect(templateURL).toEqual(undefined);
+  });
+  it('Pipeline template url with latest', async () => {
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Solution',
+      },
+    }).resolves({
+      Item: {
+        name: 'Solution',
+        data: {
+          name: 'clickstream-branch-main',
+          dist_output_bucket: 'EXAMPLE-BUCKET',
+          target: 'feature-rel/main',
+          prefix: 'default',
+          version: 'latest',
+        },
+      },
+    });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          id: 1,
+          appId: `${MOCK_APP_ID}_1`,
+        },
+        {
+          id: 2,
+          appId: `${MOCK_APP_ID}_2`,
+        },
       ],
     });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
@@ -2994,7 +3084,6 @@ describe('Workflow test', () => {
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
     templateURL = await pipeline.getTemplateUrl('ingestion_no');
     expect(templateURL).toEqual(undefined);
-
   });
   it('Set Workflow Type', async () => {
     let workflowTemplate: WorkflowTemplate = {
@@ -3006,6 +3095,7 @@ describe('Workflow test', () => {
             Action: 'Create',
             Region: 'ap-southeast-1',
             StackName: 'clickstream-sigle-test2',
+            Tags: Tags,
             TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
             Parameters: [
               {
@@ -3039,6 +3129,7 @@ describe('Workflow test', () => {
             },
           ],
           StackName: 'clickstream-sigle-test2',
+          Tags: Tags,
           TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
         },
       },
@@ -3059,6 +3150,7 @@ describe('Workflow test', () => {
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   StackName: 'clickstream-test11',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
                     {
@@ -3081,6 +3173,7 @@ describe('Workflow test', () => {
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   StackName: 'clickstream-test33',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
                     {
@@ -3103,6 +3196,7 @@ describe('Workflow test', () => {
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   StackName: 'clickstream-test22',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                   Parameters: [
                     {
@@ -3144,6 +3238,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test11',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3166,6 +3261,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test22',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3188,6 +3284,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test33',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3215,6 +3312,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3242,6 +3340,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test22',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3269,6 +3368,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test33',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3311,6 +3411,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test11',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3338,6 +3439,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test22',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3365,6 +3467,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test33',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3392,6 +3495,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3414,6 +3518,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test11',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3441,6 +3546,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test22',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3468,6 +3574,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     StackName: 'clickstream-test33',
+                    Tags: Tags,
                     TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                     Parameters: [
                       {
@@ -3510,6 +3617,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test11',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3532,6 +3640,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test11',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3559,6 +3668,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test22',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },
@@ -3586,6 +3696,7 @@ describe('Workflow test', () => {
                     },
                   ],
                   StackName: 'clickstream-test33',
+                  Tags: Tags,
                   TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
                 },
               },

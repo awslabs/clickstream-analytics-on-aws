@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
+import { Parameter, Tag, StackStatus } from '@aws-sdk/client-cloudformation';
 import { Endpoint } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
@@ -85,6 +85,7 @@ export interface SfnStackInput {
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
+  readonly Tags?: Tag[];
 }
 
 export interface SfnStackCallback {
@@ -294,5 +295,11 @@ export interface RedshiftServerlessWorkgroup {
   readonly namespaceId: string;
   readonly namespaceArn: string;
   readonly namespaceName: string;
+}
+
+export enum BuildInTagKeys {
+  AWS_SOLUTION = 'aws-solution',
+  AWS_SOLUTION_VERSION = 'aws-solution-version',
+  CLICKSTREAM_PROJECT = 'clickstream-project',
 }
 

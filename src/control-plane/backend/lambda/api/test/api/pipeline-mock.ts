@@ -56,7 +56,10 @@ const BASE_PIPELINE_ATTRIBUTES = {
     ],
   },
   executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-  tags: [],
+  tags: [
+    { key: 'customerKey1', value: 'tagValue1' },
+    { key: 'customerKey2', value: 'tagValue2' },
+  ],
   bucket: {
     name: 'EXAMPLE_BUCKET',
     prefix: 'example/',

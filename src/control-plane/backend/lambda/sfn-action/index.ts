@@ -18,6 +18,7 @@ import {
   UpdateStackCommand,
   DeleteStackCommand,
   Parameter,
+  Tag,
   Stack,
   StackStatus,
 } from '@aws-sdk/client-cloudformation';
@@ -45,6 +46,7 @@ interface SfnStackInput {
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
+  readonly Tags?: Tag[];
 }
 
 interface SfnStackCallback {
@@ -77,6 +79,7 @@ export const createStack = async (event: SfnStackEvent) => {
       Parameters: event.Input.Parameters,
       DisableRollback: true,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Tags: event.Input.Tags,
     });
     const result = await cloudFormationClient.send(params);
     return {
@@ -105,6 +108,7 @@ export const updateStack = async (event: SfnStackEvent) => {
       DisableRollback: true,
       UsePreviousTemplate: true,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Tags: event.Input.Tags,
     });
     const result = await cloudFormationClient.send(params);
     return {

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Output, Parameter } from '@aws-sdk/client-cloudformation';
+import { Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
 import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
@@ -34,6 +34,7 @@ import {
 } from '../common/constants-ln';
 import { validatePattern, validateSecretModel } from '../common/stack-params-valid';
 import {
+  BuildInTagKeys,
   ClickStreamBadRequestError,
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -270,8 +271,10 @@ export interface Report {
     readonly vpcConnection?: string;
   };
 }
-export interface Tag {
-  [key: string]: string;
+
+export interface ITag {
+  readonly key: string;
+  readonly value: string;
 }
 
 interface S3Bucket {
@@ -296,7 +299,7 @@ export interface IPipeline {
   readonly description: string;
   readonly region: string;
   readonly dataCollectionSDK: string;
-  readonly tags: Tag[];
+  readonly tags: ITag[];
 
   readonly network: NetworkProps;
   readonly bucket: S3Bucket;
@@ -333,6 +336,7 @@ export class CPipeline {
   private workgroup?: RedshiftServerlessWorkgroup;
   private solution?: IDictionary;
   private templates?: IDictionary;
+  private stackTags?: Tag[];
 
   constructor(pipeline: IPipeline) {
     this.pipeline = pipeline;
@@ -451,6 +455,11 @@ export class CPipeline {
       this.solution = await store.getDictionary('Solution');
       this.templates = await store.getDictionary('Templates');
     }
+
+    if (!this.stackTags || this.stackTags?.length === 0) {
+      await this.setTags();
+      this.stackTags = this.getStackTags();
+    }
   }
 
   private getBucketPrefix(key: string, value: string | undefined): string {
@@ -486,10 +495,40 @@ export class CPipeline {
         return undefined;
       }
       const s3Host = `https://${this.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
-      const prefix = this.solution.data.prefix;
-      return `${s3Host}/${this.solution.data.name}/${prefix}/${this.templates.data[name]}`;
+      if (this.solution.data.version === 'latest') {
+        const target = this.solution.data.target;
+        const prefix = this.solution.data.prefix;
+        return `${s3Host}/${this.solution.data.name}/${target}/${prefix}/${this.templates.data[name]}`;
+      } else {
+        const version = this.solution.data.version;
+        const prefix = this.solution.data.prefix;
+        return `${s3Host}/${this.solution.data.name}/${version}/${prefix}/${this.templates.data[name]}`;
+      }
     }
     return undefined;
+  };
+
+  public async setTags() {
+    if (this.solution) {
+      const keys = this.pipeline.tags.map(tag => tag.key);
+      if (!keys.includes(BuildInTagKeys.AWS_SOLUTION)) {
+        this.pipeline.tags.push({ key: BuildInTagKeys.AWS_SOLUTION, value: this.solution.data.name });
+      }
+      if (!keys.includes(BuildInTagKeys.AWS_SOLUTION_VERSION)) {
+        this.pipeline.tags.push({ key: BuildInTagKeys.AWS_SOLUTION_VERSION, value: this.solution.data.version });
+      }
+      if (!keys.includes(BuildInTagKeys.CLICKSTREAM_PROJECT)) {
+        this.pipeline.tags.push({ key: BuildInTagKeys.CLICKSTREAM_PROJECT, value: this.project?.id! });
+      }
+    }
+  };
+
+  private getStackTags() {
+    const stackTags: Tag[] = [];
+    for (let tag of this.pipeline.tags) {
+      stackTags.push({ Key: tag.key, Value: tag.value });
+    }
+    return stackTags;
   };
 
   public async generateWorkflow(): Promise<WorkflowTemplate> {
@@ -544,6 +583,7 @@ export class CPipeline {
             StackName: ingestionStackName,
             TemplateURL: ingestionTemplateURL,
             Parameters: ingestionStackParameters,
+            Tags: this.stackTags,
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,
@@ -568,6 +608,7 @@ export class CPipeline {
               StackName: kafkaConnectorStackName,
               TemplateURL: kafkaConnectorTemplateURL,
               Parameters: kafkaConnectorStackParameters,
+              Tags: this.stackTags,
             },
             Callback: {
               BucketName: stackWorkflowS3Bucket,
@@ -613,6 +654,7 @@ export class CPipeline {
             StackName: pipelineStackName,
             TemplateURL: dataPipelineTemplateURL,
             Parameters: pipelineStackParameters,
+            Tags: this.stackTags,
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,
@@ -648,6 +690,7 @@ export class CPipeline {
             StackName: dataAnalyticsStackName,
             TemplateURL: dataAnalyticsTemplateURL,
             Parameters: dataAnalyticsStackParameters,
+            Tags: this.stackTags,
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,

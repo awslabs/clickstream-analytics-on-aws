@@ -560,7 +560,16 @@ describe('Pipeline test', () => {
               stackDetails: [],
               status: 'Active',
             },
-            tags: [],
+            tags: [
+              {
+                key: 'customerKey1',
+                value: 'tagValue1',
+              },
+              {
+                key: 'customerKey2',
+                value: 'tagValue2',
+              },
+            ],
             type: 'PIPELINE#6666-6666#latest',
             updateAt: 1681353806173,
             version: '1681353806172',
