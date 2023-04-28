@@ -73,6 +73,8 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly odsTableName: string;
   readonly databaseName: string;
   readonly dataAPIRole: string;
+  readonly redshiftBIUserParameter: string;
+  readonly redshiftBIUsernamePrefix: string;
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;

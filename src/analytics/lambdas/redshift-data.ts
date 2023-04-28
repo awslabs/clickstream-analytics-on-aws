@@ -36,7 +36,7 @@ const GET_STATUS_TIMEOUT = 150; // second
 
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
   serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
-  database?: string) => {
+  database?: string, logSQL: boolean = true) => {
   if (serverlessRedshiftProps) {
     logger.info(`Execute SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
   } else if (provisionedRedshiftProps) {
@@ -70,14 +70,15 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
     const execResponse = await client.send(params);
     queryId = execResponse.Id!;
   }
-  logger.info(`Got query_id:${queryId} after executing command ${sqlStatements.join(';')} in redshift.`);
+  logger.info(`Got query_id:${queryId} after executing command ${logSQL ? sqlStatements.join(';') : '***'} in redshift.`);
 
   return queryId;
 };
 
 export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps, database?: string) => {
-  const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database);
+  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  database?: string, logSQL: boolean = true) => {
+  const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database, logSQL);
 
   const checkParams = new DescribeStatementCommand({
     Id: queryId,
@@ -114,14 +115,14 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
   try {
     const response = await client.send(params);
     if (response.Status == StatusString.FAILED) {
-      logger.error(`Get load status: ${response.Status}`, JSON.stringify(response));
+      logger.error(`Fail to get status of executing statement[s]: ${response.Status}`, JSON.stringify(response));
     } else {
-      logger.info(`Get load status: ${response.Status}`, JSON.stringify(response));
+      logger.info(`Get status of executing statement[s]: ${response.Status}`, JSON.stringify(response));
     }
     return response;
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when checking status of loading job.', err);
+      logger.error('Error happened when checking status of executing statement[s].', err);
     }
     throw err;
   }

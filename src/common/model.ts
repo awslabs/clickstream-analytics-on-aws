@@ -19,3 +19,8 @@ export interface AuthenticationProps {
   readonly appClientId: string;
   readonly appClientSecret: string;
 }
+
+export interface BIUserCredential {
+  readonly username: string;
+  readonly password: string;
+}

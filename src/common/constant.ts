@@ -11,41 +11,9 @@
  *  and limitations under the License.
  */
 
-export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
-export const DOMAIN_NAME_PATTERN = '[a-z0-9A-Z#$&@_%~\\*\\.\\-]+\\.[a-zA-Z0-9]{2,6}';
-export const IP_PATTERN = '((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}';
-export const HOST_ZONE_ID_PATTERN = '^Z[A-Z0-9]+$';
-export const RECORD_NAME_PARRERN = '^[a-zA-Z0-9\\-_]{1,63}$';
-export const VPC_ID_PARRERN = '^vpc-[a-f0-9]+$';
-export const IAM_CERTIFICATE_ID_PARRERN = '^[A-Z0-9]+$';
-export const EMAIL_PARRERN = '\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14}';
-export const S3_BUCKET_NAME_PATTERN = '[a-z0-9\\.\\-]{3,63}';
-export const PROJECT_ID_PATTERN = '[a-z][a-z0-9_]{0,126}';
-export const APP_ID_PATTERN = '[a-zA-Z][a-zA-Z0-9_]{0,126}';
-
-export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
-export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';
-export const PARAMETER_GROUP_LABEL_OIDC = 'OpenID Connector Information';
-export const PARAMETER_LABEL_VPCID = 'VPC ID';
-export const PARAMETER_LABEL_PUBLIC_SUBNETS = 'Public Subnet IDs';
-export const PARAMETER_LABEL_PRIVATE_SUBNETS = 'Private Subnet IDs';
-export const PARAMETER_LABEL_HOST_ZONE_ID = 'Host Zone ID';
-export const PARAMETER_LABEL_HOST_ZONE_NAME = 'Host Zone Name';
-export const PARAMETER_LABEL_RECORD_NAME = 'Record Name';
-export const PARAMETER_LABEL_DOMAIN_NAME = 'Domain Name';
-export const PARAMETER_LABEL_CERTIFICATE_ARN = 'Certificate ARN';
-export const KAFKA_BROKERS_PATTERN = `(((${DOMAIN_NAME_PATTERN}|${IP_PATTERN})(:[0-9]+){1},?)){1,}`;
-export const KAFKA_TOPIC_PATTERN = '[a-zA-Z0-9_\\-\\.]+';
-export const OIDC_ISSUER_PATTERN = '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?';
-export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
-export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
-export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
-
-
 /**
  * check mapping from doc https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
  */
-
 export const ALBLogServiceAccountMapping = {
   mapping: {
     'me-south-1': {
@@ -123,36 +91,71 @@ export const ALBLogServiceAccountMapping = {
   },
 };
 
-export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX = 'OpenID Connector Jwks Uri Suffix';
+// regex patterns
+export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
+export const DOMAIN_NAME_PATTERN = '[a-z0-9A-Z#$&@_%~\\*\\.\\-]+\\.[a-zA-Z0-9]{2,6}';
+export const IP_PATTERN = '((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}';
+export const HOST_ZONE_ID_PATTERN = '^Z[A-Z0-9]+$';
+export const RECORD_NAME_PARRERN = '^[a-zA-Z0-9\\-_]{1,63}$';
+export const VPC_ID_PARRERN = '^vpc-[a-f0-9]+$';
+export const IAM_CERTIFICATE_ID_PARRERN = '^[A-Z0-9]+$';
+export const EMAIL_PARRERN = '\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14}';
+export const S3_BUCKET_NAME_PATTERN = '[a-z0-9\\.\\-]{3,63}';
+export const PROJECT_ID_PATTERN = '[a-z][a-z0-9_]{0,126}';
+export const APP_ID_PATTERN = '[a-zA-Z][a-zA-Z0-9_]{0,126}';
+export const KAFKA_BROKERS_PATTERN = `(((${DOMAIN_NAME_PATTERN}|${IP_PATTERN})(:[0-9]+){1},?)){1,}`;
+export const KAFKA_TOPIC_PATTERN = '[a-zA-Z0-9_\\-\\.]+';
+export const OIDC_ISSUER_PATTERN = '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?';
+export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const MUTIL_APP_ID_PATTERN = `${APP_ID_PATTERN}(,${APP_ID_PATTERN})*`;
+export const EMAIL_PATTERN = '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
+export const MUTIL_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;
 export const POSITIVE_INTEGERS = '^[1-9]\\d*';
-
 export const S3_PATH_PLUGIN_JARS_PATTERN =`^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
-
 export const SUBNETS_THREE_AZ_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?){2,}';
+export const QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9_\\-]+[A-Za-z0-9]$';
+export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
+export const REDSHIFT_DB_NAME_PATTERN = '^[a-z][a-z0-9_]+[a-z0-9]$';
+export const REDSHIFT_USER_NAME_PATTERN = '^([a-z0-9-]{1,63})?$';
+export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
+
+// cloudformation parameters
+export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
+export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';
+export const PARAMETER_GROUP_LABEL_OIDC = 'OpenID Connector Information';
+export const PARAMETER_LABEL_VPCID = 'VPC ID';
+export const PARAMETER_LABEL_PUBLIC_SUBNETS = 'Public Subnet IDs';
+export const PARAMETER_LABEL_PRIVATE_SUBNETS = 'Private Subnet IDs';
+export const PARAMETER_LABEL_HOST_ZONE_ID = 'Host Zone ID';
+export const PARAMETER_LABEL_HOST_ZONE_NAME = 'Host Zone Name';
+export const PARAMETER_LABEL_RECORD_NAME = 'Record Name';
+export const PARAMETER_LABEL_DOMAIN_NAME = 'Domain Name';
+export const PARAMETER_LABEL_CERTIFICATE_ARN = 'Certificate ARN';
+export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
+export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
+export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX = 'OpenID Connector Jwks Uri Suffix';
 
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_ODS_EVENT = 'ods_events';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
+
 // Metrics
 export const METRIC_NAMESPACE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
 
-export const QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9_\\-]+[A-Za-z0-9]$';
-export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
-export const REDSHIFT_DB_NAME_PATTERN = '^[a-z][a-z0-9_]+[a-z0-9]$';
-export const REDSHIFT_USER_NAME_PATTERN = '^([a-z0-9-]{1,63})?$';
-
-export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
-export const INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
-export const INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
+// the outputs of stacks
+export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
+export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
+export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'StackCreatedRedshiftServerlessWorkgroupName';
+export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS = 'StackCreatedRedshiftServerlessWorkgroupEndpointAddress';
+export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT = 'StackCreatedRedshiftServerlessWorkgroupEndpointPort';
+export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME = 'StackCreatedRedshiftServerlessNamespaceName';
+export const OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX = 'BIUserCredentialParameterName';
 
 export enum REDSHIFT_MODE {
   PROVISIONED='Provisioned',
   SERVERLESS='Serverless',
   NEW_SERVERLESS='New_Serverless',
 }
-export const EMAIL_PATTERN = '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
-export const MUTIL_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;

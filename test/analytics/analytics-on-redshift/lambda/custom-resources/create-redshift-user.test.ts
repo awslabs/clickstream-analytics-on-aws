@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../../src/analytics/lambdas/custom-resource/create-redshift-user';
@@ -67,24 +67,25 @@ describe('Custom resource - Create redshift serverless namespace', () => {
   });
 
   test('Create a db user in Redshift serverless workgroup.', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({
-      Id: 'id-1',
-    });
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolvesOnce({ Id: 'id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FINISHED,
     });
     const resp = await handler(createUserEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      Sql: `CREATE USER "IAMR:${dataRoleName}" PASSWORD DISABLE CREATEDB;`,
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      Sqls: expect.arrayContaining([
+        `CREATE USER "IAMR:${dataRoleName}" PASSWORD DISABLE CREATEDB`,
+        'CREATE ROLE clickstream',
+        'GRANT create user to role clickstream',
+        `GRANT ROLE clickstream TO "IAMR:${dataRoleName}"`,
+      ]),
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
   });
 
   test('Update a db user with different name in Redshift serverless workgroup.', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({
-      Id: 'id-1',
-    });
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolvesOnce({ Id: 'id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.STARTED,
     }).resolvesOnce({
@@ -92,8 +93,12 @@ describe('Custom resource - Create redshift serverless namespace', () => {
     });
     const resp = await handler(updateUserEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      Sql: `CREATE USER "IAMR:${newRoleName}" PASSWORD DISABLE CREATEDB;`,
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      Sqls: expect.arrayContaining([
+        `CREATE USER "IAMR:${newRoleName}" PASSWORD DISABLE CREATEDB`,
+        'GRANT create user to role clickstream',
+        `GRANT ROLE clickstream TO "IAMR:${newRoleName}"`,
+      ]),
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
   });

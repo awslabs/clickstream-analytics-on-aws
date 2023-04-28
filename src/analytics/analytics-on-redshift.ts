@@ -50,6 +50,10 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
+
+  readonly redshiftServerlessWorkgroup: RedshiftServerless | undefined;
+  readonly applicationSchema: ApplicationSchemas;
+
   constructor(
     scope: Construct,
     id: string,
@@ -79,7 +83,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         availabilityZones: Fn.getAzs(),
         privateSubnetIds: Fn.split(',', props.newRedshiftServerlessProps.subnetIds),
       });
-      const redshiftServerlessWorkgroup = new RedshiftServerless(this, 'RedshiftServerelssWorkgroup', {
+      this.redshiftServerlessWorkgroup = new RedshiftServerless(this, 'RedshiftServerelssWorkgroup', {
         vpc: redshiftVpc,
         subnetSelection: {
           subnets: redshiftVpc.privateSubnets,
@@ -89,16 +93,16 @@ export class RedshiftAnalyticsStack extends NestedStack {
         databaseName: props.newRedshiftServerlessProps.databaseName,
         workgroupName: props.newRedshiftServerlessProps.workgroupName,
       });
-      redshiftDataAPIExecRole = redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
+      redshiftDataAPIExecRole = this.redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
       existingRedshiftServerlessProps = {
         createdInStack: true,
-        workgroupId: redshiftServerlessWorkgroup.workgroupId,
-        workgroupName: redshiftServerlessWorkgroup.workgroupName,
-        namespaceId: redshiftServerlessWorkgroup.namespaceId,
+        workgroupId: this.redshiftServerlessWorkgroup.workgroup.attrWorkgroupWorkgroupId,
+        workgroupName: this.redshiftServerlessWorkgroup.workgroup.attrWorkgroupWorkgroupName,
+        namespaceId: this.redshiftServerlessWorkgroup.namespaceId,
         dataAPIRoleArn: redshiftDataAPIExecRole.roleArn,
-        databaseName: redshiftServerlessWorkgroup.databaseName,
+        databaseName: this.redshiftServerlessWorkgroup.databaseName,
       };
-      redshiftUserCR = redshiftServerlessWorkgroup.redshiftUserCR;
+      redshiftUserCR = this.redshiftServerlessWorkgroup.redshiftUserCR;
     } else if (props.existingRedshiftServerlessProps) {
       redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
         props.existingRedshiftServerlessProps.dataAPIRoleArn, {
@@ -178,7 +182,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     const odsTableName = REDSHIFT_ODS_TABLE_NAME;
-    const appSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
+    this.applicationSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
       appIds: props.appIds,
       serverlessRedshift: existingRedshiftServerlessProps,
@@ -188,7 +192,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: redshiftDataAPIExecRole!,
     });
     if (redshiftUserCR) {
-      appSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
+      this.applicationSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
     }
 
     const loadEventsWorkflow = new LoadODSEventToRedshiftWorkflow(this, 'LoadODSEventToRedshiftWorkflow', {
@@ -207,7 +211,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: redshiftDataAPIExecRole!,
     });
 
-    loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(appSchema.crForCreateSchemas);
+    loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
 
     new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
       appId: props.appIds,

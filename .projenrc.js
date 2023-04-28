@@ -45,6 +45,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sqs',
+  '@aws-sdk/client-ssm',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [

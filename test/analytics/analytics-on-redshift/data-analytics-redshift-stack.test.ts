@@ -20,7 +20,7 @@ import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
-import { REDSHIFT_MODE } from '../../../src/common/constant';
+import { REDSHIFT_MODE, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
@@ -3056,7 +3056,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         MemorySize: Match.anyValue(),
         ReservedConcurrentExecutions: 1,
         Runtime: Match.anyValue(),
-        Timeout: 900,
+        Timeout: 300,
       });
     }
   });
@@ -3150,15 +3150,16 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
   });
 });
 
-describe('DataAnalyticsRedshiftStack tests for new Redshift workgroup and namespace', () => {
+describe('DataAnalyticsRedshiftStack tests', () => {
   const app = new App();
   const stack = new DataAnalyticsRedshiftStack(app, 'redshiftserverlessstack', {});
-  const template = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
+  const newServerlessStackTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
+  const stackTemplate = Template.fromStack(stack);
 
-  test('Redshift data API role and admin role has trust relation to the same account.', () => {
+  test('[new Redshift workgroup and namespace] Redshift data API role and admin role has trust relation to the same account.', () => {
     const roles = [
-      findFirstResourceByKeyPrefix(template, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessClickstreamWorkgroupAdminRole'),
-      findFirstResourceByKeyPrefix(template, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRole'),
+      findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessClickstreamWorkgroupAdminRole'),
+      findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRole'),
     ];
     for (const role of roles) {
       expect(role.resource.Properties.AssumeRolePolicyDocument.Statement[0].Action).toEqual('sts:AssumeRole');
@@ -3181,17 +3182,17 @@ describe('DataAnalyticsRedshiftStack tests for new Redshift workgroup and namesp
     }
   });
 
-  test('custom resource for creating redshift serverless namespace', () => {
-    template.resourceCountIs('AWS::RedshiftServerless::Namespace', 0);
-    const customResource = findFirstResourceByKeyPrefix(template, 'AWS::CloudFormation::CustomResource', 'RedshiftServerelssWorkgroupCreateRedshiftServerlessNamespaceCustomResource');
+  test('[new Redshift workgroup and namespace] custom resource for creating redshift serverless namespace', () => {
+    newServerlessStackTemplate.resourceCountIs('AWS::RedshiftServerless::Namespace', 0);
+    const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'RedshiftServerelssWorkgroupCreateRedshiftServerlessNamespaceCustomResource');
     expect(customResource.resource.Properties.adminRoleArn).toBeDefined();
     expect(customResource.resource.Properties.namespaceName).toBeDefined();
     expect(customResource.resource.Properties.databaseName).toBeDefined();
   });
 
-  test('Cfn workgroup defined as expect', () => {
-    template.resourceCountIs('AWS::RedshiftServerless::Workgroup', 1);
-    template.hasResourceProperties('AWS::RedshiftServerless::Workgroup', {
+  test('[new Redshift workgroup and namespace] Cfn workgroup defined as expect', () => {
+    newServerlessStackTemplate.resourceCountIs('AWS::RedshiftServerless::Workgroup', 1);
+    newServerlessStackTemplate.hasResourceProperties('AWS::RedshiftServerless::Workgroup', {
       WorkgroupName: RefAnyValue,
       BaseCapacity: RefAnyValue,
       EnhancedVpcRouting: false,
@@ -3217,8 +3218,34 @@ describe('DataAnalyticsRedshiftStack tests for new Redshift workgroup and namesp
     });
   });
 
-  test('Resources order - custom resource for creating database must depend on creating db user', () => {
-    const customResource = findFirstResourceByKeyPrefix(template, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource');
+  test('[new Redshift workgroup and namespace] Resources order - custom resource for creating database must depend on creating db user', () => {
+    const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource');
     expect(customResource.resource.DependsOn[0]).toContain('RedshiftServerelssWorkgroupCreateRedshiftServerlessMappingUserCustomResource');
   });
+
+  test('stack outputs', () => {
+    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+      Condition: 'redshiftProvisioned',
+    });
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+      Condition: 'existingRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
+      Value: '5439',
+      Condition: 'newRedshiftServerless',
+    });
+  });
+
 });

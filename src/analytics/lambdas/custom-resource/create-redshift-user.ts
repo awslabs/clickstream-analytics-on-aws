@@ -61,7 +61,10 @@ async function onCreate(event: CdkCustomResourceEvent) {
 
   try {
     await executeStatementsWithWait(redshiftClient, [
-      `CREATE USER "IAMR:${props.dataRoleName}" PASSWORD DISABLE CREATEDB;`,
+      `CREATE USER "IAMR:${props.dataRoleName}" PASSWORD DISABLE CREATEDB`,
+      'CREATE ROLE clickstream',
+      'GRANT create user to role clickstream',
+      `GRANT ROLE clickstream TO "IAMR:${props.dataRoleName}"`,
     ],
     props.serverlessRedshiftProps, undefined);
   } catch (err) {

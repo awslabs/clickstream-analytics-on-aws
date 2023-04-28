@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { INGESTION_SERVER_DNS_SUFFIX, INGESTION_SERVER_URL_SUFFIX, MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
@@ -78,8 +78,8 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
       const pipeline = new CPipeline(latestPipelines.items[0]);
-      const ingestionServerUrl = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, INGESTION_SERVER_URL_SUFFIX);
-      const ingestionServerDNS = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, INGESTION_SERVER_DNS_SUFFIX);
+      const ingestionServerUrl = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX);
+      const ingestionServerDNS = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,

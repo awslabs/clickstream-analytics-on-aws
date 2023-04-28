@@ -69,6 +69,7 @@
     "@aws-sdk/client-secrets-manager": "^3.310.0",
     "@aws-sdk/client-sfn": "^3.310.0",
     "@aws-sdk/client-sqs": "^3.310.0",
+    "@aws-sdk/client-ssm": "^3.310.0",
     "@aws-sdk/credential-providers": "^3.310.0",
     "@aws-sdk/lib-dynamodb": "^3.310.0",
     "@aws-sdk/util-dynamodb": "^3.310.0",

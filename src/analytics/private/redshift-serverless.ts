@@ -29,12 +29,12 @@ export class RedshiftServerless extends Construct {
 
   readonly namespaceName: string;
   readonly namespaceId: string;
-  readonly workgroupName: string;
-  readonly workgroupId: string;
   readonly databaseName: string;
   readonly workgroupDefaultAdminRole: IRole;
   readonly redshiftDataAPIExecRole: IRole;
   readonly redshiftUserCR: CustomResource;
+  readonly workgroup: CfnWorkgroup;
+  readonly workgroupPort = '5439';
 
   constructor(scope: Construct, id: string, props: RedshiftServerlessWorkgroupProps) {
     super(scope, id);
@@ -70,17 +70,16 @@ export class RedshiftServerless extends Construct {
     this.namespaceId = namespaceCR.getAttString('NamespaceId');
     this.databaseName = namespaceCR.getAttString('DatabaseName');
 
-    const workgroup = new CfnWorkgroup(this, 'ClickstreamWorkgroup', {
+    this.workgroup = new CfnWorkgroup(this, 'ClickstreamWorkgroup', {
       workgroupName: props.workgroupName,
       baseCapacity: props.baseCapacity,
       enhancedVpcRouting: false,
       namespaceName: this.namespaceName,
       publiclyAccessible: false,
+      port: Number(this.workgroupPort),
       securityGroupIds: Fn.split(',', props.securityGroupIds),
       subnetIds: props.vpc.selectSubnets(props.subnetSelection).subnetIds,
     });
-    this.workgroupName = workgroup.workgroupName;
-    this.workgroupId = workgroup.attrWorkgroupWorkgroupId;
 
     this.redshiftUserCR = this.createRedshiftMappingUserCustomResource();
 
@@ -152,8 +151,8 @@ export class RedshiftServerless extends Construct {
     const customProps: CreateMappingRoleUser = {
       dataRoleName: this.redshiftDataAPIExecRole.roleName,
       serverlessRedshiftProps: {
-        workgroupName: this.workgroupName,
-        workgroupId: this.workgroupId,
+        workgroupName: this.workgroup.attrWorkgroupWorkgroupName,
+        workgroupId: this.workgroup.attrWorkgroupWorkgroupId,
         dataAPIRoleArn: this.workgroupDefaultAdminRole.roleArn,
         databaseName: this.databaseName,
       },

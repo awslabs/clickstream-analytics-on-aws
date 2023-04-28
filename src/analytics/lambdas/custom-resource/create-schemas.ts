@@ -11,28 +11,38 @@
  *  and limitations under the License.
  */
 
+import crypto from 'crypto';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { DeleteParameterCommand, DeleteParameterCommandInput, ParameterNotFound, ParameterTier, ParameterType, PutParameterCommand, PutParameterCommandInput, SSMClient } from '@aws-sdk/client-ssm';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
+import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { CreateDatabaseAndSchemas } from '../../private/model';
+import { ReportViews } from '../../private/sqls/reporting-views';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
-type ResourcePropertiesType = CreateDatabaseAndSchemas & {
+export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
   readonly ServiceToken: string;
 }
 
+const ssmClient = new SSMClient({});
+export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event) => {
   logger.info(JSON.stringify(event));
+  const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
+    `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
+  const biUsername = `${(event.ResourceProperties as ResourcePropertiesType).redshiftBIUsernamePrefix}${physicalId.substring(physicalIdPrefix.length)}`;
   const response: CdkCustomResourceResponse = {
-    PhysicalResourceId: 'create-redshift-db-schemas-custom-resource',
+    PhysicalResourceId: physicalId,
     Data: {
       DatabaseName: event.ResourceProperties.databaseName,
+      RedshiftBIUsername: biUsername,
     },
     Status: 'SUCCESS',
   };
 
   try {
-    await _handler(event);
+    await _handler(event, biUsername);
   } catch (e) {
     if (e instanceof Error) {
       logger.error('Error when creating database and schema in redshift', e);
@@ -42,48 +52,94 @@ export const handler: CdkCustomResourceHandler = async (event) => {
   return response;
 };
 
-async function _handler(event: CdkCustomResourceEvent) {
+async function _handler(event: CdkCustomResourceEvent, biUsername: string) {
   const requestType = event.RequestType;
 
   logger.info('RequestType: ' + requestType);
   if (requestType == 'Create') {
-    await onCreate(event);
+    await onCreate(event, biUsername);
   }
 
   if (requestType == 'Update') {
-    await onUpdate(event);
+    await onUpdate(event, biUsername);
   }
 
   if (requestType == 'Delete') {
-    await onDelete(event);
+    await onDelete(event, biUsername);
   }
 }
 
-async function onCreate(event: CdkCustomResourceEvent) {
+async function onCreate(event: CdkCustomResourceEvent, biUsername: string) {
   logger.info('onCreate()');
 
   const props = event.ResourceProperties as ResourcePropertiesType;
+
+  // 0. generate password and save to parameter store
+  const credential = await createBIUserCredentialParameter(props.redshiftBIUserParameter, biUsername, props.projectId);
+
   // 1. create database in Redshift
   const client = getRedshiftClient(props.dataAPIRole);
   if (props.serverlessRedshiftProps || props.provisionedRedshiftProps) {
     await createDatabaseInRedshift(client, props.databaseName, props);
+    await createDatabaseBIUser(client, credential, props);
   } else {
     throw new Error('Can\'t identity the mode Redshift cluster!');
   }
 
   // 2. create schemas in Redshift for applications
-  await createSchemas(props);
+  await createSchemas(props, biUsername);
+
+  // 3. create views for reporting
+  await createViewForReporting(props);
 }
 
-async function onUpdate(event: CdkCustomResourceEvent) {
+async function createBIUserCredentialParameter(parameterName: string, biUsername: string, projectId: string): Promise<BIUserCredential> {
+  const credential: BIUserCredential = {
+    username: biUsername,
+    password: generateRedshiftUserPassword(32),
+  };
+  const input: PutParameterCommandInput = {
+    Name: parameterName,
+    DataType: 'text',
+    Description: `Managed by Clickstream for storing credential of Quicksight reporting user for project ${projectId}.`,
+    Tier: ParameterTier.STANDARD,
+    Type: ParameterType.SECURE_STRING,
+    Value: JSON.stringify(credential),
+    Overwrite: true,
+  };
+  logger.info(`Creating the credential of BI user '${biUsername}' of Redshift to parameter ${parameterName}.`);
+  await ssmClient.send(new PutParameterCommand(input));
+
+  return credential;
+}
+
+async function deleteBIUserCredentialParameter(parameterName: string, biUsername: string) {
+  const input: DeleteParameterCommandInput = {
+    Name: parameterName,
+  };
+  logger.info(`Deleting the credential of BI user '${biUsername}' of Redshift to parameter ${parameterName}.`);
+  await ssmClient.send(new DeleteParameterCommand(input));
+}
+
+async function onUpdate(event: CdkCustomResourceEvent, biUsername: string) {
   logger.info('onUpdate()');
 
   const props = event.ResourceProperties as ResourcePropertiesType;
-  await createSchemas(props);
+  await createSchemas(props, biUsername);
+
+  await createViewForReporting(props);
 }
 
-async function onDelete(_event: CdkCustomResourceEvent) {
+async function onDelete(event: CdkCustomResourceEvent, biUsername: string) {
   logger.info('onDelete()');
+  const props = event.ResourceProperties as ResourcePropertiesType;
+  try {
+    await deleteBIUserCredentialParameter(props.redshiftBIUserParameter, biUsername);
+  } catch (error) {
+    if (error instanceof ParameterNotFound) {
+      logger.warn(`The parameter ${props.redshiftBIUserParameter} already is deleted.`);
+    }
+  }
   logger.info('doNothing to keep the database and schema');
 }
 
@@ -95,7 +151,7 @@ function splitString(str: string): string[] {
   }
 }
 
-async function createSchemas(props: ResourcePropertiesType) {
+async function createSchemas(props: ResourcePropertiesType, biUsername: string) {
   const odsTableName = props.odsTableName;
 
   const appIds = splitString(props.appIds);
@@ -145,11 +201,38 @@ async function createSchemas(props: ResourcePropertiesType) {
       + 'END;	  '
       + '$$ LANGUAGE plpgsql;';
     sqlStatements.push(createSpLogStatement);
+
+    const schemaUsagePermStatement = `GRANT USAGE ON SCHEMA "${app}" TO "${biUsername}";`;
+    sqlStatements.push(schemaUsagePermStatement);
+
+    const tableSelectPermStatement = `GRANT SELECT ON ALL TABLES IN SCHEMA "${app}" TO "${biUsername}";`;
+    sqlStatements.push(tableSelectPermStatement);
+
+    const functionPermStatement = `GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA "${app}" TO "${biUsername}";`;
+    sqlStatements.push(functionPermStatement);
+
     createUpsertUsersSchemas(app).forEach(s => sqlStatements.push(s));
   });
 
   if (sqlStatements.length == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
+  } else {
+    const redShiftClient = getRedshiftClient(props.dataAPIRole);
+    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+  }
+}
+
+async function createViewForReporting(props: ResourcePropertiesType) {
+  const appIds = splitString(props.appIds);
+  const sqlStatements : string[] = [];
+  appIds.forEach(app => {
+    ReportViews.forEach( view => {
+      sqlStatements.push(view.replace(/####/g, app));
+    });
+  });
+
+  if (sqlStatements.length == 0) {
+    logger.info('Ignore creating reporting views in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
     await createSchemasInRedshift(redShiftClient, sqlStatements, props);
@@ -163,10 +246,30 @@ const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, data
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when creating database in serverless Redshift.', err);
+      logger.error(`Error happend when creating database '${databaseName}' in Redshift.`, err);
     }
     throw err;
   }
+};
+
+const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credential: BIUserCredential,
+  props: CreateDatabaseAndSchemas) => {
+  try {
+    await executeStatementsWithWait(redshiftClient, [
+      `CREATE USER ${credential.username} PASSWORD 'md5${md5Hash(credential.password+credential.username)}'`,
+    ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
+    props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(`Error when creating BI user '${credential.username}' in Redshift.`, err);
+    }
+    throw err;
+  }
+};
+
+// write a function to cacluate md5 hash of string
+const md5Hash = (str: string) => {
+  return crypto.createHash('md5').update(str).digest('hex');
 };
 
 const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatements: string[], props: CreateDatabaseAndSchemas) => {
@@ -180,6 +283,24 @@ const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlSt
     throw err;
   }
 };
+
+const generateRandomStr = (length: number, charSet?: string): string => {
+  const charset = charSet ?? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%^&-_=+|';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+};
+
+function generateRedshiftUserPassword(length: number): string {
+  const password = generateRandomStr(length);
+  const regex = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#$%^&-_=+|]).{${length},64}$`);
+  if (regex.test(password)) {
+    return password;
+  }
+  return generateRedshiftUserPassword(length);
+}
 
 function createUpsertUsersSchemas(app: string) {
   const sqlStatements : string[] = [];

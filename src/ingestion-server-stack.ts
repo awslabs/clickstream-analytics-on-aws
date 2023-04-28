@@ -33,7 +33,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
-import { INGESTION_SERVER_DNS_SUFFIX, INGESTION_SERVER_URL_SUFFIX } from './common/constant';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
@@ -503,13 +503,13 @@ function createNestedStackWithCondition(
   const ingestionServerDNS = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerDNS').toString();
   const ingestionServerUrl = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
 
-  const serverDNSOutput = new CfnOutput(scope, id + INGESTION_SERVER_DNS_SUFFIX, {
+  const serverDNSOutput = new CfnOutput(scope, id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX, {
     value: ingestionServerDNS,
     description: 'Server DNS',
   });
   serverDNSOutput.condition = condition;
 
-  const serverURLOutput = new CfnOutput(scope, id + INGESTION_SERVER_URL_SUFFIX, {
+  const serverURLOutput = new CfnOutput(scope, id + OUTPUT_INGESTION_SERVER_URL_SUFFIX, {
     value: ingestionServerUrl,
     description: 'Server URL',
   });

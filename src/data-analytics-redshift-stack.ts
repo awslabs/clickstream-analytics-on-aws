@@ -13,6 +13,7 @@
 
 import {
   CfnCondition,
+  CfnOutput,
   CfnStack,
   Fn,
   Stack,
@@ -24,6 +25,14 @@ import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
 import { addCfnNagForCfnResource, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
+import {
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  // OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+} from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/constant';
 
@@ -152,6 +161,42 @@ export function createRedshiftAnalyticsStack(
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
+
+  new CfnOutput(scope, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {
+    value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupWorkgroupName ?? '',
+    description: 'Workgroup name of Redshift Serverless',
+    condition: isNewRedshiftServerless,
+  });
+  new CfnOutput(scope, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, {
+    value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupEndpointAddress ?? '',
+    description: 'Endpoint address of Redshift Serverless',
+    condition: isNewRedshiftServerless,
+  });
+  new CfnOutput(scope, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
+    value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroupPort ?? '5439',
+    description: 'Endpoint port of Redshift Serverless',
+    condition: isNewRedshiftServerless,
+  });
+  new CfnOutput(scope, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, {
+    value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupNamespaceName ?? '',
+    description: 'Namespace name of Redshift Serverless',
+    condition: isNewRedshiftServerless,
+  });
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter,
+    description: 'Credential SSM parameter for BI user in Redshift',
+    condition: isNewRedshiftServerless,
+  });
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter,
+    description: 'Credential SSM parameter for BI user in Redshift',
+    condition: isExistingRedshiftServerless,
+  });
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter,
+    description: 'Credential SSM parameter for BI user in Redshift',
+    condition: isRedshiftProvisioned,
+  });
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,
     newRedshiftServerlessStack,

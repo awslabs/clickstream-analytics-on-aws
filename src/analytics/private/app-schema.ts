@@ -12,8 +12,8 @@
  */
 
 import { join } from 'path';
-import { Duration, CustomResource } from 'aws-cdk-lib';
-import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Arn, ArnFormat, Duration, CustomResource, Stack } from 'aws-cdk-lib';
+import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -35,11 +35,13 @@ export interface ApplicationSchemasProps {
 
 export class ApplicationSchemas extends Construct {
 
-  public readonly crForCreateSchemas: CustomResource;
+  readonly crForCreateSchemas: CustomResource;
+  readonly redshiftBIUserParameter: string;
 
   constructor(scope: Construct, id: string, props: ApplicationSchemasProps) {
     super(scope, id);
 
+    this.redshiftBIUserParameter = `/clickstream/reporting/user/${props.projectId}`;
     /**
      * Create database(projectId) and schemas(appIds) in Redshift using Redshift-Data API.
      */
@@ -68,6 +70,8 @@ export class ApplicationSchemas extends Construct {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
+      redshiftBIUserParameter: `${this.redshiftBIUserParameter}`,
+      redshiftBIUsernamePrefix: 'clickstream_bi_',
     };
     const cr = new CustomResource(this, 'RedshiftSchemasCustomResource', {
       serviceToken: provider.serviceToken,
@@ -79,6 +83,24 @@ export class ApplicationSchemas extends Construct {
 
   private createRedshiftSchemasLambda(): Function {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
+
+    const writeSSMParameterPolicy: PolicyStatement = new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        Arn.format(
+          {
+            resource: 'parameter',
+            service: 'ssm',
+            resourceName: this.redshiftBIUserParameter.substring(1), // Name in ssm:PutParamter must start without '/'
+            arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+          }, Stack.of(this),
+        ),
+      ],
+      actions: [
+        'ssm:PutParameter',
+      ],
+    });
+
     const fn = new NodejsFunction(this, 'CreateSchemaForApplicationsFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
@@ -86,11 +108,12 @@ export class ApplicationSchemas extends Construct {
         'create-schemas.ts',
       ),
       handler: 'handler',
-      memorySize: 256,
+      memorySize: 128,
       reservedConcurrentExecutions: 1,
-      timeout: Duration.minutes(15),
+      timeout: Duration.minutes(5),
       logRetention: RetentionDays.ONE_WEEK,
-      role: createLambdaRole(this, 'CreateApplicationSchemaRole', false, []),
+      role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
+        [writeSSMParameterPolicy]),
       environment: {
         ... POWERTOOLS_ENVS,
       },
