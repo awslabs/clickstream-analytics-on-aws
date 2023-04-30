@@ -42,9 +42,8 @@ const QuickSight: React.FC = () => {
   const unsubscribTheQuickSight = async () => {
     setLoadingUnsub(true);
     try {
-      const { success, data }: ApiResponse<string> =
-        await unsubscribQuickSight();
-      if (success && data) {
+      const { success }: ApiResponse<string> = await unsubscribQuickSight();
+      if (success) {
         setLoadingUnsub(false);
         // TODO
       }

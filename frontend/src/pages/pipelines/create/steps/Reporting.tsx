@@ -79,8 +79,13 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     try {
       const { success, data }: ApiResponse<QuickSightDetailResponse> =
         await getQuickSightDetail();
-      if (success && data) {
-        setLoadingQuickSight(false);
+      setLoadingQuickSight(false);
+      if (
+        success &&
+        data &&
+        data.accountSubscriptionStatus === 'ACCOUNT_CREATED'
+      ) {
+        setQuickSightEnabled(true);
         changeQuickSightAccountName(data.accountName);
       }
     } catch (error) {
@@ -95,7 +100,6 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       const { success, data }: ApiResponse<boolean> =
         await getQuickSightStatus();
       if (success && data) {
-        setQuickSightEnabled(true);
         getTheQuickSightDetail();
       } else {
         setLoadingQuickSight(false);
@@ -237,79 +241,84 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 </Alert>
               )}
 
-              <FormField
-                label={t('pipeline:create.quickSightUser')}
-                description={t('pipeline:create.quickSightUserDesc')}
-              >
-                <div className="flex">
-                  <div className="flex-1">
-                    <Select
-                      statusType={loadingUsers ? 'loading' : 'finished'}
-                      placeholder={
-                        t('pipeline:create.quickSIghtPlaceholder') || ''
-                      }
-                      selectedOption={pipelineInfo.selectedQuickSightUser}
-                      onChange={({ detail }) =>
-                        changeQuickSightSelectedUser(detail.selectedOption)
-                      }
-                      options={quickSightRoleOptions}
-                      filteringType="auto"
-                    />
-                  </div>
-                  <div className="ml-10">
-                    <Button
-                      loading={loadingUsers}
-                      onClick={() => {
-                        getQuickSightUserList();
-                      }}
-                      iconName="refresh"
-                    />
-                  </div>
-                  <div className="ml-10">
-                    <Button
-                      onClick={() => {
-                        setShowCreateUser(true);
-                      }}
-                    >
-                      {t('button.createNew')}
-                    </Button>
-                  </div>
-                </div>
-              </FormField>
-
-              <FormField
-                label={t('pipeline:create.dataConnectionType')}
-                description={t('pipeline:create.dataConnectionTypeDesc')}
-              >
+              {quickSightEnabled && (
                 <>
-                  <RadioGroup
-                    onChange={({ detail }) =>
-                      changeQuickSightConnectionType(detail.value)
-                    }
-                    value={pipelineInfo.dataConnectionType}
-                    items={[
-                      {
-                        value: 'public',
-                        label: t('pipeline:create.publicNetwork'),
-                        description: t('pipeline:create.publicNetworkDesc'),
-                      },
-                      {
-                        value: 'vpcconnection',
-                        label: t('pipeline:create.vpcConnection'),
-                        description: t('pipeline:create.vpcConnectionDesc'),
-                      },
-                    ]}
-                  />
-                  <div className="mt-10">
-                    <Input
-                      onChange={({ detail }) =>
-                        changeQuickSightVpcConnection(detail.value)
-                      }
-                      value={pipelineInfo.quickSightVpcConnection}
-                    />
-                  </div>
+                  <FormField
+                    label={t('pipeline:create.quickSightUser')}
+                    description={t('pipeline:create.quickSightUserDesc')}
+                  >
+                    <div className="flex">
+                      <div className="flex-1">
+                        <Select
+                          statusType={loadingUsers ? 'loading' : 'finished'}
+                          placeholder={
+                            t('pipeline:create.quickSIghtPlaceholder') || ''
+                          }
+                          selectedOption={pipelineInfo.selectedQuickSightUser}
+                          onChange={({ detail }) =>
+                            changeQuickSightSelectedUser(detail.selectedOption)
+                          }
+                          options={quickSightRoleOptions}
+                          filteringType="auto"
+                        />
+                      </div>
+                      <div className="ml-10">
+                        <Button
+                          loading={loadingUsers}
+                          onClick={() => {
+                            getQuickSightUserList();
+                          }}
+                          iconName="refresh"
+                        />
+                      </div>
+                      <div className="ml-10">
+                        <Button
+                          onClick={() => {
+                            setShowCreateUser(true);
+                          }}
+                        >
+                          {t('button.createNew')}
+                        </Button>
+                      </div>
+                    </div>
+                  </FormField>
+
+                  <FormField
+                    label={t('pipeline:create.dataConnectionType')}
+                    description={t('pipeline:create.dataConnectionTypeDesc')}
+                  >
+                    <>
+                      <RadioGroup
+                        onChange={({ detail }) =>
+                          changeQuickSightConnectionType(detail.value)
+                        }
+                        value={pipelineInfo.dataConnectionType}
+                        items={[
+                          {
+                            value: 'public',
+                            label: t('pipeline:create.publicNetwork'),
+                            description: t('pipeline:create.publicNetworkDesc'),
+                          },
+                          {
+                            value: 'vpcconnection',
+                            label: t('pipeline:create.vpcConnection'),
+                            description: t('pipeline:create.vpcConnectionDesc'),
+                          },
+                        ]}
+                      />
+                      <div className="mt-10">
+                        <Input
+                          placeholder="arn:aws:quicksight:<region>:<account-id>:vpcConnection/<connection-id>"
+                          onChange={({ detail }) =>
+                            changeQuickSightVpcConnection(detail.value)
+                          }
+                          value={pipelineInfo.quickSightVpcConnection}
+                        />
+                      </div>
+                    </>
+                  </FormField>
                 </>
-              </FormField>
+              )}
             </>
           ))}
       </SpaceBetween>
