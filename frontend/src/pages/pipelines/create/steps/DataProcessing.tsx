@@ -653,7 +653,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         <>
                           <FormField
                             label={t('pipeline:create.redshiftBaseCapacity')}
-                            description={t('pipeline:create.redshiftBaseCapacityDesc')}
+                            description={t(
+                              'pipeline:create.redshiftBaseCapacityDesc'
+                            )}
                           >
                             <Select
                               selectedOption={redshiftCapacity}
@@ -691,7 +693,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
                           <FormField
                             label={t('pipeline:create.redshiftSecurityGroup')}
-                            description={t('pipeline:create.redshiftSecurityGroupDesc')}
+                            description={t(
+                              'pipeline:create.redshiftSecurityGroupDesc'
+                            )}
                           >
                             <Multiselect
                               selectedOptions={
@@ -703,7 +707,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                               }
                               options={vpcSGOptionList}
                               placeholder={
-                                t('pipeline:create.redshiftSecurityGroupPlaceholder') || ''
+                                t(
+                                  'pipeline:create.redshiftSecurityGroupPlaceholder'
+                                ) || ''
                               }
                               selectedAriaLabel="Selected"
                               statusType={loadingSG ? 'loading' : 'finished'}
@@ -717,7 +723,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
                           <FormField
                             label={t('pipeline:create.redshiftSubnet')}
-                            description={t('pipeline:create.redshiftSubnetDesc')}
+                            description={t(
+                              'pipeline:create.redshiftSubnetDesc'
+                            )}
                           >
                             <Multiselect
                               selectedOptions={
@@ -780,7 +788,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
                       <FormField
                         label={t('pipeline:create.redshiftDatabaseUser')}
-                        description={t('pipeline:create.redshiftDatabaseUserDesc')}
+                        description={t(
+                          'pipeline:create.redshiftDatabaseUserDesc'
+                        )}
                       >
                         <Input
                           placeholder={
@@ -833,11 +843,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                     </div>
                   </FormField>
 
-                  <ExpandableSection headerText={t('pipeline:create.redshiftAdditionalSettings')}>
+                  <ExpandableSection
+                    headerText={t('pipeline:create.redshiftAdditionalSettings')}
+                  >
                     <SpaceBetween direction="vertical" size="s">
                       <FormField
                         label={t('pipeline:create.redshiftDataLoadFrequency')}
-                        description={t('pipeline:create.redshiftDataLoadFrequencyDesc')}
+                        description={t(
+                          'pipeline:create.redshiftDataLoadFrequencyDesc'
+                        )}
                       >
                         <div className="flex">
                           <div style={{ width: 250 }}>
@@ -862,8 +876,12 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         </div>
                       </FormField>
                       <FormField
-                        label={t('pipeline:create.redshiftUserTableUpsertFrequency')}
-                        description={t('pipeline:create.redshiftUserTableUpsertFrequencyDesc')}
+                        label={t(
+                          'pipeline:create.redshiftUserTableUpsertFrequency'
+                        )}
+                        description={t(
+                          'pipeline:create.redshiftUserTableUpsertFrequencyDesc'
+                        )}
                       >
                         <div className="flex">
                           <div style={{ width: 250 }}>
