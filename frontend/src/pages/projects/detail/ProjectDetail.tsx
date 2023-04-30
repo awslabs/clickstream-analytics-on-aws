@@ -44,6 +44,7 @@ const ProjectDetail: React.FC = () => {
     const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
       await getPipelineByProject({
         pid: projectId,
+        version: 'latest',
       });
     if (success) {
       if (data.items.length > 0) {
