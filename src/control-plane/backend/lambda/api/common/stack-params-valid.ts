@@ -12,6 +12,7 @@
  */
 
 import { ClickStreamBadRequestError } from './types';
+import { getSubnet } from '../store/aws/ec2';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
@@ -43,6 +44,22 @@ export const validateSecretModel = (secretValue: string|undefined) => {
   } catch (err) {
     throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret format mismatch. Please check and try again.');
   }
+  return true;
+};
+
+export const validateSubnetCrossThreeAZ = async (region: string, subnetIds: string[]) => {
+  const azSet = new Set();
+  for (let subnetId of subnetIds) {
+    const subnet = await getSubnet(region, subnetId);
+    azSet.add(subnet.AvailabilityZone);
+  }
+  if (azSet.size < 3) {
+    throw new ClickStreamBadRequestError(
+      'Validate error, the network for deploying Redshift serverless workgroup at least three subnets that cross three AZs. ' +
+      'Please check and try again.',
+    );
+  }
+  return true;
 };
 
 

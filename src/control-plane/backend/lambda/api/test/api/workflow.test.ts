@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DescribeSubnetsCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
   RedshiftServerlessClient,
@@ -46,6 +47,7 @@ const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const sfnClient = mockClient(SFNClient);
 const secretsManagerClient = mockClient(SecretsManagerClient);
+const ec2Mock = mockClient(EC2Client);
 
 const Tags = [
   {
@@ -77,6 +79,7 @@ describe('Workflow test', () => {
     redshiftServerlessClient.reset();
     sfnClient.reset();
     secretsManagerClient.reset();
+    ec2Mock.reset();
   });
 
   it('Generate Workflow ingestion-server-s3', async () => {
@@ -1649,6 +1652,16 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
     stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    ec2Mock.on(DescribeSubnetsCommand)
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
+      });
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });

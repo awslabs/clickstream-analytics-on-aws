@@ -13,6 +13,7 @@
 
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { EC2Client, DescribeSubnetsCommand } from '@aws-sdk/client-ec2';
 import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import {
   RedshiftServerlessClient,
@@ -45,6 +46,7 @@ const cloudFormationClient = mockClient(CloudFormationClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const secretsManagerClient = mockClient(SecretsManagerClient);
+const ec2Client = mockClient(EC2Client);
 
 
 describe('Pipeline test', () => {
@@ -55,6 +57,7 @@ describe('Pipeline test', () => {
     kafkaMock.reset();
     redshiftServerlessClient.reset();
     secretsManagerClient.reset();
+    ec2Client.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
@@ -84,6 +87,16 @@ describe('Pipeline test', () => {
         namespaceName: 'namespaceName',
       },
     });
+    ec2Client.on(DescribeSubnetsCommand)
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
+      });
     ddbMock.on(PutCommand).resolves({});
     ddbMock.on(QueryCommand)
       .resolvesOnce({ Items: [] })
@@ -111,6 +124,63 @@ describe('Pipeline test', () => {
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+  });
+  it('Create pipeline with new Redshift serverless subnets not cross three AZ', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    kafkaMock.on(ListNodesCommand).resolves({
+      NextToken: 'token01',
+      NodeInfoList: [{
+        BrokerNodeInfo: {
+          Endpoints: ['node1,node2'],
+        },
+      }],
+      $metadata: {},
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
+      workgroup: {
+        workgroupId: 'workgroupId',
+        workgroupArn: 'workgroupArn',
+        workgroupName: 'workgroupName',
+      },
+    });
+    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
+      namespace: {
+        namespaceId: 'namespaceId',
+        namespaceArn: 'namespaceArn',
+        namespaceName: 'namespaceName',
+      },
+    });
+    ddbMock.on(PutCommand).resolves({});
+    ec2Client.on(DescribeSubnetsCommand).resolves({
+      Subnets: [{ AvailabilityZone: 'us-east-1a' }],
+    });
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({ Items: [] })
+      .resolves({
+        Items: [
+          {
+            id: 1,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+          {
+            id: 2,
+            appId: `${MOCK_APP_ID}_2`,
+          },
+        ],
+      });
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, the network for deploying Redshift serverless workgroup at least three subnets that cross three AZs. Please check and try again.');
+    expect(ec2Client).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 3);
   });
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);

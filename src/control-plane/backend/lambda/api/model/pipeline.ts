@@ -33,7 +33,7 @@ import {
   SECRETS_MANAGER_ARN_PATTERN,
   REDSHIFT_MODE, SUBNETS_THREE_AZ_PATTERN,
 } from '../common/constants-ln';
-import { validatePattern, validateSecretModel } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
   BuildInTagKeys,
   ClickStreamBadRequestError,
@@ -62,151 +62,54 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const store: ClickStreamStore = new DynamoDbStore();
 
 interface IngestionServerSizeProps {
-  /**
-   * Server size min number
-   * default: 2
-   */
   readonly serverMin: number;
-  /**
-   * Server size max number
-   * default: 2
-   */
   readonly serverMax: number;
-  /**
-   * Server autoscaling warm pool min size
-   * default: 0
-   */
   readonly warmPoolSize: number;
-  /**
-   * Autoscaling on CPU utilization percent
-   * default: 50
-   */
   readonly scaleOnCpuUtilizationPercent?: number;
 }
 
 interface IngestionServerLoadBalancerProps {
-  /**
-   * Server endpoint path
-   * default: '/collect'
-   */
   readonly serverEndpointPath: string;
-  /**
-   * Server CORS origin
-   * default: ''
-   */
   readonly serverCorsOrigin: string;
-  /**
-   * Server protocol
-   * allowedValues: ['HTTP', 'HTTPS']
-   */
   readonly protocol: PipelineServerProtocol;
-  /**
-   * AutoScaling group notifications SNS topic arn (optional)
-   */
   readonly notificationsTopicArn?: string;
-  /**
-   * Enable global accelerator
-   */
   readonly enableGlobalAccelerator: boolean;
-  /**
-   * Enable application load balancer access log
-   */
   readonly enableApplicationLoadBalancerAccessLog: boolean;
-  /**
-   * S3 bucket to save log (optional)
-   */
   readonly logS3Bucket?: S3Bucket;
   readonly authenticationSecretArn?: string;
 }
 
 interface IngestionServerSinkS3Props {
-  /**
-   * S3 bucket
-   */
   readonly sinkBucket: S3Bucket;
-  /**
-   * s3 Batch max bytes
-   */
   readonly s3BatchMaxBytes?: number;
-  /**
-   * s3 Batch timeout seconds
-   */
   readonly s3BatchTimeout?: number;
 }
 
 interface IngestionServerSinkKafkaProps {
-  /**
-   * Kafka
-   */
   readonly topic: string;
   readonly brokers: string[];
-  /**
-   * Amazon managed streaming for apache kafka (Amazon MSK) cluster
-   */
   readonly mskCluster?: mskClusterProps;
-  /**
-   * Kafka Connector
-   */
   readonly kafkaConnector: KafkaS3Connector;
 }
 
 interface IngestionServerSinkKinesisProps {
-  /**
-   * Kinesis Data Stream mode
-   * allowedValues: ['ON_DEMAND', 'PROVISIONED']
-   * default: 'ON_DEMAND'
-   */
   readonly kinesisStreamMode: KinesisStreamMode;
-  /**
-   * Number of Kinesis Data Stream shards, only apply for Provisioned mode
-   * default: '3'
-   */
   readonly kinesisShardCount?: number;
-  /**
-   * Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)
-   * default: '24'
-   */
   readonly kinesisDataRetentionHours?: number;
-  /**
-   Batch size for Lambda function to read data from Kinesis Data Stream
-   default: '10000'
-   */
   readonly kinesisBatchSize?: number;
-  /**
-   * Max batching window in seconds for Lambda function to read data from Kinesis Data Stream
-   * default: '300'
-   */
   readonly kinesisMaxBatchingWindowSeconds?: number;
-  /**
-   * S3 bucket to save data from Kinesis Data Stream
-   */
   readonly sinkBucket: S3Bucket;
 
 }
 
 interface IngestionServerDomainProps {
-  /**
-   * The custom domain name.
-   */
   readonly domainName: string;
-  /**
-   * The ACM Certificate arn
-   */
   readonly certificateArn: string;
 }
 
 interface NetworkProps {
-  /**
-   * Select the virtual private cloud (VPC).
-   */
   readonly vpcId: string;
-  /**
-   * public subnet list
-   */
   readonly publicSubnetIds: string[];
-  /**
-   * private subnet ids.
-   */
   readonly privateSubnetIds: string[];
 }
 
@@ -1271,6 +1174,7 @@ export class CPipeline {
 
       validatePattern('RedshiftServerlessSubnets', SUBNETS_THREE_AZ_PATTERN,
         this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','));
+      await validateSubnetCrossThreeAZ(this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds);
       parameters.push({
         ParameterKey: 'RedshiftServerlessSubnets',
         ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','),
