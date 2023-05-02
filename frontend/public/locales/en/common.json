@@ -230,7 +230,8 @@
     "subscribe": "Subscribe",
     "createNew": "Create New",
     "close": "Close",
-    "unsubscribe": "Unsubscribe"
+    "unsubscribe": "Unsubscribe",
+    "retry": "Retry"
   },
   "item": "item",
   "items": "items",

@@ -50,10 +50,19 @@ const deletePipeline = async (params: { id: string; pid: string }) => {
   return result;
 };
 
+const retryPipeline = async (params: { id: string; pid: string }) => {
+  const result: any = await apiRequest(
+    'post',
+    `/pipeline/${params.id}/retry?pid=${params.pid}`
+  );
+  return result;
+};
+
 export {
   createProjectPipeline,
   deletePipeline,
   getPipelineByProject,
   getPipelineDetail,
   getPipelineList,
+  retryPipeline,
 };

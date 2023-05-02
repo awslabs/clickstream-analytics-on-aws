@@ -20,9 +20,12 @@ import {
   Link,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import PipelineStatus from 'components/pipeline/PipelineStatus';
+import { retryPipeline } from 'apis/pipeline';
+import PipelineStatus, {
+  EPipelineStatus,
+} from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
@@ -36,18 +39,52 @@ interface BasicInfoProps {
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
   const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
+  const [loadingRetry, setLoadingRetry] = useState(false);
+  const [disableRetry, setDisableRetry] = useState(false);
+
+  const startRetryPipeline = async () => {
+    setLoadingRetry(true);
+    try {
+      const resData: ApiResponse<null> = await retryPipeline({
+        pid: pipelineInfo?.projectId || '',
+        id: pipelineInfo?.pipelineId || '',
+      });
+      setLoadingRetry(false);
+      if (resData.success) {
+        setDisableRetry(true);
+        reloadPipeline();
+      }
+    } catch (error) {
+      setLoadingRetry(false);
+    }
+  };
+
   return (
     <Container
       header={
         <Header
           actions={
-            <Button
-              iconName="refresh"
-              loading={loadingRefresh}
-              onClick={() => {
-                reloadPipeline();
-              }}
-            />
+            <SpaceBetween size="xs" direction="horizontal">
+              <Button
+                iconName="refresh"
+                loading={loadingRefresh}
+                onClick={() => {
+                  reloadPipeline();
+                }}
+              />
+              {pipelineInfo?.status?.status === EPipelineStatus.Failed && (
+                <Button
+                  iconName="redo"
+                  disabled={disableRetry}
+                  loading={loadingRetry}
+                  onClick={() => {
+                    startRetryPipeline();
+                  }}
+                >
+                  {t('button.retry')}
+                </Button>
+              )}
+            </SpaceBetween>
           }
           variant="h2"
           description="Container description"

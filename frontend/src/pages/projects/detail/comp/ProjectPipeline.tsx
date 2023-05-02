@@ -27,7 +27,10 @@ import {
   deleteApplication,
   getApplicationListByPipeline,
 } from 'apis/application';
-import PipelineStatus from 'components/pipeline/PipelineStatus';
+import { retryPipeline } from 'apis/pipeline';
+import PipelineStatus, {
+  EPipelineStatus,
+} from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -53,6 +56,8 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const [totalCount, setTotalCount] = useState(0);
   const [applicationList, setApplicationList] = useState<IApplication[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingRetry, setLoadingRetry] = useState(false);
+  const [disableRetry, setDisableRetry] = useState(false);
   const goToCreateApplication = () => {
     navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
@@ -97,6 +102,23 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     }
   };
 
+  const startRetryPipeline = async () => {
+    setLoadingRetry(true);
+    try {
+      const resData: ApiResponse<null> = await retryPipeline({
+        pid: pipelineInfo.projectId || '',
+        id: pipelineInfo.pipelineId || '',
+      });
+      setLoadingRetry(false);
+      if (resData.success) {
+        setDisableRetry(true);
+        reloadPipeline();
+      }
+    } catch (error) {
+      setLoadingRetry(false);
+    }
+  };
+
   useEffect(() => {
     listApplicationByProject();
   }, [currentPage]);
@@ -117,6 +139,19 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                     reloadPipeline();
                   }}
                 />
+                {pipelineInfo.status?.status === EPipelineStatus.Failed && (
+                  <Button
+                    iconName="redo"
+                    disabled={disableRetry}
+                    loading={loadingRetry}
+                    onClick={() => {
+                      startRetryPipeline();
+                    }}
+                  >
+                    {t('button.retry')}
+                  </Button>
+                )}
+
                 <Button
                   href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                   iconAlign="right"
