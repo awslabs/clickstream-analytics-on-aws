@@ -1612,6 +1612,10 @@ describe('Workflow test', () => {
                         ParameterValue: '50',
                       },
                       {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
+                      },
+                      {
                         ParameterKey: 'RedshiftMode',
                         ParameterValue: 'Serverless',
                       },
@@ -1945,6 +1949,10 @@ describe('Workflow test', () => {
                         ParameterValue: '50',
                       },
                       {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
+                      },
+                      {
                         ParameterKey: 'RedshiftMode',
                         ParameterValue: 'New_Serverless',
                       },
@@ -2267,6 +2275,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'ProcessingFilesLimit',
                         ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -2633,6 +2645,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'ProcessingFilesLimit',
                         ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
                       },
                       {
                         ParameterKey: 'RedshiftMode',

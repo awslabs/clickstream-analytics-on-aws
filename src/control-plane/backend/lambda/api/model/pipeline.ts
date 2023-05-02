@@ -1138,6 +1138,12 @@ export class CPipeline {
       ParameterKey: 'ProcessingFilesLimit',
       ParameterValue: (this.pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit ?? 100).toString(),
     });
+    if (this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalInMinutes) {
+      parameters.push({
+        ParameterKey: 'LoadJobScheduleInterval',
+        ParameterValue: this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalInMinutes.toString(),
+      });
+    }
 
     if (this.pipeline.dataAnalytics?.redshift?.provisioned) {
       parameters.push({
