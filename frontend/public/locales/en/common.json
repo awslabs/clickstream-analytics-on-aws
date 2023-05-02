@@ -26,7 +26,7 @@
     "tools": "Tools",
     "simuTest": "Simulation testing",
     "sdkIntegration": "SDK integration",
-    "quickSight": "QuckSight subscription",
+    "quickSight": "QuickSight",
     "notifications": "Notifications",
     "doc": "Documentation"
   },
@@ -255,6 +255,17 @@
     "errorIconAriaLabel": "Error",
     "uploadSuccess": "Uploaded successfully",
     "uploadFailed": "Upload failed."
+  },
+  "quicksight": {
+    "subscription": "QuickSight Subscription",
+    "accountName": "Account Name",
+    "authType": "Authentication Type",
+    "edition": "Edition",
+    "notificationEmail": "Notification Email",
+    "status": "Status",
+    "valid": {
+      "accountExists": "QuickSight account name already exists."
+    }
   },
   "nextPage": "Next page",
   "prePage": "Previous page",

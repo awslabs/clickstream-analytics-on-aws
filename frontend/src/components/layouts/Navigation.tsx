@@ -42,7 +42,6 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       items: [
         { type: 'link', text: t('nav.plugin'), href: '/plugins' },
         { type: 'link', text: t('nav.quickSight'), href: '/quicksight' },
-        { type: 'link', text: t('nav.sdkIntegration'), href: '#/skd' },
       ],
     },
     { type: 'divider' },

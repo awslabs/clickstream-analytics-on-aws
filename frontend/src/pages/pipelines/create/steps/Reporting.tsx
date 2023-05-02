@@ -151,7 +151,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   };
 
   // subscribe quicksight
-  const subscribTheQuickSight = async () => {
+  const subscribeTheQuickSight = async () => {
     setLoadingSubscription(true);
     try {
       const { success, data }: ApiResponse<SubscribeQuickSightResponse> =
@@ -344,7 +344,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
               <Button
                 loading={loadingSubscription}
                 onClick={() => {
-                  subscribTheQuickSight();
+                  subscribeTheQuickSight();
                 }}
               >
                 {t('button.subscribe')}

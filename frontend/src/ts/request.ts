@@ -121,6 +121,7 @@ export function postRequest<T>(
     .catch((err) => {
       errMsg(err);
       reject(err);
+      throw new Error(err?.response?.data?.error || 'Error');
     });
 }
 
@@ -175,24 +176,40 @@ export const apiRequest = (
   return new Promise((resolve, reject) => {
     switch (fecth) {
       case 'get':
-        getRequest(url, param).then((response) => {
-          resolve(response);
-        });
+        getRequest(url, param)
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
         break;
       case 'post':
-        postRequest(url, param).then((response) => {
-          resolve(response);
-        });
+        postRequest(url, param)
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
         break;
       case 'put':
-        putRequest(url, param).then((response) => {
-          resolve(response);
-        });
+        putRequest(url, param)
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
         break;
       case 'delete':
-        deleteRequest(url, param).then((response) => {
-          resolve(response);
-        });
+        deleteRequest(url, param)
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
         break;
       default:
         reject('unknown request');
@@ -263,7 +280,6 @@ function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
         );
         break;
     }
-    return;
   }
   alertMsg(
     'Network error please try again later',

@@ -166,3 +166,7 @@ export const SDK_LIST: SelectProps.Option[] = [
     iconName: 'settings',
   },
 ];
+
+export enum ErrorCode {
+  QuickSightNameExists = 'Error: ResourceExistsException',
+}
