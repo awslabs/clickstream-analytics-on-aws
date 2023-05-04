@@ -24,6 +24,7 @@ import {
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { logger } from '../../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
 enum StackAction {
   CREATE = 'Create',
@@ -72,7 +73,10 @@ export const handler = async (event: SfnStackEvent, _context: any): Promise<any>
 
 export const createStack = async (event: SfnStackEvent) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({ region: event.Input.Region });
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region: event.Input.Region,
+    });
     const params: CreateStackCommand = new CreateStackCommand({
       StackName: event.Input.StackName,
       TemplateURL: event.Input.TemplateURL,
@@ -101,7 +105,10 @@ export const createStack = async (event: SfnStackEvent) => {
 
 export const updateStack = async (event: SfnStackEvent) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({ region: event.Input.Region });
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region: event.Input.Region,
+    });
     const params: UpdateStackCommand = new UpdateStackCommand({
       StackName: event.Input.StackName,
       Parameters: event.Input.Parameters,
@@ -140,7 +147,10 @@ export const deleteStack = async (event: SfnStackEvent) => {
       } as SfnStackEvent;
     }
 
-    const cloudFormationClient = new CloudFormationClient({ region: event.Input.Region });
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region: event.Input.Region,
+    });
     const params: DeleteStackCommand = new DeleteStackCommand({
       StackName: stack.StackId,
     });
@@ -185,7 +195,10 @@ export const describeStack = async (event: SfnStackEvent) => {
 
 export const describe = async (region: string, stackName: string) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({ region });
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
       StackName: stackName,
     });
@@ -209,7 +222,9 @@ export const callback = async (event: SfnStackEvent) => {
   }
 
   try {
-    const s3Client = new S3Client({});
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+    });
     const input = {
       Body: JSON.stringify({ [event.Input.StackName]: event.Result }),
       Bucket: event.Callback.BucketName,

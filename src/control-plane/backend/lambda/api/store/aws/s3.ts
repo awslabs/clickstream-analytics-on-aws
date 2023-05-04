@@ -21,12 +21,15 @@ import {
   GetBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
 
 const promisePool = pLimit(50);
 
 export const listBuckets = async (region: string) => {
-  const s3Client = new S3Client({});
+  const s3Client = new S3Client({
+    ...aws_sdk_client_common_config,
+  });
   const params: ListBucketsCommand = new ListBucketsCommand({});
   const result = await s3Client.send(params);
   const buckets: ClickStreamBucket[] = [];
@@ -74,7 +77,10 @@ export async function getS3Object(region: string, bucket: string, key: string): 
   });
 
   try {
-    const s3Client = new S3Client({ region });
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+      region,
+    });
     const { Body } = await s3Client.send(command);
     const bodyContents = await streamToString(Body);
     return bodyContents;
@@ -84,7 +90,9 @@ export async function getS3Object(region: string, bucket: string, key: string): 
 }
 
 export const getS3BucketPolicy = async (bucket: string) => {
-  const s3Client = new S3Client({});
+  const s3Client = new S3Client({
+    ...aws_sdk_client_common_config,
+  });
   const params: GetBucketPolicyCommand = new GetBucketPolicyCommand({
     Bucket: bucket,
   });

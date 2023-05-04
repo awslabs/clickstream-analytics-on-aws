@@ -13,10 +13,14 @@
 
 import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, ListClustersV2Command, paginateListNodes, NodeInfo } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { MSKCluster } from '../../common/types';
 
 export const listMSKCluster = async (region: string, vpcId: string) => {
-  const kafkaClient = new KafkaClient({ region });
+  const kafkaClient = new KafkaClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Cluster[] = [];
   for await (const page of paginateListClustersV2({ client: kafkaClient }, {})) {
     records.push(...page.ClusterInfoList as Cluster[]);
@@ -66,7 +70,10 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
   if (!clusterArn) {
     return nodeEndpoints;
   }
-  const kafkaClient = new KafkaClient({ region });
+  const kafkaClient = new KafkaClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: NodeInfo[] = [];
   for await (const page of paginateListNodes({ client: kafkaClient }, { ClusterArn: clusterArn })) {
     records.push(...page.NodeInfoList as NodeInfo[]);
@@ -84,7 +91,10 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
 
 export const mskPing = async (region: string): Promise<boolean> => {
   try {
-    const kafkaClient = new KafkaClient({ region });
+    const kafkaClient = new KafkaClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
     const params: ListClustersV2Command = new ListClustersV2Command({});
     await kafkaClient.send(params);
   } catch (err) {

@@ -29,6 +29,7 @@ import {
 import { awsAccountId } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils';
 
@@ -41,7 +42,10 @@ const ACCOUNT_SUBSCRIPTION_TIMEOUT = 20;
 export const listQuickSightUsers = async () => {
   const users: QuickSightUser[] = [];
   try {
-    const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: QUICKSIGHT_CONTROL_PLANE_REGION,
+    });
     const records = await getPaginatedResults(async (NextToken: any) => {
       const params: ListUsersCommand = new ListUsersCommand({
         AwsAccountId: awsAccountId,
@@ -71,7 +75,10 @@ export const listQuickSightUsers = async () => {
 
 // Creates an Amazon QuickSight user
 export const registerQuickSightUser = async (email: string, username?: string) => {
-  const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: QUICKSIGHT_CONTROL_PLANE_REGION,
+  });
   const command: RegisterUserCommand = new RegisterUserCommand({
     IdentityType: IdentityType.QUICKSIGHT,
     AwsAccountId: awsAccountId,
@@ -86,7 +93,10 @@ export const registerQuickSightUser = async (email: string, username?: string) =
 
 // Determine if QuickSight has already subscribed
 export const quickSightPing = async (): Promise<boolean> => {
-  const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: QUICKSIGHT_CONTROL_PLANE_REGION,
+  });
   const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
     AwsAccountId: awsAccountId,
   });
@@ -105,7 +115,10 @@ export const quickSightPing = async (): Promise<boolean> => {
 };
 
 export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {
-  const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: QUICKSIGHT_CONTROL_PLANE_REGION,
+  });
   const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
     AwsAccountId: awsAccountId,
   });
@@ -139,7 +152,10 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
 
 export const createAccountSubscription = async (email: string, accountName: string) => {
   try {
-    const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: QUICKSIGHT_CONTROL_PLANE_REGION,
+    });
     const command: CreateAccountSubscriptionCommand = new CreateAccountSubscriptionCommand({
       AccountName: accountName ? `${QUICKSIGHT_PREFIX}-${accountName}` : QUICKSIGHT_DEFAULT_ACCOUNT,
       AuthenticationMethod: AuthenticationMethodOption.IAM_AND_QUICKSIGHT,
@@ -171,7 +187,10 @@ export const createAccountSubscription = async (email: string, accountName: stri
 };
 
 export const deleteAccountSubscription = async () => {
-  const quickSightClient = new QuickSightClient({ region: QUICKSIGHT_CONTROL_PLANE_REGION });
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: QUICKSIGHT_CONTROL_PLANE_REGION,
+  });
   // @ts-ignore
   const commandUpdate: UpdateAccountSettingsCommand = new UpdateAccountSettingsCommand({
     AwsAccountId: awsAccountId,

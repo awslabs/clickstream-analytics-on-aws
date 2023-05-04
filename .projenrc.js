@@ -46,6 +46,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sqs',
   '@aws-sdk/client-ssm',
+  '@aws-sdk/node-http-handler',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [
@@ -67,6 +68,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/util-stream-node',
+  '@aws-sdk/node-http-handler',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const depsForApiProject = [

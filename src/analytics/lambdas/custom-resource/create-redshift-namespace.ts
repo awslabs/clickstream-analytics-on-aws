@@ -16,6 +16,7 @@ import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { CdkCustomResourceEvent, CdkCustomResourceHandler, CdkCustomResourceResponse } from 'aws-lambda';
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { NewNamespaceCustomProperties } from '../../private/model';
 import { Sleep } from '../redshift-data';
 
@@ -99,6 +100,7 @@ async function deleteNamespace(client: RedshiftServerlessClient, props: Resource
 
 export function getRedshiftServerlessClient(roleArn: string) {
   return new RedshiftServerlessClient({
+    ...aws_sdk_client_common_config,
     credentials: fromTemporaryCredentials({
       // Required. Options passed to STS AssumeRole operation.
       params: {

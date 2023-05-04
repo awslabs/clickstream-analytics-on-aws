@@ -24,11 +24,13 @@ import {
   ObjectIdentifier,
   NoSuchKey,
 } from '@aws-sdk/client-s3';
-
-
 import { logger } from './powertools';
+import { aws_sdk_client_common_config } from './sdk-client-config';
 
-const s3Client = new S3Client({});
+
+const s3Client = new S3Client({
+  ...aws_sdk_client_common_config,
+});
 
 export async function putStringToS3(
   content: string,

@@ -20,13 +20,20 @@ import {
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { ManifestBody } from '../../private/model';
 import { getRedshiftClient } from '../redshift-data';
 
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
-const ddbClient = new DynamoDBClient({ region: REGION });
-const s3Client = new S3Client({ region: REGION });
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
+const s3Client = new S3Client({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;

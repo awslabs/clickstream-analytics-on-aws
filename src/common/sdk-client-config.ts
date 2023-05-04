@@ -11,18 +11,12 @@
  *  and limitations under the License.
  */
 
-import {
-  SFNClient,
-} from '@aws-sdk/client-sfn';
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 
-import { aws_sdk_client_common_config } from './sdk-client-config-ln';
-
-
-// Create SFN Client
-const sfnClient = new SFNClient({
-  ...aws_sdk_client_common_config,
-});
-
-export {
-  sfnClient,
+export const aws_sdk_client_common_config = {
+  maxAttempts: 3,
+  requestHandler: new NodeHttpHandler({
+    connectionTimeout: 5000,
+    socketTimeout: 5000,
+  }),
 };

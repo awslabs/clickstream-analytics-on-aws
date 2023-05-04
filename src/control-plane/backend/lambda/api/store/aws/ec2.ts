@@ -26,12 +26,17 @@ import {
   RouteTableAssociation,
   Region,
 } from '@aws-sdk/client-ec2';
+
 import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup } from '../../common/types';
 import { getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Vpc[] = [];
   for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
     records.push(...page.Vpcs as Vpc[]);
@@ -76,7 +81,10 @@ export const describeVpcs3AZ = async (region: string) => {
 };
 
 export const describeSubnets = async (region: string, vpcId: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Subnet[] = [];
   const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
   for await (const page of paginateDescribeSubnets({ client: ec2Client }, { Filters: filters })) {
@@ -120,7 +128,10 @@ export const describeSubnetsWithType = async (region: string, vpcId: string, typ
 };
 
 export const getSubnetRouteTable = async (region: string, vpcId: string, subnetId: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   // Each subnet in VPC must be associated with a route table.
   // If a subnet is not explicitly associated with any route table,
   // it is implicitly associated with the main route table.
@@ -146,7 +157,10 @@ export const getSubnetRouteTable = async (region: string, vpcId: string, subnetI
 };
 
 export const getSubnet = async (region: string, subnetId: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Subnet[] = [];
   for await (const page of paginateDescribeSubnets({ client: ec2Client }, { SubnetIds: [subnetId] })) {
     records.push(...page.Subnets as Subnet[]);
@@ -158,7 +172,10 @@ export const getSubnet = async (region: string, subnetId: string) => {
 };
 
 export const listRegions = async () => {
-  const ec2Client = new EC2Client({});
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+  });
+
   const params: DescribeRegionsCommand = new DescribeRegionsCommand({});
   const queryResponse = await ec2Client.send(params);
   const regions: ClickStreamRegion[] = [];

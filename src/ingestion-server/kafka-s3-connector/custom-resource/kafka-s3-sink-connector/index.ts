@@ -36,11 +36,18 @@ import {
 
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
 const region = process.env.AWS_REGION;
 
-const s3Client = new S3Client({ region });
-const kafkaConnectClient = new KafkaConnectClient({ region });
+const s3Client = new S3Client({
+  ...aws_sdk_client_common_config,
+  region,
+});
+const kafkaConnectClient = new KafkaConnectClient({
+  ...aws_sdk_client_common_config,
+  region,
+});
 
 let MAX_N = 30;
 if (process.env.MAX_N) {

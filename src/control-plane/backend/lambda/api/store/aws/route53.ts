@@ -12,10 +12,13 @@
  */
 
 import { Route53Client, paginateListHostedZones, HostedZone } from '@aws-sdk/client-route-53';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { Route53HostedZone } from '../../common/types';
 
 export const listHostedZones = async () => {
-  const route53Client = new Route53Client({});
+  const route53Client = new Route53Client({
+    ...aws_sdk_client_common_config,
+  });
   const records: HostedZone[] = [];
   for await (const page of paginateListHostedZones({ client: route53Client }, {})) {
     records.push(...page.HostedZones as HostedZone[]);

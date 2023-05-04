@@ -161,6 +161,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/node-http-handler",
+      "version": "^3.310.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/util-dynamodb",
       "version": "^3.310.0",
       "type": "runtime"

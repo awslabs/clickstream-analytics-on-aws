@@ -17,10 +17,13 @@ import {
   Role,
 } from '@aws-sdk/client-iam';
 import { awsRegion } from '../../common/constants';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { AssumeRoleType, IamRole } from '../../common/types';
 
 export const listRoles = async (type: AssumeRoleType, key?: string) => {
-  const iamClient = new IAMClient({});
+  const iamClient = new IAMClient({
+    ...aws_sdk_client_common_config,
+  });
   const records: Role[] = [];
   for await (const page of paginateListRoles({ client: iamClient }, {})) {
     records.push(...page.Roles as Role[]);

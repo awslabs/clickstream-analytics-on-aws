@@ -19,9 +19,12 @@ import {
 import { v4 as uuid } from 'uuid';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey, getSinkTableLocationPrefix } from '../../utils/utils-common';
 
-const emrClient = new EMRServerlessClient({});
+const emrClient = new EMRServerlessClient({
+  ...aws_sdk_client_common_config,
+});
 
 interface EMRJobInfo {
   jobId: string;

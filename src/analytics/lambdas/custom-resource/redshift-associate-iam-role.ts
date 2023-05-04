@@ -16,6 +16,7 @@ import { RedshiftServerlessClient, GetWorkgroupCommand, UpdateNamespaceCommand }
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from '../../private/model';
 import { Sleep } from '../redshift-data';
 
@@ -92,7 +93,9 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
     }
 
     if (resourceProps.serverlessRedshiftProps) {
-      const client = new RedshiftServerlessClient({ });
+      const client = new RedshiftServerlessClient({
+        ...aws_sdk_client_common_config,
+      });
       const getWorkgroup = new GetWorkgroupCommand({
         workgroupName: resourceProps.serverlessRedshiftProps.workgroupName,
       });
@@ -117,7 +120,9 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
 
       if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client);}
     } else if (resourceProps.provisionedRedshiftProps) {
-      const client = new RedshiftClient({});
+      const client = new RedshiftClient({
+        ...aws_sdk_client_common_config,
+      });
       const getCluster = new DescribeClustersCommand({
         ClusterIdentifier: resourceProps.provisionedRedshiftProps.clusterIdentifier,
       });

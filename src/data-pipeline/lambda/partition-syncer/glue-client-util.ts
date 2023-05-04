@@ -20,6 +20,7 @@ import {
 } from '@aws-sdk/client-glue';
 import { PARTITION_APP } from '../../../common/constant';
 import { putStringToS3 } from '../../../common/s3';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 
 export class GlueClientUtil {
@@ -27,7 +28,9 @@ export class GlueClientUtil {
   private readonly client: GlueClient;
 
   public constructor() {
-    this.client = new GlueClient({});
+    this.client = new GlueClient({
+      ...aws_sdk_client_common_config,
+    });
   }
 
   public async addHourlyPartitionsForSourceTable

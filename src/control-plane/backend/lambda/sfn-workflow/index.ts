@@ -15,6 +15,7 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
 interface WorkFlowStack {
   Name: string;
@@ -118,7 +119,9 @@ async function getObject(bucket: string, key: string) {
   });
 
   try {
-    const s3Client = new S3Client({});
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+    });
     const { Body } = await s3Client.send(command);
     const bodyContents = await streamToString(Body);
     return bodyContents;

@@ -21,14 +21,21 @@ import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Context, ScheduledEvent } from 'aws-lambda';
 import { PARTITION_APP } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 import { ManifestItem, ManifestBody } from '../../private/model';
 
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
 // Create an Amazon service client object.
-const ddbClient = new DynamoDBClient({ region: REGION });
-const s3Client = new S3Client({ region: REGION });
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
+const s3Client = new S3Client({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
 
 const MANIFEST_BUCKET = process.env.MANIFEST_BUCKET!;
 const MANIFEST_BUCKET_PREFIX = process.env.MANIFEST_BUCKET_PREFIX!;

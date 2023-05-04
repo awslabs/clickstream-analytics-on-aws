@@ -28,9 +28,12 @@ import {
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
+import { aws_sdk_client_common_config } from '../api/common/sdk-client-config-ln';
 
 // Create an Amazon DynamoDB service client object.
-const ddbClient = new DynamoDBClient({});
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+});
 // Create the DynamoDB Document client.
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 

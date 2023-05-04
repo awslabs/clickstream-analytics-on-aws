@@ -17,6 +17,7 @@ import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
 import { REDSHIFT_MODE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 import { ProvisionedRedshiftProps, ManifestBody, ExistingRedshiftServerlessCustomProps } from '../../private/model';
 import { getRedshiftClient, executeStatements } from '../redshift-data';
@@ -24,7 +25,10 @@ import { getRedshiftClient, executeStatements } from '../redshift-data';
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
 // Create an Amazon service client object.
-const ddbClient = new DynamoDBClient({ region: REGION });
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const REDSHIFT_ROLE_ARN = process.env.REDSHIFT_ROLE!;

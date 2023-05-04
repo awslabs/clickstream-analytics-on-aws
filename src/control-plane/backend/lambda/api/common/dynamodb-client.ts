@@ -13,9 +13,12 @@
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
 // Create DynamoDB Client and patch it for tracing
-const ddbClient = new DynamoDBClient({});
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+});
 
 const marshallOptions = {
   // Whether to automatically convert empty strings, blobs, and sets to `null`.

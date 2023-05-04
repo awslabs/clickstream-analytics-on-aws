@@ -19,10 +19,14 @@ import {
   GetNamespaceCommand,
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { RedshiftCluster, RedshiftServerlessWorkgroup, RedshiftWorkgroup } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId: string) => {
-  const redshiftClient = new RedshiftClient({ region });
+  const redshiftClient = new RedshiftClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Cluster[] = [];
   for await (const page of paginateDescribeClusters({ client: redshiftClient }, {})) {
     records.push(...page.Clusters as Cluster[]);
@@ -45,7 +49,10 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
 };
 
 export const getRedshiftWorkgroupAndNamespace = async (region: string, name: string) => {
-  const redshiftServerlessClient = new RedshiftServerlessClient({ region });
+  const redshiftServerlessClient = new RedshiftServerlessClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const getWorkgroupCommand: GetWorkgroupCommand = new GetWorkgroupCommand({
     workgroupName: name,
   });
@@ -72,7 +79,10 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
 };
 
 export const listRedshiftServerlessWorkgroups = async (region: string) => {
-  const redshiftServerlessClient = new RedshiftServerlessClient({ region });
+  const redshiftServerlessClient = new RedshiftServerlessClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Workgroup[] = [];
   for await (const page of paginateListWorkgroups({ client: redshiftServerlessClient }, {})) {
     records.push(...page.workgroups as Workgroup[]);

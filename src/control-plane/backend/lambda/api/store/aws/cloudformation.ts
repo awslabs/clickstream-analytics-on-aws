@@ -13,10 +13,14 @@
 
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { logger } from '../../common/powertools';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const describeStack = async (region: string, stackName: string) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({ region });
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
       StackName: stackName,
     });

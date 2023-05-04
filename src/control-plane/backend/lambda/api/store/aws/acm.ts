@@ -19,11 +19,15 @@ import {
   KeyAlgorithm,
 } from '@aws-sdk/client-acm';
 
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { Certificate } from '../../common/types';
 
 export const ListCertificates = async (region: string) => {
   const certificates: Certificate[] = [];
-  const acmClient = new ACMClient({ region });
+  const acmClient = new ACMClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: CertificateSummary[] = [];
   for await (const page of paginateListCertificates({ client: acmClient }, {
     CertificateStatuses: [CertificateStatus.ISSUED],

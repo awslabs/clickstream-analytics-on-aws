@@ -19,6 +19,7 @@ import { EventBridgeEvent } from 'aws-lambda';
 import { METRIC_NAMESPACE_DATAPIPELINE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { copyS3Object, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey } from '../../utils/utils-common';
 
 const emrApplicationId = process.env.EMR_SERVERLESS_APPLICATION_ID!;
@@ -28,9 +29,15 @@ const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
 const dlQueueUrl = process.env.DL_QUEUE_URL!;
 
-const cwClient = new CloudWatchClient({});
-const emrClient = new EMRServerlessClient({});
-const sqsClient = new SQSClient({});
+const cwClient = new CloudWatchClient({
+  ...aws_sdk_client_common_config,
+});
+const emrClient = new EMRServerlessClient({
+  ...aws_sdk_client_common_config,
+});
+const sqsClient = new SQSClient({
+  ...aws_sdk_client_common_config,
+});
 
 export const handler = async (event: EventBridgeEvent<string, { jobRunId: string; applicationId: string; state: string }>) => {
   logger.info('Triggered from  event', { event });

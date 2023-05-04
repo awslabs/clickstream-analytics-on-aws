@@ -15,12 +15,16 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, S3ObjectCreatedNotificationEventDetail } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
 // Create an Amazon DynamoDB service client object.
-const ddbClient = new DynamoDBClient({ region: REGION });
+const ddbClient = new DynamoDBClient({
+  ...aws_sdk_client_common_config,
+  region: REGION,
+});
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
 const S3_FILE_SUFFIX = process.env.S3_FILE_SUFFIX;

@@ -12,10 +12,14 @@
  */
 
 import { SecretsManagerClient, GetSecretValueCommand, SecretListEntry, paginateListSecrets } from '@aws-sdk/client-secrets-manager';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { SSMSecret } from '../../common/types';
 
 export const listSecrets = async (region: string) => {
-  const secretsManagerClient = new SecretsManagerClient({ region });
+  const secretsManagerClient = new SecretsManagerClient({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const results: SecretListEntry[] = [];
   for await (const page of paginateListSecrets({ client: secretsManagerClient }, {})) {
     // page contains a single paginated output.
@@ -33,7 +37,10 @@ export const listSecrets = async (region: string) => {
 
 export const getSecretValue = async (region: string, name: string) => {
   try {
-    const secretsManagerClient = new SecretsManagerClient({ region });
+    const secretsManagerClient = new SecretsManagerClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
     const response = await secretsManagerClient.send(
       new GetSecretValueCommand({
         SecretId: name,
