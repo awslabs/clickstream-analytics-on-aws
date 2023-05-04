@@ -165,7 +165,7 @@ export const MSK_WITH_CONNECTOR_INGESTION_PIPELINE: IPipeline = {
     sinkType: PipelineSinkType.KAFKA,
     sinkKafka: {
       brokers: [],
-      topic: 't1',
+      topic: '',
       mskCluster: {
         name: 'mskClusterName',
         arn: 'mskClusterArn',

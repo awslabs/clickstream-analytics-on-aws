@@ -666,7 +666,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -725,7 +725,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'MskClusterName',
@@ -1386,7 +1386,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -1445,7 +1445,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'MskClusterName',
@@ -1501,7 +1501,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/project_8888_8888/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',
@@ -2421,7 +2421,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'KafkaBrokers',
@@ -2480,7 +2480,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KafkaTopic',
-                        ParameterValue: 't1',
+                        ParameterValue: 'project_8888_8888',
                       },
                       {
                         ParameterKey: 'MskClusterName',
@@ -2536,7 +2536,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'SourceS3Prefix',
-                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/t1/',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/project_8888_8888/',
                       },
                       {
                         ParameterKey: 'SinkS3Bucket',

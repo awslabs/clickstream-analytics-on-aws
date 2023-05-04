@@ -758,6 +758,8 @@ export class CPipeline {
 
     // Kafka sink
     if (this.pipeline.ingestionServer.sinkType === 'kafka') {
+      const kafkaTopic = this.getKafkaTopic();
+      validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, kafkaTopic);
       if (!isEmpty(this.pipeline.ingestionServer.sinkKafka?.mskCluster)) { //MSK
         parameters.push({
           ParameterKey: 'MskClusterName',
@@ -767,10 +769,9 @@ export class CPipeline {
           ParameterKey: 'MskSecurityGroupId',
           ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
         });
-        validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId);
         parameters.push({
           ParameterKey: 'KafkaTopic',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId,
+          ParameterValue: kafkaTopic,
         });
         let kafkaBrokers = this.pipeline.ingestionServer.sinkKafka?.brokers;
         if (isEmpty(kafkaBrokers)) {
@@ -788,10 +789,9 @@ export class CPipeline {
           ParameterKey: 'KafkaBrokers',
           ParameterValue: this.pipeline.ingestionServer.sinkKafka?.brokers?.join(','),
         });
-        validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId);
         parameters.push({
           ParameterKey: 'KafkaTopic',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId,
+          ParameterValue: kafkaTopic,
         });
       }
 
@@ -881,10 +881,12 @@ export class CPipeline {
       ParameterKey: 'KafkaBrokers',
       ParameterValue: kafkaBrokers?.join(','),
     });
-    validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId);
+
+    const kafkaTopic = this.getKafkaTopic();
+    validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, kafkaTopic);
     parameters.push({
       ParameterKey: 'KafkaTopic',
-      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId,
+      ParameterValue: kafkaTopic,
     });
 
     parameters.push({
@@ -980,8 +982,7 @@ export class CPipeline {
 
     let sourceS3Prefix = this.getBucketPrefix('data-buffer', this.pipeline.etl?.sourceS3Bucket.prefix);
     if (this.pipeline.ingestionServer.sinkType === 'kafka') {
-      const kafkaTopic = this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId;
-      sourceS3Prefix = `${sourceS3Prefix}${kafkaTopic}/`;
+      sourceS3Prefix = `${sourceS3Prefix}${this.getKafkaTopic()}/`;
     }
     parameters.push({
       ParameterKey: 'SourceS3Prefix',
@@ -1229,6 +1230,14 @@ export class CPipeline {
       }
     }
     return undefined;
+  }
+
+  private getKafkaTopic() {
+    let kafkaTopic = this.pipeline.projectId;
+    if (!isEmpty(this.pipeline.ingestionServer.sinkKafka?.topic)) {
+      kafkaTopic = this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId;
+    }
+    return kafkaTopic;
   }
 }
 
