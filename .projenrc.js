@@ -104,6 +104,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'test-deploy*',
     'deployment/global-s3-assets/',
     '.viperlightrc',
+    'codescan-funcs.sh',
     '*.iml',
     '*.ipr',
     '*.iws',
@@ -438,6 +439,7 @@ gitlabMain.createNestedTemplates({
         before_script: [
           'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
           'apt -y install nodejs',
+          'npm install -g yarn',
           'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
           'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
           'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
