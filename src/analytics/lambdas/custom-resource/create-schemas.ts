@@ -17,6 +17,7 @@ import { DeleteParameterCommand, DeleteParameterCommandInput, ParameterNotFound,
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { CreateDatabaseAndSchemas } from '../../private/model';
 import { ReportViews } from '../../private/sqls/reporting-views';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
@@ -25,7 +26,9 @@ export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
   readonly ServiceToken: string;
 }
 
-const ssmClient = new SSMClient({});
+const ssmClient = new SSMClient({
+  ...aws_sdk_client_common_config,
+});
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event) => {
   logger.info(JSON.stringify(event));

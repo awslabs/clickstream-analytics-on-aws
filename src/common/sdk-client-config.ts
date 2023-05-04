@@ -17,6 +17,6 @@ export const aws_sdk_client_common_config = {
   maxAttempts: 3,
   requestHandler: new NodeHttpHandler({
     connectionTimeout: 5000,
-    socketTimeout: 5000,
+    requestTimeout: 5000,
   }),
 };

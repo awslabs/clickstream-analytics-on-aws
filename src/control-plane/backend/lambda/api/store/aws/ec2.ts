@@ -54,7 +54,10 @@ export const describeVpcs = async (region: string) => {
 };
 
 export const describeVpcs3AZ = async (region: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: Vpc[] = [];
   for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
     records.push(...page.Vpcs as Vpc[]);
@@ -188,7 +191,10 @@ export const listRegions = async () => {
 };
 
 export const describeSecurityGroups = async (region: string, vpcId: string) => {
-  const ec2Client = new EC2Client({ region });
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
   const records: SecurityGroup[] = [];
   const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
   for await (const page of paginateDescribeSecurityGroups({ client: ec2Client }, {
