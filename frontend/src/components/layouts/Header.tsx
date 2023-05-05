@@ -12,7 +12,7 @@
  */
 
 import { TopNavigation } from '@cloudscape-design/components';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROJECT_CONFIG_JSON } from 'ts/const';
 
@@ -63,29 +63,6 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             text: t('header.solutionLibrary') || '',
             href: 'https://example.com/',
             external: true,
-          },
-          {
-            type: 'button',
-            iconName: 'notification',
-            title: t('header.notifications') || '',
-            badge: true,
-            disableUtilityCollapse: false,
-          },
-          {
-            type: 'menu-dropdown',
-            ariaLabel: 'settings',
-            iconName: 'settings',
-            title: t('header.settings') || '',
-            items: [
-              {
-                id: 'settings-project',
-                text: t('header.projectSettings') || '',
-              },
-              {
-                id: 'settings',
-                text: t('header.projectSettings') || '',
-              },
-            ],
           },
           {
             type: 'menu-dropdown',

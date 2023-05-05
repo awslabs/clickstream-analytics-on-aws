@@ -1,5 +1,6 @@
 {
   "projects": "Projects",
+  "description": "Project Description",
   "valid": {
     "nameEmpty": "Please input project name.",
     "emailEmpty": "please input notification email.",
@@ -14,7 +15,8 @@
     "platform": "App Platform",
     "created": "Creation Time",
     "notifyEmail": "Notification Email",
-    "envType": "Enviroment Type"
+    "envType": "Enviroment Type",
+    "description": "Description"
   },
   "create": {
     "createProject": "Create project (Step 1 of 3)",
@@ -28,12 +30,13 @@
     "inputEmailAlert": "Use comma to seperate the emails if you want to add multiple email addresses",
     "inputEnv": "Please specify the environment type for your project",
     "inputEnvAlert": "This setting customizes your project for different stages of the app lifecycle. Tagging your project as an environment type has no effect on how your project works or its features. However, the tagging can help you and your team manage your various projects for the app lifecycle.",
-    "unspecified": "Unspecified"
+    "unspecified": "Unspecified",
+    "projectDesc": "Project description - optional"
   },
   "pipeline": {
     "pipeline": "Pipeline",
     "dataPipeline": "Data pipeline",
-    "dataPipelineDesc": "The data pipeline that is used in the project to ingest and process data.",
+    "dataPipelineDesc": "A data pipeline is a set of AWS resource that collect, process and model your clickstream data.",
     "health": "Pipeline health",
     "healthDesc": "Health status of the pipeline of this project.",
     "status": "Status",
@@ -58,6 +61,12 @@
     "loading": "Loading projects",
     "filter": "Filter projects",
     "find": "Find projects",
-    "noProject": "You don’t have any clickstream analytics project yet"
+    "noProject": "You don’t have any clickstream analytics project yet",
+    "createAt": "Creation Date"
+  },
+  "delete": {
+    "title": "Delete Project",
+    "tip1": "Are you sure you want to delete the project ",
+    "tip2": " delete project will delete all data in redshift."
   }
 }

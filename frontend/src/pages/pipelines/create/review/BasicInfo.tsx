@@ -43,14 +43,6 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       <ColumnLayout columns={3} variant="text-grid">
         <SpaceBetween direction="vertical" size="l">
           <div>
-            <Box variant="awsui-key-label">{t('pipeline:name')}</Box>
-            <div>{pipelineInfo?.name}</div>
-          </div>
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:desc')}</Box>
-            <div>{pipelineInfo?.description}</div>
-          </div>
-          <div>
             <Box variant="awsui-key-label">
               {t('pipeline:create.awsRegion')}
             </Box>

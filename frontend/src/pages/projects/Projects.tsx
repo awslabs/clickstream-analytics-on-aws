@@ -23,8 +23,11 @@ import {
 import { getProjectList } from 'apis/project';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TIME_FORMAT } from 'ts/const';
+import Environment from './comps/Environment';
 import ProjectsHeader from './comps/ProjectsHeader';
 import SplitPanelContent from './comps/SplitPanel';
 import CreateProject from './create/CreateProject';
@@ -53,9 +56,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     ),
     sections: [
       {
-        id: 'name',
-        header: t('project:list.name'),
-        content: (item: IProject) => item.name,
+        id: 'description',
+        header: '',
+        content: (item: IProject) => item.description,
       },
       {
         id: 'projectId',
@@ -63,9 +66,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         content: (item: IProject) => item.id,
       },
       {
-        id: 'projectPlatform',
-        header: t('project:list.platform'),
-        content: (item: IProject) => item.platform || '-',
+        id: 'createAt',
+        header: t('project:list.createAt'),
+        content: (item: IProject) =>
+          moment(item?.createAt).format(TIME_FORMAT) || '-',
+      },
+      {
+        id: 'environment',
+        header: '',
+        content: (item: IProject) => <Environment env={item.environment} />,
       },
     ],
   };
@@ -132,6 +141,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           <ProjectsHeader
             totalProject={totalCount}
             project={selectedItems?.[0]}
+            setSelectItemEmpty={() => {
+              changeSelectedItems([]);
+            }}
             refreshPage={() => {
               changeSelectedItems([]);
               listProjects();
@@ -173,10 +185,15 @@ const Projects: React.FC = () => {
   ];
   const [showSplit, setShowSplit] = useState(false);
   const [selectedItems, setSelectedItems] = useState<IProject[]>([]);
+  const [curProject, setCurProject] = useState<IProject | null>();
 
   useEffect(() => {
-    if (selectedItems.length === 1) {
+    if (selectedItems.length >= 1) {
       setShowSplit(true);
+      setCurProject(selectedItems[0]);
+    } else {
+      setShowSplit(false);
+      setCurProject(null);
     }
   }, [selectedItems]);
 
@@ -198,8 +215,20 @@ const Projects: React.FC = () => {
         setShowSplit(e.detail.open);
       }}
       splitPanel={
-        selectedItems.length > 0 ? (
-          <SplitPanelContent project={selectedItems?.[0]} />
+        curProject ? (
+          <SplitPanelContent
+            project={curProject}
+            changeProjectEnv={(env) => {
+              if (curProject) {
+                setCurProject((prev: any) => {
+                  return {
+                    ...prev,
+                    environment: env,
+                  };
+                });
+              }
+            }}
+          />
         ) : (
           ''
         )

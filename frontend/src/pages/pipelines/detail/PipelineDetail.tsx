@@ -87,7 +87,7 @@ const PipelineDetail: React.FC = () => {
       href: `/project/detail/${pid}`,
     },
     {
-      text: projectPipeline?.name || '',
+      text: projectPipeline?.pipelineId || '',
       href: '/',
     },
   ];
@@ -104,7 +104,7 @@ const PipelineDetail: React.FC = () => {
           header={
             <SpaceBetween size="m">
               <Header variant="h1" info={<InfoLink />}>
-                {projectPipeline?.name}
+                {projectPipeline?.pipelineId}
               </Header>
             </SpaceBetween>
           }

@@ -17,6 +17,7 @@ import {
   Container,
   Header,
 } from '@cloudscape-design/components';
+import HOW_IT_WORKS from 'assets/images/howitworks.webp';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -56,6 +57,13 @@ const HowItWorks: React.FC = () => {
           <div>{t('home:howItWorks.step4Desc')}</div>
         </div>
       </ColumnLayout>
+      <div className="mt-10">
+        <img
+          alt={t('home:howItWorks.name') || ''}
+          src={HOW_IT_WORKS}
+          width="100%"
+        />
+      </div>
     </Container>
   );
 };

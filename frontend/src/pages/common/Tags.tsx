@@ -14,6 +14,7 @@
 import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { alertMsg } from 'ts/utils';
 
 interface TagsProps {
   tags: TagEditorProps.Tag[];
@@ -72,7 +73,22 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
         enteredValueLabel: (value) => t('tag.tagLimit.use') + value + '"',
       }}
       tags={tags}
-      onChange={({ detail }) => changeTags(detail.tags as any)}
+      onChange={(event) => {
+        if (
+          event.detail.tags.length >= 2 &&
+          (event.detail.tags[0].markedForRemoval === true ||
+            event.detail.tags[0].value === '' ||
+            event.detail.tags[1].markedForRemoval === true ||
+            event.detail.tags[1].value === '' ||
+            event.detail.tags[2].markedForRemoval === true ||
+            event.detail.tags[2].value === '')
+        ) {
+          alertMsg('Default tags can not be delete', 'error');
+          return;
+        } else {
+          changeTags(event.detail.tags as any);
+        }
+      }}
     />
   );
 };

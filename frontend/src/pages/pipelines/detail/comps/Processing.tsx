@@ -14,12 +14,14 @@
 import {
   Box,
   ColumnLayout,
+  Link,
   SpaceBetween,
   StatusIndicator,
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
+import { buildReshiftLink } from 'ts/url';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -27,6 +29,65 @@ interface TabContentProps {
 const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
+
+  const buildRedshiftDisplay = (pipelineInfo?: IExtPipeline) => {
+    // in creating process
+    if (!pipelineInfo?.pipelineId) {
+      if (pipelineInfo?.redshiftType === 'serverless') {
+        return 'New Serverless';
+      } else {
+        return (
+          <Link
+            external
+            href={buildReshiftLink(
+              pipelineInfo?.region || '',
+              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+                ?.clusterIdentifier || '',
+              'provisioned'
+            )}
+          >
+            {
+              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+                ?.clusterIdentifier
+            }
+          </Link>
+        );
+      }
+    } else {
+      // in detail page
+      if (pipelineInfo?.redshiftType === 'serverless') {
+        return (
+          <Link
+            external
+            href={buildReshiftLink(
+              pipelineInfo?.region || '',
+              '',
+              'serverless'
+            )}
+          >
+            Serverless
+          </Link>
+        );
+      } else {
+        return (
+          <Link
+            external
+            href={buildReshiftLink(
+              pipelineInfo?.region || '',
+              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+                ?.clusterIdentifier || '',
+              'provisioned'
+            )}
+          >
+            {
+              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+                ?.clusterIdentifier
+            }
+          </Link>
+        );
+      }
+    }
+  };
 
   const getDataProcessingIntervalDisplay = () => {
     if (pipelineInfo) {
@@ -152,10 +213,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.anlyEngine')}</Box>
-          <div>
-            {pipelineInfo?.dataAnalytics?.redshift?.provisioned
-              ?.clusterIdentifier || 'New Serverless'}
-          </div>
+          <div>{buildRedshiftDisplay(pipelineInfo)}</div>
         </div>
 
         <div>

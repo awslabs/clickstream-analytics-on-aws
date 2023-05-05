@@ -31,6 +31,7 @@ import { TIME_FORMAT } from 'ts/const';
 interface PluginTableProps {
   pluginType?: string;
   hideAction?: boolean;
+  showRefresh?: boolean;
   selectionType?: 'multi' | 'single';
   title: React.ReactNode;
   desc: React.ReactNode;
@@ -42,6 +43,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const {
     pluginType,
     hideAction,
+    showRefresh,
     selectionType,
     title,
     desc,
@@ -59,6 +61,10 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const [totalCount, setTotalCount] = useState(0);
   const [pluginList, setPluginList] = useState<IPlugin[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
+
+  const openCreatePluginInNewTab = () => {
+    window.open('/plugins/create', '_blank', 'noreferrer');
+  };
 
   const redirectToCreatePage = () => {
     navigate(`/plugins/create`);
@@ -195,12 +201,32 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
                         {t('button.delete')}
                       </Button>
                       <Button
+                        iconName="add-plus"
                         variant="primary"
                         onClick={() => {
                           redirectToCreatePage();
                         }}
                       >
                         {t('button.create')}
+                      </Button>
+                    </>
+                  )}
+                  {showRefresh && (
+                    <>
+                      <Button
+                        iconName="refresh"
+                        loading={loadingData}
+                        onClick={() => {
+                          listPlugins();
+                        }}
+                      />
+                      <Button
+                        iconName="external"
+                        onClick={() => {
+                          openCreatePluginInNewTab();
+                        }}
+                      >
+                        {t('button.addPlugin')}
                       </Button>
                     </>
                   )}

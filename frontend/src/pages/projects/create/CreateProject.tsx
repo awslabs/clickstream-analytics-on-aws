@@ -22,6 +22,7 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
+  Textarea,
 } from '@cloudscape-design/components';
 import { createProject, verificationProjectId } from 'apis/project';
 import React, { useEffect, useState } from 'react';
@@ -207,7 +208,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
                         name: e.detail.value,
                         id: `${e.detail.value
                           ?.toLocaleLowerCase()
-                          ?.replace(/[^\w]/g, '_')}_${generateStr(8)}`,
+                          ?.replace(/[^\w]/g, '_')}_${generateStr(4)}`,
                       };
                     });
                   }}
@@ -264,11 +265,28 @@ const CreateProject: React.FC<CreateProjectProps> = (
                     </div>
                   </FormField>
                 </div>
-                <div className="mt-10">
-                  <Alert>{t('project:create.projectNameAlert')}</Alert>
-                </div>
               </>
             )}
+            {curProject.name && (
+              <div className="mt-10">
+                <Alert>{t('project:create.projectNameAlert')}</Alert>
+              </div>
+            )}
+
+            <div className="mt-10">
+              <FormField>
+                <Textarea
+                  placeholder="Project description - optional"
+                  rows={3}
+                  value={curProject.description}
+                  onChange={(e) => {
+                    setCurProject((prev) => {
+                      return { ...prev, description: e.detail.value };
+                    });
+                  }}
+                />
+              </FormField>
+            </div>
           </>
         )}
 

@@ -10,7 +10,13 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Button, Header, SpaceBetween } from '@cloudscape-design/components';
+import {
+  Box,
+  Button,
+  Header,
+  Modal,
+  SpaceBetween,
+} from '@cloudscape-design/components';
 import { deleteProject } from 'apis/project';
 import InfoLink from 'components/common/InfoLink';
 import React, { useState } from 'react';
@@ -22,6 +28,7 @@ interface ProjectsHeaderProps {
   totalProject: number;
   project?: IProject;
   refreshPage: () => void;
+  setSelectItemEmpty: () => void;
 }
 
 const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
@@ -29,9 +36,11 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
 ) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { totalProject, project, refreshPage } = props;
+  const { totalProject, project, refreshPage, setSelectItemEmpty } = props;
   const [openCreate, setOpenCreate] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const confirmDeleteProject = async () => {
     setLoadingDelete(true);
@@ -42,6 +51,8 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
       if (resData.success) {
         refreshPage();
         setLoadingDelete(false);
+        setShowDeleteModal(false);
+        setSelectItemEmpty();
       }
     } catch (error) {
       setLoadingDelete(false);
@@ -50,6 +61,37 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
 
   return (
     <>
+      <Modal
+        onDismiss={() => setShowDeleteModal(false)}
+        visible={showDeleteModal}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                }}
+                variant="link"
+              >
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  confirmDeleteProject();
+                }}
+                loading={loadingDelete}
+              >
+                {t('button.confirm')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('project:delete.title')}
+      >
+        {t('project:delete.tip1')} <b>{project?.name}</b>,
+        {t('project:delete.tip2')}
+      </Modal>
       <CreateProject
         openModel={openCreate}
         closeModel={() => {
@@ -63,9 +105,10 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
         actions={
           <SpaceBetween size="xs" direction="horizontal">
             <Button
-              loading={loadingDelete}
               disabled={!project?.id}
-              onClick={confirmDeleteProject}
+              onClick={() => {
+                setShowDeleteModal(true);
+              }}
             >
               {t('button.delete')}
             </Button>
@@ -87,7 +130,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
             </Button>
           </SpaceBetween>
         }
-        description="Collection description"
+        description={t('project:description')}
       >
         {t('project:projects')}
       </Header>

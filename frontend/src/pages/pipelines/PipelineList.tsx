@@ -96,9 +96,9 @@ const Content: React.FC = () => {
             } ${t('selected')}`,
           itemSelectionLabel: ({ selectedItems }, item) => {
             const isItemSelected = selectedItems.filter(
-              (i) => i.name === item.name
+              (i) => i.pipelineId === item.pipelineId
             ).length;
-            return `${item.name} is ${isItemSelected ? '' : t('not')} ${t(
+            return `${item.pipelineId} is ${isItemSelected ? '' : t('not')} ${t(
               'selected'
             )}`;
           },
@@ -116,12 +116,6 @@ const Content: React.FC = () => {
               );
             },
             sortingField: 'alt',
-          },
-          {
-            id: 'name',
-            header: t('pipeline:list.name'),
-            cell: (e) => e.name,
-            sortingField: 'name',
           },
           {
             id: 'region',

@@ -38,13 +38,13 @@ const NonePipeline: React.FC<NonePipelineProps> = (
       }
     >
       <Button
-        iconName="add-plus"
+        iconName="settings"
         variant="primary"
         onClick={() => {
           navigate(`/project/${projectId}/pipelines/create`);
         }}
       >
-        {t('button.addPipeline')}
+        {t('button.configPipeline')}
       </Button>
     </Container>
   );

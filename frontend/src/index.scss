@@ -162,6 +162,24 @@ code {
   cursor: pointer;
 }
 
+.project-env {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  .unspecified {
+    background-color: #d1d5db;
+    font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.005em;
+    line-height: 22px;
+    display: inline-block;
+    border-radius: 4px;
+    padding: 0 8px;
+    color: #fff;
+  }
+}
+
 .button-actions {
   button {
     margin-left: 10px;

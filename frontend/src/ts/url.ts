@@ -51,7 +51,21 @@ export const buildS3Link = (
 
 export const buildSubnetLink = (region: string, subnetId: string): string => {
   if (region.startsWith('cn')) {
-    return `https://console.amazonaws.cn/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+    return `https://${region}.console.amazonaws.cn/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
   }
-  return `https://console.aws.amazon.com/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+  return `https://${region}.console.aws.amazon.com/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+};
+
+export const buildReshiftLink = (
+  region: string,
+  cluster: string,
+  type: string
+) => {
+  if (region.startsWith('cn')) {
+    return `https://${region}.console.amazonaws.cn/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+  }
+  if (type === 'serverless') {
+    return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#serverless-dashboard`;
+  }
+  return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };

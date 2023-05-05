@@ -32,13 +32,14 @@ import { validateEmails } from 'ts/utils';
 
 interface SplitPanelContentProps {
   project: IProject;
+  changeProjectEnv: (env: string) => void;
 }
 
 const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   props: SplitPanelContentProps
 ) => {
   const { t } = useTranslation();
-  const { project } = props;
+  const { project, changeProjectEnv } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
     preferencesPositionLabel: t('splitPanel.preferencesPositionLabel'),
@@ -104,6 +105,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
             ) || PROJECT_STAGE_LIST[0]
           );
           setIsEditingEvn(false);
+          changeProjectEnv(newProject.environment);
         }
       }
       setLoadingUpdateEmail(false);
@@ -127,10 +129,8 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
           <div className="mb-10">{project.id}</div>
           <Box variant="awsui-key-label">{t('project:split.name')}</Box>
           <div className="mb-10">{project.name}</div>
-          <Box variant="awsui-key-label">{t('project:split.created')}</Box>
-          <div className="mb-10">
-            {moment(project.createAt).format(TIME_FORMAT)}
-          </div>
+          <Box variant="awsui-key-label">{t('project:split.description')}</Box>
+          <div className="mb-10">{project.description}</div>
           <Box variant="awsui-key-label">{t('project:split.notifyEmail')}</Box>
           <div className="mb-10">
             {!isEditingEmail && (
@@ -262,8 +262,10 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
               </div>
             )}
           </div>
-          <Box variant="awsui-key-label">{t('project:split.platform')}</Box>
-          <div className="mb-10">{project.platform || '-'} </div>
+          <Box variant="awsui-key-label">{t('project:split.created')}</Box>
+          <div className="mb-10">
+            {moment(project.createAt).format(TIME_FORMAT)}
+          </div>
         </div>
       </ColumnLayout>
     </SplitPanel>

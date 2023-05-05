@@ -61,6 +61,7 @@ interface ConfigIngestionProps {
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
   changeSelectedMSK: (msk: SelectProps.Option) => void;
+  changeSecurityGroup: (sg: SelectProps.Option) => void;
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
@@ -105,6 +106,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeSelfHosted,
     changeCreateMSKMethod,
     changeSelectedMSK,
+    changeSecurityGroup,
     changeMSKTopic,
     changeKafkaBrokers,
     changeKafkaTopic,
@@ -576,6 +578,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               }}
               changeKafkaTopic={(topic) => {
                 changeKafkaTopic(topic);
+              }}
+              changeSecurityGroup={(sg) => {
+                changeSecurityGroup(sg);
               }}
             />
           )}

@@ -18,13 +18,14 @@ import {
   Container,
   ContentLayout,
   Header,
-  SpaceBetween,
-  Tabs,
   Link,
+  SpaceBetween,
   Spinner,
+  Tabs,
 } from '@cloudscape-design/components';
 import { getApplicationDetail } from 'apis/application';
 import { getProjectDetail } from 'apis/project';
+import CopyText from 'components/common/CopyIcon';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
@@ -194,7 +195,12 @@ const ApplicationDetail: React.FC = () => {
                       <Box variant="awsui-key-label">
                         {t('application:detail.serverEdp')}
                       </Box>
-                      <div>{applicationInfo?.pipeline?.endpoint}</div>
+                      <div>
+                        {applicationInfo?.pipeline?.endpoint}{' '}
+                        <CopyText
+                          text={applicationInfo?.pipeline?.endpoint || ''}
+                        />
+                      </div>
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">

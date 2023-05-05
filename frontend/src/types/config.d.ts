@@ -52,4 +52,12 @@ declare global {
   interface ResponseVerify {
     exist: boolean;
   }
+
+  interface AWSRegionMap {
+    [key: string]: {
+      Endpoint: string;
+      RegionName: string;
+      OptInStatus: string;
+    };
+  }
 }

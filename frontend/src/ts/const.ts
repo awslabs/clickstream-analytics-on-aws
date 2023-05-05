@@ -24,10 +24,16 @@ export const COMMON_ALERT_TYPE = {
 
 export const DEFAULT_TRANSFORM_SDK_IDS = ['clickstream', 'amplify'];
 
+export enum ProjectStage {
+  DEV = 'Dev',
+  TEST = 'Test',
+  PROD = 'Prod',
+}
+
 export const PROJECT_STAGE_LIST = [
-  { label: 'Dev', value: 'Dev' },
-  { label: 'Test', value: 'Test' },
-  { label: 'Prod', value: 'Prod' },
+  { label: 'Dev', value: ProjectStage.DEV },
+  { label: 'Test', value: ProjectStage.TEST },
+  { label: 'Prod', value: ProjectStage.PROD },
 ];
 
 export const PLUGIN_TYPE_LIST = [
@@ -170,3 +176,141 @@ export const SDK_LIST: SelectProps.Option[] = [
 export enum ErrorCode {
   QuickSightNameExists = 'Error: ResourceExistsException',
 }
+
+export const AWS_REGION_MAP: AWSRegionMap = {
+  'ap-northeast-3': {
+    Endpoint: 'ec2.ap-northeast-3.amazonaws.com',
+    RegionName: 'region.ap-northeast-3',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-northeast-2': {
+    Endpoint: 'ec2.ap-northeast-2.amazonaws.com',
+    RegionName: 'region.ap-northeast-2',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-northeast-1': {
+    Endpoint: 'ec2.ap-northeast-1.amazonaws.com',
+    RegionName: 'region.ap-northeast-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-south-2': {
+    Endpoint: 'ec2.ap-south-2.amazonaws.com',
+    RegionName: 'region.ap-south-2',
+    OptInStatus: 'opted-in',
+  },
+  'ap-south-1': {
+    Endpoint: 'ec2.ap-south-1.amazonaws.com',
+    RegionName: 'region.ap-south-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-east-1': {
+    Endpoint: 'ec2.ap-east-1.amazonaws.com',
+    RegionName: 'region.ap-east-1',
+    OptInStatus: 'opted-in',
+  },
+  'ap-southeast-1': {
+    Endpoint: 'ec2.ap-southeast-1.amazonaws.com',
+    RegionName: 'region.ap-southeast-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-southeast-2': {
+    Endpoint: 'ec2.ap-southeast-2.amazonaws.com',
+    RegionName: 'region.ap-southeast-2',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'ap-southeast-3': {
+    Endpoint: 'ec2.ap-southeast-3.amazonaws.com',
+    RegionName: 'region.ap-southeast-3',
+    OptInStatus: 'opted-in',
+  },
+  'ap-southeast-4': {
+    Endpoint: 'ec2.ap-southeast-4.amazonaws.com',
+    RegionName: 'region.ap-southeast-4',
+    OptInStatus: 'opted-in',
+  },
+  'me-central-1': {
+    Endpoint: 'ec2.me-central-1.amazonaws.com',
+    RegionName: 'region.me-central-1',
+    OptInStatus: 'opted-in',
+  },
+  'ca-central-1': {
+    Endpoint: 'ec2.ca-central-1.amazonaws.com',
+    RegionName: 'region.ca-central-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'eu-central-1': {
+    Endpoint: 'ec2.eu-central-1.amazonaws.com',
+    RegionName: 'region.eu-central-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'eu-central-2': {
+    Endpoint: 'ec2.eu-central-2.amazonaws.com',
+    RegionName: 'region.eu-central-2',
+    OptInStatus: 'opted-in',
+  },
+  'us-east-1': {
+    Endpoint: 'ec2.us-east-1.amazonaws.com',
+    RegionName: 'region.us-east-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'us-east-2': {
+    Endpoint: 'ec2.us-east-2.amazonaws.com',
+    RegionName: 'region.us-east-2',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'us-west-1': {
+    Endpoint: 'ec2.us-west-1.amazonaws.com',
+    RegionName: 'region.us-west-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'us-west-2': {
+    Endpoint: 'ec2.us-west-2.amazonaws.com',
+    RegionName: 'region.us-west-2',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'af-south-1': {
+    Endpoint: 'ec2.af-south-1.amazonaws.com',
+    RegionName: 'region.af-south-1',
+    OptInStatus: 'opted-in',
+  },
+  'eu-south-1': {
+    Endpoint: 'ec2.eu-south-1.amazonaws.com',
+    RegionName: 'region.eu-south-1',
+    OptInStatus: 'opted-in',
+  },
+  'eu-south-2': {
+    Endpoint: 'ec2.eu-south-2.amazonaws.com',
+    RegionName: 'region.eu-south-2',
+    OptInStatus: 'opted-in',
+  },
+  'eu-north-1': {
+    Endpoint: 'ec2.eu-north-1.amazonaws.com',
+    RegionName: 'region.eu-north-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'eu-west-3': {
+    Endpoint: 'ec2.eu-west-3.amazonaws.com',
+    RegionName: 'region.eu-west-3',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'eu-west-2': {
+    Endpoint: 'ec2.eu-west-2.amazonaws.com',
+    RegionName: 'region.eu-west-2',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'eu-west-1': {
+    Endpoint: 'ec2.eu-west-1.amazonaws.com',
+    RegionName: 'region.eu-west-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'me-south-1': {
+    Endpoint: 'ec2.me-south-1.amazonaws.com',
+    RegionName: 'region.me-south-1',
+    OptInStatus: 'opted-in',
+  },
+  'sa-east-1': {
+    Endpoint: 'ec2.sa-east-1.amazonaws.com',
+    RegionName: 'region.sa-east-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+};

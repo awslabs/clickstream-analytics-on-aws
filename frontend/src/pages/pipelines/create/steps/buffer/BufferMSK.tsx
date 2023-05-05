@@ -17,13 +17,12 @@ import {
   Container,
   FormField,
   Input,
-  RadioGroup,
   Select,
   SelectProps,
   SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
-import { getMSKList } from 'apis/resource';
+import { getMSKList, getSecurityGroups } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceCreateMehod } from 'ts/const';
@@ -36,6 +35,7 @@ interface BufferMSKProps {
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
+  changeSecurityGroup: (sg: SelectProps.Option) => void;
 }
 
 const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
@@ -43,16 +43,21 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const {
     pipelineInfo,
     changeSelfHosted,
-    changeCreateMSKMethod,
     changeSelectedMSK,
     changeMSKTopic,
     changeKafkaBrokers,
     changeKafkaTopic,
+    changeSecurityGroup,
   } = props;
   const [loadingMSK, setLoadingMSK] = useState(false);
+  const [loadingSG, setLoadingSG] = useState(false);
   const [mskOptionList, setMSKOptionList] = useState<AutosuggestProps.Options>(
     []
   );
+  const [vpcSGOptionList, setVpcSGOptionList] = useState<SelectProps.Options>(
+    []
+  );
+
   // get msk clusters by region
   const getAllMSKClusterList = async () => {
     setLoadingMSK(true);
@@ -77,9 +82,38 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
     }
   };
 
+  // get Security Groups By VPC
+  const getSecurityGroupByVPC = async () => {
+    setLoadingSG(true);
+    try {
+      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+        await getSecurityGroups({
+          region: pipelineInfo.region,
+          vpcId: pipelineInfo.selectedVPC?.value || '',
+        });
+      if (success) {
+        const sgOptions: SelectProps.Options = data.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: element.description,
+        }));
+        setVpcSGOptionList(sgOptions);
+      }
+      setLoadingSG(false);
+    } catch (error) {
+      setLoadingSG(false);
+    }
+  };
+
   useEffect(() => {
     getAllMSKClusterList();
   }, []);
+
+  useEffect(() => {
+    if (pipelineInfo.kafkaSelfHost) {
+      getSecurityGroupByVPC();
+    }
+  }, [pipelineInfo.kafkaSelfHost]);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -101,28 +135,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
               content: (
                 <div className="plr-20">
                   <SpaceBetween direction="vertical" size="l">
-                    <RadioGroup
-                      onChange={({ detail }) =>
-                        changeCreateMSKMethod(detail.value)
-                      }
-                      value={pipelineInfo.mskCreateMethod}
-                      items={[
-                        {
-                          value: ResourceCreateMehod.CREATE,
-                          label: t('pipeline:create.msk.createMSK'),
-                          description: t('pipeline:create.msk.createMSKDesc'),
-                        },
-                        {
-                          value: ResourceCreateMehod.EXSITING,
-                          label: t('pipeline:create.msk.exsitingMSK'),
-                          description: t('pipeline:create.msk.exsitingMSKDesc'),
-                        },
-                      ]}
-                    />
-
                     {pipelineInfo.mskCreateMethod ===
                       ResourceCreateMehod.EXSITING && (
-                      <FormField>
+                      <FormField
+                        label={t('pipeline:create.msk.exsitingMSK')}
+                        description={t('pipeline:create.msk.exsitingMSKDesc')}
+                      >
                         <div className="flex">
                           <div className="flex-1">
                             <Select
@@ -201,6 +219,23 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           value={pipelineInfo.ingestionServer.sinkKafka.topic}
                           onChange={(e) => {
                             changeKafkaTopic(e.detail.value);
+                          }}
+                        />
+                      </FormField>
+                      <FormField
+                        label={t('pipeline:create.securityGroup')}
+                        description={t('pipeline:create.mskSecurityGroupDesc')}
+                      >
+                        <Select
+                          selectedOption={pipelineInfo.selectedSelfHostedMSKSG}
+                          options={vpcSGOptionList}
+                          placeholder={
+                            t('pipeline:create.securityGroupPlaceholder') || ''
+                          }
+                          selectedAriaLabel="Selected"
+                          statusType={loadingSG ? 'loading' : 'finished'}
+                          onChange={(e) => {
+                            changeSecurityGroup(e.detail.selectedOption);
                           }}
                         />
                       </FormField>

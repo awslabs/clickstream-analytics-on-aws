@@ -117,7 +117,6 @@ const QuickSight: React.FC = () => {
         setQuickSightEnabled(true);
         setShowSubQuickSight(false);
       } else {
-        console.info('resData:', resDta);
         setLoadingSubscription(false);
       }
     } catch (error: any) {

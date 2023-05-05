@@ -179,7 +179,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   externalIconAriaLabel="Opens in a new tab"
                   href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                 >
-                  {pipelineInfo.name}
+                  {pipelineInfo.pipelineId}
                 </Link>
               </div>
             </div>

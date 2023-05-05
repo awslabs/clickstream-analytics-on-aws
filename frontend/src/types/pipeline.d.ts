@@ -26,8 +26,6 @@ declare global {
     pipelineId?: string;
     appIds: string[];
     projectId: string;
-    name: string;
-    description: string;
     region: string;
     dataCollectionSDK: string;
     tags: ITag[];
@@ -166,6 +164,7 @@ declare global {
     seledtedKDKProvisionType: SelectProps.Option | null;
     kafkaSelfHost: boolean;
     kafkaBrokers: string;
+    selectedSelfHostedMSKSG: SelectProps.Option | null;
 
     enableDataProcessing: boolean;
     scheduleExpression: string;

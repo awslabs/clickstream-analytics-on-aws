@@ -18,30 +18,25 @@ import {
   Container,
   FormField,
   Header,
-  Input,
   Select,
   SelectProps,
   SpaceBetween,
   TagEditorProps,
-  Textarea,
 } from '@cloudscape-design/components';
 import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
 import InfoLink from 'components/common/InfoLink';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SDK_LIST } from 'ts/const';
+import { AWS_REGION_MAP, SDK_LIST } from 'ts/const';
 
 interface BasicInformationProps {
   pipelineInfo: IExtPipeline;
-  changePipelineName: (name: string) => void;
-  changeDescription: (desc: string) => void;
   changeRegion: (region: SelectProps.Option) => void;
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
   changeTags: (tag: TagEditorProps.Tag[]) => void;
   changeS3Bucket: (bucket: string) => void;
-  nameEmptyError: boolean;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
@@ -54,14 +49,11 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   const { t } = useTranslation();
   const {
     pipelineInfo,
-    changePipelineName,
-    changeDescription,
     changeRegion,
     changeVPC,
     changeSDK,
     changeTags,
     changeS3Bucket,
-    nameEmptyError,
     regionEmptyError,
     vpcEmptyError,
     sdkEmptyError,
@@ -84,10 +76,16 @@ const BasicInformation: React.FC<BasicInformationProps> = (
       const { success, data }: ApiResponse<RegionResponse[]> =
         await getRegionList();
       if (success) {
-        const regionOptions: SelectProps.Options = data.map((element) => ({
-          label: element.id,
-          value: element.id,
-        }));
+        const sortedRegions = data.sort((a, b) => a.id.localeCompare(b.id));
+        const regionOptions: SelectProps.Options = sortedRegions.map(
+          (element) => ({
+            label: AWS_REGION_MAP[element.id]?.RegionName
+              ? t(AWS_REGION_MAP[element.id].RegionName) || ''
+              : '-',
+            labelTag: element.id,
+            value: element.id,
+          })
+        );
         setRegionOptionList(regionOptions);
         setLoadingRegion(false);
       }
@@ -159,31 +157,6 @@ const BasicInformation: React.FC<BasicInformationProps> = (
       }
     >
       <SpaceBetween direction="vertical" size="l">
-        <FormField
-          label={t('pipeline:create.name')}
-          description={t('pipeline:create.nameDesc')}
-          constraintText={t('pipeline:create.nameConstraint')}
-          errorText={nameEmptyError ? t('pipeline:valid.nameEmpty') : ''}
-        >
-          <Input
-            value={pipelineInfo.name}
-            onChange={(e) => {
-              changePipelineName(e.detail.value);
-            }}
-            placeholder="my-pipeline"
-          />
-        </FormField>
-
-        <FormField label={t('pipeline:create.desc')}>
-          <Textarea
-            value={pipelineInfo.description}
-            placeholder={t('pipeline:create.descPlaceholder') || ''}
-            onChange={(e) => {
-              changeDescription(e.detail.value);
-            }}
-          />
-        </FormField>
-
         <FormField
           label={t('pipeline:create.awsRegion')}
           description={t('pipeline:create.awsRegionDesc')}

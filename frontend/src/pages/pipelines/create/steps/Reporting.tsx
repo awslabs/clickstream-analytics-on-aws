@@ -37,6 +37,8 @@ import {
 } from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ErrorCode } from 'ts/const';
+import { alertMsg } from 'ts/utils';
 
 interface ReportingProps {
   pipelineInfo: IExtPipeline;
@@ -165,9 +167,14 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         setShowSubQuickSight(false);
         changeQuickSightAccountName(data.accountName);
         getQuickSightUserList();
+      } else {
+        setLoadingSubscription(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       setLoadingSubscription(false);
+      if (error.toString().trim() === ErrorCode.QuickSightNameExists) {
+        alertMsg(t('quicksight.valid.accountExists'), 'error');
+      }
     }
   };
 

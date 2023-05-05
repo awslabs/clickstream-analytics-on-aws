@@ -497,6 +497,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
           ) && (
             <PluginTable
               hideAction
+              showRefresh
               pluginType="Transform"
               selectionType="single"
               pluginSelectedItems={pipelineInfo.selectedTransformPlugins}
@@ -516,6 +517,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
           <PluginTable
             hideAction
+            showRefresh
             pluginType="Enrich"
             selectionType="multi"
             pluginSelectedItems={pipelineInfo.selectedEnrichPlugins}
@@ -692,7 +694,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           </FormField>
 
                           <FormField
-                            label={t('pipeline:create.redshiftSecurityGroup')}
+                            label={t('pipeline:create.securityGroup')}
                             description={t(
                               'pipeline:create.redshiftSecurityGroupDesc'
                             )}
@@ -707,9 +709,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                               }
                               options={vpcSGOptionList}
                               placeholder={
-                                t(
-                                  'pipeline:create.redshiftSecurityGroupPlaceholder'
-                                ) || ''
+                                t('pipeline:create.securityGroupPlaceholder') ||
+                                ''
                               }
                               selectedAriaLabel="Selected"
                               statusType={loadingSG ? 'loading' : 'finished'}

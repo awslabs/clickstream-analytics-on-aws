@@ -15,8 +15,9 @@ import { AppLayout, Wizard } from '@cloudscape-design/components';
 import { createProjectPipeline } from 'apis/pipeline';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import { AppContext } from 'context/AppContext';
 import cloneDeep from 'lodash/cloneDeep';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -42,10 +43,10 @@ const Content: React.FC = () => {
   const { projectId } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const appConfig = useContext(AppContext);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [loadingCreate, setLoadingCreate] = useState(false);
 
-  const [nameEmptyError, setNameEmptyError] = useState(false);
   const [regionEmptyError, setRegionEmptyError] = useState(false);
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
@@ -69,11 +70,25 @@ const Content: React.FC = () => {
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>({
     projectId: projectId ?? ''.toString(),
     appIds: [],
-    name: '',
-    description: '',
     region: 'us-east-1',
     dataCollectionSDK: '',
-    tags: [],
+    tags: [
+      {
+        key: 'aws-solution/name',
+        value: 'clickstream',
+        existing: true,
+      },
+      {
+        key: 'aws-solution/version',
+        value: appConfig?.solution_version,
+        existing: true,
+      },
+      {
+        key: 'aws-solution/clickstream/project',
+        value: projectId,
+        existing: true,
+      },
+    ],
     network: {
       vpcId: '',
       publicSubnetIds: [],
@@ -188,6 +203,7 @@ const Content: React.FC = () => {
     selectedSecret: null,
     mskCreateMethod: ResourceCreateMehod.EXSITING,
     selectedMSK: null,
+    selectedSelfHostedMSKSG: null,
     seledtedKDKProvisionType: null,
     kafkaSelfHost: false,
     kafkaBrokers: '',
@@ -257,10 +273,6 @@ const Content: React.FC = () => {
   });
 
   const validateBasicInfo = () => {
-    if (!pipelineInfo.name.trim()) {
-      setNameEmptyError(true);
-      return false;
-    }
     if (!pipelineInfo.selectedRegion) {
       setRegionEmptyError(true);
       return false;
@@ -520,23 +532,11 @@ const Content: React.FC = () => {
           title: t('pipeline:create.basicInfo'),
           content: (
             <BasicInformation
-              nameEmptyError={nameEmptyError}
               regionEmptyError={regionEmptyError}
               vpcEmptyError={vpcEmptyError}
               sdkEmptyError={sdkEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
-              changePipelineName={(name) => {
-                setNameEmptyError(false);
-                setPipelineInfo((prev) => {
-                  return { ...prev, name: name };
-                });
-              }}
-              changeDescription={(desc) => {
-                setPipelineInfo((prev) => {
-                  return { ...prev, description: desc };
-                });
-              }}
               changeRegion={(region) => {
                 setRegionEmptyError(false);
                 setVPCEmptyError(false);
@@ -931,6 +931,21 @@ const Content: React.FC = () => {
                   };
                 });
               }}
+              changeSecurityGroup={(sg) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedSelfHostedMSKSG: sg,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        securityGroupId: sg.value || '',
+                      },
+                    },
+                  };
+                });
+              }}
               changeMSKTopic={(topic) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -1032,6 +1047,7 @@ const Content: React.FC = () => {
         },
         {
           title: t('pipeline:create.dataProcessor'),
+          isOptional: true,
           content: (
             <DataProcessing
               pipelineInfo={pipelineInfo}
@@ -1328,6 +1344,7 @@ const Content: React.FC = () => {
         },
         {
           title: t('pipeline:create.reporting'),
+          isOptional: true,
           content: (
             <Reporting
               pipelineInfo={pipelineInfo}
