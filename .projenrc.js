@@ -46,6 +46,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sqs',
   '@aws-sdk/client-ssm',
+  '@aws-sdk/client-lambda',
   '@aws-sdk/node-http-handler',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 

@@ -60,6 +60,7 @@
     "@aws-sdk/client-iam": "^3.310.0",
     "@aws-sdk/client-kafka": "^3.310.0",
     "@aws-sdk/client-kafkaconnect": "^3.310.0",
+    "@aws-sdk/client-lambda": "^3.310.0",
     "@aws-sdk/client-quicksight": "^3.310.0",
     "@aws-sdk/client-redshift": "^3.310.0",
     "@aws-sdk/client-redshift-data": "^3.310.0",

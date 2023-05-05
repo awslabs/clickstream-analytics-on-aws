@@ -16,7 +16,9 @@ import {
   StartJobRunCommand,
   StartJobRunCommandInput,
 } from '@aws-sdk/client-emr-serverless';
+import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
+import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -31,7 +33,7 @@ interface EMRJobInfo {
 }
 
 export class EMRServerlessUtil {
-  public static async start(event: any): Promise<EMRJobInfo> {
+  public static async start(event: any, context: Context): Promise<EMRJobInfo> {
     try {
       logger.info('enter start');
       const config = this.getConfig();
@@ -45,6 +47,7 @@ export class EMRServerlessUtil {
       const jobId = await EMRServerlessUtil.startJobRun(
         event,
         config,
+        context,
       );
       logger.info('started job:', { jobId });
 
@@ -63,7 +66,10 @@ export class EMRServerlessUtil {
   private static async startJobRun(
     event: any,
     config: any,
+    context: Context,
   ) {
+
+    const funcTags = await getFunctionTags(context);
 
     const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
       event,
@@ -137,6 +143,7 @@ export class EMRServerlessUtil {
           },
         },
       },
+      tags: funcTags, // propagate the tags of function itself to EMR job runs
     };
 
     logger.info('startJobRunCommandInput', { startJobRunCommandInput });

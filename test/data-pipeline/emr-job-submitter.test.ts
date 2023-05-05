@@ -10,14 +10,16 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
-
 const emrMock = {
   EMRServerlessClient: jest.fn(() => {
     return {
       send: jest.fn(() => {
         return {
           applicationId: 'testApplicationId',
+          tags: {
+            project_id: 'project_007',
+            tag_key1: 'tag_value1',
+          },
         };
       }),
     };
@@ -37,7 +39,11 @@ jest.mock('../../src/common/s3', () => {
   };
 });
 
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
+import { mockClient } from 'aws-sdk-client-mock';
 import { EMRServerlessUtil } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
+import { getMockContext } from '../common/lambda-context';
+import 'aws-sdk-client-mock-jest';
 
 process.env.EMR_SERVERLESS_APPLICATION_ID='testApplicationId',
 process.env.PROJECT_ID = 'test_proj_001';
@@ -63,86 +69,102 @@ process.env.OUTPUT_FORMAT = 'json';
 process.env.OUTPUT_PARTITIONS ='128';
 process.env.RE_PARTITIONS ='96';
 
-test('start ETL job', async () => {
-  await EMRServerlessUtil.start({});
-  expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
-});
+describe('Data Process -- EMR Serverless job submitter function', () => {
 
+  const context = getMockContext();
+  const lambdaMock = mockClient(LambdaClient);
 
-test('start ETL job with timestamp - string', async () => {
-  await EMRServerlessUtil.start({
-    startTimestamp: '2023-03-12T09:33:26.572Z',
-    endTimestamp: '2023-03-13T09:33:26.572Z',
+  const functionTags = {
+    project_id: 'project_007',
+    tag_key1: 'tag_value1',
+  };
+
+  beforeEach(() => {
+    lambdaMock.reset();
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
   });
-  expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
 
-  const expectedStartParam = {
-    applicationId: 'testApplicationId',
-    executionRoleArn: 'arn:aws::role:role1',
-    // "name": "282407d2-3847-479d-8bae-c64e3badc6c5",
-    jobDriver: {
-      sparkSubmit: {
-        entryPoint: 's3://test/main.jar',
-        entryPointArguments: [
-          'test_db',
-          'source_table',
-          '1678613606572',
-          '1678700006572',
-          `s3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/corrupted_records/${(new Date()).toISOString().split('T')[0]}/1678613606572-1678700006572`, // pipeline data path
-          'com.test.ClassMain,com.test.ClassMainTest',
-          's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
-          'test_proj_001',
-          'app1,app2',
-          '24',
-          'json',
-          '128',
-          '96',
-        ],
-        sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
+  test('start ETL job', async () => {
+    await EMRServerlessUtil.start({}, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+  });
+
+  test('start ETL job with timestamp - string', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
+    await EMRServerlessUtil.start({
+      startTimestamp: '2023-03-12T09:33:26.572Z',
+      endTimestamp: '2023-03-13T09:33:26.572Z',
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+
+    const expectedStartParam = {
+      applicationId: 'testApplicationId',
+      executionRoleArn: 'arn:aws::role:role1',
+      // "name": "282407d2-3847-479d-8bae-c64e3badc6c5",
+      jobDriver: {
+        sparkSubmit: {
+          entryPoint: 's3://test/main.jar',
+          entryPointArguments: [
+            'test_db',
+            'source_table',
+            '1678613606572',
+            '1678700006572',
+            `s3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/corrupted_records/${(new Date()).toISOString().split('T')[0]}/1678613606572-1678700006572`, // pipeline data path
+            'com.test.ClassMain,com.test.ClassMainTest',
+            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            'test_proj_001',
+            'app1,app2',
+            '24',
+            'json',
+            '128',
+            '96',
+          ],
+          sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
 --conf spark.driver.cores=4 --conf spark.driver.memory=14g \
 --conf spark.executor.cores=4 --conf spark.executor.memory=14g',
+        },
       },
-    },
-    configurationOverrides: {
-      monitoringConfiguration:
-            {
-              s3MonitoringConfiguration:
-                {
-                  logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
-                },
-            },
-    },
-  };
-  //@ts-ignore
-  const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
-  delete actParam.name;
-  expect(actParam).toEqual(expectedStartParam);
-
-});
-
-
-test('start ETL job with timestamp - number', async () => {
-  await EMRServerlessUtil.start({
-    startTimestamp: '1678700304279',
+      tags: functionTags,
+      configurationOverrides: {
+        monitoringConfiguration:
+              {
+                s3MonitoringConfiguration:
+                  {
+                    logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
+                  },
+              },
+      },
+    };
+    //@ts-ignore
+    const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
+    delete actParam.name;
+    expect(actParam).toEqual(expectedStartParam);
   });
-  expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
-});
 
-test('start ETL job with timestamp - error', async () => {
-  let errMsg = '';
-  try {
+  test('start ETL job with timestamp - number', async () => {
     await EMRServerlessUtil.start({
-      startTimestamp: '2023-03-13T09:33:26.572Z',
-      endTimestamp: '2023-03-10T09:33:26.572Z',
-    });
-  } catch (e: any) {
-    errMsg = e.message;
-  }
-  expect(errMsg).toEqual('endTimestamp less than startTimestamp');
+      startTimestamp: '1678700304279',
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+    //@ts-ignore
+    const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
+    expect(actParam.tags).toEqual({});
+  });
+
+  test('start ETL job with timestamp - error', async () => {
+    let errMsg = '';
+    try {
+      await EMRServerlessUtil.start({
+        startTimestamp: '2023-03-13T09:33:26.572Z',
+        endTimestamp: '2023-03-10T09:33:26.572Z',
+      }, context);
+    } catch (e: any) {
+      errMsg = e.message;
+    }
+    expect(errMsg).toEqual('endTimestamp less than startTimestamp');
+  });
 
 });
-
-

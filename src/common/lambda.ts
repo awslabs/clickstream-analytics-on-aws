@@ -52,6 +52,23 @@ export function createENI(id: string, func: IFunction): IFunction {
   return func;
 }
 
+export function listTags(id: string, func: IFunction): IFunction {
+  if (func.role !== undefined) {
+    new Policy(func.stack, id, {
+      roles: [func.role],
+      statements: [
+        new PolicyStatement({
+          actions: [
+            'lambda:ListTags',
+          ],
+          resources: [func.functionArn],
+        }),
+      ],
+    });
+  }
+  return func;
+}
+
 function suppressLogsWildcardResources(policy: Policy) {
   suppressWildcardResources(policy, 'The lambda service writes to undetermined logs stream by design');
 }

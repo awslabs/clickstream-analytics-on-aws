@@ -870,6 +870,47 @@ describe ('ETL job submitter', () => {
     });
   });
 
+  test('The role of EMR submitter function has lambda:ListTags permission', ()=> {
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'lambda:ListTags',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'EmrSparkJobSubmitterFunctionBEE9C140',
+                'Arn',
+              ],
+            },
+          },
+        ],
+      },
+      Roles: [
+        {
+          Ref: 'EmrSparkJobSubmitterLambdaRole8B2F7827',
+        },
+      ],
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Role: {
+        'Fn::GetAtt': [
+          'EmrSparkJobSubmitterLambdaRole8B2F7827',
+          'Arn',
+        ],
+      },
+      Environment: {
+        Variables: {
+          EMR_SERVERLESS_APPLICATION_ID: {
+            'Fn::GetAtt': [
+              'NestedStackClickStreamETLAPPA7796B30',
+              'ApplicationId',
+            ],
+          },
+        },
+      },
+    });
+  });
 
   test('IAM::Policy for EMR job role has specified resource', ()=> {
     template.hasResourceProperties('AWS::IAM::Policy', {
@@ -878,8 +919,11 @@ describe ('ETL job submitter', () => {
           Match.anyValue(),
           Match.anyValue(),
           {
-            Action:
+            Action: [
               'emr-serverless:StartApplication',
+              'emr-serverless:StartJobRun',
+              'emr-serverless:TagResource',
+            ],
             Effect: 'Allow',
             Resource: {
               'Fn::Join': [
@@ -897,39 +941,13 @@ describe ('ETL job submitter', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':applications/',
+                  ':/applications/',
                   {
                     'Fn::GetAtt': [
                       Match.anyValue(),
                       'ApplicationId',
                     ],
                   },
-                ],
-              ],
-            },
-          },
-          {
-            Action:
-                'emr-serverless:StartJobRun',
-
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':emr-serverless:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':*',
                 ],
               ],
             },

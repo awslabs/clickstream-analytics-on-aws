@@ -11,11 +11,12 @@
  *  and limitations under the License.
  */
 
+import { Context } from 'aws-lambda';
 import { EMRServerlessUtil } from './emr-client-util';
 import { logger } from '../../../common/powertools';
 
-exports.handler = async (event: any) => {
+exports.handler = async (event: any, context: Context) => {
   logger.info('Triggered from schedule event', { event });
-  let jobInfo = await EMRServerlessUtil.start(event);
+  let jobInfo = await EMRServerlessUtil.start(event, context);
   logger.info('Started Application', { jobInfo });
 };

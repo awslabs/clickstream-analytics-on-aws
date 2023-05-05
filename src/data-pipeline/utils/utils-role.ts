@@ -75,36 +75,18 @@ export class RoleUtil {
         resources: [
           Arn.format(
             {
-              resource: `applications/${emrApplicationId}`,
-              region: Aws.REGION,
-              account: Aws.ACCOUNT_ID,
+              resource: 'applications',
+              resourceName: emrApplicationId,
               service: 'emr-serverless',
-              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+              arnFormat: ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
             },
             Stack.of(this.scope),
           ),
         ],
         actions: [
           'emr-serverless:StartApplication',
-        ],
-      }),
-
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        resources: [
-          Arn.format(
-            {
-              resource: '*',
-              region: Aws.REGION,
-              account: Aws.ACCOUNT_ID,
-              service: 'emr-serverless',
-              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-            },
-            Stack.of(this.scope),
-          ),
-        ],
-        actions: [
           'emr-serverless:StartJobRun',
+          'emr-serverless:TagResource',
         ],
       }),
 
