@@ -59,15 +59,15 @@ const Tags = [
     Value: 'tagValue2',
   },
   {
-    Key: 'aws-solution',
-    Value: 'clickstream-branch-main',
+    Key: 'aws-solution/name',
+    Value: 'clickstream',
   },
   {
-    Key: 'aws-solution-version',
+    Key: 'aws-solution/version',
     Value: 'v1.0.0',
   },
   {
-    Key: 'clickstream-project',
+    Key: 'aws-solution/clickstream/project',
     Value: MOCK_PROJECT_ID,
   },
 ];

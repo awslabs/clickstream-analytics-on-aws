@@ -639,6 +639,10 @@ describe('Pipeline test', () => {
                 key: 'customerKey2',
                 value: 'tagValue2',
               },
+              {
+                key: 'aws-solution/version',
+                value: 'tagValue3',
+              },
             ],
             type: 'PIPELINE#6666-6666#latest',
             updateAt: 1681353806173,

@@ -304,9 +304,3 @@ export interface RedshiftServerlessWorkgroup {
   readonly namespaceName: string;
 }
 
-export enum BuildInTagKeys {
-  AWS_SOLUTION = 'aws-solution',
-  AWS_SOLUTION_VERSION = 'aws-solution-version',
-  CLICKSTREAM_PROJECT = 'clickstream-project',
-}
-

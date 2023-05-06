@@ -33,9 +33,9 @@ import {
   SECRETS_MANAGER_ARN_PATTERN,
   REDSHIFT_MODE, SUBNETS_THREE_AZ_PATTERN,
 } from '../common/constants-ln';
+import { BuiltInTagKeys } from '../common/model-ln';
 import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
-  BuildInTagKeys,
   ClickStreamBadRequestError,
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -431,16 +431,22 @@ export class CPipeline {
 
   public async setTags() {
     if (this.solution) {
+      const builtInTagKeys = [
+        BuiltInTagKeys.AWS_SOLUTION,
+        BuiltInTagKeys.AWS_SOLUTION_VERSION,
+        BuiltInTagKeys.CLICKSTREAM_PROJECT,
+      ];
       const keys = this.pipeline.tags.map(tag => tag.key);
-      if (!keys.includes(BuildInTagKeys.AWS_SOLUTION)) {
-        this.pipeline.tags.push({ key: BuildInTagKeys.AWS_SOLUTION, value: this.solution.data.name });
+      for (let i = 0; i < builtInTagKeys.length; i++) {
+        if (keys.indexOf(builtInTagKeys[i]) > -1) {
+          const index = keys.indexOf(builtInTagKeys[i]);
+          this.pipeline.tags.splice(index, 1);
+          keys.splice(index, 1);
+        }
       }
-      if (!keys.includes(BuildInTagKeys.AWS_SOLUTION_VERSION)) {
-        this.pipeline.tags.push({ key: BuildInTagKeys.AWS_SOLUTION_VERSION, value: this.solution.data.version });
-      }
-      if (!keys.includes(BuildInTagKeys.CLICKSTREAM_PROJECT)) {
-        this.pipeline.tags.push({ key: BuildInTagKeys.CLICKSTREAM_PROJECT, value: this.project?.id! });
-      }
+      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION, value: 'clickstream' });
+      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: this.solution.data.version });
+      this.pipeline.tags.push({ key: BuiltInTagKeys.CLICKSTREAM_PROJECT, value: this.project?.id! });
     }
   };
 

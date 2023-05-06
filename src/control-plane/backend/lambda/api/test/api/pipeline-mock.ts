@@ -59,6 +59,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
+    { key: 'aws-solution/version', value: 'tagValue3' },
   ],
   bucket: {
     name: 'EXAMPLE_BUCKET',
