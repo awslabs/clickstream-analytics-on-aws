@@ -383,8 +383,6 @@ export class DynamoDbStore implements ClickStreamStore {
         prefix: 'PIPELINE',
         pipelineId: pipeline.pipelineId,
         projectId: pipeline.projectId,
-        name: pipeline.name,
-        description: pipeline.description,
         region: pipeline.region,
         dataCollectionSDK: pipeline.dataCollectionSDK,
         status: pipeline.status,
@@ -454,8 +452,6 @@ export class DynamoDbStore implements ClickStreamStore {
               prefix: { S: curPipeline.prefix },
               pipelineId: { S: curPipeline.pipelineId },
               projectId: { S: curPipeline.projectId },
-              name: { S: curPipeline.name },
-              description: { S: curPipeline.description },
               region: { S: curPipeline.region },
               dataCollectionSDK: { S: curPipeline.dataCollectionSDK },
               status: marshallCurPipeline.status,
@@ -489,8 +485,6 @@ export class DynamoDbStore implements ClickStreamStore {
             // Define expressions for the new or updated attributes
             UpdateExpression: 'SET ' +
               '#prefix = :prefix, ' +
-              '#pipelineName = :name, ' +
-              'description = :description, ' +
               '#region = :region, ' +
               'dataCollectionSDK = :dataCollectionSDK, ' +
               '#status = :status, ' +
@@ -510,7 +504,6 @@ export class DynamoDbStore implements ClickStreamStore {
               '#pipelineOperator = :operator ',
             ExpressionAttributeNames: {
               '#prefix': 'prefix',
-              '#pipelineName': 'name',
               '#region': 'region',
               '#status': 'status',
               '#tags': 'tags',
@@ -521,8 +514,6 @@ export class DynamoDbStore implements ClickStreamStore {
             },
             ExpressionAttributeValues: {
               ':prefix': { S: pipeline.prefix },
-              ':name': { S: pipeline.name },
-              ':description': { S: pipeline.description },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
               ':status': marshallPipeline.status,
@@ -559,8 +550,6 @@ export class DynamoDbStore implements ClickStreamStore {
       ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
       // Define expressions for the new or updated attributes
       UpdateExpression: 'SET ' +
-        '#pipelineName = :name, ' +
-        'description = :description, ' +
         'dataCollectionSDK = :dataCollectionSDK, ' +
         '#status = :status, ' +
         '#tags = :tags, ' +
@@ -576,7 +565,6 @@ export class DynamoDbStore implements ClickStreamStore {
         'updateAt = :updateAt, ' +
         '#pipelineOperator = :operator ',
       ExpressionAttributeNames: {
-        '#pipelineName': 'name',
         '#status': 'status',
         '#tags': 'tags',
         '#network': 'network',
@@ -585,8 +573,6 @@ export class DynamoDbStore implements ClickStreamStore {
         '#ConditionVersion': 'version',
       },
       ExpressionAttributeValues: {
-        ':name': pipeline.name,
-        ':description': pipeline.description,
         ':dataCollectionSDK': pipeline.dataCollectionSDK,
         ':status': pipeline.status,
         ':tags': pipeline.tags,

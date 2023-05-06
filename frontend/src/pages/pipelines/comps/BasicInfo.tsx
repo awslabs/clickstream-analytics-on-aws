@@ -87,7 +87,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             </SpaceBetween>
           }
           variant="h2"
-          description="Container description"
+          description=""
         >
           {t('pipeline:basic')}
         </Header>

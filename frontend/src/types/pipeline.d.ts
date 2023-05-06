@@ -24,6 +24,8 @@ declare global {
 
   interface IPipeline {
     pipelineId?: string;
+    dns?: string;
+    endpoint?: string;
     appIds: string[];
     projectId: string;
     region: string;
@@ -74,10 +76,10 @@ declare global {
       sinkKafka: {
         brokers: string[];
         topic: string;
+        securityGroupId: string;
         mskCluster: {
           name: string;
           arn: string;
-          securityGroupId: string;
         };
         kafkaConnector: {
           enable: boolean;

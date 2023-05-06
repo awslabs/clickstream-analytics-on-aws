@@ -88,6 +88,7 @@ interface IngestionServerSinkS3Props {
 interface IngestionServerSinkKafkaProps {
   readonly topic: string;
   readonly brokers: string[];
+  readonly securityGroupId: string;
   readonly mskCluster?: mskClusterProps;
   readonly kafkaConnector: KafkaS3Connector;
 }
@@ -206,7 +207,6 @@ interface S3Bucket {
 interface mskClusterProps {
   readonly name: string;
   readonly arn: string;
-  readonly securityGroupId: string;
 }
 
 export interface IPipeline {
@@ -216,8 +216,6 @@ export interface IPipeline {
 
   readonly projectId: string;
   readonly pipelineId: string;
-  readonly name: string;
-  readonly description: string;
   readonly region: string;
   readonly dataCollectionSDK: string;
   readonly tags: ITag[];
@@ -773,7 +771,7 @@ export class CPipeline {
         });
         parameters.push({
           ParameterKey: 'MskSecurityGroupId',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
+          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
         });
         parameters.push({
           ParameterKey: 'KafkaTopic',
@@ -798,6 +796,10 @@ export class CPipeline {
         parameters.push({
           ParameterKey: 'KafkaTopic',
           ParameterValue: kafkaTopic,
+        });
+        parameters.push({
+          ParameterKey: 'MskSecurityGroupId',
+          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
         });
       }
 
@@ -895,13 +897,15 @@ export class CPipeline {
       ParameterValue: kafkaTopic,
     });
 
-    parameters.push({
-      ParameterKey: 'MskClusterName',
-      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
-    });
+    if (this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name) {
+      parameters.push({
+        ParameterKey: 'MskClusterName',
+        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
+      });
+    }
     parameters.push({
       ParameterKey: 'SecurityGroupId',
-      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.securityGroupId,
+      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
     });
 
     if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount !== undefined) {
@@ -1226,16 +1230,16 @@ export class CPipeline {
     return parameters;
   }
 
-  public async getStackOutputBySuffix(stackType: PipelineStackType, outputKeySuffix: string): Promise<string | undefined> {
+  public async getStackOutputBySuffix(stackType: PipelineStackType, outputKeySuffix: string): Promise<string> {
     const stack = await describeStack(this.pipeline.region, this.getStackName(stackType));
-    if (stack) {
+    if (stack && stack.Outputs && stack.Outputs.length > 0) {
       for (let out of stack.Outputs as Output[]) {
         if (out.OutputKey?.endsWith(outputKeySuffix)) {
           return out.OutputValue ?? '';
         }
       }
     }
-    return undefined;
+    return '';
   }
 
   private getKafkaTopic() {

@@ -35,7 +35,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   return (
     <Container
       header={
-        <Header variant="h2" description="Container description">
+        <Header variant="h2" description="">
           {t('pipeline:basic')}
         </Header>
       }

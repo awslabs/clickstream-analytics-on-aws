@@ -33,6 +33,7 @@ declare global {
         status: string;
       };
       endpoint: string;
+      dns: string;
     };
     createAt?: number;
     updateAt?: number;

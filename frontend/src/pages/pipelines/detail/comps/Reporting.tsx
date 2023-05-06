@@ -21,36 +21,45 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface TabContentProps {
-  pipelineInfo?: IPipeline;
+  pipelineInfo?: IExtPipeline;
 }
-const Reporting: React.FC<TabContentProps> = () => {
+const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { t } = useTranslation();
+  const { pipelineInfo } = props;
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.status')}</Box>
-          <div>
+          {!pipelineInfo?.pipelineId ? (
+            pipelineInfo?.enableReporting ? (
+              <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
+            ) : (
+              <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
+            )
+          ) : pipelineInfo.report ? (
+            <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
+          ) : (
             <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
-          </div>
+          )}
         </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">
-            {t('pipeline:detail.quicksightRole')}
+            {t('pipeline:create.qsAccountName')}
           </Box>
-          <div>-</div>
+          <div>{pipelineInfo?.report.quickSight.accountName || '-'}</div>
         </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">
-            {t('pipeline:detail.datasetName')}
+            {t('pipeline:create.quickSightUser')}
           </Box>
-          <div>-</div>
+          <div>{pipelineInfo?.report.quickSight.user || '-'}</div>
         </div>
       </SpaceBetween>
     </ColumnLayout>

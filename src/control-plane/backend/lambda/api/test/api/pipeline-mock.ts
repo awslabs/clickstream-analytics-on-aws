@@ -28,8 +28,6 @@ const BASE_PIPELINE_ATTRIBUTES = {
   id: MOCK_PROJECT_ID,
   projectId: MOCK_PROJECT_ID,
   prefix: 'PIPELINE',
-  name: 'Pipeline01',
-  description: 'Pipeline01 Description',
   pipelineId: MOCK_PIPELINE_ID,
   region: 'ap-southeast-1',
   versionTag: 'latest',
@@ -134,11 +132,7 @@ export const KAFKA_INGESTION_PIPELINE: IPipeline = {
     sinkKafka: {
       brokers: ['test1.com:9092', 'test2.com:9092', 'test3.com:9092'],
       topic: 't1',
-      mskCluster: {
-        name: 'mskClusterName',
-        arn: 'mskClusterArn',
-        securityGroupId: 'sg-0000000000002',
-      },
+      securityGroupId: 'sg-0000000000002',
       kafkaConnector: {
         enable: false,
       },
@@ -167,10 +161,10 @@ export const MSK_WITH_CONNECTOR_INGESTION_PIPELINE: IPipeline = {
     sinkKafka: {
       brokers: [],
       topic: '',
+      securityGroupId: 'sg-0000000000002',
       mskCluster: {
         name: 'mskClusterName',
         arn: 'mskClusterArn',
-        securityGroupId: 'sg-0000000000002',
       },
       kafkaConnector: {
         enable: true,

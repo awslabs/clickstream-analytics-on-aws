@@ -36,9 +36,14 @@ const Content: React.FC = () => {
         ]}
       >
         <HowItWorks />
-        <GetStarted />
+        <div>
+          <GetStarted />
+          <div className="mt-20">
+            <MoreResource />
+          </div>
+        </div>
         <BenefitsFeatures />
-        <MoreResource />
+        <div></div>
         <UseCases />
       </Grid>
     </div>

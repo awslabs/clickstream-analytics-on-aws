@@ -280,9 +280,10 @@ function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
         );
         break;
     }
+  } else {
+    alertMsg(
+      'Network error please try again later',
+      COMMON_ALERT_TYPE.Error as AlertType
+    );
   }
-  alertMsg(
-    'Network error please try again later',
-    COMMON_ALERT_TYPE.Error as AlertType
-  );
 }

@@ -193,7 +193,7 @@
     "vpcConnection": "VPC connection",
     "vpcConnectionDesc": "Connect to data source through a  VPC connection predefined by QuickSight account admin. Fill in the Arn of the VPC connection in below.",
     "ingestSettings": "Ingestion setting",
-    "ingestSettingsDesc": "Ingestion setting description",
+    "ingestSettingsDesc": "",
     "clusterSize": "Cluster Size",
     "topic": "Topic",
     "modelSettings": "Data modeling setting",
@@ -280,7 +280,9 @@
     "redshiftServerless": "Serverless",
     "redshiftServerlessDesc": "Low starting cost, auto-scaling capacity.",
     "redshiftProvisioned": "Provisioned",
-    "redshiftProvisionedDesc": "Predefined resource capacity for predicable workload"
+    "redshiftProvisionedDesc": "Predefined resource capacity for predicable workload",
+    "reportNotSupported": "Not Supported",
+    "reportNotSupportedDesc": "Reporting is not supported if ETL is not enabled."
   },
   "detail": {
     "ingestion": "Ingestion",
@@ -293,6 +295,7 @@
     "ingestionCapacity": "Ingestion capacity",
     "enableHTTPS": "Enable HTTPS",
     "domainName": "Domain name",
+    "endpoint": "Endpoint",
     "acm": "ACM",
     "enableAGA": "Enable Global Accelerator",
     "enableAuth": "Enable Authentication",
@@ -316,6 +319,8 @@
     "enrichment": "Enrichment",
     "anlyEngine": "Analytic engine",
     "redshiftPermission": "Redshift Permissions",
+    "redshiftDataLoadFrequency": "Data load frequency",
+    "redshiftUserTableUpsertFrequency": "User table upsert frequency",
     "dataRange": "Data range",
     "athena": "Athena",
     "hours": "Hours",

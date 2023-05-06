@@ -55,14 +55,14 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       }
     } else {
       // in detail page
-      if (pipelineInfo?.redshiftType === 'serverless') {
+      if (pipelineInfo?.dataAnalytics.redshift.newServerless) {
         return (
           <Link
             external
             href={buildReshiftLink(
               pipelineInfo?.region || '',
               '',
-              'serverless'
+              'Redshift Serverless'
             )}
           >
             Serverless
@@ -167,6 +167,88 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
+  const getRedshiftUpsertFrequncyDisplay = () => {
+    if (pipelineInfo) {
+      if (pipelineInfo.redshiftUpsertFreqUnit?.value) {
+        return `${pipelineInfo.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
+      } else if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
+        if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
+          if (
+            pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression.startsWith(
+              'cron'
+            )
+          ) {
+            return pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression;
+          } else {
+            const pattern = /rate\((\d+\s\w+)\)/;
+            const match =
+              pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression.match(
+                pattern
+              );
+
+            if (match) {
+              const rateValue = match[1];
+              const formattedRateValue = rateValue.replace(
+                /\b\s+(\w)/,
+                (match) => match.toUpperCase()
+              );
+              return formattedRateValue;
+            }
+          }
+        } else {
+          return '-';
+        }
+      }
+    }
+    return '-';
+  };
+
+  const getRedshiftDataLoadFrequencyDisplay = () => {
+    if (pipelineInfo) {
+      if (pipelineInfo.redshiftDataLoadUnit?.value) {
+        return `${pipelineInfo.redshiftDataLoadValue} ${pipelineInfo.redshiftDataLoadUnit.label}`;
+      } else {
+        const minutes = parseInt(
+          pipelineInfo.dataAnalytics.loadWorkflow
+            .loadJobScheduleIntervalInMinutes
+        );
+        if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
+          const months = minutes / (60 * 24 * 30);
+          return `${months} Months`;
+        } else if (minutes >= 60 * 24 && minutes % (60 * 24) === 0) {
+          const days = minutes / (60 * 24);
+          return `${days} Days`;
+        } else {
+          return `${minutes} Minutes`;
+        }
+      }
+    }
+  };
+
+  const getEnrichPluginDisplay = () => {
+    if (pipelineInfo?.selectedEnrichPlugins) {
+      return (
+        pipelineInfo?.selectedEnrichPlugins
+          ?.map((element) => element.name)
+          .join(', ') || '-'
+      );
+    } else {
+      return pipelineInfo?.etl.enrichPlugin.map((element) => element) || '-';
+    }
+  };
+
+  const getTransformPluginDisplay = () => {
+    if (pipelineInfo?.selectedTransformPlugins) {
+      return (
+        pipelineInfo?.selectedTransformPlugins
+          ?.map((element) => element.name)
+          .join(', ') || '-'
+      );
+    } else {
+      return pipelineInfo?.etl.transformPlugin || '-';
+    }
+  };
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
@@ -197,18 +279,14 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.transform')}</Box>
-          <div>{pipelineInfo?.etl.transformPlugin || '-'}</div>
+          {getTransformPluginDisplay()}
         </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enrichment')}</Box>
-          <div>
-            {pipelineInfo?.etl.enrichPlugin.map((element) => {
-              return <div key={element}>{element}</div>;
-            }) || '-'}
-          </div>
+          <div>{getEnrichPluginDisplay()}</div>
         </div>
 
         <div>
@@ -233,9 +311,25 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
       <SpaceBetween direction="vertical" size="l">
         <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:detail.redshiftDataLoadFrequency')}
+          </Box>
+          <div>{getRedshiftDataLoadFrequencyDisplay()}</div>
+        </div>
+        <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:detail.redshiftUserTableUpsertFrequency')}
+          </Box>
+          <div>{getRedshiftUpsertFrequncyDisplay()}</div>
+        </div>
+        <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.athena')}</Box>
           <div>
-            <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
+            {pipelineInfo?.dataAnalytics.athena ? (
+              <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
+            ) : (
+              <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
+            )}
           </div>
         </div>
       </SpaceBetween>

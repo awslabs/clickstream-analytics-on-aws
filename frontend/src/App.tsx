@@ -197,6 +197,7 @@ const App: React.FC = () => {
       const configData = JSON.parse(
         localStorage.getItem(PROJECT_CONFIG_JSON) || ''
       );
+      setContextData(configData);
       initAuthentication(configData);
       setLoadingConfig(false);
     } else {

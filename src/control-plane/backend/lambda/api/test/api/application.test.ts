@@ -461,7 +461,6 @@ describe('Application test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [
         {
-          name: 'Pipeline-01',
           pipelineId: MOCK_PROJECT_ID,
           status: ExecutionStatus.RUNNING,
           ingestionServer: {
@@ -509,7 +508,6 @@ describe('Application test', () => {
           endpoint: 'http://xxx/xxx',
           dns: 'http://yyy/yyy',
           id: MOCK_PROJECT_ID,
-          name: 'Pipeline-01',
           status: 'RUNNING',
         },
       },

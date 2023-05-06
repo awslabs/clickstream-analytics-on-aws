@@ -90,7 +90,6 @@ export class ApplicationServ {
         iosAppStoreId: result.iosAppStoreId,
         pipeline: {
           id: latestPipelines.items[0].pipelineId,
-          name: latestPipelines.items[0].name,
           status: latestPipelines.items[0].status,
           endpoint: ingestionServerUrl,
           dns: ingestionServerDNS,

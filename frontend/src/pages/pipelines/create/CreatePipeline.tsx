@@ -134,10 +134,10 @@ const Content: React.FC = () => {
       sinkKafka: {
         brokers: [],
         topic: '',
+        securityGroupId: '',
         mskCluster: {
           name: '',
           arn: '',
-          securityGroupId: '',
         },
         kafkaConnector: {
           enable: true,
@@ -212,11 +212,11 @@ const Content: React.FC = () => {
     scheduleExpression: '',
 
     exeCronExp: '',
-    excutionFixedValue: '',
+    excutionFixedValue: '1',
     enableRedshift: true,
     enableAthena: false,
-    eventFreshValue: '',
-    redshiftExecutionValue: '',
+    eventFreshValue: '3',
+    redshiftExecutionValue: '6',
 
     selectedExcutionType: null,
     selectedExcutionUnit: null,
@@ -266,9 +266,9 @@ const Content: React.FC = () => {
     redshiftServerlessVPC: null,
     redshiftServerlessSG: [],
     redshiftServerlessSubnets: [],
-    redshiftDataLoadValue: '',
+    redshiftDataLoadValue: '5',
     redshiftDataLoadUnit: null,
-    redshiftUpsertFreqValue: '',
+    redshiftUpsertFreqValue: '1',
     redshiftUpsertFreqUnit: null,
   });
 
@@ -382,16 +382,16 @@ const Content: React.FC = () => {
       // set dataAnalytics to null when not enable Redshift
       if (!pipelineInfo.enableRedshift) {
         createPipelineObj.dataAnalytics = null;
-      }
+      } else {
+        // set serverless to null when user select provisioned
+        if (pipelineInfo.redshiftType === 'provisioned') {
+          createPipelineObj.dataAnalytics.redshift.newServerless = null;
+        }
 
-      // set serverless to null when user select provisioned
-      if (pipelineInfo.redshiftType === 'provisioned') {
-        createPipelineObj.dataAnalytics.redshift.newServerless = null;
-      }
-
-      // set provisioned to null when user select serverless
-      if (pipelineInfo.redshiftType === 'serverless') {
-        createPipelineObj.dataAnalytics.redshift.provisioned = null;
+        // set provisioned to null when user select serverless
+        if (pipelineInfo.redshiftType === 'serverless') {
+          createPipelineObj.dataAnalytics.redshift.provisioned = null;
+        }
       }
     } else {
       createPipelineObj.etl = null;
@@ -472,6 +472,8 @@ const Content: React.FC = () => {
     delete createPipelineObj.redshiftDataLoadUnit;
     delete createPipelineObj.redshiftUpsertFreqValue;
     delete createPipelineObj.redshiftUpsertFreqUnit;
+
+    delete createPipelineObj.selectedSelfHostedMSKSG;
 
     setLoadingCreate(true);
     try {
@@ -921,10 +923,10 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
+                        securityGroupId: msk.description || '',
                         mskCluster: {
                           name: msk.label || '',
                           arn: msk.iconAlt || '',
-                          securityGroupId: msk.description || '',
                         },
                       },
                     },

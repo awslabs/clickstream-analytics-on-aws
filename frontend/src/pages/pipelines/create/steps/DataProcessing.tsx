@@ -162,7 +162,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     pipelineInfo.redshiftDataLoadUnit || REDSHIFT_FREQUENCY_UNIT[0]
   );
   const [upsertUserUnit, setUpsertUserUnit] = useState(
-    pipelineInfo.redshiftUpsertFreqUnit || REDSHIFT_FREQUENCY_UNIT[0]
+    pipelineInfo.redshiftUpsertFreqUnit || REDSHIFT_FREQUENCY_UNIT[2]
   );
 
   // get redshift clusters by region

@@ -56,6 +56,7 @@
     "ios": "iOS",
     "web": "Web",
     "pipelineInfo": "Pipeline Information",
-    "serverEdp": "Server Endpoint"
+    "serverEdp": "Server Endpoint",
+    "serverDomain": "Server Domain"
   }
 }

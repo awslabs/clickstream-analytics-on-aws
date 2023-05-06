@@ -190,14 +190,15 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   };
 
   useEffect(() => {
-    console.info('quickSightEnabled:', quickSightEnabled);
     if (quickSightEnabled) {
       getQuickSightUserList();
     }
   }, [quickSightEnabled]);
 
   useEffect(() => {
-    checkTheQuickSightStatus();
+    if (pipelineInfo.enableDataProcessing) {
+      checkTheQuickSightStatus();
+    }
   }, []);
 
   return (
@@ -211,240 +212,258 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         </Header>
       }
     >
-      <SpaceBetween direction="vertical" size="l">
-        <FormField>
-          <Toggle
-            onChange={({ detail }) => changeEnableReporting(detail.checked)}
-            checked={pipelineInfo.enableReporting}
-            description={t('pipeline:create.createSampleQuickSightDesc')}
-          >
-            <b>{t('pipeline:create.createSampleQuickSight')}</b>
-          </Toggle>
-        </FormField>
+      {pipelineInfo.enableDataProcessing ? (
+        <>
+          <SpaceBetween direction="vertical" size="l">
+            <FormField>
+              <Toggle
+                onChange={({ detail }) => changeEnableReporting(detail.checked)}
+                checked={pipelineInfo.enableReporting}
+                description={t('pipeline:create.createSampleQuickSightDesc')}
+              >
+                <b>{t('pipeline:create.createSampleQuickSight')}</b>
+              </Toggle>
+            </FormField>
 
-        {pipelineInfo.enableReporting &&
-          (loadingQuickSight ? (
-            <Spinner />
-          ) : (
-            <>
-              {!quickSightEnabled && (
-                <Alert
-                  type="warning"
-                  action={
-                    <SpaceBetween size="xs" direction="horizontal">
-                      <Button
-                        loading={loadingSubscription}
-                        onClick={() => {
-                          setShowSubQuickSight(true);
-                        }}
-                      >
-                        {t('button.subscribe')}
-                      </Button>
-                    </SpaceBetween>
-                  }
-                  header={t('pipeline:create.quickSightNotSub')}
-                >
-                  {t('pipeline:create.quickSightNotSubDesc')}
-                </Alert>
-              )}
-
-              {quickSightEnabled && (
+            {pipelineInfo.enableReporting &&
+              (loadingQuickSight ? (
+                <Spinner />
+              ) : (
                 <>
-                  <FormField
-                    label={t('pipeline:create.quickSightUser')}
-                    description={t('pipeline:create.quickSightUserDesc')}
-                  >
-                    <div className="flex">
-                      <div className="flex-1">
-                        <Select
-                          statusType={loadingUsers ? 'loading' : 'finished'}
-                          placeholder={
-                            t('pipeline:create.quickSIghtPlaceholder') || ''
-                          }
-                          selectedOption={pipelineInfo.selectedQuickSightUser}
-                          onChange={({ detail }) =>
-                            changeQuickSightSelectedUser(detail.selectedOption)
-                          }
-                          options={quickSightRoleOptions}
-                          filteringType="auto"
-                        />
-                      </div>
-                      <div className="ml-10">
-                        <Button
-                          loading={loadingUsers}
-                          onClick={() => {
-                            getQuickSightUserList();
-                          }}
-                          iconName="refresh"
-                        />
-                      </div>
-                      <div className="ml-10">
-                        <Button
-                          onClick={() => {
-                            setShowCreateUser(true);
-                          }}
-                        >
-                          {t('button.createNew')}
-                        </Button>
-                      </div>
-                    </div>
-                  </FormField>
+                  {!quickSightEnabled && (
+                    <Alert
+                      type="warning"
+                      action={
+                        <SpaceBetween size="xs" direction="horizontal">
+                          <Button
+                            loading={loadingSubscription}
+                            onClick={() => {
+                              setShowSubQuickSight(true);
+                            }}
+                          >
+                            {t('button.subscribe')}
+                          </Button>
+                        </SpaceBetween>
+                      }
+                      header={t('pipeline:create.quickSightNotSub')}
+                    >
+                      {t('pipeline:create.quickSightNotSubDesc')}
+                    </Alert>
+                  )}
 
-                  <FormField
-                    label={t('pipeline:create.dataConnectionType')}
-                    description={t('pipeline:create.dataConnectionTypeDesc')}
-                  >
+                  {quickSightEnabled && (
                     <>
-                      <RadioGroup
-                        onChange={({ detail }) =>
-                          changeQuickSightConnectionType(detail.value)
-                        }
-                        value={pipelineInfo.dataConnectionType}
-                        items={[
-                          {
-                            value: 'public',
-                            label: t('pipeline:create.publicNetwork'),
-                            description: t('pipeline:create.publicNetworkDesc'),
-                          },
-                          {
-                            value: 'vpcconnection',
-                            label: t('pipeline:create.vpcConnection'),
-                            description: t('pipeline:create.vpcConnectionDesc'),
-                          },
-                        ]}
-                      />
-                      <div className="mt-10">
-                        <Input
-                          placeholder="arn:aws:quicksight:<region>:<account-id>:vpcConnection/<connection-id>"
-                          onChange={({ detail }) =>
-                            changeQuickSightVpcConnection(detail.value)
-                          }
-                          value={pipelineInfo.quickSightVpcConnection}
-                        />
-                      </div>
+                      <FormField
+                        label={t('pipeline:create.quickSightUser')}
+                        description={t('pipeline:create.quickSightUserDesc')}
+                      >
+                        <div className="flex">
+                          <div className="flex-1">
+                            <Select
+                              statusType={loadingUsers ? 'loading' : 'finished'}
+                              placeholder={
+                                t('pipeline:create.quickSIghtPlaceholder') || ''
+                              }
+                              selectedOption={
+                                pipelineInfo.selectedQuickSightUser
+                              }
+                              onChange={({ detail }) =>
+                                changeQuickSightSelectedUser(
+                                  detail.selectedOption
+                                )
+                              }
+                              options={quickSightRoleOptions}
+                              filteringType="auto"
+                            />
+                          </div>
+                          <div className="ml-10">
+                            <Button
+                              loading={loadingUsers}
+                              onClick={() => {
+                                getQuickSightUserList();
+                              }}
+                              iconName="refresh"
+                            />
+                          </div>
+                          <div className="ml-10">
+                            <Button
+                              onClick={() => {
+                                setShowCreateUser(true);
+                              }}
+                            >
+                              {t('button.createNew')}
+                            </Button>
+                          </div>
+                        </div>
+                      </FormField>
+
+                      <FormField
+                        label={t('pipeline:create.dataConnectionType')}
+                        description={t(
+                          'pipeline:create.dataConnectionTypeDesc'
+                        )}
+                      >
+                        <>
+                          <RadioGroup
+                            onChange={({ detail }) =>
+                              changeQuickSightConnectionType(detail.value)
+                            }
+                            value={pipelineInfo.dataConnectionType}
+                            items={[
+                              {
+                                value: 'public',
+                                label: t('pipeline:create.publicNetwork'),
+                                description: t(
+                                  'pipeline:create.publicNetworkDesc'
+                                ),
+                              },
+                              {
+                                value: 'vpcconnection',
+                                label: t('pipeline:create.vpcConnection'),
+                                description: t(
+                                  'pipeline:create.vpcConnectionDesc'
+                                ),
+                              },
+                            ]}
+                          />
+                          <div className="mt-10">
+                            <Input
+                              placeholder="arn:aws:quicksight:<region>:<account-id>:vpcConnection/<connection-id>"
+                              onChange={({ detail }) =>
+                                changeQuickSightVpcConnection(detail.value)
+                              }
+                              value={pipelineInfo.quickSightVpcConnection}
+                            />
+                          </div>
+                        </>
+                      </FormField>
                     </>
-                  </FormField>
+                  )}
                 </>
-              )}
-            </>
-          ))}
-      </SpaceBetween>
+              ))}
+          </SpaceBetween>
 
-      {/* Subscription Modal */}
-      <Modal
-        onDismiss={() => {
-          closeSubQuickSightModal();
-        }}
-        visible={showSubQuickSight}
-        footer={
-          <Box float="right">
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button
-                variant="link"
-                onClick={() => {
-                  closeSubQuickSightModal();
-                }}
-              >
-                {t('button.close')}
-              </Button>
-
-              <Button
-                loading={loadingSubscription}
-                onClick={() => {
-                  subscribeTheQuickSight();
-                }}
-              >
-                {t('button.subscribe')}
-              </Button>
-            </SpaceBetween>
-          </Box>
-        }
-        header={t('pipeline:create.createQSSub')}
-      >
-        <FormField
-          label={t('pipeline:create.qsAccountName')}
-          description={t('pipeline:create.qsAccountNameDesc')}
-        >
-          <Input
-            placeholder="my-quicksight"
-            value={subscriptionAccountName}
-            onChange={(e) => {
-              setSubscriptionAccountName(e.detail.value);
+          {/* Subscription Modal */}
+          <Modal
+            onDismiss={() => {
+              closeSubQuickSightModal();
             }}
-          />
-        </FormField>
-        <FormField
-          label={t('pipeline:create.qsUserEmail')}
-          description={t('pipeline:create.qsUserEmailDesc')}
-        >
-          <Input
-            placeholder="email@example.com"
-            value={subscriptionEmail}
-            onChange={(e) => {
-              setSubscriptionEmail(e.detail.value);
-            }}
-          />
-        </FormField>
-      </Modal>
+            visible={showSubQuickSight}
+            footer={
+              <Box float="right">
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      closeSubQuickSightModal();
+                    }}
+                  >
+                    {t('button.close')}
+                  </Button>
 
-      {/* Create User Modal */}
-      <Modal
-        onDismiss={() => {
-          closeNewUserModal();
-        }}
-        visible={showCreateUser}
-        footer={
-          <Box float="right">
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button
-                variant="link"
-                onClick={() => {
-                  closeNewUserModal();
-                }}
-              >
-                {t('button.close')}
-              </Button>
-            </SpaceBetween>
-          </Box>
-        }
-        header={t('pipeline:create.createQSUser')}
-      >
-        <FormField
-          label={t('pipeline:create.qsUserEmail')}
-          description={t('pipeline:create.qsCreateUserDesc')}
-        >
-          <div className="flex">
-            <div className="flex-1">
+                  <Button
+                    loading={loadingSubscription}
+                    onClick={() => {
+                      subscribeTheQuickSight();
+                    }}
+                  >
+                    {t('button.subscribe')}
+                  </Button>
+                </SpaceBetween>
+              </Box>
+            }
+            header={t('pipeline:create.createQSSub')}
+          >
+            <FormField
+              label={t('pipeline:create.qsAccountName')}
+              description={t('pipeline:create.qsAccountNameDesc')}
+            >
               <Input
-                placeholder="email@example.com"
-                value={newUserEmail}
+                placeholder="my-quicksight"
+                value={subscriptionAccountName}
                 onChange={(e) => {
-                  setNewUserEmail(e.detail.value);
+                  setSubscriptionAccountName(e.detail.value);
                 }}
               />
-            </div>
-            <div className="ml-10">
-              <Button
-                loading={loadingCreateUser}
-                onClick={() => {
-                  createNewQuickSightUser();
+            </FormField>
+            <FormField
+              label={t('pipeline:create.qsUserEmail')}
+              description={t('pipeline:create.qsUserEmailDesc')}
+            >
+              <Input
+                placeholder="email@example.com"
+                value={subscriptionEmail}
+                onChange={(e) => {
+                  setSubscriptionEmail(e.detail.value);
                 }}
-              >
-                {t('button.create')}
-              </Button>
-            </div>
-          </div>
-          <div className="mt-10">
-            {userActiveLink && (
-              <Alert header={t('pipeline:create.qsUserActive')}>
-                <Link external href={userActiveLink}>
-                  {userActiveLink}
-                </Link>
-              </Alert>
-            )}
-          </div>
-        </FormField>
-      </Modal>
+              />
+            </FormField>
+          </Modal>
+
+          {/* Create User Modal */}
+          <Modal
+            onDismiss={() => {
+              closeNewUserModal();
+            }}
+            visible={showCreateUser}
+            footer={
+              <Box float="right">
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      closeNewUserModal();
+                    }}
+                  >
+                    {t('button.close')}
+                  </Button>
+                </SpaceBetween>
+              </Box>
+            }
+            header={t('pipeline:create.createQSUser')}
+          >
+            <FormField
+              label={t('pipeline:create.qsUserEmail')}
+              description={t('pipeline:create.qsCreateUserDesc')}
+            >
+              <div className="flex">
+                <div className="flex-1">
+                  <Input
+                    placeholder="email@example.com"
+                    value={newUserEmail}
+                    onChange={(e) => {
+                      setNewUserEmail(e.detail.value);
+                    }}
+                  />
+                </div>
+                <div className="ml-10">
+                  <Button
+                    loading={loadingCreateUser}
+                    onClick={() => {
+                      createNewQuickSightUser();
+                    }}
+                  >
+                    {t('button.create')}
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-10">
+                {userActiveLink && (
+                  <Alert header={t('pipeline:create.qsUserActive')}>
+                    <Link external href={userActiveLink}>
+                      {userActiveLink}
+                    </Link>
+                  </Alert>
+                )}
+              </div>
+            </FormField>
+          </Modal>
+        </>
+      ) : (
+        <Alert header={t('pipeline:create.reportNotSupported')}>
+          {t('pipeline:create.reportNotSupportedDesc')}
+        </Alert>
+      )}
     </Container>
   );
 };

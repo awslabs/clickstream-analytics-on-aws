@@ -13,7 +13,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
-import { ApiFail, ApiSuccess, PipelineStatusType } from '../common/types';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
+import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -61,14 +62,21 @@ export class PipelineServ {
     try {
       const { id } = req.params;
       const { pid } = req.query;
-      const pipeline = await store.getPipeline(pid, id);
-      if (!pipeline) {
+      const latestPipeline = await store.getPipeline(pid, id);
+      if (!latestPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const stackManager: StackManager = new StackManager(pipeline);
-      pipeline.status = await stackManager.getPipelineStatus();
-      await store.updatePipelineAtCurrentVersion(pipeline);
-      return res.json(new ApiSuccess(pipeline));
+      const stackManager: StackManager = new StackManager(latestPipeline);
+      latestPipeline.status = await stackManager.getPipelineStatus();
+      await store.updatePipelineAtCurrentVersion(latestPipeline);
+      const pipeline = new CPipeline(latestPipeline);
+      const ingestionServerUrl = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX);
+      const ingestionServerDNS = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
+      return res.json(new ApiSuccess({
+        ...latestPipeline,
+        endpoint: ingestionServerUrl,
+        dns: ingestionServerDNS,
+      }));
     } catch (error) {
       next(error);
     }

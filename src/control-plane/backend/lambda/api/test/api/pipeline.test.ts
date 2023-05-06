@@ -383,6 +383,25 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
+    cloudFormationClient.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -392,6 +411,8 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        dns: 'http://yyy/yyy',
+        endpoint: 'http://xxx/xxx',
       },
     });
   });
@@ -568,7 +589,6 @@ describe('Pipeline test', () => {
             createAt: 1681353806173,
             dataCollectionSDK: 'clickstream',
             deleted: false,
-            description: 'Pipeline01 Description',
             executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
             executionName: 'main-3333-3333',
             id: 'project_8888_8888',
@@ -606,7 +626,6 @@ describe('Pipeline test', () => {
                 warmPoolSize: 1,
               },
             },
-            name: 'Pipeline01',
             network: {
               privateSubnetIds: [
                 'subnet-00000000000000011',

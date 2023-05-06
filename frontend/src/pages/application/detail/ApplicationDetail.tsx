@@ -21,6 +21,7 @@ import {
   Link,
   SpaceBetween,
   Spinner,
+  StatusIndicator,
   Tabs,
 } from '@cloudscape-design/components';
 import { getApplicationDetail } from 'apis/application';
@@ -47,6 +48,7 @@ const ApplicationDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
   const [applicationInfo, setApplicationInfo] = useState<IApplication>();
+  const [domainResolved, setDomainResolved] = useState(false);
 
   const breadcrumbItems = [
     {
@@ -98,6 +100,22 @@ const ApplicationDetail: React.FC = () => {
   useEffect(() => {
     getApplicationDetailByAppId();
   }, []);
+
+  useEffect(() => {
+    if (applicationInfo?.pipeline?.dns) {
+      fetch(`https://${applicationInfo?.pipeline?.dns}`)
+        .then((response) => {
+          if (response.ok) {
+            setDomainResolved(true);
+          } else {
+            setDomainResolved(false);
+          }
+        })
+        .catch((error) => {
+          setDomainResolved(false);
+        });
+    }
+  }, [applicationInfo?.pipeline?.dns]);
 
   return (
     <AppLayout
@@ -193,13 +211,39 @@ const ApplicationDetail: React.FC = () => {
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
+                        {t('application:detail.serverDomain')}
+                      </Box>
+                      <div>
+                        {applicationInfo?.pipeline?.dns && (
+                          <CopyText
+                            text={applicationInfo?.pipeline?.dns || ''}
+                          />
+                        )}
+                        {applicationInfo?.pipeline?.dns || '-'}
+                        {applicationInfo?.pipeline &&
+                          applicationInfo?.pipeline.dns &&
+                          (domainResolved ? (
+                            <span className="ml-5">
+                              <StatusIndicator type="success" />
+                            </span>
+                          ) : (
+                            <span className="ml-5">
+                              <StatusIndicator type="error" />
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Box variant="awsui-key-label">
                         {t('application:detail.serverEdp')}
                       </Box>
                       <div>
-                        {applicationInfo?.pipeline?.endpoint}{' '}
-                        <CopyText
-                          text={applicationInfo?.pipeline?.endpoint || ''}
-                        />
+                        {applicationInfo?.pipeline?.endpoint && (
+                          <CopyText
+                            text={applicationInfo?.pipeline?.endpoint || ''}
+                          />
+                        )}
+                        {applicationInfo?.pipeline?.endpoint || '-'}
                       </div>
                     </div>
                   </SpaceBetween>

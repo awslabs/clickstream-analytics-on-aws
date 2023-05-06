@@ -16,18 +16,73 @@ import {
   ColumnLayout,
   SpaceBetween,
   Link,
+  StatusIndicator,
 } from '@cloudscape-design/components';
-import React from 'react';
+import CopyText from 'components/common/CopyIcon';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
 import { buildSubnetLink } from 'ts/url';
 
 interface TabContentProps {
-  pipelineInfo?: IPipeline;
+  pipelineInfo?: IExtPipeline;
 }
 const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
+
+  const [domainResolved, setDomainResolved] = useState(false);
+
+  const buildBufferDisplay = (pipelineInfo?: IExtPipeline) => {
+    if (pipelineInfo?.ingestionServer.sinkType === SinkType.S3) {
+      return `S3 (${pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}/${pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix})`;
+    }
+    if (pipelineInfo?.ingestionServer.sinkType === SinkType.KDS) {
+      return `KDS (${pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode})`;
+    }
+    // review and launch page
+    if (!pipelineInfo?.pipelineId) {
+      // self hosted kafka
+      if (pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) {
+        if (pipelineInfo?.kafkaSelfHost) {
+          return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
+            ','
+          )})`;
+        } else {
+          return `MSK (${pipelineInfo?.ingestionServer.sinkKafka.mskCluster.arn})`;
+        }
+      }
+    } else {
+      // pipeline detail page
+      if (pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) {
+        if (pipelineInfo?.ingestionServer.sinkKafka.mskCluster) {
+          return `MSK (${pipelineInfo?.ingestionServer.sinkKafka.mskCluster.arn})`;
+        } else {
+          return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
+            ','
+          )})`;
+        }
+      }
+    }
+    return '-';
+  };
+
+  useEffect(() => {
+    if (pipelineInfo?.dns) {
+      fetch(`https://${pipelineInfo?.dns}`)
+        .then((response) => {
+          if (response.ok) {
+            setDomainResolved(true);
+          } else {
+            setDomainResolved(false);
+          }
+        })
+        .catch((error) => {
+          setDomainResolved(false);
+        });
+    }
+  }, [pipelineInfo?.dns]);
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
@@ -104,7 +159,43 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
-          <div>{pipelineInfo?.ingestionServer.domain.domainName || '-'}</div>
+          <div>
+            {pipelineInfo?.ingestionServer?.domain?.domainName && (
+              <CopyText
+                text={
+                  pipelineInfo?.dns ||
+                  pipelineInfo.ingestionServer.domain.domainName ||
+                  ''
+                }
+              />
+            )}
+
+            {pipelineInfo?.dns ||
+              pipelineInfo?.ingestionServer.domain.domainName ||
+              '-'}
+
+            {pipelineInfo?.pipelineId &&
+              pipelineInfo.dns &&
+              (domainResolved ? (
+                <span className="ml-5">
+                  <StatusIndicator type="success" />
+                </span>
+              ) : (
+                <span className="ml-5">
+                  <StatusIndicator type="error" />
+                </span>
+              ))}
+          </div>
+        </div>
+
+        <div>
+          <Box variant="awsui-key-label">{t('pipeline:detail.endpoint')}</Box>
+          <div>
+            {pipelineInfo?.endpoint && (
+              <CopyText text={pipelineInfo?.endpoint || ''} />
+            )}
+            {pipelineInfo?.endpoint || '-'}
+          </div>
         </div>
 
         <div>
@@ -125,30 +216,28 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enableAuth')}</Box>
-          <div>-</div>
+          <div>
+            {pipelineInfo?.ingestionServer.loadBalancer.authenticationSecretArn
+              ? t('yes')
+              : t('no')}
+          </div>
         </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.dataBuffer')}</Box>
-          <div>
-            {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
-              <div>
-                MSK({pipelineInfo.ingestionServer.sinkKafka.brokers.join(',')})
-              </div>
-            )}
-          </div>
+          <div>{buildBufferDisplay(pipelineInfo)}</div>
         </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.topic')}</Box>
+        {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
           <div>
-            {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
-              <div>{pipelineInfo.ingestionServer.sinkKafka.topic}</div>
-            )}
+            <Box variant="awsui-key-label">{t('pipeline:detail.topic')}</Box>
+            <div>
+              <div>{pipelineInfo.ingestionServer.sinkKafka.topic || '-'}</div>
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <Box variant="awsui-key-label">

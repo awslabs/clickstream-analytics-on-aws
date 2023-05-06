@@ -323,20 +323,16 @@ describe('Workflow test', () => {
                         ParameterValue: 'logs/',
                       },
                       {
-                        ParameterKey: 'MskClusterName',
-                        ParameterValue: 'mskClusterName',
-                      },
-                      {
-                        ParameterKey: 'MskSecurityGroupId',
-                        ParameterValue: 'sg-0000000000002',
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                       {
                         ParameterKey: 'KafkaTopic',
                         ParameterValue: 't1',
                       },
                       {
-                        ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                        ParameterKey: 'MskSecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
@@ -458,20 +454,16 @@ describe('Workflow test', () => {
                         ParameterValue: 'logs/',
                       },
                       {
-                        ParameterKey: 'MskClusterName',
-                        ParameterValue: 'mskClusterName',
-                      },
-                      {
-                        ParameterKey: 'MskSecurityGroupId',
-                        ParameterValue: 'sg-0000000000002',
+                        ParameterKey: 'KafkaBrokers',
+                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
                       },
                       {
                         ParameterKey: 'KafkaTopic',
                         ParameterValue: 't1',
                       },
                       {
-                        ParameterKey: 'KafkaBrokers',
-                        ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+                        ParameterKey: 'MskSecurityGroupId',
+                        ParameterValue: 'sg-0000000000002',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
@@ -527,10 +519,6 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'KafkaTopic',
                         ParameterValue: 't1',
-                      },
-                      {
-                        ParameterKey: 'MskClusterName',
-                        ParameterValue: 'mskClusterName',
                       },
                       {
                         ParameterKey: 'SecurityGroupId',

@@ -473,15 +473,30 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <div className="plr-20">
                   {pipelineInfo.enableAuthentication && (
                     <FormField label={t('pipeline:create.secret')}>
-                      <Select
-                        statusType={loadingSecret ? 'loading' : 'finished'}
-                        placeholder={t('pipeline:create.selectSecret') || ''}
-                        selectedOption={pipelineInfo.selectedSecret}
-                        options={ssmSecretOptionList}
-                        onChange={(e) => {
-                          changeSSMSecret(e.detail.selectedOption);
-                        }}
-                      />
+                      <div className="flex">
+                        <div className="flex-1">
+                          <Select
+                            statusType={loadingSecret ? 'loading' : 'finished'}
+                            placeholder={
+                              t('pipeline:create.selectSecret') || ''
+                            }
+                            selectedOption={pipelineInfo.selectedSecret}
+                            options={ssmSecretOptionList}
+                            onChange={(e) => {
+                              changeSSMSecret(e.detail.selectedOption);
+                            }}
+                          />
+                        </div>
+                        <div className="ml-10">
+                          <Button
+                            iconName="refresh"
+                            loading={loadingSecret}
+                            onClick={() => {
+                              getSSMSecretListByReion();
+                            }}
+                          />
+                        </div>
+                      </div>
                     </FormField>
                   )}
                 </div>
