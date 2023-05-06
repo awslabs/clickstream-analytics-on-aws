@@ -138,4 +138,5 @@ export type MustacheParamType = {
   table_dim_users: string;
   sp_clickstream_log: string;
   table_clickstream_log: string;
+  user_bi?: string;
 }

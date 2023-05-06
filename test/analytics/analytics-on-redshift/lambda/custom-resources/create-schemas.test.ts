@@ -108,15 +108,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ssmMock.reset();
     const rootPath = __dirname+'/../../../../../src/analytics/private/sqls/';
     mockfs({
-      '/opt/clickstream-daily-active-user-view.sql': await testSqlContent(rootPath + 'clickstream-daily-active-user-view.sql'),
-      '/opt/clickstream-dau-wau-view.sql': await testSqlContent(rootPath + 'clickstream-dau-wau-view.sql'),
-      '/opt/clickstream-ods-flattened-view.sql': await testSqlContent(rootPath + 'clickstream-ods-flattened-view.sql'),
-      '/opt/clickstream-retention-view.sql': await testSqlContent(rootPath + 'clickstream-retention-view.sql'),
-      '/opt/clickstream-session-view.sql': await testSqlContent(rootPath + 'clickstream-session-view.sql'),
-      '/opt/dim-users.sql': await testSqlContent(rootPath + 'dim-users.sql'),
-      '/opt/ods-events.sql': await testSqlContent(rootPath + 'ods-events.sql'),
-      '/opt/sp-clickstream-log.sql': await testSqlContent(rootPath + 'sp-clickstream-log.sql'),
-      '/opt/sp-upsert-users.sql': await testSqlContent(rootPath + 'sp-upsert-users.sql'),
+      '/opt/clickstream-daily-active-user-view.sql': testSqlContent(rootPath + 'clickstream-daily-active-user-view.sql'),
+      '/opt/clickstream-dau-wau-view.sql': testSqlContent(rootPath + 'clickstream-dau-wau-view.sql'),
+      '/opt/clickstream-ods-flattened-view.sql': testSqlContent(rootPath + 'clickstream-ods-flattened-view.sql'),
+      '/opt/clickstream-retention-view.sql': testSqlContent(rootPath + 'clickstream-retention-view.sql'),
+      '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
+      '/opt/dim-users.sql': testSqlContent(rootPath + 'dim-users.sql'),
+      '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
+      '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
+      '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
+      '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
     });
   });
 
@@ -204,8 +205,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
     }).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
         for (const sql of input.Sqls) {
-          if (sql.includes('####.ods_events')) {
-            throw new Error(`The SQL '${sql}' contains the placeholder!`);
+          if (sql.includes('{{')) {
+            throw new Error(`The SQL '${sql}' contains the mustache variables!`);
           }
         }
       }
@@ -218,7 +219,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
-        expect.stringMatching(`GRANT USAGE ON SCHEMA "app1" TO "${biUserNamePrefix}\\w{8}";`),
+        expect.stringMatching(`GRANT USAGE ON SCHEMA app1 TO ${biUserNamePrefix}\\w{8}`),
       ]),
     });
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
@@ -293,8 +294,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
-        `GRANT USAGE ON SCHEMA "app2" TO "${biUserNamePrefix}abcde";`,
-        `GRANT SELECT ON ALL TABLES IN SCHEMA "app2" TO "${biUserNamePrefix}abcde";`,
+        `GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`,
+        `GRANT SELECT ON ALL TABLES IN SCHEMA app2 TO ${biUserNamePrefix}abcde`,
       ]),
     });
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
@@ -424,7 +425,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 });
 
-const testSqlContent = async (filePath: string) => {
+const testSqlContent = (filePath: string) => {
   const sqlTemplate = readFileSync(filePath, 'utf8');
   return sqlTemplate;
 };

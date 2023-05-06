@@ -20,7 +20,7 @@ import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
-import { getSqlContent } from '../../private/utils';
+import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
 export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
@@ -160,24 +160,18 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
-  for await (let app of appIds) {
+  for (const app of appIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableName,
+      user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
     sqlStatements.push(getSqlContent('ods-events.sql', mustacheParam));
     sqlStatements.push(getSqlContent('sp-clickstream-log.sql', mustacheParam));
 
-    const schemaUsagePermStatement = `GRANT USAGE ON SCHEMA "${app}" TO "${biUsername}";`;
-    sqlStatements.push(schemaUsagePermStatement);
-
-    const tableSelectPermStatement = `GRANT SELECT ON ALL TABLES IN SCHEMA "${app}" TO "${biUsername}";`;
-    sqlStatements.push(tableSelectPermStatement);
-
-    const functionPermStatement = `GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA "${app}" TO "${biUsername}";`;
-    sqlStatements.push(functionPermStatement);
+    sqlStatements.push(...getSqlContents('grant-permissions-to-bi-user.sql', mustacheParam));
 
     sqlStatements.push(getSqlContent('dim-users.sql', mustacheParam));
     sqlStatements.push(getSqlContent('sp-upsert-users.sql', mustacheParam));
@@ -195,7 +189,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
   const odsTableName = props.odsTableName;
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
-  for await (let app of appIds) {
+  for (const app of appIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableName,

@@ -15,11 +15,17 @@ import { readFileSync } from 'fs';
 import Mustache from 'mustache';
 import { MustacheParamType } from './model';
 
-// export const getSqlContent = async (
 export function getSqlContent(
   sqlFile: string,
   mustacheParam: MustacheParamType,
-) {
+): string {
   const sqlTemplate = readFileSync(`/opt/${sqlFile}`, 'utf8');
   return Mustache.render(sqlTemplate, mustacheParam);
+};
+
+export function getSqlContents(
+  sqlFile: string,
+  mustacheParam: MustacheParamType,
+): string[] {
+  return getSqlContent(sqlFile, mustacheParam).split(';').filter(sql => sql.trim().length > 0).map(sql => sql.trim());
 };
