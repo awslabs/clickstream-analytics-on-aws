@@ -70,12 +70,17 @@ export const generateFileDownloadLink = (fileContent: string): string => {
   return url;
 };
 
-export const generateDataProcessingInterval = (
+export const generateCronDateRange = (
   type: string | undefined,
   fixedValue: number,
   cronExp: string,
-  unit: SelectProps.Option | null
+  unit: SelectProps.Option | null,
+  attr: 'processing' | 'upsert'
 ) => {
+  let DEFAULT_VALUE = `rate(1 hour)`;
+  if (attr === 'upsert') {
+    DEFAULT_VALUE = `rate(1 day)`;
+  }
   if (type === ExecutionType.FIXED_RATE) {
     if (fixedValue && fixedValue > 0) {
       if (unit?.value === 'hour') {
@@ -85,19 +90,19 @@ export const generateDataProcessingInterval = (
       } else if (unit?.value === 'day') {
         return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
       } else {
-        return `rate(1 hour)`;
+        return DEFAULT_VALUE;
       }
     } else {
-      return `rate(1 hour)`;
+      return DEFAULT_VALUE;
     }
   } else if (type === ExecutionType.CRON_EXPRESS) {
     if (cronExp) {
       return `cron(${cronExp})`;
     } else {
-      return `rate(1 hour)`;
+      return DEFAULT_VALUE;
     }
   } else {
-    return `rate(1 hour)`;
+    return DEFAULT_VALUE;
   }
 };
 
@@ -112,25 +117,6 @@ export const generateRedshiftInterval = (value?: number, unit?: string) => {
     return value;
   } else {
     return 6 * 60 * 24 * 30;
-  }
-};
-
-export const generateUpsertFrequencyExpression = (
-  fixedValue: number,
-  unit: SelectProps.Option | null
-) => {
-  if (fixedValue && fixedValue > 0) {
-    if (unit?.value === 'hour') {
-      return `rate(${fixedValue} ${fixedValue > 1 ? 'hours' : 'hour'})`;
-    } else if (unit?.value === 'minute') {
-      return `rate(${fixedValue} ${fixedValue > 1 ? 'minutes' : 'minute'})`;
-    } else if (unit?.value === 'day') {
-      return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
-    } else {
-      return `rate(5 minutes)`;
-    }
-  } else {
-    return `rate(5 minutes)`;
   }
 };
 

@@ -205,5 +205,8 @@ declare global {
     redshiftDataLoadUnit: SelectProps.Option | null;
     redshiftUpsertFreqValue: string;
     redshiftUpsertFreqUnit: SelectProps.Option | null;
+
+    selectedUpsertType: SelectProps.Option | null;
+    upsertCronExp: string;
   }
 }

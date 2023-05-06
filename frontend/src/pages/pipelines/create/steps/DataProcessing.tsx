@@ -83,7 +83,8 @@ interface DataProcessingProps {
   changeUpsertUserValue: (value: string) => void;
   changeUpsertUserUnit: (unit: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
-
+  changeSelectedUpsertType: (type: SelectProps.Option) => void;
+  changeUpsertCronExp: (cron: string) => void;
   dataProcessorIntervalInvalidError: boolean;
 }
 
@@ -118,6 +119,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeUpsertUserValue,
     changeUpsertUserUnit,
     changeDBUser,
+    changeSelectedUpsertType,
+    changeUpsertCronExp,
     dataProcessorIntervalInvalidError,
   } = props;
 
@@ -133,6 +136,11 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const [selectedRedshiftExeUnit, setSelectedRedshiftExeUnit] = useState(
     pipelineInfo.selectedRedshiftExecutionUnit || REDSHIFT_UNIT_LIST[0]
   );
+
+  const [selectedUpsertType, setSelectedUpsertType] = useState(
+    pipelineInfo.selectedExcutionType || EXECUTION_TYPE_LIST[0]
+  );
+
   const [loadingRedshift, setLoadingRedshift] = useState(false);
   const [loading3AZVpc, setLoading3AZVpc] = useState(false);
   const [loadingSG, setLoadingSG] = useState(false);
@@ -344,6 +352,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   useEffect(() => {
     changeEventFreshUnit(selectedEventFreshUnit);
   }, [selectedEventFreshUnit]);
+
+  useEffect(() => {
+    changeSelectedUpsertType(selectedUpsertType);
+  }, [selectedUpsertType]);
 
   useEffect(() => {
     getVPCListByRegion();
@@ -885,25 +897,54 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         )}
                       >
                         <div className="flex">
-                          <div style={{ width: 250 }}>
-                            <Input
-                              type="number"
-                              placeholder="5"
-                              value={pipelineInfo.redshiftUpsertFreqValue}
-                              onChange={(e) => {
-                                changeUpsertUserValue(e.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="ml-10">
+                          <div style={{ width: 200 }}>
                             <Select
-                              selectedOption={upsertUserUnit}
+                              selectedOption={selectedUpsertType}
                               onChange={({ detail }) => {
-                                setUpsertUserUnit(detail.selectedOption);
+                                setSelectedUpsertType(detail.selectedOption);
                               }}
-                              options={REDSHIFT_FREQUENCY_UNIT}
+                              options={EXECUTION_TYPE_LIST}
                             />
                           </div>
+                          {selectedUpsertType.value ===
+                            ExecutionType.CRON_EXPRESS && (
+                            <div className="flex-1 ml-10">
+                              <SpaceBetween direction="horizontal" size="xs">
+                                <Input
+                                  placeholder="0 1 * * ? *"
+                                  value={pipelineInfo.upsertCronExp}
+                                  onChange={(e) => {
+                                    changeUpsertCronExp(e.detail.value);
+                                  }}
+                                />
+                              </SpaceBetween>
+                            </div>
+                          )}
+
+                          {selectedUpsertType.value ===
+                            ExecutionType.FIXED_RATE && (
+                            <div className="flex  ml-10">
+                              <div style={{ width: 250 }}>
+                                <Input
+                                  type="number"
+                                  placeholder="5"
+                                  value={pipelineInfo.redshiftUpsertFreqValue}
+                                  onChange={(e) => {
+                                    changeUpsertUserValue(e.detail.value);
+                                  }}
+                                />
+                              </div>
+                              <div className="ml-10">
+                                <Select
+                                  selectedOption={upsertUserUnit}
+                                  onChange={({ detail }) => {
+                                    setUpsertUserUnit(detail.selectedOption);
+                                  }}
+                                  options={REDSHIFT_FREQUENCY_UNIT}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </FormField>
                     </SpaceBetween>

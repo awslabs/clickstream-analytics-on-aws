@@ -169,8 +169,14 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
   const getRedshiftUpsertFrequncyDisplay = () => {
     if (pipelineInfo) {
-      if (pipelineInfo.redshiftUpsertFreqUnit?.value) {
-        return `${pipelineInfo.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
+      if (pipelineInfo.selectedUpsertType) {
+        if (
+          pipelineInfo.selectedUpsertType.value === ExecutionType.FIXED_RATE
+        ) {
+          return `${pipelineInfo.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
+        } else {
+          return `${pipelineInfo.upsertCronExp}`;
+        }
       } else if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
         if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
           if (

@@ -14,7 +14,7 @@
 import { ExecutionType } from '../const';
 import {
   extractAccountIdFromArn,
-  generateDataProcessingInterval,
+  generateCronDateRange,
   generateRedshiftInterval,
   generateStr,
   validateAppId,
@@ -56,74 +56,81 @@ describe('validateEmails', () => {
   });
 });
 
-describe('generateDataProcessingInterval', () => {
+describe('generateCronDateRange', () => {
   describe('when type is ExecutionType.FIXED_RATE', () => {
     it('should return default value when fixedValue is 0', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         0,
         '',
-        null
+        null,
+        'processing'
       );
       expect(interval).toEqual('rate(1 hour)');
     });
 
     it('should return default value when unit is undefined', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         2,
         '',
-        null
+        null,
+        'upsert'
       );
-      expect(interval).toEqual('rate(1 hour)');
+      expect(interval).toEqual('rate(1 day)');
     });
 
     it('should return rate with hours when fixedValue and unit are defined', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         2,
         '',
-        { value: 'hour', label: 'Hour' }
+        { value: 'hour', label: 'Hour' },
+        'processing'
       );
       expect(interval).toEqual('rate(2 hours)');
     });
 
     it('should return rate with days when fixedValue, unit and value > 1', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         3,
         '',
-        { value: 'day', label: 'Day' }
+        { value: 'day', label: 'Day' },
+        'processing'
       );
       expect(interval).toEqual('rate(3 days)');
     });
 
     it('should return rate with hour when fixedValue, unit and value <= 1', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         1,
         '',
-        { value: 'hour', label: 'Hour' }
+        { value: 'hour', label: 'Hour' },
+        'processing'
       );
       expect(interval).toEqual('rate(1 hour)');
     });
 
     it('should return rate with minutes when fixedValue, unit and value > 1', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         2,
         '',
-        { value: 'minute', label: 'Minutes' }
+        { value: 'minute', label: 'Minutes' },
+        'processing'
       );
       expect(interval).toEqual('rate(2 minutes)');
     });
 
     it('should return rate with minutes when fixedValue, unit and value <= 1', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
         1,
         '',
-        { value: 'minute', label: 'Minutes' }
+        { value: 'minute', label: 'Minutes' },
+        'processing'
       );
       expect(interval).toEqual('rate(1 minute)');
     });
@@ -131,31 +138,34 @@ describe('generateDataProcessingInterval', () => {
 
   describe('when type is ExecutionType.CRON_EXPRESS', () => {
     it('should return default value when cronExp is undefined', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.CRON_EXPRESS,
         10,
         '',
-        null
+        null,
+        'upsert'
       );
-      expect(interval).toEqual('rate(1 hour)');
+      expect(interval).toEqual('rate(1 day)');
     });
 
     it('should return default value when cronExp is empty string', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.CRON_EXPRESS,
         0,
         '',
-        null
+        null,
+        'processing'
       );
       expect(interval).toEqual('rate(1 hour)');
     });
 
     it('should return cron expression when cronExp is defined', () => {
-      const interval = generateDataProcessingInterval(
+      const interval = generateCronDateRange(
         ExecutionType.CRON_EXPRESS,
         10,
         '0 0 * * *',
-        null
+        null,
+        'processing'
       );
       expect(interval).toEqual('cron(0 0 * * *)');
     });

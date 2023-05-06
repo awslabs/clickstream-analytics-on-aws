@@ -29,9 +29,8 @@ import {
 import {
   extractAccountIdFromArn,
   generateDataLoadFreqency,
-  generateDataProcessingInterval,
+  generateCronDateRange,
   generateRedshiftInterval,
-  generateUpsertFrequencyExpression,
 } from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
@@ -270,6 +269,8 @@ const Content: React.FC = () => {
     redshiftDataLoadUnit: null,
     redshiftUpsertFreqValue: '1',
     redshiftUpsertFreqUnit: null,
+    selectedUpsertType: null,
+    upsertCronExp: '',
   });
 
   const validateBasicInfo = () => {
@@ -345,11 +346,13 @@ const Content: React.FC = () => {
         pipelineInfo.selectedEventFreshUnit?.value === 'day'
           ? parseInt(pipelineInfo.eventFreshValue) * 24
           : pipelineInfo.eventFreshValue || 72;
-      createPipelineObj.etl.scheduleExpression = generateDataProcessingInterval(
+
+      createPipelineObj.etl.scheduleExpression = generateCronDateRange(
         pipelineInfo.selectedExcutionType?.value,
         parseInt(pipelineInfo.excutionFixedValue),
         pipelineInfo.exeCronExp,
-        pipelineInfo.selectedExcutionUnit
+        pipelineInfo.selectedExcutionUnit,
+        'processing'
       );
 
       // set plugin value
@@ -374,9 +377,12 @@ const Content: React.FC = () => {
 
       // set redshift upsert frequency express
       createPipelineObj.dataAnalytics.upsertUsers.scheduleExpression =
-        generateUpsertFrequencyExpression(
+        generateCronDateRange(
+          pipelineInfo.selectedUpsertType?.value,
           parseInt(pipelineInfo.redshiftUpsertFreqValue),
-          pipelineInfo.redshiftUpsertFreqUnit
+          pipelineInfo.upsertCronExp,
+          pipelineInfo.redshiftUpsertFreqUnit,
+          'upsert'
         );
 
       // set dataAnalytics to null when not enable Redshift
@@ -474,6 +480,8 @@ const Content: React.FC = () => {
     delete createPipelineObj.redshiftUpsertFreqUnit;
 
     delete createPipelineObj.selectedSelfHostedMSKSG;
+    delete createPipelineObj.selectedUpsertType;
+    delete createPipelineObj.upsertCronExp;
 
     setLoadingCreate(true);
     try {
@@ -1338,6 +1346,22 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     redshiftUpsertFreqUnit: unit,
+                  };
+                });
+              }}
+              changeSelectedUpsertType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedUpsertType: type,
+                  };
+                });
+              }}
+              changeUpsertCronExp={(cron) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    upsertCronExp: cron,
                   };
                 });
               }}
