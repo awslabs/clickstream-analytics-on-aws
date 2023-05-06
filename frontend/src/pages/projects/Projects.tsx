@@ -33,13 +33,14 @@ import SplitPanelContent from './comps/SplitPanel';
 import CreateProject from './create/CreateProject';
 
 interface ContentProps {
+  refresh: number;
   selectedItems: IProject[];
   changeSelectedItems: (item: IProject[]) => void;
 }
 
 const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const { t } = useTranslation();
-  const { selectedItems, changeSelectedItems } = props;
+  const { selectedItems, refresh, changeSelectedItems } = props;
   const [pageSize] = useState(12);
   const [loadingData, setLoadingData] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,7 +100,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   useEffect(() => {
     listProjects();
-  }, [currentPage]);
+  }, [currentPage, refresh]);
 
   return (
     <div className="pb-30">
@@ -186,6 +187,7 @@ const Projects: React.FC = () => {
   const [showSplit, setShowSplit] = useState(false);
   const [selectedItems, setSelectedItems] = useState<IProject[]>([]);
   const [curProject, setCurProject] = useState<IProject | null>();
+  const [refreshPage, setRefreshPage] = useState(0);
 
   useEffect(() => {
     if (selectedItems.length >= 1) {
@@ -201,6 +203,7 @@ const Projects: React.FC = () => {
     <AppLayout
       content={
         <Content
+          refresh={refreshPage}
           selectedItems={selectedItems}
           changeSelectedItems={(items) => {
             setSelectedItems(items);
@@ -227,6 +230,9 @@ const Projects: React.FC = () => {
                   };
                 });
               }
+              setRefreshPage((prev) => {
+                return prev + 1;
+              });
             }}
           />
         ) : (

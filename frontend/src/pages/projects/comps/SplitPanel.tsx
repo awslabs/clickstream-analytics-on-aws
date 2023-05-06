@@ -88,6 +88,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     }
 
     if (type === 'env') {
+      newProject.environment = selectedEnv.value || '';
       setLoadingUpdateEnv(true);
     }
 
@@ -214,6 +215,11 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                 </Badge>
                 <Button
                   onClick={() => {
+                    setSelectedEnv(
+                      PROJECT_STAGE_LIST.find(
+                        (element) => element.value === project.environment
+                      ) || PROJECT_STAGE_LIST[0]
+                    );
                     setIsEditingEvn(true);
                   }}
                   variant="icon"
