@@ -335,6 +335,11 @@ ul.menu-list li.checkbox-item {
   color: #d1d5db;
 }
 
+.stack-status {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 @media only screen and (max-width: 493px) {
   #f {
     padding: 10px 20px;

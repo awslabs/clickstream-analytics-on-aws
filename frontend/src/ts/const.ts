@@ -314,3 +314,23 @@ export const AWS_REGION_MAP: AWSRegionMap = {
     OptInStatus: 'opt-in-not-required',
   },
 };
+
+export const CLOUDFORMATION_STATUS_MAP: any = {
+  CREATE_COMPLETE: 'success',
+  CREATE_IN_PROGRESS: 'loading',
+  CREATE_FAILED: 'error',
+  DELETE_COMPLETE: 'success',
+  DELETE_FAILED: 'error',
+  DELETE_IN_PROGRESS: 'loading',
+  REVIEW_IN_PROGRESS: 'loading',
+  ROLLBACK_COMPLETE: 'success',
+  ROLLBACK_FAILED: 'error',
+  ROLLBACK_IN_PROGRESS: 'loading',
+  UPDATE_COMPLETE: 'success',
+  UPDATE_COMPLETE_CLEANUP_IN_PROGRESS: 'loading',
+  UPDATE_IN_PROGRESS: 'loading',
+  UPDATE_ROLLBACK_COMPLETE: 'success',
+  UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS: 'loading',
+  UPDATE_ROLLBACK_FAILED: 'error',
+  UPDATE_ROLLBACK_IN_PROGRESS: 'loading',
+};

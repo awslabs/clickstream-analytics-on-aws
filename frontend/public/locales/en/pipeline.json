@@ -339,7 +339,8 @@
     "accessFromSolutionStep6": "Provide the sharing URL in below input box and click Submit button.",
     "sharingUrl": "Dashboard sharing URL",
     "alarmName": "Alarm name",
-    "action": "Action"
+    "action": "Action",
+    "stackDetails": "Stack Details"
   },
   "list": {
     "id": "Pipeline ID",

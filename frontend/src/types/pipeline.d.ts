@@ -17,6 +17,7 @@ export {};
 declare global {
   interface IStackStatus {
     stackName: string;
+    stackType: string;
     stackStatus: string;
     stackStatusReason: string;
     url: string;
@@ -145,7 +146,7 @@ declare global {
     };
     status?: {
       status: string;
-      details: IStackStatus[];
+      stackDetails: IStackStatus[];
     };
     createAt?: string;
     updateAt?: string;

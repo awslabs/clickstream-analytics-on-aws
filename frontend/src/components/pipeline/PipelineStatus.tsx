@@ -12,12 +12,17 @@
  */
 
 import {
+  Link,
+  Popover,
+  SpaceBetween,
+  Spinner,
   StatusIndicator,
   StatusIndicatorProps,
 } from '@cloudscape-design/components';
 import { getPipelineDetail } from 'apis/pipeline';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CLOUDFORMATION_STATUS_MAP } from 'ts/const';
 
 export enum EPipelineStatus {
   Active = 'Active',
@@ -41,7 +46,9 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   const { status, projectId, pipelineId } = props;
   const { t } = useTranslation();
   let intervalId: any = 0;
+  const [loadingStatus, setLoadingStatus] = useState(false);
   const [updatedStatus, setUpdatedStatus] = useState(status);
+  const [stackStatusList, setStackStatusList] = useState<IStackStatus[]>([]);
   let indicatorType: StatusIndicatorProps.Type = 'loading';
   let displayStatus = '';
   if (
@@ -71,6 +78,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   }
 
   const checkStatus = async () => {
+    setLoadingStatus(true);
     try {
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
@@ -79,14 +87,17 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
         });
       if (success) {
         setUpdatedStatus(data.status?.status);
+        setStackStatusList(data.status?.stackDetails || []);
         if (
           data.status?.status === EPipelineStatus.Active ||
           data.status?.status === EPipelineStatus.Failed
         ) {
           window.clearInterval(intervalId);
         }
+        setLoadingStatus(false);
       }
     } catch (error) {
+      setLoadingStatus(false);
       window.clearInterval(intervalId);
     }
   };
@@ -101,6 +112,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   }, []);
 
   useEffect(() => {
+    checkStatus();
     if (status) {
       setUpdatedStatus(status);
     }
@@ -108,7 +120,44 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
 
   return (
     <>
-      <StatusIndicator type={indicatorType}>{t(displayStatus)}</StatusIndicator>
+      <Popover
+        dismissButton={false}
+        position="right"
+        size="large"
+        triggerType="custom"
+        content={
+          loadingStatus ? (
+            <Spinner />
+          ) : (
+            <SpaceBetween direction="vertical" size="xs">
+              {stackStatusList.map((element) => {
+                return (
+                  <div className="flex flex-1" key={element.stackType}>
+                    <StatusIndicator
+                      type={
+                        CLOUDFORMATION_STATUS_MAP[element.stackStatus] ||
+                        'stopped'
+                      }
+                    >
+                      <b>{element.stackType}</b>(
+                      {element.stackStatus || t('status.unknown')})
+                      <span className="ml-5">
+                        <Link external href={element.url}>
+                          {t('pipeline:detail.stackDetails')}
+                        </Link>
+                      </span>
+                    </StatusIndicator>
+                  </div>
+                );
+              })}
+            </SpaceBetween>
+          )
+        }
+      >
+        <StatusIndicator type={indicatorType}>
+          <span className="stack-status">{t(displayStatus)}</span>
+        </StatusIndicator>
+      </Popover>
     </>
   );
 };
