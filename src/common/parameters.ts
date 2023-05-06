@@ -33,7 +33,6 @@ import {
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
   IAM_CERTIFICATE_ID_PARRERN,
-  EMAIL_PARRERN,
   OIDC_ISSUER_PATTERN,
   OIDC_CLIENT_ID_PATTERN,
   PARAMETER_LABEL_OIDC_ISSUER,
@@ -44,6 +43,7 @@ import {
   APP_ID_PATTERN,
   PARAMETER_LABEL_OIDC_JWKS_SUFFIX,
   OIDC_JWKS_SUFFIX_PATTERN,
+  EMAIL_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -183,8 +183,8 @@ export class Parameters {
     return new CfnParameter(scope, id ?? 'Email', {
       description: 'Email address of admin user ',
       type: 'String',
-      allowedPattern: `^${EMAIL_PARRERN}$`,
-      constraintDescription: `Email address must match pattern ${EMAIL_PARRERN}`,
+      allowedPattern: `^${EMAIL_PATTERN}$`,
+      constraintDescription: `Email address must match pattern ${EMAIL_PATTERN}`,
     });
   }
 
