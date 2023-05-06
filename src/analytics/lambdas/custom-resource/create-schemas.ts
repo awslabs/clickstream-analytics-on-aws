@@ -18,8 +18,9 @@ import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResp
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { CreateDatabaseAndSchemas } from '../../private/model';
-import { ReportViews } from '../../private/sqls/reporting-views';
+import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
+import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
+import { getSqlContent } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
 export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
@@ -159,51 +160,15 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
-  appIds.forEach(app => {
+  for await (let app of appIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
-    const createTblStatement = `CREATE TABLE IF NOT EXISTS ${app}.${odsTableName}(`
-      + '    app_info SUPER, '
-      + '    device SUPER, '
-      + '    ecommerce SUPER,'
-      + '    event_bundle_sequence_id BIGINT,'
-      + '    event_date VARCHAR(255), '
-      + '    event_dimensions SUPER,'
-      + '    event_id VARCHAR(255)  DEFAULT RANDOM(),'
-      + '    event_name VARCHAR(255),'
-      + '    event_params SUPER,'
-      + '    event_previous_timestamp BIGINT,'
-      + '    event_server_timestamp_offset BIGINT,'
-      + '    event_timestamp BIGINT,'
-      + '    event_value_in_usd VARCHAR(255),'
-      + '    geo SUPER, '
-      + '    ingest_timestamp BIGINT,'
-      + '    items SUPER,'
-      + '    platform VARCHAR(255),'
-      + '    privacy_info SUPER,'
-      + '    project_id VARCHAR(255),'
-      + '    traffic_source SUPER,'
-      + '    user_first_touch_timestamp BIGINT,'
-      + '    user_id VARCHAR(255),'
-      + '    user_ltv SUPER,'
-      + '    user_properties SUPER,'
-      + '    user_pseudo_id VARCHAR(255)'
-      + ') DISTSTYLE AUTO '
-      + 'SORTKEY AUTO';
-    sqlStatements.push(createTblStatement);
-    const createSpLogStatement = `CREATE OR REPLACE PROCEDURE ${app}.sp_clickstream_log(name in varchar(50), level in varchar(10), msg in varchar(256))`
-      + 'AS '
-      + '$$ '
-      + 'DECLARE '
-      + '    log_id INT;'
-      + 'BEGIN '
-      + `CREATE TABLE IF NOT EXISTS ${app}.clickstream_log (id varchar(256), log_name varchar(50), log_level varchar(10), log_msg varchar(256), log_date TIMESTAMP default getdate());`
-      + `EXECUTE \'SELECT COUNT(1) FROM ${app}.clickstream_log\' INTO log_id;`
-      + `INSERT INTO ${app}.clickstream_log VALUES(log_id, name, level, msg);`
-      + 'EXCEPTION WHEN OTHERS THEN'
-      + '    RAISE INFO \'error message: %\', SQLERRM;'
-      + 'END;	  '
-      + '$$ LANGUAGE plpgsql;';
-    sqlStatements.push(createSpLogStatement);
+    sqlStatements.push(getSqlContent('ods-events.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('sp-clickstream-log.sql', mustacheParam));
 
     const schemaUsagePermStatement = `GRANT USAGE ON SCHEMA "${app}" TO "${biUsername}";`;
     sqlStatements.push(schemaUsagePermStatement);
@@ -214,8 +179,9 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
     const functionPermStatement = `GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA "${app}" TO "${biUsername}";`;
     sqlStatements.push(functionPermStatement);
 
-    createUpsertUsersSchemas(app).forEach(s => sqlStatements.push(s));
-  });
+    sqlStatements.push(getSqlContent('dim-users.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('sp-upsert-users.sql', mustacheParam));
+  };
 
   if (sqlStatements.length == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
@@ -226,13 +192,22 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 }
 
 async function createViewForReporting(props: ResourcePropertiesType) {
+  const odsTableName = props.odsTableName;
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
-  appIds.forEach(app => {
-    ReportViews.forEach( view => {
-      sqlStatements.push(view.replace(/####/g, app));
-    });
-  });
+  for await (let app of appIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
+    // keep view order due to dependency between them.
+    sqlStatements.push(getSqlContent('clickstream-daily-active-user-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-ods-flattened-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-dau-wau-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-session-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-retention-view.sql', mustacheParam));
+  };
 
   if (sqlStatements.length == 0) {
     logger.info('Ignore creating reporting views in Redshift due to there is no application.');
@@ -249,7 +224,7 @@ const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, data
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
-      logger.error(`Error happend when creating database '${databaseName}' in Redshift.`, err);
+      logger.error(`Error happened when creating database '${databaseName}' in Redshift.`, err);
     }
     throw err;
   }
@@ -303,111 +278,4 @@ function generateRedshiftUserPassword(length: number): string {
     return password;
   }
   return generateRedshiftUserPassword(length);
-}
-
-function createUpsertUsersSchemas(app: string) {
-  const sqlStatements : string[] = [];
-  const createDimUserStatement = `CREATE TABLE IF NOT EXISTS ${app}.dim_users( `
-    +'    event_timestamp BIGINT,'
-    +'    user_id VARCHAR(255),'
-    +'    user_properties SUPER,'
-    +'    user_pseudo_id VARCHAR(255),'
-    +'    create_date TIMESTAMP default getdate()'
-    +') sortkey(user_pseudo_id, event_timestamp)';
-  sqlStatements.push(createDimUserStatement);
-  const createSpStatement = `CREATE OR REPLACE PROCEDURE ${app}.sp_upsert_users() `
-    +'AS '
-    +'$$ '
-    +'DECLARE '
-    +'  record_number INT; '
-    +'  begin_update_timestamp_record RECORD; '
-    +'  begin_update_timestamp TIMESTAMP; '
-    +'  log_name varchar(50);'
-    +'BEGIN '
-    +'log_name = \'sp_upsert_users\';'
-    +'CREATE TEMP TABLE IF NOT EXISTS ods_users( '
-    +'    event_timestamp BIGINT,'
-    +'    user_id VARCHAR(255),'
-    +'    user_properties SUPER,'
-    +'    user_pseudo_id VARCHAR(255),'
-    +'    create_date TIMESTAMP default getdate()'
-    +') sortkey(user_pseudo_id, event_timestamp);'
-    +`EXECUTE 'SELECT event_timestamp FROM ${app}.dim_users ORDER BY event_timestamp DESC LIMIT 1' INTO begin_update_timestamp_record;`
-    +`CALL ${app}.sp_clickstream_log(log_name, 'info', 'get event_timestamp = ' || begin_update_timestamp_record.event_timestamp || ' from ${app}.dim_users');`
-    +'IF begin_update_timestamp_record.event_timestamp is null THEN'
-    +`  EXECUTE 'SELECT event_timestamp FROM ${app}.ods_events ORDER BY event_timestamp ASC LIMIT 1' INTO begin_update_timestamp_record;`
-    +`  CALL ${app}.sp_clickstream_log(log_name, 'info', 'get event_timestamp = ' || begin_update_timestamp_record.event_timestamp || ' from ${app}.ods_events');`
-    +'END IF;'
-    +`CALL ${app}.sp_clickstream_log(log_name, 'info', 'begin='||begin_update_timestamp_record.event_timestamp);`
-    +'IF begin_update_timestamp_record.event_timestamp is NULL or record_number = 0 THEN '
-    +`    CALL ${app}.sp_clickstream_log(log_name, 'info', 'nothing to upsert users');`
-    +'ELSE '
-    +'    INSERT INTO ods_users'
-    +'    ('
-    +'        SELECT event_timestamp, user_id, user_properties, user_pseudo_id'
-    +'        FROM'
-    +'        ('
-    +'            SELECT e.event_timestamp, e.user_id, e.user_properties, e.user_pseudo_id,'
-    +'            sum(1) OVER (PARTITION BY e.user_pseudo_id ORDER BY e.event_timestamp DESC ROWS UNBOUNDED PRECEDING) AS row_number'
-    +`            FROM ${app}.ods_events e, e.user_properties u`
-    +'            WHERE e.event_timestamp > begin_update_timestamp_record.event_timestamp'
-    +'            AND u.key IS NOT NULL'
-    +'        )'
-    +'        WHERE row_number = 1'
-    +'    );'
-    +'    GET DIAGNOSTICS record_number := ROW_COUNT;'
-    +`    CALL ${app}.sp_clickstream_log(log_name, 'info', 'rows add in ods_users = ' || record_number);`
-    +`    LOCK ${app}.dim_users;`
-    +`    DELETE FROM ${app}.dim_users`
-    +'    WHERE user_pseudo_id NOT IN'
-    +'    ('
-    +'        WITH'
-    +'            current_users AS ('
-    +'                SELECT ce.user_pseudo_id, cu.key, '
-    +'                cu.value.double_value, cu.value.float_value, cu.value.int_value, cu.value.string_value, cu.value.set_timestamp_micros'
-    +`                FROM ${app}.dim_users ce, ce.user_properties cu`
-    +'            )'
-    +'            ,latest_users AS ('
-    +'                SELECT e.user_pseudo_id, u.key, '
-    +'                u.value.double_value, u.value.float_value, u.value.int_value, u.value.string_value, u.value.set_timestamp_micros'
-    +'                FROM ods_users e, e.user_properties u'
-    +'            )'
-    +'        SELECT current_users.user_pseudo_id'
-    +'        FROM latest_users, current_users'
-    +'        WHERE current_users.user_pseudo_id = latest_users.user_pseudo_id'
-    +'        AND current_users.key = latest_users.key'
-    +'        AND current_users.double_value = latest_users.double_value'
-    +'        AND current_users.float_value = latest_users.float_value'
-    +'        AND current_users.int_value = latest_users.int_value'
-    +'        AND current_users.string_value = latest_users.string_value'
-    +'        AND current_users.set_timestamp_micros = latest_users.set_timestamp_micros'
-    +'    );'
-    +'    GET DIAGNOSTICS record_number := ROW_COUNT;'
-    +`    CALL ${app}.sp_clickstream_log(log_name, 'info', 'rows deleted in dim_users = ' || record_number);`
-    +`    INSERT INTO ${app}.dim_users`
-    +'    ('
-    +'        event_timestamp,'
-    +'        user_id,'
-    +'        user_pseudo_id,'
-    +'        user_properties'
-    +'    )'
-    +'    ('
-    +'        SELECT '
-    +'            event_timestamp,'
-    +'            user_id,'
-    +'            user_pseudo_id,'
-    +'            user_properties'
-    +'        FROM ods_users'
-    +'    );'
-    +'    GET DIAGNOSTICS record_number := ROW_COUNT;'
-    +`    CALL ${app}.sp_clickstream_log(log_name, 'info', 'rows inserted into dim_users = ' || record_number);`
-    +'    TRUNCATE TABLE ods_users;'
-    +'END IF;'
-    +'EXCEPTION WHEN OTHERS THEN'
-    +`    CALL ${app}.sp_clickstream_log(log_name, 'error', 'error message:' || SQLERRM);`
-    +'END;'
-    +'$$ LANGUAGE plpgsql';
-  sqlStatements.push(createSpStatement);
-  return sqlStatements;
-
 }

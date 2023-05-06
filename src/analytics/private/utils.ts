@@ -11,23 +11,15 @@
  *  and limitations under the License.
  */
 
-export enum JobStatus {
-  JOB_NEW = 'NEW',
-  JOB_ENQUEUE = 'ENQUEUE',
-  JOB_PROCESSING = 'PROCESSING',
-}
+import { readFileSync } from 'fs';
+import Mustache from 'mustache';
+import { MustacheParamType } from './model';
 
-export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
-
-export const REDSHIFT_ODS_TABLE_NAME = 'ods_events';
-export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
-
-export const SP_UPSERT_USERS = 'sp_upsert_users';
-
-export const SQL_TEMPLATE_PARAMETER = {
-  sp_upsert_users: 'sp_upsert_users',
-  table_ods_users: 'ods_users',
-  table_dim_users: 'dim_users',
-  sp_clickstream_log: 'sp_clickstream_log',
-  table_clickstream_log: 'clickstream_log',
+// export const getSqlContent = async (
+export function getSqlContent(
+  sqlFile: string,
+  mustacheParam: MustacheParamType,
+) {
+  const sqlTemplate = readFileSync(`/opt/${sqlFile}`, 'utf8');
+  return Mustache.render(sqlTemplate, mustacheParam);
 };

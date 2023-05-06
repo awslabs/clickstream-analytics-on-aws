@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Arn, ArnFormat, Duration, CustomResource, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
-import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, Function, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -101,6 +101,13 @@ export class ApplicationSchemas extends Construct {
       ],
     });
 
+    const codePath = __dirname + '/sqls';
+    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
+      compatibleRuntimes: [Runtime.NODEJS_18_X],
+      code: Code.fromAsset(codePath),
+      description: 'SQL layer',
+    });
+
     const fn = new NodejsFunction(this, 'CreateSchemaForApplicationsFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
@@ -117,6 +124,7 @@ export class ApplicationSchemas extends Construct {
       environment: {
         ... POWERTOOLS_ENVS,
       },
+      layers: [sqlLayer],
     });
     return fn;
   }

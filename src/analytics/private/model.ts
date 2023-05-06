@@ -129,3 +129,13 @@ export type CheckUpsertStatusEventDetail = {
   appId: string;
   status: string;
 }
+
+export type MustacheParamType = {
+  schema: string;
+  table_ods_events: string;
+  sp_upsert_users: string;
+  table_ods_users: string;
+  table_dim_users: string;
+  sp_clickstream_log: string;
+  table_clickstream_log: string;
+}

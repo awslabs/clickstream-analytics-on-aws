@@ -25,12 +25,16 @@ const commonDeps = [
   '@aws-lambda-powertools/logger@^1.5.1',
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
+  'mustache@^4.2.0',
 ];
 
 const commonDevDeps = [
   '@types/uuid@^9.0.0',
   'aws-sdk-client-mock@^2.1.1',
   'aws-sdk-client-mock-jest@^2.1.1',
+  '@types/mustache@^4.2.2',
+  'mock-fs@^5.2.0',
+  '@types/mock-fs@^4.13.1',
 ];
 
 const awsSDKVersion = '3.310.0';

@@ -10,10 +10,13 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+
+import { readFileSync } from 'fs';
 import { DescribeStatementCommand, BatchExecuteStatementCommand, BatchExecuteStatementCommandInput, ExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommandInput } from '@aws-sdk/client-redshift-data';
 import { PutParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+import mockfs from 'mock-fs';
 import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
@@ -100,10 +103,24 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     redshiftDataMock.reset();
     ssmMock.reset();
+    const rootPath = __dirname+'/../../../../../src/analytics/private/sqls/';
+    mockfs({
+      '/opt/clickstream-daily-active-user-view.sql': await testSqlContent(rootPath + 'clickstream-daily-active-user-view.sql'),
+      '/opt/clickstream-dau-wau-view.sql': await testSqlContent(rootPath + 'clickstream-dau-wau-view.sql'),
+      '/opt/clickstream-ods-flattened-view.sql': await testSqlContent(rootPath + 'clickstream-ods-flattened-view.sql'),
+      '/opt/clickstream-retention-view.sql': await testSqlContent(rootPath + 'clickstream-retention-view.sql'),
+      '/opt/clickstream-session-view.sql': await testSqlContent(rootPath + 'clickstream-session-view.sql'),
+      '/opt/dim-users.sql': await testSqlContent(rootPath + 'dim-users.sql'),
+      '/opt/ods-events.sql': await testSqlContent(rootPath + 'ods-events.sql'),
+      '/opt/sp-clickstream-log.sql': await testSqlContent(rootPath + 'sp-clickstream-log.sql'),
+      '/opt/sp-upsert-users.sql': await testSqlContent(rootPath + 'sp-upsert-users.sql'),
+    });
   });
+
+  afterEach(mockfs.restore);
 
   test('Only creating database and bi user are invoked if no application is given', async () => {
     ssmMock.onAnyCommand().resolves({});
@@ -406,3 +423,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
     fail('No exception happened when Redshift ExecuteStatementCommand failed');
   });
 });
+
+const testSqlContent = async (filePath: string) => {
+  const sqlTemplate = readFileSync(filePath, 'utf8');
+  return sqlTemplate;
+};

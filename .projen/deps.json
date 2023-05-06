@@ -10,6 +10,16 @@
       "type": "build"
     },
     {
+      "name": "@types/mock-fs",
+      "version": "^4.13.1",
+      "type": "build"
+    },
+    {
+      "name": "@types/mustache",
+      "version": "^4.2.2",
+      "type": "build"
+    },
+    {
       "name": "@types/node",
       "version": "^16",
       "type": "build"
@@ -72,6 +82,11 @@
     {
       "name": "jest-junit",
       "version": "^15",
+      "type": "build"
+    },
+    {
+      "name": "mock-fs",
+      "version": "^5.2.0",
       "type": "build"
     },
     {
@@ -288,6 +303,11 @@
     {
       "name": "jwks-rsa",
       "version": "^3.0.1",
+      "type": "runtime"
+    },
+    {
+      "name": "mustache",
+      "version": "^4.2.0",
       "type": "runtime"
     },
     {
