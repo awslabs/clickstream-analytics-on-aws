@@ -295,12 +295,17 @@ export enum ProjectEnvironment {
   PROD = 'Prod',
 }
 
-export interface RedshiftServerlessWorkgroup {
-  readonly workgroupId: string;
-  readonly workgroupArn: string;
-  readonly workgroupName: string;
-  readonly namespaceId: string;
-  readonly namespaceArn: string;
-  readonly namespaceName: string;
+export interface RedshiftInfo {
+  readonly endpoint: {
+    address: string;
+    port: number;
+  };
+  readonly publiclyAccessible: boolean;
+  readonly workgroupId?: string;
+  readonly workgroupArn?: string;
+  readonly workgroupName?: string;
+  readonly namespaceId?: string;
+  readonly namespaceArn?: string;
+  readonly namespaceName?: string;
 }
 

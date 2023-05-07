@@ -25,3 +25,34 @@ export const basicCloudFormationEvent: CdkCustomResourceEvent = {
     ServiceToken: 'ServiceToken1',
   },
 };
+
+export const basicCloudFormationUpdateEvent: CdkCustomResourceEvent = {
+  RequestType: 'Update',
+  ServiceToken: 'ServiceToken1',
+  ResponseURL: '',
+  StackId: 'stack1',
+  RequestId: 'requestId-1',
+  PhysicalResourceId: 'physicalResourceId-1',
+  LogicalResourceId: 'logicalResouceId-1',
+  ResourceType: '',
+  ResourceProperties: {
+    ServiceToken: 'ServiceToken1',
+  },
+  OldResourceProperties: {
+  },
+};
+
+
+export const basicCloudFormationDeleteEvent: CdkCustomResourceEvent = {
+  RequestType: 'Delete',
+  ServiceToken: 'ServiceToken1',
+  ResponseURL: '',
+  StackId: 'stack1',
+  RequestId: 'requestId-1',
+  LogicalResourceId: 'logicalResouceId-1',
+  PhysicalResourceId: 'physicalResourceId-1',
+  ResourceType: '',
+  ResourceProperties: {
+    ServiceToken: 'ServiceToken1',
+  },
+};

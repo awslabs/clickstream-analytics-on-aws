@@ -228,7 +228,7 @@ export const callback = async (event: SfnStackEvent) => {
     const input = {
       Body: JSON.stringify({ [event.Input.StackName]: event.Result }),
       Bucket: event.Callback.BucketName,
-      Key: `${event.Callback.BucketPrefix}/output.json`,
+      Key: `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
       ContentType: 'application/json',
     };
     const command = new PutObjectCommand(input);

@@ -135,11 +135,12 @@ export function createLambdaRole(
   inVpc: boolean,
   extraPolicyStatements: PolicyStatement[],
   assumedBy: PrincipalBase = new ServicePrincipal('lambda.amazonaws.com'),
+  logGroupArn: string = '*',
 ): Role {
   const role = new Role(scope, id, {
     assumedBy,
   });
-  getLambdaBasicPolicyStatements(inVpc).forEach((ps) => role.addToPolicy(ps));
+  getLambdaBasicPolicyStatements(inVpc, logGroupArn).forEach((ps) => role.addToPolicy(ps));
   extraPolicyStatements.forEach((ps) => role.addToPolicy(ps));
   if (inVpc) {suppressENIWildcardResources(role.node.findChild('DefaultPolicy') as Policy);} else {suppressLogsWildcardResources(role.node.findChild('DefaultPolicy') as Policy);}
   return role;

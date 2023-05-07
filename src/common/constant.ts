@@ -114,10 +114,11 @@ export const POSITIVE_INTEGERS = '^[1-9]\\d*';
 export const S3_PATH_PLUGIN_JARS_PATTERN =`^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
 export const SUBNETS_THREE_AZ_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?){2,}';
-export const QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9_\\-]+[A-Za-z0-9]$';
+export const QUICKSIGHT_ACCOUNT_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9_\\-]+[A-Za-z0-9]$';
+export const QUICKSIGHT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
-export const REDSHIFT_DB_NAME_PATTERN = '^[a-z][a-z0-9_]+[a-z0-9]$';
-export const REDSHIFT_USER_NAME_PATTERN = '^([a-z0-9-]{1,63})?$';
+export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
+export const REDSHIFT_DB_SCHEMA_NAME_PATTERN = `^${APP_ID_PATTERN}$`;
 export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
 
 // cloudformation parameters

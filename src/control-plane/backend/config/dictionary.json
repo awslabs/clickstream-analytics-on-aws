@@ -10,6 +10,10 @@
     }
   },
   {
+    "name": "QuickSightTemplateArn",
+    "data": "arn:aws:quicksight:us-east-1:451426793911:template/clickstream-quicksight-template-v1"
+  },
+  {
     "name": "Templates",
     "data": {
       "ingestion_s3": "ingestion-server-s3-stack.template.json",
@@ -18,7 +22,7 @@
       "kafka-s3-sink": "kafka-s3-sink-stack.template.json",
       "data-pipeline": "data-pipeline-stack.template.json",
       "data-analytics": "data-analytics-redshift-stack.template.json",
-      "quicksight": "data-analytics-quicksight-stack.template.json"
+      "reporting": "data-reporting-quicksight-stack.template.json"
     }
   },
   {

@@ -18,6 +18,7 @@ import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-st
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
+import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 
@@ -160,6 +161,29 @@ stackSuppressions([
   { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
+
+stackSuppressions([
+  new DataReportingQuickSightStack(app, 'data-reporting-quicksight-stack', {
+    synthesizer: synthesizer(),
+  }),
+], [
+  {
+    id: 'AwsSolutions-IAM4',
+    reason:
+      'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
+  },
+  {
+    id: 'AwsSolutions-IAM5',
+    reason:
+      'LogRetention lambda policy which are created by CDK contains wildcard permissions',
+  },
+  {
+    id: 'AwsSolutions-L1',
+    reason:
+      'Caused by CDK built-in custom resource provider not using latest Nodejs runtime',
+  },
+]);
+
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {

@@ -56,7 +56,7 @@ export class StackManager {
     return this.execWorkflow;
   }
 
-  public updateETLWorkflow(appIds: string[], etlStackName: string, analyticsStackName: string): void {
+  public updateETLWorkflow(appIds: string[], etlStackName: string, analyticsStackName: string, reportStackName: string): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
@@ -68,12 +68,16 @@ export class StackManager {
       this.execWorkflow.Workflow, etlStackName, 'AppIds', appIds.join(','), 'Update');
     this.execWorkflow.Workflow = this.updateStackParameter(
       this.execWorkflow.Workflow, analyticsStackName, 'AppIds', appIds.join(','), 'Update');
+    this.execWorkflow.Workflow = this.updateStackParameter(
+      this.execWorkflow.Workflow, reportStackName, 'RedShiftDBSchemaParam', appIds.join(','), 'Update');
 
     // Update saveWorkflow AppIds Parameter
     this.workflow.Workflow = this.updateStackParameter(
       this.workflow.Workflow, etlStackName, 'AppIds', appIds.join(','), 'Create');
     this.workflow.Workflow = this.updateStackParameter(
       this.workflow.Workflow, analyticsStackName, 'AppIds', appIds.join(','), 'Create');
+    this.workflow.Workflow = this.updateStackParameter(
+      this.workflow.Workflow, reportStackName, 'RedShiftDBSchemaParam', appIds.join(','), 'Create');
   }
 
   public deleteWorkflow(): void {

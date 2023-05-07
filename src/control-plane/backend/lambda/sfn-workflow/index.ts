@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
+import { Parameter, Output } from '@aws-sdk/client-cloudformation';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
@@ -87,18 +87,40 @@ async function stackParametersResolve(stack: WorkFlowStack) {
     const prefix = stack.Data.Callback.BucketPrefix;
     for (let param of stack.Data.Input.Parameters) {
       if (param.ParameterKey?.endsWith('.$') && param.ParameterValue?.startsWith('$.')) {
+        // Find the value in output accurately through JSONPath
         // get stack name
         const splitValues = param.ParameterValue.split('.');
         const stackName = splitValues[1];
         // get output from s3
         const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+        let value = '';
         if (output) {
-          const value = JSONPath({ path: param.ParameterValue, json: JSON.parse(output as string) });
-          param.ParameterKey = param.ParameterKey.substring(0, param.ParameterKey.length - 2);
-          if (Array.prototype.isPrototypeOf(value) && value.length > 0) {
-            param.ParameterValue = value[0] as string;
+          const values = JSONPath({ path: param.ParameterValue, json: JSON.parse(output as string) });
+          if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
+            value = values[0] as string;
           }
         }
+        param.ParameterKey = param.ParameterKey.substring(0, param.ParameterKey.length - 2);
+        param.ParameterValue = value;
+      } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) {
+        // Find the value in output by suffix
+        // get stack name
+        const splitValues = param.ParameterValue.split('.');
+        const stackName = splitValues[1];
+        // get output from s3
+        const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+        const stackOutputs = JSON.parse(output as string)[stackName].Outputs;
+        let value = '';
+        if (stackOutputs) {
+          for (let out of stackOutputs as Output[]) {
+            if (out.OutputKey?.endsWith(splitValues[2])) {
+              value = out.OutputValue ?? '';
+              break;
+            }
+          }
+        }
+        param.ParameterKey = param.ParameterKey.substring(0, param.ParameterKey.length - 2);
+        param.ParameterValue = value ?? '';
       }
     }
   }

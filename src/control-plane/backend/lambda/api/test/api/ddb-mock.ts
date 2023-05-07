@@ -12,6 +12,7 @@
  */
 
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
+import { DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
@@ -200,6 +201,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           'kafka-s3-sink': 'kafka-s3-sink-stack.template.json',
           'data-pipeline': 'data-pipeline-stack.template.json',
           'data-analytics': 'data-analytics-redshift-stack.template.json',
+          'reporting': 'data-reporting-quicksight-stack.template.json',
         },
       },
     });
@@ -223,9 +225,22 @@ function dictionaryMock(ddbMock: any, name?: string): any {
       },
     });
   }
+  if (!name || name === 'QuickSightTemplateArn') {
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'QuickSightTemplateArn',
+      },
+    }).resolves({
+      Item: {
+        name: 'QuickSightTemplateArn',
+        data: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
+      },
+    });
+  }
 }
 
-function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClient: any, props?: any): any {
+function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClient: any, redshiftClient:any, props?: any): any {
   // project
   ddbMock.on(GetCommand, {
     TableName: clickStreamTableName,
@@ -307,6 +322,10 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
       workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
       workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
       workgroupName: 'test-wg',
+      endpoint: {
+        address: 'https://redshift-serverless/xxx/yyy',
+        port: 5001,
+      },
     },
   });
   redshiftServerlessClient.on(GetNamespaceCommand).resolves({
@@ -316,6 +335,22 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
       namespaceName: 'test-ns',
     },
   });
+  redshiftClient.on(DescribeClustersCommand).resolves({
+    Clusters: [
+      {
+        ClusterIdentifier: 'cluster-1',
+        NodeType: '',
+        Endpoint: {
+          Address: 'https://redshift/xxx/yyy',
+          Port: 5002,
+        },
+        ClusterStatus: 'Active',
+        MasterUsername: 'awsuser',
+        publiclyAccessible: false,
+      },
+    ],
+  });
+
 }
 
 export {

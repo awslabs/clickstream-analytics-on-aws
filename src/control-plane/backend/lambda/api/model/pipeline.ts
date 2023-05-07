@@ -26,12 +26,16 @@ import {
   SUBNETS_PATTERN,
   VPC_ID_PARRERN,
   POSITIVE_INTEGERS,
-  QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN,
+  QUICKSIGHT_ACCOUNT_NAME_PATTERN,
   QUICKSIGHT_NAMESPACE_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
-  REDSHIFT_MODE, SUBNETS_THREE_AZ_PATTERN,
+  REDSHIFT_MODE,
+  SUBNETS_THREE_AZ_PATTERN,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
@@ -42,7 +46,7 @@ import {
   PipelineSinkType, PipelineStackType,
   PipelineStatus,
   ProjectEnvironment,
-  RedshiftServerlessWorkgroup,
+  RedshiftInfo,
   WorkflowParallelBranch,
   WorkflowState,
   WorkflowStateType,
@@ -54,7 +58,7 @@ import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
-import { getRedshiftWorkgroupAndNamespace } from '../store/aws/redshift';
+import { getRedshiftInfo } from '../store/aws/redshift';
 import { getSecretValue } from '../store/aws/secretsmanager';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -252,9 +256,10 @@ export class CPipeline {
   private mskBrokers?: string[];
   private appIds?: string[];
   private plugins?: IPlugin[];
-  private workgroup?: RedshiftServerlessWorkgroup;
+  private redshift?: RedshiftInfo;
   private solution?: IDictionary;
   private templates?: IDictionary;
+  private quickSightTemplateArn?: IDictionary;
   private stackTags?: Tag[];
 
   constructor(pipeline: IPipeline) {
@@ -285,8 +290,9 @@ export class CPipeline {
   public async updateETL(appIds: string[]): Promise<void> {
     const etlStackName = this.getStackName(PipelineStackType.ETL);
     const analyticsStackName = this.getStackName(PipelineStackType.DATA_ANALYTICS);
+    const reportStackName = this.getStackName(PipelineStackType.REPORT);
     // update workflow
-    this.stackManager.updateETLWorkflow(appIds, etlStackName, analyticsStackName);
+    this.stackManager.updateETLWorkflow(appIds, etlStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionName = `main-${uuidv4()}`;
@@ -361,18 +367,20 @@ export class CPipeline {
       this.mskBrokers = await listMSKClusterBrokers(this.pipeline.region, this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
     }
 
-    if (!this.workgroup && this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName) {
-      const workgroup = await getRedshiftWorkgroupAndNamespace(
-        this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName);
-      if (!workgroup) {
-        throw new ClickStreamBadRequestError('Workgroup no found. Please check and try again.');
+    const workgroupName = this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName;
+    const clusterIdentifier = this.pipeline.dataAnalytics?.redshift?.provisioned?.clusterIdentifier;
+    if (!this.redshift && (workgroupName || clusterIdentifier)) {
+      const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
+      if (!redshift) {
+        throw new ClickStreamBadRequestError('Redshift info no found. Please check and try again.');
       }
-      this.workgroup = workgroup;
+      this.redshift = redshift;
     }
 
-    if (!this.solution || !this.templates) {
+    if (!this.solution || !this.templates || !this.quickSightTemplateArn) {
       this.solution = await store.getDictionary('Solution');
       this.templates = await store.getDictionary('Templates');
+      this.quickSightTemplateArn = await store.getDictionary('QuickSightTemplateArn');
     }
 
     if (!this.stackTags || this.stackTags?.length === 0) {
@@ -404,11 +412,11 @@ export class CPipeline {
     names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${this.pipeline.pipelineId}`);
     names.set(PipelineStackType.ETL, `Clickstream-${PipelineStackType.ETL}-${this.pipeline.pipelineId}`);
     names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${this.pipeline.pipelineId}`);
+    names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${this.pipeline.pipelineId}`);
     return names.get(key) ?? '';
   }
 
   public async getTemplateUrl(name: string) {
-    await this.init();
     if (this.solution && this.templates) {
       if (isEmpty(this.templates.data[name])) {
         return undefined;
@@ -451,7 +459,10 @@ export class CPipeline {
   private getStackTags() {
     const stackTags: Tag[] = [];
     for (let tag of this.pipeline.tags) {
-      stackTags.push({ Key: tag.key, Value: tag.value });
+      stackTags.push({
+        Key: tag.key,
+        Value: tag.value,
+      });
     }
     return stackTags;
   };
@@ -512,7 +523,7 @@ export class CPipeline {
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}/${ingestionStackName}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
           },
         },
       };
@@ -537,7 +548,7 @@ export class CPipeline {
             },
             Callback: {
               BucketName: stackWorkflowS3Bucket,
-              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}/${kafkaConnectorStackName}`,
+              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
             },
           },
           End: true,
@@ -583,7 +594,7 @@ export class CPipeline {
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}/${pipelineStackName}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
           },
         },
         End: true,
@@ -619,11 +630,47 @@ export class CPipeline {
           },
           Callback: {
             BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}/${dataAnalyticsStackName}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
           },
         },
-        End: true,
       };
+
+      if (this.pipeline.report) {
+        const reportTemplateURL = await this.getTemplateUrl('reporting');
+        if (!reportTemplateURL) {
+          throw Error('Template: quicksight not found in dictionary.');
+        }
+        const reportStackParameters = await this.getReportStackParameters();
+        const reportStackName = this.getStackName(PipelineStackType.REPORT);
+        const reportState: WorkflowState = {
+          Type: WorkflowStateType.STACK,
+          Data: {
+            Input: {
+              Action: 'Create',
+              Region: this.pipeline.region,
+              StackName: reportStackName,
+              TemplateURL: reportTemplateURL,
+              Parameters: reportStackParameters,
+              Tags: this.stackTags,
+            },
+            Callback: {
+              BucketName: stackWorkflowS3Bucket,
+              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+            },
+          },
+          End: true,
+        };
+        dataAnalyticsState.Next = PipelineStackType.REPORT;
+        return {
+          StartAt: PipelineStackType.DATA_ANALYTICS,
+          States: {
+            [PipelineStackType.DATA_ANALYTICS]: dataAnalyticsState,
+            [PipelineStackType.REPORT]: reportState,
+          },
+        };
+      }
+
+      dataAnalyticsState.End = true;
       return {
         StartAt: PipelineStackType.DATA_ANALYTICS,
         States: {
@@ -1196,6 +1243,10 @@ export class CPipeline {
         ParameterKey: 'RedshiftServerlessSubnets',
         ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','),
       });
+
+      if (isEmpty(this.pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups)) {
+        throw new ClickStreamBadRequestError('SecurityGroups required for provisioning new Redshift Serverless.');
+      }
       parameters.push({
         ParameterKey: 'RedshiftServerlessSGs',
         ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups.join(','),
@@ -1211,15 +1262,15 @@ export class CPipeline {
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessNamespaceId',
-        ParameterValue: this.workgroup?.namespaceId,
+        ParameterValue: this.redshift?.namespaceId,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessWorkgroupId',
-        ParameterValue: this.workgroup?.workgroupId,
+        ParameterValue: this.redshift?.workgroupId,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessWorkgroupName',
-        ParameterValue: this.workgroup?.workgroupName,
+        ParameterValue: this.redshift?.workgroupName,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessIAMRole',
@@ -1230,16 +1281,93 @@ export class CPipeline {
     return parameters;
   }
 
-  public async getStackOutputBySuffix(stackType: PipelineStackType, outputKeySuffix: string): Promise<string> {
+  private async getReportStackParameters() {
+    const parameters: Parameter[] = [];
+
+    validatePattern('QuickSightUser', QUICKSIGHT_ACCOUNT_NAME_PATTERN, this.pipeline.report?.quickSight?.user);
+    parameters.push({
+      ParameterKey: 'QuickSightUserParam',
+      ParameterValue: this.pipeline.report?.quickSight?.user,
+    });
+
+    validatePattern('QuickSightNamespace', QUICKSIGHT_NAMESPACE_PATTERN, this.pipeline.report?.quickSight?.namespace ?? 'default');
+    parameters.push({
+      ParameterKey: 'QuickSightNamespaceParam',
+      ParameterValue: this.pipeline.report?.quickSight?.namespace ?? 'default',
+    });
+
+    if (this.pipeline.report?.quickSight?.vpcConnection) {
+      parameters.push({
+        ParameterKey: 'QuickSightVpcConnectionParam',
+        ParameterValue: this.pipeline.report?.quickSight?.vpcConnection,
+      });
+    }
+
+    parameters.push({
+      ParameterKey: 'RedshiftDBParam',
+      ParameterValue: this.pipeline.projectId,
+    });
+
+    parameters.push({
+      ParameterKey: 'RedShiftDBSchemaParam',
+      ParameterValue: this.appIds?.join(','),
+    });
+
+    if (!this.quickSightTemplateArn) {
+      throw new ClickStreamBadRequestError('QuickSightTemplateArn can not found in dictionary.');
+    }
+    parameters.push({
+      ParameterKey: 'QuickSightTemplateArnParam',
+      ParameterValue: this.quickSightTemplateArn.data,
+    });
+
+    const dataAnalyticsStackName = this.getStackName(PipelineStackType.DATA_ANALYTICS);
+    if (this.pipeline.dataAnalytics?.redshift?.provisioned || this.pipeline.dataAnalytics?.redshift?.existingServerless) {
+      parameters.push({
+        ParameterKey: 'RedshiftEndpointParam',
+        ParameterValue: this.redshift?.endpoint.address ?? '',
+      });
+
+      parameters.push({
+        ParameterKey: 'RedshiftPortParam',
+        ParameterValue: (this.redshift?.endpoint.port ?? 5439).toString(),
+      });
+    } else if (this.pipeline.dataAnalytics?.redshift?.newServerless) {
+      parameters.push({
+        ParameterKey: 'RedshiftEndpointParam.#',
+        ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS}`,
+      });
+
+      parameters.push({
+        ParameterKey: 'RedshiftPortParam.#',
+        ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT}`,
+      });
+    }
+
+    parameters.push({
+      ParameterKey: 'RedshiftParameterKeyParam.#',
+      ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`,
+    });
+
+    return parameters;
+  }
+
+  public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {
     const stack = await describeStack(this.pipeline.region, this.getStackName(stackType));
-    if (stack && stack.Outputs && stack.Outputs.length > 0) {
-      for (let out of stack.Outputs as Output[]) {
-        if (out.OutputKey?.endsWith(outputKeySuffix)) {
-          return out.OutputValue ?? '';
+    const res: Map<string, string> = new Map<string, string>();
+    if (stack) {
+      for (let suffix of outputKeySuffixs) {
+        let value = '';
+        for (let out of stack.Outputs as Output[]) {
+          if (out.OutputKey?.endsWith(suffix)) {
+            value = out.OutputValue ?? '';
+            break;
+          }
         }
+        res.set(suffix, value);
       }
     }
-    return '';
+    return res;
   }
 
   private getKafkaTopic() {
@@ -1251,31 +1379,3 @@ export class CPipeline {
   }
 }
 
-export async function getReportStackParameters(pipeline: IPipeline) {
-  const parameters: Parameter[] = [];
-
-  validatePattern('QuickSightAccountName', QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN, pipeline.report?.quickSight?.accountName);
-  parameters.push({
-    ParameterKey: 'QuickSightAccountNameParam',
-    ParameterValue: pipeline.report?.quickSight?.accountName,
-  });
-
-  validatePattern('QuickSightUser', QUICKSIGHT_ACCOUNT_USER_NAME_PATTERN, pipeline.report?.quickSight?.user);
-  parameters.push({
-    ParameterKey: 'QuickSightUserParam',
-    ParameterValue: pipeline.report?.quickSight?.user,
-  });
-
-  validatePattern('QuickSightNamespace', QUICKSIGHT_NAMESPACE_PATTERN, pipeline.report?.quickSight?.namespace?? 'default');
-  parameters.push({
-    ParameterKey: 'QuickSightNamespaceParam',
-    ParameterValue: pipeline.report?.quickSight?.namespace?? 'default',
-  });
-
-  parameters.push({
-    ParameterKey: 'QuickSightVpcConnectionParam',
-    ParameterValue: pipeline.report?.quickSight?.vpcConnection,
-  });
-
-  return parameters;
-}

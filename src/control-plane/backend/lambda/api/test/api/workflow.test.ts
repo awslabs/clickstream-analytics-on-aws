@@ -14,6 +14,9 @@
 import { DescribeSubnetsCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
+  RedshiftClient,
+} from '@aws-sdk/client-redshift';
+import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
@@ -26,12 +29,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, projectExistedMock, stackParameterMock } from './ddb-mock';
 import {
   KAFKA_INGESTION_PIPELINE,
-  KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE, KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE,
+  KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
+  KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE,
+  KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
   KINESIS_ETL_REDSHIFT_PIPELINE,
   KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
   MSK_ETL_REDSHIFT_PIPELINE,
-  MSK_WITH_CONNECTOR_INGESTION_PIPELINE, RETRY_PIPELINE_WITH_WORKFLOW,
+  MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
+  RETRY_PIPELINE_WITH_WORKFLOW,
   S3_ETL_PIPELINE,
   S3_INGESTION_PIPELINE,
 } from './pipeline-mock';
@@ -44,6 +51,7 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
+const redshiftClient = mockClient(RedshiftClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const sfnClient = mockClient(SFNClient);
 const secretsManagerClient = mockClient(SecretsManagerClient);
@@ -76,6 +84,7 @@ describe('Workflow test', () => {
   beforeEach(() => {
     ddbMock.reset();
     kafkaMock.reset();
+    redshiftClient.reset();
     redshiftServerlessClient.reset();
     sfnClient.reset();
     secretsManagerClient.reset();
@@ -84,7 +93,7 @@ describe('Workflow test', () => {
 
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -101,7 +110,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -223,7 +232,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -240,7 +249,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -354,7 +363,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka with connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -371,7 +380,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -478,7 +487,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -545,7 +554,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -562,7 +571,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -673,7 +682,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -744,7 +753,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -761,7 +770,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -891,7 +900,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -908,7 +917,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1038,7 +1047,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -1055,7 +1064,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-s3-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1175,7 +1184,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1265,7 +1274,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow kafka msk + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -1282,7 +1291,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1393,7 +1402,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1461,7 +1470,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1549,7 +1558,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1643,7 +1652,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     ec2Mock.on(DescribeSubnetsCommand)
       .resolvesOnce({
         Subnets: [{ AvailabilityZone: 'us-east-1a' }],
@@ -1670,7 +1679,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1798,7 +1807,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1886,7 +1895,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -1984,7 +1993,7 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1998,7 +2007,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kinesis-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2126,7 +2135,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2214,7 +2223,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2298,9 +2307,765 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift + quicksight', async () => {
+    dictionaryMock(ddbMock);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
+    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs/',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'KinesisStreamMode',
+                        ParameterValue: 'ON_DEMAND',
+                      },
+                      {
+                        ParameterKey: 'KinesisShardCount',
+                        ParameterValue: '3',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataRetentionHours',
+                        ParameterValue: '24',
+                      },
+                      {
+                        ParameterKey: 'KinesisBatchSize',
+                        ParameterValue: '10000',
+                      },
+                      {
+                        ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+                        ParameterValue: '300',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '7',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: 'hour',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
+                      },
+                    ],
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'ODSEventBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'ODSEventPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'ODSEventFileSuffix',
+                        ParameterValue: '.snappy.parquet',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucketPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'MaxFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'ProcessingFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
+                      },
+                      {
+                        ParameterKey: 'RedshiftMode',
+                        ParameterValue: 'Provisioned',
+                      },
+                      {
+                        ParameterKey: 'RedshiftClusterIdentifier',
+                        ParameterValue: 'redshift-cluster-1',
+                      },
+                      {
+                        ParameterKey: 'RedshiftDbUser',
+                        ParameterValue: 'clickstream',
+                      },
+                    ],
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                Next: 'Report',
+                Type: 'Stack',
+              },
+              Report: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QuickSightUserParam',
+                        ParameterValue: 'clickstream-user-xxx',
+                      },
+                      {
+                        ParameterKey: 'QuickSightNamespaceParam',
+                        ParameterValue: 'default',
+                      },
+                      {
+                        ParameterKey: 'RedshiftDBParam',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                      {
+                        ParameterKey: 'RedShiftDBSchemaParam',
+                        ParameterValue: 'app_7777_7777_1,app_7777_7777_2',
+                      },
+                      {
+                        ParameterKey: 'QuickSightTemplateArnParam',
+                        ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
+                      },
+                      {
+                        ParameterKey: 'RedshiftEndpointParam',
+                        ParameterValue: 'https://redshift/xxx/yyy',
+                      },
+                      {
+                        ParameterKey: 'RedshiftPortParam',
+                        ParameterValue: '5002',
+                      },
+                      {
+                        ParameterKey: 'RedshiftParameterKeyParam.#',
+                        ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.BIUserCredentialParameterName',
+                      },
+                    ],
+                    StackName: 'Clickstream-Report-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + new redshift + quicksight', async () => {
+    dictionaryMock(ddbMock);
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
+    ec2Mock.on(DescribeSubnetsCommand)
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
+      })
+      .resolvesOnce({
+        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
+      });
+    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PublicSubnetIds',
+                        ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'DomainName',
+                        ParameterValue: 'fake.example.com',
+                      },
+                      {
+                        ParameterKey: 'ACMCertificateArn',
+                        ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+                      },
+                      {
+                        ParameterKey: 'Protocol',
+                        ParameterValue: 'HTTPS',
+                      },
+                      {
+                        ParameterKey: 'ServerEndpointPath',
+                        ParameterValue: '/collect',
+                      },
+                      {
+                        ParameterKey: 'ServerCorsOrigin',
+                        ParameterValue: '',
+                      },
+                      {
+                        ParameterKey: 'ServerMax',
+                        ParameterValue: '4',
+                      },
+                      {
+                        ParameterKey: 'ServerMin',
+                        ParameterValue: '2',
+                      },
+                      {
+                        ParameterKey: 'ScaleOnCpuUtilizationPercent',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'WarmPoolSize',
+                        ParameterValue: '1',
+                      },
+                      {
+                        ParameterKey: 'NotificationsTopicArn',
+                        ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                      },
+                      {
+                        ParameterKey: 'EnableGlobalAccelerator',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'DevMode',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'EnableAuthentication',
+                        ParameterValue: 'No',
+                      },
+                      {
+                        ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
+                        ParameterValue: 'Yes',
+                      },
+                      {
+                        ParameterKey: 'LogS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LogS3Prefix',
+                        ParameterValue: 'logs/',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'KinesisStreamMode',
+                        ParameterValue: 'ON_DEMAND',
+                      },
+                      {
+                        ParameterKey: 'KinesisShardCount',
+                        ParameterValue: '3',
+                      },
+                      {
+                        ParameterKey: 'KinesisDataRetentionHours',
+                        ParameterValue: '24',
+                      },
+                      {
+                        ParameterKey: 'KinesisBatchSize',
+                        ParameterValue: '10000',
+                      },
+                      {
+                        ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+                        ParameterValue: '300',
+                      },
+                    ],
+                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'SourceS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SourceS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'SinkS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Bucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'PipelineS3Prefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
+                      },
+                      {
+                        ParameterKey: 'DataFreshnessInHour',
+                        ParameterValue: '7',
+                      },
+                      {
+                        ParameterKey: 'ScheduleExpression',
+                        ParameterValue: 'hour',
+                      },
+                      {
+                        ParameterKey: 'TransformerAndEnrichClassNames',
+                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginJars',
+                        ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+                      },
+                      {
+                        ParameterKey: 'S3PathPluginFiles',
+                        ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+                      },
+                      {
+                        ParameterKey: 'OutputFormat',
+                        ParameterValue: 'parquet',
+                      },
+                    ],
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'VpcId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'PrivateSubnetIds',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
+                        ParameterKey: 'AppIds',
+                        ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+                      },
+                      {
+                        ParameterKey: 'ODSEventBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'ODSEventPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'ODSEventFileSuffix',
+                        ParameterValue: '.snappy.parquet',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucket',
+                        ParameterValue: 'EXAMPLE_BUCKET',
+                      },
+                      {
+                        ParameterKey: 'LoadWorkflowBucketPrefix',
+                        ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+                      },
+                      {
+                        ParameterKey: 'MaxFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'ProcessingFilesLimit',
+                        ParameterValue: '50',
+                      },
+                      {
+                        ParameterKey: 'LoadJobScheduleInterval',
+                        ParameterValue: '180',
+                      },
+                      {
+                        ParameterKey: 'RedshiftMode',
+                        ParameterValue: 'New_Serverless',
+                      },
+                      {
+                        ParameterKey: 'NewRedshiftServerlessWorkgroupName',
+                        ParameterValue: 'clickstream-project-8888-8888',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessVPCId',
+                        ParameterValue: 'vpc-00000000000000001',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessSubnets',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessSGs',
+                        ParameterValue: 'sg-00000000000000030,sg-00000000000000031',
+                      },
+                      {
+                        ParameterKey: 'RedshiftServerlessRPU',
+                        ParameterValue: '8',
+                      },
+                    ],
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                Next: 'Report',
+                Type: 'Stack',
+              },
+              Report: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'QuickSightUserParam',
+                        ParameterValue: 'clickstream-user-xxx',
+                      },
+                      {
+                        ParameterKey: 'QuickSightNamespaceParam',
+                        ParameterValue: 'default',
+                      },
+                      {
+                        ParameterKey: 'RedshiftDBParam',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                      {
+                        ParameterKey: 'RedShiftDBSchemaParam',
+                        ParameterValue: 'app_7777_7777_1,app_7777_7777_2',
+                      },
+                      {
+                        ParameterKey: 'QuickSightTemplateArnParam',
+                        ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
+                      },
+                      {
+                        ParameterKey: 'RedshiftEndpointParam.#',
+                        ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress',
+                      },
+                      {
+                        ParameterKey: 'RedshiftPortParam.#',
+                        ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
+                      },
+                      {
+                        ParameterKey: 'RedshiftParameterKeyParam.#',
+                        ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.BIUserCredentialParameterName',
+                      },
+                    ],
+                    StackName: 'Clickstream-Report-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, { noApp: true });
+    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient, { noApp: true });
     secretsManagerClient.on(GetSecretValueCommand).resolves({
       SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
@@ -2317,7 +3082,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2428,7 +3193,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2496,7 +3261,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2584,7 +3349,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2693,7 +3458,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2795,7 +3560,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Update',
@@ -2862,7 +3627,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -2941,7 +3706,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Create',
@@ -3040,7 +3805,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-Ingestion-kafka-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Delete',
@@ -3142,7 +3907,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-KafkaConnector-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Delete',
@@ -3209,7 +3974,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-ETL-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Delete',
@@ -3288,7 +4053,7 @@ describe('Workflow test', () => {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333/Clickstream-DataAnalytics-6666-6666',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
                     Action: 'Delete',
@@ -3386,7 +4151,11 @@ describe('Workflow test', () => {
         },
       ],
     });
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json');
     templateURL = await pipeline.getTemplateUrl('ingestion_no');
@@ -3424,7 +4193,11 @@ describe('Workflow test', () => {
         },
       ],
     });
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
     templateURL = await pipeline.getTemplateUrl('ingestion_no');

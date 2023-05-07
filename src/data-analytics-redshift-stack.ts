@@ -183,17 +183,17 @@ export function createRedshiftAnalyticsStack(
     condition: isNewRedshiftServerless,
   });
   new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter.substring(1),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isNewRedshiftServerless,
   });
   new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter.substring(1),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isExistingRedshiftServerless,
   });
   new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter.substring(1),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isRedshiftProvisioned,
   });

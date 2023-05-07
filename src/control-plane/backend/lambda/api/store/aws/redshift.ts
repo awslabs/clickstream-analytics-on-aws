@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { RedshiftClient, Cluster, paginateDescribeClusters } from '@aws-sdk/client-redshift';
+import {
+  RedshiftClient,
+  paginateDescribeClusters,
+  Cluster,
+} from '@aws-sdk/client-redshift';
 import {
   RedshiftServerlessClient,
   GetWorkgroupCommand,
@@ -20,21 +24,32 @@ import {
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { RedshiftCluster, RedshiftServerlessWorkgroup, RedshiftWorkgroup } from '../../common/types';
+import { RedshiftCluster, RedshiftInfo, RedshiftWorkgroup } from '../../common/types';
 
-export const describeRedshiftClusters = async (region: string, vpcId: string) => {
+export const describeRedshiftClusters = async (region: string, vpcId?: string, clusterIdentifier?: string) => {
   const redshiftClient = new RedshiftClient({
     ...aws_sdk_client_common_config,
     region,
   });
   const records: Cluster[] = [];
-  for await (const page of paginateDescribeClusters({ client: redshiftClient }, {})) {
+  for await (const page of paginateDescribeClusters({ client: redshiftClient }, {
+    ClusterIdentifier: clusterIdentifier,
+  })) {
     records.push(...page.Clusters as Cluster[]);
   }
 
   const clusters: RedshiftCluster[] = [];
   for (let cluster of records as Cluster[]) {
-    if (cluster.VpcId === vpcId) {
+    if (!vpcId) {
+      clusters.push({
+        name: cluster.ClusterIdentifier ?? '',
+        nodeType: cluster.NodeType ?? '',
+        endpoint: cluster.Endpoint,
+        status: cluster.ClusterStatus ?? '',
+        masterUsername: cluster.MasterUsername ?? '',
+        publiclyAccessible: cluster.PubliclyAccessible ?? false,
+      });
+    } else if (cluster.VpcId === vpcId) {
       clusters.push({
         name: cluster.ClusterIdentifier ?? '',
         nodeType: cluster.NodeType ?? '',
@@ -48,13 +63,13 @@ export const describeRedshiftClusters = async (region: string, vpcId: string) =>
   return clusters;
 };
 
-export const getRedshiftWorkgroupAndNamespace = async (region: string, name: string) => {
+export const getRedshiftServerlessInfo = async (region: string, workgroupName: string) => {
   const redshiftServerlessClient = new RedshiftServerlessClient({
     ...aws_sdk_client_common_config,
     region,
   });
   const getWorkgroupCommand: GetWorkgroupCommand = new GetWorkgroupCommand({
-    workgroupName: name,
+    workgroupName: workgroupName,
   });
   const getWorkgroupCommandOutput = await redshiftServerlessClient.send(getWorkgroupCommand);
   if (getWorkgroupCommandOutput.workgroup) {
@@ -65,14 +80,34 @@ export const getRedshiftWorkgroupAndNamespace = async (region: string, name: str
     const getNamespaceCommandOutput = await redshiftServerlessClient.send(getNamespaceCommand);
     if (getNamespaceCommandOutput.namespace) {
       return {
+        endpoint: getWorkgroupCommandOutput.workgroup.endpoint,
+        publiclyAccessible: getWorkgroupCommandOutput.workgroup.publiclyAccessible,
         workgroupId: getWorkgroupCommandOutput.workgroup.workgroupId ?? '',
         workgroupArn: getWorkgroupCommandOutput.workgroup.workgroupArn ?? '',
         workgroupName: getWorkgroupCommandOutput.workgroup.workgroupName ?? '',
         namespaceId: getNamespaceCommandOutput.namespace.namespaceId ?? '',
         namespaceArn: getNamespaceCommandOutput.namespace.namespaceArn ?? '',
         namespaceName: getNamespaceCommandOutput.namespace.namespaceName ?? '',
-      } as RedshiftServerlessWorkgroup;
+      } as RedshiftInfo;
     }
+  }
+
+  return undefined;
+};
+
+export const getRedshiftInfo = async (region: string, workgroupName?: string, clusterIdentifier?: string) => {
+
+  if (workgroupName) {
+    return getRedshiftServerlessInfo(region, workgroupName);
+  } else if (clusterIdentifier) {
+    const clusters = await describeRedshiftClusters(region, undefined, clusterIdentifier);
+    return {
+      endpoint: {
+        address: clusters[0].endpoint?.Address ?? '',
+        port: clusters[0].endpoint?.Port ?? 5439,
+      },
+      publiclyAccessible: clusters[0].publiclyAccessible,
+    } as RedshiftInfo;
   }
 
   return undefined;

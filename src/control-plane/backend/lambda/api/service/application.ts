@@ -79,8 +79,13 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
       const pipeline = new CPipeline(latestPipelines.items[0]);
-      const ingestionServerUrl = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX);
-      const ingestionServerDNS = await pipeline.getStackOutputBySuffix(PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
+      const outputs = await pipeline.getStackOutputBySuffixs(
+        PipelineStackType.INGESTION,
+        [
+          OUTPUT_INGESTION_SERVER_URL_SUFFIX,
+          OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
+        ],
+      );
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -92,8 +97,8 @@ export class ApplicationServ {
         pipeline: {
           id: latestPipelines.items[0].pipelineId,
           status: latestPipelines.items[0].status,
-          endpoint: ingestionServerUrl,
-          dns: ingestionServerDNS,
+          endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+          dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
         },
       }));
     } catch (error) {

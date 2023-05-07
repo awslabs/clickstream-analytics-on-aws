@@ -212,6 +212,7 @@ describe('Pipeline test', () => {
         ],
       });
     dictionaryMock(ddbMock, 'BuildInPlugins');
+    dictionaryMock(ddbMock, 'QuickSightTemplateArn');
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
       Key: {

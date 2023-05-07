@@ -390,6 +390,26 @@ export const KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = {
   },
 };
 
+export const KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
+  ...KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE,
+  report: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+      user: 'clickstream-user-xxx',
+    },
+  },
+};
+
+export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
+  ...KINESIS_ETL_REDSHIFT_PIPELINE,
+  report: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+      user: 'clickstream-user-xxx',
+    },
+  },
+};
+
 const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [
@@ -497,7 +517,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}/Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -599,7 +619,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}/Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -678,7 +698,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   StackName: `Clickstream-ETL-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}/Clickstream-ETL-${MOCK_PIPELINE_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -761,7 +781,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   StackName: `Clickstream-DataAnalytics-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}/Clickstream-DataAnalytics-${MOCK_PIPELINE_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
