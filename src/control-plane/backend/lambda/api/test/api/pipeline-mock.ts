@@ -395,7 +395,7 @@ export const KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
   report: {
     quickSight: {
       accountName: 'clickstream-acc-xxx',
-      user: 'clickstream-user-xxx',
+      user: 'Admin/clickstream-user-xxx',
     },
   },
 };
@@ -405,7 +405,7 @@ export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
   report: {
     quickSight: {
       accountName: 'clickstream-acc-xxx',
-      user: 'clickstream-user-xxx',
+      user: 'clickstream-user-xxx@example.com',
     },
   },
 };

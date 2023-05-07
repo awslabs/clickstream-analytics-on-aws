@@ -2626,7 +2626,7 @@ describe('Workflow test', () => {
                     Parameters: [
                       {
                         ParameterKey: 'QuickSightUserParam',
-                        ParameterValue: 'clickstream-user-xxx',
+                        ParameterValue: 'Admin/clickstream-user-xxx',
                       },
                       {
                         ParameterKey: 'QuickSightNamespaceParam',
@@ -3015,7 +3015,7 @@ describe('Workflow test', () => {
                     Parameters: [
                       {
                         ParameterKey: 'QuickSightUserParam',
-                        ParameterValue: 'clickstream-user-xxx',
+                        ParameterValue: 'clickstream-user-xxx@example.com',
                       },
                       {
                         ParameterKey: 'QuickSightNamespaceParam',

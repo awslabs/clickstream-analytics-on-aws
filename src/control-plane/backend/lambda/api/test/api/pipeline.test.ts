@@ -35,7 +35,7 @@ import {
   projectExistedMock,
   tokenMock,
 } from './ddb-mock';
-import { KINESIS_ETL_REDSHIFT_PIPELINE, KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW, S3_INGESTION_PIPELINE } from './pipeline-mock';
+import { KINESIS_ETL_REDSHIFT_PIPELINE, KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW, S3_INGESTION_PIPELINE, KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -116,7 +116,7 @@ describe('Pipeline test', () => {
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        ...KINESIS_ETL_REDSHIFT_PIPELINE,
+        ...KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);

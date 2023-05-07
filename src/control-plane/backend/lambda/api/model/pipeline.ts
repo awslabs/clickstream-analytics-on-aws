@@ -26,7 +26,6 @@ import {
   SUBNETS_PATTERN,
   VPC_ID_PARRERN,
   POSITIVE_INTEGERS,
-  QUICKSIGHT_ACCOUNT_NAME_PATTERN,
   QUICKSIGHT_NAMESPACE_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
@@ -36,6 +35,7 @@ import {
   OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  QUICKSIGHT_USER_NAME_PATTERN,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
@@ -1284,7 +1284,7 @@ export class CPipeline {
   private async getReportStackParameters() {
     const parameters: Parameter[] = [];
 
-    validatePattern('QuickSightUser', QUICKSIGHT_ACCOUNT_NAME_PATTERN, this.pipeline.report?.quickSight?.user);
+    validatePattern('QuickSightUser', QUICKSIGHT_USER_NAME_PATTERN, this.pipeline.report?.quickSight?.user);
     parameters.push({
       ParameterKey: 'QuickSightUserParam',
       ParameterValue: this.pipeline.report?.quickSight?.user,
