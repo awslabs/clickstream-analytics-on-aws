@@ -1,17 +1,17 @@
 {
   "header": {
-    "desc": "Build a flexible, robust, and cost-efffecitve analytics platform to collect and analyze clickstream data from your websites and mobile apps, providing 100% ownership and control over data that enables you grow your business with data-driven insights. "
+    "desc": "Build a flexible, robust, and cost-efffecitve analytics platform to collect and analyze clickstream data from your websites and mobile apps, which not only you grow your business with data-driven insights, but also provides 100% ownership and control to your own data. "
   },
   "benefits": {
     "name": "Benefits and features",
     "benefit1": "Easy to use",
     "benefit1Desc": " With a few clicks on a web-based console, you can create an end-to-end analytic platform and start analyzing your data.",
-    "benefit2": "A single pane of glass view",
-    "benefit2Desc": "Manage all resources in a single place, provides built-in monitoring dashboards and alarms that gives you full visibility into the underlining AWS resources within your data pipelines.",
-    "benefit3": "Flexible",
-    "benefit3Desc": "Modularized components with rich customization options for you to assemble a data pipeline that tailored to your needs.",
-    "benefit4": "Well-architected",
-    "benefit4Desc": "The solution is designed based on AWS best practices, providing you production-level scalability and cost-effitiveness."
+    "benefit2": "Flexible",
+    "benefit2Desc": "Modularized data pipeline components with rich customization options for you to assemble a data pipeline that tailored to your needs.",
+    "benefit3": "Well-architected",
+    "benefit3Desc": "The solution is designed based on AWS best practices, providing you production-level scalability and competitive cost-effitiveness.",
+    "benefit4": "A single pane of glass view",
+    "benefit4Desc": "A single place to manage all related AWS resources, provides built-in monitoring dashboards and alarms that gives you full visibility into the underlining AWS resources within your data pipelines."
   },
   "getStarted": {
     "name": "Getting started",
@@ -25,16 +25,16 @@
     "name": "How it works",
     "step1": "Step 1.",
     "step1SubTitle": "Create a project",
-    "step1Desc": "A project is a container for your Apple, Android, and Web apps. Apps in the project will share the same data pipeline.",
+    "step1Desc": "A project is a container to group your apps. Apps in the project will share the same data pipeline.",
     "step2": "Step 2.",
-    "step2SubTitle": "Create a data pipeline",
+    "step2SubTitle": "Configure data pipeline",
     "step2Desc": "A data pipeline is a set of modules that collect, process, and visualize your clickstream data",
     "step3": "Step 3.",
     "step3SubTitle": "Add apps",
     "step3Desc": "Add apps to your project, and follow the guidance to integrate SDK into your apps",
     "step4": "Step 4.",
     "step4SubTitle": "View dashboards",
-    "step4Desc": "View the out-of-the-box dashboards to understand app's overall performance, create custom queries and visualization based on your business needs."
+    "step4Desc": "View the out-of-the-box dashboards to gain insights into app performance, create custom queries and visualization per your needs."
   },
   "moreResource": {
     "name": "More resource",
