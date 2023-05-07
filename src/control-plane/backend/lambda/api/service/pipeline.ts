@@ -42,6 +42,7 @@ export class PipelineServ {
       // create stack
       const { projectId } = req.body;
       req.body.id = projectId;
+      req.body.operator = res.get('X-Click-Stream-Operator');
       req.body.pipelineId = uuidv4().replace(/-/g, '');
       const result = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
       if (result.totalCount && result.totalCount > 0) {
@@ -86,6 +87,7 @@ export class PipelineServ {
     try {
       const { projectId } = req.body;
       req.body.id = projectId;
+      req.body.operator = res.get('X-Click-Stream-Operator');
       let pipeline: IPipeline = req.body;
       // Read current version from db
       const curPipeline = await store.getPipeline(pipeline.id, pipeline.pipelineId);
@@ -110,7 +112,8 @@ export class PipelineServ {
       const pipeline = new CPipeline(ddbPipeline);
       await pipeline.delete();
       // TODO: Asynchronize
-      await store.deletePipeline(pid, id);
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deletePipeline(pid, id, operator);
       return res.status(200).send(new ApiSuccess(null, 'Pipeline deleted.'));
     } catch (error) {
       next(error);

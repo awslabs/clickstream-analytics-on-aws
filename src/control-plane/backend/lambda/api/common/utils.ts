@@ -12,6 +12,7 @@
  */
 
 import { Tag } from '@aws-sdk/client-ec2';
+import { logger } from './powertools';
 import { ALBRegionMappingObject } from './types';
 
 function isEmpty(a: any): boolean {
@@ -62,10 +63,25 @@ function generateRandomStr(length: number) {
   return randomString;
 }
 
+function getEmailFromRequestContext(requestContext: string | undefined) {
+  let email = 'unknown';
+  try {
+    if (requestContext) {
+      // Api Gateway pass the request context to the backend
+      const context = JSON.parse(requestContext);
+      email = context.authorizer.email ?? 'unknown';
+    }
+  } catch (err) {
+    logger.warn('unknown user', { requestContext, err });
+  }
+  return email;
+}
+
 export {
   isEmpty,
   tryToJson,
   getValueFromTags,
   getRegionAccount,
   generateRandomStr,
+  getEmailFromRequestContext,
 };

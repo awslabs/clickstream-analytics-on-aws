@@ -24,10 +24,10 @@ export class JWTAuthorizer {
   public static async auth(client: jwksClient.JwksClient, issuer: string, authorizationToken: string) {
     try {
       if (authorizationToken === undefined
-          || authorizationToken.indexOf('Bearer ') != 0 ) {
+        || authorizationToken.indexOf('Bearer ') != 0 ) {
 
         logger.error('AuthorizationToken is undefined or has invalid format');
-        return [false, null];
+        return [false, null, null];
       }
 
       // Get the token from the Authorization header
@@ -36,7 +36,7 @@ export class JWTAuthorizer {
       const decodedToken = jwt.decode(token, { complete: true });
       if (decodedToken === null) {
         logger.error('DecodedToken is null');
-        return [false, null];
+        return [false, null, null];
       }
 
       // Get the kid from the header
@@ -60,15 +60,16 @@ export class JWTAuthorizer {
       });
       if (verifiedToken.sub === undefined) {
         logger.info('VerifiedToken is invalid');
-        return [false, null];
+        return [false, null, null];
       } else {
         // Return a policy document that allows access to the API
         logger.debug('Token verified');
-        return [true, verifiedToken.sub];
+        const email = (verifiedToken as any).email as string;
+        return [true, verifiedToken.sub, email];
       }
     } catch (error) {
       logger.error('Token verification failed due to : ' + (error as Error).message);
-      return [false, null];
+      return [false, null, null];
     }
   }
 }

@@ -14,6 +14,7 @@
 import express from 'express';
 import { body, header, param, query } from 'express-validator';
 import jwksClient from 'jwks-rsa';
+import { amznRequestContextHeader } from './common/constants';
 import { logger } from './common/powertools';
 import {
   defaultPageValueValid,
@@ -33,6 +34,7 @@ import {
   isValidAppId, isEmails,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
+import { getEmailFromRequestContext } from './common/utils';
 import { JWTAuthorizer } from './middle-ware/authorizer';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
@@ -82,19 +84,27 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
 
 // Implement authorization middleware function
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  let email = 'unknown';
   if (WITH_AUTH_MIDDLEWARE === 'true') {
+    // ALB control plane get IdToken from header
     const authorization = req.get('authorization');
     if (authorization === undefined) {
       logger.info('Missing authentication token.');
       return res.status(401).send({ auth: false, message: 'No token provided.' });
     } else {
       const isAuthorized = await JWTAuthorizer.auth(client, issuer, authorization);
-      if (!isAuthorized) {
-        logger.warn(`Authentication failed. Request ID:${header('X-Click-Stream-Request-Id')}`);
+      if (!isAuthorized[0]) {
+        const requestId = req.get('X-Click-Stream-Request-Id');
+        logger.warn(`Authentication failed. Request ID: ${requestId}`);
         return res.status(403).send({ auth: false, message: 'Invalid token provided.' });
       }
+      email = isAuthorized[2]!.toString();
     }
+  } else {
+    // Cloudfront control plane
+    email = getEmailFromRequestContext(req.get(amznRequestContextHeader));
   }
+  res.set('X-Click-Stream-Operator', email);
   return next();
 });
 

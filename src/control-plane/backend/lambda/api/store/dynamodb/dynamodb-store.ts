@@ -70,7 +70,7 @@ export class DynamoDbStore implements ClickStreamStore {
         status: 'ACTIVED',
         createAt: Date.now(),
         updateAt: Date.now(),
-        operator: '',
+        operator: project.operator?? '',
         deleted: false,
       },
     });
@@ -111,11 +111,13 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async updateProject(project: IProject): Promise<void> {
-    let updateExpression = 'SET #updateAt= :u';
+    let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':operator', project.operator);
     expressionAttributeNames['#updateAt'] = 'updateAt';
+    expressionAttributeNames['#operator'] = 'operator';
     if (project.name) {
       updateExpression = `${updateExpression}, #name= :n`;
       expressionAttributeValues.set(':n', project.name);
@@ -163,7 +165,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async deleteProject(id: string): Promise<void> {
+  public async deleteProject(id: string, operator: string): Promise<void> {
     // Scan all project versions
     const input: ScanCommandInput = {
       TableName: clickStreamTableName,
@@ -183,9 +185,13 @@ export class DynamoDbStore implements ClickStreamStore {
           type: projects[index].type,
         },
         // Define expressions for the new or updated attributes
-        UpdateExpression: 'SET deleted= :d',
+        UpdateExpression: 'SET deleted= :d, #operator= :operator',
+        ExpressionAttributeNames: {
+          '#operator': 'operator',
+        },
         ExpressionAttributeValues: {
           ':d': true,
+          ':operator': operator,
         },
         ReturnValues: 'ALL_NEW',
       });
@@ -243,7 +249,7 @@ export class DynamoDbStore implements ClickStreamStore {
         iosAppStoreId: app.iosAppStoreId ?? '',
         createAt: Date.now(),
         updateAt: Date.now(),
-        operator: '',
+        operator: app.operator?? '',
         deleted: false,
       },
     });
@@ -268,11 +274,13 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async updateApplication(app: IApplication): Promise<void> {
-    let updateExpression = 'SET #updateAt= :u';
+    let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':operator', app.operator);
     expressionAttributeNames['#updateAt'] = 'updateAt';
+    expressionAttributeNames['#operator'] = 'operator';
     if (app.description) {
       updateExpression = `${updateExpression}, description= :d`;
       expressionAttributeValues.set(':d', app.description);
@@ -341,7 +349,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return apps;
   };
 
-  public async deleteApplication(projectId: string, appId: string): Promise<void> {
+  public async deleteApplication(projectId: string, appId: string, operator: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -349,9 +357,13 @@ export class DynamoDbStore implements ClickStreamStore {
         type: `APP#${appId}`,
       },
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET deleted= :d',
+      UpdateExpression: 'SET deleted= :d, #operator= :operator',
+      ExpressionAttributeNames: {
+        '#operator': 'operator',
+      },
       ExpressionAttributeValues: {
         ':d': true,
+        ':operator': operator,
       },
       ReturnValues: 'ALL_NEW',
     });
@@ -469,7 +481,7 @@ export class DynamoDbStore implements ClickStreamStore {
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
-              operator: { S: pipeline.operator },
+              operator: { S: pipeline.operator ?? '' },
               deleted: { BOOL: pipeline.deleted },
             },
           },
@@ -531,7 +543,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
-              ':operator': { S: '' },
+              ':operator': { S: pipeline.operator ?? '' },
             },
           },
         },
@@ -594,7 +606,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async deletePipeline(projectId: string, pipelineId: string): Promise<void> {
+  public async deletePipeline(projectId: string, pipelineId: string, operator: string): Promise<void> {
     // Scan all pipeline versions
     const input: ScanCommandInput = {
       TableName: clickStreamTableName,
@@ -622,12 +634,14 @@ export class DynamoDbStore implements ClickStreamStore {
           type: pipelines[index].type,
         },
         // Define expressions for the new or updated attributes
-        UpdateExpression: 'SET deleted= :d, #status =:status',
+        UpdateExpression: 'SET deleted= :d, #status =:status, #operator= :operator',
         ExpressionAttributeNames: {
           '#status': 'status',
+          '#operator': 'operator',
         },
         ExpressionAttributeValues: {
           ':d': true,
+          ':operator': operator,
           ':status': status,
         },
         ReturnValues: 'ALL_NEW',
@@ -764,7 +778,7 @@ export class DynamoDbStore implements ClickStreamStore {
         bindCount: 0,
         createAt: Date.now(),
         updateAt: Date.now(),
-        operator: '',
+        operator: plugin.operator?? '',
         deleted: false,
       },
     });
@@ -805,12 +819,14 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async updatePlugin(plugin: IPlugin): Promise<void> {
-    let updateExpression = 'SET #updateAt= :u';
+    let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':operator', plugin.operator);
     expressionAttributeValues.set(':bindCount', 0);
     expressionAttributeNames['#updateAt'] = 'updateAt';
+    expressionAttributeNames['#operator'] = 'operator';
     if (plugin.description) {
       updateExpression = `${updateExpression}, description= :d`;
       expressionAttributeValues.set(':d', plugin.description);
@@ -926,7 +942,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return plugins;
   };
 
-  public async deletePlugin(pluginId: string): Promise<void> {
+  public async deletePlugin(pluginId: string, operator: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -935,10 +951,14 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       ConditionExpression: 'bindCount = :bindCount',
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET deleted= :d',
+      UpdateExpression: 'SET deleted= :d, #operator= :operator',
+      ExpressionAttributeNames: {
+        '#operator': 'operator',
+      },
       ExpressionAttributeValues: {
         ':d': true,
         ':bindCount': 0,
+        ':operator': operator,
       },
       ReturnValues: 'ALL_NEW',
     });

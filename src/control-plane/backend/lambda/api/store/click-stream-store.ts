@@ -22,14 +22,14 @@ export interface ClickStreamStore {
   getProject: (id: string) => Promise<IProject | undefined>;
   updateProject: (project: IProject) => Promise<void>;
   listProjects: (order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IProjectList>;
-  deleteProject: (id: string) => Promise<void>;
+  deleteProject: (id: string, operator: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
   addApplication: (app: IApplication) => Promise<string>;
   getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
   updateApplication: (app: IApplication) => Promise<void>;
   listApplication: (projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IApplicationList>;
-  deleteApplication: (projectId: string, appId: string) => Promise<void>;
+  deleteApplication: (projectId: string, appId: string, operator: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 
   addPipeline: (pipeline: IPipeline) => Promise<string>;
@@ -38,14 +38,14 @@ export interface ClickStreamStore {
   updatePipelineAtCurrentVersion: (pipeline: IPipeline) => Promise<void>;
   listPipeline: (projectId: string, version: string, order: string,
     pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPipelineList>;
-  deletePipeline: (projectId: string, pipelineId: string) => Promise<void>;
+  deletePipeline: (projectId: string, pipelineId: string, operator: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 
   addPlugin: (plugin: IPlugin) => Promise<string>;
   getPlugin: (pluginId: string) => Promise<IPlugin | undefined>;
   updatePlugin: (plugin: IPlugin) => Promise<void>;
   listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPluginList>;
-  deletePlugin: (pluginId: string) => Promise<void>;
+  deletePlugin: (pluginId: string, operator: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
   bindPlugins: (pluginIds: string[], count: number) => Promise<void>;
 

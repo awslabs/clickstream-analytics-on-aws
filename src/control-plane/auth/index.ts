@@ -60,6 +60,9 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
   logger.info('authtication success.');
   return {
     principalId: authResult[1]!.toString(),
+    context: {
+      email: authResult[2]!.toString(),
+    },
     policyDocument: {
       Version: '2012-10-17',
       Statement: [

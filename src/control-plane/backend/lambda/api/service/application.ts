@@ -38,6 +38,7 @@ export class ApplicationServ {
     try {
       const { projectId, appId } = req.body;
       req.body.id = projectId;
+      req.body.operator = res.get('X-Click-Stream-Operator');
       let app: IApplication = req.body;
       // Check pipeline status
       const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
@@ -102,6 +103,7 @@ export class ApplicationServ {
 
   public async update(req: any, res: any, next: any) {
     try {
+      req.body.operator = res.get('X-Click-Stream-Operator');
       let app: IApplication = req.body as IApplication;
       await store.updateApplication(app);
       return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
@@ -136,7 +138,8 @@ export class ApplicationServ {
         validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
       }
 
-      await store.deleteApplication(pid, id);
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deleteApplication(pid, id, operator);
 
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateETL(appIds);

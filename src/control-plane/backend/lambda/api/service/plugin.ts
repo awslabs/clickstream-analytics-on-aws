@@ -33,6 +33,7 @@ export class PluginServ {
 
   public async add(req: any, res: any, next: any) {
     try {
+      req.body.operator = res.get('X-Click-Stream-Operator');
       req.body.id = uuidv4().replace(/-/g, '');
       const plugin: IPlugin = req.body;
       const id = await store.addPlugin(plugin);
@@ -58,6 +59,7 @@ export class PluginServ {
 
   public async update(req: any, res: any, next: any) {
     try {
+      req.body.operator = res.get('X-Click-Stream-Operator');
       let plugin: IPlugin = req.body as IPlugin;
       await store.updatePlugin(plugin);
       return res.status(201).json(new ApiSuccess(null, 'Plugin updated.'));
@@ -72,7 +74,8 @@ export class PluginServ {
   public async delete(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
-      await store.deletePlugin(id);
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deletePlugin(id, operator);
       return res.status(200).json(new ApiSuccess(null, 'Plugin deleted.'));
     } catch (error) {
       if ((error as Error).name === 'ConditionalCheckFailedException') {

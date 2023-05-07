@@ -33,6 +33,7 @@ export class ProjectServ {
 
   public async create(req: any, res: any, next: any) {
     try {
+      req.body.operator = res.get('X-Click-Stream-Operator');
       let project: IProject = req.body;
       const id = await store.createProject(project);
       return res.status(201).json(new ApiSuccess({ id }, 'Project created.'));
@@ -57,6 +58,7 @@ export class ProjectServ {
 
   public async update(req: any, res: any, next: any) {
     try {
+      req.body.operator = res.get('X-Click-Stream-Operator');
       const project: IProject = req.body as IProject;
       await store.updateProject(project);
       return res.status(201).json(new ApiSuccess(null, 'Project updated.'));
@@ -75,7 +77,8 @@ export class ProjectServ {
         const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
       }
-      await store.deleteProject(id);
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deleteProject(id, operator);
       return res.json(new ApiSuccess(null, 'Project deleted.'));
     } catch (error) {
       next(error);
