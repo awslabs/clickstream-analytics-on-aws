@@ -417,6 +417,34 @@ describe('Pipeline test', () => {
       },
     });
   });
+  it('Get pipeline by ID with stack no outputs', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand).resolves({
+      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    });
+    cloudFormationClient.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        dns: '',
+        endpoint: '',
+      },
+    });
+  });
   it('Get pipeline by ID with mock error', async () => {
     projectExistedMock(ddbMock, true);
     // Mock DynamoDB error

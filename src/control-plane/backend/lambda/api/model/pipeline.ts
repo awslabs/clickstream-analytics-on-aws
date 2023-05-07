@@ -1358,10 +1358,12 @@ export class CPipeline {
     if (stack) {
       for (let suffix of outputKeySuffixs) {
         let value = '';
-        for (let out of stack.Outputs as Output[]) {
-          if (out.OutputKey?.endsWith(suffix)) {
-            value = out.OutputValue ?? '';
-            break;
+        if (stack.Outputs) {
+          for (let out of stack.Outputs as Output[]) {
+            if (out.OutputKey?.endsWith(suffix)) {
+              value = out.OutputValue ?? '';
+              break;
+            }
           }
         }
         res.set(suffix, value);
