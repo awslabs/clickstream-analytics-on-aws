@@ -54,6 +54,30 @@ export class RedshiftServerless extends Construct {
             }),
           ],
         }),
+        'redshift-service-role': new PolicyDocument({
+          statements: [
+            new PolicyStatement({
+              actions: [
+                'iam:CreateServiceLinkedRole',
+              ],
+              resources: [
+                // arn:aws:iam::<AWS-account-ID>:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift
+                // https://docs.aws.amazon.com/redshift/latest/mgmt/using-service-linked-roles.html
+                Arn.format(
+                  {
+                    resource: 'role',
+                    resourceName: 'aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift',
+                    service: 'iam',
+                    arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+                  },
+                  Stack.of(this)),
+              ],
+              conditions: {
+                StringLike: { 'iam:AWSServiceName': 'redshift.amazonaws.com' },
+              },
+            }),
+          ],
+        }),
       },
       description: `Managed by ${Stack.of(this).templateOptions.description} to manage the lifecycle of Redshift namespace.`,
     });

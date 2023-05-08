@@ -3164,6 +3164,20 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     }
   });
 
+  test('[new Redshift workgroup and namespace] Redshift Admin role has iam:CreateServiceRole permission.', () => {
+    const adminRole = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::IAM::Role', 'RedshiftServerelssWorkgroupRedshiftServerlessClickstreamWorkgroupAdminRole');
+    var foundInlinePolicy = false;
+    for (const policy of adminRole.resource.Properties.Policies) {
+      if ('redshift-service-role' === policy.PolicyName) {
+        foundInlinePolicy = true;
+        expect(policy.PolicyDocument.Statement[0].Action).toEqual('iam:CreateServiceLinkedRole');
+        console.log(policy.PolicyDocument.Statement[0].Resource['Fn::Join']);
+        expect(policy.PolicyDocument.Statement[0].Resource['Fn::Join'][1][6]).toMatch(/^:role\/aws-service-role\/redshift\.amazonaws\.com\/AWSServiceRoleForRedshift$/);
+      }
+    }
+    expect(foundInlinePolicy).toBeTruthy();
+  });
+
   test('[new Redshift workgroup and namespace] custom resource for creating redshift serverless namespace', () => {
     newServerlessStackTemplate.resourceCountIs('AWS::RedshiftServerless::Namespace', 0);
     const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'RedshiftServerelssWorkgroupCreateRedshiftServerlessNamespaceCustomResource');
