@@ -141,11 +141,13 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                     >
                       <b>{element.stackType}</b>(
                       {element.stackStatus || t('status.unknown')})
-                      <span className="ml-5">
-                        <Link external href={element.url}>
-                          {t('pipeline:detail.stackDetails')}
-                        </Link>
-                      </span>
+                      {element.stackStatus && (
+                        <span className="ml-5">
+                          <Link external href={element.url}>
+                            {t('pipeline:detail.stackDetails')}
+                          </Link>
+                        </span>
+                      )}
                     </StatusIndicator>
                   </div>
                 );
