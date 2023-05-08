@@ -119,9 +119,9 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         await getQuickSightUsers();
       if (success) {
         const mskOptions: SelectProps.Options = data.map((element) => ({
-          label: element.email,
+          label: element.userName,
           value: element.userName,
-          description: element.userName,
+          description: element.email,
           labelTag: element.role,
         }));
         setQuickSightRoleOptions(mskOptions);
