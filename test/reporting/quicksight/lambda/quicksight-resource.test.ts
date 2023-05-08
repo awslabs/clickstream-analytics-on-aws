@@ -220,7 +220,7 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationEvent.ResourceProperties,
       ...commonProps,
-      schemas: ['test1'],
+      schemas: 'test1',
     },
 
   };
@@ -230,7 +230,7 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
-      schemas: ['test1'],
+      schemas: 'test1',
     },
   };
 
@@ -239,7 +239,7 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
-      schemas: ['test1', 'zzzz'],
+      schemas: 'test1,zzzz',
     },
   };
 
@@ -248,7 +248,7 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationDeleteEvent.ResourceProperties,
       ...commonProps,
-      schemas: ['test1'],
+      schemas: 'test1',
     },
   };
 

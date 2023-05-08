@@ -93,16 +93,23 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
     const databaseSchemaNames = props.schemas;
 
-    const defString = JSON.stringify(props.dashboardDefProps);
-    for (const schemaName of databaseSchemaNames) {
-      logger.info('schemaName: ', schemaName);
-      const dashboardDefProps: QuickSightDashboardDefProps = JSON.parse(defString.slice().replace(/##SCHEMA##/g, schemaName));
-      logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
+    if ( databaseSchemaNames.trim().length > 0 ) {
+      const defString = JSON.stringify(props.dashboardDefProps);
 
-      const dashboard = await createQuickSightDashboard(quickSight, ssm, awsAccountId, principalArn, dashboardDefProps);
-      logger.info('created dashboard:', JSON.stringify(dashboard));
-      dashboards.push(dashboard?.Arn!);
-    };
+      logger.info(`databaseSchemaNames: ${databaseSchemaNames}`);
+
+      for (const schemaName of databaseSchemaNames.split(',')) {
+        logger.info('schemaName: ', schemaName);
+        const dashboardDefProps: QuickSightDashboardDefProps = JSON.parse(defString.slice().replace(/##SCHEMA##/g, schemaName));
+        logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
+
+        const dashboard = await createQuickSightDashboard(quickSight, ssm, awsAccountId, principalArn, dashboardDefProps);
+        logger.info('created dashboard:', JSON.stringify(dashboard));
+        dashboards.push(dashboard?.Arn!);
+      };
+    } else {
+      logger.info('empty database schema.');
+    }
 
     return {
       Data: {

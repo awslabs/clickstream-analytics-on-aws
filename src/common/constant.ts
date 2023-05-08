@@ -107,7 +107,7 @@ export const KAFKA_TOPIC_PATTERN = '[a-zA-Z0-9_\\-\\.]+';
 export const OIDC_ISSUER_PATTERN = '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?';
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
-export const MUTIL_APP_ID_PATTERN = `${APP_ID_PATTERN}(,${APP_ID_PATTERN})*`;
+export const MUTIL_APP_ID_PATTERN = `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`;
 export const EMAIL_PATTERN = '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
 export const MUTIL_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;
 export const POSITIVE_INTEGERS = '^[1-9]\\d*';
@@ -117,7 +117,6 @@ export const SUBNETS_THREE_AZ_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?){2
 export const QUICKSIGHT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
 export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
-export const REDSHIFT_DB_SCHEMA_NAME_PATTERN = `^${APP_ID_PATTERN}$`;
 export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
 
 // cloudformation parameters

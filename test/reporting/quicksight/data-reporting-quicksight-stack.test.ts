@@ -148,6 +148,33 @@ describe('DataReportingQuickSightStack parameter test', () => {
     }
   });
 
+  test('RedShiftDBSchemaParam pattern', () => {
+    const param = template.toJSON().Parameters.RedShiftDBSchemaParam;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      '',
+      'abc',
+      'abcd,efgh',
+      'aaa12',
+      'abc_ef',
+      'ACde',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'abc-ef',
+      'abc$rt',
+      '123',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
   test('RedshiftEndpointParam pattern', () => {
     const param = template.toJSON().Parameters.RedshiftEndpointParam;
     const pattern = param.AllowedPattern;

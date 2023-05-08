@@ -435,7 +435,7 @@ describe('Application test', () => {
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
-      message: 'Validate error, AppId: app_7777_7777-1,app_7777_7777 not match [a-zA-Z][a-zA-Z0-9_]{0,126}(,[a-zA-Z][a-zA-Z0-9_]{0,126})*. Please check and try again.',
+      message: 'Validate error, AppId: app_7777_7777-1,app_7777_7777 not match ^(([a-zA-Z][a-zA-Z0-9_]{0,126})(,[a-zA-Z][a-zA-Z0-9_]{0,126}){0,})?$. Please check and try again.',
     });
   });
   it('Get application by ID', async () => {
@@ -967,7 +967,7 @@ describe('Application test', () => {
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
-      message: 'Validate error, AppId: app_7777_7777-1 not match [a-zA-Z][a-zA-Z0-9_]{0,126}(,[a-zA-Z][a-zA-Z0-9_]{0,126})*. Please check and try again.',
+      message: 'Validate error, AppId: app_7777_7777-1 not match ^(([a-zA-Z][a-zA-Z0-9_]{0,126})(,[a-zA-Z][a-zA-Z0-9_]{0,126}){0,})?$. Please check and try again.',
     });
   });
   it('Delete application with error pipeline status', async () => {

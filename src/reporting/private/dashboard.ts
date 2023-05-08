@@ -16,7 +16,7 @@ import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
   databaseName: string;
-  databaseSchemaNames: string[];
+  databaseSchemaNames: string;
   host: string;
   port: number;
   ssmParameterName: string;
@@ -42,7 +42,7 @@ export interface QuicksightCustomResourceLabmdaProps {
   readonly quickSightNamespace: string;
   readonly quickSightUser: string;
   readonly quickSightPrincipalArn: string;
-  readonly schemas: string[];
+  readonly schemas: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
 }
 
