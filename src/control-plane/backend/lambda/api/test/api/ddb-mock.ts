@@ -12,7 +12,7 @@
  */
 
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
-import { DescribeClustersCommand } from '@aws-sdk/client-redshift';
+import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
@@ -326,6 +326,8 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
         address: 'https://redshift-serverless/xxx/yyy',
         port: 5001,
       },
+      subnetIds: ['subnet-00000000000000021', 'subnet-00000000000000022'],
+      securityGroupIds: ['sg-00000000000000031', 'sg-00000000000000032'],
     },
   });
   redshiftServerlessClient.on(GetNamespaceCommand).resolves({
@@ -347,6 +349,15 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
         ClusterStatus: 'Active',
         MasterUsername: 'awsuser',
         publiclyAccessible: false,
+        VpcSecurityGroups: [{ VpcSecurityGroupId: 'sg-00000000000000031' }],
+      },
+    ],
+  });
+  redshiftClient.on(DescribeClusterSubnetGroupsCommand).resolves({
+    ClusterSubnetGroups: [
+      {
+        ClusterSubnetGroupName: 'group-1',
+        Subnets: [{ SubnetIdentifier: 'subnet-00000000000000022' }],
       },
     ],
   });

@@ -118,6 +118,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
+      '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
     });
   });
 

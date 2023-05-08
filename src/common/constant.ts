@@ -93,6 +93,7 @@ export const ALBLogServiceAccountMapping = {
 
 // regex patterns
 export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
+export const SECURITY_GROUP_PATTERN = 'sg-[a-f0-9]+';
 export const DOMAIN_NAME_PATTERN = '[a-z0-9A-Z#$&@_%~\\*\\.\\-]+\\.[a-zA-Z0-9]{2,6}';
 export const IP_PATTERN = '((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}';
 export const HOST_ZONE_ID_PATTERN = '^Z[A-Z0-9]+$';

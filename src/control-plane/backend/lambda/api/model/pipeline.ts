@@ -1262,15 +1262,15 @@ export class CPipeline {
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessNamespaceId',
-        ParameterValue: this.redshift?.namespaceId,
+        ParameterValue: this.redshift?.serverless?.namespaceId,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessWorkgroupId',
-        ParameterValue: this.redshift?.workgroupId,
+        ParameterValue: this.redshift?.serverless?.workgroupId,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessWorkgroupName',
-        ParameterValue: this.redshift?.workgroupName,
+        ParameterValue: this.redshift?.serverless?.workgroupName,
       });
       parameters.push({
         ParameterKey: 'RedshiftServerlessIAMRole',
@@ -1295,13 +1295,6 @@ export class CPipeline {
       ParameterKey: 'QuickSightNamespaceParam',
       ParameterValue: this.pipeline.report?.quickSight?.namespace ?? 'default',
     });
-
-    if (this.pipeline.report?.quickSight?.vpcConnection) {
-      parameters.push({
-        ParameterKey: 'QuickSightVpcConnectionParam',
-        ParameterValue: this.pipeline.report?.quickSight?.vpcConnection,
-      });
-    }
 
     parameters.push({
       ParameterKey: 'RedshiftDBParam',
@@ -1332,6 +1325,16 @@ export class CPipeline {
         ParameterKey: 'RedshiftPortParam',
         ParameterValue: (this.redshift?.endpoint.port ?? 5439).toString(),
       });
+
+      parameters.push({
+        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
+        ParameterValue: this.redshift?.network.subnetIds?.join(','),
+      });
+
+      parameters.push({
+        ParameterKey: 'QuickSightVpcConnectionSGParam',
+        ParameterValue: this.redshift?.network.securityGroups?.join(','),
+      });
     } else if (this.pipeline.dataAnalytics?.redshift?.newServerless) {
       parameters.push({
         ParameterKey: 'RedshiftEndpointParam.#',
@@ -1341,6 +1344,16 @@ export class CPipeline {
       parameters.push({
         ParameterKey: 'RedshiftPortParam.#',
         ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT}`,
+      });
+
+      parameters.push({
+        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift.newServerless.network.subnetIds.join(','),
+      });
+
+      parameters.push({
+        ParameterKey: 'QuickSightVpcConnectionSGParam',
+        ParameterValue: this.pipeline.dataAnalytics?.redshift.newServerless.network.securityGroups.join(','),
       });
     }
 

@@ -21,7 +21,6 @@ import {
   Input,
   Link,
   Modal,
-  RadioGroup,
   Select,
   SelectProps,
   SpaceBetween,
@@ -44,8 +43,6 @@ interface ReportingProps {
   pipelineInfo: IExtPipeline;
   changeEnableReporting: (enable: boolean) => void;
   changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
-  changeQuickSightVpcConnection: (connection: string) => void;
-  changeQuickSightConnectionType: (type: string) => void;
   changeQuickSightAccountName: (accountName: string) => void;
 }
 
@@ -55,8 +52,6 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     pipelineInfo,
     changeEnableReporting,
     changeQuickSightSelectedUser,
-    changeQuickSightVpcConnection,
-    changeQuickSightConnectionType,
     changeQuickSightAccountName,
   } = props;
   const [quickSightRoleOptions, setQuickSightRoleOptions] =
@@ -295,47 +290,6 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                             </Button>
                           </div>
                         </div>
-                      </FormField>
-
-                      <FormField
-                        label={t('pipeline:create.dataConnectionType')}
-                        description={t(
-                          'pipeline:create.dataConnectionTypeDesc'
-                        )}
-                      >
-                        <>
-                          <RadioGroup
-                            onChange={({ detail }) =>
-                              changeQuickSightConnectionType(detail.value)
-                            }
-                            value={pipelineInfo.dataConnectionType}
-                            items={[
-                              {
-                                value: 'public',
-                                label: t('pipeline:create.publicNetwork'),
-                                description: t(
-                                  'pipeline:create.publicNetworkDesc'
-                                ),
-                              },
-                              {
-                                value: 'vpcconnection',
-                                label: t('pipeline:create.vpcConnection'),
-                                description: t(
-                                  'pipeline:create.vpcConnectionDesc'
-                                ),
-                              },
-                            ]}
-                          />
-                          <div className="mt-10">
-                            <Input
-                              placeholder="arn:aws:quicksight:<region>:<account-id>:vpcConnection/<connection-id>"
-                              onChange={({ detail }) =>
-                                changeQuickSightVpcConnection(detail.value)
-                              }
-                              value={pipelineInfo.quickSightVpcConnection}
-                            />
-                          </div>
-                        </>
                       </FormField>
                     </>
                   )}

@@ -36,10 +36,12 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
-  test('Should has Parameter quickSightVpcConnectionParam', () => {
-    template.hasParameter('QuickSightVpcConnectionParam', {
-      Type: 'String',
-    });
+  test('Should has Parameter QuickSightVpcConnectionSGParam', () => {
+    template.hasParameter('QuickSightVpcConnectionSGParam', {});
+  });
+
+  test('Should has Parameter QuickSightVpcConnectionSubnetParam', () => {
+    template.hasParameter('QuickSightVpcConnectionSubnetParam', {});
   });
 
   test('Should has Parameter QuickSightPrincipalParam', () => {
@@ -116,6 +118,60 @@ describe('DataReportingQuickSightStack parameter test', () => {
       'abc$rt',
       '123',
       'abc',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('QuickSightVpcConnectionSubnetParam pattern', () => {
+    const param = template.toJSON().Parameters.QuickSightVpcConnectionSubnetParam;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'subnet-06e3a4689f1025e5b,subnet-06e3a4689f1025eab',
+      'subnet-aaaaaaaa,subnet-bbbbbbb,subnet-ccccccc,',
+
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'Subnet-06e3a4689f1025e5b',
+      'subnet-06e3a4689f1025e5b,  subnet-06e3a4689f102fff',
+      'xxxxxx-06e3a4689f1025e5b,yyyyy-06e3a4689f1025e5b',
+      'subnet-06E3a4689f1025e5b',
+      'subnet-1231aacc',
+      'subnet-cccc',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('QuickSightVpcConnectionSGParam pattern', () => {
+    const param = template.toJSON().Parameters.QuickSightVpcConnectionSGParam;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'sg-0757849a2a9eebc4c,sg-11111aaaaaaaaa',
+      'sg-0757849a2a9eebc4c,sg-11111aaaaaaaaa,sg-11111bbbbbbbb',
+      'sg-0757849a2a9eebc4c',
+      'sg-12345678',
+    ];
+
+    for (const v of validValues) {
+      for ( const t of v.split(',')) {
+        expect(t).toMatch(regex);
+      }
+    }
+
+    const invalidValues = [
+      'sg-0757849a2a9eebc4c,  sg-11111aaaaaaaaa',
+      'xxxxxx-0757849a2a9eebc4c',
+      'subnet-0757849a2a9Eebc4c',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
@@ -457,6 +513,45 @@ describe('DataReportingQuickSightStack resource test', () => {
     Timeout: 900,
   }, 1);
 
+  template.resourcePropertiesCountIs('AWS::QuickSight::VPCConnection', {
+    AwsAccountId: {
+      Ref: 'AWS::AccountId',
+    },
+    RoleArn: {
+      'Fn::GetAtt': [
+        'VPCConnectionCreateRoleC12A5544',
+        'Arn',
+      ],
+    },
+    SecurityGroupIds: {
+      Ref: 'QuickSightVpcConnectionSGParam',
+    },
+    SubnetIds: {
+      'Fn::Split': [
+        ',',
+        {
+          Ref: 'QuickSightVpcConnectionSubnetParam',
+        },
+      ],
+    },
+  }, 1);
+
+  template.resourcePropertiesCountIs('AWS::IAM::Role', {
+    AssumeRolePolicyDocument: {
+      Statement: [
+        {
+          Action: 'sts:AssumeRole',
+          Effect: 'Allow',
+          Principal: {
+            Service: 'quicksight.amazonaws.com',
+          },
+        },
+      ],
+      Version: '2012-10-17',
+    },
+    Description: 'IAM role use to create QuickSight VPC connection.',
+  }, 1);
+
 
   template.resourcePropertiesCountIs('AWS::Lambda::Function', {
     Code: Match.anyValue(),
@@ -502,10 +597,9 @@ describe('DataReportingQuickSightStack resource test', () => {
   }, 1);
 
   template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource', {
-
     ServiceToken: {
       'Fn::GetAtt': [
-        Match.stringLikeRegexp('QuicksightDatasourceCustomResourceProviderframeworkonEvent[A-Z0-9a-z]+'),
+        Match.stringLikeRegexp('QuicksightDatasourceCustomResourceProviderframeworkonEvent[0-9A-Z]+'),
         'Arn',
       ],
     },
@@ -647,7 +741,10 @@ describe('DataReportingQuickSightStack resource test', () => {
             Ref: 'RedshiftParameterKeyParam',
           },
           vpcConnectionArn: {
-            Ref: 'QuickSightVpcConnectionParam',
+            'Fn::GetAtt': [
+              'ClickstreamVPCConnectionResource',
+              'Arn',
+            ],
           },
         },
         dataSets: [
@@ -656,7 +753,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'Fn::Join': [
                 '',
                 [
-                  'dataset_clickstream_daily_active_user_view_v1_',
+                  'dataset_clickstream_user_dim_view_v1_',
                   {
                     Ref: 'RedshiftDBParam',
                   },
@@ -678,7 +775,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             },
             importMode: 'DIRECT_QUERY',
             physicalTableMap: {
-              DailyActiveUserTable: {
+              UserDimTable: {
                 CustomSql: {
                   DataSourceArn: {
                     'Fn::Join': [
@@ -704,39 +801,79 @@ describe('DataReportingQuickSightStack resource test', () => {
                       ],
                     ],
                   },
-                  Name: 'clickstream_daily_active_user_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_daily_active_user_view',
+                  Name: 'clickstream_user_dim_view',
+                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_user_dim_view',
                   Columns: [
                     {
-                      Name: 'user_type',
+                      Name: 'user_id',
                       Type: 'STRING',
                     },
                     {
-                      Name: 'mobile_brand',
+                      Name: 'custom_attr_value',
                       Type: 'STRING',
                     },
                     {
-                      Name: 'country',
+                      Name: 'is_registered',
                       Type: 'STRING',
                     },
                     {
-                      Name: 'event_create_day',
+                      Name: 'first_visit_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_traffic_source_source',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_traffic_source_name',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'custom_attr_key',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_visit_city',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_traffic_source_medium',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_visit_install_source',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_visit_device_language',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'user_pseudo_id',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'first_visit_date',
                       Type: 'DATETIME',
+                    },
+                    {
+                      Name: 'first_platform',
+                      Type: 'STRING',
                     },
                   ],
                 },
               },
             },
             logicalTableMap: {
-              DailyActiveUserLogicTable: {
-                Alias: 'DailyActiveUserTableAlias',
+              UserDimLogicalTable: {
+                Alias: 'UserDimTableAlias',
                 Source: {
-                  PhysicalTableId: 'DailyActiveUserTable',
+                  PhysicalTableId: 'UserDimTable',
                 },
                 DataTransforms: [
                   {
                     TagColumnOperation: {
-                      ColumnName: 'country',
+                      ColumnName: 'first_visit_country',
                       Tags: [
                         {
                           ColumnGeographicRole: 'COUNTRY',
@@ -744,9 +881,50 @@ describe('DataReportingQuickSightStack resource test', () => {
                       ],
                     },
                   },
+                  {
+                    TagColumnOperation: {
+                      ColumnName: 'first_visit_city',
+                      Tags: [
+                        {
+                          ColumnGeographicRole: 'CITY',
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    ProjectOperation: {
+                      ProjectedColumns: [
+                        'user_pseudo_id',
+                        'user_id',
+                        'first_visit_date',
+                        'first_visit_install_source',
+                        'first_visit_device_language',
+                        'first_platform',
+                        'first_visit_country',
+                        'first_visit_city',
+                        'first_traffic_source_source',
+                        'first_traffic_source_medium',
+                        'first_traffic_source_name',
+                        'custom_attr_key',
+                        'custom_attr_value',
+                        'is_registered',
+                      ],
+                    },
+                  },
                 ],
               },
             },
+            columnGroups: [
+              {
+                GeoSpatialColumnGroup: {
+                  Name: 'geo',
+                  Columns: [
+                    'first_visit_country',
+                    'first_visit_city',
+                  ],
+                },
+              },
+            ],
           },
           {
             id: {
@@ -805,11 +983,39 @@ describe('DataReportingQuickSightStack resource test', () => {
                   SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_ods_flattened_view',
                   Columns: [
                     {
+                      Name: 'event_parameter_value',
+                      Type: 'STRING',
+                    },
+                    {
                       Name: 'event_name',
                       Type: 'STRING',
                     },
                     {
+                      Name: 'platform',
+                      Type: 'STRING',
+                    },
+                    {
                       Name: 'event_date',
+                      Type: 'DATETIME',
+                    },
+                    {
+                      Name: 'event_id',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'user_pseudo_id',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'app_info_version',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'geo_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'event_parameter_key',
                       Type: 'STRING',
                     },
                   ],
@@ -874,20 +1080,40 @@ describe('DataReportingQuickSightStack resource test', () => {
                   SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_session_view',
                   Columns: [
                     {
-                      Name: 'avg_session_duration_min',
+                      Name: 'session_engagement_time_min',
                       Type: 'DECIMAL',
                     },
                     {
-                      Name: 'engaged_rate_percentage',
-                      Type: 'DECIMAL',
+                      Name: 'exit_view',
+                      Type: 'STRING',
                     },
                     {
-                      Name: 'engaged_session_num__per_user',
-                      Type: 'DECIMAL',
-                    },
-                    {
-                      Name: 'event_create_day',
+                      Name: 'session_date',
                       Type: 'DATETIME',
+                    },
+                    {
+                      Name: 'platform',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'session_views',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'session_id',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'user_pseudo_id',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'engaged_session',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'entry_view',
+                      Type: 'STRING',
                     },
                   ],
                 },
@@ -899,7 +1125,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'Fn::Join': [
                 '',
                 [
-                  'dataset_clickstream_retention_view_v1_',
+                  'dataset_clickstream_ods_events_view_v1_',
                   {
                     Ref: 'RedshiftDBParam',
                   },
@@ -947,96 +1173,15 @@ describe('DataReportingQuickSightStack resource test', () => {
                       ],
                     ],
                   },
-                  Name: 'clickstream_retention_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_retention_view',
+                  Name: 'clickstream_ods_events_view',
+                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_ods_events_view',
                   Columns: [
                     {
-                      Name: 'day_cohort',
-                      Type: 'DATETIME',
+                      Name: 'event_id',
+                      Type: 'STRING',
                     },
                     {
-                      Name: 'day_3',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'day_1',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'day_2',
-                      Type: 'INTEGER',
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            id: {
-              'Fn::Join': [
-                '',
-                [
-                  'dataset_clickstream_dau_wau_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            name: {
-              'Fn::Join': [
-                '',
-                [
-                  'Dau Wau Dataset ',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              DauWauTable: {
-                CustomSql: {
-                  DataSourceArn: {
-                    'Fn::Join': [
-                      '',
-                      [
-                        'arn:',
-                        {
-                          Ref: 'AWS::Partition',
-                        },
-                        ':quicksight:',
-                        {
-                          Ref: 'AWS::Region',
-                        },
-                        ':',
-                        {
-                          Ref: 'AWS::AccountId',
-                        },
-                        ':datasource/clickstream_quicksight_data_source_v1_',
-                        {
-                          Ref: 'RedshiftDBParam',
-                        },
-                        '_##SCHEMA##',
-                      ],
-                    ],
-                  },
-                  Name: 'clickstream_dau_wau_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_dau_wau_view',
-                  Columns: [
-                    {
-                      Name: 'today_active_user_num',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'active_user_numer_last_7_days',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'event_create_day',
+                      Name: 'event_date_d',
                       Type: 'DATETIME',
                     },
                   ],
@@ -1047,7 +1192,7 @@ describe('DataReportingQuickSightStack resource test', () => {
         ],
         dataSetReferences: [
           {
-            DataSetPlaceholder: 'clickstream_daily_active_user_view',
+            DataSetPlaceholder: 'clickstream_user_dim_view',
             DataSetArn: {
               'Fn::Join': [
                 '',
@@ -1064,7 +1209,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':dataset/dataset_clickstream_daily_active_user_view_v1_',
+                  ':dataset/dataset_clickstream_user_dim_view_v1_',
                   {
                     Ref: 'RedshiftDBParam',
                   },
@@ -1101,33 +1246,6 @@ describe('DataReportingQuickSightStack resource test', () => {
             },
           },
           {
-            DataSetPlaceholder: 'clickstream_dau_wau_view',
-            DataSetArn: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/dataset_clickstream_dau_wau_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-          },
-          {
             DataSetPlaceholder: 'clickstream_session_view',
             DataSetArn: {
               'Fn::Join': [
@@ -1155,7 +1273,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             },
           },
           {
-            DataSetPlaceholder: 'clickstream_retention_view',
+            DataSetPlaceholder: 'clickstream_ods_events_view',
             DataSetArn: {
               'Fn::Join': [
                 '',
@@ -1172,7 +1290,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':dataset/dataset_clickstream_retention_view_v1_',
+                  ':dataset/dataset_clickstream_ods_events_view_v1_',
                   {
                     Ref: 'RedshiftDBParam',
                   },

@@ -45,17 +45,6 @@ export const clickstream_dau_wau_view_columns = [
   },
 ];
 
-export const clickstream_ods_flattened_view_columns = [
-  {
-    Name: 'event_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_date',
-    Type: 'STRING',
-  },
-];
-
 export const clickstream_retention_view_columns = [
   {
     Name: 'day_cohort',
@@ -75,22 +64,158 @@ export const clickstream_retention_view_columns = [
   },
 ];
 
-export const clickstream_session_view_columns = [
-  {
-    Name: 'avg_session_duration_min',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'engaged_rate_percentage',
-    Type: 'DECIMAL',
-  },
+export const clickstream_ods_events_view_columns = [
 
   {
-    Name: 'engaged_session_num__per_user',
+    Name: 'event_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_date_d',
+    Type: 'DATETIME',
+  },
+
+];
+
+export const clickstream_ods_flattened_view_columns = [
+
+  {
+    Name: 'event_parameter_value',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'platform',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'event_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_pseudo_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_info_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'geo_country',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_parameter_key',
+    Type: 'STRING',
+  },
+
+];
+
+export const clickstream_session_view_columns = [
+
+  {
+    Name: 'session_engagement_time_min',
     Type: 'DECIMAL',
   },
   {
-    Name: 'event_create_day',
+    Name: 'exit_view',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_date',
     Type: 'DATETIME',
   },
+  {
+    Name: 'platform',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_views',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'session_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_pseudo_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'engaged_session',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'entry_view',
+    Type: 'STRING',
+  },
+
+];
+
+export const clickstream_user_dim_view_columns = [
+
+  {
+    Name: 'user_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'custom_attr_value',
+    Type: 'STRING',
+  },
+  {
+    Name: 'is_registered',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_country',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_traffic_source_source',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_traffic_source_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'custom_attr_key',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_city',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_traffic_source_medium',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_install_source',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_device_language',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_pseudo_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'first_platform',
+    Type: 'STRING',
+  },
+
 ];

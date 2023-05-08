@@ -197,6 +197,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     };
     // keep view order due to dependency between them.
     sqlStatements.push(getSqlContent('clickstream-daily-active-user-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-user-dim-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-ods-flattened-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-dau-wau-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-session-view.sql', mustacheParam));

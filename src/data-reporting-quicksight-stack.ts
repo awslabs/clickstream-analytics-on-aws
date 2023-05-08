@@ -11,7 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Stack } from 'aws-cdk-lib';
+import {
+  Aws,
+  CfnResource,
+  Fn,
+  Stack,
+} from 'aws-cdk-lib';
+import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import {
   addCfnNagForLogRetention,
@@ -20,6 +26,7 @@ import {
   addCfnNagForCfnResource,
 } from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
+import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
@@ -35,11 +42,43 @@ export class DataReportingQuickSightStack extends Stack {
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
     const stackParames = createStackParametersQuickSight(this, this.paramGroups, this.paramLabels);
-    createQuicksightCustomResource(this, {
+
+    const vpcConnectionCreateRole = new Role(this, 'VPCConnectionCreateRole', {
+      assumedBy: new ServicePrincipal('quicksight.amazonaws.com'),
+      description: 'IAM role use to create QuickSight VPC connection.',
+    });
+
+    vpcConnectionCreateRole.addToPolicy(new PolicyStatement({
+      actions: [
+        'ec2:DescribeSubnets',
+        'ec2:DescribeSecurityGroups',
+        'ec2:CreateNetworkInterface',
+        'ec2:ModifyNetworkInterfaceAttribute',
+        'ec2:DeleteNetworkInterface',
+      ],
+      resources: ['*'],
+    }));
+
+    const vpcConnectionId = `clickstream-quicksight-vpc-connection-${getShortIdOfStack(Stack.of(this))}`;
+    const vPCConnectionResource = new CfnResource(this, 'Clickstream-VPCConnectionResource', {
+      type: 'AWS::QuickSight::VPCConnection',
+      properties: {
+        AwsAccountId: Aws.ACCOUNT_ID,
+        Name: `VPC Connection for Clickstream pipeline ${stackParames.redshiftDBParam.valueAsString}`,
+        RoleArn: vpcConnectionCreateRole.roleArn,
+        SecurityGroupIds: stackParames.quickSightVpcConnectionSGParam.valueAsList,
+        SubnetIds: Fn.split(',', stackParames.quickSightVpcConnectionSubnetParam.valueAsString),
+        VPCConnectionId: vpcConnectionId,
+      },
+    });
+    vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
+    const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
+
+    const cr = createQuicksightCustomResource(this, {
       quickSightProps: {
         userName: stackParames.quickSightUserParam.valueAsString,
         namespace: stackParames.quickSightNamespaceParam.valueAsString,
-        vpcConnectionArn: stackParames.quickSightVpcConnectionParam.valueAsString,
+        vpcConnectionArn: vpcConnectionArn,
         principalArn: stackParames.quickSightPrincipalParam.valueAsString,
         templateArn: stackParames.quickSightTemplateArnParam.valueAsString,
       },
@@ -51,6 +90,7 @@ export class DataReportingQuickSightStack extends Stack {
         ssmParameterName: stackParames.redshiftParameterKeyParam.valueAsString,
       },
     });
+    cr.node.addDependency(vPCConnectionResource);
 
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
@@ -83,6 +123,16 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+    {
+      paths_endswith: ['VPCConnectionCreateRole/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        {
+          id: 'W12',
+          reason: 'Create QuickSight VPC connection need permission on * resource',
+        },
+      ],
+    },
+
   ]);
 
 }

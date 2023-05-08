@@ -12,7 +12,7 @@
  */
 
 import { Parameter, Tag, StackStatus } from '@aws-sdk/client-cloudformation';
-import { Endpoint } from '@aws-sdk/client-redshift';
+import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 
@@ -193,6 +193,9 @@ export interface RedshiftCluster {
   readonly status: string;
   readonly masterUsername: string;
   readonly publiclyAccessible: boolean;
+  readonly vpcSecurityGroups: VpcSecurityGroupMembership[];
+  readonly clusterSubnetGroupName: string;
+  readonly vpcId: string;
 }
 
 export interface RedshiftWorkgroup {
@@ -301,11 +304,21 @@ export interface RedshiftInfo {
     port: number;
   };
   readonly publiclyAccessible: boolean;
-  readonly workgroupId?: string;
-  readonly workgroupArn?: string;
-  readonly workgroupName?: string;
-  readonly namespaceId?: string;
-  readonly namespaceArn?: string;
-  readonly namespaceName?: string;
+  readonly network: {
+    readonly vpcId?: string;
+    readonly securityGroups?: string[];
+    readonly subnetIds?: string[];
+  };
+  readonly serverless?: {
+    readonly workgroupId: string;
+    readonly workgroupArn: string;
+    readonly workgroupName: string;
+    readonly namespaceId: string;
+    readonly namespaceArn: string;
+    readonly namespaceName: string;
+  };
+  readonly provisioned?: {
+    readonly clusterIdentifier: string;
+  };
 }
 

@@ -2653,6 +2653,14 @@ describe('Workflow test', () => {
                         ParameterValue: '5002',
                       },
                       {
+                        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
+                        ParameterValue: 'subnet-00000000000000022',
+                      },
+                      {
+                        ParameterKey: 'QuickSightVpcConnectionSGParam',
+                        ParameterValue: 'sg-00000000000000031',
+                      },
+                      {
                         ParameterKey: 'RedshiftParameterKeyParam.#',
                         ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.BIUserCredentialParameterName',
                       },
@@ -3040,6 +3048,14 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'RedshiftPortParam.#',
                         ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
+                      },
+                      {
+                        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
+                        ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'QuickSightVpcConnectionSGParam',
+                        ParameterValue: 'sg-00000000000000030,sg-00000000000000031',
                       },
                       {
                         ParameterKey: 'RedshiftParameterKeyParam.#',

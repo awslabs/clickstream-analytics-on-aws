@@ -249,14 +249,11 @@ const Content: React.FC = () => {
     ],
     enableReporting: true,
     selectedQuickSightUser: null,
-    dataConnectionType: '',
-    quickSightVpcConnection: '',
     arnAccountId: '',
     report: {
       quickSight: {
         accountName: '',
         user: '',
-        vpcConnection: '',
       },
     },
     enableAuthentication: false,
@@ -416,13 +413,6 @@ const Content: React.FC = () => {
     if (!createPipelineObj.enableAuthentication) {
       createPipelineObj.ingestionServer.loadBalancer.authenticationSecretArn =
         null;
-    }
-
-    if (createPipelineObj.dataConnectionType === 'public') {
-      createPipelineObj.report.quickSight.vpcConnection = 'public';
-    } else {
-      createPipelineObj.report.quickSight.vpcConnection =
-        pipelineInfo.quickSightVpcConnection;
     }
 
     // remove temporary properties
@@ -1394,22 +1384,6 @@ const Content: React.FC = () => {
                         user: user.value || '',
                       },
                     },
-                  };
-                });
-              }}
-              changeQuickSightConnectionType={(type) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    dataConnectionType: type,
-                  };
-                });
-              }}
-              changeQuickSightVpcConnection={(connection) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    quickSightVpcConnection: connection,
                   };
                 });
               }}

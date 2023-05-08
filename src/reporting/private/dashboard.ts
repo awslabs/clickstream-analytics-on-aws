@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DataSetReference, LogicalTable, PhysicalTable, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { ColumnGroup, DataSetReference, LogicalTable, PhysicalTable, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -62,6 +62,7 @@ export interface QuickSightDataSetProps {
   importMode: string;
   physicalTableMap: Record<string, PhysicalTable>;
   logicalTableMap?: Record<string, LogicalTable>;
+  columnGroups?: ColumnGroup[];
 };
 
 export interface QuickSightDataProps {
@@ -104,6 +105,8 @@ export const CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER = 'clickstream_ods_flatt
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
 export const CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER = 'clickstream_dau_wau_view';
+export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
+export const CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER = 'clickstream_ods_events_view';
 
 function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));

@@ -846,6 +846,7 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
+          clusterSubnetGroupName: '',
           name: 'redshift-cluster-1',
           nodeType: 'dc2.large',
           endpoint: {
@@ -855,6 +856,8 @@ describe('Account Env test', () => {
           publiclyAccessible: false,
           masterUsername: 'click',
           status: 'available',
+          vpcId: 'vpc-111',
+          vpcSecurityGroups: [],
         },
       ],
     });
@@ -883,6 +886,7 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
+          clusterSubnetGroupName: '',
           name: 'redshift-cluster-1',
           nodeType: 'dc2.large',
           endpoint: {
@@ -892,6 +896,9 @@ describe('Account Env test', () => {
           publiclyAccessible: false,
           masterUsername: 'click',
           status: 'available',
+          vpcId: 'vpc-111',
+          vpcSecurityGroups: [],
+
         },
       ],
     });

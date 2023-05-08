@@ -316,7 +316,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     }
 
     logger.info('start to create dataset');
-    let dataset: CreateDataSourceCommandOutput | undefined = undefined;
+    let dataset: CreateDataSetCommandOutput | undefined = undefined;
     for (const i of Array(60).keys()) {
       logger.info(`create dataset round: ${i} `);
       try {
@@ -332,6 +332,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
           ImportMode: props.importMode,
           PhysicalTableMap: props.physicalTableMap,
           LogicalTableMap: props.logicalTableMap,
+          ColumnGroups: props.columnGroups,
         });
         break;
       } catch (err: any) {
@@ -469,12 +470,6 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
 
       SourceEntity: sourceEntity,
 
-      DashboardPublishOptions: {
-        AdHocFilteringOption: {
-          AvailabilityStatus: 'DISABLED',
-        },
-      },
-
     });
     await waitForDashboardCreateCompleted(quickSight, awsAccountId, props.dashboardId);
     logger.info('create dashboard finished. arn: ', dashboard.Arn!);
@@ -514,9 +509,11 @@ const createQuickSightDashboard = async (quickSight: QuickSight, ssm: SSM, accou
     },
   };
 
-  await createAnalysis(quickSight, accountId, principalArn, sourceEntity, dashboardDef);
+  const analysis = await createAnalysis(quickSight, accountId, principalArn, sourceEntity, dashboardDef);
+  logger.info(`Analysis ${analysis?.Arn} creation completed.`);
 
   const dashboard = await createDashboard(quickSight, accountId, principalArn, sourceEntity, dashboardDef);
+  logger.info(`Dashboard ${dashboard?.Arn} creation completed.`);
 
   return dashboard;
 

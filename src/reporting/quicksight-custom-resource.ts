@@ -19,18 +19,16 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import {
-  clickstream_daily_active_user_view_columns,
-  clickstream_dau_wau_view_columns,
+  clickstream_ods_events_view_columns,
   clickstream_ods_flattened_view_columns,
-  clickstream_retention_view_columns,
   clickstream_session_view_columns,
+  clickstream_user_dim_view_columns,
 } from './lambda/custom-resource/quicksight/resources-def';
 import {
-  CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-  CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-  CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
   CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+  CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
   QuickSightDashboardDefProps,
   QuicksightCustomResourceProps,
 } from './private/dashboard';
@@ -80,37 +78,78 @@ export function createQuicksightCustomResource(
       },
       dataSets: [
         {
-          id: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
+          id: `dataset_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
           name: `Daily Active User Dataset ${suffix}_##SCHEMA##`,
           importMode: 'DIRECT_QUERY',
           physicalTableMap: {
-            DailyActiveUserTable: {
+            UserDimTable: {
               CustomSql: {
                 DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_daily_active_user_view_columns,
+                Name: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}`,
+                Columns: clickstream_user_dim_view_columns,
               },
             },
           },
           logicalTableMap: {
-            DailyActiveUserLogicTable: {
-              Alias: 'DailyActiveUserTableAlias',
+            UserDimLogicalTable: {
+              Alias: 'UserDimTableAlias',
               Source: {
-                PhysicalTableId: 'DailyActiveUserTable',
+                PhysicalTableId: 'UserDimTable',
               },
               DataTransforms: [{
                 TagColumnOperation: {
-                  ColumnName: 'country',
+                  ColumnName: 'first_visit_country',
                   Tags: [
                     {
                       ColumnGeographicRole: 'COUNTRY',
                     },
                   ],
                 },
+              },
+              {
+                TagColumnOperation: {
+                  ColumnName: 'first_visit_city',
+                  Tags: [
+                    {
+                      ColumnGeographicRole: 'CITY',
+                    },
+                  ],
+                },
+              },
+              {
+                ProjectOperation: {
+                  ProjectedColumns: [
+                    'user_pseudo_id',
+                    'user_id',
+                    'first_visit_date',
+                    'first_visit_install_source',
+                    'first_visit_device_language',
+                    'first_platform',
+                    'first_visit_country',
+                    'first_visit_city',
+                    'first_traffic_source_source',
+                    'first_traffic_source_medium',
+                    'first_traffic_source_name',
+                    'custom_attr_key',
+                    'custom_attr_value',
+                    'is_registered',
+                  ],
+                },
               }],
             },
           },
+          columnGroups: [
+            {
+              GeoSpatialColumnGroup: {
+                Name: 'geo',
+                Columns: [
+                  'first_visit_country',
+                  'first_visit_city',
+                ],
+              },
+            },
+          ],
         },
         {
           id: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
@@ -143,56 +182,38 @@ export function createQuicksightCustomResource(
           },
         },
         {
-          id: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
+          id: `dataset_${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
           name: `Retention Dataset ${suffix}_##SCHEMA##`,
           importMode: 'DIRECT_QUERY',
           physicalTableMap: {
             RetentionTable: {
               CustomSql: {
                 DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_retention_view_columns,
+                Name: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
+                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}`,
+                Columns: clickstream_ods_events_view_columns,
               },
             },
           },
         },
-        {
-          id: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          name: `Dau Wau Dataset ${suffix}_##SCHEMA##`,
-          importMode: 'DIRECT_QUERY',
-          physicalTableMap: {
-            DauWauTable: {
-              CustomSql: {
-                DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_dau_wau_view_columns,
-              },
-            },
-          },
-        },
+
       ],
       dataSetReferences: [
         {
-          DataSetPlaceholder: CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
+          DataSetPlaceholder: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
         },
         {
           DataSetPlaceholder: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
           DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
         },
         {
-          DataSetPlaceholder: CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-        },
-        {
           DataSetPlaceholder: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
         },
         {
-          DataSetPlaceholder: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
+          DataSetPlaceholder: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
+          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
         },
       ],
 

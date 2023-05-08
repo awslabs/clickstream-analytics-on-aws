@@ -19,6 +19,8 @@ import {
   REDSHIFT_DB_NAME_PATTERN,
   MUTIL_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
+  SECURITY_GROUP_PATTERN,
+  SUBNETS_PATTERN,
 } from '../common/constant';
 
 export function createStackParametersQuickSight(scope: Construct, paramGroups?: any[], paramLabels?: any) {
@@ -47,13 +49,24 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'QuickSight Nameapce Name',
   };
 
-  const quickSightVpcConnectionParam = new CfnParameter(scope, 'QuickSightVpcConnectionParam', {
-    description: 'QuickSight Vpc connection arn.',
-    type: 'String',
-    default: 'public',
+  const quickSightVpcConnectionSGParam = new CfnParameter(scope, 'QuickSightVpcConnectionSGParam', {
+    description: 'Comma delimited security group ids used to create QuickSight VPC connection.',
+    type: 'CommaDelimitedList',
+    allowedPattern: `^${SECURITY_GROUP_PATTERN}$`,
+    constraintDescription: `Security group id must match ${SECURITY_GROUP_PATTERN}`,
   });
-  labels[quickSightVpcConnectionParam.logicalId] = {
-    default: 'QuickSight Vpc Connection Arn',
+  labels[quickSightVpcConnectionSGParam.logicalId] = {
+    default: 'Comma Delimited Security Group Ids',
+  };
+
+  const quickSightVpcConnectionSubnetParam = new CfnParameter(scope, 'QuickSightVpcConnectionSubnetParam', {
+    description: 'Comma delimited subnet ids used to create QuickSight VPC connection.',
+    type: 'String',
+    allowedPattern: `^${SUBNETS_PATTERN}$`,
+    constraintDescription: `Subnet id must match ${SUBNETS_PATTERN}`,
+  });
+  labels[quickSightVpcConnectionSubnetParam.logicalId] = {
+    default: 'Comma Delimited Subnet Ids',
   };
 
   const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
@@ -125,7 +138,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     Parameters: [
       quickSightNamespaceParam.logicalId,
       quickSightUserParam.logicalId,
-      quickSightVpcConnectionParam.logicalId,
+      quickSightVpcConnectionSGParam,
+      quickSightVpcConnectionSubnetParam,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
     ],
@@ -145,7 +159,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   return {
     quickSightUserParam,
     quickSightNamespaceParam,
-    quickSightVpcConnectionParam,
+    quickSightVpcConnectionSGParam,
+    quickSightVpcConnectionSubnetParam,
     quickSightPrincipalParam,
     quickSightTemplateArnParam,
     redshiftEndpointParam,

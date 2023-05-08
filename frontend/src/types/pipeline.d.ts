@@ -141,7 +141,6 @@ declare global {
       quickSight: {
         accountName: string;
         user: string;
-        vpcConnection: string;
       };
     };
     status?: {
@@ -191,8 +190,6 @@ declare global {
 
     enableReporting: boolean;
     selectedQuickSightUser: SelectProps.Option | null;
-    dataConnectionType: string;
-    quickSightVpcConnection: string;
     arnAccountId: string;
     enableAuthentication: boolean;
 
