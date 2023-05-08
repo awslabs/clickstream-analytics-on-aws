@@ -1083,6 +1083,31 @@ describe('Account Env test', () => {
       },
     });
   });
+  it('Describe QuickSight with already exists', async () => {
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
+      AccountInfo: {
+        AccountName: 'xxxx-xsxs',
+        Edition: 'ENTERPRISE',
+        NotificationEmail: 'fake@example.com',
+        AuthenticationType: 'IDENTITY_POOL',
+        AccountSubscriptionStatus: 'ACCOUNT_CREATED',
+      },
+    });
+    const res = await request(app).get('/api/env/quicksight/describe');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        accountName: 'xxxx-xsxs',
+        accountSubscriptionStatus: 'ACCOUNT_CREATED',
+        authenticationType: 'IDENTITY_POOL',
+        edition: 'ENTERPRISE',
+        notificationEmail: 'fake@example.com',
+      },
+    });
+  });
   it('Ping QuickSight', async () => {
     quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({});
     let res = await request(app).get('/api/env/quicksight/ping');

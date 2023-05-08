@@ -131,16 +131,13 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
     if (response.AccountInfo?.AccountSubscriptionStatus === 'UNSUBSCRIBED') {
       return undefined;
     }
-    if (response.AccountInfo?.AccountName?.startsWith(QUICKSIGHT_PREFIX)) {
-      return {
-        accountName: response.AccountInfo?.AccountName,
-        edition: response.AccountInfo?.Edition,
-        notificationEmail: response.AccountInfo?.NotificationEmail,
-        authenticationType: response.AccountInfo?.AuthenticationType,
-        accountSubscriptionStatus: response.AccountInfo?.AccountSubscriptionStatus,
-      } as QuickSightAccountInfo;
-    }
-    return undefined;
+    return {
+      accountName: response.AccountInfo?.AccountName,
+      edition: response.AccountInfo?.Edition,
+      notificationEmail: response.AccountInfo?.NotificationEmail,
+      authenticationType: response.AccountInfo?.AuthenticationType,
+      accountSubscriptionStatus: response.AccountInfo?.AccountSubscriptionStatus,
+    } as QuickSightAccountInfo;
   } catch (err) {
     if ((err as Error).name === 'ResourceNotFoundException') {
       return undefined;
