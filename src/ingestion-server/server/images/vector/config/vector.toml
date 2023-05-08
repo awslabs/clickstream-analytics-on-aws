@@ -23,4 +23,5 @@ if get_env_var!("DEV_MODE") == "Yes" && !is_null(.fakeIp) {
 .method = del(.X_Method)
 .data = del(.message)
 .ingest_time = to_unix_timestamp(now()) * 1000
+.server_ingest_time = to_unix_timestamp(now()) * 1000
 '''
