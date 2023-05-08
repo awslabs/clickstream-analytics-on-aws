@@ -62,10 +62,10 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
             href={buildReshiftLink(
               pipelineInfo?.region || '',
               '',
-              'Redshift Serverless'
+              'serverless'
             )}
           >
-            Serverless
+            {t('pipeline:detail.redshiftServerless')}
           </Link>
         );
       } else {

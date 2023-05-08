@@ -340,7 +340,8 @@
     "sharingUrl": "Dashboard sharing URL",
     "alarmName": "Alarm name",
     "action": "Action",
-    "stackDetails": "Stack Details"
+    "stackDetails": "Stack Details",
+    "redshiftServerless": "Redshift Serverless"
   },
   "list": {
     "id": "Pipeline ID",
