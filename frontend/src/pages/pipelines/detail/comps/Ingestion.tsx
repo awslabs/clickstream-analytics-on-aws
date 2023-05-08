@@ -16,10 +16,10 @@ import {
   ColumnLayout,
   SpaceBetween,
   Link,
-  StatusIndicator,
 } from '@cloudscape-design/components';
 import CopyText from 'components/common/CopyIcon';
-import React, { useEffect, useState } from 'react';
+import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
 import { buildSubnetLink } from 'ts/url';
@@ -30,8 +30,6 @@ interface TabContentProps {
 const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
-
-  const [domainResolved, setDomainResolved] = useState(false);
 
   const buildBufferDisplay = (pipelineInfo?: IExtPipeline) => {
     if (pipelineInfo?.ingestionServer.sinkType === SinkType.S3) {
@@ -66,22 +64,6 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
     return '-';
   };
-
-  useEffect(() => {
-    if (pipelineInfo?.dns) {
-      fetch(`https://${pipelineInfo?.dns}`)
-        .then((response) => {
-          if (response.ok) {
-            setDomainResolved(true);
-          } else {
-            setDomainResolved(false);
-          }
-        })
-        .catch((error) => {
-          setDomainResolved(false);
-        });
-    }
-  }, [pipelineInfo?.dns]);
 
   return (
     <ColumnLayout columns={3} variant="text-grid">
@@ -159,33 +141,11 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
-          <div>
-            {pipelineInfo?.ingestionServer?.domain?.domainName && (
-              <CopyText
-                text={
-                  pipelineInfo?.dns ||
-                  pipelineInfo.ingestionServer.domain.domainName ||
-                  ''
-                }
-              />
-            )}
-
-            {pipelineInfo?.dns ||
-              pipelineInfo?.ingestionServer.domain.domainName ||
-              '-'}
-
-            {pipelineInfo?.pipelineId &&
-              pipelineInfo.dns &&
-              (domainResolved ? (
-                <span className="ml-5">
-                  <StatusIndicator type="success" />
-                </span>
-              ) : (
-                <span className="ml-5">
-                  <StatusIndicator type="error" />
-                </span>
-              ))}
-          </div>
+          <DomainNameWithStatus
+            pipelineId={pipelineInfo?.pipelineId}
+            dns={pipelineInfo?.dns}
+            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+          />
         </div>
 
         <div>

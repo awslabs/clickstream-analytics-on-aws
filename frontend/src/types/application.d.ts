@@ -34,6 +34,7 @@ declare global {
       };
       endpoint: string;
       dns: string;
+      customDomain: string;
     };
     createAt?: number;
     updateAt?: number;

@@ -505,6 +505,7 @@ describe('Application test', () => {
         iosAppStoreId: 'iosAppStoreId',
         iosBundleId: 'iosBundleId',
         pipeline: {
+          customDomain: '',
           endpoint: 'http://xxx/xxx',
           dns: 'http://yyy/yyy',
           id: MOCK_PROJECT_ID,

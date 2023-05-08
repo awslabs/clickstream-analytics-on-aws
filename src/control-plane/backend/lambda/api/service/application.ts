@@ -99,6 +99,7 @@ export class ApplicationServ {
           status: latestPipelines.items[0].status,
           endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+          customDomain: latestPipelines.items[0].ingestionServer.domain?.domainName ?? '',
         },
       }));
     } catch (error) {
