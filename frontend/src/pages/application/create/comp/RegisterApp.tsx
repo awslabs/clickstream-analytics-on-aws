@@ -29,7 +29,7 @@ import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { generateStr, validateAppId } from 'ts/utils';
+import { validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
   const { t } = useTranslation();
@@ -138,10 +138,7 @@ const RegisterApp: React.FC = () => {
                       return {
                         ...prev,
                         name: e.detail.value,
-                        appId: `${e.detail.value?.replace(
-                          /[^\w]/g,
-                          '_'
-                        )}_${generateStr(12)}`,
+                        appId: `${e.detail.value?.replace(/[^\w]/g, '_')}`,
                       };
                     });
                   }}
