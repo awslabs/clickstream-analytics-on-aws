@@ -75,11 +75,14 @@ export const generateCronDateRange = (
   fixedValue: number,
   cronExp: string,
   unit: SelectProps.Option | null,
-  attr: 'processing' | 'upsert'
+  attr: 'processing' | 'upsert' | 'dataload'
 ) => {
   let DEFAULT_VALUE = `rate(1 hour)`;
   if (attr === 'upsert') {
     DEFAULT_VALUE = `rate(1 day)`;
+  }
+  if (attr === 'dataload') {
+    DEFAULT_VALUE = `rate(5 minutes)`;
   }
   if (type === ExecutionType.FIXED_RATE) {
     if (fixedValue && fixedValue > 0) {
@@ -117,20 +120,6 @@ export const generateRedshiftInterval = (value?: number, unit?: string) => {
     return value;
   } else {
     return 6 * 60 * 24 * 30;
-  }
-};
-
-export const generateDataLoadFreqency = (value?: number, unit?: string) => {
-  if (value) {
-    if (unit === 'day') {
-      return value * 60 * 24;
-    }
-    if (unit === 'hour') {
-      return value * 60;
-    }
-    return value;
-  } else {
-    return 5;
   }
 };
 

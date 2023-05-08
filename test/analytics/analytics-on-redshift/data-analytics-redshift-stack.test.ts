@@ -266,7 +266,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Should has parameter LoadJobScheduleInterval', () => {
     template.hasParameter('LoadJobScheduleInterval', {
-      Type: 'Number',
+      Type: 'String',
     });
   });
 
@@ -575,7 +575,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         prefix: 'project1/',
       },
       loadDataProps: {
-        scheduleInterval: 5,
+        scheduleInterval: '5',
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
@@ -624,7 +624,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         prefix: 'project1/',
       },
       loadDataProps: {
-        scheduleInterval: 5,
+        scheduleInterval: '5',
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
@@ -676,7 +676,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         prefix: 'project1/',
       },
       loadDataProps: {
-        scheduleInterval: 5,
+        scheduleInterval: '5',
         maxFilesLimit: 50,
         processingFilesLimit: 100,
       },
@@ -2410,16 +2410,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
-        ScheduleExpression: {
-          'Fn::Join': [
-            '',
-            [
-              'rate(',
-              RefAnyValue,
-              ' minutes)',
-            ],
-          ],
-        },
+        ScheduleExpression: RefAnyValue,
         State: 'ENABLED',
         Targets: [
           {
@@ -2438,16 +2429,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
-        ScheduleExpression: {
-          'Fn::Join': [
-            '',
-            [
-              'rate(',
-              RefAnyValue,
-              ' minutes)',
-            ],
-          ],
-        },
+        ScheduleExpression: RefAnyValue,
         State: 'ENABLED',
         Targets: [
           {

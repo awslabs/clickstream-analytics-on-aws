@@ -15,7 +15,7 @@ import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 
 export interface LoadDataProps {
-  readonly scheduleInterval: number;
+  readonly scheduleInterval: string;
   readonly maxFilesLimit: number;
   readonly processingFilesLimit: number;
 }

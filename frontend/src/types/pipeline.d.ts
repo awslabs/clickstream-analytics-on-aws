@@ -131,7 +131,7 @@ declare global {
         };
       };
       loadWorkflow: {
-        loadJobScheduleIntervalInMinutes: string;
+        loadJobScheduleIntervalExpression: string;
       };
       upsertUsers: {
         scheduleExpression: string;
@@ -205,5 +205,7 @@ declare global {
 
     selectedUpsertType: SelectProps.Option | null;
     upsertCronExp: string;
+    selectedDataLoadType: SelectProps.Option | null;
+    dataLoadCronExp: string;
   }
 }

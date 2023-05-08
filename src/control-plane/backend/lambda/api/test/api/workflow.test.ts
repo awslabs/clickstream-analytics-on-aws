@@ -1610,7 +1610,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -1947,7 +1947,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -2275,7 +2275,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -2591,7 +2591,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -2976,7 +2976,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',
@@ -3417,7 +3417,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'LoadJobScheduleInterval',
-                        ParameterValue: '180',
+                        ParameterValue: 'rate(5 minutes)',
                       },
                       {
                         ParameterKey: 'RedshiftMode',

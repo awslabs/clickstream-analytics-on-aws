@@ -152,7 +152,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       } else {
         const minutes = parseInt(
           pipelineInfo.dataAnalytics.loadWorkflow
-            .loadJobScheduleIntervalInMinutes
+            .loadJobScheduleIntervalExpression
         );
         if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
           const months = minutes / (60 * 24 * 30);
@@ -211,24 +211,51 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
   const getRedshiftDataLoadFrequencyDisplay = () => {
     if (pipelineInfo) {
-      if (pipelineInfo.redshiftDataLoadUnit?.value) {
-        return `${pipelineInfo.redshiftDataLoadValue} ${pipelineInfo.redshiftDataLoadUnit.label}`;
-      } else {
-        const minutes = parseInt(
-          pipelineInfo.dataAnalytics.loadWorkflow
-            .loadJobScheduleIntervalInMinutes
-        );
-        if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
-          const months = minutes / (60 * 24 * 30);
-          return `${months} Months`;
-        } else if (minutes >= 60 * 24 && minutes % (60 * 24) === 0) {
-          const days = minutes / (60 * 24);
-          return `${days} Days`;
+      if (pipelineInfo.selectedDataLoadType) {
+        if (
+          pipelineInfo.selectedDataLoadType.value === ExecutionType.FIXED_RATE
+        ) {
+          return `${pipelineInfo.redshiftDataLoadValue} ${pipelineInfo.redshiftDataLoadUnit?.label} `;
         } else {
-          return `${minutes} Minutes`;
+          return `${pipelineInfo.dataLoadCronExp}`;
+        }
+      } else if (
+        pipelineInfo.dataAnalytics.loadWorkflow
+          .loadJobScheduleIntervalExpression
+      ) {
+        if (
+          pipelineInfo.dataAnalytics.loadWorkflow
+            .loadJobScheduleIntervalExpression
+        ) {
+          if (
+            pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression.startsWith(
+              'cron'
+            )
+          ) {
+            return pipelineInfo.dataAnalytics.loadWorkflow
+              .loadJobScheduleIntervalExpression;
+          } else {
+            const pattern = /rate\((\d+\s\w+)\)/;
+            const match =
+              pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression.match(
+                pattern
+              );
+
+            if (match) {
+              const rateValue = match[1];
+              const formattedRateValue = rateValue.replace(
+                /\b\s+(\w)/,
+                (match) => match.toUpperCase()
+              );
+              return formattedRateValue;
+            }
+          }
+        } else {
+          return '-';
         }
       }
     }
+    return '-';
   };
 
   const getEnrichPluginDisplay = () => {

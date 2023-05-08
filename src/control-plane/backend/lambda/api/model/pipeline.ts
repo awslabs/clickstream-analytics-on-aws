@@ -180,7 +180,7 @@ export interface DataAnalytics {
   readonly athena: boolean;
   readonly loadWorkflow: {
     readonly bucket?: S3Bucket;
-    readonly loadJobScheduleIntervalInMinutes: number;
+    readonly loadJobScheduleIntervalExpression: string;
     readonly maxFilesLimit?: number;
     readonly processingFilesLimit?: number;
   };
@@ -1196,10 +1196,10 @@ export class CPipeline {
       ParameterKey: 'ProcessingFilesLimit',
       ParameterValue: (this.pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit ?? 100).toString(),
     });
-    if (this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalInMinutes) {
+    if (this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression) {
       parameters.push({
         ParameterKey: 'LoadJobScheduleInterval',
-        ParameterValue: this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalInMinutes.toString(),
+        ParameterValue: this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
       });
     }
 

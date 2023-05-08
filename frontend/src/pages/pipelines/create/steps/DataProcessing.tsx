@@ -85,6 +85,8 @@ interface DataProcessingProps {
   changeDBUser: (user: string) => void;
   changeSelectedUpsertType: (type: SelectProps.Option) => void;
   changeUpsertCronExp: (cron: string) => void;
+  changeDataLoadType: (type: SelectProps.Option) => void;
+  changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalInvalidError: boolean;
 }
 
@@ -121,6 +123,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeDBUser,
     changeSelectedUpsertType,
     changeUpsertCronExp,
+    changeDataLoadType,
+    changeDataLoadCronExp,
     dataProcessorIntervalInvalidError,
   } = props;
 
@@ -139,6 +143,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
   const [selectedUpsertType, setSelectedUpsertType] = useState(
     pipelineInfo.selectedExcutionType || EXECUTION_TYPE_LIST[0]
+  );
+
+  const [selectDataLoadType, setSelectDataLoadType] = useState(
+    pipelineInfo.selectedDataLoadType || EXECUTION_TYPE_LIST[0]
   );
 
   const [loadingRedshift, setLoadingRedshift] = useState(false);
@@ -356,6 +364,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   useEffect(() => {
     changeSelectedUpsertType(selectedUpsertType);
   }, [selectedUpsertType]);
+
+  useEffect(() => {
+    changeDataLoadType(selectDataLoadType);
+  }, [selectDataLoadType]);
 
   useEffect(() => {
     getVPCListByRegion();
@@ -867,25 +879,54 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         )}
                       >
                         <div className="flex">
-                          <div style={{ width: 250 }}>
-                            <Input
-                              type="number"
-                              placeholder="5"
-                              value={pipelineInfo.redshiftDataLoadValue}
-                              onChange={(e) => {
-                                changeDataLoadValue(e.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="ml-10">
+                          <div style={{ width: 200 }}>
                             <Select
-                              selectedOption={dataLoadUnit}
+                              selectedOption={selectDataLoadType}
                               onChange={({ detail }) => {
-                                setDataLoadUnit(detail.selectedOption);
+                                setSelectDataLoadType(detail.selectedOption);
                               }}
-                              options={REDSHIFT_FREQUENCY_UNIT}
+                              options={EXECUTION_TYPE_LIST}
                             />
                           </div>
+                          {selectDataLoadType.value ===
+                            ExecutionType.CRON_EXPRESS && (
+                            <div className="flex-1 ml-10">
+                              <SpaceBetween direction="horizontal" size="xs">
+                                <Input
+                                  placeholder="0 5 * * ? *"
+                                  value={pipelineInfo.dataLoadCronExp}
+                                  onChange={(e) => {
+                                    changeDataLoadCronExp(e.detail.value);
+                                  }}
+                                />
+                              </SpaceBetween>
+                            </div>
+                          )}
+
+                          {selectDataLoadType.value ===
+                            ExecutionType.FIXED_RATE && (
+                            <div className="flex  ml-10">
+                              <div style={{ width: 250 }}>
+                                <Input
+                                  type="number"
+                                  placeholder="5"
+                                  value={pipelineInfo.redshiftDataLoadValue}
+                                  onChange={(e) => {
+                                    changeDataLoadValue(e.detail.value);
+                                  }}
+                                />
+                              </div>
+                              <div className="ml-10">
+                                <Select
+                                  selectedOption={dataLoadUnit}
+                                  onChange={({ detail }) => {
+                                    setDataLoadUnit(detail.selectedOption);
+                                  }}
+                                  options={REDSHIFT_FREQUENCY_UNIT}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </FormField>
                       <FormField

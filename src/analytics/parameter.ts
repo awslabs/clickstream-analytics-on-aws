@@ -38,7 +38,7 @@ export interface RedshiftAnalyticsStackProps {
       bucket: IBucket;
       prefix: string;
     };
-    loadJobScheduleIntervalInMinutes: number;
+    loadJobScheduleIntervalInMinutes: string;
     maxFilesLimit: number;
     processingFilesLimit: number;
   };
@@ -359,9 +359,9 @@ export function createStackParameters(scope: Construct): {
   const loadJobParamsGroup = [];
 
   const loadJobScheduleIntervalParam = new CfnParameter(scope, 'LoadJobScheduleInterval', {
-    description: 'The time interval at which the loading job runs regularly, in minutes.',
-    type: 'Number',
-    default: 5,
+    description: 'The time interval or cron(minutes,hours,day-of-month,month,day-of-week,year) at which the loading job runs regularly, in minutes.',
+    type: 'String',
+    default: '5',
   });
 
   const maxFilesLimitParam = new CfnParameter(scope, 'MaxFilesLimit', {
@@ -533,7 +533,7 @@ export function createStackParameters(scope: Construct): {
           ),
           prefix: loadWorkflowBucketPrefixParam.valueAsString,
         },
-        loadJobScheduleIntervalInMinutes: loadJobScheduleIntervalParam.valueAsNumber,
+        loadJobScheduleIntervalInMinutes: loadJobScheduleIntervalParam.valueAsString,
         maxFilesLimit: maxFilesLimitParam.valueAsNumber,
         processingFilesLimit: processingFilesLimitParam.valueAsNumber,
       },

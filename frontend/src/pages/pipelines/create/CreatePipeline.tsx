@@ -28,7 +28,6 @@ import {
 } from 'ts/const';
 import {
   extractAccountIdFromArn,
-  generateDataLoadFreqency,
   generateCronDateRange,
   generateRedshiftInterval,
 } from 'ts/utils';
@@ -187,7 +186,7 @@ const Content: React.FC = () => {
         },
       },
       loadWorkflow: {
-        loadJobScheduleIntervalInMinutes: '',
+        loadJobScheduleIntervalExpression: '',
       },
       upsertUsers: {
         scheduleExpression: '',
@@ -268,6 +267,8 @@ const Content: React.FC = () => {
     redshiftUpsertFreqUnit: null,
     selectedUpsertType: null,
     upsertCronExp: '',
+    selectedDataLoadType: null,
+    dataLoadCronExp: '',
   });
 
   const validateBasicInfo = () => {
@@ -366,10 +367,13 @@ const Content: React.FC = () => {
         );
 
       // set redshift dataload frequency
-      createPipelineObj.dataAnalytics.loadWorkflow.loadJobScheduleIntervalInMinutes =
-        generateDataLoadFreqency(
+      createPipelineObj.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression =
+        generateCronDateRange(
+          pipelineInfo.selectedDataLoadType?.value,
           parseInt(pipelineInfo.redshiftDataLoadValue),
-          pipelineInfo.redshiftDataLoadUnit?.value
+          pipelineInfo.dataLoadCronExp,
+          pipelineInfo.redshiftDataLoadUnit,
+          'dataload'
         );
 
       // set redshift upsert frequency express
@@ -472,6 +476,9 @@ const Content: React.FC = () => {
     delete createPipelineObj.selectedSelfHostedMSKSG;
     delete createPipelineObj.selectedUpsertType;
     delete createPipelineObj.upsertCronExp;
+
+    delete createPipelineObj.selectedDataLoadType;
+    delete createPipelineObj.dataLoadCronExp;
 
     setLoadingCreate(true);
     try {
@@ -1307,6 +1314,14 @@ const Content: React.FC = () => {
                   };
                 });
               }}
+              changeDataLoadType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedDataLoadType: type,
+                  };
+                });
+              }}
               changeDataLoadValue={(value) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -1320,6 +1335,14 @@ const Content: React.FC = () => {
                   return {
                     ...prev,
                     redshiftDataLoadUnit: unit,
+                  };
+                });
+              }}
+              changeDataLoadCronExp={(cron) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    dataLoadCronExp: cron,
                   };
                 });
               }}

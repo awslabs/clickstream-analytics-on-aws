@@ -94,10 +94,17 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     const loadEventWorkflow = this.createWorkflow(odsEventTable, props, redshiftRoleForCopyFromS3);
 
     // Create an EventBridge Rule to trigger the workflow periodically
-    const rule = new Rule(scope, 'LoadScheduleRule', {
-      //schedule: events.Schedule.expression('cron(0 18 ? * MON-FRI *)')
-      schedule: Schedule.rate(Duration.minutes(props.loadDataProps.scheduleInterval)),
-    });
+    var rule;
+    if (!isNaN(+props.loadDataProps.scheduleInterval)) {
+      rule = new Rule(scope, 'LoadScheduleRule', {
+        //schedule: events.Schedule.expression('cron(0 18 ? * MON-FRI *)')
+        schedule: Schedule.rate(Duration.minutes(Number(props.loadDataProps.scheduleInterval))),
+      });
+    } else {
+      rule = new Rule(scope, 'LoadScheduleRule', {
+        schedule: Schedule.expression(props.loadDataProps.scheduleInterval),
+      });
+    }
     rule.addTarget(new SfnStateMachine(loadEventWorkflow));
   }
 
