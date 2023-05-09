@@ -501,6 +501,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'ec2:DescribeVpcs',
               'ec2:DescribeSecurityGroups',
               'redshift:DescribeClusters',
+              'redshift:DescribeClusterSubnetGroups',
               'redshift-serverless:ListWorkgroups',
               'redshift-serverless:GetWorkgroup',
               'redshift-serverless:GetNamespace',
