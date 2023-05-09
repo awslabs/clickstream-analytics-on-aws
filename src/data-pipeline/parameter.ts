@@ -13,7 +13,7 @@
 
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN } from '../common/constant';
+import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -68,7 +68,7 @@ export function createStackParameters(scope: Construct) {
   const scheduleExpressionParam = new CfnParameter(scope, 'ScheduleExpression', {
     description: 'The schedule expression to run ETL job, e.g: rate(24 hours) or cron(0 1 * * ? *)',
     default: 'cron(0 1 * * ? *)',
-    allowedPattern: '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
     type: 'String',
   });
 

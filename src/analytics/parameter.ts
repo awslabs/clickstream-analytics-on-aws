@@ -17,7 +17,7 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN,
+  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN,
 } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
@@ -359,9 +359,10 @@ export function createStackParameters(scope: Construct): {
   const loadJobParamsGroup = [];
 
   const loadJobScheduleIntervalParam = new CfnParameter(scope, 'LoadJobScheduleInterval', {
-    description: 'The time interval or cron(minutes,hours,day-of-month,month,day-of-week,year) at which the loading job runs regularly, in minutes.',
+    description: 'The time interval of cron(minutes,hours,day-of-month,month,day-of-week,year) or rate(value unit) at which the loading job runs regularly, in minutes.',
     type: 'String',
-    default: '5',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
+    default: 'rate(5 minutes)',
   });
 
   const maxFilesLimitParam = new CfnParameter(scope, 'MaxFilesLimit', {

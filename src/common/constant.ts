@@ -119,6 +119,7 @@ export const QUICKSIGHT_USER_NAME_PATTERN = '^[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Z
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
 export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
 export const SECRETS_MANAGER_ARN_PATTERN = '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$';
+export const SCHEDULE_EXPRESSION_PATTERN = '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
 // cloudformation parameters
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
