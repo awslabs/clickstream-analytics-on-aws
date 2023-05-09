@@ -322,3 +322,8 @@ export interface RedshiftInfo {
   };
 }
 
+export interface IngestionServerSinkBatchProps {
+  readonly size: number;
+  readonly intervalSeconds: number;
+}
+

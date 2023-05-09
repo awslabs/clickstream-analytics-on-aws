@@ -38,7 +38,7 @@ import {
   QUICKSIGHT_USER_NAME_PATTERN,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
-import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel, validateSinkBatch, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
   KinesisStreamMode,
@@ -52,6 +52,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
+  IngestionServerSinkBatchProps,
 } from '../common/types';
 import { isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -101,10 +102,7 @@ interface IngestionServerSinkKinesisProps {
   readonly kinesisStreamMode: KinesisStreamMode;
   readonly kinesisShardCount?: number;
   readonly kinesisDataRetentionHours?: number;
-  readonly kinesisBatchSize?: number;
-  readonly kinesisMaxBatchingWindowSeconds?: number;
   readonly sinkBucket: S3Bucket;
-
 }
 
 interface IngestionServerDomainProps {
@@ -129,6 +127,7 @@ interface IngestionServer {
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
   readonly sinkType: PipelineSinkType;
+  readonly sinkBatch?: IngestionServerSinkBatchProps;
   readonly sinkS3?: IngestionServerSinkS3Props;
   readonly sinkKafka?: IngestionServerSinkKafkaProps;
   readonly sinkKinesis?: IngestionServerSinkKinesisProps;
@@ -152,8 +151,6 @@ export interface KafkaS3Connector {
   readonly minWorkerCount?: number;
   readonly workerMcuCount?: number;
   readonly pluginUrl?: string;
-  readonly rotateIntervalMS?: number;
-  readonly flushSize?: number;
   readonly customConnectorConfiguration?: string;
 }
 
@@ -807,6 +804,10 @@ export class CPipeline {
 
     }
 
+    if (this.pipeline.ingestionServer.sinkBatch) {
+      validateSinkBatch(this.pipeline.ingestionServer.sinkType, this.pipeline.ingestionServer.sinkBatch);
+    }
+
     // Kafka sink
     if (this.pipeline.ingestionServer.sinkType === 'kafka') {
       const kafkaTopic = this.getKafkaTopic();
@@ -882,11 +883,11 @@ export class CPipeline {
       });
       parameters.push({
         ParameterKey: 'KinesisBatchSize',
-        ParameterValue: (this.pipeline.ingestionServer.sinkKinesis?.kinesisBatchSize ?? 10000).toString(),
+        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.size ?? 10000).toString(),
       });
       parameters.push({
         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-        ParameterValue: (this.pipeline.ingestionServer.sinkKinesis?.kinesisMaxBatchingWindowSeconds ?? 300).toString(),
+        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds ?? 300).toString(),
       });
     }
     return parameters;
@@ -983,17 +984,17 @@ export class CPipeline {
       });
     }
 
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.rotateIntervalMS !== undefined) {
+    if (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds) {
       parameters.push({
         ParameterKey: 'RotateIntervalMS',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.rotateIntervalMS.toString(),
+        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds * 1000).toString(),
       });
     }
 
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.flushSize !== undefined) {
+    if (this.pipeline.ingestionServer.sinkBatch?.size) {
       parameters.push({
         ParameterKey: 'FlushSize',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.flushSize.toString(),
+        ParameterValue: this.pipeline.ingestionServer.sinkBatch?.size.toString(),
       });
     }
 

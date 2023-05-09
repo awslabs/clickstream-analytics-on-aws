@@ -129,6 +129,10 @@ export const KAFKA_INGESTION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     sinkType: PipelineSinkType.KAFKA,
+    sinkBatch: {
+      size: 10000,
+      intervalSeconds: 120,
+    },
     sinkKafka: {
       brokers: ['test1.com:9092', 'test2.com:9092', 'test3.com:9092'],
       topic: 't1',
@@ -178,6 +182,10 @@ export const KINESIS_ON_DEMAND_INGESTION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     sinkType: PipelineSinkType.KINESIS,
+    sinkBatch: {
+      size: 10000,
+      intervalSeconds: 180,
+    },
     sinkKinesis: {
       kinesisStreamMode: KinesisStreamMode.ON_DEMAND,
       sinkBucket: {

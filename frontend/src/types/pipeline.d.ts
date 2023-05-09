@@ -66,6 +66,10 @@ declare global {
         notificationsTopicArn: string;
       };
       sinkType: string;
+      sinkBatch: {
+        size: string;
+        intervalSeconds: string;
+      };
       sinkS3: {
         sinkBucket: {
           name: string;

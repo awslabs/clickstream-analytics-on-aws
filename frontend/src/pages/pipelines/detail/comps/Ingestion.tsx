@@ -199,6 +199,36 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           </div>
         )}
 
+        {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
+          <div>
+            <Box variant="awsui-key-label">{t('pipeline:detail.topic')}</Box>
+            <div>
+              <div>{pipelineInfo.ingestionServer.sinkKafka.topic || '-'}</div>
+            </div>
+          </div>
+        )}
+
+        {(pipelineInfo?.ingestionServer.sinkType === SinkType.KDS ||
+          pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) && (
+          <>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:create.sinkMaxInterval')}
+              </Box>
+              <div>
+                {pipelineInfo?.ingestionServer.sinkBatch.intervalSeconds}
+              </div>
+            </div>
+
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:create.sinkBatchSize')}
+              </Box>
+              <div>{pipelineInfo?.ingestionServer.sinkBatch.size}</div>
+            </div>
+          </>
+        )}
+
         <div>
           <Box variant="awsui-key-label">
             {t('pipeline:detail.enableALBLog')}

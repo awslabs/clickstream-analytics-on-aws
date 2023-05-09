@@ -21,7 +21,19 @@ import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  DEFAULT_KDS_BATCH_SIZE,
+  DEFAULT_KDS_SINK_INTERVAL,
+  DEFAULT_MSK_BATCH_SIZE,
+  DEFAULT_MSK_SINK_INTERVAL,
   ExecutionType,
+  MAX_KDS_BATCH_SIZE,
+  MAX_KDS_SINK_INTERVAL,
+  MAX_MSK_BATCH_SIZE,
+  MAX_MSK_SINK_INTERVAL,
+  MIN_KDS_BATCH_SIZE,
+  MIN_KDS_SINK_INTERVAL,
+  MIN_MSK_BATCH_SIZE,
+  MIN_MSK_SINK_INTERVAL,
   ProtocalType,
   ResourceCreateMehod,
   SinkType,
@@ -54,6 +66,9 @@ const Content: React.FC = () => {
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
   const [domainNameEmptyError, setDomainNameEmptyError] = useState(false);
   const [certificateEmptyError, setCertificateEmptyError] = useState(false);
+
+  const [sinkBatchSizeError, setSinkBatchSizeError] = useState(false);
+  const [sinkIntervalError, setSinkIntervalError] = useState(false);
 
   const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
     useState(false);
@@ -121,6 +136,10 @@ const Content: React.FC = () => {
         notificationsTopicArn: '',
       },
       sinkType: SinkType.MSK,
+      sinkBatch: {
+        size: '50000',
+        intervalSeconds: '3000',
+      },
       sinkS3: {
         sinkBucket: {
           name: '',
@@ -321,6 +340,48 @@ const Content: React.FC = () => {
     ) {
       return false;
     }
+
+    const sinkIntervalNum = parseInt(
+      pipelineInfo.ingestionServer.sinkBatch.intervalSeconds
+    );
+    const sinkBatchSize = parseInt(pipelineInfo.ingestionServer.sinkBatch.size);
+    if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
+      // check kds batch interval
+      if (
+        sinkIntervalNum < MIN_KDS_SINK_INTERVAL ||
+        sinkIntervalNum > MAX_KDS_SINK_INTERVAL
+      ) {
+        setSinkIntervalError(true);
+        return false;
+      }
+      // check kds batch size
+      if (
+        sinkBatchSize < MIN_KDS_BATCH_SIZE ||
+        sinkBatchSize > MAX_KDS_BATCH_SIZE
+      ) {
+        setSinkBatchSizeError(true);
+        return false;
+      }
+    }
+
+    if (pipelineInfo.ingestionServer.sinkType === SinkType.MSK) {
+      // check msk batch interval
+      if (
+        sinkIntervalNum < MIN_MSK_SINK_INTERVAL ||
+        sinkIntervalNum > MAX_MSK_SINK_INTERVAL
+      ) {
+        setSinkIntervalError(true);
+        return false;
+      }
+      // check msk batch size
+      if (
+        sinkBatchSize < MIN_MSK_BATCH_SIZE ||
+        sinkBatchSize > MAX_MSK_BATCH_SIZE
+      ) {
+        setSinkBatchSizeError(true);
+        return false;
+      }
+    }
     return true;
   };
 
@@ -406,6 +467,11 @@ const Content: React.FC = () => {
       createPipelineObj.dataAnalytics = null;
       // kafaka connector to false
       createPipelineObj.ingestionServer.sinkKafka.kafkaConnector.enable = false;
+    }
+
+    // set sink batch to null when sink type is S3
+    if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
+      createPipelineObj.ingestionServer.sinkBatch = null;
     }
 
     // set msk cluster when user selected self-hosted
@@ -649,6 +715,8 @@ const Content: React.FC = () => {
               certificateEmptyError={certificateEmptyError}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
               acknowledgedHTTPSecurity={acknowledgedHTTPSecurity}
+              sinkBatchSizeError={sinkBatchSizeError}
+              sinkIntervalError={sinkIntervalError}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
@@ -838,12 +906,58 @@ const Content: React.FC = () => {
                 });
               }}
               changeBufferType={(type) => {
+                let sinkInterval = '';
+                let sinkBatchSize = '';
+                if (type === SinkType.KDS) {
+                  sinkInterval = DEFAULT_KDS_SINK_INTERVAL;
+                  sinkBatchSize = DEFAULT_KDS_BATCH_SIZE;
+                }
+                if (type === SinkType.MSK) {
+                  sinkInterval = DEFAULT_MSK_SINK_INTERVAL;
+                  sinkBatchSize = DEFAULT_MSK_BATCH_SIZE;
+                }
+                setSinkIntervalError(false);
+                setSinkBatchSizeError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkType: type,
+                      sinkBatch: {
+                        intervalSeconds: sinkInterval,
+                        size: sinkBatchSize,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSinkMaxInterval={(interval) => {
+                setSinkIntervalError(false);
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkBatch: {
+                        ...prev.ingestionServer.sinkBatch,
+                        intervalSeconds: interval,
+                      },
+                    },
+                  };
+                });
+              }}
+              changeSinkBatchSize={(size) => {
+                setSinkBatchSizeError(false);
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      sinkBatch: {
+                        ...prev.ingestionServer.sinkBatch,
+                        size: size,
+                      },
                     },
                   };
                 });

@@ -533,6 +533,14 @@ describe('Workflow test', () => {
                         ParameterKey: 'SecurityGroupId',
                         ParameterValue: 'sg-0000000000002',
                       },
+                      {
+                        ParameterKey: 'RotateIntervalMS',
+                        ParameterValue: '120000',
+                      },
+                      {
+                        ParameterKey: 'FlushSize',
+                        ParameterValue: '10000',
+                      },
                     ],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
                     Tags: Tags,
@@ -878,7 +886,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-                        ParameterValue: '300',
+                        ParameterValue: '180',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
@@ -1787,7 +1795,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-                        ParameterValue: '300',
+                        ParameterValue: '180',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
@@ -2115,7 +2123,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-                        ParameterValue: '300',
+                        ParameterValue: '180',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
@@ -2431,7 +2439,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-                        ParameterValue: '300',
+                        ParameterValue: '180',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
@@ -2816,7 +2824,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-                        ParameterValue: '300',
+                        ParameterValue: '180',
                       },
                     ],
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',

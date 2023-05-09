@@ -19,7 +19,9 @@
     "domainNameEmpty": "Please input domain name",
     "certificateEmpty": "Please select SSL certificate",
     "dataProcessorIntervalError": "Data processing interval could not be less than 3 minutes",
-    "acknowledgeHTTPSecurity": "Please click acknowledge button to continue."
+    "acknowledgeHTTPSecurity": "Please click acknowledge button to continue.",
+    "sinkIntervalError": "The interval value must be greater than {{min}} and less than {{max}}",
+    "sinkSizeError": "The size value must be greater than {{min}} and less than {{max}}"
   },
   "create": {
     "basicInfo": "Basic configuration",
@@ -43,6 +45,10 @@
     "s3Assets": "Data location",
     "s3AssetsDesc": "Choose an Amazon S3 location to store the raw and processed data for this project",
     "selectS3": "Select an Amazon S3 Bucket",
+    "sinkMaxInterval": "Sink maximum interval",
+    "sinkMaxIntervalDesc": "Specifies the maximum length of time (in seconds) that records should be buffered before streaming to the AWS service",
+    "sinkBatchSize": "Batch size",
+    "sinkBatchSizeDesc": "The maximum number of records to deliver in a single batch",
     "kds": {
       "kdsSettings": "Amazon Kinesis Data Stream settings",
       "kdsSettingsDesc": "The solution will create a KDS for you based on your specifications.",

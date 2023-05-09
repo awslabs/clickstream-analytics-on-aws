@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ClickStreamBadRequestError } from './types';
+import { ClickStreamBadRequestError, IngestionServerSinkBatchProps, PipelineSinkType } from './types';
 import { getSubnet } from '../store/aws/ec2';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
@@ -26,7 +26,7 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
   return true;
 };
 
-export const validateSecretModel = (secretValue: string|undefined) => {
+export const validateSecretModel = (secretValue: string | undefined) => {
   try {
     if (!secretValue) {
       throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret is undefined. Please check and try again.');
@@ -58,6 +58,38 @@ export const validateSubnetCrossThreeAZ = async (region: string, subnetIds: stri
       'Validate error, the network for deploying Redshift serverless workgroup at least three subnets that cross three AZs. ' +
       'Please check and try again.',
     );
+  }
+  return true;
+};
+
+export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: IngestionServerSinkBatchProps) => {
+  if (sinkType === PipelineSinkType.KAFKA) {
+    if (sinkBatch.intervalSeconds < 0 || sinkBatch.intervalSeconds > 3000) {
+      throw new ClickStreamBadRequestError(
+        'Validate error, the sink batch interval must 0 <= interval <= 3000 for Kafka sink. ' +
+        'Please check and try again.',
+      );
+    }
+    if (sinkBatch.size < 1 || sinkBatch.size > 50000) {
+      throw new ClickStreamBadRequestError(
+        'Validate error, the sink batch size must 1 <= size <=50000 for Kafka sink. ' +
+        'Please check and try again.',
+      );
+    }
+  }
+  if (sinkType === PipelineSinkType.KINESIS) {
+    if (sinkBatch.intervalSeconds < 0 || sinkBatch.intervalSeconds > 300) {
+      throw new ClickStreamBadRequestError(
+        'Validate error, the sink batch interval must 0 <= interval <= 300 for Kinesis sink. ' +
+        'Please check and try again.',
+      );
+    }
+    if (sinkBatch.size < 1 || sinkBatch.size > 10000) {
+      throw new ClickStreamBadRequestError(
+        'Validate error, the sink batch size must 1 <= size <= 10000 for Kinesis sink. ' +
+        'Please check and try again.',
+      );
+    }
   }
   return true;
 };

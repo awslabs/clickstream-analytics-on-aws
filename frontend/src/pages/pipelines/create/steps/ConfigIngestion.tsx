@@ -33,7 +33,22 @@ import { OptionDefinition } from '@cloudscape-design/components/internal/compone
 import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProtocalType, SinkType } from 'ts/const';
+import {
+  DEFAULT_KDS_BATCH_SIZE,
+  DEFAULT_KDS_SINK_INTERVAL,
+  DEFAULT_MSK_BATCH_SIZE,
+  DEFAULT_MSK_SINK_INTERVAL,
+  MAX_KDS_BATCH_SIZE,
+  MAX_KDS_SINK_INTERVAL,
+  MAX_MSK_BATCH_SIZE,
+  MAX_MSK_SINK_INTERVAL,
+  MIN_KDS_BATCH_SIZE,
+  MIN_KDS_SINK_INTERVAL,
+  MIN_MSK_BATCH_SIZE,
+  MIN_MSK_SINK_INTERVAL,
+  ProtocalType,
+  SinkType,
+} from 'ts/const';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
 import BufferS3 from './buffer/BufferS3';
@@ -57,6 +72,8 @@ interface ConfigIngestionProps {
   changeBufferS3Prefix: (prefix: string) => void;
   changeS3BufferSize: (size: string) => void;
   changeBufferInterval: (interval: string) => void;
+  changeSinkMaxInterval: (interval: string) => void;
+  changeSinkBatchSize: (size: string) => void;
 
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
@@ -78,6 +95,8 @@ interface ConfigIngestionProps {
   certificateEmptyError: boolean;
   bufferS3BucketEmptyError: boolean;
   acknowledgedHTTPSecurity: boolean;
+  sinkBatchSizeError: boolean;
+  sinkIntervalError: boolean;
 }
 
 const ConfigIngestion: React.FC<ConfigIngestionProps> = (
@@ -103,6 +122,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeBufferS3Prefix,
     changeS3BufferSize,
     changeBufferInterval,
+    changeSinkMaxInterval,
+    changeSinkBatchSize,
     changeSelfHosted,
     changeCreateMSKMethod,
     changeSelectedMSK,
@@ -121,6 +142,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     certificateEmptyError,
     bufferS3BucketEmptyError,
     acknowledgedHTTPSecurity,
+    sinkBatchSizeError,
+    sinkIntervalError,
   } = props;
   const [loadingSubnet, setLoadingSubnet] = useState(false);
   const [loadingCertificate, setLoadingCertificate] = useState(false);
@@ -642,6 +665,82 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 </Checkbox>
               </FormField>
             </Container>
+          )}
+
+          {(pipelineInfo.ingestionServer.sinkType === SinkType.MSK ||
+            pipelineInfo.ingestionServer.sinkType === SinkType.KDS) && (
+            <ExpandableSection headerText={t('addtionalSettings')}>
+              <SpaceBetween direction="vertical" size="l">
+                <FormField
+                  label={t('pipeline:create.sinkMaxInterval')}
+                  description={t('pipeline:create.sinkMaxIntervalDesc')}
+                  errorText={
+                    sinkIntervalError
+                      ? t('pipeline:valid.sinkIntervalError', {
+                          min:
+                            pipelineInfo.ingestionServer.sinkType ===
+                            SinkType.KDS
+                              ? MIN_KDS_SINK_INTERVAL
+                              : MIN_MSK_SINK_INTERVAL,
+                          max:
+                            pipelineInfo.ingestionServer.sinkType ===
+                            SinkType.KDS
+                              ? MAX_KDS_SINK_INTERVAL
+                              : MAX_MSK_SINK_INTERVAL,
+                        })
+                      : ''
+                  }
+                >
+                  <Input
+                    type="number"
+                    placeholder={
+                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS
+                        ? DEFAULT_KDS_SINK_INTERVAL
+                        : DEFAULT_MSK_SINK_INTERVAL
+                    }
+                    value={
+                      pipelineInfo.ingestionServer.sinkBatch.intervalSeconds
+                    }
+                    onChange={(e) => {
+                      changeSinkMaxInterval(e.detail.value);
+                    }}
+                  />
+                </FormField>
+                <FormField
+                  label={t('pipeline:create.sinkBatchSize')}
+                  description={t('pipeline:create.sinkBatchSizeDesc')}
+                  errorText={
+                    sinkBatchSizeError
+                      ? t('pipeline:valid.sinkSizeError', {
+                          min:
+                            pipelineInfo.ingestionServer.sinkType ===
+                            SinkType.KDS
+                              ? MIN_KDS_BATCH_SIZE
+                              : MIN_MSK_BATCH_SIZE,
+                          max:
+                            pipelineInfo.ingestionServer.sinkType ===
+                            SinkType.KDS
+                              ? MAX_KDS_BATCH_SIZE
+                              : MAX_MSK_BATCH_SIZE,
+                        })
+                      : ''
+                  }
+                >
+                  <Input
+                    type="number"
+                    placeholder={
+                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS
+                        ? DEFAULT_KDS_BATCH_SIZE
+                        : DEFAULT_MSK_BATCH_SIZE
+                    }
+                    value={pipelineInfo.ingestionServer.sinkBatch.size}
+                    onChange={(e) => {
+                      changeSinkBatchSize(e.detail.value);
+                    }}
+                  />
+                </FormField>
+              </SpaceBetween>
+            </ExpandableSection>
           )}
         </SpaceBetween>
       </Container>
