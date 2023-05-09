@@ -66,6 +66,7 @@ export class RedshiftServerless extends Construct {
                 Arn.format(
                   {
                     resource: 'role',
+                    region: '', // region be empty for IAM resources
                     resourceName: 'aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift',
                     service: 'iam',
                     arnFormat: ArnFormat.SLASH_RESOURCE_NAME,

@@ -3172,7 +3172,8 @@ describe('DataAnalyticsRedshiftStack tests', () => {
         foundInlinePolicy = true;
         expect(policy.PolicyDocument.Statement[0].Action).toEqual('iam:CreateServiceLinkedRole');
         console.log(policy.PolicyDocument.Statement[0].Resource['Fn::Join']);
-        expect(policy.PolicyDocument.Statement[0].Resource['Fn::Join'][1][6]).toMatch(/^:role\/aws-service-role\/redshift\.amazonaws\.com\/AWSServiceRoleForRedshift$/);
+        expect(policy.PolicyDocument.Statement[0].Resource['Fn::Join'][1][2]).toEqual(':iam::');
+        expect(policy.PolicyDocument.Statement[0].Resource['Fn::Join'][1][4]).toMatch(/^:role\/aws-service-role\/redshift\.amazonaws\.com\/AWSServiceRoleForRedshift$/);
       }
     }
     expect(foundInlinePolicy).toBeTruthy();
