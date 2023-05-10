@@ -342,7 +342,7 @@ const Content: React.FC = () => {
     }
 
     const sinkIntervalNum = parseInt(
-      pipelineInfo.ingestionServer.sinkBatch.intervalSeconds
+      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds
     );
     const sinkBatchSize = parseInt(pipelineInfo.ingestionServer.sinkBatch.size);
     if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {

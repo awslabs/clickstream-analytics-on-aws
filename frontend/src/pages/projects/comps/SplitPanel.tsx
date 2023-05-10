@@ -22,6 +22,7 @@ import {
   SelectProps,
   SpaceBetween,
   SplitPanel,
+  Textarea,
 } from '@cloudscape-design/components';
 import { updateProject } from 'apis/project';
 import moment from 'moment';
@@ -33,13 +34,14 @@ import { validateEmails } from 'ts/utils';
 interface SplitPanelContentProps {
   project: IProject;
   changeProjectEnv: (env: string) => void;
+  refreshPage?: () => void;
 }
 
 const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   props: SplitPanelContentProps
 ) => {
   const { t } = useTranslation();
-  const { project, changeProjectEnv } = props;
+  const { project, changeProjectEnv, refreshPage } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
     preferencesPositionLabel: t('splitPanel.preferencesPositionLabel'),
@@ -57,6 +59,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
 
   const [newProject, setNewProject] = useState(project);
   const [prevEmail, setPrevEmail] = useState(project.emails);
+  const [prevDesc, setPrevDesc] = useState(project.description);
   const [prevEnvOption, setPrevEnvOption] = useState<SelectProps.Option>(
     PROJECT_STAGE_LIST.find(
       (element) => element.value === project.environment
@@ -64,8 +67,10 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   );
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingEvn, setIsEditingEvn] = useState(false);
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [loadingUpdateEmail, setLoadingUpdateEmail] = useState(false);
   const [loadingUpdateEnv, setLoadingUpdateEnv] = useState(false);
+  const [loadingUpdateDesc, setLoadingUpdateDesc] = useState(false);
   const [emailsEmptyError, setEmailsEmptyError] = useState(false);
   const [emailsInvalidError, setEmailsInvalidError] = useState(false);
   const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option>(
@@ -74,7 +79,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     ) || PROJECT_STAGE_LIST[0]
   );
 
-  const updateProjectInfo = async (type: 'email' | 'env') => {
+  const updateProjectInfo = async (type: 'email' | 'env' | 'description') => {
     if (type === 'email') {
       if (!newProject.emails) {
         setEmailsEmptyError(true);
@@ -92,12 +97,20 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
       setLoadingUpdateEnv(true);
     }
 
+    if (type === 'description') {
+      setLoadingUpdateDesc(true);
+    }
+
     try {
       const { success }: ApiResponse<null> = await updateProject(newProject);
       if (success) {
         if (type === 'email') {
           setPrevEmail(newProject.emails);
           setIsEditingEmail(false);
+        }
+        if (type === 'description') {
+          setPrevDesc(newProject.description);
+          setIsEditingDesc(false);
         }
         if (type === 'env') {
           setPrevEnvOption(
@@ -108,12 +121,15 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
           setIsEditingEvn(false);
           changeProjectEnv(newProject.environment);
         }
+        refreshPage && refreshPage();
       }
       setLoadingUpdateEmail(false);
       setLoadingUpdateEnv(false);
+      setLoadingUpdateDesc(false);
     } catch (error) {
       setLoadingUpdateEmail(false);
       setLoadingUpdateEnv(false);
+      setLoadingUpdateDesc(false);
     }
   };
 
@@ -131,7 +147,64 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
           <Box variant="awsui-key-label">{t('project:split.name')}</Box>
           <div className="mb-10">{project.name}</div>
           <Box variant="awsui-key-label">{t('project:split.description')}</Box>
-          <div className="mb-10">{project.description}</div>
+          <div>
+            {!isEditingDesc && (
+              <div className="flex align-center">
+                <div>{newProject.description}</div>
+                <Button
+                  onClick={() => {
+                    setIsEditingDesc(true);
+                  }}
+                  variant="icon"
+                  iconName="edit"
+                />
+              </div>
+            )}
+            {isEditingDesc && (
+              <div>
+                <FormField>
+                  <Textarea
+                    rows={3}
+                    value={newProject.description}
+                    onChange={(e) => {
+                      setNewProject((prev) => {
+                        return {
+                          ...prev,
+                          description: e.detail.value,
+                        };
+                      });
+                    }}
+                  />
+                </FormField>
+                <div className="mt-5">
+                  <SpaceBetween direction="horizontal" size="xs">
+                    <Button
+                      onClick={() => {
+                        setNewProject((prev) => {
+                          return {
+                            ...prev,
+                            description: prevDesc,
+                          };
+                        });
+                        setIsEditingDesc(false);
+                      }}
+                    >
+                      {t('button.cancel')}
+                    </Button>
+                    <Button
+                      loading={loadingUpdateDesc}
+                      variant="primary"
+                      onClick={() => {
+                        updateProjectInfo('description');
+                      }}
+                    >
+                      {t('button.save')}
+                    </Button>
+                  </SpaceBetween>
+                </div>
+              </div>
+            )}
+          </div>
           <Box variant="awsui-key-label">{t('project:split.notifyEmail')}</Box>
           <div className="mb-10">
             {!isEditingEmail && (

@@ -230,6 +230,8 @@ const Projects: React.FC = () => {
                   };
                 });
               }
+            }}
+            refreshPage={() => {
               setRefreshPage((prev) => {
                 return prev + 1;
               });

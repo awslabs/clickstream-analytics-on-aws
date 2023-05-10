@@ -699,7 +699,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                         : DEFAULT_MSK_SINK_INTERVAL
                     }
                     value={
-                      pipelineInfo.ingestionServer.sinkBatch.intervalSeconds
+                      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds
                     }
                     onChange={(e) => {
                       changeSinkMaxInterval(e.detail.value);
