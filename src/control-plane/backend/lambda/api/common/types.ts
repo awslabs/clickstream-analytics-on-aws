@@ -166,6 +166,7 @@ export interface MSKCluster {
   readonly name: string;
   readonly arn: string;
   readonly type: string;
+  readonly authentication: string[];
   readonly state: string;
   readonly securityGroupId: string;
 }

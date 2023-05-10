@@ -33,12 +33,26 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
       const clientSubnets = cluster.Provisioned?.BrokerNodeGroupInfo?.ClientSubnets;
       if (clientSubnets && securityGroups) {
         const subnet = await getSubnet(region, clientSubnets[0]);
+        const authentication: string[] = [];
+        if (cluster.Provisioned?.ClientAuthentication?.Sasl?.Iam?.Enabled) {
+          authentication.push('IAM');
+        }
+        if (cluster.Provisioned?.ClientAuthentication?.Sasl?.Scram?.Enabled) {
+          authentication.push('SASL/SCRAM');
+        }
+        if (cluster.Provisioned?.ClientAuthentication?.Tls?.Enabled) {
+          authentication.push('TLS');
+        }
+        if (cluster.Provisioned?.ClientAuthentication?.Unauthenticated?.Enabled) {
+          authentication.push('Unauthenticated');
+        }
         if (subnet.VpcId === vpcId) {
           clusters.push({
             name: cluster.ClusterName?? '',
             arn: cluster.ClusterArn ?? '',
             type: cluster.ClusterType ?? '',
             state: cluster.State ?? '',
+            authentication: authentication,
             securityGroupId: securityGroups[0],
           });
         }
@@ -50,11 +64,16 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
         if (subnetIds && securityGroupIds) {
           const subnet = await getSubnet(region, subnetIds[0]);
           if (subnet.VpcId === vpcId) {
+            const authentication: string[] = [];
+            if (cluster.Serverless?.ClientAuthentication?.Sasl?.Iam?.Enabled) {
+              authentication.push('IAM');
+            }
             clusters.push({
               name: cluster.ClusterName?? '',
               arn: cluster.ClusterArn ?? '',
               type: cluster.ClusterType ?? '',
               state: cluster.State ?? '',
+              authentication: authentication,
               securityGroupId: securityGroupIds[0],
             });
           }

@@ -61,6 +61,7 @@ declare global {
     securityGroupId: string;
     state: string;
     type: string;
+    authentication: string[];
   }
 
   interface RedshiftResponse {

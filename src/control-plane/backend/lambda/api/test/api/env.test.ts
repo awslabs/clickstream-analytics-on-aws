@@ -668,6 +668,10 @@ describe('Account Env test', () => {
               SecurityGroups: ['sg-111'],
               ClientSubnets: ['subnet-111'],
             },
+            ClientAuthentication: {
+              Unauthenticated: { Enabled: true },
+              Sasl: { Iam: { Enabled: true } },
+            },
             NumberOfBrokerNodes: 1,
           },
           State: 'ACTIVE',
@@ -700,6 +704,7 @@ describe('Account Env test', () => {
       data: [
         {
           name: 'demo-cluster-1',
+          authentication: ['IAM', 'Unauthenticated'],
           arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           type: 'PROVISIONED',
           state: 'ACTIVE',
@@ -753,6 +758,7 @@ describe('Account Env test', () => {
       data: [
         {
           name: 'demo-cluster-1',
+          authentication: [],
           arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
           type: 'SERVERLESS',
           state: 'ACTIVE',

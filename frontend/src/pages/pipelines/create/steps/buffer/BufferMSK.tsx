@@ -70,9 +70,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
           label: element.name,
           value: element.arn,
-          description: element.securityGroupId,
+          description: `Authentication: ${element.authentication.join(',')}`,
           labelTag: element.type,
           iconAlt: element.arn,
+          disabled:
+            element.type === 'SERVERLESS' ||
+            element.authentication.indexOf('Unauthenticated') === -1,
         }));
         setMSKOptionList(mskOptions);
         setLoadingMSK(false);
