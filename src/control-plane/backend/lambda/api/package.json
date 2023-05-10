@@ -56,6 +56,7 @@
     "@aws-sdk/client-s3": "^3.310.0",
     "@aws-sdk/client-secrets-manager": "^3.310.0",
     "@aws-sdk/client-sfn": "^3.310.0",
+    "@aws-sdk/client-sts": "^3.310.0",
     "@aws-sdk/lib-dynamodb": "^3.310.0",
     "@aws-sdk/node-http-handler": "^3.310.0",
     "@aws-sdk/util-dynamodb": "^3.310.0",

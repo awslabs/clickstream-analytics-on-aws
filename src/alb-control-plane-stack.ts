@@ -17,7 +17,7 @@ import {
   Stack,
   StackProps,
   Fn,
-  CfnOutput,
+  CfnOutput, Aws,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Vpc, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -204,6 +204,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       throw new Error('Application Load Balancer VPC create error.');
     }
 
+    const pluginPrefix = 'plugins/';
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'alb',
       applicationLoadBalancer: {
@@ -216,6 +217,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         jwksUri: Fn.join('', [issuer, jwksUriSuffix]),
       },
       stackWorkflowS3Bucket: solutionBucket.bucket,
+      pluginPrefix: pluginPrefix,
     });
 
     controlPlane.addRoute('api-targets', {
@@ -236,6 +238,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       solutionVersion: process.env.BUILD_VERSION || 'v1',
       cotrolPlaneMode: 'ALB',
       solutionBucket: solutionBucket.bucket.bucketName,
+      solutionPluginPrefix: pluginPrefix,
+      solutionRegion: Aws.REGION,
     });
 
     controlPlane.addFixedResponse('aws-exports', {

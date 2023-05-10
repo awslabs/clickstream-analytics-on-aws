@@ -231,6 +231,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sts",
+      "version": "^3.310.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/credential-providers",
       "version": "^3.310.0",
       "type": "runtime"

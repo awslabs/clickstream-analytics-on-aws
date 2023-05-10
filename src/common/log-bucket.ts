@@ -12,7 +12,7 @@
  */
 
 import { RemovalPolicy } from 'aws-cdk-lib';
-import { BucketEncryption, BlockPublicAccess, IBucket, Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
+import { BucketEncryption, BlockPublicAccess, IBucket, Bucket, ObjectOwnership, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 export interface LogProps {
@@ -41,6 +41,20 @@ export class LogBucket extends Construct {
       removalPolicy: props?.removalPolicy ?? RemovalPolicy.RETAIN,
       serverAccessLogsPrefix: props?.logPrefix ?? 'log-bucket-access-logs',
       objectOwnership: ObjectOwnership.OBJECT_WRITER,
+      cors: [
+        {
+          maxAge: 3000,
+          allowedOrigins: ['*'],
+          allowedHeaders: ['*'],
+          allowedMethods: [HttpMethods.PUT, HttpMethods.POST, HttpMethods.GET],
+          exposedHeaders: [
+            'x-amz-server-side-encryption',
+            'x-amz-request-id',
+            'x-amz-id-2',
+            'ETag',
+          ],
+        },
+      ],
     });
   }
 }

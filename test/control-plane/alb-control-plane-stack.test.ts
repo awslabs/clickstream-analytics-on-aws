@@ -657,7 +657,6 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
     });
 
     const template = Template.fromStack(portalStack);
-
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
       Actions: [
         {
@@ -673,11 +672,11 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                   },
                   '.amazonaws.com/',
                   {
-                    Ref: Match.anyValue(),
+                    Ref: 'userPoolDC9497E0',
                   },
                   '","oidc_client_id":"',
                   {
-                    Ref: Match.anyValue(),
+                    Ref: 'clickstreambackendclient721D6562',
                   },
                   '","oidc_redirect_url":"https://',
                   {
@@ -693,7 +692,15 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                       ],
                     ],
                   },
-                  ':443/signin","solution_version":"v1","cotrol_plane_mode":"ALB"}',
+                  ':443/signin","solution_version":"v1","cotrol_plane_mode":"ALB","solution_data_bucket":"',
+                  {
+                    Ref: 'solutionBucketLogBucket39CCA1AD',
+                  },
+                  '","solution_plugin_prefix":"plugins/","solution_region":"',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  '"}',
                 ],
               ],
             },
@@ -712,10 +719,10 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
           },
         },
       ],
-      ListenerArn: {
-        Ref: Match.anyValue(),
-      },
       Priority: 45,
+      ListenerArn: {
+        Ref: 'albcontrolplaneALBListener2210871E',
+      },
     });
 
   });

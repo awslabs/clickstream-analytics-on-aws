@@ -126,4 +126,11 @@ declare global {
     id: string;
     name: string;
   }
+
+  interface UploadTokenResponse {
+    AccessKeyId: string;
+    Expiration: string;
+    SecretAccessKey: string;
+    SessionToken: string;
+  }
 }

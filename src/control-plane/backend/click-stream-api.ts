@@ -40,6 +40,7 @@ import {
   SubnetSelection,
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
+import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -79,6 +80,7 @@ export interface ClickStreamApiProps {
   readonly apiGateway?: ApiGatewayProps;
   readonly targetToCNRegions?: boolean;
   readonly stackWorkflowS3Bucket: IBucket;
+  readonly pluginPrefix: string;
   readonly s3MainRegion?: string;
   readonly authProps?: AuthProps;
 }
@@ -260,6 +262,12 @@ export class ClickStreamApiConstruct extends Construct {
       },
     ]);
 
+    // Create a role for upload object to S3
+    const uploadRole = new iam.Role(this, 'UploadRole', {
+      assumedBy: new ArnPrincipal(clickStreamApiFunctionRole.roleArn),
+    });
+    props.stackWorkflowS3Bucket.grantPut(uploadRole, `${props.pluginPrefix}*`);
+
     this.clickStreamApiFunction = new DockerImageFunction(this, 'ClickStreamApiFunction', {
       description: 'Lambda function for api of solution Click Stream Analytics on AWS',
       code: DockerImageCode.fromImageAsset(path.join(__dirname, './lambda/api'), {
@@ -279,6 +287,7 @@ export class ClickStreamApiConstruct extends Construct {
         S3_MAIN_REGION: props.s3MainRegion?? 'us-east-1',
         ISSUER: props.authProps?.issuer ?? '',
         JWKS_URI: props.authProps?.jwksUri ?? '',
+        STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

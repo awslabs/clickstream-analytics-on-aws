@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { XhrHttpHandler } from '@aws-sdk/xhr-http-handler';
 import {
   AppLayout,
   Button,
@@ -28,31 +31,16 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { createPlugin } from 'apis/plugin';
-import { Auth, Storage } from 'aws-amplify';
+import { getSTSUploadRole } from 'apis/resource';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import { AppContext } from 'context/AppContext';
-import { result } from 'lodash';
 import moment from 'moment';
-import { User } from 'oidc-client-ts';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PLUGIN_TYPE_LIST, PROJECT_CONFIG_JSON } from 'ts/const';
+import { PLUGIN_TYPE_LIST } from 'ts/const';
 import { alertMsg } from 'ts/utils';
-
-function getUser() {
-  const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
-    ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
-    : {};
-  const oidcStorage = localStorage.getItem(
-    `oidc.user:${configJSONObj.oidc_provider}:${configJSONObj.oidc_client_id}`
-  );
-  if (!oidcStorage) {
-    return null;
-  }
-  return User.fromStorageString(oidcStorage);
-}
 
 function Content() {
   const navigate = useNavigate();
@@ -81,6 +69,7 @@ function Content() {
     []
   );
 
+  const [s3Client, setS3Client] = useState<any>();
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
     name: '',
     description: '',
@@ -113,7 +102,15 @@ function Content() {
   };
 
   const buildS3Path = (key: string) => {
-    return `s3://${appConfig?.solution_data_bucket}/${appConfig?.solution_plugin_prefix}${key}`;
+    return `s3://${appConfig?.solution_data_bucket}/${key}`;
+  };
+
+  const buildFileKey = (fileName: string) => {
+    const [name, suffiex] = splitFileNameWithSuffix(fileName, '.');
+    const fileKey = `${appConfig?.solution_plugin_prefix}${name}_${moment(
+      new Date()
+    ).format('YYYYMMDDHHmmss')}.${suffiex}`;
+    return fileKey;
   };
 
   const validPluginInput = () => {
@@ -151,57 +148,60 @@ function Content() {
     }
   };
 
-  const signInIdpWithOIDCAuthentication = async () => {
-    const user = getUser();
-    const idToken = user?.id_token || '';
-    await Auth.federatedSignIn(
-      appConfig?.oidc_provider?.split('//')?.[1] || '',
-      {
-        token: idToken,
-        expires_at: user?.expires_at || new Date().getTime() + 10 * 60 * 1000,
-      },
-      {
-        name: user?.profile.email || '',
-      }
-    )
-      .then(() => {
-        // If success, you will get the AWS credentials
-        return Auth.currentAuthenticatedUser();
-      })
-      .catch((e) => {
-        console.error(e);
+  const initS3ClientWithSTS = async () => {
+    const { success, data }: ApiResponse<UploadTokenResponse> =
+      await getSTSUploadRole();
+    if (success && data) {
+      const s3 = new S3Client({
+        requestHandler: new XhrHttpHandler({}),
+        apiVersion: '2006-03-01',
+        region: appConfig?.solution_region,
+        credentials: {
+          accessKeyId: data.AccessKeyId,
+          secretAccessKey: data.SecretAccessKey,
+          sessionToken: data.SessionToken,
+        },
       });
+      setS3Client(s3);
+    }
   };
 
   const uploadJarFile = async () => {
     setShowUploadJarSuccess(false);
+    const Key = buildFileKey(jarFiles[0]?.name);
     try {
-      const [name, suffiex] = splitFileNameWithSuffix(jarFiles[0]?.name, '.');
-      const uploadRes = await Storage.put(
-        `${name}_${moment(new Date()).format('YYYYMMDDHHmmss')}.${suffiex}`,
-        jarFiles[0],
-        {
-          level: 'public',
-          customPrefix: {
-            public: appConfig?.solution_plugin_prefix,
-          },
-          progressCallback(progress) {
-            setUploadJarProgress(
-              Math.ceil((progress.loaded / progress.total) * 100)
-            );
-            if (Math.ceil((progress.loaded / progress.total) * 100) >= 100) {
-              setUploadJarProgress(0);
-              setShowUploadJarSuccess(true);
-            }
-          },
-        }
-      );
-      setCurPlugin((prev) => {
-        return {
-          ...prev,
-          jarFile: buildS3Path(uploadRes.key),
-        };
+      const parallelUploads3 = new Upload({
+        client: s3Client,
+        params: {
+          Bucket: appConfig?.solution_data_bucket,
+          Key: Key,
+          Body: jarFiles[0],
+        },
+        queueSize: 4,
+        partSize: 1024 * 1024 * 5,
+        leavePartsOnError: false,
       });
+
+      parallelUploads3.on('httpUploadProgress', (progress: any) => {
+        console.info('progress:', progress);
+        setUploadJarProgress(
+          Math.ceil((progress.loaded / progress.total) * 100)
+        );
+        if (Math.ceil((progress.loaded / progress.total) * 100) >= 100) {
+          setUploadJarProgress(0);
+          setShowUploadJarSuccess(true);
+        }
+      });
+      const data: any = await parallelUploads3.done();
+      console.info('data:', data);
+      if (data) {
+        setCurPlugin((prev) => {
+          return {
+            ...prev,
+            jarFile: buildS3Path(data.Key),
+          };
+        });
+      }
     } catch (error) {
       alertMsg(t('upload.uploadFailed'), 'error');
       console.error(error);
@@ -220,49 +220,48 @@ function Content() {
               total: 0,
               isUploaded: false,
             });
-            const [name, suffiex] = splitFileNameWithSuffix(element?.name, '.');
-            const result = await Storage.put(
-              `${name}_${moment(new Date()).format(
-                'YYYYMMDDHHmmss'
-              )}.${suffiex}`,
-              element,
-              {
-                level: 'public',
-                customPrefix: {
-                  public: appConfig?.solution_plugin_prefix,
-                },
-                progressCallback(progress) {
-                  if (
-                    progress.loaded > 0 &&
-                    progress.loaded === progress.total
-                  ) {
-                    setUploadedDependencyFiles((prev) => {
-                      return [...prev, element];
-                    });
-                  }
-                  const tmpArr: any = JSON.parse(
-                    JSON.stringify(dependenciesUploadingArr)
-                  );
-                  if (tmpArr) {
-                    tmpArr.find(
-                      (item: any) => item.name === element.name
-                    ).loaded = progress.loaded;
-                    tmpArr.find(
-                      (item: any) => item.name === element.name
-                    ).total = progress.total;
-                    setDependenciesUploadingArr(tmpArr);
-                  }
-                },
+            const Key = buildFileKey(element?.name);
+
+            const parallelUploads3 = new Upload({
+              client: s3Client,
+              params: {
+                Bucket: appConfig?.solution_data_bucket,
+                Key: Key,
+                Body: element,
+              },
+              queueSize: 4,
+              partSize: 1024 * 1024 * 5,
+              leavePartsOnError: false,
+            });
+
+            parallelUploads3.on('httpUploadProgress', (progress: any) => {
+              if (progress.loaded > 0 && progress.loaded === progress.total) {
+                setUploadedDependencyFiles((prev) => {
+                  return [...prev, element];
+                });
               }
-            );
-            return result;
+              const tmpArr: any = JSON.parse(
+                JSON.stringify(dependenciesUploadingArr)
+              );
+              if (tmpArr) {
+                tmpArr.find((item: any) => item.name === element.name).loaded =
+                  progress.loaded;
+                tmpArr.find((item: any) => item.name === element.name).total =
+                  progress.total;
+                setDependenciesUploadingArr(tmpArr);
+              }
+            });
+            const result: any = await parallelUploads3.done();
+            if (result && result.Key) {
+              return result;
+            }
           })
         );
-        if (results && result.length > 0) {
+        if (results && results.length > 0) {
           setdependeciesS3FileKeys((prev) => {
             return [
               ...prev,
-              ...results.map((element) => buildS3Path(element.key)),
+              ...results.map((element) => buildS3Path(element.Key)),
             ];
           });
         }
@@ -310,7 +309,7 @@ function Content() {
   }, [dependenciesUploadingArr]);
 
   useEffect(() => {
-    signInIdpWithOIDCAuthentication();
+    initS3ClientWithSTS();
   }, []);
 
   return (
@@ -408,7 +407,7 @@ function Content() {
                 label={t('plugin:create.uploadJar')}
                 description={t('plugin:create.uploadJarDesc')}
               >
-                <>
+                <div>
                   <FileUpload
                     onChange={({ detail }) => {
                       setJarFiles(detail.value);
@@ -439,14 +438,14 @@ function Content() {
                       {t('upload.uploadSuccess')}
                     </StatusIndicator>
                   )}
-                </>
+                </div>
               </FormField>
 
               <FormField
                 label={t('plugin:create.uploadFile')}
                 description={t('plugin:create.uploadFileDesc')}
               >
-                <>
+                <div>
                   <FileUpload
                     onChange={({ detail }) => {
                       setDependenciesFiles(detail.value);
@@ -479,7 +478,7 @@ function Content() {
                       {t('upload.uploadSuccess')}
                     </StatusIndicator>
                   )}
-                </>
+                </div>
               </FormField>
 
               <FormField

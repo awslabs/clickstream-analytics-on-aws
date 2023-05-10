@@ -259,6 +259,7 @@ export class TestEnv {
     const stack = new TestStack(new App(), 'apiTestStack');
     const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
+    const pluginPrefix = 'plugins/';
     new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
       fronting: 'alb',
       applicationLoadBalancer: {
@@ -268,6 +269,7 @@ export class TestEnv {
       },
       targetToCNRegions: cn,
       stackWorkflowS3Bucket: s3Bucket,
+      pluginPrefix,
     });
 
     const template = Template.fromStack(stack);
@@ -295,6 +297,7 @@ export class TestEnv {
       validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
     });
 
+    const pluginPrefix = 'plugins/';
     new ClickStreamApiConstruct(stack, 'testClickStreamCloudfrontApi', {
       fronting: 'cloudfront',
       apiGateway: {
@@ -303,6 +306,7 @@ export class TestEnv {
       },
       targetToCNRegions: cn,
       stackWorkflowS3Bucket: s3Bucket,
+      pluginPrefix,
     });
 
     const template = Template.fromStack(stack);

@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aspects, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -224,6 +224,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       resultsCacheTtl: Duration.seconds(0),
     });
 
+    const pluginPrefix = 'plugins/';
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'cloudfront',
       apiGateway: {
@@ -232,6 +233,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
       targetToCNRegions: props?.targetToCNRegions,
       stackWorkflowS3Bucket: solutionBucket.bucket,
+      pluginPrefix: pluginPrefix,
     });
 
     if (!clickStreamApi.lambdaRestApi) {
@@ -272,6 +274,8 @@ export class CloudFrontControlPlaneStack extends Stack {
       solutionVersion: process.env.BUILD_VERSION || 'v1',
       cotrolPlaneMode: 'CLOUDFRONT',
       solutionBucket: solutionBucket.bucket.bucketName,
+      solutionPluginPrefix: pluginPrefix,
+      solutionRegion: Aws.REGION,
     });
 
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));

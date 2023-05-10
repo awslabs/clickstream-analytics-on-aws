@@ -148,6 +148,11 @@ const getSecurityGroups = async (params: { region: string; vpcId: string }) => {
   return result;
 };
 
+const getSTSUploadRole = async () => {
+  const result: any = await apiRequest('get', '/env/sts/assume_upload_role');
+  return result;
+};
+
 export {
   fetchOutsideLink,
   createQuickSightUser,
@@ -170,4 +175,5 @@ export {
   getVPCList,
   subscribQuickSight,
   unsubscribQuickSight,
+  getSTSUploadRole,
 };

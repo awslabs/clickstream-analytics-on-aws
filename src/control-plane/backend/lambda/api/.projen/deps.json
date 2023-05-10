@@ -175,6 +175,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sts",
+      "version": "^3.310.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/lib-dynamodb",
       "version": "^3.310.0",
       "type": "runtime"

@@ -322,6 +322,15 @@ app.get(
     return environmentServ.listSecrets(req, res, next);
   });
 
+app.get(
+  '/api/env/sts/assume_upload_role',
+  validate([
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.AssumeUploadRole(req, res, next);
+  });
+
 app.post(
   '/api/env/fetch',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

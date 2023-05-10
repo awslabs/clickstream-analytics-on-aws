@@ -74,6 +74,7 @@
     "@aws-sdk/client-sfn": "^3.310.0",
     "@aws-sdk/client-sqs": "^3.310.0",
     "@aws-sdk/client-ssm": "^3.310.0",
+    "@aws-sdk/client-sts": "^3.310.0",
     "@aws-sdk/credential-providers": "^3.310.0",
     "@aws-sdk/lib-dynamodb": "^3.310.0",
     "@aws-sdk/node-http-handler": "^3.310.0",

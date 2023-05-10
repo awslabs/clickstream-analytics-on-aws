@@ -12,7 +12,6 @@
  */
 
 import { Button, Spinner } from '@cloudscape-design/components';
-import { Amplify } from 'aws-amplify';
 import Axios from 'axios';
 import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
@@ -156,21 +155,6 @@ const App: React.FC = () => {
       client_id: configData.oidc_client_id,
       redirect_uri: configData.oidc_redirect_url,
     };
-    // Init Amplify
-    const amplifyConfig = {
-      Auth: {
-        identityPoolId: configData.solution_cognito_idp,
-        region: configData.solution_region,
-      },
-      Storage: {
-        AWSS3: {
-          bucket: configData.solution_data_bucket,
-          region: configData.solution_region,
-        },
-      },
-    };
-    Amplify.configure(amplifyConfig);
-    // Init Amplify End
     setOidcConfig(settings);
   };
 

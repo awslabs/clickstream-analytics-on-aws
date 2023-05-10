@@ -23,6 +23,7 @@ const awsRegion = process.env.AWS_REGION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 const s3MainRegion = process.env.S3_MAIN_REGION;
+const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
 const amznRequestContextHeader = 'x-amzn-request-context';
 
 export {
@@ -37,5 +38,6 @@ export {
   awsAccountId,
   awsUrlSuffix,
   s3MainRegion,
+  STSUploadRole,
   amznRequestContextHeader,
 };
