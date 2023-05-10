@@ -148,6 +148,7 @@ export const METRIC_NAMESPACE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
 // the outputs of stacks
 export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
 export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
+export const OUTPUT_REPORT_DASHBOARDS_SUFFIX = 'Dashboards';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'StackCreatedRedshiftServerlessWorkgroupName';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS = 'StackCreatedRedshiftServerlessWorkgroupEndpointAddress';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT = 'StackCreatedRedshiftServerlessWorkgroupEndpointPort';

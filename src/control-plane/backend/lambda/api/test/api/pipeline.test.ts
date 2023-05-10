@@ -476,6 +476,10 @@ describe('Pipeline test', () => {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
               OutputValue: 'http://yyy/yyy',
             },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
           ],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
@@ -493,6 +497,16 @@ describe('Pipeline test', () => {
         ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         dns: 'http://yyy/yyy',
         endpoint: 'http://xxx/xxx',
+        dashboards: [
+          {
+            appId: 'app1',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app1',
+          },
+          {
+            appId: 'app2',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
+          },
+        ],
       },
     });
   });
@@ -521,6 +535,7 @@ describe('Pipeline test', () => {
         ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         dns: '',
         endpoint: '',
+        dashboards: [],
       },
     });
   });

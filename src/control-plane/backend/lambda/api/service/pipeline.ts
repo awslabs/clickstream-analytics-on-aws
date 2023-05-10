@@ -71,17 +71,19 @@ export class PipelineServ {
       latestPipeline.status = await stackManager.getPipelineStatus();
       await store.updatePipelineAtCurrentVersion(latestPipeline);
       const pipeline = new CPipeline(latestPipeline);
-      const outputs = await pipeline.getStackOutputBySuffixs(
+      const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_URL_SUFFIX,
           OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
         ],
       );
+      const dashboards = await pipeline.getReportDashboardsUrl();
       return res.json(new ApiSuccess({
         ...latestPipeline,
-        endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
-        dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+        endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+        dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+        dashboards,
       }));
     } catch (error) {
       next(error);

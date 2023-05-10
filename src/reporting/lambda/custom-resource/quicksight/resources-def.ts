@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 
-export const clickstream_daily_active_user_view_columns = [
+import { InputColumn } from '@aws-sdk/client-quicksight';
+
+export const clickstream_daily_active_user_view_columns: InputColumn[] = [
   {
     Name: 'user_type',
     Type: 'STRING',
@@ -77,7 +79,7 @@ export const clickstream_ods_events_view_columns = [
 
 ];
 
-export const clickstream_ods_flattened_view_columns = [
+export const clickstream_ods_flattened_view_columns: InputColumn[] = [
 
   {
     Name: 'event_parameter_value',

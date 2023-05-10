@@ -13,11 +13,13 @@
 
 import {
   Aws,
+  CfnOutput,
   CfnResource,
   Fn,
   Stack,
 } from 'aws-cdk-lib';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
 import { Construct } from 'constructs';
 import {
   addCfnNagForLogRetention,
@@ -74,13 +76,42 @@ export class DataReportingQuickSightStack extends Stack {
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
 
+    const principalPrefix = `arn:${Aws.PARTITION}:quicksight:us-east-1:${Aws.ACCOUNT_ID}`;
+    const quickSightNamespace = stackParames.quickSightNamespaceParam.valueAsString;
+    const quickSightUser = stackParames.quickSightUserParam.valueAsString;
+    const principalArn = `${principalPrefix}:user/${quickSightNamespace}/${quickSightUser}`;
+
+    const templateId = `clickstream_template_v1_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const template = new CfnTemplate(this, 'Clickstream-Template', {
+      templateId,
+      awsAccountId: Aws.ACCOUNT_ID,
+      permissions: [{
+        principal: principalArn,
+        actions: [
+          'quicksight:UpdateTemplatePermissions',
+          'quicksight:DescribeTemplatePermissions',
+          'quicksight:DescribeTemplate',
+          'quicksight:DeleteTemplate',
+          'quicksight:UpdateTemplate',
+        ],
+      }],
+
+      sourceEntity: {
+        sourceTemplate: {
+          arn: stackParames.quickSightTemplateArnParam.valueAsString,
+        },
+      },
+    });
+
     const cr = createQuicksightCustomResource(this, {
+      templateArn: template.attrArn,
+      databaseName: stackParames.redshiftDBParam.valueAsString,
+      identifer: `${getShortIdOfStack(Stack.of(this))}`,
       quickSightProps: {
         userName: stackParames.quickSightUserParam.valueAsString,
         namespace: stackParames.quickSightNamespaceParam.valueAsString,
         vpcConnectionArn: vpcConnectionArn,
         principalArn: stackParames.quickSightPrincipalParam.valueAsString,
-        templateArn: stackParames.quickSightTemplateArnParam.valueAsString,
       },
       redshiftProps: {
         host: stackParames.redshiftEndpointParam.valueAsString,
@@ -91,6 +122,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
     });
     cr.node.addDependency(vPCConnectionResource);
+    cr.node.addDependency(template);
 
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
@@ -98,6 +130,12 @@ export class DataReportingQuickSightStack extends Stack {
         ParameterLabels: this.paramLabels,
       },
     };
+
+    const dababoards = cr.getAttString('dashboards');
+    new CfnOutput(this, 'Dashboards', {
+      description: 'The QuickSight dashboard list',
+      value: dababoards,
+    }).overrideLogicalId('Dashboards');
 
     addCfnNag(this);
   }

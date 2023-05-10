@@ -13,15 +13,18 @@
 
 import {
   QuickSight,
-  VpcConnectionProperties,
   DashboardSourceEntity,
   AnalysisSourceEntity,
-  CreateDataSourceCommandOutput,
-  CreateTemplateCommandOutput,
   CreateDataSetCommandOutput,
   CreateAnalysisCommandOutput,
   CreateDashboardCommandOutput,
   ResourceNotFoundException,
+  ColumnGroup,
+  DataSetReference,
+  TransformOperation,
+  ColumnTag,
+  CreateDataSourceCommandOutput,
+  VpcConnectionProperties,
 } from '@aws-sdk/client-quicksight';
 import { SSM } from '@aws-sdk/client-ssm';
 import { Context, CloudFormationCustomResourceEvent } from 'aws-lambda';
@@ -37,14 +40,12 @@ import {
   waitForDashboardDeleteCompleted,
   waitForDataSetCreateCompleted,
   waitForDataSetDeleteCompleted,
-  waitForDataSourceCreateCompleted,
-  waitForDataSourceDeleteCompleted,
-  waitForTemplateCreateCompleted,
-  waitForTemplateDeleteCompleted,
   QuickSightDashboardDefProps,
-  QuickSightTemplateProps,
+  DataSetProps,
+  waitForDataSourceDeleteCompleted,
+  waitForDataSourceCreateCompleted,
   RedShiftDataSourceProps,
-  QuickSightDataSetProps,
+  truncateString,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -55,7 +56,7 @@ type QuicksightCustomResourceLabmdaPropsType = QuicksightCustomResourceLabmdaPro
 
 interface ReturnData {
   Data: {
-    dashboards: string[];
+    dashboards: string;
   };
 }
 
@@ -67,17 +68,18 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   logger.info(JSON.stringify(event));
 
   const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
-
   const region = props.awsRegion;
   const partition = props.awsPartition;
   const quickSight = new QuickSight({
     region,
     ...aws_sdk_client_common_config,
   });
+
   const ssm = new SSM({
     region,
     ...aws_sdk_client_common_config,
   });
+
 
   const awsAccountId = props.awsAccountId;
   const namespace: string = props.quickSightNamespace;
@@ -87,47 +89,54 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
     principalArn = props.quickSightPrincipalArn;
   }
 
-  if (event.RequestType === 'Create' || event.RequestType === 'Update' ) {
+  let dashboards = [];
 
-    let dashboards: string[] = [];
+  if (event.RequestType === 'Create' || event.RequestType === 'Update' ) {
+    const dataSource = props.dashboardDefProps.dataSource;
+    const datasource = await createDataSource(quickSight, ssm, awsAccountId, principalArn, dataSource);
 
     const databaseSchemaNames = props.schemas;
-
     if ( databaseSchemaNames.trim().length > 0 ) {
-      const defString = JSON.stringify(props.dashboardDefProps);
-
-      logger.info(`databaseSchemaNames: ${databaseSchemaNames}`);
-
       for (const schemaName of databaseSchemaNames.split(',')) {
         logger.info('schemaName: ', schemaName);
-        const dashboardDefProps: QuickSightDashboardDefProps = JSON.parse(defString.slice().replace(/##SCHEMA##/g, schemaName));
+        const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
         logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-        const dashboard = await createQuickSightDashboard(quickSight, ssm, awsAccountId, principalArn, dashboardDefProps);
+        const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn,
+          schemaName,
+          props.dashboardDefProps.dataSource.databaseName,
+          props.templateArn,
+          datasource?.Arn!,
+          dashboardDefProps);
         logger.info('created dashboard:', JSON.stringify(dashboard));
-        dashboards.push(dashboard?.Arn!);
+        dashboards.push({
+          appId: schemaName,
+          dashboardId: dashboard?.DashboardId,
+        });
       };
     } else {
       logger.info('empty database schema.');
     }
-
-    return {
-      Data: {
-        dashboards,
-      },
-    };
   } else {
     logger.warn('Ignore Cloudformation Delete request to keep QuickSight resources.');
-    return {
-      Data: { dashboards: [] },
-    };
   }
+
+  return {
+    Data: {
+      dashboards: JSON.stringify(dashboards),
+    },
+  };
 };
 
 const createDataSource = async (quickSight: QuickSight, ssm: SSM, awsAccountId: string, principalArn: string, props: RedShiftDataSourceProps)
 : Promise<CreateDataSourceCommandOutput|undefined> => {
   try {
-    const datasourceId = props.id;
+
+    //truncate to 40 length if databaseName is too long.
+    //suffix is short stackid.
+    const templateIdentifer = truncateString(props.databaseName, 40);
+    const datasourceId = `clickstream_datasource_v1_${templateIdentifer}_${props.suffix}`;
+
     //delete datasource if it exist.
     try {
       const datasource = await quickSight.describeDataSource({
@@ -161,6 +170,7 @@ const createDataSource = async (quickSight: QuickSight, ssm: SSM, awsAccountId: 
     } else {
       vpcConnectionPropertiesProperty = undefined;
     }
+
     //create datasource
     const secretInfo = await ssm.getParameter({
       Name: `/${props.credentialParameter}`,
@@ -214,83 +224,19 @@ const createDataSource = async (quickSight: QuickSight, ssm: SSM, awsAccountId: 
   }
 };
 
-const createTemplate = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, props: QuickSightTemplateProps)
-: Promise<CreateTemplateCommandOutput|undefined> => {
 
-  //create template
-  try {
-    const templateId = props.id;
-
-    //delete template if it exist.
-    try {
-      const template = await quickSight.describeTemplate({
-        AwsAccountId: awsAccountId,
-        TemplateId: templateId,
-      });
-      logger.info('exist template: ', JSON.stringify(template));
-
-      if (template.Template?.TemplateId === templateId) {
-        logger.info('delete exist template');
-        await quickSight.deleteTemplate({
-          AwsAccountId: awsAccountId,
-          TemplateId: templateId,
-        });
-        await waitForTemplateDeleteCompleted(quickSight, awsAccountId, templateId);
-      }
-    } catch (err: any) {
-
-      if ((err as Error) instanceof ResourceNotFoundException) {
-        logger.info('Template not exist. skip delete operation.');
-      } else {
-        throw err;
-      }
-    }
-
-    logger.info('start to create template');
-    const template = await quickSight.createTemplate({
-      AwsAccountId: awsAccountId,
-      TemplateId: templateId,
-      Name: props.name ?? templateId,
-      Permissions: [{
-        Principal: principalArn,
-        Actions: [
-          'quicksight:UpdateTemplatePermissions',
-          'quicksight:DescribeTemplatePermissions',
-          'quicksight:DescribeTemplate',
-          'quicksight:DeleteTemplate',
-          'quicksight:UpdateTemplate',
-        ],
-      }],
-
-      // Definition: TemplateDefV1,
-
-      SourceEntity: {
-        SourceTemplate: {
-          Arn: props.templateArn,
-        },
-      },
-    })
-    ;
-
-    await waitForTemplateCreateCompleted(quickSight, awsAccountId, templateId);
-    logger.info('Template: ', JSON.stringify(template));
-
-    const templateArn = template.Arn!;
-    logger.info('create template finished. arn: ', templateArn);
-
-    return template;
-
-  } catch (err: any) {
-    logger.error(`Create QuickSight template failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, props: QuickSightDataSetProps)
+const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+  dataSourceArn: string,
+  schema: string,
+  databaseName: string,
+  props: DataSetProps)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    const datasetId = props.id;
+    const tableNameIdentifer = truncateString(props.tableName, 30);
+    const schemaIdentifer = truncateString(schema, 20);
+    const databaseIdentifer = truncateString(databaseName, 20);
+    const datasetId = `clickstream_dataset_v1_${tableNameIdentifer}_${databaseIdentifer}_${schemaIdentifer}`;
     //delete dataset if it exist.
     try {
       const dataset = await quickSight.describeDataSet({
@@ -315,24 +261,87 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
       }
     }
 
+    let colGroups: ColumnGroup[] = [];
+    if (props.columnGroups !== undefined) {
+      for (const columnsGroup of props.columnGroups ) {
+        colGroups.push({
+          GeoSpatialColumnGroup: {
+            Name: columnsGroup.geoSpatialColumnGroupName,
+            Columns: columnsGroup.geoSpatialColumnGroupColumns,
+          },
+        });
+      }
+    }
+
+    let dataTransforms: TransformOperation[] = [];
+    let needLogicalMap = false;
+    if (props.tagColumnOperations !== undefined) {
+      needLogicalMap = true;
+      for (const tagColOperation of props.tagColumnOperations ) {
+        const tags: ColumnTag[] = [];
+        for (const role of tagColOperation.columnGeographicRoles) {
+          tags.push({
+            ColumnGeographicRole: role,
+          });
+        }
+        dataTransforms.push({
+          TagColumnOperation: {
+            ColumnName: tagColOperation.columnName,
+            Tags: tags,
+          },
+        });
+      }
+    }
+
+    if (props.projectedColumns !== undefined) {
+      needLogicalMap = true;
+      dataTransforms.push({
+        ProjectOperation: {
+          ProjectedColumns: props.projectedColumns,
+        },
+      });
+    }
+
+    let logicalMap = undefined;
+    if (needLogicalMap) {
+      logicalMap = {
+        LogialTable1: {
+          Alias: 'Alias_LogialTable1',
+          Source: {
+            PhysicalTableId: 'PhyTable1',
+          },
+          DataTransforms: dataTransforms,
+        },
+      };
+    }
+
     logger.info('start to create dataset');
     let dataset: CreateDataSetCommandOutput | undefined = undefined;
     for (const i of Array(60).keys()) {
-      logger.info(`create dataset round: ${i} `);
+      logger.info(`create dataset ${datasetId} round: ${i} `);
       try {
         dataset = await quickSight.createDataSet({
           AwsAccountId: awsAccountId,
           DataSetId: datasetId,
-          Name: props.name ?? props.id,
+          Name: `${props.name} - ${databaseIdentifer} - ${schemaIdentifer} - ${tableNameIdentifer}`,
           Permissions: [{
             Principal: principalArn,
             Actions: dataSetActions,
           }],
 
           ImportMode: props.importMode,
-          PhysicalTableMap: props.physicalTableMap,
-          LogicalTableMap: props.logicalTableMap,
-          ColumnGroups: props.columnGroups,
+          PhysicalTableMap: {
+            PhyTable1: {
+              CustomSql: {
+                DataSourceArn: dataSourceArn,
+                Name: props.tableName,
+                SqlQuery: `SELECT * FROM ${schema}.${props.tableName}`,
+                Columns: props.columns,
+              },
+            },
+          },
+          LogicalTableMap: needLogicalMap ? logicalMap : undefined,
+          ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
         });
         break;
       } catch (err: any) {
@@ -358,27 +367,31 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
   }
 };
 
-const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, databaseName: string, schema: string,
   sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateAnalysisCommandOutput|undefined> => {
 
   try {
+    const schemaIdentifer = truncateString(schema, 40);
+    const databaseIdentifer = truncateString(databaseName, 40);
+    const analysisId = `clickstream_analysis_v1_${databaseIdentifer}_${schemaIdentifer}`;
+
     //delete analysis if it exist.
     try {
       const analysis = await quickSight.describeAnalysis({
         AwsAccountId: awsAccountId,
-        AnalysisId: props.analysisId,
+        AnalysisId: analysisId,
       });
       logger.info('exist analysis: ', JSON.stringify(analysis));
 
-      if (analysis.Analysis?.AnalysisId === props.analysisId) {
+      if (analysis.Analysis?.AnalysisId === analysisId) {
         logger.info('delete exist analysis');
         await quickSight.deleteAnalysis({
           AwsAccountId: awsAccountId,
-          AnalysisId: props.analysisId,
+          AnalysisId: analysisId,
           ForceDeleteWithoutRecovery: true,
         });
-        await waitForAnalysisDeleteCompleted(quickSight, awsAccountId, props.analysisId);
+        await waitForAnalysisDeleteCompleted(quickSight, awsAccountId, analysisId);
       }
     } catch (err: any) {
       if ((err as Error) instanceof ResourceNotFoundException) {
@@ -391,8 +404,8 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
     logger.info('start to create analysis');
     const analysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
-      AnalysisId: props.analysisId,
-      Name: props.analysisName ?? props.analysisId,
+      AnalysisId: analysisId,
+      Name: `${props.analysisName} ${databaseIdentifer} - ${schemaIdentifer}`,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -408,7 +421,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
 
       SourceEntity: sourceEntity,
     });
-    await waitForAnalysisCreateCompleted(quickSight, awsAccountId, props.analysisId);
+    await waitForAnalysisCreateCompleted(quickSight, awsAccountId, analysisId);
     logger.info('create analysis finished. arn: ', analysis.Arn!);
 
     return analysis;
@@ -420,26 +433,31 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
 };
 
 
-const createDashboard = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+const createDashboard = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, databaseName: string, schema: string,
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
+    const schemaIdentifer = truncateString(schema, 40);
+    const databaseIdentifer = truncateString(databaseName, 40);
+    const dashboardId = `clickstream_dashboard_v1_${databaseIdentifer}_${schemaIdentifer}`;
+
     //delete dashboard if it exist.
     try {
+
       const dashbaord = await quickSight.describeDashboard({
         AwsAccountId: awsAccountId,
-        DashboardId: props.dashboardId,
+        DashboardId: dashboardId,
       });
       logger.info('exist dashboard: ', JSON.stringify(dashbaord));
 
-      if (dashbaord.Dashboard?.DashboardId === props.dashboardId) {
+      if (dashbaord.Dashboard?.DashboardId === dashboardId) {
         logger.info('delete exist dashboard');
         await quickSight.deleteDashboard({
           AwsAccountId: awsAccountId,
-          DashboardId: props.dashboardId,
+          DashboardId: dashboardId,
         });
 
-        await waitForDashboardDeleteCompleted(quickSight, awsAccountId, props.dashboardId);
+        await waitForDashboardDeleteCompleted(quickSight, awsAccountId, dashboardId);
       }
     } catch (err: any) {
       if ((err as Error) instanceof ResourceNotFoundException) {
@@ -452,8 +470,8 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
     logger.info('start to create dashboard');
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
-      DashboardId: props.dashboardId,
-      Name: props.dashboardName ?? props.dashboardId,
+      DashboardId: dashboardId,
+      Name: `${props.dashboardName} ${databaseIdentifer} - ${schemaIdentifer}`,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -471,7 +489,7 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
       SourceEntity: sourceEntity,
 
     });
-    await waitForDashboardCreateCompleted(quickSight, awsAccountId, props.dashboardId);
+    await waitForDashboardCreateCompleted(quickSight, awsAccountId, dashboardId);
     logger.info('create dashboard finished. arn: ', dashboard.Arn!);
 
     return dashboard;
@@ -482,37 +500,39 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
   }
 };
 
-const createQuickSightDashboard = async (quickSight: QuickSight, ssm: SSM, accountId: string, principalArn: string,
+const createQuickSightDashboard = async (quickSight: QuickSight,
+  accountId: string,
+  principalArn: string,
+  schema: string,
+  databaseName: string,
+  templeteArn: string,
+  datasourceArn: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
-  const dataDef = dashboardDef.data;
-  const dataSource = dataDef.dataSource;
-  await createDataSource(quickSight, ssm, accountId, principalArn, dataSource);
-
-  const tempalteDef = dashboardDef.template;
-  logger.info('tempalteDef', JSON.stringify(tempalteDef));
-
-  const template = await createTemplate(quickSight, accountId, principalArn, tempalteDef);
-
-  const dataSets = dataDef.dataSets;
-  const datasetRef = dataDef.dataSetReferences;
+  const datasetRefs: DataSetReference[] = [];
+  const dataSets = dashboardDef.dataSets;
   for ( const dataSet of dataSets) {
-    const createdDataset = await createDataSet(quickSight, accountId, principalArn, dataSet);
+    const createdDataset = await createDataSet(quickSight, accountId, principalArn, datasourceArn, schema, databaseName, dataSet);
     logger.info('data set arn:', createdDataset?.Arn!);
+
+    datasetRefs.push({
+      DataSetPlaceholder: dataSet.tableName,
+      DataSetArn: createdDataset?.Arn!,
+    });
   }
 
   const sourceEntity = {
     SourceTemplate: {
-      Arn: template?.Arn,
-      DataSetReferences: datasetRef,
+      Arn: templeteArn,
+      DataSetReferences: datasetRefs,
     },
   };
 
-  const analysis = await createAnalysis(quickSight, accountId, principalArn, sourceEntity, dashboardDef);
+  const analysis = await createAnalysis(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
   logger.info(`Analysis ${analysis?.Arn} creation completed.`);
 
-  const dashboard = await createDashboard(quickSight, accountId, principalArn, sourceEntity, dashboardDef);
+  const dashboard = await createDashboard(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.Arn} creation completed.`);
 
   return dashboard;

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ColumnGroup, DataSetReference, LogicalTable, PhysicalTable, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -27,10 +27,12 @@ export interface QuickSightProps {
   userName: string;
   vpcConnectionArn: string;
   principalArn: string;
-  templateArn: string;
 }
 
 export interface QuicksightCustomResourceProps {
+  readonly identifer: string;
+  readonly templateArn: string;
+  readonly databaseName: string;
   readonly quickSightProps: QuickSightProps;
   readonly redshiftProps: RedShiftProps;
 }
@@ -43,12 +45,22 @@ export interface QuicksightCustomResourceLabmdaProps {
   readonly quickSightUser: string;
   readonly quickSightPrincipalArn: string;
   readonly schemas: string;
+  readonly templateArn: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
 }
 
+export interface TagColumnOperationProps {
+  columnName: string;
+  columnGeographicRoles: string[];
+}
+
+export interface ColumnGroupsProps {
+  geoSpatialColumnGroupName: string;
+  geoSpatialColumnGroupColumns: string[];
+}
+
 export interface RedShiftDataSourceProps {
-  id: string;
-  name?: string;
+  suffix: string;
   endpoint: string;
   port: number;
   databaseName: string;
@@ -56,35 +68,23 @@ export interface RedShiftDataSourceProps {
   vpcConnectionArn: string | undefined;
 };
 
-export interface QuickSightDataSetProps {
-  id: string;
-  name?: string;
+export interface DataSetProps {
+  name: string;
+  tableName: string;
+  columns: InputColumn[];
   importMode: string;
-  physicalTableMap: Record<string, PhysicalTable>;
-  logicalTableMap?: Record<string, LogicalTable>;
-  columnGroups?: ColumnGroup[];
-};
-
-export interface QuickSightDataProps {
-  dataSets: QuickSightDataSetProps[];
-  dataSource: RedShiftDataSourceProps;
-  dataSetReferences: DataSetReference[];
-};
-
-export interface QuickSightTemplateProps {
-  id: string;
-  name?: string;
-  templateArn?: string;
-  templateDefinition?: string;
+  columnGroups?: ColumnGroupsProps[];
+  projectedColumns?: string[];
+  tagColumnOperations?: TagColumnOperationProps[];
 };
 
 export interface QuickSightDashboardDefProps {
-  dashboardId: string;
-  dashboardName?: string;
-  analysisId: string;
-  analysisName?: string;
-  data: QuickSightDataProps;
-  template: QuickSightTemplateProps;
+  dashboardName: string;
+  analysisName: string;
+  templateArn: string;
+  databaseName: string;
+  dataSource: RedShiftDataSourceProps;
+  dataSets: DataSetProps[];
 };
 
 export const dataSetActions = [
@@ -100,11 +100,8 @@ export const dataSetActions = [
   'quicksight:CancelIngestion',
 ];
 
-export const CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER = 'clickstream_daily_active_user_view';
 export const CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER = 'clickstream_ods_flattened_view';
-export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
-export const CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER = 'clickstream_dau_wau_view';
 export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
 export const CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER = 'clickstream_ods_events_view';
 
@@ -120,7 +117,7 @@ export async function waitForDataSetCreateCompleted(quickSight: QuickSight, acco
         DataSetId: datasetId,
       });
 
-      if ( dataset.DataSet !== undefined && dataset.DataSet?.DataSetId !== undefined ) {
+      if ( dataset.DataSet !== undefined && dataset.DataSet?.DataSetId !== undefined) {
         return;
       }
       logger.info('DataSetCreate: sleep 1 second');
@@ -195,12 +192,12 @@ export async function waitForAnalysisCreateCompleted(quickSight: QuickSight, acc
   }
 };
 
-export async function waitForDashboardCreateCompleted(quickSight: QuickSight, accountId: string, dashbaordId: string) {
+export async function waitForDashboardCreateCompleted(quickSight: QuickSight, accountId: string, dashboardId: string) {
   for (const _i of Array(60).keys()) {
     try {
       const dashboard = await quickSight.describeDashboard({
         AwsAccountId: accountId,
-        DashboardId: dashbaordId,
+        DashboardId: dashboardId,
       });
       if ( dashboard.Dashboard !== undefined && dashboard.Dashboard?.DashboardId !== undefined ) {
         return;
@@ -317,4 +314,11 @@ export async function waitForDashboardDeleteCompleted(quickSight: QuickSight, ac
       await sleep(1000);
     }
   }
+};
+
+export function truncateString(source: string, length: number): string {
+  if (source.length > length) {
+    return source.substring(0, length);
+  }
+  return source;
 };

@@ -23,6 +23,11 @@ declare global {
     url: string;
   }
 
+  interface IDashboard {
+    appId: string;
+    dashboardId: string;
+  }
+
   interface IPipeline {
     pipelineId?: string;
     dns?: string;
@@ -151,6 +156,7 @@ declare global {
       status: string;
       stackDetails: IStackStatus[];
     };
+    dashboards?: IDashboard[],
     createAt?: string;
     updateAt?: string;
   }

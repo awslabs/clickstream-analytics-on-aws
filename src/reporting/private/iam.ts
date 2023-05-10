@@ -51,7 +51,7 @@ export function createRoleForQuicksightCustomResourceLambda(
     new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
-        `${arnPrefix}:datasource/clickstream_quicksight_data_source_*`,
+        `${arnPrefix}:datasource/clickstream_datasource_*`,
       ],
       actions: [
         'quicksight:DescribeDataSource',
@@ -65,7 +65,7 @@ export function createRoleForQuicksightCustomResourceLambda(
     new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
-        `${arnPrefix}:template/clickstream_quicksight_template_*`,
+        `${arnPrefix}:template/clickstream_template_*`,
         parentTemplateArn,
       ],
       actions: [
@@ -79,7 +79,7 @@ export function createRoleForQuicksightCustomResourceLambda(
     new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
-        `${arnPrefix}:dataset/dataset_clickstream_*`,
+        `${arnPrefix}:dataset/clickstream_dataset_*`,
       ],
       actions: [
         'quicksight:DescribeDataSet',

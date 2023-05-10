@@ -26,14 +26,13 @@ import {
   UserRole,
   DescribeAccountSubscriptionCommandOutput,
 } from '@aws-sdk/client-quicksight';
-import { APIRoleName, awsAccountId } from '../../common/constants';
+import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils';
 
-const QUICKSIGHT_CONTROL_PLANE_REGION = 'us-east-1';
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_ACCOUNT = `${QUICKSIGHT_PREFIX}-${generateRandomStr(8)}`;

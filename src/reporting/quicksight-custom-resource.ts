@@ -39,7 +39,7 @@ export function createQuicksightCustomResource(
   scope: Construct,
   props: QuicksightCustomResourceProps,
 ): CustomResource {
-  const fn = createQuicksightLambda(scope, props);
+  const fn = createQuicksightLambda(scope, props.redshiftProps.ssmParameterName, props.templateArn);
   const provider = new Provider(
     scope,
     'QuicksightDatasourceCustomResourceProvider',
@@ -49,176 +49,81 @@ export function createQuicksightCustomResource(
     },
   );
 
-  const awsAccountId: string = Aws.ACCOUNT_ID;
-  const arnPrefix = `arn:${Aws.PARTITION}:quicksight:${Aws.REGION}:${awsAccountId}:`;
-
   const databaseName = props.redshiftProps.databaseName;
-
-  const suffix = `${databaseName}`;
   const dashboardDefProps: QuickSightDashboardDefProps = {
-    analysisId: `clickstream_analysis_v1_${suffix}_##SCHEMA##`,
-    analysisName: `Clickstream Analysis ${suffix}_##SCHEMA##`,
-    dashboardId: `clickstream_dashboard_v1_${suffix}_##SCHEMA##`,
-    dashboardName: `Clickstream Dashboard ${suffix}_##SCHEMA##`,
-    template: {
-      id: `clickstream_quicksight_template_v1_${suffix}_##SCHEMA##`,
-      name: `Clickstream Quicksight Template ${suffix}_##SCHEMA##`,
-      templateArn: props.quickSightProps.templateArn,
-      // templateDefinition?: templeteDef, //keep for future use.
+    analysisName: `Clickstream Analysis ${databaseName}`,
+    dashboardName: `Clickstream Dashboard ${databaseName}`,
+    templateArn: props.templateArn,
+    databaseName: databaseName,
+    dataSource: {
+      suffix: props.identifer,
+      endpoint: props.redshiftProps.host,
+      port: props.redshiftProps.port,
+      databaseName: databaseName,
+      credentialParameter: props.redshiftProps.ssmParameterName,
+      vpcConnectionArn: props.quickSightProps.vpcConnectionArn,
     },
-    data: {
-      dataSource: {
-        id: `clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-        name: `Clickstream Quicksight Data Source ${suffix}_##SCHEMA##`,
-        endpoint: props.redshiftProps.host,
-        port: props.redshiftProps.port,
-        databaseName: databaseName,
-        credentialParameter: props.redshiftProps.ssmParameterName,
-        vpcConnectionArn: props.quickSightProps.vpcConnectionArn,
+    dataSets: [
+      {
+        name: 'User Dim Data Set',
+        tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        columns: clickstream_user_dim_view_columns,
+        columnGroups: [
+          {
+            geoSpatialColumnGroupName: 'geo',
+            geoSpatialColumnGroupColumns: [
+              'first_visit_country',
+              'first_visit_city',
+            ],
+          },
+        ],
+        projectedColumns: [
+          'user_pseudo_id',
+          'user_id',
+          'first_visit_date',
+          'first_visit_install_source',
+          'first_visit_device_language',
+          'first_platform',
+          'first_visit_country',
+          'first_visit_city',
+          'first_traffic_source_source',
+          'first_traffic_source_medium',
+          'first_traffic_source_name',
+          'custom_attr_key',
+          'custom_attr_value',
+          'is_registered',
+        ],
+        tagColumnOperations: [
+          {
+            columnName: 'first_visit_city',
+            columnGeographicRoles: ['CITY'],
+          },
+          {
+            columnName: 'first_visit_country',
+            columnGeographicRoles: ['COUNTRY'],
+          },
+        ],
       },
-      dataSets: [
-        {
-          id: `dataset_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          name: `Daily Active User Dataset ${suffix}_##SCHEMA##`,
-          importMode: 'DIRECT_QUERY',
-          physicalTableMap: {
-            UserDimTable: {
-              CustomSql: {
-                DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_user_dim_view_columns,
-              },
-            },
-          },
-          logicalTableMap: {
-            UserDimLogicalTable: {
-              Alias: 'UserDimTableAlias',
-              Source: {
-                PhysicalTableId: 'UserDimTable',
-              },
-              DataTransforms: [{
-                TagColumnOperation: {
-                  ColumnName: 'first_visit_country',
-                  Tags: [
-                    {
-                      ColumnGeographicRole: 'COUNTRY',
-                    },
-                  ],
-                },
-              },
-              {
-                TagColumnOperation: {
-                  ColumnName: 'first_visit_city',
-                  Tags: [
-                    {
-                      ColumnGeographicRole: 'CITY',
-                    },
-                  ],
-                },
-              },
-              {
-                ProjectOperation: {
-                  ProjectedColumns: [
-                    'user_pseudo_id',
-                    'user_id',
-                    'first_visit_date',
-                    'first_visit_install_source',
-                    'first_visit_device_language',
-                    'first_platform',
-                    'first_visit_country',
-                    'first_visit_city',
-                    'first_traffic_source_source',
-                    'first_traffic_source_medium',
-                    'first_traffic_source_name',
-                    'custom_attr_key',
-                    'custom_attr_value',
-                    'is_registered',
-                  ],
-                },
-              }],
-            },
-          },
-          columnGroups: [
-            {
-              GeoSpatialColumnGroup: {
-                Name: 'geo',
-                Columns: [
-                  'first_visit_country',
-                  'first_visit_city',
-                ],
-              },
-            },
-          ],
-        },
-        {
-          id: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          name: `ODS Flattened Dataset ${suffix}_##SCHEMA##`,
-          importMode: 'DIRECT_QUERY',
-          physicalTableMap: {
-            ODSFalttenedTable: {
-              CustomSql: {
-                DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_ods_flattened_view_columns,
-              },
-            },
-          },
-        },
-        {
-          id: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          name: `Session Dataset ${suffix}_##SCHEMA##`,
-          importMode: 'DIRECT_QUERY',
-          physicalTableMap: {
-            SessionTable: {
-              CustomSql: {
-                DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_session_view_columns,
-              },
-            },
-          },
-        },
-        {
-          id: `dataset_${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          name: `Retention Dataset ${suffix}_##SCHEMA##`,
-          importMode: 'DIRECT_QUERY',
-          physicalTableMap: {
-            RetentionTable: {
-              CustomSql: {
-                DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                Name: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
-                SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}`,
-                Columns: clickstream_ods_events_view_columns,
-              },
-            },
-          },
-        },
-
-      ],
-      dataSetReferences: [
-        {
-          DataSetPlaceholder: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-        },
-        {
-          DataSetPlaceholder: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-        },
-        {
-          DataSetPlaceholder: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-        },
-        {
-          DataSetPlaceholder: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
-          DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-        },
-      ],
-
-
-    },
+      {
+        name: 'ODS Flattened Data Set',
+        tableName: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        columns: clickstream_ods_flattened_view_columns,
+      },
+      {
+        name: 'Session Data Set',
+        tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        columns: clickstream_session_view_columns,
+      },
+      {
+        name: 'ODS Event Data Set',
+        tableName: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        columns: clickstream_ods_events_view_columns,
+      },
+    ],
   };
 
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
@@ -230,6 +135,7 @@ export function createQuicksightCustomResource(
       quickSightNamespace: props.quickSightProps.namespace,
       quickSightUser: props.quickSightProps.userName,
       quickSightPrincipalArn: props.quickSightProps.principalArn,
+      templateArn: props.templateArn,
       schemas: props.redshiftProps.databaseSchemaNames,
       dashboardDefProps,
     },
@@ -239,9 +145,10 @@ export function createQuicksightCustomResource(
 
 function createQuicksightLambda(
   scope: Construct,
-  props: QuicksightCustomResourceProps,
+  ssmParameterName: string,
+  templateArn: string,
 ): NodejsFunction {
-  const role = createRoleForQuicksightCustomResourceLambda(scope, props.redshiftProps.ssmParameterName, props.quickSightProps.templateArn);
+  const role = createRoleForQuicksightCustomResourceLambda(scope, ssmParameterName, templateArn);
   const fn = new NodejsFunction(scope, 'QuicksightCustomResourceLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(

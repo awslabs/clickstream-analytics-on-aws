@@ -16,37 +16,29 @@ import {
   CreateDashboardCommand,
   CreateDataSetCommand,
   CreateDataSourceCommand,
-  CreateTemplateCommand,
   DeleteAnalysisCommand,
   DeleteDashboardCommand,
   DeleteDataSetCommand,
   DeleteDataSourceCommand,
-  DeleteTemplateCommand,
   DescribeAnalysisCommand,
   DescribeDashboardCommand,
   DescribeDataSetCommand,
   DescribeDataSourceCommand,
-  DescribeTemplateCommand,
   QuickSightClient,
   ResourceNotFoundException,
 } from '@aws-sdk/client-quicksight';
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
 import {
-  clickstream_daily_active_user_view_columns,
-  clickstream_dau_wau_view_columns,
   clickstream_ods_flattened_view_columns,
-  clickstream_retention_view_columns,
-  clickstream_session_view_columns,
+  clickstream_user_dim_view_columns,
 } from '../../../../src/reporting/lambda/custom-resource/quicksight/resources-def';
 import {
-  CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-  CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
   CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-  CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-  CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+  CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
 } from '../../../../src/reporting/private/dashboard';
 import { getMockContext } from '../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
@@ -63,8 +55,7 @@ describe('QuickSight Lambda function', () => {
   const context = getMockContext();
   const quickSightClientMock = mockClient(QuickSightClient);
   const ssmClientMock = mockClient(SSMClient);
-  const suffix = 'test-database-name';
-  const arnPrefix = 'test';
+  const suffix = 'test1';
 
   const commonProps = {
     awsAccountId: 'xxxxxxxxxx',
@@ -73,145 +64,72 @@ describe('QuickSight Lambda function', () => {
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
     quickSightPrincipalArn: 'test-principal-arn',
+    databaseName: 'test-database',
+    templateArn: 'test-template-arn',
+
     dashboardDefProps: {
-      analysisId: `clickstream_analysis_v1_${suffix}_##SCHEMA##`,
-      analysisName: `Clickstream Analysis ${suffix}_##SCHEMA##`,
-      dashboardId: `clickstream_dashboard_v1_${suffix}_##SCHEMA##`,
-      dashboardName: `Clickstream Dashboard ${suffix}_##SCHEMA##`,
-      template: {
-        id: `clickstream_quicksight_template_v1_${suffix}_##SCHEMA##`,
-        name: `Clickstream Quicksight Template ${suffix}_##SCHEMA##`,
-        templateArn: 'test-template-arn',
-        // templateDefinition?: templeteDef, //keep for future use.
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
+      templateArn: 'test-template-arn',
+      databaseName: 'test-database-name',
+      dataSource: {
+        name: 'Clickstream Quicksight Data Source',
+        suffix,
+        endpoint: 'test.example.com',
+        port: 5439,
+        databaseName: ['test-database-name'],
+        credentialParameter: 'test-parameter',
+        vpcConnectionArn: 'test-vpc-connection',
       },
-      data: {
-        dataSource: {
-          id: `clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-          name: `Clickstream Quicksight Data Source ${suffix}_##SCHEMA##`,
-          endpoint: 'test.example.com',
-          port: 5439,
-          databaseName: ['test-database'],
-          credentialParameter: 'test-parameter',
-          vpcConnectionArn: 'test-vpc-connection',
+      dataSets: [
+        {
+          name: 'User Dim Data Set',
+          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_user_dim_view_columns,
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'is_registered',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
+            },
+          ],
         },
-        dataSets: [
-          {
-            id: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-            name: `Daily Active User Dataset ${suffix}_##SCHEMA##`,
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              DailyActiveUserTable: {
-                CustomSql: {
-                  DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                  Name: CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-                  SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}`,
-                  Columns: clickstream_daily_active_user_view_columns,
-                },
-              },
-            },
-            logicalTableMap: {
-              DailyActiveUserLogicTable: {
-                Alias: 'DailyActiveUserTableAlias',
-                Source: {
-                  PhysicalTableId: 'DailyActiveUserTable',
-                },
-                DataTransforms: [{
-                  TagColumnOperation: {
-                    ColumnName: 'country',
-                    Tags: [
-                      {
-                        ColumnGeographicRole: 'COUNTRY',
-                      },
-                    ],
-                  },
-                }],
-              },
-            },
-          },
-          {
-            id: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-            name: `ODS Flattened Dataset ${suffix}_##SCHEMA##`,
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              ODSFalttenedTable: {
-                CustomSql: {
-                  DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                  Name: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-                  SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}`,
-                  Columns: clickstream_ods_flattened_view_columns,
-                },
-              },
-            },
-          },
-          {
-            id: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-            name: `Session Dataset ${suffix}_##SCHEMA##`,
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              SessionTable: {
-                CustomSql: {
-                  DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                  Name: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
-                  SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
-                  Columns: clickstream_session_view_columns,
-                },
-              },
-            },
-          },
-          {
-            id: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-            name: `Retention Dataset ${suffix}_##SCHEMA##`,
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              RetentionTable: {
-                CustomSql: {
-                  DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                  Name: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-                  SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}`,
-                  Columns: clickstream_retention_view_columns,
-                },
-              },
-            },
-          },
-          {
-            id: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-            name: `Dau Wau Dataset ${suffix}_##SCHEMA##`,
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              DauWauTable: {
-                CustomSql: {
-                  DataSourceArn: `${arnPrefix}datasource/clickstream_quicksight_data_source_v1_${suffix}_##SCHEMA##`,
-                  Name: CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
-                  SqlQuery: `SELECT * FROM ##SCHEMA##.${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}`,
-                  Columns: clickstream_dau_wau_view_columns,
-                },
-              },
-            },
-          },
-        ],
-        dataSetReferences: [
-          {
-            DataSetPlaceholder: CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER,
-            DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          },
-          {
-            DataSetPlaceholder: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
-            DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          },
-          {
-            DataSetPlaceholder: CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER,
-            DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          },
-          {
-            DataSetPlaceholder: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
-            DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          },
-          {
-            DataSetPlaceholder: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-            DataSetArn: `${arnPrefix}dataset/dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_${suffix}_##SCHEMA##`,
-          },
-        ],
-      },
+        {
+          name: 'ODS Flattened Data Set',
+          tableName: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_ods_flattened_view_columns,
+        },
+      ],
     },
   };
 
@@ -221,6 +139,16 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+    },
+
+  };
+
+  const emptyAppIdEvent = {
+    ...basicCloudFormationEvent,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      ...commonProps,
+      schemas: '',
     },
 
   };
@@ -297,21 +225,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeTemplateCommand).resolves({
-      Template: {
-        TemplateId: 'template_123456',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    });
-
-
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -325,15 +238,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     }).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_2',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_3',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_4',
       Status: 200,
     });
 
@@ -359,7 +263,7 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0',
+      DashboardId: 'dashboard_0',
       Status: 200,
     });
 
@@ -367,14 +271,11 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 10);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
 
@@ -383,8 +284,9 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
     expect(resp.Data?.dashboards).toBeDefined();
-    expect(resp.Data?.dashboards).toHaveLength(1);
-    expect(resp.Data?.dashboards[0]).toEqual('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0');
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
 
@@ -407,21 +309,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeTemplateCommand).resolves({
-      Template: {
-        TemplateId: 'template_123456',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    });
-
-
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -435,15 +322,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     }).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_2',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_3',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_4',
       Status: 200,
     });
 
@@ -469,7 +347,7 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0',
+      DashboardId: 'dashboard_0',
       Status: 200,
     });
 
@@ -477,14 +355,11 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 10);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
 
@@ -493,8 +368,9 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
     expect(resp.Data?.dashboards).toBeDefined();
-    expect(resp.Data?.dashboards).toHaveLength(1);
-    expect(resp.Data?.dashboards).toContain('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0');
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
 
@@ -508,13 +384,13 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(DescribeDataSourceCommand).resolvesOnce({
       DataSource: {
-        DataSourceId: 'clickstream_quicksight_data_source_v1_test-database-name_test1',
+        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
       },
       RequestId: 'request-123',
       Status: 200,
     }).rejectsOnce(error).resolvesOnce({
       DataSource: {
-        DataSourceId: 'clickstream_quicksight_data_source_v1_test-database-name_test1',
+        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
       },
       RequestId: 'request-123',
       Status: 200,
@@ -528,65 +404,21 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeTemplateCommand).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_test1',
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    });
-
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).rejectsOnce(error).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).rejectsOnce(error).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     });
 
@@ -595,19 +427,10 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Arn: `arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       Status: 200,
     }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_2',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_3',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_4',
+      Arn: `arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       Status: 200,
     });
 
@@ -643,7 +466,7 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_test1',
+      DashboardId: 'clickstream_dashboard_v1_test-database-name_test1',
       Status: 200,
     });
 
@@ -651,24 +474,23 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 3);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 15);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 6);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
 
     expect(resp.Data?.dashboards).toBeDefined();
-    expect(resp.Data?.dashboards).toHaveLength(1);
-    expect(resp.Data?.dashboards[0]).toEqual('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_test1');
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('clickstream_dashboard_v1_test-database-name_test1');
+
 
   }, 10000);
 
@@ -687,20 +509,6 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(CreateDataSourceCommand).rejects();
 
-    quickSightClientMock.on(DescribeTemplateCommand).resolves({
-      Template: {
-        TemplateId: 'template_123456',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolvesOnce({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    });
-
     try {
       await handler(vpcConnectionAccessEvent, context) as CdkCustomResourceResponse;
     } catch (e) {
@@ -712,47 +520,6 @@ describe('QuickSight Lambda function', () => {
 
     fail('No exception happened when CreateDataSourceCommand failed');
 
-  });
-
-  test('Create QuichSight datasource - create template exception', async () => {
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DescribeTemplateCommand).resolves({
-      Template: {
-        TemplateId: 'template_123456',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolvesOnce({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).rejects();
-
-    try {
-      await handler(vpcConnectionAccessEvent, context) as CdkCustomResourceResponse;
-    } catch (e) {
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 1);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 0);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 1);
-      return;
-    }
-
-    fail('No exception happened when CreateTemplateCommand failed');
   });
 
   test('Custom resource update', async () => {
@@ -773,21 +540,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeTemplateCommand).resolves({
-      Template: {
-        TemplateId: 'template_123456',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    });
-
-
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -801,15 +553,6 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     }).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_2',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_3',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_4',
       Status: 200,
     });
 
@@ -835,7 +578,7 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0',
+      DashboardId: 'dashboard_0',
       Status: 200,
     });
 
@@ -843,14 +586,11 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 10);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
 
@@ -859,7 +599,9 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
     expect(resp.Data?.dashboards).toBeDefined();
-    expect(resp.Data?.dashboards[0]).toEqual('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0');
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
 
@@ -869,9 +611,6 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
@@ -882,7 +621,33 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
 
-    expect(resp.Data!.dashboards).toHaveLength(0);
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(0);
+  });
+
+  test('Empty app ids', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        DataSourceId: 'datasource_123456',
+      },
+      RequestId: 'request-123',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
+    });
+
+    quickSightClientMock.on(CreateDataSourceCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
+      Status: 200,
+    });
+
+    const resp = await handler(emptyAppIdEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
+
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(0);
   });
 
   test('Custom resource multi update', async () => {
@@ -894,25 +659,13 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(DescribeDataSourceCommand).resolvesOnce({
       DataSource: {
-        DataSourceId: 'clickstream_quicksight_data_source_v1_test-database-name_test1',
+        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
       },
       RequestId: 'request-123',
       Status: 200,
     }).rejectsOnce(error).resolvesOnce({
       DataSource: {
-        DataSourceId: 'clickstream_quicksight_data_source_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    }).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    }).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
+        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
       },
       RequestId: 'request-123',
       Status: 200,
@@ -922,123 +675,41 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDataSourceCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/zzzz',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DescribeTemplateCommand).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_test1',
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    }).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_0000',
-      },
-    }).resolvesOnce({
-      Template: {
-        TemplateId: 'clickstream_quicksight_template_v1_test-database-name_0000',
-      },
-    });
-
-    quickSightClientMock.on(DeleteTemplateCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateTemplateCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/test_template',
-      Status: 200,
-    }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:template/zzzz',
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/clickstream_datasource_v1_test-database-name_test1',
       Status: 200,
     });
 
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).rejectsOnce(error).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).rejectsOnce(error).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: `clickstream_dataset_v1_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_test-database-name_test1`,
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: 'zzzz',
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: 'zzzz',
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).rejectsOnce(error).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: 'zzzz',
       },
     }).resolvesOnce({
       DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAILY_ACTIVE_USER_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
-      },
-    }).resolvesOnce({
-      DataSet: {
-        DataSetId: `dataset_${CLICKSTREAM_DAU_WAU_VIEW_PLACEHOLDER}_v1_test-database-name_test1`,
+        DataSetId: 'zzzz',
       },
     });
 
@@ -1068,11 +739,29 @@ describe('QuickSight Lambda function', () => {
       },
     });
 
+    quickSightClientMock.on(DescribeAnalysisCommand).resolvesOnce({
+      Analysis: {
+        AnalysisId: 'clickstream_analysis_v1_test-database-name_test1',
+      },
+    }).rejectsOnce(error).resolvesOnce({
+      Analysis: {
+        AnalysisId: 'clickstream_analysis_v1_test-database-name_test1',
+      },
+    }).resolvesOnce({
+      Analysis: {
+        AnalysisId: 'zzzz',
+      },
+    }).resolvesOnce({
+      Analysis: {
+        AnalysisId: 'zzzz',
+      },
+    });
+
     quickSightClientMock.on(DeleteAnalysisCommand).resolves({
     });
 
     quickSightClientMock.on(CreateAnalysisCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/clickstream_analysis_v1_test-database-name_test1',
       Status: 200,
     }).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/zzzz',
@@ -1101,36 +790,33 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_test1',
+      DashboardId: 'clickstream_dashboard_v1_test-database-name_test1',
       Status: 200,
     }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_zzzz',
+      DashboardId: 'zzzz',
       Status: 200,
     });
 
     const resp = await handler(multiUpdateEvent, context) as CdkCustomResourceResponse;
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeTemplateCommand, 5);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteTemplateCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateTemplateCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 5);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 5);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 25);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 10);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 10);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 4);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 2);
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
 
     expect(resp.Data?.dashboards).toBeDefined();
-    expect(resp.Data?.dashboards[0]).toEqual('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_test1');
-    expect(resp.Data?.dashboards[1]).toEqual('arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_v1_test-database-name_zzzz');
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('clickstream_dashboard_v1_test-database-name_test1');
+    expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('zzzz');
   });
 
 });

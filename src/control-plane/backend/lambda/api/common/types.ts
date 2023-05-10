@@ -328,3 +328,8 @@ export interface IngestionServerSinkBatchProps {
   readonly intervalSeconds: number;
 }
 
+export interface ReportDashboardOutput {
+  readonly appId: string;
+  readonly dashboardId: string;
+}
+

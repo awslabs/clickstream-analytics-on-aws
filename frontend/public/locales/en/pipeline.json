@@ -341,7 +341,8 @@
     "alarmName": "Alarm name",
     "action": "Action",
     "stackDetails": "Stack Details",
-    "redshiftServerless": "Redshift Serverless"
+    "redshiftServerless": "Redshift Serverless",
+    "dashboards": "Dashboards"
   },
   "list": {
     "id": "Pipeline ID",

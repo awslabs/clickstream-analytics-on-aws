@@ -69,3 +69,7 @@ export const buildReshiftLink = (
   }
   return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };
+
+export const buildQuickSightDashboardLink = (region: string, dashboardId: string): string => {
+  return `https://${region}.quicksight.aws.amazon.com/sn/dashboards/${dashboardId}`;
+};

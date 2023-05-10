@@ -36,8 +36,10 @@ import {
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   QUICKSIGHT_USER_NAME_PATTERN,
+  OUTPUT_REPORT_DASHBOARDS_SUFFIX,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
+import { logger } from '../common/powertools';
 import { validatePattern, validateSecretModel, validateSinkBatch, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
@@ -52,7 +54,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps,
+  IngestionServerSinkBatchProps, ReportDashboardOutput,
 } from '../common/types';
 import { isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -1405,6 +1407,25 @@ export class CPipeline {
       kafkaTopic = this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId;
     }
     return kafkaTopic;
+  }
+
+  public async getReportDashboardsUrl() {
+    let dashboards: ReportDashboardOutput[] = [];
+    const reportOutputs = await this.getStackOutputBySuffixs(
+      PipelineStackType.REPORT,
+      [
+        OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+      ],
+    );
+    const dashboardsOutputs = reportOutputs.get(OUTPUT_REPORT_DASHBOARDS_SUFFIX);
+    if (dashboardsOutputs) {
+      try {
+        dashboards = JSON.parse(dashboardsOutputs);
+      } catch (error) {
+        logger.warn('Report Outputs error.', { reportOutputs });
+      }
+    }
+    return dashboards;
   }
 }
 

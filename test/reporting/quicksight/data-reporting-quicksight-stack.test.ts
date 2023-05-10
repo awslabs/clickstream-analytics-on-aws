@@ -24,6 +24,10 @@ describe('DataReportingQuickSightStack parameter test', () => {
   beforeEach(() => {
   });
 
+  test('Has Dashboards output', () => {
+    template.hasOutput('Dashboards', {});
+  });
+
   test('Should has Parameter quickSightUserParam', () => {
     template.hasParameter('QuickSightUserParam', {
       Type: 'String',
@@ -325,7 +329,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 {
                   Ref: 'AWS::AccountId',
                 },
-                ':datasource/clickstream_quicksight_data_source_*',
+                ':datasource/clickstream_datasource_*',
               ],
             ],
           },
@@ -355,12 +359,15 @@ describe('DataReportingQuickSightStack resource test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':template/clickstream_quicksight_template_*',
+                  ':template/clickstream_template_*',
                 ],
               ],
             },
             {
-              Ref: 'QuickSightTemplateArnParam',
+              'Fn::GetAtt': [
+                'ClickstreamTemplate',
+                'Arn',
+              ],
             },
           ],
         },
@@ -390,7 +397,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 {
                   Ref: 'AWS::AccountId',
                 },
-                ':dataset/dataset_clickstream_*',
+                ':dataset/clickstream_dataset_*',
               ],
             ],
           },
@@ -621,22 +628,16 @@ describe('DataReportingQuickSightStack resource test', () => {
     quickSightPrincipalArn: {
       Ref: 'QuickSightPrincipalParam',
     },
+    templateArn: {
+      'Fn::GetAtt': [
+        'ClickstreamTemplate',
+        'Arn',
+      ],
+    },
     schemas: {
       Ref: 'RedShiftDBSchemaParam',
     },
     dashboardDefProps: {
-      analysisId: {
-        'Fn::Join': [
-          '',
-          [
-            'clickstream_analysis_v1_',
-            {
-              Ref: 'RedshiftDBParam',
-            },
-            '_##SCHEMA##',
-          ],
-        ],
-      },
       analysisName: {
         'Fn::Join': [
           '',
@@ -645,19 +646,6 @@ describe('DataReportingQuickSightStack resource test', () => {
             {
               Ref: 'RedshiftDBParam',
             },
-            '_##SCHEMA##',
-          ],
-        ],
-      },
-      dashboardId: {
-        'Fn::Join': [
-          '',
-          [
-            'clickstream_dashboard_v1_',
-            {
-              Ref: 'RedshiftDBParam',
-            },
-            '_##SCHEMA##',
           ],
         ],
       },
@@ -669,638 +657,266 @@ describe('DataReportingQuickSightStack resource test', () => {
             {
               Ref: 'RedshiftDBParam',
             },
-            '_##SCHEMA##',
           ],
         ],
       },
-      template: {
-        id: {
-          'Fn::Join': [
-            '',
-            [
-              'clickstream_quicksight_template_v1_',
-              {
-                Ref: 'RedshiftDBParam',
-              },
-              '_##SCHEMA##',
-            ],
-          ],
-        },
-        name: {
-          'Fn::Join': [
-            '',
-            [
-              'Clickstream Quicksight Template ',
-              {
-                Ref: 'RedshiftDBParam',
-              },
-              '_##SCHEMA##',
-            ],
-          ],
-        },
-        templateArn: {
-          Ref: 'QuickSightTemplateArnParam',
-        },
+      templateArn: {
+        'Fn::GetAtt': [
+          'ClickstreamTemplate',
+          'Arn',
+        ],
       },
-      data: {
-        dataSource: {
-          id: {
-            'Fn::Join': [
-              '',
-              [
-                'clickstream_quicksight_data_source_v1_',
+      databaseName: {
+        Ref: 'RedshiftDBParam',
+      },
+      dataSource: {
+        suffix: {
+          'Fn::Select': [
+            0,
+            {
+              'Fn::Split': [
+                '-',
                 {
-                  Ref: 'RedshiftDBParam',
+                  'Fn::Select': [
+                    2,
+                    {
+                      'Fn::Split': [
+                        '/',
+                        {
+                          Ref: 'AWS::StackId',
+                        },
+                      ],
+                    },
+                  ],
                 },
-                '_##SCHEMA##',
               ],
-            ],
-          },
-          name: {
-            'Fn::Join': [
-              '',
-              [
-                'Clickstream Quicksight Data Source ',
-                {
-                  Ref: 'RedshiftDBParam',
-                },
-                '_##SCHEMA##',
-              ],
-            ],
-          },
-          endpoint: {
-            Ref: 'RedshiftEndpointParam',
-          },
-          port: {
-            Ref: 'RedshiftPortParam',
-          },
-          databaseName: {
-            Ref: 'RedshiftDBParam',
-          },
-          credentialParameter: {
-            Ref: 'RedshiftParameterKeyParam',
-          },
-          vpcConnectionArn: {
-            'Fn::GetAtt': [
-              'ClickstreamVPCConnectionResource',
-              'Arn',
-            ],
-          },
+            },
+          ],
         },
-        dataSets: [
-          {
-            id: {
-              'Fn::Join': [
-                '',
-                [
-                  'dataset_clickstream_user_dim_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            name: {
-              'Fn::Join': [
-                '',
-                [
-                  'Daily Active User Dataset ',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              UserDimTable: {
-                CustomSql: {
-                  DataSourceArn: {
-                    'Fn::Join': [
-                      '',
-                      [
-                        'arn:',
-                        {
-                          Ref: 'AWS::Partition',
-                        },
-                        ':quicksight:',
-                        {
-                          Ref: 'AWS::Region',
-                        },
-                        ':',
-                        {
-                          Ref: 'AWS::AccountId',
-                        },
-                        ':datasource/clickstream_quicksight_data_source_v1_',
-                        {
-                          Ref: 'RedshiftDBParam',
-                        },
-                        '_##SCHEMA##',
-                      ],
-                    ],
-                  },
-                  Name: 'clickstream_user_dim_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_user_dim_view',
-                  Columns: [
-                    {
-                      Name: 'user_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'custom_attr_value',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'is_registered',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_visit_country',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_traffic_source_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_traffic_source_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'custom_attr_key',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_visit_city',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_traffic_source_medium',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_visit_install_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_visit_device_language',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_pseudo_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'first_visit_date',
-                      Type: 'DATETIME',
-                    },
-                    {
-                      Name: 'first_platform',
-                      Type: 'STRING',
-                    },
-                  ],
-                },
-              },
-            },
-            logicalTableMap: {
-              UserDimLogicalTable: {
-                Alias: 'UserDimTableAlias',
-                Source: {
-                  PhysicalTableId: 'UserDimTable',
-                },
-                DataTransforms: [
-                  {
-                    TagColumnOperation: {
-                      ColumnName: 'first_visit_country',
-                      Tags: [
-                        {
-                          ColumnGeographicRole: 'COUNTRY',
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    TagColumnOperation: {
-                      ColumnName: 'first_visit_city',
-                      Tags: [
-                        {
-                          ColumnGeographicRole: 'CITY',
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    ProjectOperation: {
-                      ProjectedColumns: [
-                        'user_pseudo_id',
-                        'user_id',
-                        'first_visit_date',
-                        'first_visit_install_source',
-                        'first_visit_device_language',
-                        'first_platform',
-                        'first_visit_country',
-                        'first_visit_city',
-                        'first_traffic_source_source',
-                        'first_traffic_source_medium',
-                        'first_traffic_source_name',
-                        'custom_attr_key',
-                        'custom_attr_value',
-                        'is_registered',
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            columnGroups: [
-              {
-                GeoSpatialColumnGroup: {
-                  Name: 'geo',
-                  Columns: [
-                    'first_visit_country',
-                    'first_visit_city',
-                  ],
-                },
-              },
-            ],
-          },
-          {
-            id: {
-              'Fn::Join': [
-                '',
-                [
-                  'dataset_clickstream_ods_flattened_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            name: {
-              'Fn::Join': [
-                '',
-                [
-                  'ODS Flattened Dataset ',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              ODSFalttenedTable: {
-                CustomSql: {
-                  DataSourceArn: {
-                    'Fn::Join': [
-                      '',
-                      [
-                        'arn:',
-                        {
-                          Ref: 'AWS::Partition',
-                        },
-                        ':quicksight:',
-                        {
-                          Ref: 'AWS::Region',
-                        },
-                        ':',
-                        {
-                          Ref: 'AWS::AccountId',
-                        },
-                        ':datasource/clickstream_quicksight_data_source_v1_',
-                        {
-                          Ref: 'RedshiftDBParam',
-                        },
-                        '_##SCHEMA##',
-                      ],
-                    ],
-                  },
-                  Name: 'clickstream_ods_flattened_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_ods_flattened_view',
-                  Columns: [
-                    {
-                      Name: 'event_parameter_value',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_date',
-                      Type: 'DATETIME',
-                    },
-                    {
-                      Name: 'event_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_pseudo_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_info_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_country',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_parameter_key',
-                      Type: 'STRING',
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            id: {
-              'Fn::Join': [
-                '',
-                [
-                  'dataset_clickstream_session_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            name: {
-              'Fn::Join': [
-                '',
-                [
-                  'Session Dataset ',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              SessionTable: {
-                CustomSql: {
-                  DataSourceArn: {
-                    'Fn::Join': [
-                      '',
-                      [
-                        'arn:',
-                        {
-                          Ref: 'AWS::Partition',
-                        },
-                        ':quicksight:',
-                        {
-                          Ref: 'AWS::Region',
-                        },
-                        ':',
-                        {
-                          Ref: 'AWS::AccountId',
-                        },
-                        ':datasource/clickstream_quicksight_data_source_v1_',
-                        {
-                          Ref: 'RedshiftDBParam',
-                        },
-                        '_##SCHEMA##',
-                      ],
-                    ],
-                  },
-                  Name: 'clickstream_session_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_session_view',
-                  Columns: [
-                    {
-                      Name: 'session_engagement_time_min',
-                      Type: 'DECIMAL',
-                    },
-                    {
-                      Name: 'exit_view',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_date',
-                      Type: 'DATETIME',
-                    },
-                    {
-                      Name: 'platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_views',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_pseudo_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'engaged_session',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'entry_view',
-                      Type: 'STRING',
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            id: {
-              'Fn::Join': [
-                '',
-                [
-                  'dataset_clickstream_ods_events_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            name: {
-              'Fn::Join': [
-                '',
-                [
-                  'Retention Dataset ',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-            importMode: 'DIRECT_QUERY',
-            physicalTableMap: {
-              RetentionTable: {
-                CustomSql: {
-                  DataSourceArn: {
-                    'Fn::Join': [
-                      '',
-                      [
-                        'arn:',
-                        {
-                          Ref: 'AWS::Partition',
-                        },
-                        ':quicksight:',
-                        {
-                          Ref: 'AWS::Region',
-                        },
-                        ':',
-                        {
-                          Ref: 'AWS::AccountId',
-                        },
-                        ':datasource/clickstream_quicksight_data_source_v1_',
-                        {
-                          Ref: 'RedshiftDBParam',
-                        },
-                        '_##SCHEMA##',
-                      ],
-                    ],
-                  },
-                  Name: 'clickstream_ods_events_view',
-                  SqlQuery: 'SELECT * FROM ##SCHEMA##.clickstream_ods_events_view',
-                  Columns: [
-                    {
-                      Name: 'event_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_date_d',
-                      Type: 'DATETIME',
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        ],
-        dataSetReferences: [
-          {
-            DataSetPlaceholder: 'clickstream_user_dim_view',
-            DataSetArn: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/dataset_clickstream_user_dim_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-          },
-          {
-            DataSetPlaceholder: 'clickstream_ods_flattened_view',
-            DataSetArn: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/dataset_clickstream_ods_flattened_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-          },
-          {
-            DataSetPlaceholder: 'clickstream_session_view',
-            DataSetArn: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/dataset_clickstream_session_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-          },
-          {
-            DataSetPlaceholder: 'clickstream_ods_events_view',
-            DataSetArn: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/dataset_clickstream_ods_events_view_v1_',
-                  {
-                    Ref: 'RedshiftDBParam',
-                  },
-                  '_##SCHEMA##',
-                ],
-              ],
-            },
-          },
-        ],
+        endpoint: {
+          Ref: 'RedshiftEndpointParam',
+        },
+        port: {
+          Ref: 'RedshiftPortParam',
+        },
+        databaseName: {
+          Ref: 'RedshiftDBParam',
+        },
+        credentialParameter: {
+          Ref: 'RedshiftParameterKeyParam',
+        },
+        vpcConnectionArn: {
+          'Fn::GetAtt': [
+            'ClickstreamVPCConnectionResource',
+            'Arn',
+          ],
+        },
       },
+      dataSets: [
+        {
+          name: 'User Dim Data Set',
+          tableName: 'clickstream_user_dim_view',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'custom_attr_value',
+              Type: 'STRING',
+            },
+            {
+              Name: 'is_registered',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'custom_attr_key',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+          ],
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'is_registered',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: [
+                'CITY',
+              ],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: [
+                'COUNTRY',
+              ],
+            },
+          ],
+        },
+        {
+          name: 'ODS Flattened Data Set',
+          tableName: 'clickstream_ods_flattened_view',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'event_parameter_value',
+              Type: 'STRING',
+            },
+            {
+              Name: 'event_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'event_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'event_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'app_info_version',
+              Type: 'STRING',
+            },
+            {
+              Name: 'geo_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'event_parameter_key',
+              Type: 'STRING',
+            },
+          ],
+        },
+        {
+          name: 'Session Data Set',
+          tableName: 'clickstream_session_view',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'session_engagement_time_min',
+              Type: 'DECIMAL',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+          ],
+        },
+        {
+          name: 'ODS Event Data Set',
+          tableName: 'clickstream_ods_events_view',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'event_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'event_date_d',
+              Type: 'DATETIME',
+            },
+          ],
+        },
+      ],
     },
   }, 1);
 

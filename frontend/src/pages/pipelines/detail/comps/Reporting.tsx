@@ -16,9 +16,11 @@ import {
   ColumnLayout,
   SpaceBetween,
   StatusIndicator,
+  Link,
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildQuickSightDashboardLink } from '../../../../ts/url';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -47,14 +49,29 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
 
       <SpaceBetween direction="vertical" size="l">
         <div>
+          <Box variant="awsui-key-label">{t('pipeline:detail.dashboards')}</Box>
+          {pipelineInfo?.dashboards?.map((element) => {
+              return (
+                <div key={element.appId}>
+                  <Link
+                    external
+                    href={buildQuickSightDashboardLink(pipelineInfo.region || '', element.dashboardId)}
+                  >
+                    {element.appId}
+                  </Link>
+                </div>
+              );
+            }) || '-'}
+        </div>
+      </SpaceBetween>
+
+      <SpaceBetween direction="vertical" size="l">
+        <div>
           <Box variant="awsui-key-label">
             {t('pipeline:create.qsAccountName')}
           </Box>
           <div>{pipelineInfo?.report.quickSight.accountName || '-'}</div>
         </div>
-      </SpaceBetween>
-
-      <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">
             {t('pipeline:create.quickSightUser')}
