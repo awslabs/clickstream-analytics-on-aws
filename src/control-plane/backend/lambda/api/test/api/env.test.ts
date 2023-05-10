@@ -957,6 +957,13 @@ describe('Account Env test', () => {
           Role: 'ADMIN',
           Active: true,
         },
+        {
+          UserName: 'api-role-name/fake',
+          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/api-role-name/fake',
+          Email: 'fake@example.com',
+          Role: 'ADMIN',
+          Active: true,
+        },
       ],
     });
     let res = await request(app).get('/api/env/quicksight/users');

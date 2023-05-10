@@ -26,7 +26,7 @@ import {
   UserRole,
   DescribeAccountSubscriptionCommandOutput,
 } from '@aws-sdk/client-quicksight';
-import { awsAccountId } from '../../common/constants';
+import { APIRoleName, awsAccountId } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
@@ -59,13 +59,15 @@ export const listQuickSightUsers = async () => {
       };
     });
     for (let user of records as User[]) {
-      users.push({
-        userName: user.UserName ?? '',
-        arn: user.Arn ?? '',
-        email: user.Email ?? '',
-        role: user.Role ?? '',
-        active: user.Active ?? false,
-      });
+      if (!user.UserName?.startsWith(APIRoleName!)) {
+        users.push({
+          userName: user.UserName ?? '',
+          arn: user.Arn ?? '',
+          email: user.Email ?? '',
+          role: user.Role ?? '',
+          active: user.Active ?? false,
+        });
+      }
     }
   } catch (err) {
     logger.warn('List QuickSight users error.', { err });

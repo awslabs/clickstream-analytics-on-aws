@@ -288,6 +288,7 @@ export class ClickStreamApiConstruct extends Construct {
         ISSUER: props.authProps?.issuer ?? '',
         JWKS_URI: props.authProps?.jwksUri ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
+        API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,
