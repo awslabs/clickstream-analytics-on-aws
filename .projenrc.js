@@ -83,6 +83,7 @@ const depsForApiProject = [
   'p-limit@3.1.0',
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
+  'node-fetch@^2.6.3',
   ...awsSDKDepsForApiProject,
 ];
 
@@ -93,6 +94,7 @@ const devDepsForApiProject = [
   'ts-node@^10.9.1',
   '@types/express@^4.17.16',
   '@types/supertest@^2.0.12',
+  '@types/node-fetch',
 ];
 const project = new awscdk.AwsCdkTypeScriptApp({
   version,

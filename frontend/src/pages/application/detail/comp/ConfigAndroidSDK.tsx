@@ -19,11 +19,14 @@ import {
   Header,
   Link,
   SpaceBetween,
+  Spinner,
 } from '@cloudscape-design/components';
+import { fetchOutsideLink } from 'apis/resource';
 import AndroidConfig from 'assets/images/android.webp';
 import CopyCode from 'components/common/CopyCode';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SDK_MAVEN_VERSION_API_LINK } from 'ts/const';
 import {
   ANDROID_ADD_DEPENDENCY_TEXT,
   ANDROID_ADD_USER_ATTR,
@@ -33,8 +36,9 @@ import {
   ANDROID_RECODE_EVENT,
   DOWNLOAD_FILENAME,
   GUIDE_LINK_ANDROID_SDK,
-  TEMPALTE_SERVER_ENDPOINT,
+  TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
+  TEMPLATE_ANDROID_SDK_VERSION,
 } from 'ts/guideConst';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
@@ -45,13 +49,15 @@ interface ConfigSDKProps {
 const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const { appInfo } = props;
   const { t } = useTranslation();
+  const [sdkLatestVersion, setSdkLatestVersion] = useState('0.4.0');
+  const [loadingSdkVersion, setLoadingSdkVersion] = useState(false);
 
   const generateAndroidConfigFile = () => {
     // Define config content
     const fileContent = ANDROID_CONFIG_JSON_TEMPLATE.replace(
       TEMPLATE_APP_ID,
       appInfo?.appId || ''
-    ).replace(TEMPALTE_SERVER_ENDPOINT, appInfo?.pipeline?.endpoint || '');
+    ).replace(TEMPLATE_SERVER_ENDPOINT, appInfo?.pipeline?.endpoint || '');
 
     // create url object
     const url = generateFileDownloadLink(fileContent);
@@ -62,6 +68,31 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
     downloadLink.download = DOWNLOAD_FILENAME;
     downloadLink.click();
   };
+
+  const getAndroidMavenVersion = async () => {
+    try {
+      setLoadingSdkVersion(true);
+      const { data }: ApiResponse<FetchOutsideResponse> =
+        await fetchOutsideLink({
+          method: 'get',
+          url: SDK_MAVEN_VERSION_API_LINK,
+        });
+      setLoadingSdkVersion(false);
+      if (data.ok) {
+        const resDataObj = JSON.parse(data.data);
+        if (resDataObj.response?.docs?.[0]?.latestVersion) {
+          setSdkLatestVersion(resDataObj.response.docs[0].latestVersion);
+        }
+      }
+    } catch (error) {
+      setLoadingSdkVersion(false);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getAndroidMavenVersion();
+  }, []);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -118,7 +149,16 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
             constraintText={t('application:sdkGuide.androidSyncProject')}
           >
             <div className="mt-10">
-              <CopyCode code={ANDROID_ADD_DEPENDENCY_TEXT} />
+              {loadingSdkVersion ? (
+                <Spinner />
+              ) : (
+                <CopyCode
+                  code={ANDROID_ADD_DEPENDENCY_TEXT.replace(
+                    TEMPLATE_ANDROID_SDK_VERSION,
+                    sdkLatestVersion
+                  )}
+                />
+              )}
             </div>
           </FormField>
           <FormField label={t('application:sdkGuide.androidStep2')}>
@@ -133,7 +173,7 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
                   TEMPLATE_APP_ID,
                   appInfo?.appId || ''
                 ).replace(
-                  TEMPALTE_SERVER_ENDPOINT,
+                  TEMPLATE_SERVER_ENDPOINT,
                   appInfo?.pipeline?.endpoint || ''
                 )}
               />

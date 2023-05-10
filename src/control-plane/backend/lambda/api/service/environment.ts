@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import fetch from 'node-fetch';
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
 import { getRegionAccount } from '../common/utils';
@@ -264,7 +265,7 @@ export class EnvironmentServ {
         if (statement.Effect === 'Allow' && statement.Principal && statement.Resource) {
           if (
             (typeof statement.Principal[principal.key] === 'string' &&
-            statement.Principal[principal.key] === principal.value) ||
+              statement.Principal[principal.key] === principal.value) ||
             (Array.prototype.isPrototypeOf(statement.Principal[principal.key]) &&
               (statement.Principal[principal.key] as string[]).indexOf(principal.value) > -1)
           ) {
@@ -283,6 +284,29 @@ export class EnvironmentServ {
       return match;
     } catch (error) {
       return false;
+    }
+  }
+
+  public async fetch(req: any, res: any, _next: any) {
+    try {
+      const { url, method, body, headers } = req.body;
+      const response = await fetch(url, {
+        method: method,
+        body: body,
+        headers: headers,
+      });
+      const data = await response.text();
+      return res.json(new ApiSuccess({
+        ok: response.status < 500,
+        status: response.status,
+        data: data,
+      }));
+    } catch (error) {
+      return res.json(new ApiSuccess({
+        ok: false,
+        status: 500,
+        data: (error as Error).message,
+      }));
     }
   }
 }

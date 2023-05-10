@@ -20,6 +20,10 @@
       "type": "build"
     },
     {
+      "name": "@types/node-fetch",
+      "type": "build"
+    },
+    {
       "name": "@types/node",
       "version": "^16",
       "type": "build"
@@ -218,6 +222,11 @@
     {
       "name": "mustache",
       "version": "^4.2.0",
+      "type": "runtime"
+    },
+    {
+      "name": "node-fetch",
+      "version": "^2.6.3",
       "type": "runtime"
     },
     {

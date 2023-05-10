@@ -186,7 +186,7 @@ const ApplicationDetail: React.FC = () => {
                           externalIconAriaLabel="Opens in a new tab"
                           href={`/project/${pid}/pipeline/${applicationInfo?.pipeline?.id}`}
                         >
-                          {applicationInfo?.pipeline?.name}
+                          {applicationInfo?.pipeline?.id}
                         </Link>
                       </div>
                     </div>

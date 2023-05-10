@@ -322,6 +322,12 @@ app.get(
     return environmentServ.listSecrets(req, res, next);
   });
 
+app.post(
+  '/api/env/fetch',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.fetch(req, res, next);
+  });
+
 app.get('/api/dictionary', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return dictionaryServ.list(req, res, next);
 });

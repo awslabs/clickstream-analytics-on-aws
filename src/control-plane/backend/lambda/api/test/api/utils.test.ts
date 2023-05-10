@@ -251,24 +251,24 @@ describe('Utils test', () => {
 
   it('Sink batch valid', async () => {
     const validValues = [
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 1000, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 1, intervalSeconds: 3000}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 1, intervalSeconds: 0}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 50000, intervalSeconds: 0}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 1000, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 1, intervalSeconds: 300}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 10000, intervalSeconds: 0}},
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1000, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 3000 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 0 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 50000, intervalSeconds: 0 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1000, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: 300 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 10000, intervalSeconds: 0 } },
     ];
     validValues.map(v => expect(validateSinkBatch(v.sinkType, v.sinkBatch)).toEqual(true));
     const invalidValues = [
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: -1, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 0, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 1, intervalSeconds: 3001}},
-      {sinkType: PipelineSinkType.KAFKA, sinkBatch: {size: 1, intervalSeconds: -1}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: -1, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 0, intervalSeconds: 100}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 1, intervalSeconds: 301}},
-      {sinkType: PipelineSinkType.KINESIS, sinkBatch: {size: 1, intervalSeconds: -1}},
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: -1, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 0, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 3001 } },
+      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: -1 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: -1, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 0, intervalSeconds: 100 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: 301 } },
+      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: -1 } },
     ];
     invalidValues.map(v => expect(() => validateSinkBatch(v.sinkType, v.sinkBatch)).toThrow(ClickStreamBadRequestError));
   });

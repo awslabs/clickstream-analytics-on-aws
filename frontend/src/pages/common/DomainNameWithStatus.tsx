@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { StatusIndicator } from '@cloudscape-design/components';
+import { StatusIndicator, Spinner } from '@cloudscape-design/components';
+import { fetchOutsideLink } from 'apis/resource';
 import CopyText from 'components/common/CopyIcon';
 import React, { useState, useEffect } from 'react';
 
@@ -26,6 +27,7 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
 ) => {
   const { pipelineId, dns, customDomain } = props;
   const [domainResolved, setDomainResolved] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
     if (dns) {
@@ -33,15 +35,18 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
       if (customDomain) {
         requestUrl = `https://${customDomain}`;
       }
-      fetch(`${requestUrl}`)
-        .then((response) => {
-          if (response.ok) {
+      setLoadingData(true);
+      fetchOutsideLink({ method: 'get', url: `${requestUrl}` })
+        .then((response: ApiResponse<FetchOutsideResponse>) => {
+          setLoadingData(false);
+          if (response.data.ok) {
             setDomainResolved(true);
           } else {
             setDomainResolved(false);
           }
         })
         .catch((error) => {
+          setLoadingData(false);
           setDomainResolved(false);
         });
     }
@@ -51,7 +56,12 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
     <div>
       {(dns || customDomain) && <CopyText text={dns || customDomain || ''} />}
       {dns || customDomain || '-'}
-      {pipelineId &&
+      {loadingData ? (
+        <span className="ml-5">
+          <Spinner />
+        </span>
+      ) : (
+        pipelineId &&
         dns &&
         (domainResolved ? (
           <span className="ml-5">
@@ -61,7 +71,8 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
           <span className="ml-5">
             <StatusIndicator type="error" />
           </span>
-        ))}
+        ))
+      )}
     </div>
   );
 };

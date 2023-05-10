@@ -13,6 +13,15 @@
 
 import { apiRequest } from 'ts/request';
 
+const fetchOutsideLink = async (params: {
+  method: string;
+  url: string;
+  headers?: any;
+}) => {
+  const result: any = await apiRequest('post', `/env/fetch`, params);
+  return result;
+};
+
 const getRegionList = async () => {
   const result: any = await apiRequest('get', `/env/regions`);
   return result;
@@ -140,6 +149,7 @@ const getSecurityGroups = async (params: { region: string; vpcId: string }) => {
 };
 
 export {
+  fetchOutsideLink,
   createQuickSightUser,
   get3AZVPCList,
   getCertificates,

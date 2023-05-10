@@ -13,6 +13,8 @@ import { SelectProps } from '@cloudscape-design/components';
  *  and limitations under the License.
  */
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
+export const SDK_MAVEN_VERSION_API_LINK =
+  'https://search.maven.org/solrsearch/select?q=g:%22software.aws.solution%22+AND+a:%22clickstream%22&wt=json';
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const CONFIG_URL = '/aws-exports.json';
 export const COMMON_ALERT_TYPE = {

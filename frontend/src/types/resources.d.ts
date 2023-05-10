@@ -14,6 +14,12 @@
 export {};
 
 declare global {
+  interface FetchOutsideResponse {
+    data: any;
+    ok: boolean;
+    status: number;
+  }
+
   interface RegionResponse {
     id: string;
     cn_name: string;

@@ -32,9 +32,9 @@ import {
   IOS_RECODE_EVENT,
   DOWNLOAD_FILENAME,
   GUIDE_LINK_IOS_SDK,
-  TEMPALTE_SERVER_ENDPOINT,
+  TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
-  CLICKSTREAM_REPO_LINK,
+  CLICKSTREAM_IOS_REPO_LINK,
 } from 'ts/guideConst';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
@@ -51,7 +51,7 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
     const fileContent = IOS_CONFIG_JSON_TEMPLATE.replace(
       TEMPLATE_APP_ID,
       appInfo?.appId || ''
-    ).replace(TEMPALTE_SERVER_ENDPOINT, appInfo?.pipeline?.endpoint || '');
+    ).replace(TEMPLATE_SERVER_ENDPOINT, appInfo?.pipeline?.endpoint || '');
 
     // create url object
     const url = generateFileDownloadLink(fileContent);
@@ -78,7 +78,7 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
               <div>
                 {t('application:sdkGuide.iosEnterRepo1')}
                 <code>
-                  <b>({CLICKSTREAM_REPO_LINK})</b>
+                  <b>({CLICKSTREAM_IOS_REPO_LINK})</b>
                 </code>
                 {t('application:sdkGuide.iosEnterRepo2')}
               </div>
@@ -132,7 +132,7 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
                   TEMPLATE_APP_ID,
                   appInfo?.appId || ''
                 ).replace(
-                  TEMPALTE_SERVER_ENDPOINT,
+                  TEMPLATE_SERVER_ENDPOINT,
                   appInfo?.pipeline?.endpoint || ''
                 )}
               />
