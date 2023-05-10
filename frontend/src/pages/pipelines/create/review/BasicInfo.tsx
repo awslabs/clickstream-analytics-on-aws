@@ -68,7 +68,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               external
               href={buildS3Link(
                 pipelineInfo?.region || '',
-                pipelineInfo?.bucket.name || ''
+                pipelineInfo?.bucket.name || '',
+                `clickstream/${pipelineInfo?.projectId}/data/`
               )}
             >
               {pipelineInfo?.bucket.name}

@@ -216,7 +216,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
                 {t('pipeline:create.sinkMaxInterval')}
               </Box>
               <div>
-                {pipelineInfo?.ingestionServer.sinkBatch.intervalSeconds}
+                {pipelineInfo?.ingestionServer?.sinkBatch?.intervalSeconds}
               </div>
             </div>
 
@@ -224,7 +224,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               <Box variant="awsui-key-label">
                 {t('pipeline:create.sinkBatchSize')}
               </Box>
-              <div>{pipelineInfo?.ingestionServer.sinkBatch.size}</div>
+              <div>{pipelineInfo?.ingestionServer?.sinkBatch?.size}</div>
             </div>
           </>
         )}
