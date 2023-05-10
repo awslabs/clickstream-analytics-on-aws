@@ -408,6 +408,33 @@ export const KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
   },
 };
 
+export const KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE: IPipeline = {
+  ...KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE,
+  dataAnalytics: {
+    ...KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE.dataAnalytics,
+    athena: true,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      provisioned: {
+        clusterIdentifier: 'redshift-cluster-1',
+        dbUser: '',
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      loadJobScheduleIntervalExpression: 'rate(5 minutes)',
+      maxFilesLimit: 50,
+      processingFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+};
+
 export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
   ...KINESIS_ETL_REDSHIFT_PIPELINE,
   report: {

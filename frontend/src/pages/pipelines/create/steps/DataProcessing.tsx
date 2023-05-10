@@ -160,6 +160,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const [provisionedRedshiftOptionList, setProvisionedRedshiftOptionList] =
     useState<AutosuggestProps.Options>([]);
 
+  const [provisionedRedshiftClusterList, setProvisionedRedshiftClusterList] =
+    useState<RedshiftResponse[]>([]);
+
   const [redshiftRoleOptions, setRedshiftRoleOptions] =
     useState<SelectProps.Options>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
@@ -224,6 +227,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             labelTag: element.status,
           })
         );
+        setProvisionedRedshiftClusterList(data);
         setProvisionedRedshiftOptionList(provisionedOptions);
         setLoadingRedshift(false);
       }
@@ -803,9 +807,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             ) || ''
                           }
                           selectedOption={pipelineInfo.selectedRedshiftCluster}
-                          onChange={({ detail }) =>
-                            changeSelectedRedshift(detail.selectedOption)
-                          }
+                          onChange={({ detail }) => {
+                            changeSelectedRedshift(detail.selectedOption);
+                            const clusters: RedshiftResponse[] =
+                              provisionedRedshiftClusterList.filter(
+                                (cluster) =>
+                                  cluster.name === detail.selectedOption.value
+                              );
+                            changeDBUser(clusters[0].masterUsername);
+                          }}
                           options={provisionedRedshiftOptionList}
                           filteringType="auto"
                         />

@@ -348,7 +348,7 @@ function stackParameterMock(ddbMock: any, kafkaMock:any, redshiftServerlessClien
         },
         ClusterStatus: 'Active',
         MasterUsername: 'awsuser',
-        publiclyAccessible: false,
+        PubliclyAccessible: false,
         VpcSecurityGroups: [{ VpcSecurityGroupId: 'sg-00000000000000031' }],
       },
     ],

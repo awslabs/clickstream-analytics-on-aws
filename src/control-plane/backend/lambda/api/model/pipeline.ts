@@ -447,9 +447,18 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION, value: 'clickstream' });
-      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: this.solution.data.version });
-      this.pipeline.tags.push({ key: BuiltInTagKeys.CLICKSTREAM_PROJECT, value: this.project?.id! });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.AWS_SOLUTION,
+        value: 'clickstream',
+      });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+        value: this.solution.data.version,
+      });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+        value: this.project?.id!,
+      });
     }
   };
 
@@ -1209,6 +1218,10 @@ export class CPipeline {
         ParameterKey: 'RedshiftMode',
         ParameterValue: REDSHIFT_MODE.PROVISIONED,
       });
+      if (isEmpty(this.pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier) ||
+        isEmpty(this.pipeline.dataAnalytics?.redshift?.provisioned.dbUser)) {
+        throw new ClickStreamBadRequestError('Cluster Identifier and DbUser are required when using Redshift Provisioned cluster.');
+      }
       parameters.push({
         ParameterKey: 'RedshiftClusterIdentifier',
         ParameterValue: this.pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier,

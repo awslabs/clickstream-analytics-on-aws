@@ -16,6 +16,11 @@ import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { EC2Client, DescribeSubnetsCommand } from '@aws-sdk/client-ec2';
 import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
 import {
+  RedshiftClient,
+  DescribeClustersCommand,
+  DescribeClusterSubnetGroupsCommand,
+} from '@aws-sdk/client-redshift';
+import {
   RedshiftServerlessClient,
   GetWorkgroupCommand,
   GetNamespaceCommand,
@@ -35,7 +40,13 @@ import {
   projectExistedMock,
   tokenMock,
 } from './ddb-mock';
-import { KINESIS_ETL_REDSHIFT_PIPELINE, KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW, S3_INGESTION_PIPELINE, KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE } from './pipeline-mock';
+import {
+  KINESIS_ETL_REDSHIFT_PIPELINE,
+  KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  S3_INGESTION_PIPELINE,
+  KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE,
+} from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -44,6 +55,7 @@ const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
 const cloudFormationClient = mockClient(CloudFormationClient);
 const kafkaMock = mockClient(KafkaClient);
+const redshiftMock = mockClient(RedshiftClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const secretsManagerClient = mockClient(SecretsManagerClient);
 const ec2Client = mockClient(EC2Client);
@@ -55,6 +67,7 @@ describe('Pipeline test', () => {
     sfnMock.reset();
     cloudFormationClient.reset();
     kafkaMock.reset();
+    redshiftMock.reset();
     redshiftServerlessClient.reset();
     secretsManagerClient.reset();
     ec2Client.reset();
@@ -181,6 +194,72 @@ describe('Pipeline test', () => {
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toEqual('Validate error, the network for deploying Redshift serverless workgroup at least three subnets that cross three AZs. Please check and try again.');
     expect(ec2Client).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 3);
+  });
+  it('Create pipeline with provisioned redshift empty dbuser', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    kafkaMock.on(ListNodesCommand).resolves({
+      NextToken: 'token01',
+      NodeInfoList: [{
+        BrokerNodeInfo: {
+          Endpoints: ['node1,node2'],
+        },
+      }],
+      $metadata: {},
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    redshiftMock.on(DescribeClustersCommand).resolves({
+      Clusters: [
+        {
+          ClusterIdentifier: 'cluster-1',
+          NodeType: '',
+          Endpoint: {
+            Address: 'https://redshift/xxx/yyy',
+            Port: 5002,
+          },
+          ClusterStatus: 'Active',
+          MasterUsername: 'awsuser',
+          PubliclyAccessible: false,
+          VpcSecurityGroups: [{ VpcSecurityGroupId: 'sg-00000000000000031' }],
+        },
+      ],
+    });
+    redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
+      ClusterSubnetGroups: [
+        {
+          ClusterSubnetGroupName: 'group-1',
+          Subnets: [{ SubnetIdentifier: 'subnet-00000000000000022' }],
+        },
+      ],
+    });
+    ddbMock.on(PutCommand).resolves({});
+    ec2Client.on(DescribeSubnetsCommand).resolves({
+      Subnets: [{ AvailabilityZone: 'us-east-1a' }],
+    });
+    ddbMock.on(QueryCommand)
+      .resolvesOnce({ Items: [] })
+      .resolves({
+        Items: [
+          {
+            id: 1,
+            appId: `${MOCK_APP_ID}_1`,
+          },
+          {
+            id: 2,
+            appId: `${MOCK_APP_ID}_2`,
+          },
+        ],
+      });
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Cluster Identifier and DbUser are required when using Redshift Provisioned cluster.');
   });
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);

@@ -73,6 +73,7 @@ declare global {
     name: string;
     nodeType: string;
     status: string;
+    masterUsername: string;
   }
 
   interface RedshiftServerlessResponse {
