@@ -77,8 +77,10 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     displayStatus = 'status.pending';
   }
 
-  const checkStatus = async () => {
-    setLoadingStatus(true);
+  const checkStatus = async (isRefresh?: boolean) => {
+    if (!isRefresh) {
+      setLoadingStatus(true);
+    }
     try {
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
@@ -104,7 +106,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
 
   useEffect(() => {
     intervalId = setInterval(() => {
-      checkStatus();
+      checkStatus(true);
     }, CHECK_TIME_INTERVAL);
     return () => {
       window.clearInterval(intervalId);
