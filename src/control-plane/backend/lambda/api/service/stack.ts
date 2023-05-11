@@ -87,20 +87,12 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
   }
 
-  public retryWorkflow(stackName?: string): void {
+  public retryWorkflow(): void {
     if (!this.execWorkflow || !this.pipeline.status?.stackDetails) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
     const stackDetails = this.pipeline.status?.stackDetails;
-    let failStackNames: string[] = stackDetails.filter(status => status.stackStatus?.endsWith('_FAILED')).map(status => status.stackName);
-    if (stackName) {
-      failStackNames = failStackNames.filter(s => s === stackName);
-    }
-    if (failStackNames.length === 0) {
-      return;
-    }
-
-    this.execWorkflow.Workflow = this.getRetryWorkflow(this.execWorkflow.Workflow, failStackNames);
+    this.execWorkflow.Workflow = this.getRetryWorkflow(this.execWorkflow.Workflow, stackDetails);
   }
 
   public async execute(workflow: WorkflowTemplate | undefined, executionName: string): Promise<string> {
@@ -224,21 +216,31 @@ export class StackManager {
     return state;
   }
 
-  private getRetryWorkflow(state: WorkflowState, failStacks: string[]): WorkflowState {
+  private getRetryWorkflow(state: WorkflowState, statusDetail: PipelineStatusDetail[]): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this.getRetryWorkflow(branch.States[key], failStacks);
+          branch.States[key] = this.getRetryWorkflow(branch.States[key], statusDetail);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
-      if (failStacks.indexOf(state.Data?.Input.StackName) > -1) {
+      const status = this.getStackStatusByName(state.Data?.Input.StackName, statusDetail);
+      if (status?.endsWith('_FAILED')) {
         state.Data.Input.Action = 'Update';
-      } else {
+      } else if (status?.endsWith('_IN_PROGRESS') || status?.endsWith('_COMPLETE')) {
         state.Type = WorkflowStateType.PASS;
       }
     }
     return state;
+  }
+
+  private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
+    for (let detail of statusDetail) {
+      if (detail.stackName === stackName) {
+        return detail.stackStatus;
+      }
+    }
+    return undefined;
   }
 
   private getWorkflowStacks(state: WorkflowState): string[] {

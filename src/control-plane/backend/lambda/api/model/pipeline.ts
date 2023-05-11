@@ -322,13 +322,9 @@ export class CPipeline {
     await store.bindPlugins(pluginIds, -1);
   }
 
-  public async retry(type?: PipelineStackType): Promise<void> {
-    let stackName = '';
-    if (type) {
-      stackName = this.getStackName(type);
-    }
+  public async retry(): Promise<void> {
     // update workflow
-    this.stackManager.retryWorkflow(stackName);
+    this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionName = `main-${uuidv4()}`;

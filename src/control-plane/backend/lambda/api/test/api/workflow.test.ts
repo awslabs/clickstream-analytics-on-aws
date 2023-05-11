@@ -38,7 +38,7 @@ import {
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
   MSK_ETL_REDSHIFT_PIPELINE,
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
-  RETRY_PIPELINE_WITH_WORKFLOW,
+  RETRY_PIPELINE_WITH_WORKFLOW, RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS,
   S3_ETL_PIPELINE,
   S3_INGESTION_PIPELINE,
 } from './pipeline-mock';
@@ -3803,6 +3803,122 @@ describe('Workflow test', () => {
                 },
                 End: true,
                 Type: 'Pass',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(stackManager.getExecWorkflow()).toEqual(expected);
+  });
+  it('Generate Retry Workflow with undefined stack status', async () => {
+    dictionaryMock(ddbMock);
+    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS);
+    await stackManager.retryWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Next: 'KafkaConnector',
+                Type: 'Pass',
+              },
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Update',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-ETL-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                Next: 'Report',
+                Type: 'Pass',
+              },
+              Report: {
+                Data: {
+                  Callback: {
+                    BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-1d45u2r5l3wkg',
+                    BucketPrefix: 'clickstream/workflow/main-d6e73fc2-6211-4013-8c4d-a539c407f834',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-Report-e9a8f34fbf734ca4950787f1ad818989',
+                    TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
               },
             },
           },

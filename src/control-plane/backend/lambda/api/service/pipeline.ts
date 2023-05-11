@@ -130,7 +130,7 @@ export class PipelineServ {
   public async retry(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
-      const { pid, type } = req.query;
+      const { pid } = req.query;
       const ddbPipeline = await store.getPipeline(pid, id);
       if (!ddbPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
@@ -140,7 +140,7 @@ export class PipelineServ {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow retry.'));
       }
       const pipeline = new CPipeline(ddbPipeline);
-      await pipeline.retry(type);
+      await pipeline.retry();
       return res.status(201).send(new ApiSuccess(null, 'Pipeline retry.'));
     } catch (error) {
       next(error);
