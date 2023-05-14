@@ -75,7 +75,7 @@ export function createStackParameters(scope: Construct) {
 
   const transformerAndEnrichClassNamesParam = new CfnParameter(scope, 'TransformerAndEnrichClassNames', {
     description: 'The class name list of custom plugins to transform or enrich data',
-    default: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+    default: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
     type: 'String',
   });
 

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

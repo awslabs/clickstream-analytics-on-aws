@@ -107,7 +107,7 @@ export class EMRServerlessUtil {
 
     const sparkSubmitParameters = [
       '--class',
-      'sofeware.aws.solution.clickstream.DataProcessor',
+      'software.aws.solution.clickstream.DataProcessor',
       '--jars',
       jars,
     ];

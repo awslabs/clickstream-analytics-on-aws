@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 public class UAEnrichment {
 

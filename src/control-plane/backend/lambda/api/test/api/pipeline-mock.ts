@@ -722,7 +722,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                       ParameterKey: 'ScheduleExpression',
                     },
                     {
-                      ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                      ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
                       ParameterKey: 'TransformerAndEnrichClassNames',
                     },
                     {

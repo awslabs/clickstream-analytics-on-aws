@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;

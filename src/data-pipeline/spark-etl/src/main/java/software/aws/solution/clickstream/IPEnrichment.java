@@ -12,7 +12,7 @@
  */
 
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import com.maxmind.db.MaxMindDbConstructor;
 import com.maxmind.db.MaxMindDbParameter;
@@ -36,7 +36,7 @@ import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class IPEnrichment {

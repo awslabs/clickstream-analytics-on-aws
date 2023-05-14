@@ -1248,7 +1248,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'test.aws.solution.main,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -1534,7 +1534,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -1871,7 +1871,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -2199,7 +2199,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -2515,7 +2515,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -2900,7 +2900,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -3341,7 +3341,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                       },
                       {
                         ParameterKey: 'S3PathPluginJars',
@@ -3707,7 +3707,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
                       },
                       {
                         ParameterKey: 'OutputFormat',
@@ -4170,7 +4170,7 @@ describe('Workflow test', () => {
                       },
                       {
                         ParameterKey: 'TransformerAndEnrichClassNames',
-                        ParameterValue: 'sofeware.aws.solution.clickstream.Transformer,sofeware.aws.solution.clickstream.UAEnrichment,sofeware.aws.solution.clickstream.IPEnrichment',
+                        ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
                       },
                       {
                         ParameterKey: 'OutputFormat',

@@ -119,7 +119,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '128',
             '96',
           ],
-          sparkSubmitParameters: '--class sofeware.aws.solution.clickstream.DataProcessor \
+          sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.apache.spark.sql.functions.*;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class UserPropertiesConverter {

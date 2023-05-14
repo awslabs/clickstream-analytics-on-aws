@@ -12,7 +12,7 @@
  */
 
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -44,7 +44,7 @@ import java.util.zip.GZIPInputStream;
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
 import static org.apache.spark.sql.types.DataTypes.StringType;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class Cleaner {

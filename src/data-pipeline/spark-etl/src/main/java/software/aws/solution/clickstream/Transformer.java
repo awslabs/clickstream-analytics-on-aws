@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
@@ -21,7 +21,7 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.types.DataTypes;
 
 import static org.apache.spark.sql.functions.*;
-import static sofeware.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public final class Transformer {

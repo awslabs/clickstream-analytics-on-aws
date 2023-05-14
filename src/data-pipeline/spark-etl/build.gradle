@@ -67,7 +67,7 @@ tasks.named('test') {
 
 application {
     // Define the main class for the application.
-    mainClass = 'sofeware.aws.solution.clickstream.DataProcessor'
+    mainClass = 'software.aws.solution.clickstream.DataProcessor'
 }
 
 jacocoTestReport {

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package sofeware.aws.solution.clickstream;
+package software.aws.solution.clickstream;
 
 import com.clearspring.analytics.util.Lists;
 import org.apache.spark.sql.Dataset;
@@ -39,9 +39,9 @@ class ETLRunnerTest extends BaseSparkTest {
 
         List<String> transformers = Lists.newArrayList();
 
-        transformers.add("sofeware.aws.solution.clickstream.Transformer");
-        transformers.add("sofeware.aws.solution.clickstream.UAEnrichment");
-        transformers.add("sofeware.aws.solution.clickstream.IPEnrichment");
+        transformers.add("software.aws.solution.clickstream.Transformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
         String database = "fakeDatabase";
         String sourceTable = "fakeSourceTable";
@@ -145,9 +145,9 @@ class ETLRunnerTest extends BaseSparkTest {
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
         List<String> transformers = Lists.newArrayList();
 
-        transformers.add("sofeware.aws.solution.clickstream.Transformer");
-        transformers.add("sofeware.aws.solution.clickstream.UAEnrichment");
-        transformers.add("sofeware.aws.solution.clickstream.IPEnrichment");
+        transformers.add("software.aws.solution.clickstream.Transformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
         String database = "fakeDatabase";
         String sourceTable = "fakeSourceTable";
