@@ -222,20 +222,6 @@ test('Check the parameters into kafaka client are correct', async () => {
   expect(response.Status).toEqual('SUCCESS');
 });
 
-test('Create s3 sink - failed', async () => {
-  event.RequestType = 'Create';
-  https.get = jest.fn().mockImplementation(() => {
-    throw new Error('get err');
-  });
-  let error = false;
-  try {
-    await msk_sink_handler(event as CloudFormationCustomResourceEvent, c);
-  } catch (e: any) {
-    error = true;
-  }
-  expect(error).toBeTruthy();
-});
-
 test('Update s3 sink existing - success', async () => {
   KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
     if (command.command == 'UpdateConnectorCommand') {
@@ -386,4 +372,44 @@ test('Delete s3 sink connector not found - success', async () => {
     error = true;
   }
   expect(error).toBeFalsy();
+});
+
+test('Check connector hardcode configurations are correct', async () => {
+  event.RequestType = 'Create';
+  KafkaClientMock.CreateConnectorCommand = jest.fn((cmd) => {
+    expect(cmd.connectorConfiguration['tasks.max']).toEqual('2');
+    expect(cmd.connectorConfiguration['connector.class']).toEqual('io.confluent.connect.s3.S3SinkConnector');
+    expect(cmd.connectorConfiguration['s3.compression.type']).toEqual('gzip');
+    expect(cmd.connectorConfiguration['storage.class']).toEqual('io.confluent.connect.s3.storage.S3Storage');
+    expect(cmd.connectorConfiguration['format.class']).toEqual('io.confluent.connect.s3.format.json.JsonFormat');
+    expect(cmd.connectorConfiguration['partitioner.class']).toEqual('io.confluent.connect.storage.partitioner.TimeBasedPartitioner');
+    expect(cmd.connectorConfiguration['path.format']).toEqual("'year'=YYYY/'month'=MM/'day'=dd/'hour'=HH");
+    expect(cmd.connectorConfiguration['partition.duration.ms']).toEqual('60000');
+    expect(cmd.connectorConfiguration.timezone).toEqual('UTC');
+    expect(cmd.connectorConfiguration.locale).toEqual('en-US');
+    expect(cmd.connectorConfiguration['key.converter']).toEqual('org.apache.kafka.connect.storage.StringConverter');
+    expect(cmd.connectorConfiguration['value.converter']).toEqual('org.apache.kafka.connect.json.JsonConverter');
+    expect(cmd.connectorConfiguration['value.converter.schemas.enable']).toEqual('false');
+    expect(cmd.connectorConfiguration['schema.compatibility']).toEqual('NONE');
+    return { ...cmd, command: 'CreateConnectorCommand' };
+  });
+  const response = await msk_sink_handler(
+    event as CloudFormationCustomResourceEvent,
+    c,
+  );
+  expect(response.Status).toEqual('SUCCESS');
+});
+
+test('Create s3 sink - failed', async () => {
+  event.RequestType = 'Create';
+  https.get = jest.fn().mockImplementation(() => {
+    throw new Error('get err');
+  });
+  let error = false;
+  try {
+    await msk_sink_handler(event as CloudFormationCustomResourceEvent, c);
+  } catch (e: any) {
+    error = true;
+  }
+  expect(error).toBeTruthy();
 });

@@ -319,6 +319,9 @@ function getConnectorConfiguration(
     'partition.duration.ms': '60000',
     'timezone': 'UTC',
     'locale': 'en-US',
+    'key.converter': 'org.apache.kafka.connect.storage.StringConverter',
+    'value.converter': 'org.apache.kafka.connect.json.JsonConverter',
+    'value.converter.schemas.enable': 'false',
     'schema.compatibility': 'NONE',
   };
 
