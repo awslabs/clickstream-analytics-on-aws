@@ -87,19 +87,15 @@ type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
   logger.info(JSON.stringify(event));
-  const response = {
-    PhysicalResourceId: 'create-msk-s3-connector-custom-resource',
-    StackId: event.StackId,
-    RequestId: event.RequestId,
-    LogicalResourceId: event.LogicalResourceId,
-    Reason: '',
-    Status: 'SUCCESS',
-  };
-
+  const { connectorName } = getResourceName(event);
   try {
     await _handler(event, context);
     logger.info('=== complete ===');
-    return response;
+    return {
+      Data: {
+        connectorName,
+      },
+    };
   } catch (e: any) {
     logger.error(e);
     throw e;
@@ -323,6 +319,7 @@ function getConnectorConfiguration(
     'value.converter': 'org.apache.kafka.connect.json.JsonConverter',
     'value.converter.schemas.enable': 'false',
     'schema.compatibility': 'NONE',
+    'errors.log.enable': 'true',
   };
 
   if (props.customConnectorConfiguration) {

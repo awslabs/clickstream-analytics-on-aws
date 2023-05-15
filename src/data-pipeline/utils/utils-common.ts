@@ -19,6 +19,8 @@ export function getPluginS3Prefix(pipelineS3Prefix:string, stackId: string, proj
   return `${pipelineS3Prefix}${stackId}/${projectId}/${type}/`;
 }
 
-export function getJobInfoKey(config: {pipelineS3Prefix: string; stackId: string; projectId: string}, jobId: string) {
-  return `${config.pipelineS3Prefix}job-info/${config.stackId}/${config.projectId}/job-${jobId}.json`;
+export function getJobInfoKey(config: {pipelineS3Prefix: string; projectId: string}, jobId: string) {
+  // should not include stackId in the file path,
+  // when update root stack, the nest stacks might be delete and recreate, so the nested stack id changed.
+  return `${config.pipelineS3Prefix}job-info/${config.projectId}/job-${jobId}.json`;
 }

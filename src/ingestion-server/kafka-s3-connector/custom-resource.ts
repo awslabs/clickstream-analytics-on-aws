@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { CfnResource, CustomResource, Duration, Resource, Stack } from 'aws-cdk-lib';
+import { CfnResource, CustomResource, Duration, Stack } from 'aws-cdk-lib';
 import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -27,7 +27,8 @@ import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 
 export interface S3SinkConnectorCustomResourceProps {
-  readonly subnetIds: String;
+  readonly projectId: string;
+  readonly subnetIds: string;
   readonly securityGroup: ISecurityGroup;
   readonly dataS3Bucket: IBucket;
   readonly dataS3Prefix: string;
@@ -51,7 +52,7 @@ export interface S3SinkConnectorCustomResourceProps {
 export function createS3SinkConnectorCustomResource(
   scope: Construct,
   props: S3SinkConnectorCustomResourceProps,
-): Resource {
+): CustomResource {
   const fn = createS3SinkConnectorLambda(scope, {
     logS3Bucket: props.logS3Bucket,
     pluginS3Bucket: props.pluginS3Bucket,

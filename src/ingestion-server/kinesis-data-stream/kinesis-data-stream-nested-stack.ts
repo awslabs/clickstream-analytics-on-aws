@@ -28,6 +28,7 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { KinesisDataStreamToS3 } from './kinesis-to-s3';
 import {
+  addCfnNagForCustomResourceProvider,
   addCfnNagForLogRetention,
   addCfnNagToStack,
   ruleRolePolicyWithWildcardResources,
@@ -36,6 +37,7 @@ import {
 import { SolutionInfo } from '../../common/solution-info';
 
 export interface CreateKinesisNestStackProps {
+  projectIdParam: CfnParameter;
   vpcIdParam: CfnParameter;
   privateSubnetIdsParam: CfnParameter;
   kinesisParams: {
@@ -98,6 +100,7 @@ export function createKinesisNestStack(
   };
 
   const p = {
+    projectId: props.projectIdParam.valueAsString,
     vpc,
     subnetSelection,
     dataRetentionHours: props.kinesisParams.kinesisDataRetentionHoursParam.valueAsNumber,
@@ -146,6 +149,7 @@ export function createKinesisNestStack(
 }
 
 interface KinesisDataStreamToS3StackNestStackProps extends NestedStackProps {
+  projectId: string;
   vpc: IVpc;
   subnetSelection: SubnetSelection;
   streamMode: StreamMode;
@@ -208,4 +212,6 @@ function addCfnNag(stack: Stack) {
   ];
   addCfnNagForLogRetention(stack);
   addCfnNagToStack(stack, cfnNagList);
+  addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
+
 }

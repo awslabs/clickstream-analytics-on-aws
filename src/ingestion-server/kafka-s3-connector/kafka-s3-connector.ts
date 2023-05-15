@@ -16,8 +16,10 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { createS3SinkConnectorCustomResource } from './custom-resource';
 import { createS3SinkConnectorRole } from './iam';
+import { createMetricsWidgetForS3Connector } from './metrics-connector';
 
 export interface KafkaS3SinkConnectorProps {
+  readonly projectId: string;
   readonly kafkaBrokers: string;
   readonly kafkaTopics: string;
   readonly dataS3Bucket: IBucket;
@@ -53,7 +55,8 @@ export class KafkaS3SinkConnector extends Construct {
     const dataS3Bucket = props.dataS3Bucket;
     const logS3Bucket = props.logS3Bucket;
 
-    createS3SinkConnectorCustomResource(scope, {
+    const cr = createS3SinkConnectorCustomResource(scope, {
+      projectId: props.projectId,
       subnetIds: props.subnetIds,
       securityGroup,
       dataS3Bucket,
@@ -73,6 +76,15 @@ export class KafkaS3SinkConnector extends Construct {
       rotateIntervalMS: props.rotateIntervalMS,
       customConnectorConfiguration: props.customConnectorConfiguration,
       flushSize: props.flushSize,
+    });
+
+    const connectorName = cr.getAttString('connectorName');
+
+    createMetricsWidgetForS3Connector(scope, {
+      projectId: props.projectId,
+      mskClusterName: props.mskClusterName,
+      connectorName,
+      kafkaTopic: props.kafkaTopics,
     });
   }
 }

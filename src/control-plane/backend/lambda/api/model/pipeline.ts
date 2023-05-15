@@ -705,6 +705,12 @@ export class CPipeline {
       ParameterValue: isEmpty(this.pipeline.network.privateSubnetIds) ?
         this.pipeline.network.publicSubnetIds.join(',') : this.pipeline.network.privateSubnetIds.join(','),
     });
+
+    parameters.push({
+      ParameterKey: 'ProjectId',
+      ParameterValue: this.pipeline.projectId,
+    });
+
     // Domain Information
     if (this.pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
       validatePattern('DomainName', DOMAIN_NAME_PATTERN, this.pipeline.ingestionServer.domain?.domainName);
@@ -902,6 +908,11 @@ export class CPipeline {
 
   private async getKafkaConnectorStackParameters() {
     const parameters: Parameter[] = [];
+
+    parameters.push({
+      ParameterKey: 'ProjectId',
+      ParameterValue: this.pipeline.projectId,
+    });
 
     parameters.push({
       ParameterKey: 'DataS3Bucket',

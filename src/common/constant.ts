@@ -160,3 +160,5 @@ export enum REDSHIFT_MODE {
   SERVERLESS='Serverless',
   NEW_SERVERLESS='New_Serverless',
 }
+
+export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';

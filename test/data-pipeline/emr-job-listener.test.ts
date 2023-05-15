@@ -90,8 +90,8 @@ test('lambda should record SUCCESS job state', async () => {
   };
 
   const keys: string[] = [
-    'prefix1/job-info/test-stack-id/project_id1/job-latest.json',
-    'prefix1/job-info/test-stack-id/project_id1/job-job_run_id1-SUCCESS.json',
+    'prefix1/job-info/project_id1/job-latest.json',
+    'prefix1/job-info/project_id1/job-job_run_id1-SUCCESS.json',
   ];
   const logText = [
     '23/04/04 02:43:02 INFO ETLRunner: [ETLMetric]source dataset count:1',

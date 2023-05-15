@@ -20,8 +20,10 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { createKinesisDataStream } from './private/kinesis';
 import { createKinesisToS3Lambda } from './private/lambda';
+import { createMetricsWidgetForKinesis } from './private/metrics-kinesis';
 
 export interface KinesisDataStreamToS3Props {
+  projectId: string;
   vpc: IVpc;
   subnetSelection: SubnetSelection;
   streamMode: StreamMode;
@@ -64,5 +66,11 @@ export class KinesisDataStreamToS3 extends Construct {
     if (fn.role) {
       props.s3DataBucket.grantPut(fn.role);
     }
+
+    createMetricsWidgetForKinesis(scope, {
+      projectId: props.projectId,
+      streamName: this.kinesisDataSteam.streamName,
+      kinesisToS3FunctionName: fn.functionName,
+    });
   }
 }

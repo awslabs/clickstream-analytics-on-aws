@@ -188,7 +188,7 @@ test('Create s3 sink - success', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Update s3 sink - success', async () => {
@@ -197,7 +197,7 @@ test('Update s3 sink - success', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Delete s3 sink - success', async () => {
@@ -206,7 +206,7 @@ test('Delete s3 sink - success', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Check the parameters into kafaka client are correct', async () => {
@@ -219,7 +219,7 @@ test('Check the parameters into kafaka client are correct', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Update s3 sink existing - success', async () => {
@@ -245,7 +245,7 @@ test('Update s3 sink existing - success', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Update s3 sink  - error', async () => {
@@ -397,7 +397,7 @@ test('Check connector hardcode configurations are correct', async () => {
     event as CloudFormationCustomResourceEvent,
     c,
   );
-  expect(response.Status).toEqual('SUCCESS');
+  expect(response.Data.connectorName).not.toBeNull();
 });
 
 test('Create s3 sink - failed', async () => {

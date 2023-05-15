@@ -505,6 +505,10 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   Action: 'Create',
                   Parameters: [
                     {
+                      ParameterValue: `${MOCK_PROJECT_ID}`,
+                      ParameterKey: 'ProjectId',
+                    },
+                    {
                       ParameterValue: 'EXAMPLE_BUCKET',
                       ParameterKey: 'DataS3Bucket',
                     },
@@ -577,6 +581,10 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                     {
                       ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       ParameterKey: 'PrivateSubnetIds',
+                    },
+                    {
+                      ParameterValue: `${MOCK_PROJECT_ID}`,
+                      ParameterKey: 'ProjectId',
                     },
                     {
                       ParameterValue: 'fake.example.com',

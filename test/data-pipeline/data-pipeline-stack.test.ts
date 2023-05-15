@@ -15,6 +15,7 @@ import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
+import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
 import { genString } from '../utils';
 
@@ -1200,6 +1201,22 @@ test('AWS::Events::Rule for EMR Serverless Job Run State Change', ()=>{
       ],
     },
     State: 'ENABLED',
+  });
+});
+
+
+test('Should set metrics widgets', ()=>{
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    metricsWidgetsProps: {
+      order: WIDGETS_ORDER.dataPipelineETL,
+      projectId: Match.anyValue(),
+      name: Match.anyValue(),
+      description: {
+        markdown: Match.anyValue(),
+      },
+      widgets: Match.anyValue(),
+    },
   });
 });
 

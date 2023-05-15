@@ -15,6 +15,7 @@ import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { TestStack } from './TestTask';
+import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { findConditionByName, findFirstResource, findResources } from '../../utils';
 
 test('Has one autoscaling group', () => {
@@ -823,5 +824,43 @@ test('Disable Global Accelerator feature', () => {
   expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
   expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
 
+});
+
+test('Should set metrics widgets', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+  });
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    metricsWidgetsProps: {
+      order: WIDGETS_ORDER.ingestionServer,
+      projectId: Match.anyValue(),
+      name: Match.anyValue(),
+      description: {
+        markdown: Match.anyValue(),
+      },
+      widgets: Match.anyValue(),
+    },
+  });
+});
+
+
+test('Ingestion server with MskConfig should set metrics widgets for kafkaCluster', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+  });
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    metricsWidgetsProps: {
+      order: WIDGETS_ORDER.kafkaCluster,
+      projectId: Match.anyValue(),
+      name: Match.anyValue(),
+      description: {
+        markdown: Match.anyValue(),
+      },
+      widgets: Match.anyValue(),
+    },
+  });
 });
 

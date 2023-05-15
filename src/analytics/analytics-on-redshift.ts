@@ -29,6 +29,8 @@ import {
   REDSHIFT_ODS_TABLE_NAME,
 } from './private/constant';
 import { LoadODSEventToRedshiftWorkflow } from './private/load-ods-events-workflow';
+import { createMetricsWidgetForRedshiftCluster } from './private/metircs-redshift-cluster';
+import { createMetricsWidgetForRedshiftServerless } from './private/metircs-redshift-serverless';
 import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData } from './private/model';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
@@ -103,11 +105,25 @@ export class RedshiftAnalyticsStack extends NestedStack {
         databaseName: this.redshiftServerlessWorkgroup.databaseName,
       };
       redshiftUserCR = this.redshiftServerlessWorkgroup.redshiftUserCR;
+
+      createMetricsWidgetForRedshiftServerless(this, {
+        projectId: props.projectId,
+        redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
+        redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
+      });
+
+
     } else if (props.existingRedshiftServerlessProps) {
       redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
         props.existingRedshiftServerlessProps.dataAPIRoleArn, {
           mutable: true,
         });
+
+      createMetricsWidgetForRedshiftServerless(this, {
+        projectId: props.projectId,
+        redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
+        redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
+      });
     } else if (props.provisionedRedshiftProps) {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
@@ -174,11 +190,15 @@ export class RedshiftAnalyticsStack extends NestedStack {
           }),
         ],
       });
-
       (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
         actions: ['redshift-data:DescribeStatement', 'redshift-data:GetStatementResult'],
         resources: ['*'],
       }));
+
+      createMetricsWidgetForRedshiftCluster(this, {
+        projectId: props.projectId,
+        redshiftClusterIdentifier: props.provisionedRedshiftProps!.clusterIdentifier,
+      });
     }
 
     const odsTableName = REDSHIFT_ODS_TABLE_NAME;
@@ -235,6 +255,8 @@ function addCfnNag(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftSchemasCustomResource', 'RedshiftDbSchemasCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for RedshiftSchemasCustomResourceProvider', 'RedshiftSchemasCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftAssociateIAMRoleCustomResource', 'RedshiftAssociateIAMRoleCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
+
   addCfnNagToStack(stack, [
     ruleRolePolicyWithWildcardResources(
       'LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource',
@@ -255,7 +277,7 @@ function addCfnNag(stack: Stack) {
         {
           id: 'F39',
           reason:
-          'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
+            'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
         },
         {
           id: 'W12',
@@ -264,4 +286,5 @@ function addCfnNag(stack: Stack) {
       ],
     },
   ]);
+
 }

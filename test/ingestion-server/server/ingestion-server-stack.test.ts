@@ -13,6 +13,7 @@
 import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { IngestionServerStack } from '../../../src/ingestion-server-stack';
+import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { validateSubnetsRule } from '../../rules';
 import { findResourceByCondition, getParameter, getParameterNamesFromParameterObject } from '../../utils';
 
@@ -542,6 +543,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'EnableGlobalAccelerator',
     'DevMode',
     'AuthenticationSecretArn',
+    'ProjectId',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -578,6 +580,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'KafkaTopic',
     'EnableGlobalAccelerator',
     'DevMode',
+    'ProjectId',
   ];
 
   console.log('');
@@ -619,6 +622,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'EnableGlobalAccelerator',
     'DevMode',
     'AuthenticationSecretArn',
+    'ProjectId',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -653,6 +657,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'ScaleOnCpuUtilizationPercent',
     'EnableGlobalAccelerator',
     'DevMode',
+    'ProjectId',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -696,6 +701,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'EnableGlobalAccelerator',
     'DevMode',
     'AuthenticationSecretArn',
+    'ProjectId',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -733,6 +739,7 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'S3BatchTimeout',
     'EnableGlobalAccelerator',
     'DevMode',
+    'ProjectId',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -976,6 +983,7 @@ test('Parameters of onDemand Kinesis nested stack ', () => {
     'PrivateSubnetIds',
     'KinesisBatchSize',
     'KinesisMaxBatchingWindowSeconds',
+    'ProjectId',
   ]);
 });
 
@@ -998,6 +1006,7 @@ test('Parameters of provisioned Kinesis nested stack ', () => {
     'PrivateSubnetIds',
     'KinesisBatchSize',
     'KinesisMaxBatchingWindowSeconds',
+    'ProjectId',
   ]);
 });
 
@@ -1068,7 +1077,7 @@ test('Lambda has POWERTOOLS ENV set', () => {
     [
       kinesisStack.kinesisNestedStacks.onDemandStack,
       kinesisStack.kinesisNestedStacks.provisionedStack,
-    ].forEach ( stack => {
+    ].forEach(stack => {
       const template = Template.fromStack(stack);
       template.hasResourceProperties('AWS::Lambda::Function', {
         Environment: {
@@ -1169,3 +1178,29 @@ test('check AuthenticationSecretArn pattern', () => {
     }
   });
 });
+
+
+test('Each of kinesis nested templates should set metrics widgets', () => {
+  expect(kinesisStack.kinesisNestedStacks).toBeDefined();
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+          metricsWidgetsProps: {
+            order: WIDGETS_ORDER.kinesisDataStream,
+            projectId: Match.anyValue(),
+            name: Match.anyValue(),
+            description: {
+              markdown: Match.anyValue(),
+            },
+            widgets: Match.anyValue(),
+          },
+        });
+      });
+  }
+});
+

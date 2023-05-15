@@ -41,6 +41,8 @@ export class KafkaS3SinkConnectorStack extends Stack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
+    const projectIdParam = Parameters.createProjectIdParameter(this);
+
     const dataS3BucketParam = new CfnParameter(this, 'DataS3Bucket', {
       description: 'S3 bucket to save data',
       type: 'String',
@@ -171,6 +173,7 @@ export class KafkaS3SinkConnectorStack extends Stack {
 
     const kafkaConnectVersion = '2.7.1';
     const p: KafkaS3SinkConnectorProps = {
+      projectId: projectIdParam.valueAsString,
       kafkaBrokers: kafkaBrokersParam.valueAsString,
       kafkaTopics: kafkaTopicParam.valueAsString,
       dataS3Bucket,
@@ -241,6 +244,7 @@ function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for MSKS3SinkConnector', 'SinkConnectorCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
   addCfnNagToStack(stack, cfnNagList);
 }

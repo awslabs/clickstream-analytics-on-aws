@@ -131,6 +131,7 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly logPrefix?: string;
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
+  readonly projectId: string;
 
   // authentication parameters
   readonly enableAuthentication?: string;
@@ -297,6 +298,7 @@ export class IngestionServerNestedStack extends NestedStack {
       enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
       authenticationSecretArn,
+      projectId: props.projectId,
     };
 
     const ingestionServer = new IngestionServer(
@@ -380,6 +382,7 @@ export class IngestionServerStack extends Stack {
         kinesisParams,
         enableGlobalAcceleratorParam,
         devModeParam,
+        projectIdParam,
         enableAuthenticationParam,
         authenticationSecretArnParam,
       },
@@ -389,6 +392,7 @@ export class IngestionServerStack extends Stack {
 
     if (kinesisParams) {
       this.kinesisNestedStacks = createKinesisNestStack(this, {
+        projectIdParam,
         vpcIdParam,
         privateSubnetIdsParam,
         kinesisParams,
@@ -411,6 +415,7 @@ export class IngestionServerStack extends Stack {
       protocol: protocolParam.valueAsString,
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
       devMode: devModeParam.valueAsString,
+      projectId: projectIdParam.valueAsString,
     };
 
     let nestStackProps = { ... nestStackCommonProps };

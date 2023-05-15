@@ -293,6 +293,7 @@ export class TestStack extends Stack {
       kinesisSinkConfig,
       enableGlobalAccelerator,
       devMode,
+      projectId: 'test_proj_001',
     };
 
     const ingestionServer = new IngestionServer(

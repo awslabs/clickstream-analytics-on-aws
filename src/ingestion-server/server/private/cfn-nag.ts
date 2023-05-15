@@ -66,5 +66,6 @@ const cfnNagList = [
 export function addCfnNagToIngestionServer(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'S3SinkConnector', 'S3SinkConnectorCustomResource', '');
+  addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
   addCfnNagToStack(stack, cfnNagList);
 }

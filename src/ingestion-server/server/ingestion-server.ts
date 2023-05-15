@@ -31,6 +31,8 @@ import { createGlobalAccelerator } from './private/aga';
 import { createApplicationLoadBalancer, PROXY_PORT } from './private/alb';
 import { createECSClusterAndService } from './private/ecs-cluster';
 import { grantMskReadWrite } from './private/iam';
+import { createMetricsWidgetForKafka } from './private/metircs-kafka';
+import { createMetricsWidgetForServer } from './private/metircs-server';
 import { createALBSecurityGroup, createECSSecurityGroup } from './private/sg';
 import { LogProps } from '../../common/alb';
 
@@ -116,6 +118,7 @@ export interface IngestionServerProps {
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
   readonly authenticationSecretArn?: string;
+  readonly projectId: string;
 }
 
 export class IngestionServer extends Construct {
@@ -183,6 +186,24 @@ export class IngestionServer extends Construct {
       alb,
       endpointPath,
     });
+
+    createMetricsWidgetForServer(this, {
+      projectId: props.projectId,
+      albFullName: alb.loadBalancerFullName,
+      ecsServiceName: ecsService.serviceName,
+      ecsClusterName: ecsService.cluster.clusterName,
+      autoScalingGroupName: autoScalingGroup.autoScalingGroupName,
+    });
+
+    if (props.kafkaSinkConfig && mskClusterName) {
+      createMetricsWidgetForKafka(this, {
+        projectId: props.projectId,
+        mskClusterName: mskClusterName,
+        kafkaBrokers: props.kafkaSinkConfig.kafkaBrokers,
+        kafkaTopic: props.kafkaSinkConfig.kafkaTopic,
+      });
+    }
+
 
     const acceleratorEnableCondition = new CfnCondition(
       scope,

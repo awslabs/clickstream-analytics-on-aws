@@ -21,6 +21,7 @@ import { DataPipelineStack } from './data-pipeline-stack';
 import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
+import { MetricsStack } from './metrics-stack';
 
 const app = new App();
 
@@ -184,6 +185,16 @@ stackSuppressions([
   },
 ]);
 
+
+stackSuppressions([
+  new MetricsStack(app, 'metrics-stack', {
+    synthesizer: synthesizer(),
+  }),
+], [
+  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
+  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler with wildcard policy' },
+  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
+]);
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {

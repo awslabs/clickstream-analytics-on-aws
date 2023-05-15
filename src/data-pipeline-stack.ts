@@ -209,6 +209,9 @@ function addCfnNag(stack: Stack) {
 
   addCfnNagForCustomResourceProvider(stack, 'CopyAssets', 'CopyAssetsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'InitPartition', 'InitPartitionCustomResourceProvider', '');
+  addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
+
   addCfnNagForBucketDeployment(stack, 'data-pipeline');
+
 }
 

@@ -22,6 +22,7 @@ import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../sr
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
 import { REDSHIFT_MODE, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
+import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
 import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition } from '../../utils';
@@ -2979,7 +2980,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
 
   test('redshiftServerlessStack has two CustomResource', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
-      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 2);
+      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 3);
     }
   });
 
@@ -3246,3 +3247,56 @@ describe('DataAnalyticsRedshiftStack tests', () => {
   });
 
 });
+
+
+describe('Should set metrics widgets', () => {
+  const app = new App();
+  const stack = new DataAnalyticsRedshiftStack(app, 'redshiftserverlessstack', {});
+  const newServerlessTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
+  const existingServerlessTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+  const provisionTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+
+  test('Should set metrics widgets for new redshiftServerless', () => {
+    newServerlessTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+      metricsWidgetsProps: {
+        order: WIDGETS_ORDER.redshiftServerless,
+        projectId: Match.anyValue(),
+        name: Match.anyValue(),
+        description: {
+          markdown: Match.anyValue(),
+        },
+        widgets: Match.anyValue(),
+      },
+    });
+  });
+
+  test('Should set metrics widgets for existing redshiftServerless', () => {
+    existingServerlessTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+      metricsWidgetsProps: {
+        order: WIDGETS_ORDER.redshiftServerless,
+        projectId: Match.anyValue(),
+        name: Match.anyValue(),
+        description: {
+          markdown: Match.anyValue(),
+        },
+        widgets: Match.anyValue(),
+      },
+    });
+  });
+
+  test('Should set metrics widgets for provisioned Redshift Cluster', () => {
+    provisionTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+      metricsWidgetsProps: {
+        order: WIDGETS_ORDER.redshiftProvisionedCluster,
+        projectId: Match.anyValue(),
+        name: Match.anyValue(),
+        description: {
+          markdown: Match.anyValue(),
+        },
+        widgets: Match.anyValue(),
+      },
+    });
+  });
+
+},
+);

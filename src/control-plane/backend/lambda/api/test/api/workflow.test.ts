@@ -129,6 +129,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -268,6 +272,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -399,6 +407,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -493,6 +505,10 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
                       {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',
@@ -598,6 +614,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -697,6 +717,10 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                      {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',
                       },
@@ -795,6 +819,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'DomainName',
@@ -944,6 +972,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -1089,6 +1121,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'DomainName',
@@ -1318,6 +1354,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -1416,6 +1456,10 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
                       {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',
@@ -1704,6 +1748,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'DomainName',
@@ -2034,6 +2082,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -2348,6 +2400,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'DomainName',
@@ -2733,6 +2789,10 @@ describe('Workflow test', () => {
                       {
                         ParameterKey: 'PrivateSubnetIds',
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+                      },
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
                       },
                       {
                         ParameterKey: 'DomainName',
@@ -3125,6 +3185,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -3223,6 +3287,10 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
                       {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',
@@ -3501,6 +3569,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -3590,6 +3662,10 @@ describe('Workflow test', () => {
                     Action: 'Update',
                     Region: 'ap-southeast-1',
                     Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
                       {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',
@@ -3964,6 +4040,10 @@ describe('Workflow test', () => {
                         ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
                       },
                       {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: MOCK_PROJECT_ID,
+                      },
+                      {
                         ParameterKey: 'DomainName',
                         ParameterValue: 'fake.example.com',
                       },
@@ -4053,6 +4133,10 @@ describe('Workflow test', () => {
                     Action: 'Delete',
                     Region: 'ap-southeast-1',
                     Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
                       {
                         ParameterKey: 'DataS3Bucket',
                         ParameterValue: 'EXAMPLE_BUCKET',

@@ -29,11 +29,11 @@ import {
 import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
+import { createMetricsWidget } from './utils/utils-metircs';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
 import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
-
 const EMR_VERSION = 'emr-6.9.0';
 
 export interface DataPipelineProps {
@@ -53,7 +53,7 @@ export interface DataPipelineProps {
   readonly s3PathPluginJars?: string;
   readonly s3PathPluginFiles?: string;
   readonly scheduleExpression: string;
-  readonly outputFormat: 'json'|'parquet';
+  readonly outputFormat: 'json' | 'parquet';
 }
 
 export class DataPipelineConstruct extends Construct {
@@ -137,6 +137,7 @@ export class DataPipelineConstruct extends Construct {
 
     const emrServerlessApp = this.createEmrServerlessApplication();
     const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
+      scope,
       this.props,
     );
     this.createSparkJobSubmitter(
@@ -147,10 +148,18 @@ export class DataPipelineConstruct extends Construct {
     );
 
     this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId, dlQueue);
+
+    const emrApplicationId = emrServerlessApp.attrApplicationId;
+    // Metrics
+    createMetricsWidget(this, {
+      projectId: props.projectId,
+      emrApplicationId,
+    });
   }
 
-  private createGlueResources(props: DataPipelineProps) {
-    const databaseName = props.projectId;
+  private createGlueResources(scope: Construct, props: DataPipelineProps) {
+    const stackId = getShortIdOfStack(Stack.of(scope));
+    const databaseName = Fn.join('_', [props.projectId, stackId]);
     const glueDatabase = this.glueUtil.createDatabase(databaseName);
     const sourceTable = this.glueUtil.createSourceTable(
       glueDatabase,

@@ -105,6 +105,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
+  const projectIdParam = Parameters.createProjectIdParameter(scope);
+
   const logS3BucketParam = Parameters.createS3BucketParameter(scope, 'LogS3Bucket', {
     description: 'S3 bucket name to save log (optional)',
     default: '',
@@ -545,6 +547,13 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
         {
+          Label: { default: 'Project' },
+          Parameters: [
+            projectIdParam.logicalId,
+          ],
+        },
+
+        {
           Label: { default: PARAMETER_GROUP_LABEL_VPC },
           Parameters: [
             netWorkProps.vpcId.logicalId,
@@ -586,6 +595,11 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         },
       ],
       ParameterLabels: {
+
+        [projectIdParam.logicalId]: {
+          default: 'Project Id',
+        },
+
         [netWorkProps.vpcId.logicalId]: {
           default: PARAMETER_LABEL_VPCID,
         },
@@ -679,6 +693,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kinesisParams,
       enableGlobalAcceleratorParam,
       devModeParam,
+      projectIdParam,
       enableAuthenticationParam,
       authenticationSecretArnParam,
     },

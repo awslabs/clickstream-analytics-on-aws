@@ -115,6 +115,8 @@ export class RedshiftServerless extends Construct {
     const stack = Stack.of(this);
     addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for CreateRedshiftServerlessNamespaceCustomResourceProvider', 'CreateRedshiftServerlessNamespaceCustomResourceProvider');
     addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for CreateRedshiftServerlessMappingUserCustomResource', 'CreateRedshiftServerlessMappingUserCustomResourceProvider');
+    addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
+
     addCfnNagToStack(stack, [
       ruleRolePolicyWithWildcardResources(
         'DataAPIRole/DefaultPolicy/Resource',

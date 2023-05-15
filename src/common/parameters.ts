@@ -440,14 +440,22 @@ export class Parameters {
     return securityGroupIdParam;
   }
 
-  public static createProjectAndAppsParameters(scope: IConstruct,
-    projectIdName: string = 'ProjectId',
-    appIdsName: string = 'AppIds') {
+  public static createProjectIdParameter(scope: IConstruct,
+    projectIdName: string = 'ProjectId') {
     const projectIdParam = new CfnParameter(scope, projectIdName, {
       description: 'Project Id',
       allowedPattern: `^${PROJECT_ID_PATTERN}$`,
       type: 'String',
     });
+    return projectIdParam;
+  }
+
+  public static createProjectAndAppsParameters(scope: IConstruct,
+    projectIdName: string = 'ProjectId',
+    appIdsName: string = 'AppIds') {
+
+    const projectIdParam = this.createProjectIdParameter(scope, projectIdName);
+
     const appIdsParam = new CfnParameter(scope, appIdsName, {
       description: 'App Ids, comma delimited list',
       type: 'String',

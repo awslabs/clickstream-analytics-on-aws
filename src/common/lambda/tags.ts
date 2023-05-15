@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Context } from 'aws-lambda';
+import { Construct } from 'constructs';
 import { aws_sdk_client_common_config } from '../sdk-client-config';
 
 const client = new LambdaClient({
@@ -36,4 +39,20 @@ export async function getFunctionTags(context: Context): Promise<Record<string, 
     }
   }
   return tags;
+}
+
+
+export function attachListTagsPolicyForFunction(scope: Construct, id: string, fn: NodejsFunction) {
+  const listTagsPolicy = new Policy(scope, id + 'listTagsPolicy');
+  listTagsPolicy.addStatements(new PolicyStatement({
+    actions: [
+      'lambda:ListTags',
+    ],
+    resources: [
+      fn.functionArn,
+    ],
+  }));
+  if (fn.role) {
+    listTagsPolicy.attachToRole(fn.role);
+  }
 }

@@ -23,7 +23,6 @@ import { aws_sdk_client_common_config } from '../../../common/sdk-client-config'
 import { getJobInfoKey } from '../../utils/utils-common';
 
 const emrApplicationId = process.env.EMR_SERVERLESS_APPLICATION_ID!;
-const stackId = process.env.STACK_ID!;
 const projectId = process.env.PROJECT_ID!;
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
@@ -49,13 +48,11 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
 
   const jobStartStateFile = getJobInfoKey({
     pipelineS3Prefix,
-    stackId,
     projectId,
   }, event.detail.jobRunId);
 
   const jobFinishStateFile = getJobInfoKey({
     pipelineS3Prefix,
-    stackId,
     projectId,
   }, `${event.detail.jobRunId}-${jobState}`);
 
@@ -160,14 +157,12 @@ async function sendMetrics(event: any) {
 
   const Timestamp = new Date();
   const Namespace = METRIC_NAMESPACE_DATAPIPELINE;
-  const Dimensions = [{
-    Name: 'projectId',
-    Value: `${projectId}`,
-  },
-  {
-    Name: 'emrApplicationId',
-    Value: `${emrApplicationId}`,
-  }];
+  const Dimensions = [
+    {
+      Name: 'ApplicationId',
+      Value: `${emrApplicationId}`,
+    },
+  ];
 
   const metricInput = {
     Namespace,

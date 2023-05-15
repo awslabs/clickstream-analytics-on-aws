@@ -14,6 +14,7 @@
 import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { KafkaS3SinkConnectorStack } from './../../../src/kafka-s3-connector-stack';
+import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 
 function findFirstResourceByKeyPrefix(template: Template, type: string, keyPrefix: string) {
   const allResources = template.toJSON().Resources;
@@ -400,3 +401,19 @@ test('Lambda has POWERTOOLS ENV set', () => {
     },
   });
 });
+
+
+test('Should set metrics widgets', () => {
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    metricsWidgetsProps: {
+      order: WIDGETS_ORDER.kafkaS3Connector,
+      projectId: Match.anyValue(),
+      name: Match.anyValue(),
+      description: {
+        markdown: Match.anyValue(),
+      },
+      widgets: Match.anyValue(),
+    },
+  });
+});
+
