@@ -91,6 +91,16 @@ describe('Plugin test', () => {
           value: {},
         },
         {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'jarFile',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'mainFunction',
+        },
+        {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
@@ -127,6 +137,38 @@ describe('Plugin test', () => {
       ],
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+  });
+  it('Create plugin without jar or main function', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(PutCommand).resolvesOnce({});
+    const res = await request(app)
+      .post('/api/plugin')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        name: 'Plugin-01',
+        description: 'Description of Plugin-01',
+        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        pluginType: 'Transform',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'jarFile',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'mainFunction',
+        },
+      ],
+    });
+    expect(res.body.success).toEqual(false);
   });
   it('Get plugin by ID', async () => {
     ddbMock.on(GetCommand).resolves({

@@ -40,6 +40,8 @@ describe('Request Id test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'Plugin-01',
+        jarFile: 's3://xx/a.jar',
+        mainFunction: 'a.b.c',
       });
     expect(res.statusCode).toBe(201);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
@@ -50,6 +52,8 @@ describe('Request Id test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'Plugin-01',
+        jarFile: 's3://xx/a.jar',
+        mainFunction: 'a.b.c',
       });
     expect(res.statusCode).toBe(400);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
@@ -72,6 +76,8 @@ describe('Request Id test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'Plugin-01',
+        jarFile: 's3://xx/a.jar',
+        mainFunction: 'a.b.c',
       });
     expect(res.statusCode).toBe(201);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
@@ -86,6 +92,8 @@ describe('Request Id test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'Plugin-01',
+        jarFile: 's3://xx/a.jar',
+        mainFunction: 'a.b.c',
       });
     expect(res.statusCode).toBe(500);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
@@ -97,6 +105,8 @@ describe('Request Id test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'Plugin-01',
+        jarFile: 's3://xx/a.jar',
+        mainFunction: 'a.b.c',
       });
     expect(res.statusCode).toBe(201);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);

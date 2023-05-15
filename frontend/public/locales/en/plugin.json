@@ -15,7 +15,8 @@
   "valid": {
     "nameEmpty": "Please input plugin name",
     "typeEmpty": "Please select plugin type",
-    "mainFuncEmpty": "Plase input main function class"
+    "mainFuncEmpty": "Plase input main function class",
+    "uploadJarEmpty": "Plase upload custom JAR file"
   },
   "create": {
     "createPlugin": "Create Plugin",

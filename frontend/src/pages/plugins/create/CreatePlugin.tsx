@@ -52,6 +52,7 @@ function Content() {
   const [dependenciesFiles, setDependenciesFiles] = useState<File[]>([]);
   const [nameEmptypError, setNameEmptypError] = useState(false);
   const [typeEmptyError, setTypeEmptyError] = useState(false);
+  const [uploadJarEmptyError, setUploadJarEmptyError] = useState(false);
   const [mainFuncEmptyError, setMainFuncEmptyError] = useState(false);
   const [uploadJarProgress, setUploadJarProgress] = useState(0);
   const [uploadDependenciesProgress, setUploadDependenciesProgress] =
@@ -120,6 +121,10 @@ function Content() {
     }
     if (!curPlugin.pluginType.trim()) {
       setTypeEmptyError(true);
+      return false;
+    }
+    if (!curPlugin.jarFile.trim()) {
+      setUploadJarEmptyError(true);
       return false;
     }
     if (!curPlugin.mainFunction.trim()) {
@@ -406,10 +411,12 @@ function Content() {
               <FormField
                 label={t('plugin:create.uploadJar')}
                 description={t('plugin:create.uploadJarDesc')}
+                errorText={uploadJarEmptyError ? t('plugin:valid.uploadJarEmpty') : ''}
               >
                 <div>
                   <FileUpload
                     onChange={({ detail }) => {
+                      setUploadJarEmptyError(false);
                       setJarFiles(detail.value);
                     }}
                     value={jarFiles}

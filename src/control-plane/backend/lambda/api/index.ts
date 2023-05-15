@@ -532,6 +532,8 @@ app.post(
   '/api/plugin',
   validate([
     body().custom(isValidEmpty),
+    body('jarFile').custom(isValidEmpty),
+    body('mainFunction').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
