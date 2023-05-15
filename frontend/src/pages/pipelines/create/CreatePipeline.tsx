@@ -483,6 +483,11 @@ const Content: React.FC = () => {
         null;
     }
 
+    // set report empty when not enable report
+    if (!createPipelineObj.enableReporting) {
+      createPipelineObj.report = null;
+    }
+
     // remove temporary properties
     delete createPipelineObj.selectedRegion;
     delete createPipelineObj.selectedVPC;
