@@ -12,13 +12,12 @@
  */
 
 
-import { Duration, Stack } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
-import { getShortIdOfStack } from '../../../common/stack';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../../metrics/settings';
-import { setCfnNagForAlarms } from '../../../metrics/util';
+import { setCfnNagForAlarms, getAlarmName } from '../../../metrics/util';
 
 export function createMetricsWidgetForServer(scope: Construct, props: {
   projectId: string;
@@ -28,7 +27,6 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
   ecsClusterName: string;
 }) {
 
-  const stackId = getShortIdOfStack(Stack.of(scope));
 
   const albNamespace = 'AWS/ApplicationELB';
   const albDimension = [
@@ -66,7 +64,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
       },
     }),
     alarmDescription: 'ECS has PendingTaskCount >= 1',
-    alarmName: `ECS Pending Task Count(${props.projectId}_${stackId})`,
+    alarmName: getAlarmName(scope, props.projectId, 'ECS Pending Task Count'),
   });
 
   const ecsCpuUtilizedAlarm = new Alarm(scope, 'ecsCpuUtilizedAlarm', {
@@ -84,7 +82,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
       },
     }),
     alarmDescription: 'ECS Cpu Utilized more than 85%',
-    alarmName: `ECS CPU Utilized(${props.projectId}_${stackId})`,
+    alarmName: getAlarmName(scope, props.projectId, 'ECS CPU Utilized'),
   });
 
   setCfnNagForAlarms([ecsPendingTaskCountAlarm, ecsCpuUtilizedAlarm]);

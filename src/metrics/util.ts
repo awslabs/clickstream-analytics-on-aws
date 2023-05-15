@@ -12,12 +12,14 @@
  */
 
 import { GetParametersByPathCommand, Parameter, SSMClient } from '@aws-sdk/client-ssm';
-import { CfnResource } from 'aws-cdk-lib';
+import { CfnResource, Stack } from 'aws-cdk-lib';
 import { Alarm } from 'aws-cdk-lib/aws-cloudwatch';
+import { Construct } from 'constructs';
 import { WIDGETS_HEIGHT } from './settings';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { METRICS_PARAMETER_PATH_PREFIX } from '../common/constant';
+import { ALARM_NAME_PREFIX, METRICS_PARAMETER_PATH_PREFIX } from '../common/constant';
 import { logger } from '../common/powertools';
+import { getShortIdOfStack } from '../common/stack';
 
 export function getParameterStoreName(projectId: string, stackId?: string, name?: string): string {
   if (name && stackId) {
@@ -76,4 +78,9 @@ export function setCfnNagForAlarms(alarms: Alarm[]) {
       },
     ]);
   });
+}
+
+export function getAlarmName(scope: Construct, projectId: string, alarm: string) {
+  const stackId = getShortIdOfStack(Stack.of(scope));
+  return `${ALARM_NAME_PREFIX}|${projectId} ${alarm} ${stackId}`;
 }

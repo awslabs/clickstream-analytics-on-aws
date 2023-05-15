@@ -163,3 +163,4 @@ export enum REDSHIFT_MODE {
 }
 
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
+export const ALARM_NAME_PREFIX = 'Clickstream';

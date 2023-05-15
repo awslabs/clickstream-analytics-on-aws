@@ -12,20 +12,18 @@
  */
 
 
-import { Duration, Stack } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
 import { METRIC_NAMESPACE_DATAPIPELINE } from '../../common/constant';
-import { getShortIdOfStack } from '../../common/stack';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
-import { setCfnNagForAlarms } from '../../metrics/util';
+import { setCfnNagForAlarms, getAlarmName } from '../../metrics/util';
 
 export function createMetricsWidget(scope: Construct, props: {
   projectId: string;
   emrApplicationId: string;
 }) {
-  const stackId = getShortIdOfStack(Stack.of(scope));
   const dataPipelineNamespace = METRIC_NAMESPACE_DATAPIPELINE;
   const emrServerlessNamespace = 'AWS/EMRServerless';
   const appIdDimension = [
@@ -49,7 +47,7 @@ export function createMetricsWidget(scope: Construct, props: {
       },
     }),
     alarmDescription: 'Has failed jobs in last hour',
-    alarmName: `ETL Job Failed(${props.projectId}_${stackId})`,
+    alarmName: getAlarmName(scope, props.projectId, 'ETL Job Failed'),
   });
 
 
@@ -68,7 +66,7 @@ export function createMetricsWidget(scope: Construct, props: {
       },
     }),
     alarmDescription: 'No data loaded in past 24 hours',
-    alarmName: `No Data Loaded(${props.projectId}_${stackId})`,
+    alarmName: getAlarmName(scope, props.projectId, 'No Data Loaded'),
   });
 
   setCfnNagForAlarms([failedJobAlarm, noDataAlarm]);
