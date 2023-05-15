@@ -529,6 +529,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               pluginType="Transform"
               selectionType="single"
               pluginSelectedItems={pipelineInfo.selectedTransformPlugins}
+              selectBuitInPlugins
               changePluginSeletedItems={(items) => {
                 changeTransformPlugins(items);
               }}
@@ -549,6 +550,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             pluginType="Enrich"
             selectionType="multi"
             pluginSelectedItems={pipelineInfo.selectedEnrichPlugins}
+            selectBuitInPlugins
             changePluginSeletedItems={(items) => {
               changeEnrichPlugins(items);
             }}

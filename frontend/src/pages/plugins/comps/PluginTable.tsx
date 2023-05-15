@@ -36,6 +36,7 @@ interface PluginTableProps {
   title: React.ReactNode;
   desc: React.ReactNode;
   pluginSelectedItems?: IPlugin[];
+  selectBuitInPlugins?: boolean;
   changePluginSeletedItems?: (items: IPlugin[]) => void;
 }
 
@@ -48,6 +49,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     title,
     desc,
     pluginSelectedItems,
+    selectBuitInPlugins,
     changePluginSeletedItems,
   } = props;
   const { t } = useTranslation();
@@ -82,6 +84,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
       if (success) {
         setPluginList(data.items);
         setTotalCount(data.totalCount);
+        if (selectBuitInPlugins) {
+          setSelectedItems(data.items.filter(item => item.builtIn === true));
+        }
         setLoadingData(false);
       }
     } catch (error) {
