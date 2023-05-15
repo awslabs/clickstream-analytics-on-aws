@@ -130,7 +130,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return `${pipelineInfo.eventFreshValue} ${pipelineInfo.selectedEventFreshUnit.label}`;
       } else {
         if (pipelineInfo.etl.dataFreshnessInHour) {
-          const hours = parseInt(pipelineInfo.etl.dataFreshnessInHour);
+          const hours = pipelineInfo.etl.dataFreshnessInHour;
           if (hours >= 24 && hours % 24 === 0) {
             const days = hours / 24;
             return `${days} Days`;

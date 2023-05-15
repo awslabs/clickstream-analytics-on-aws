@@ -20,7 +20,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { dictionaryMock, MOCK_BUILDIN_PLUGIN_ID, MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
+import { dictionaryMock, MOCK_BUILT_IN_PLUGIN_ID, MOCK_PLUGIN_ID, MOCK_TOKEN, pluginExistedMock, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -249,15 +249,15 @@ describe('Plugin test', () => {
   it('Get build-in plugin by ID', async () => {
     dictionaryMock(ddbMock);
     let res = await request(app)
-      .get(`/api/plugin/${MOCK_BUILDIN_PLUGIN_ID}`);
+      .get(`/api/plugin/${MOCK_BUILT_IN_PLUGIN_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
       data: {
-        id: 'BUILDIN-1',
-        type: 'PLUGIN#BUILDIN-1',
+        id: 'BUILT-IN-1',
+        type: 'PLUGIN#BUILT-IN-1',
         prefix: 'PLUGIN',
         name: 'Transformer',
         description: 'Description of Transformer',
@@ -290,7 +290,7 @@ describe('Plugin test', () => {
   it('Get non-existent build-in plugin by ID', async () => {
     dictionaryMock(ddbMock);
     let res = await request(app)
-      .get(`/api/plugin/${MOCK_BUILDIN_PLUGIN_ID}1`);
+      .get(`/api/plugin/${MOCK_BUILT_IN_PLUGIN_ID}1`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
@@ -319,8 +319,8 @@ describe('Plugin test', () => {
       data: {
         items: [
           {
-            id: 'BUILDIN-1',
-            type: 'PLUGIN#BUILDIN-1',
+            id: 'BUILT-IN-1',
+            type: 'PLUGIN#BUILT-IN-1',
             prefix: 'PLUGIN',
             name: 'Transformer',
             description: 'Description of Transformer',
@@ -336,8 +336,8 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'BUILDIN-2',
-            type: 'PLUGIN#BUILDIN-2',
+            id: 'BUILT-IN-2',
+            type: 'PLUGIN#BUILT-IN-2',
             prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: 'Description of UAEnrichment',
@@ -353,8 +353,8 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'BUILDIN-3',
-            type: 'PLUGIN#BUILDIN-3',
+            id: 'BUILT-IN-3',
+            type: 'PLUGIN#BUILT-IN-3',
             prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: 'Description of IPEnrichment',
@@ -413,8 +413,8 @@ describe('Plugin test', () => {
       data: {
         items: [
           {
-            id: 'BUILDIN-3',
-            type: 'PLUGIN#BUILDIN-3',
+            id: 'BUILT-IN-3',
+            type: 'PLUGIN#BUILT-IN-3',
             prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: 'Description of IPEnrichment',
@@ -453,8 +453,8 @@ describe('Plugin test', () => {
       data: {
         items: [
           {
-            id: 'BUILDIN-2',
-            type: 'PLUGIN#BUILDIN-2',
+            id: 'BUILT-IN-2',
+            type: 'PLUGIN#BUILT-IN-2',
             prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: 'Description of UAEnrichment',
@@ -470,8 +470,8 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'BUILDIN-3',
-            type: 'PLUGIN#BUILDIN-3',
+            id: 'BUILT-IN-3',
+            type: 'PLUGIN#BUILT-IN-3',
             prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: 'Description of IPEnrichment',
@@ -512,8 +512,8 @@ describe('Plugin test', () => {
       data: {
         items: [
           {
-            id: 'BUILDIN-1',
-            type: 'PLUGIN#BUILDIN-1',
+            id: 'BUILT-IN-1',
+            type: 'PLUGIN#BUILT-IN-1',
             prefix: 'PLUGIN',
             name: 'Transformer',
             description: 'Description of Transformer',
@@ -529,8 +529,8 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'BUILDIN-2',
-            type: 'PLUGIN#BUILDIN-2',
+            id: 'BUILT-IN-2',
+            type: 'PLUGIN#BUILT-IN-2',
             prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: 'Description of UAEnrichment',
@@ -546,8 +546,8 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'BUILDIN-3',
-            type: 'PLUGIN#BUILDIN-3',
+            id: 'BUILT-IN-3',
+            type: 'PLUGIN#BUILT-IN-3',
             prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: 'Description of IPEnrichment',

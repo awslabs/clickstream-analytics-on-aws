@@ -19,7 +19,7 @@ import {
   KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN,
+  VPC_ID_PATTERN,
   POSITIVE_INTEGERS,
   MUTIL_EMAIL_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
@@ -100,13 +100,13 @@ describe('Utils test', () => {
       'vpc-0d2619f249ded4511',
       'vpc-012345678910abcde',
     ];
-    validValues.map(v => expect(validatePattern('VpcId', VPC_ID_PARRERN, v)).toEqual(true));
+    validValues.map(v => expect(validatePattern('VpcId', VPC_ID_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'vp-0d2619f249ded45111',
       'vpc0d2619f249ded45111',
       'vpc-0123456789abcdefg',
     ];
-    invalidValues.map(v => expect(() => validatePattern('VpcId', VPC_ID_PARRERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.map(v => expect(() => validatePattern('VpcId', VPC_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Subnets Params valid', async () => {

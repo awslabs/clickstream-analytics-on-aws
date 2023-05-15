@@ -114,7 +114,7 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      s3BatchMaxBytes: 500,
+      s3BatchMaxBytes: 1000000,
       s3BatchTimeout: 60,
     },
     loadBalancer: {
@@ -230,11 +230,11 @@ export const S3_ETL_PIPELINE: IPipeline = {
       prefix: '',
     },
     transformPlugin: `${MOCK_PLUGIN_ID}_1`,
-    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
 };
 
-export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
+export const MSK_ETL_EXISTING_SERVERLESS_PIPELINE: IPipeline = {
   ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   etl: {
     dataFreshnessInHour: 7,
@@ -252,7 +252,7 @@ export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
       prefix: '',
     },
     transformPlugin: undefined,
-    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {
     ods: {
@@ -285,7 +285,7 @@ export const MSK_ETL_REDSHIFT_PIPELINE: IPipeline = {
   },
 };
 
-export const KINESIS_ETL_REDSHIFT_PIPELINE: IPipeline = {
+export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE: IPipeline = {
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   etl: {
     dataFreshnessInHour: 7,
@@ -302,8 +302,8 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILDIN_1',
-    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
+    transformPlugin: 'BUILT-IN_1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {
     ods: {
@@ -364,8 +364,8 @@ export const KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILDIN_1',
-    enrichPlugin: ['BUILDIN-2', 'BUILDIN-3', `${MOCK_PLUGIN_ID}_2`],
+    transformPlugin: 'BUILT-IN_1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {
     ods: {
@@ -436,7 +436,7 @@ export const KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE: 
 };
 
 export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
-  ...KINESIS_ETL_REDSHIFT_PIPELINE,
+  ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
   report: {
     quickSight: {
       accountName: 'clickstream-acc-xxx',
@@ -476,6 +476,13 @@ const BASE_STATUS = {
       stackStatusReason: '',
       url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
     },
+    {
+      stackName: `Clickstream-Report-${MOCK_PIPELINE_ID}`,
+      stackType: PipelineStackType.REPORT,
+      stackStatus: StackStatus.CREATE_COMPLETE,
+      stackStatusReason: '',
+      url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+    },
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -483,8 +490,8 @@ const BASE_STATUS = {
   },
 };
 
-export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_ETL_REDSHIFT_PIPELINE,
+export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
+  ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
   status: {
     ...BASE_STATUS,
   },
@@ -503,56 +510,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
-                  Parameters: [
-                    {
-                      ParameterValue: `${MOCK_PROJECT_ID}`,
-                      ParameterKey: 'ProjectId',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'DataS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/buffer/`,
-                      ParameterKey: 'DataS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'LogS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/logs/kafka-connector/`,
-                      ParameterKey: 'LogS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'PluginS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/runtime/ingestion/kafka-connector/plugins/`,
-                      ParameterKey: 'PluginS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
-                      ParameterKey: 'SubnetIds',
-                    },
-                    {
-                      ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
-                      ParameterKey: 'KafkaBrokers',
-                    },
-                    {
-                      ParameterValue: 't1',
-                      ParameterKey: 'KafkaTopic',
-                    },
-                    {
-                      ParameterValue: 'test',
-                      ParameterKey: 'MskClusterName',
-                    },
-                    {
-                      ParameterValue: 'sg-0000000000002',
-                      ParameterKey: 'SecurityGroupId',
-                    },
-                  ],
+                  Parameters: [],
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
@@ -569,96 +527,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   Action: 'Create',
-                  Parameters: [
-                    {
-                      ParameterValue: 'vpc-00000000000000001',
-                      ParameterKey: 'VpcId',
-                    },
-                    {
-                      ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
-                      ParameterKey: 'PublicSubnetIds',
-                    },
-                    {
-                      ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
-                      ParameterKey: 'PrivateSubnetIds',
-                    },
-                    {
-                      ParameterValue: `${MOCK_PROJECT_ID}`,
-                      ParameterKey: 'ProjectId',
-                    },
-                    {
-                      ParameterValue: 'fake.example.com',
-                      ParameterKey: 'DomainName',
-                    },
-                    {
-                      ParameterValue: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
-                      ParameterKey: 'ACMCertificateArn',
-                    },
-                    {
-                      ParameterValue: 'HTTPS',
-                      ParameterKey: 'Protocol',
-                    },
-                    {
-                      ParameterValue: '/collect',
-                      ParameterKey: 'ServerEndpointPath',
-                    },
-                    {
-                      ParameterValue: '',
-                      ParameterKey: 'ServerCorsOrigin',
-                    },
-                    {
-                      ParameterValue: '4',
-                      ParameterKey: 'ServerMax',
-                    },
-                    {
-                      ParameterValue: '2',
-                      ParameterKey: 'ServerMin',
-                    },
-                    {
-                      ParameterValue: '50',
-                      ParameterKey: 'ScaleOnCpuUtilizationPercent',
-                    },
-                    {
-                      ParameterValue: '1',
-                      ParameterKey: 'WarmPoolSize',
-                    },
-                    {
-                      ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
-                      ParameterKey: 'NotificationsTopicArn',
-                    },
-                    {
-                      ParameterValue: 'Yes',
-                      ParameterKey: 'EnableGlobalAccelerator',
-                    },
-                    {
-                      ParameterValue: 'Yes',
-                      ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'LogS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/logs/alb/`,
-                      ParameterKey: 'LogS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'test',
-                      ParameterKey: 'MskClusterName',
-                    },
-                    {
-                      ParameterValue: 'sg-0000000000002',
-                      ParameterKey: 'MskSecurityGroupId',
-                    },
-                    {
-                      ParameterValue: 't1',
-                      ParameterKey: 'KafkaTopic',
-                    },
-                    {
-                      ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
-                      ParameterKey: 'KafkaBrokers',
-                    },
-                  ],
+                  Parameters: [],
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
@@ -680,64 +549,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
-                  Parameters: [
-                    {
-                      ParameterValue: 'vpc-00000000000000001',
-                      ParameterKey: 'VpcId',
-                    },
-                    {
-                      ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
-                      ParameterKey: 'PrivateSubnetIds',
-                    },
-                    {
-                      ParameterValue: `${MOCK_PROJECT_ID}`,
-                      ParameterKey: 'ProjectId',
-                    },
-                    {
-                      ParameterValue: '',
-                      ParameterKey: 'AppIds',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'SourceS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/buffer/t1/`,
-                      ParameterKey: 'SourceS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'SinkS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
-                      ParameterKey: 'SinkS3Prefix',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'PipelineS3Bucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/pipeline-temp/`,
-                      ParameterKey: 'PipelineS3Prefix',
-                    },
-                    {
-                      ParameterValue: '72',
-                      ParameterKey: 'DataFreshnessInHour',
-                    },
-                    {
-                      ParameterValue: 'rate(1 hour)',
-                      ParameterKey: 'ScheduleExpression',
-                    },
-                    {
-                      ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
-                      ParameterKey: 'TransformerAndEnrichClassNames',
-                    },
-                    {
-                      ParameterValue: 'parquet',
-                      ParameterKey: 'OutputFormat',
-                    },
-                  ],
+                  Parameters: [],
                   StackName: `Clickstream-ETL-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
@@ -752,76 +564,15 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
         },
         {
           States: {
-            DataAnalytics: {
+            Report: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
-                  Parameters: [
-                    {
-                      ParameterValue: 'vpc-00000000000000001',
-                      ParameterKey: 'VpcId',
-                    },
-                    {
-                      ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
-                      ParameterKey: 'PrivateSubnetIds',
-                    },
-                    {
-                      ParameterValue: `${MOCK_PROJECT_ID}`,
-                      ParameterKey: 'ProjectId',
-                    },
-                    {
-                      ParameterValue: '',
-                      ParameterKey: 'AppIds',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'ODSEventBucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
-                      ParameterKey: 'ODSEventPrefix',
-                    },
-                    {
-                      ParameterValue: '.snappy.parquet',
-                      ParameterKey: 'ODSEventFileSuffix',
-                    },
-                    {
-                      ParameterValue: 'EXAMPLE_BUCKET',
-                      ParameterKey: 'LoadWorkflowBucket',
-                    },
-                    {
-                      ParameterValue: `clickstream/${MOCK_PROJECT_ID}/data/ods/`,
-                      ParameterKey: 'LoadWorkflowBucketPrefix',
-                    },
-                    {
-                      ParameterValue: '50',
-                      ParameterKey: 'MaxFilesLimit',
-                    },
-                    {
-                      ParameterValue: '100',
-                      ParameterKey: 'ProcessingFilesLimit',
-                    },
-                    {
-                      ParameterValue: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
-                      ParameterKey: 'RedshiftServerlessNamespaceId',
-                    },
-                    {
-                      ParameterValue: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
-                      ParameterKey: 'RedshiftServerlessWorkgroupId',
-                    },
-                    {
-                      ParameterValue: 'test',
-                      ParameterKey: 'RedshiftServerlessWorkgroupName',
-                    },
-                    {
-                      ParameterValue: 'arn:aws:iam::111122223333:role/MyRedshiftServerlessDataRole',
-                      ParameterKey: 'RedshiftServerlessIAMRole',
-                    },
-                  ],
-                  StackName: `Clickstream-DataAnalytics-${MOCK_PIPELINE_ID}`,
+                  Parameters: [],
+                  StackName: `Clickstream-Report-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -829,6 +580,23 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
                 },
               },
               End: true,
+            },
+            DataAnalytics: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-DataAnalytics-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              Next: 'Report',
             },
           },
           StartAt: 'DataAnalytics',
@@ -839,7 +607,7 @@ export const KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
@@ -851,6 +619,7 @@ export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
       BASE_STATUS.stackDetails[1],
       BASE_STATUS.stackDetails[2],
       BASE_STATUS.stackDetails[3],
+      BASE_STATUS.stackDetails[4],
     ],
     executionDetail: {
       name: MOCK_EXECUTION_ID,
@@ -992,11 +761,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
       BASE_STATUS.stackDetails[2],
       BASE_STATUS.stackDetails[3],
       {
-        stackName: `Clickstream-Report-${MOCK_PIPELINE_ID}`,
-        stackType: PipelineStackType.REPORT,
+        ...BASE_STATUS.stackDetails[4],
         stackStatus: undefined,
-        stackStatusReason: '',
-        url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
       },
     ],
     executionDetail: {

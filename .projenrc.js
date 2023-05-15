@@ -85,6 +85,7 @@ const depsForApiProject = [
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
   'node-fetch@^2.6.3',
+  'ts-json-object@^0.4.0',
   ...awsSDKDepsForApiProject,
 ];
 
@@ -147,6 +148,16 @@ const project = new awscdk.AwsCdkTypeScriptApp({
       setupFiles: ['./test/jestEnv.js'],
     },
   },
+  tsconfig: {
+    compilerOptions: {
+      emitDecoratorMetadata: true,
+    },
+  },
+  tsconfigDev: {
+    compilerOptions: {
+      emitDecoratorMetadata: true,
+    },
+  },
 });
 
 project.eslint?.addRules({
@@ -197,6 +208,16 @@ const apiProject = new typescript.TypeScriptProject({
   testdir: 'test/',
   eslint: false,
   minNodeVersion: '16.18.0',
+  tsconfig: {
+    compilerOptions: {
+      emitDecoratorMetadata: true,
+    },
+  },
+  tsconfigDev: {
+    compilerOptions: {
+      emitDecoratorMetadata: true,
+    },
+  },
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');

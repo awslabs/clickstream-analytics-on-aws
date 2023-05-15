@@ -48,10 +48,10 @@ declare global {
     };
     ingestionServer: {
       size: {
-        serverMin: string;
-        serverMax: string;
-        warmPoolSize: string;
-        scaleOnCpuUtilizationPercent: string;
+        serverMin: number;
+        serverMax: number;
+        warmPoolSize: number;
+        scaleOnCpuUtilizationPercent: number;
       };
       domain: {
         domainName: string;
@@ -72,16 +72,16 @@ declare global {
       };
       sinkType: string;
       sinkBatch: {
-        size: string;
-        intervalSeconds: string;
+        size: number;
+        intervalSeconds: number;
       };
       sinkS3: {
         sinkBucket: {
           name: string;
           prefix: string;
         };
-        s3BufferSize: string;
-        s3BufferInterval: string;
+        s3BufferSize: number;
+        s3BufferInterval: number;
       };
       sinkKafka: {
         brokers: string[];
@@ -97,7 +97,7 @@ declare global {
       };
       sinkKinesis: {
         kinesisStreamMode: string;
-        kinesisShardCount: string;
+        kinesisShardCount: number;
         sinkBucket: {
           name: string;
           prefix: string;
@@ -105,7 +105,7 @@ declare global {
       };
     };
     etl: {
-      dataFreshnessInHour: string;
+      dataFreshnessInHour: number;
       scheduleExpression: string;
       sourceS3Bucket: {
         name: string;
@@ -136,7 +136,7 @@ declare global {
             subnetIds: string[];
             securityGroups: string[];
           };
-          baseCapacity: string;
+          baseCapacity: number;
         };
       };
       loadWorkflow: {

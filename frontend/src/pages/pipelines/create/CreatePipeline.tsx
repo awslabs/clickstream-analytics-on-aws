@@ -113,10 +113,10 @@ const Content: React.FC = () => {
     },
     ingestionServer: {
       size: {
-        serverMin: '2',
-        serverMax: '4',
-        warmPoolSize: '1',
-        scaleOnCpuUtilizationPercent: '50',
+        serverMin: 2,
+        serverMax: 4,
+        warmPoolSize: 1,
+        scaleOnCpuUtilizationPercent: 50,
       },
       domain: {
         domainName: '',
@@ -137,16 +137,16 @@ const Content: React.FC = () => {
       },
       sinkType: SinkType.MSK,
       sinkBatch: {
-        size: '50000',
-        intervalSeconds: '3000',
+        size: 50000,
+        intervalSeconds: 3000,
       },
       sinkS3: {
         sinkBucket: {
           name: '',
           prefix: '',
         },
-        s3BufferSize: '10',
-        s3BufferInterval: '300',
+        s3BufferSize: 10,
+        s3BufferInterval: 300,
       },
       sinkKafka: {
         brokers: [],
@@ -162,7 +162,7 @@ const Content: React.FC = () => {
       },
       sinkKinesis: {
         kinesisStreamMode: '',
-        kinesisShardCount: '2',
+        kinesisShardCount: 2,
         sinkBucket: {
           name: '',
           prefix: '',
@@ -170,7 +170,7 @@ const Content: React.FC = () => {
       },
     },
     etl: {
-      dataFreshnessInHour: '',
+      dataFreshnessInHour: 72,
       scheduleExpression: '',
       sourceS3Bucket: {
         name: '',
@@ -201,7 +201,7 @@ const Content: React.FC = () => {
             subnetIds: [],
             securityGroups: [],
           },
-          baseCapacity: '',
+          baseCapacity: 16,
         },
       },
       loadWorkflow: {
@@ -341,10 +341,8 @@ const Content: React.FC = () => {
       return false;
     }
 
-    const sinkIntervalNum = parseInt(
-      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds
-    );
-    const sinkBatchSize = parseInt(pipelineInfo.ingestionServer.sinkBatch.size);
+    const sinkIntervalNum = pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
+    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch.size;
     if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
       // check kds batch interval
       if (
@@ -755,7 +753,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       size: {
                         ...prev.ingestionServer.size,
-                        serverMin: min,
+                        serverMin: parseInt(min),
                       },
                     },
                   };
@@ -769,7 +767,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       size: {
                         ...prev.ingestionServer.size,
-                        serverMax: max,
+                        serverMax: parseInt(max),
                       },
                     },
                   };
@@ -783,7 +781,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       size: {
                         ...prev.ingestionServer.size,
-                        warmPoolSize: size,
+                        warmPoolSize: parseInt(size),
                       },
                     },
                   };
@@ -925,8 +923,8 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkType: type,
                       sinkBatch: {
-                        intervalSeconds: sinkInterval,
-                        size: sinkBatchSize,
+                        intervalSeconds: parseInt(sinkInterval),
+                        size: parseInt(sinkBatchSize),
                       },
                     },
                   };
@@ -941,7 +939,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkBatch: {
                         ...prev.ingestionServer.sinkBatch,
-                        intervalSeconds: interval,
+                        intervalSeconds: parseInt(interval),
                       },
                     },
                   };
@@ -956,7 +954,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkBatch: {
                         ...prev.ingestionServer.sinkBatch,
-                        size: size,
+                        size: parseInt(size),
                       },
                     },
                   };
@@ -1005,7 +1003,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3BufferSize: size,
+                        s3BufferSize: parseInt(size),
                       },
                     },
                   };
@@ -1019,7 +1017,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
-                        s3BufferInterval: interval,
+                        s3BufferInterval: parseInt(interval),
                       },
                     },
                   };
@@ -1033,19 +1031,19 @@ const Content: React.FC = () => {
                   };
                 });
               }}
-              changeSelectedMSK={(msk) => {
+              changeSelectedMSK={(mskOption, mskCluster) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    selectedMSK: msk,
+                    selectedMSK: mskOption,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        securityGroupId: msk.description || '',
+                        securityGroupId: mskCluster?.securityGroupId || '',
                         mskCluster: {
-                          name: msk.label || '',
-                          arn: msk.iconAlt || '',
+                          name: mskCluster?.name || '',
+                          arn: mskCluster?.arn || '',
                         },
                       },
                     },
@@ -1157,7 +1155,7 @@ const Content: React.FC = () => {
                       ...prev.ingestionServer,
                       sinkKinesis: {
                         ...prev.ingestionServer.sinkKinesis,
-                        kinesisShardCount: num,
+                        kinesisShardCount: parseInt(num),
                       },
                     },
                   };
@@ -1351,7 +1349,7 @@ const Content: React.FC = () => {
                         ...prev.dataAnalytics.redshift,
                         newServerless: {
                           ...prev.dataAnalytics.redshift.newServerless,
-                          baseCapacity: capacity.value || '',
+                          baseCapacity: parseInt(capacity.value || '16'),
                         },
                       },
                     },

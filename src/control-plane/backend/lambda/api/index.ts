@@ -578,6 +578,9 @@ app.use((err: Error, req: express.Request, res: express.Response, _next: express
   if (err.name === 'ClickStreamBadRequestError') {
     return res.status(400).json(new ApiFail(err.message));
   }
+  if (err.name === 'TypeError') {
+    return res.status(400).json(new ApiFail(`Validate error, ${err.message}. Please check and try again.`));
+  }
   return res.status(500).send(new ApiFail('Unexpected error occurred at server.', err.name));
 });
 

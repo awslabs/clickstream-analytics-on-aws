@@ -41,8 +41,8 @@ import {
   tokenMock,
 } from './ddb-mock';
 import {
-  KINESIS_ETL_REDSHIFT_PIPELINE,
-  KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+  KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
   S3_INGESTION_PIPELINE,
   KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
   KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE,
@@ -136,6 +136,7 @@ describe('Pipeline test', () => {
     expect(res.body.data).toHaveProperty('id');
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
+    expect(ec2Client).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 3);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create pipeline with new Redshift serverless subnets not cross three AZ', async () => {
@@ -188,7 +189,7 @@ describe('Pipeline test', () => {
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        ...KINESIS_ETL_REDSHIFT_PIPELINE,
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -290,7 +291,7 @@ describe('Pipeline test', () => {
           },
         ],
       });
-    dictionaryMock(ddbMock, 'BuildInPlugins');
+    dictionaryMock(ddbMock, 'BuiltInPlugins');
     dictionaryMock(ddbMock, 'QuickSightTemplateArn');
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
@@ -307,6 +308,9 @@ describe('Pipeline test', () => {
       },
     }).resolves({
       Item: undefined,
+    });
+    secretsManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
     });
     const res = await request(app)
       .post('/api/pipeline')
@@ -461,7 +465,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
     cloudFormationClient.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -494,7 +498,7 @@ describe('Pipeline test', () => {
       success: true,
       message: '',
       data: {
-        ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         dns: 'http://yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [
@@ -513,7 +517,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
     cloudFormationClient.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -532,7 +536,7 @@ describe('Pipeline test', () => {
       success: true,
       message: '',
       data: {
-        ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         dns: '',
         endpoint: '',
         dashboards: [],
@@ -734,7 +738,7 @@ describe('Pipeline test', () => {
                 serverEndpointPath: '/collect',
               },
               sinkS3: {
-                s3BatchMaxBytes: 500,
+                s3BatchMaxBytes: 1000000,
                 s3BatchTimeout: 60,
                 sinkBucket: {
                   name: 'EXAMPLE_BUCKET',
@@ -942,7 +946,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1002,6 +1006,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'UPDATE_IN_PROGRESS',
@@ -1016,7 +1027,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1076,6 +1087,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'CREATE_COMPLETE',
@@ -1090,7 +1108,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1150,6 +1168,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'UPDATE_COMPLETE',
@@ -1164,7 +1189,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1224,6 +1249,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'DELETE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'DELETE_COMPLETE',
@@ -1238,7 +1270,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolves({
@@ -1290,6 +1322,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'UPDATE_COMPLETE',
@@ -1304,7 +1343,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolves({
@@ -1356,6 +1395,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'CREATE_COMPLETE',
@@ -1370,7 +1416,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({})
@@ -1422,6 +1468,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'CREATE_COMPLETE',
@@ -1436,7 +1489,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationClient.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1492,6 +1545,13 @@ describe('Pipeline test', () => {
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
         {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_FAILED',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
           stackStatus: 'UPDATE_FAILED',
@@ -1510,12 +1570,12 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -1528,7 +1588,7 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
@@ -1542,7 +1602,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}1`)
-      .send(KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -1598,7 +1658,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -1619,7 +1679,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, false);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
@@ -1631,7 +1691,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
     const mockError = new Error('TransactionCanceledException');
     mockError.name = 'TransactionCanceledException';
@@ -1639,7 +1699,7 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
-        ...KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         version: '0',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1653,7 +1713,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(ScanCommand).resolves({

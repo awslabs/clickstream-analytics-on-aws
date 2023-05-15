@@ -77,7 +77,7 @@ interface ConfigIngestionProps {
 
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
-  changeSelectedMSK: (msk: SelectProps.Option) => void;
+  changeSelectedMSK: (mskOption: SelectProps.Option, mskCluster: MSKResponse) => void;
   changeSecurityGroup: (sg: SelectProps.Option) => void;
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
@@ -311,7 +311,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <div>{t('pipeline:create.minSize')}</div>
                 <Input
                   type="number"
-                  value={pipelineInfo.ingestionServer.size.serverMin}
+                  value={pipelineInfo.ingestionServer.size.serverMin.toString()}
                   onChange={(e) => {
                     changeServerMin(e.detail.value);
                   }}
@@ -321,7 +321,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <div>{t('pipeline:create.maxSize')}</div>
                 <Input
                   type="number"
-                  value={pipelineInfo.ingestionServer.size.serverMax}
+                  value={pipelineInfo.ingestionServer.size.serverMax.toString()}
                   onChange={(e) => {
                     changeServerMax(e.detail.value);
                   }}
@@ -331,7 +331,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <div>{t('pipeline:create.warmPool')}</div>
                 <Input
                   type="number"
-                  value={pipelineInfo.ingestionServer.size.warmPoolSize}
+                  value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
                   onChange={(e) => {
                     changeWarmSize(e.detail.value);
                   }}
@@ -602,8 +602,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               changeCreateMSKMethod={(type) => {
                 changeCreateMSKMethod(type);
               }}
-              changeSelectedMSK={(msk) => {
-                changeSelectedMSK(msk);
+              changeSelectedMSK={(msk, mskCluster) => {
+                changeSelectedMSK(msk, mskCluster);
               }}
               changeMSKTopic={(topic) => {
                 changeMSKTopic(topic);
@@ -699,7 +699,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                         : DEFAULT_MSK_SINK_INTERVAL
                     }
                     value={
-                      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds
+                      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds.toString()
                     }
                     onChange={(e) => {
                       changeSinkMaxInterval(e.detail.value);
@@ -733,7 +733,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                         ? DEFAULT_KDS_BATCH_SIZE
                         : DEFAULT_MSK_BATCH_SIZE
                     }
-                    value={pipelineInfo.ingestionServer.sinkBatch.size}
+                    value={pipelineInfo.ingestionServer.sinkBatch.size.toString()}
                     onChange={(e) => {
                       changeSinkBatchSize(e.detail.value);
                     }}

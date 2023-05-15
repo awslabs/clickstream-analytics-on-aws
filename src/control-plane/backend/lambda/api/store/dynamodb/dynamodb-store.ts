@@ -787,20 +787,20 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async getPlugin(pluginId: string): Promise<IPlugin | undefined> {
-    if (pluginId.startsWith('BUILDIN')) {
-      const dic = await this.getDictionary('BuildInPlugins');
+    if (pluginId.startsWith('BUILT-IN')) {
+      const dic = await this.getDictionary('BuiltInPlugins');
       if (dic) {
-        let buildInPlugins: IPlugin[] = [];
+        let builtInPlugins: IPlugin[] = [];
         for (let p of dic.data) {
           p.createAt = +p.createAt;
           p.updateAt = +p.updateAt;
           p.bindCount = +p.bindCount;
           p.builtIn = p.builtIn === 'true';
           p.deleted = p.deleted === 'true';
-          buildInPlugins.push(p as IPlugin);
+          builtInPlugins.push(p as IPlugin);
         }
-        buildInPlugins = buildInPlugins.filter(p => p.id === pluginId);
-        return !isEmpty(buildInPlugins) ? buildInPlugins[0] : undefined;
+        builtInPlugins = builtInPlugins.filter(p => p.id === pluginId);
+        return !isEmpty(builtInPlugins) ? builtInPlugins[0] : undefined;
       }
     }
     const params: GetCommand = new GetCommand({
@@ -897,22 +897,22 @@ export class DynamoDbStore implements ClickStreamStore {
       totalCount: 0,
       items: [],
     };
-    const dic = await this.getDictionary('BuildInPlugins');
+    const dic = await this.getDictionary('BuiltInPlugins');
     if (dic) {
-      let buildInPlugins: IPlugin[] = [];
+      let builtInPlugins: IPlugin[] = [];
       for (let p of dic.data) {
         p.createAt = +p.createAt;
         p.updateAt = +p.updateAt;
         p.bindCount = +p.bindCount;
         p.builtIn = p.builtIn === 'true';
         p.deleted = p.deleted === 'true';
-        buildInPlugins.push(p as IPlugin);
+        builtInPlugins.push(p as IPlugin);
       }
       if (!isEmpty(pluginType)) {
-        buildInPlugins = buildInPlugins.filter(p => p.pluginType === pluginType);
+        builtInPlugins = builtInPlugins.filter(p => p.pluginType === pluginType);
       }
-      plugins.items = buildInPlugins;
-      plugins.totalCount = buildInPlugins.length;
+      plugins.items = builtInPlugins;
+      plugins.totalCount = builtInPlugins.length;
     }
 
     const input: QueryCommandInput = {

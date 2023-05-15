@@ -6661,6 +6661,11 @@ rechoir@^0.6.2:
   dependencies:
     resolve "^1.1.6"
 
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
+
 registry-auth-token@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/registry-auth-token/-/registry-auth-token-5.0.1.tgz"
@@ -7219,6 +7224,13 @@ ts-jest@^29.0.3:
     make-error "1.x"
     semver "7.x"
     yargs-parser "^21.0.1"
+
+ts-json-object@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/ts-json-object/-/ts-json-object-0.4.0.tgz#d4b024096b93032c8ea7f9c1aaf3a1c82f808e58"
+  integrity sha512-ZzR+mU3LZOjlCiAAeIG3u7uav6GKa954anF+MyIKLjXLeqvnp1M3df+AlamV7eUw61eoqwfodMUUNqhuSGgm5Q==
+  dependencies:
+    reflect-metadata "^0.1.13"
 
 ts-node@^10.9.1:
   version "10.9.1"

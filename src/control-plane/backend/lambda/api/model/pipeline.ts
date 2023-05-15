@@ -11,43 +11,28 @@
  *  and limitations under the License.
  */
 
-import { Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
+import { Output, Tag } from '@aws-sdk/client-cloudformation';
 import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
+import { CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CReportStack } from './stacks';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
-  DOMAIN_NAME_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
   PROJECT_ID_PATTERN,
-  SUBNETS_PATTERN,
-  VPC_ID_PARRERN,
-  POSITIVE_INTEGERS,
-  QUICKSIGHT_NAMESPACE_PATTERN,
-  S3_PATH_PLUGIN_JARS_PATTERN,
-  S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
-  REDSHIFT_MODE,
-  SUBNETS_THREE_AZ_PATTERN,
-  OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
-  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
-  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
-  QUICKSIGHT_USER_NAME_PATTERN,
   OUTPUT_REPORT_DASHBOARDS_SUFFIX,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { logger } from '../common/powertools';
-import { validatePattern, validateSecretModel, validateSinkBatch, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType, PipelineStackType,
   PipelineStatus,
-  ProjectEnvironment,
   RedshiftInfo,
   WorkflowParallelBranch,
   WorkflowState,
@@ -56,13 +41,12 @@ import {
   WorkflowVersion,
   IngestionServerSinkBatchProps, ReportDashboardOutput,
 } from '../common/types';
-import { isEmpty } from '../common/utils';
+import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { getRedshiftInfo } from '../store/aws/redshift';
-import { getSecretValue } from '../store/aws/secretsmanager';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -248,35 +232,42 @@ export interface IPipelineList {
   items: IPipeline[];
 }
 
+export interface CPipelineResources {
+  project?: IProject;
+  mskBrokers?: string[];
+  appIds?: string[];
+  plugins?: IPlugin[];
+  redshift?: RedshiftInfo;
+  solution?: IDictionary;
+  templates?: IDictionary;
+  quickSightTemplateArn?: IDictionary;
+}
+
 export class CPipeline {
   private pipeline: IPipeline;
   private stackManager: StackManager;
-  private project?: IProject;
-  private mskBrokers?: string[];
-  private appIds?: string[];
-  private plugins?: IPlugin[];
-  private redshift?: RedshiftInfo;
-  private solution?: IDictionary;
-  private templates?: IDictionary;
-  private quickSightTemplateArn?: IDictionary;
+  private resources?: CPipelineResources;
+  private validateSubnetCrossThreeAZOnce: boolean;
   private stackTags?: Tag[];
 
   constructor(pipeline: IPipeline) {
     this.pipeline = pipeline;
     this.stackManager = new StackManager(pipeline);
+    this.validateSubnetCrossThreeAZOnce = false;
   }
 
   public async create(): Promise<void> {
     // state machine
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
+
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
     // bind plugin
     const pluginIds: string[] = [];
-    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILDIN')) {
+    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
       pluginIds.push(this.pipeline.etl?.transformPlugin);
     }
-    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILDIN'));
+    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
     pluginIds.concat(enrichIds!);
     await store.bindPlugins(pluginIds, 1);
   }
@@ -287,9 +278,9 @@ export class CPipeline {
   }
 
   public async updateETL(appIds: string[]): Promise<void> {
-    const etlStackName = this.getStackName(PipelineStackType.ETL);
-    const analyticsStackName = this.getStackName(PipelineStackType.DATA_ANALYTICS);
-    const reportStackName = this.getStackName(PipelineStackType.REPORT);
+    const etlStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL);
+    const analyticsStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS);
+    const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT);
     // update workflow
     this.stackManager.updateETLWorkflow(appIds, etlStackName, analyticsStackName, reportStackName);
     // create new execution
@@ -314,10 +305,10 @@ export class CPipeline {
 
     // bind plugin
     const pluginIds: string[] = [];
-    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILDIN')) {
+    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
       pluginIds.push(this.pipeline.etl?.transformPlugin);
     }
-    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILDIN'));
+    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
     pluginIds.concat(enrichIds!);
     await store.bindPlugins(pluginIds, -1);
   }
@@ -334,104 +325,110 @@ export class CPipeline {
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
-  private async init(): Promise<void> {
+  private async resourcesCheck(): Promise<void> {
+    // Check project resources that in DDB
     validatePattern('ProjectId', PROJECT_ID_PATTERN, this.pipeline.projectId);
-    if (!this.project) {
+    if (!this.resources || !this.resources.project) {
       const project = await store.getProject(this.pipeline.projectId);
       if (!project) {
         throw new ClickStreamBadRequestError('Project no found. Please check and try again.');
       }
-      this.project = project;
+      this.resources = {
+        ...this.resources,
+        project,
+      };
     }
 
-    if (!this.appIds) {
+    if (!this.resources || !this.resources.appIds) {
       const apps = await store.listApplication('asc', this.pipeline.projectId, false, 1, 1);
-      this.appIds = apps.items.map(a => a.appId);
-
-      if (!isEmpty(this.appIds)) {
-        validatePattern('AppId', MUTIL_APP_ID_PATTERN, this.appIds.join(','));
+      const appIds = apps.items.map(a => a.appId);
+      if (!isEmpty(appIds)) {
+        validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
       }
+      this.resources = {
+        ...this.resources,
+        appIds,
+      };
     }
 
-    if (!this.plugins) {
+    if (!this.resources || !this.resources.plugins) {
       const plugins = await store.listPlugin('', 'asc', false, 1, 1);
-      this.plugins = plugins.items;
+      this.resources = {
+        ...this.resources,
+        plugins: plugins.items,
+      };
     }
 
-    if (!this.mskBrokers && this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
-      this.mskBrokers = await listMSKClusterBrokers(this.pipeline.region, this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
+    if (!this.resources || !this.resources.solution || !this.resources.templates || !this.resources.quickSightTemplateArn) {
+      const solution = await store.getDictionary('Solution');
+      const templates = await store.getDictionary('Templates');
+      const quickSightTemplateArn = await store.getDictionary('QuickSightTemplateArn');
+      this.resources = {
+        ...this.resources,
+        solution,
+        templates,
+        quickSightTemplateArn,
+      };
+    }
+
+    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
+      await this.setTags();
+      this.stackTags = this.getStackTags();
+    }
+
+    // Check AWS account resources
+    if (!this.resources || (!this.resources.mskBrokers && this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn)) {
+      const mskBrokers = await listMSKClusterBrokers(this.pipeline.region, this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
+      this.resources = {
+        ...this.resources,
+        mskBrokers,
+      };
     }
 
     const workgroupName = this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName;
     const clusterIdentifier = this.pipeline.dataAnalytics?.redshift?.provisioned?.clusterIdentifier;
-    if (!this.redshift && (workgroupName || clusterIdentifier)) {
+    if (!this.resources || (!this.resources!.redshift && (workgroupName || clusterIdentifier))) {
       const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
       if (!redshift) {
         throw new ClickStreamBadRequestError('Redshift info no found. Please check and try again.');
       }
-      this.redshift = redshift;
+      this.resources = {
+        ...this.resources,
+        redshift,
+      };
+    }
+    if (!this.validateSubnetCrossThreeAZOnce && this.pipeline.dataAnalytics?.redshift?.newServerless) {
+      this.validateSubnetCrossThreeAZOnce = true;
+      await validateSubnetCrossThreeAZ(this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds);
     }
 
-    if (!this.solution || !this.templates || !this.quickSightTemplateArn) {
-      this.solution = await store.getDictionary('Solution');
-      this.templates = await store.getDictionary('Templates');
-      this.quickSightTemplateArn = await store.getDictionary('QuickSightTemplateArn');
+    if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
+      await validateSecretModel(this.pipeline.region, 'AuthenticationSecretArn',
+        this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn, SECRETS_MANAGER_ARN_PATTERN);
     }
-
-    if (!this.stackTags || this.stackTags?.length === 0) {
-      await this.setTags();
-      this.stackTags = this.getStackTags();
-    }
-  }
-
-  private getBucketPrefix(key: string, value: string | undefined): string {
-    if (value === undefined || value === '' || value === '/') {
-      const prefixs: Map<string, string> = new Map();
-      prefixs.set('logs-alb', `clickstream/${this.pipeline.projectId}/logs/alb/`);
-      prefixs.set('logs-kafka-connector', `clickstream/${this.pipeline.projectId}/logs/kafka-connector/`);
-      prefixs.set('data-buffer', `clickstream/${this.pipeline.projectId}/data/buffer/`);
-      prefixs.set('data-ods', `clickstream/${this.pipeline.projectId}/data/ods/`);
-      prefixs.set('data-pipeline-temp', `clickstream/${this.pipeline.projectId}/data/pipeline-temp/`);
-      prefixs.set('kafka-connector-plugin', `clickstream/${this.pipeline.projectId}/runtime/ingestion/kafka-connector/plugins/`);
-      return prefixs.get(key) ?? '';
-    }
-    if (!value.endsWith('/')) {
-      return `${value}/`;
-    }
-    return value;
-  }
-
-  private getStackName(key: PipelineStackType): string {
-    const names: Map<string, string> = new Map();
-    names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${this.pipeline.ingestionServer.sinkType}-${this.pipeline.pipelineId}`);
-    names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${this.pipeline.pipelineId}`);
-    names.set(PipelineStackType.ETL, `Clickstream-${PipelineStackType.ETL}-${this.pipeline.pipelineId}`);
-    names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${this.pipeline.pipelineId}`);
-    names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${this.pipeline.pipelineId}`);
-    return names.get(key) ?? '';
   }
 
   public async getTemplateUrl(name: string) {
-    if (this.solution && this.templates) {
-      if (isEmpty(this.templates.data[name])) {
+    if (this.resources!.solution && this.resources!.templates) {
+      if (isEmpty(this.resources!.templates.data[name])) {
         return undefined;
       }
-      const s3Host = `https://${this.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
-      if (this.solution.data.version === 'latest') {
-        const target = this.solution.data.target;
-        const prefix = this.solution.data.prefix;
-        return `${s3Host}/${this.solution.data.name}/${target}/${prefix}/${this.templates.data[name]}`;
+      const s3Host = `https://${this.resources!.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
+      if (this.resources!.solution.data.version === 'latest') {
+        const target = this.resources!.solution.data.target;
+        const prefix = this.resources!.solution.data.prefix;
+        return `${s3Host}/${this.resources!.solution.data.name}/${target}/${prefix}/${this.resources!.templates.data[name]}`;
       } else {
-        const version = this.solution.data.version;
-        const prefix = this.solution.data.prefix;
-        return `${s3Host}/${this.solution.data.name}/${version}/${prefix}/${this.templates.data[name]}`;
+        const version = this.resources!.solution.data.version;
+        const prefix = this.resources!.solution.data.prefix;
+        return `${s3Host}/${this.resources!.solution.data.name}/${version}/${prefix}/${this.resources!.templates.data[name]}`;
       }
     }
     return undefined;
   };
 
   public async setTags() {
-    if (this.solution) {
+    if (this.resources!.solution) {
       const builtInTagKeys = [
         BuiltInTagKeys.AWS_SOLUTION,
         BuiltInTagKeys.AWS_SOLUTION_VERSION,
@@ -451,11 +448,11 @@ export class CPipeline {
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: this.solution.data.version,
+        value: this.resources!.solution.data.version,
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
-        value: this.project?.id!,
+        value: this.resources!.project?.id!,
       });
     }
   };
@@ -502,7 +499,7 @@ export class CPipeline {
   }
 
   private async getWorkflowStack(type: PipelineStackType): Promise<WorkflowParallelBranch | undefined> {
-    await this.init();
+    await this.resourcesCheck();
 
     if (!stackWorkflowS3Bucket) {
       throw new Error('Stack Workflow S3Bucket can not empty.');
@@ -512,8 +509,9 @@ export class CPipeline {
       if (!ingestionTemplateURL) {
         throw Error(`Template: ingestion_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
       }
-      const ingestionStackParameters = await this.getIngestionStackParameters();
-      const ingestionStackName = this.getStackName(PipelineStackType.INGESTION);
+      const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
+      const ingestionStackParameters = ingestionStack.parameters();
+      const ingestionStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
       const ingestionState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -537,8 +535,9 @@ export class CPipeline {
         if (!kafkaConnectorTemplateURL) {
           throw Error('Template: kafka-s3-sink not found in dictionary.');
         }
-        const kafkaConnectorStackParameters = await this.getKafkaConnectorStackParameters();
-        const kafkaConnectorStackName = this.getStackName(PipelineStackType.KAFKA_CONNECTOR);
+        const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
+        const kafkaConnectorStackParameters = kafkaConnectorStack.parameters();
+        const kafkaConnectorStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR);
         const kafkaConnectorState: WorkflowState = {
           Type: WorkflowStateType.STACK,
           Data: {
@@ -583,8 +582,9 @@ export class CPipeline {
         throw Error('Template: data-pipeline not found in dictionary.');
       }
 
-      const pipelineStackParameters = await this.getETLPipelineStackParameters();
-      const pipelineStackName = this.getStackName(PipelineStackType.ETL);
+      const pipelineStack = new CETLStack(this.pipeline, this.resources!);
+      const pipelineStackParameters = pipelineStack.parameters();
+      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL);
       const etlState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -619,8 +619,9 @@ export class CPipeline {
         throw Error('Template: data-analytics not found in dictionary.');
       }
 
-      const dataAnalyticsStackParameters = await this.getDataAnalyticsStackParameters();
-      const dataAnalyticsStackName = this.getStackName(PipelineStackType.DATA_ANALYTICS);
+      const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
+      const dataAnalyticsStackParameters = dataAnalyticsStack.parameters();
+      const dataAnalyticsStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS);
       const dataAnalyticsState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -644,8 +645,9 @@ export class CPipeline {
         if (!reportTemplateURL) {
           throw Error('Template: quicksight not found in dictionary.');
         }
-        const reportStackParameters = await this.getReportStackParameters();
-        const reportStackName = this.getStackName(PipelineStackType.REPORT);
+        const reportStack = new CReportStack(this.pipeline, this.resources!);
+        const reportStackParameters = reportStack.parameters();
+        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT);
         const reportState: WorkflowState = {
           Type: WorkflowStateType.STACK,
           Data: {
@@ -685,711 +687,9 @@ export class CPipeline {
     return undefined;
   }
 
-  private async getIngestionStackParameters() {
-    const parameters: Parameter[] = [];
-
-    // VPC Information
-    validatePattern('VpcId', VPC_ID_PARRERN, this.pipeline.network.vpcId);
-    parameters.push({
-      ParameterKey: 'VpcId',
-      ParameterValue: this.pipeline.network.vpcId,
-    });
-    validatePattern('PublicSubnetIds', SUBNETS_PATTERN, this.pipeline.network.publicSubnetIds.join(','));
-    parameters.push({
-      ParameterKey: 'PublicSubnetIds',
-      ParameterValue: this.pipeline.network.publicSubnetIds.join(','),
-    });
-    validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, this.pipeline.network.privateSubnetIds.join(','));
-    parameters.push({
-      ParameterKey: 'PrivateSubnetIds',
-      ParameterValue: isEmpty(this.pipeline.network.privateSubnetIds) ?
-        this.pipeline.network.publicSubnetIds.join(',') : this.pipeline.network.privateSubnetIds.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'ProjectId',
-      ParameterValue: this.pipeline.projectId,
-    });
-
-    // Domain Information
-    if (this.pipeline.ingestionServer.loadBalancer.protocol === 'HTTPS') {
-      validatePattern('DomainName', DOMAIN_NAME_PATTERN, this.pipeline.ingestionServer.domain?.domainName);
-      parameters.push({
-        ParameterKey: 'DomainName',
-        ParameterValue: this.pipeline.ingestionServer.domain?.domainName ?? '',
-      });
-      parameters.push({
-        ParameterKey: 'ACMCertificateArn',
-        ParameterValue: this.pipeline.ingestionServer.domain?.certificateArn ?? '',
-      });
-    }
-    // Server
-    parameters.push({
-      ParameterKey: 'Protocol',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.protocol,
-    });
-    parameters.push({
-      ParameterKey: 'ServerEndpointPath',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.serverEndpointPath,
-    });
-    parameters.push({
-      ParameterKey: 'ServerCorsOrigin',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.serverCorsOrigin ?? '',
-    });
-    parameters.push({
-      ParameterKey: 'ServerMax',
-      ParameterValue: this.pipeline.ingestionServer.size.serverMax.toString(),
-    });
-    parameters.push({
-      ParameterKey: 'ServerMin',
-      ParameterValue: this.pipeline.ingestionServer.size.serverMin.toString(),
-    });
-    parameters.push({
-      ParameterKey: 'ScaleOnCpuUtilizationPercent',
-      ParameterValue: (this.pipeline.ingestionServer.size.scaleOnCpuUtilizationPercent ?? 50).toString(),
-    });
-    parameters.push({
-      ParameterKey: 'WarmPoolSize',
-      ParameterValue: (this.pipeline.ingestionServer.size.warmPoolSize ?? 0).toString(),
-    });
-    parameters.push({
-      ParameterKey: 'NotificationsTopicArn',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
-    });
-    parameters.push({
-      ParameterKey: 'EnableGlobalAccelerator',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.enableGlobalAccelerator ? 'Yes' : 'No',
-    });
-    parameters.push({
-      ParameterKey: 'DevMode',
-      ParameterValue: this.project?.environment === ProjectEnvironment.DEV ? 'Yes' : 'No',
-    });
-    let enableAuthentication = 'No';
-    if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
-      validatePattern('AuthenticationSecretArn', SECRETS_MANAGER_ARN_PATTERN,
-        this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn);
-      const secretContent = await getSecretValue(this.pipeline.region,
-        this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn);
-      validateSecretModel(secretContent);
-      enableAuthentication = 'Yes';
-      parameters.push({
-        ParameterKey: 'AuthenticationSecretArn',
-        ParameterValue: this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn,
-      });
-    }
-    parameters.push({
-      ParameterKey: 'EnableAuthentication',
-      ParameterValue: enableAuthentication,
-    });
-
-    // Logs
-    parameters.push({
-      ParameterKey: 'EnableApplicationLoadBalancerAccessLog',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
-    });
-    parameters.push({
-      ParameterKey: 'LogS3Bucket',
-      ParameterValue: this.pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'LogS3Prefix',
-      ParameterValue: this.getBucketPrefix('logs-alb', this.pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
-    });
-
-    // S3 sink
-    if (this.pipeline.ingestionServer.sinkType === 's3') {
-      parameters.push({
-        ParameterKey: 'S3DataBucket',
-        ParameterValue: this.pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? this.pipeline.bucket.name,
-      });
-      parameters.push({
-        ParameterKey: 'S3DataPrefix',
-        ParameterValue: this.getBucketPrefix('data-buffer', this.pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
-      });
-      parameters.push({
-        ParameterKey: 'S3BatchMaxBytes',
-        ParameterValue: (this.pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes ?? 30000000).toString(),
-      });
-      parameters.push({
-        ParameterKey: 'S3BatchTimeout',
-        ParameterValue: (this.pipeline.ingestionServer.sinkS3?.s3BatchTimeout ?? 300).toString(),
-      });
-
-    }
-
-    if (this.pipeline.ingestionServer.sinkBatch) {
-      validateSinkBatch(this.pipeline.ingestionServer.sinkType, this.pipeline.ingestionServer.sinkBatch);
-    }
-
-    // Kafka sink
-    if (this.pipeline.ingestionServer.sinkType === 'kafka') {
-      const kafkaTopic = this.getKafkaTopic();
-      validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, kafkaTopic);
-      if (!isEmpty(this.pipeline.ingestionServer.sinkKafka?.mskCluster)) { //MSK
-        parameters.push({
-          ParameterKey: 'MskClusterName',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name ?? '',
-        });
-        parameters.push({
-          ParameterKey: 'MskSecurityGroupId',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
-        });
-        parameters.push({
-          ParameterKey: 'KafkaTopic',
-          ParameterValue: kafkaTopic,
-        });
-        let kafkaBrokers = this.pipeline.ingestionServer.sinkKafka?.brokers;
-        if (isEmpty(kafkaBrokers)) {
-          kafkaBrokers = this.mskBrokers;
-        }
-        validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
-        parameters.push({
-          ParameterKey: 'KafkaBrokers',
-          ParameterValue: kafkaBrokers?.join(','),
-        });
-
-      } else { //self hosted kafka culster
-        validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, this.pipeline.ingestionServer.sinkKafka?.brokers?.join(','));
-        parameters.push({
-          ParameterKey: 'KafkaBrokers',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.brokers?.join(','),
-        });
-        parameters.push({
-          ParameterKey: 'KafkaTopic',
-          ParameterValue: kafkaTopic,
-        });
-        parameters.push({
-          ParameterKey: 'MskSecurityGroupId',
-          ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
-        });
-      }
-
-    }
-    // Kinesis sink
-    if (this.pipeline.ingestionServer.sinkType === 'kinesis') {
-      parameters.push({
-        ParameterKey: 'KinesisDataS3Bucket',
-        ParameterValue: this.pipeline.ingestionServer.sinkKinesis?.sinkBucket.name ?? this.pipeline.bucket.name,
-      });
-      parameters.push({
-        ParameterKey: 'KinesisDataS3Prefix',
-        ParameterValue: this.getBucketPrefix('data-buffer', this.pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
-      });
-
-      const kinesisStreamMode = this.pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode ?? KinesisStreamMode.ON_DEMAND;
-      parameters.push({
-        ParameterKey: 'KinesisStreamMode',
-        ParameterValue: kinesisStreamMode,
-      });
-      let kinesisShardCount = '3';
-      if (kinesisStreamMode === KinesisStreamMode.PROVISIONED && this.pipeline.ingestionServer.sinkKinesis?.kinesisShardCount) {
-        kinesisShardCount = this.pipeline.ingestionServer.sinkKinesis?.kinesisShardCount.toString();
-      }
-      validatePattern('KinesisShardCount', POSITIVE_INTEGERS, kinesisShardCount);
-      parameters.push({
-        ParameterKey: 'KinesisShardCount',
-        ParameterValue: kinesisShardCount,
-      });
-      parameters.push({
-        ParameterKey: 'KinesisDataRetentionHours',
-        ParameterValue: (this.pipeline.ingestionServer.sinkKinesis?.kinesisDataRetentionHours ?? 24).toString(),
-      });
-      parameters.push({
-        ParameterKey: 'KinesisBatchSize',
-        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.size ?? 10000).toString(),
-      });
-      parameters.push({
-        ParameterKey: 'KinesisMaxBatchingWindowSeconds',
-        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds ?? 300).toString(),
-      });
-    }
-    return parameters;
-  }
-
-  private async getKafkaConnectorStackParameters() {
-    const parameters: Parameter[] = [];
-
-    parameters.push({
-      ParameterKey: 'ProjectId',
-      ParameterValue: this.pipeline.projectId,
-    });
-
-    parameters.push({
-      ParameterKey: 'DataS3Bucket',
-      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'DataS3Prefix',
-      ParameterValue: this.getBucketPrefix('data-buffer', this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix),
-    });
-
-    parameters.push({
-      ParameterKey: 'LogS3Bucket',
-      ParameterValue: this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'LogS3Prefix',
-      ParameterValue: this.getBucketPrefix('logs-kafka-connector', ''),
-    });
-
-    parameters.push({
-      ParameterKey: 'PluginS3Bucket',
-      ParameterValue: this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'PluginS3Prefix',
-      ParameterValue: this.getBucketPrefix('kafka-connector-plugin', ''),
-    });
-
-    parameters.push({
-      ParameterKey: 'SubnetIds',
-      ParameterValue: this.pipeline.network.privateSubnetIds.join(','),
-    });
-
-    let kafkaBrokers = this.pipeline.ingestionServer.sinkKafka?.brokers;
-    if (isEmpty(kafkaBrokers)) {
-      kafkaBrokers = this.mskBrokers;
-    }
-    validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, kafkaBrokers?.join(','));
-    parameters.push({
-      ParameterKey: 'KafkaBrokers',
-      ParameterValue: kafkaBrokers?.join(','),
-    });
-
-    const kafkaTopic = this.getKafkaTopic();
-    validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, kafkaTopic);
-    parameters.push({
-      ParameterKey: 'KafkaTopic',
-      ParameterValue: kafkaTopic,
-    });
-
-    if (this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name) {
-      parameters.push({
-        ParameterKey: 'MskClusterName',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
-      });
-    }
-    parameters.push({
-      ParameterKey: 'SecurityGroupId',
-      ParameterValue: this.pipeline.ingestionServer.sinkKafka?.securityGroupId,
-    });
-
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount !== undefined) {
-      parameters.push({
-        ParameterKey: 'MaxWorkerCount',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount?.toString(),
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount !== undefined) {
-      parameters.push({
-        ParameterKey: 'MinWorkerCount',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount?.toString(),
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount !== undefined) {
-      parameters.push({
-        ParameterKey: 'WorkerMcuCount',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount?.toString(),
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl !== undefined) {
-      parameters.push({
-        ParameterKey: 'PluginUrl',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl,
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds) {
-      parameters.push({
-        ParameterKey: 'RotateIntervalMS',
-        ParameterValue: (this.pipeline.ingestionServer.sinkBatch?.intervalSeconds * 1000).toString(),
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkBatch?.size) {
-      parameters.push({
-        ParameterKey: 'FlushSize',
-        ParameterValue: this.pipeline.ingestionServer.sinkBatch?.size.toString(),
-      });
-    }
-
-    if (this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.customConnectorConfiguration !== undefined) {
-      parameters.push({
-        ParameterKey: 'CustomConnectorConfiguration',
-        ParameterValue: this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.customConnectorConfiguration,
-      });
-    }
-
-    return parameters;
-  }
-
-  private async getETLPipelineStackParameters() {
-    const parameters: Parameter[] = [];
-
-    validatePattern('VpcId', VPC_ID_PARRERN, this.pipeline.network.vpcId);
-    parameters.push({
-      ParameterKey: 'VpcId',
-      ParameterValue: this.pipeline.network.vpcId,
-    });
-
-    validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, this.pipeline.network.privateSubnetIds.join(','));
-    parameters.push({
-      ParameterKey: 'PrivateSubnetIds',
-      ParameterValue: this.pipeline.network.privateSubnetIds.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'ProjectId',
-      ParameterValue: this.pipeline.projectId,
-    });
-
-    parameters.push({
-      ParameterKey: 'AppIds',
-      ParameterValue: this.appIds?.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'SourceS3Bucket',
-      ParameterValue: this.pipeline.etl?.sourceS3Bucket.name ?? this.pipeline.bucket.name,
-    });
-
-    let sourceS3Prefix = this.getBucketPrefix('data-buffer', this.pipeline.etl?.sourceS3Bucket.prefix);
-    if (this.pipeline.ingestionServer.sinkType === 'kafka') {
-      sourceS3Prefix = `${sourceS3Prefix}${this.getKafkaTopic()}/`;
-    }
-    parameters.push({
-      ParameterKey: 'SourceS3Prefix',
-      ParameterValue: sourceS3Prefix,
-    });
-
-    parameters.push({
-      ParameterKey: 'SinkS3Bucket',
-      ParameterValue: this.pipeline.etl?.sinkS3Bucket.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'SinkS3Prefix',
-      ParameterValue: this.getBucketPrefix('data-ods', this.pipeline.etl?.sinkS3Bucket.prefix),
-    });
-
-    parameters.push({
-      ParameterKey: 'PipelineS3Bucket',
-      ParameterValue: this.pipeline.etl?.pipelineBucket.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'PipelineS3Prefix',
-      ParameterValue: this.getBucketPrefix('data-pipeline-temp', this.pipeline.etl?.pipelineBucket.prefix),
-    });
-
-    parameters.push({
-      ParameterKey: 'DataFreshnessInHour',
-      ParameterValue: (this.pipeline.etl?.dataFreshnessInHour ?? 72).toString(),
-    });
-
-    parameters.push({
-      ParameterKey: 'ScheduleExpression',
-      ParameterValue: this.pipeline.etl?.scheduleExpression,
-    });
-
-    const transformerAndEnrichClassNames: string[] = [];
-    const s3PathPluginJars: string[] = [];
-    let s3PathPluginFiles: string[] = [];
-    // Transformer
-    if (!isEmpty(this.pipeline.etl?.transformPlugin) && !this.pipeline.etl?.transformPlugin?.startsWith('BUILDIN')) {
-      const transformer = this.plugins?.filter(p => p.id === this.pipeline.etl?.transformPlugin)[0];
-      if (transformer?.mainFunction) {
-        transformerAndEnrichClassNames.push(transformer?.mainFunction);
-      }
-      if (transformer?.jarFile) {
-        s3PathPluginJars.push(transformer?.jarFile);
-      }
-      if (transformer?.dependencyFiles) {
-        s3PathPluginFiles = s3PathPluginFiles.concat(transformer?.dependencyFiles);
-      }
-    } else {
-      let defaultTransformer = this.plugins?.filter(p => p.id === 'BUILDIN-1')[0];
-      if (defaultTransformer?.mainFunction) {
-        transformerAndEnrichClassNames.push(defaultTransformer?.mainFunction);
-      }
-    }
-    // Enrich
-    if (this.pipeline.etl?.enrichPlugin) {
-      for (let enrichPluginId of this.pipeline.etl?.enrichPlugin) {
-        const enrich = this.plugins?.filter(p => p.id === enrichPluginId)[0];
-        if (!enrich?.id.startsWith('BUILDIN')) {
-          if (enrich?.jarFile) {
-            s3PathPluginJars.push(enrich?.jarFile);
-          }
-          if (enrich?.dependencyFiles) {
-            s3PathPluginFiles = s3PathPluginFiles.concat(enrich?.dependencyFiles);
-          }
-        }
-        if (enrich?.mainFunction) {
-          transformerAndEnrichClassNames.push(enrich?.mainFunction);
-        }
-      }
-    }
-
-    parameters.push({
-      ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: transformerAndEnrichClassNames.join(','),
-    });
-
-    if (!isEmpty(s3PathPluginJars)) {
-      validatePattern('PluginJars', S3_PATH_PLUGIN_JARS_PATTERN, s3PathPluginJars.join(','));
-    }
-    parameters.push({
-      ParameterKey: 'S3PathPluginJars',
-      ParameterValue: s3PathPluginJars.join(','),
-    });
-
-    if (!isEmpty(s3PathPluginFiles)) {
-      validatePattern('PluginFiles', S3_PATH_PLUGIN_FILES_PATTERN, s3PathPluginFiles.join(','));
-    }
-    parameters.push({
-      ParameterKey: 'S3PathPluginFiles',
-      ParameterValue: s3PathPluginFiles.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'OutputFormat',
-      ParameterValue: this.pipeline.etl?.outputFormat ?? 'parquet',
-    });
-
-    return parameters;
-  }
-
-  private async getDataAnalyticsStackParameters() {
-    const parameters: Parameter[] = [];
-
-    validatePattern('VpcId', VPC_ID_PARRERN, this.pipeline.network.vpcId);
-    parameters.push({
-      ParameterKey: 'VpcId',
-      ParameterValue: this.pipeline.network.vpcId,
-    });
-
-    validatePattern('PrivateSubnetIds', SUBNETS_PATTERN, this.pipeline.network.privateSubnetIds.join(','));
-    parameters.push({
-      ParameterKey: 'PrivateSubnetIds',
-      ParameterValue: this.pipeline.network.privateSubnetIds.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'ProjectId',
-      ParameterValue: this.pipeline.projectId,
-    });
-
-    parameters.push({
-      ParameterKey: 'AppIds',
-      ParameterValue: this.appIds?.join(','),
-    });
-
-    parameters.push({
-      ParameterKey: 'ODSEventBucket',
-      ParameterValue: this.pipeline.dataAnalytics?.ods?.bucket.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'ODSEventPrefix',
-      ParameterValue: this.getBucketPrefix('data-ods', this.pipeline.dataAnalytics?.ods?.bucket.prefix),
-    });
-    parameters.push({
-      ParameterKey: 'ODSEventFileSuffix',
-      ParameterValue: this.pipeline.dataAnalytics?.ods?.fileSuffix ?? '.snappy.parquet',
-    });
-
-    parameters.push({
-      ParameterKey: 'LoadWorkflowBucket',
-      ParameterValue: this.pipeline.dataAnalytics?.loadWorkflow?.bucket?.name ?? this.pipeline.bucket.name,
-    });
-    parameters.push({
-      ParameterKey: 'LoadWorkflowBucketPrefix',
-      ParameterValue: this.getBucketPrefix('data-ods', this.pipeline.dataAnalytics?.loadWorkflow?.bucket?.prefix),
-    });
-    parameters.push({
-      ParameterKey: 'MaxFilesLimit',
-      ParameterValue: (this.pipeline.dataAnalytics?.loadWorkflow?.maxFilesLimit ?? 50).toString(),
-    });
-    parameters.push({
-      ParameterKey: 'ProcessingFilesLimit',
-      ParameterValue: (this.pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit ?? 100).toString(),
-    });
-    if (this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression) {
-      parameters.push({
-        ParameterKey: 'LoadJobScheduleInterval',
-        ParameterValue: this.pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
-      });
-    }
-
-    if (this.pipeline.dataAnalytics?.redshift?.provisioned) {
-      parameters.push({
-        ParameterKey: 'RedshiftMode',
-        ParameterValue: REDSHIFT_MODE.PROVISIONED,
-      });
-      if (isEmpty(this.pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier) ||
-        isEmpty(this.pipeline.dataAnalytics?.redshift?.provisioned.dbUser)) {
-        throw new ClickStreamBadRequestError('Cluster Identifier and DbUser are required when using Redshift Provisioned cluster.');
-      }
-      parameters.push({
-        ParameterKey: 'RedshiftClusterIdentifier',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier,
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftDbUser',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.provisioned.dbUser,
-      });
-    } else if (this.pipeline.dataAnalytics?.redshift?.newServerless) {
-      parameters.push({
-        ParameterKey: 'RedshiftMode',
-        ParameterValue: REDSHIFT_MODE.NEW_SERVERLESS,
-      });
-      let workgroupName = `clickstream-${this.project?.id.replace(/_/g, '-')}`;
-      if (workgroupName.length > 120) {
-        workgroupName = workgroupName.substring(0, 120);
-      }
-      parameters.push({
-        ParameterKey: 'NewRedshiftServerlessWorkgroupName',
-        ParameterValue: workgroupName,
-      });
-
-      validatePattern('VpcId', VPC_ID_PARRERN, this.pipeline.dataAnalytics?.redshift?.newServerless.network.vpcId);
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessVPCId',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.vpcId,
-      });
-
-      validatePattern('RedshiftServerlessSubnets', SUBNETS_THREE_AZ_PATTERN,
-        this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','));
-      await validateSubnetCrossThreeAZ(this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds);
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessSubnets',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','),
-      });
-
-      if (isEmpty(this.pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups)) {
-        throw new ClickStreamBadRequestError('SecurityGroups required for provisioning new Redshift Serverless.');
-      }
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessSGs',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups.join(','),
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessRPU',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.newServerless.baseCapacity.toString(),
-      });
-    } else if (this.pipeline.dataAnalytics?.redshift?.existingServerless) {
-      parameters.push({
-        ParameterKey: 'RedshiftMode',
-        ParameterValue: REDSHIFT_MODE.SERVERLESS,
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessNamespaceId',
-        ParameterValue: this.redshift?.serverless?.namespaceId,
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessWorkgroupId',
-        ParameterValue: this.redshift?.serverless?.workgroupId,
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessWorkgroupName',
-        ParameterValue: this.redshift?.serverless?.workgroupName,
-      });
-      parameters.push({
-        ParameterKey: 'RedshiftServerlessIAMRole',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift?.existingServerless?.iamRoleArn,
-      });
-    }
-
-    return parameters;
-  }
-
-  private async getReportStackParameters() {
-    const parameters: Parameter[] = [];
-
-    validatePattern('QuickSightUser', QUICKSIGHT_USER_NAME_PATTERN, this.pipeline.report?.quickSight?.user);
-    parameters.push({
-      ParameterKey: 'QuickSightUserParam',
-      ParameterValue: this.pipeline.report?.quickSight?.user,
-    });
-
-    validatePattern('QuickSightNamespace', QUICKSIGHT_NAMESPACE_PATTERN, this.pipeline.report?.quickSight?.namespace ?? 'default');
-    parameters.push({
-      ParameterKey: 'QuickSightNamespaceParam',
-      ParameterValue: this.pipeline.report?.quickSight?.namespace ?? 'default',
-    });
-
-    parameters.push({
-      ParameterKey: 'RedshiftDBParam',
-      ParameterValue: this.pipeline.projectId,
-    });
-
-    parameters.push({
-      ParameterKey: 'RedShiftDBSchemaParam',
-      ParameterValue: this.appIds?.join(','),
-    });
-
-    if (!this.quickSightTemplateArn) {
-      throw new ClickStreamBadRequestError('QuickSightTemplateArn can not found in dictionary.');
-    }
-    parameters.push({
-      ParameterKey: 'QuickSightTemplateArnParam',
-      ParameterValue: this.quickSightTemplateArn.data,
-    });
-
-    const dataAnalyticsStackName = this.getStackName(PipelineStackType.DATA_ANALYTICS);
-    if (this.pipeline.dataAnalytics?.redshift?.provisioned || this.pipeline.dataAnalytics?.redshift?.existingServerless) {
-      parameters.push({
-        ParameterKey: 'RedshiftEndpointParam',
-        ParameterValue: this.redshift?.endpoint.address ?? '',
-      });
-
-      parameters.push({
-        ParameterKey: 'RedshiftPortParam',
-        ParameterValue: (this.redshift?.endpoint.port ?? 5439).toString(),
-      });
-
-      parameters.push({
-        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
-        ParameterValue: this.redshift?.network.subnetIds?.join(','),
-      });
-
-      parameters.push({
-        ParameterKey: 'QuickSightVpcConnectionSGParam',
-        ParameterValue: this.redshift?.network.securityGroups?.join(','),
-      });
-    } else if (this.pipeline.dataAnalytics?.redshift?.newServerless) {
-      parameters.push({
-        ParameterKey: 'RedshiftEndpointParam.#',
-        ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS}`,
-      });
-
-      parameters.push({
-        ParameterKey: 'RedshiftPortParam.#',
-        ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT}`,
-      });
-
-      parameters.push({
-        ParameterKey: 'QuickSightVpcConnectionSubnetParam',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift.newServerless.network.subnetIds.join(','),
-      });
-
-      parameters.push({
-        ParameterKey: 'QuickSightVpcConnectionSGParam',
-        ParameterValue: this.pipeline.dataAnalytics?.redshift.newServerless.network.securityGroups.join(','),
-      });
-    }
-
-    parameters.push({
-      ParameterKey: 'RedshiftParameterKeyParam.#',
-      ParameterValue: `#.${dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`,
-    });
-
-    return parameters;
-  }
 
   public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {
-    const stack = await describeStack(this.pipeline.region, this.getStackName(stackType));
+    const stack = await describeStack(this.pipeline.region, getStackName(this.pipeline.pipelineId, stackType));
     const res: Map<string, string> = new Map<string, string>();
     if (stack) {
       for (let suffix of outputKeySuffixs) {
@@ -1406,14 +706,6 @@ export class CPipeline {
       }
     }
     return res;
-  }
-
-  private getKafkaTopic() {
-    let kafkaTopic = this.pipeline.projectId;
-    if (!isEmpty(this.pipeline.ingestionServer.sinkKafka?.topic)) {
-      kafkaTopic = this.pipeline.ingestionServer.sinkKafka?.topic ?? this.pipeline.projectId;
-    }
-    return kafkaTopic;
   }
 
   public async getReportDashboardsUrl() {

@@ -70,7 +70,7 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
         >
           <Input
             placeholder="2"
-            value={pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount}
+            value={pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount.toString()}
             type="number"
             onChange={(e) => {
               changeKDSShardNumber(e.detail.value);

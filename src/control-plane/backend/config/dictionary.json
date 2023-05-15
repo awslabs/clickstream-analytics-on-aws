@@ -26,11 +26,11 @@
     }
   },
   {
-    "name": "BuildInPlugins",
+    "name": "BuiltInPlugins",
     "data": [
       {
-        "id": "BUILDIN-1",
-        "type": "PLUGIN#BUILDIN-1",
+        "id": "BUILT-IN-1",
+        "type": "PLUGIN#BUILT-IN-1",
         "prefix": "PLUGIN",
         "name": "Transformer",
         "description": "Description of Transformer",
@@ -46,8 +46,8 @@
         "updateAt": 1667355960000
       },
       {
-        "id": "BUILDIN-2",
-        "type": "PLUGIN#BUILDIN-2",
+        "id": "BUILT-IN-2",
+        "type": "PLUGIN#BUILT-IN-2",
         "prefix": "PLUGIN",
         "name": "UAEnrichment",
         "description": "Description of UAEnrichment",
@@ -63,8 +63,8 @@
         "updateAt": 1667355960000
       },
       {
-        "id": "BUILDIN-3",
-        "type": "PLUGIN#BUILDIN-3",
+        "id": "BUILT-IN-3",
+        "type": "PLUGIN#BUILT-IN-3",
         "prefix": "PLUGIN",
         "name": "IPEnrichment",
         "description": "Description of IPEnrichment",

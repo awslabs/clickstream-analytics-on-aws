@@ -27,12 +27,12 @@ import {
   PARAMETER_LABEL_PUBLIC_SUBNETS,
   PARAMETER_LABEL_RECORD_NAME,
   PARAMETER_LABEL_VPCID,
-  RECORD_NAME_PARRERN,
+  RECORD_NAME_PATTERN,
   SUBNETS_PATTERN,
-  VPC_ID_PARRERN,
+  VPC_ID_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
-  IAM_CERTIFICATE_ID_PARRERN,
+  IAM_CERTIFICATE_ID_PATTERN,
   OIDC_ISSUER_PATTERN,
   OIDC_CLIENT_ID_PATTERN,
   PARAMETER_LABEL_OIDC_ISSUER,
@@ -117,8 +117,8 @@ export class Parameters {
     return new CfnParameter(scope, id ?? 'IAMCertificateId', {
       description: 'The IAM certificate id.',
       type: 'String',
-      allowedPattern: `^${IAM_CERTIFICATE_ID_PARRERN}$`,
-      constraintDescription: `Certifiate id must match pattern ${IAM_CERTIFICATE_ID_PARRERN}`,
+      allowedPattern: `^${IAM_CERTIFICATE_ID_PATTERN}$`,
+      constraintDescription: `Certifiate id must match pattern ${IAM_CERTIFICATE_ID_PATTERN}`,
     });
   }
 
@@ -126,13 +126,13 @@ export class Parameters {
     return new CfnParameter(scope, id ?? 'RecordName', {
       description: 'The record name of custom domain.',
       type: 'String',
-      allowedPattern: `${RECORD_NAME_PARRERN}`,
-      constraintDescription: `Record name must match pattern ${RECORD_NAME_PARRERN}`,
+      allowedPattern: `${RECORD_NAME_PATTERN}`,
+      constraintDescription: `Record name must match pattern ${RECORD_NAME_PATTERN}`,
     });
   }
 
   public static createVpcIdParameter(scope: Construct, id?: string, props: ParameterProps = {}) : CfnParameter {
-    const allowedPattern = props.allowedPattern ?? `^${VPC_ID_PARRERN}$`;
+    const allowedPattern = props.allowedPattern ?? `^${VPC_ID_PATTERN}$`;
     return new CfnParameter(scope, id ?? 'VpcId', {
       description: 'Select the virtual private cloud (VPC).',
       type: 'AWS::EC2::VPC::Id',

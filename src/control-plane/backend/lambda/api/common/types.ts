@@ -333,3 +333,13 @@ export interface ReportDashboardOutput {
   readonly dashboardId: string;
 }
 
+export enum BucketPrefix {
+  LOGS_ALB = 'logs-alb',
+  LOGS_KAFKA_CONNECTOR = 'logs-kafka-connector',
+  DATA_BUFFER = 'data-buffer',
+  DATA_ODS = 'data-ods',
+  DATA_PIPELINE_TEMP = 'data-pipeline-temp',
+  KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
+}
+
+

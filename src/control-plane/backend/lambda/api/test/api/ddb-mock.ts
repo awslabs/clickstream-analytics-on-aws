@@ -25,7 +25,7 @@ const MOCK_APP_ID = 'app_7777_7777';
 const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
 const MOCK_EXECUTION_ID = 'main-3333-3333';
-const MOCK_BUILDIN_PLUGIN_ID = 'BUILDIN-1';
+const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -120,19 +120,19 @@ function pluginExistedMock(ddbMock: any, existed: boolean): any {
 }
 
 function dictionaryMock(ddbMock: any, name?: string): any {
-  if (!name || name === 'BuildInPlugins') {
+  if (!name || name === 'BuiltInPlugins') {
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
       Key: {
-        name: 'BuildInPlugins',
+        name: 'BuiltInPlugins',
       },
     }).resolves({
       Item: {
-        name: 'BuildInPlugins',
+        name: 'BuiltInPlugins',
         data: [
           {
-            id: 'BUILDIN-1',
-            type: 'PLUGIN#BUILDIN-1',
+            id: 'BUILT-IN-1',
+            type: 'PLUGIN#BUILT-IN-1',
             prefix: 'PLUGIN',
             name: 'Transformer',
             description: 'Description of Transformer',
@@ -148,8 +148,8 @@ function dictionaryMock(ddbMock: any, name?: string): any {
             updateAt: '1667355960000',
           },
           {
-            id: 'BUILDIN-2',
-            type: 'PLUGIN#BUILDIN-2',
+            id: 'BUILT-IN-2',
+            type: 'PLUGIN#BUILT-IN-2',
             prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: 'Description of UAEnrichment',
@@ -165,8 +165,8 @@ function dictionaryMock(ddbMock: any, name?: string): any {
             updateAt: '1667355960000',
           },
           {
-            id: 'BUILDIN-3',
-            type: 'PLUGIN#BUILDIN-3',
+            id: 'BUILT-IN-3',
+            type: 'PLUGIN#BUILT-IN-3',
             prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: 'Description of IPEnrichment',
@@ -372,7 +372,7 @@ export {
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,
   MOCK_EXECUTION_ID,
-  MOCK_BUILDIN_PLUGIN_ID,
+  MOCK_BUILT_IN_PLUGIN_ID,
   tokenMock,
   projectExistedMock,
   appExistedMock,

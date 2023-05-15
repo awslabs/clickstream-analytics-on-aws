@@ -17,7 +17,7 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PARRERN,
+  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
 } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
@@ -161,7 +161,7 @@ export function createStackParameters(scope: Construct): {
     minValue: 8,
   });
   const redshiftServerlessVPCId = Parameters.createVpcIdParameter(scope, 'RedshiftServerlessVPCId', {
-    allowedPattern: `(${VPC_ID_PARRERN})?`,
+    allowedPattern: `(${VPC_ID_PATTERN})?`,
     default: '',
     type: 'String',
   });

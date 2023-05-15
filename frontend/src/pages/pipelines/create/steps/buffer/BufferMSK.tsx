@@ -31,7 +31,7 @@ interface BufferMSKProps {
   pipelineInfo: IExtPipeline;
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
-  changeSelectedMSK: (msk: SelectProps.Option) => void;
+  changeSelectedMSK: (msk: SelectProps.Option, mskCluster: MSKResponse) => void;
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
@@ -52,6 +52,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const [loadingMSK, setLoadingMSK] = useState(false);
   const [loadingSG, setLoadingSG] = useState(false);
   const [mskOptionList, setMSKOptionList] = useState<AutosuggestProps.Options>(
+    []
+  );
+  const [mskClusterList, setMSKClusterList] = useState<MSKResponse[]>(
     []
   );
   const [vpcSGOptionList, setVpcSGOptionList] = useState<SelectProps.Options>(
@@ -77,6 +80,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
             element.type === 'SERVERLESS' ||
             element.authentication.indexOf('Unauthenticated') === -1,
         }));
+        setMSKClusterList(data);
         setMSKOptionList(mskOptions);
         setLoadingMSK(false);
       }
@@ -152,8 +156,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                               }
                               statusType={loadingMSK ? 'loading' : 'finished'}
                               selectedOption={pipelineInfo.selectedMSK}
-                              onChange={({ detail }) =>
-                                changeSelectedMSK(detail.selectedOption)
+                              onChange={({ detail }) => {
+                                const clusters: MSKResponse[] = mskClusterList.filter((cluster) =>
+                                  cluster.arn === detail.selectedOption.value
+                                );
+                                changeSelectedMSK(detail.selectedOption, clusters[0])
+                              }
                               }
                               options={mskOptionList}
                               filteringType="auto"

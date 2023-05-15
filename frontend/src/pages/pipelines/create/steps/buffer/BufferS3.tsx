@@ -111,7 +111,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         <Input
           type="number"
           placeholder="10"
-          value={pipelineInfo.ingestionServer.sinkS3.s3BufferSize}
+          value={pipelineInfo.ingestionServer.sinkS3.s3BufferSize.toString()}
           onChange={(e) => {
             changeS3BufferSize(e.detail.value);
           }}
@@ -125,7 +125,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         <Input
           placeholder="300"
           type="number"
-          value={pipelineInfo.ingestionServer.sinkS3.s3BufferInterval}
+          value={pipelineInfo.ingestionServer.sinkS3.s3BufferInterval.toString()}
           onChange={(e) => {
             changeBufferInterval(e.detail.value);
           }}

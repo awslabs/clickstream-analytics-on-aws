@@ -13,7 +13,8 @@
 
 import { Tag } from '@aws-sdk/client-ec2';
 import { logger } from './powertools';
-import { ALBRegionMappingObject } from './types';
+import { ALBRegionMappingObject, BucketPrefix, PipelineStackType } from './types';
+import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -77,6 +78,89 @@ function getEmailFromRequestContext(requestContext: string | undefined) {
   return email;
 }
 
+
+function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
+  if (value === undefined || value === '' || value === '/') {
+    const prefixs: Map<string, string> = new Map();
+    prefixs.set(BucketPrefix.LOGS_ALB, `clickstream/${projectId}/logs/alb/`);
+    prefixs.set(BucketPrefix.LOGS_KAFKA_CONNECTOR, `clickstream/${projectId}/logs/kafka-connector/`);
+    prefixs.set(BucketPrefix.DATA_BUFFER, `clickstream/${projectId}/data/buffer/`);
+    prefixs.set(BucketPrefix.DATA_ODS, `clickstream/${projectId}/data/ods/`);
+    prefixs.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
+    prefixs.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
+    return prefixs.get(key) ?? '';
+  }
+  if (!value.endsWith('/')) {
+    return `${value}/`;
+  }
+  return value;
+}
+
+function getStackName(pipelineId: string, key: PipelineStackType, sinkType?: string): string {
+  const names: Map<string, string> = new Map();
+  names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
+  names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
+  names.set(PipelineStackType.ETL, `Clickstream-${PipelineStackType.ETL}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${pipelineId}`);
+  names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${pipelineId}`);
+  return names.get(key) ?? '';
+}
+
+function getKafkaTopic(pipeline: IPipeline):string {
+  let kafkaTopic = pipeline.projectId;
+  if (!isEmpty(pipeline.ingestionServer.sinkKafka?.topic)) {
+    kafkaTopic = pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId;
+  }
+  return kafkaTopic;
+}
+
+function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources ) {
+  const transformerAndEnrichClassNames: string[] = [];
+  const s3PathPluginJars: string[] = [];
+  let s3PathPluginFiles: string[] = [];
+  // Transformer
+  if (!isEmpty(pipeline.etl?.transformPlugin) && !pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
+    const transformer = resources!.plugins?.filter(p => p.id === pipeline.etl?.transformPlugin)[0];
+    if (transformer?.mainFunction) {
+      transformerAndEnrichClassNames.push(transformer?.mainFunction);
+    }
+    if (transformer?.jarFile) {
+      s3PathPluginJars.push(transformer?.jarFile);
+    }
+    if (transformer?.dependencyFiles) {
+      s3PathPluginFiles = s3PathPluginFiles.concat(transformer?.dependencyFiles);
+    }
+  } else {
+    let defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
+    if (defaultTransformer?.mainFunction) {
+      transformerAndEnrichClassNames.push(defaultTransformer?.mainFunction);
+    }
+  }
+  // Enrich
+  if (pipeline.etl?.enrichPlugin) {
+    for (let enrichPluginId of pipeline.etl?.enrichPlugin) {
+      const enrich = resources.plugins?.filter(p => p.id === enrichPluginId)[0];
+      if (!enrich?.id.startsWith('BUILT-IN')) {
+        if (enrich?.jarFile) {
+          s3PathPluginJars.push(enrich?.jarFile);
+        }
+        if (enrich?.dependencyFiles) {
+          s3PathPluginFiles = s3PathPluginFiles.concat(enrich?.dependencyFiles);
+        }
+      }
+      if (enrich?.mainFunction) {
+        transformerAndEnrichClassNames.push(enrich?.mainFunction);
+      }
+    }
+  }
+
+  return {
+    transformerAndEnrichClassNames,
+    s3PathPluginJars,
+    s3PathPluginFiles,
+  };
+}
+
 export {
   isEmpty,
   tryToJson,
@@ -84,4 +168,8 @@ export {
   getRegionAccount,
   generateRandomStr,
   getEmailFromRequestContext,
+  getBucketPrefix,
+  getStackName,
+  getKafkaTopic,
+  getPluginInfo,
 };

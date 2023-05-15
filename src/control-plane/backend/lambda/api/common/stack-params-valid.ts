@@ -13,6 +13,7 @@
 
 import { ClickStreamBadRequestError, IngestionServerSinkBatchProps, PipelineSinkType } from './types';
 import { getSubnet } from '../store/aws/ec2';
+import { getSecretValue } from '../store/aws/secretsmanager';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
@@ -26,12 +27,14 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
   return true;
 };
 
-export const validateSecretModel = (secretValue: string | undefined) => {
+export const validateSecretModel = async (region: string, key: string, secretArn: string, pattern: string ) => {
   try {
-    if (!secretValue) {
+    validatePattern(key, pattern, secretArn);
+    const secretContent = await getSecretValue(region, secretArn);
+    if (!secretContent) {
       throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret is undefined. Please check and try again.');
     }
-    const secret = JSON.parse(secretValue);
+    const secret = JSON.parse(secretContent);
     const keys = secret.issuer &&
       secret.userEndpoint &&
       secret.authorizationEndpoint &&
