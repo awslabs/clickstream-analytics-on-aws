@@ -26,7 +26,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
-enum StackAction {
+export enum StackAction {
   CREATE = 'Create',
   UPDATE = 'Update',
   DELETE = 'Delete',
@@ -35,7 +35,7 @@ enum StackAction {
   END = 'End',
 }
 
-interface SfnStackEvent {
+export interface SfnStackEvent {
   readonly Action: StackAction;
   readonly Input: SfnStackInput;
   readonly Callback?: SfnStackCallback;
@@ -173,7 +173,8 @@ export const deleteStack = async (event: SfnStackEvent) => {
 };
 
 export const describeStack = async (event: SfnStackEvent) => {
-  const stack = await describe(event.Input.Region, event.Input.StackName);
+  const stackName = event.Result?.StackId ? event.Result?.StackId : event.Input.StackName;
+  const stack = await describe(event.Input.Region, stackName);
   if (!stack) {
     throw Error('Describe Stack failed.');
   }
