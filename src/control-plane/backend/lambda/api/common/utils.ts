@@ -96,7 +96,7 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
   return value;
 }
 
-function getStackName(pipelineId: string, key: PipelineStackType, sinkType?: string): string {
+function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
   const names: Map<string, string> = new Map();
   names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
   names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);

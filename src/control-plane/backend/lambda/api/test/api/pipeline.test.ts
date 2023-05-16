@@ -569,6 +569,50 @@ describe('Pipeline test', () => {
       error: 'Error',
     });
   });
+  it('Get pipeline by with ingestion server endpoint', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand).resolves({
+      Item: S3_INGESTION_PIPELINE,
+    });
+    cloudFormationClient
+      .on(DescribeStacksCommand, {
+        StackName: 'Clickstream-Ingestion-s3-6666-6666',
+      })
+      .resolves({
+        Stacks: [
+          {
+            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+            Outputs: [
+              {
+                OutputKey: 'IngestionServerC000IngestionServerURL',
+                OutputValue: 'http://xxx/xxx',
+              },
+              {
+                OutputKey: 'IngestionServerC000IngestionServerDNS',
+                OutputValue: 'http://yyy/yyy',
+              },
+            ],
+            StackStatus: StackStatus.CREATE_COMPLETE,
+            CreationTime: new Date(),
+          },
+        ],
+      });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 3);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ...S3_INGESTION_PIPELINE,
+        dns: 'http://yyy/yyy',
+        endpoint: 'http://xxx/xxx',
+        dashboards: [],
+      },
+    });
+  });
   it('Get pipeline with no pid', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({});

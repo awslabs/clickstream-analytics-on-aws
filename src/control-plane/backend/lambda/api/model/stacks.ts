@@ -945,7 +945,7 @@ export class CReportStack extends JSONObject {
     super({
       _pipeline: pipeline,
       _resources: resources,
-      _dataAnalyticsStackName: getStackName(pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS),
+      _dataAnalyticsStackName: getStackName(pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, pipeline.ingestionServer.sinkType),
 
       QuickSightUserParam: pipeline.report?.quickSight?.user,
       QuickSightNamespaceParam: pipeline.report?.quickSight?.namespace,

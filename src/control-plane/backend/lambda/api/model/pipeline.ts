@@ -280,9 +280,12 @@ export class CPipeline {
   }
 
   public async updateETL(appIds: string[]): Promise<void> {
-    const etlStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL);
-    const analyticsStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS);
-    const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT);
+    const etlStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.ETL, this.pipeline.ingestionServer.sinkType);
+    const analyticsStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
+    const reportStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
     // update workflow
     this.stackManager.updateETLWorkflow(appIds, etlStackName, analyticsStackName, reportStackName);
     // create new execution
@@ -534,7 +537,8 @@ export class CPipeline {
         }
         const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
         const kafkaConnectorStackParameters = kafkaConnectorStack.parameters();
-        const kafkaConnectorStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR);
+        const kafkaConnectorStackName = getStackName(
+          this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType);
         const kafkaConnectorState: WorkflowState = {
           Type: WorkflowStateType.STACK,
           Data: {
@@ -581,7 +585,7 @@ export class CPipeline {
 
       const pipelineStack = new CETLStack(this.pipeline, this.resources!);
       const pipelineStackParameters = pipelineStack.parameters();
-      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL);
+      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL, this.pipeline.ingestionServer.sinkType);
       const etlState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -618,7 +622,8 @@ export class CPipeline {
 
       const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
       const dataAnalyticsStackParameters = dataAnalyticsStack.parameters();
-      const dataAnalyticsStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS);
+      const dataAnalyticsStackName = getStackName(
+        this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
       const dataAnalyticsState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -644,7 +649,7 @@ export class CPipeline {
         }
         const reportStack = new CReportStack(this.pipeline, this.resources!);
         const reportStackParameters = reportStack.parameters();
-        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT);
+        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
         const reportState: WorkflowState = {
           Type: WorkflowStateType.STACK,
           Data: {
@@ -689,7 +694,7 @@ export class CPipeline {
 
       const metricsStack = new CMetricsStack(this.pipeline);
       const metricsStackParameters = metricsStack.parameters();
-      const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS);
+      const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
       const metricsState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
@@ -719,7 +724,10 @@ export class CPipeline {
   }
 
   public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {
-    const stack = await describeStack(this.pipeline.region, getStackName(this.pipeline.pipelineId, stackType));
+    const stack = await describeStack(
+      this.pipeline.region,
+      getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
+    );
     const res: Map<string, string> = new Map<string, string>();
     if (stack) {
       for (let suffix of outputKeySuffixs) {
