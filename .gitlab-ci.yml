@@ -25,6 +25,7 @@ workflow:
 stages:
   - .pre
   - build
+  - deploy
   - qa
 main:
   stage: .pre

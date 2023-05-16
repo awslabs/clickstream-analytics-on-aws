@@ -1,5 +1,5 @@
 site_name: Clickstream Analytics on AWS
-repo_url: https://github.com/awslabs/clickstream-analytics-on-aws/
+repo_url: https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/
 
 
 theme:

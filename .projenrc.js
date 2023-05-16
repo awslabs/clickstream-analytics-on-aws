@@ -109,6 +109,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk.context.json',
     '.DS_Store',
     'docs/site/',
+    'public/',
     'frontend/amplify',
     'test-deploy*',
     'deployment/global-s3-assets/',
@@ -362,9 +363,10 @@ gitlabMain.createNestedTemplates({
   'docs': {
     stages: [
       'build',
+      'deploy',
     ],
     jobs: {
-      mkdocs: {
+      'doc-build': {
         stage: 'build',
         image: {
           name: 'public.ecr.aws/docker/library/python:3.9',
@@ -375,6 +377,35 @@ gitlabMain.createNestedTemplates({
         script: [
           'mkdocs build -f ./docs/mkdocs.en.yml -s',
           'mkdocs build -f ./docs/mkdocs.zh.yml -s',
+        ],
+        rules: [
+          {
+            if: '$CI_COMMIT_REF_NAME != $DOC_BRANCH',
+          },
+        ],
+      },
+      'pages': {
+        stage: 'deploy',
+        image: {
+          name: 'public.ecr.aws/docker/library/python:3.9',
+        },
+        before_script: [
+          'python3 -m pip install \'mkdocs<1.5\' \'mkdocs-material<10\' \'mkdocs-material-extensions<1.2\' \'mkdocs-include-markdown-plugin<5\' \'mkdocs-macros-plugin<1\'',
+        ],
+        script: [
+          'mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../public/en',
+          'mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../public/zh',
+          'cp -av ./docs/index.html ./public',
+        ],
+        artifacts: {
+          paths: [
+            'public',
+          ],
+        },
+        rules: [
+          {
+            if: '$CI_COMMIT_REF_NAME == $DOC_BRANCH',
+          },
         ],
       },
     },
