@@ -21,8 +21,6 @@ import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, de
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
-  createAccountSubscription,
-  deleteAccountSubscription,
   describeClickstreamAccountSubscription,
   listQuickSightUsers,
   quickSightPing,
@@ -218,23 +216,6 @@ export class EnvironmentServ {
       if (!result) {
         return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
       }
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-  public async createAccountSubscription(req: any, res: any, next: any) {
-    try {
-      const { email, accountName } = req.body;
-      const result = await createAccountSubscription(email, accountName);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-  public async deleteAccountSubscription(_req: any, res: any, next: any) {
-    try {
-      const result = await deleteAccountSubscription();
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

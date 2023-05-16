@@ -11,8 +11,7 @@
     "projects": "Projects",
     "plugins": "Plugins",
     "createPlugin": "Create Plugin",
-    "registerApp": "Register Application",
-    "quicksight": "QuickSight"
+    "registerApp": "Register Application"
   },
   "nav": {
     "home": "Home",
@@ -26,7 +25,6 @@
     "tools": "Tools",
     "simuTest": "Simulation testing",
     "sdkIntegration": "SDK integration",
-    "quickSight": "QuickSight",
     "notifications": "Notifications",
     "doc": "Documentation"
   },
@@ -227,7 +225,6 @@
     "viewAlarmInCloudWatch": "View in Alarms Group in CloudWatch",
     "registerAndGenerate": "Register App & Generate SDK instructions",
     "acknowledge": "Acknowledge",
-    "subscribe": "Subscribe",
     "createNew": "Create New",
     "close": "Close",
     "unsubscribe": "Unsubscribe",

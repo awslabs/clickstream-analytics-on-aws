@@ -37,6 +37,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ErrorCode } from 'ts/const';
+import { buildQuickSightSubscriptionLink } from 'ts/url';
 import { alertMsg } from 'ts/utils';
 
 interface ReportingProps {
@@ -228,21 +229,16 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                   {!quickSightEnabled && (
                     <Alert
                       type="warning"
-                      action={
-                        <SpaceBetween size="xs" direction="horizontal">
-                          <Button
-                            loading={loadingSubscription}
-                            onClick={() => {
-                              setShowSubQuickSight(true);
-                            }}
-                          >
-                            {t('button.subscribe')}
-                          </Button>
-                        </SpaceBetween>
-                      }
                       header={t('pipeline:create.quickSightNotSub')}
                     >
-                      {t('pipeline:create.quickSightNotSubDesc')}
+                      {t('pipeline:create.quickSightNotSubDesc1')}
+                      <Link 
+                      external
+                      href={buildQuickSightSubscriptionLink()}
+                      > 
+                      {t('pipeline:create.quickSightSubscription')}
+                      </Link>
+                      {t('pipeline:create.quickSightNotSubDesc2')}
                     </Alert>
                   )}
 

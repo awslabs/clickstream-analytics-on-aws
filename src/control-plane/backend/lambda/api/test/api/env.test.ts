@@ -27,8 +27,7 @@ import {
   QuickSightClient,
   ListUsersCommand,
   RegisterUserCommand,
-  CreateAccountSubscriptionCommand,
-  UpdateAccountSettingsCommand, DeleteAccountSubscriptionCommand, DescribeAccountSubscriptionCommand,
+  DescribeAccountSubscriptionCommand,
 } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
@@ -1002,74 +1001,6 @@ describe('Account Env test', () => {
       message: '',
       data: 'http://xxx',
     });
-  });
-  it('Subscription QuickSight', async () => {
-    tokenMock(ddbMock, false);
-    quickSightClient.on(CreateAccountSubscriptionCommand).resolves({
-      SignupResponse: { accountName: 'Clickstream-ssxs' },
-    });
-    quickSightClient.on(DescribeAccountSubscriptionCommand)
-      .resolvesOnce({
-        AccountInfo: {
-          AccountName: 'Clickstream-xsxs',
-          Edition: 'ENTERPRISE',
-          NotificationEmail: 'fake@example.com',
-          AuthenticationType: 'IDENTITY_POOL',
-          AccountSubscriptionStatus: 'SUBSCRIPTION_IN_PROGRESS',
-        },
-      })
-      .resolvesOnce({
-        AccountInfo: {
-          AccountName: 'Clickstream-xsxs',
-          Edition: 'ENTERPRISE',
-          NotificationEmail: 'fake@example.com',
-          AuthenticationType: 'IDENTITY_POOL',
-          AccountSubscriptionStatus: 'SUBSCRIPTION_IN_PROGRESS',
-        },
-      })
-      .resolvesOnce({
-        AccountInfo: {
-          AccountName: 'Clickstream-xsxs',
-          Edition: 'ENTERPRISE',
-          NotificationEmail: 'fake@example.com',
-          AuthenticationType: 'IDENTITY_POOL',
-          AccountSubscriptionStatus: 'ACCOUNT_CREATED',
-        },
-      });
-    let res = await request(app)
-      .post('/api/env/quicksight/subscription')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        email: 'fake@example.com',
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        accountName: 'Clickstream-ssxs',
-        vpcConnectionsUrl: 'https://us-east-1.quicksight.aws.amazon.com/sn/admin#vpc-connections',
-      },
-    });
-    expect(quickSightClient).toHaveReceivedCommandTimes(CreateAccountSubscriptionCommand, 1);
-    expect(quickSightClient).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 3);
-  });
-  it('UnSubscription QuickSight', async () => {
-    tokenMock(ddbMock, false);
-    quickSightClient.on(UpdateAccountSettingsCommand).resolves({});
-    quickSightClient.on(DeleteAccountSubscriptionCommand).resolves({});
-    let res = await request(app)
-      .post('/api/env/quicksight/unsubscription')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-    });
-    expect(quickSightClient).toHaveReceivedCommandTimes(UpdateAccountSettingsCommand, 1);
-    expect(quickSightClient).toHaveReceivedCommandTimes(DeleteAccountSubscriptionCommand, 1);
   });
   it('Describe QuickSight', async () => {
     quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({

@@ -255,22 +255,6 @@ app.get(
     return environmentServ.describeAccountSubscription(req, res, next);
   });
 
-app.post(
-  '/api/env/quicksight/subscription',
-  validate([
-    body('email').isEmail(),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.createAccountSubscription(req, res, next);
-  });
-
-app.post(
-  '/api/env/quicksight/unsubscription',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.deleteAccountSubscription(req, res, next);
-  });
-
 app.get(
   '/api/env/athena/workgroups',
   validate([
