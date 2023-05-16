@@ -317,10 +317,9 @@ describe('Pipeline test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send(S3_INGESTION_PIPELINE);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
+    expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      error: 'Error',
-      message: 'Unexpected error occurred at server.',
+      message: 'Template: ingestion_s3 not found in dictionary.',
       success: false,
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
@@ -484,6 +483,10 @@ describe('Pipeline test', () => {
               OutputKey: 'Dashboards',
               OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
             },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
           ],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
@@ -511,6 +514,7 @@ describe('Pipeline test', () => {
             dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
           },
         ],
+        metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy'
       },
     });
   });
@@ -540,6 +544,7 @@ describe('Pipeline test', () => {
         dns: '',
         endpoint: '',
         dashboards: [],
+        metricsDashboardName: '',
       },
     });
   });
@@ -1019,6 +1024,13 @@ describe('Pipeline test', () => {
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
       ],
       status: 'Failed',
     });
@@ -1096,6 +1108,13 @@ describe('Pipeline test', () => {
         {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
@@ -1181,6 +1200,13 @@ describe('Pipeline test', () => {
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
       ],
       status: 'Updating',
     });
@@ -1262,6 +1288,13 @@ describe('Pipeline test', () => {
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'DELETE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
       ],
       status: 'Deleting',
     });
@@ -1331,6 +1364,13 @@ describe('Pipeline test', () => {
         {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
@@ -1408,6 +1448,13 @@ describe('Pipeline test', () => {
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
         },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
       ],
       status: 'Active',
     });
@@ -1477,6 +1524,13 @@ describe('Pipeline test', () => {
         {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
@@ -1554,6 +1608,13 @@ describe('Pipeline test', () => {
         {
           stackName: 'Clickstream-DataAnalytics-6666-6666',
           stackType: 'DataAnalytics',
+          stackStatus: 'UPDATE_FAILED',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
           url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',

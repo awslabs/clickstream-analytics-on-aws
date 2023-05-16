@@ -258,6 +258,7 @@ export enum PipelineStackType {
   ETL = 'ETL',
   DATA_ANALYTICS = 'DataAnalytics',
   REPORT = 'Report',
+  METRICS = 'Metrics',
 }
 
 export enum PipelineStatusType {
@@ -342,4 +343,9 @@ export enum BucketPrefix {
   KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
 }
 
+export enum MetricsLegendPosition {
+  RIGHT = 'right',
+  BOTTOM = 'bottom',
+  HIDDEN = 'hidden',
+}
 

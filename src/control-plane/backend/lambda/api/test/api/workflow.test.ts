@@ -44,7 +44,7 @@ import {
 } from './pipeline-mock';
 import {
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-  BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
+  BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_PARAMETERS,
   ETL_PLUGIN1_PARAMETERS,
   ETL_PLUGIN2_PARAMETERS,
   ETL_PLUGIN3_PARAMETERS,
@@ -142,6 +142,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -181,6 +204,29 @@ describe('Workflow test', () => {
                 },
                 Type: 'Stack',
                 End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
               },
             },
           },
@@ -237,6 +283,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -305,6 +374,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -348,6 +440,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -383,6 +498,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -448,6 +586,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-ETL-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -561,6 +722,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -659,6 +843,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -737,6 +944,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -840,6 +1070,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-Report-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -960,6 +1213,29 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -1067,6 +1343,29 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -1191,6 +1490,28 @@ describe('Workflow test', () => {
               },
             },
           },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
         ],
         End: true,
         Type: 'Parallel',
@@ -1300,6 +1621,28 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     StackName: 'Clickstream-Report-e9a8f34fbf734ca4950787f1ad818989',
                     TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
                 End: true,
@@ -1419,6 +1762,28 @@ describe('Workflow test', () => {
                   },
                 },
                 Next: 'Report',
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
                 Type: 'Stack',
               },
             },

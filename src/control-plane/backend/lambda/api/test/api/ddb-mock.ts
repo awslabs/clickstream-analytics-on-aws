@@ -202,6 +202,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           'data-pipeline': 'data-pipeline-stack.template.json',
           'data-analytics': 'data-analytics-redshift-stack.template.json',
           'reporting': 'data-reporting-quicksight-stack.template.json',
+          'metrics': 'metrics-stack.template.json',
         },
       },
     });

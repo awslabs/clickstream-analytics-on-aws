@@ -16,13 +16,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CReportStack } from './stacks';
+import { CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportStack } from './stacks';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
   OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+  OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -495,6 +496,10 @@ export class CPipeline {
         workflowTemplate.Workflow.Branches?.push(branch);
       }
     }
+    const metricsBranch = await this.getWorkflowStack(PipelineStackType.METRICS);
+    if (metricsBranch) {
+      workflowTemplate.Workflow.Branches?.push(metricsBranch);
+    }
     return workflowTemplate;
   }
 
@@ -502,12 +507,12 @@ export class CPipeline {
     await this.resourcesCheck();
 
     if (!stackWorkflowS3Bucket) {
-      throw new Error('Stack Workflow S3Bucket can not empty.');
+      throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
     }
     if (type === PipelineStackType.INGESTION) {
       const ingestionTemplateURL = await this.getTemplateUrl(`ingestion_${this.pipeline.ingestionServer.sinkType}`);
       if (!ingestionTemplateURL) {
-        throw Error(`Template: ingestion_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+        throw new ClickStreamBadRequestError(`Template: ingestion_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
       }
       const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
       const ingestionStackParameters = ingestionStack.parameters();
@@ -533,7 +538,7 @@ export class CPipeline {
       if (this.pipeline.ingestionServer.sinkType === 'kafka' && this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
         const kafkaConnectorTemplateURL = await this.getTemplateUrl('kafka-s3-sink');
         if (!kafkaConnectorTemplateURL) {
-          throw Error('Template: kafka-s3-sink not found in dictionary.');
+          throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
         }
         const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
         const kafkaConnectorStackParameters = kafkaConnectorStack.parameters();
@@ -579,7 +584,7 @@ export class CPipeline {
       }
       const dataPipelineTemplateURL = await this.getTemplateUrl('data-pipeline');
       if (!dataPipelineTemplateURL) {
-        throw Error('Template: data-pipeline not found in dictionary.');
+        throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
       }
 
       const pipelineStack = new CETLStack(this.pipeline, this.resources!);
@@ -616,7 +621,7 @@ export class CPipeline {
       }
       const dataAnalyticsTemplateURL = await this.getTemplateUrl('data-analytics');
       if (!dataAnalyticsTemplateURL) {
-        throw Error('Template: data-analytics not found in dictionary.');
+        throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
       }
 
       const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
@@ -643,7 +648,7 @@ export class CPipeline {
       if (this.pipeline.report) {
         const reportTemplateURL = await this.getTemplateUrl('reporting');
         if (!reportTemplateURL) {
-          throw Error('Template: quicksight not found in dictionary.');
+          throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
         }
         const reportStack = new CReportStack(this.pipeline, this.resources!);
         const reportStackParameters = reportStack.parameters();
@@ -681,6 +686,40 @@ export class CPipeline {
         StartAt: PipelineStackType.DATA_ANALYTICS,
         States: {
           [PipelineStackType.DATA_ANALYTICS]: dataAnalyticsState,
+        },
+      };
+    }
+    if (type === PipelineStackType.METRICS) {
+      const metricsTemplateURL = await this.getTemplateUrl('metrics');
+      if (!metricsTemplateURL) {
+        throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
+      }
+
+      const metricsStack = new CMetricsStack(this.pipeline);
+      const metricsStackParameters = metricsStack.parameters();
+      const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS);
+      const metricsState: WorkflowState = {
+        Type: WorkflowStateType.STACK,
+        Data: {
+          Input: {
+            Action: 'Create',
+            Region: this.pipeline.region,
+            StackName: metricsStackStackName,
+            TemplateURL: metricsTemplateURL,
+            Parameters: metricsStackParameters,
+            Tags: this.stackTags,
+          },
+          Callback: {
+            BucketName: stackWorkflowS3Bucket,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          },
+        },
+        End: true,
+      };
+      return {
+        StartAt: PipelineStackType.METRICS,
+        States: {
+          [PipelineStackType.METRICS]: metricsState,
         },
       };
     }
@@ -725,6 +764,16 @@ export class CPipeline {
       }
     }
     return dashboards;
+  }
+
+  public async getMetricsDashboardName() {
+    const metricsOutputs = await this.getStackOutputBySuffixs(
+      PipelineStackType.METRICS,
+      [
+        OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
+      ],
+    );
+    return metricsOutputs.get(OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME);
   }
 }
 

@@ -24,12 +24,14 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildMetricsDashboardLink } from 'ts/url';
 
 interface TabContentProps {
   pipelineInfo?: IPipeline;
 }
-const Monitoring: React.FC<TabContentProps> = () => {
+const Monitoring: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { t } = useTranslation();
+  const { pipelineInfo } = props;
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container>
@@ -40,10 +42,11 @@ const Monitoring: React.FC<TabContentProps> = () => {
           <SpaceBetween direction="vertical" size="s">
             <div className="mt-10">
               <Button
-                href="/"
+                href={buildMetricsDashboardLink(pipelineInfo?.region || '', pipelineInfo?.metricsDashboardName || '')}
                 iconAlign="right"
                 iconName="external"
                 target="_blank"
+                disabled={pipelineInfo?.region === undefined || pipelineInfo?.metricsDashboardName === undefined}
               >
                 {t('button.viewInCloudWatch')}
               </Button>

@@ -34,7 +34,7 @@ import { validatePattern, validateSinkBatch } from '../common/stack-params-valid
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
-  KinesisStreamMode,
+  KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
   PipelineStackType,
@@ -976,3 +976,40 @@ export class CReportStack extends JSONObject {
     return parameters;
   }
 }
+
+export class CMetricsStack extends JSONObject {
+
+  @JSONObject.required
+    ProjectId?: string;
+
+  @JSONObject.optional(4)
+  @JSONObject.gte(1)
+    ColumnNumber?: number;
+
+  @JSONObject.optional(MetricsLegendPosition.BOTTOM)
+    LegendPosition?: MetricsLegendPosition;
+
+  @JSONObject.optional('1')
+    Version?: string;
+
+  constructor(pipeline: IPipeline) {
+
+    super({
+      ProjectId: pipeline.projectId,
+    });
+  }
+
+  public parameters() {
+    const parameters: Parameter[] = [];
+    Object.entries(this).forEach(([k, v]) => {
+      if (!k.startsWith('_')) {
+        parameters.push({
+          ParameterKey: k,
+          ParameterValue: v ? v.toString() : '',
+        });
+      }
+    });
+    return parameters;
+  }
+}
+

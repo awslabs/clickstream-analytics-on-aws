@@ -103,6 +103,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType?: str
   names.set(PipelineStackType.ETL, `Clickstream-${PipelineStackType.ETL}-${pipelineId}`);
   names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${pipelineId}`);
   names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${pipelineId}`);
+  names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 

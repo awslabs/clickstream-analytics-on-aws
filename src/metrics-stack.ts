@@ -14,7 +14,7 @@
 import { CfnOutput, CfnParameter, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention } from './common/cfn-nag';
-import { PROJECT_ID_PATTERN } from './common/constant';
+import { OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, PROJECT_ID_PATTERN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { MetricAndAlarm } from './metrics/metrics';
 
@@ -65,7 +65,7 @@ export class MetricsStack extends Stack {
       legendPosition: legendPositionParam.valueAsString,
     });
 
-    new CfnOutput(this, 'ObservabilityDashboardName', {
+    new CfnOutput(this, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, {
       description: 'ObservabilityDashboardName',
       value: metrics.dashboard.dashboardName,
     });

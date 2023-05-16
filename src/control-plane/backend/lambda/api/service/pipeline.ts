@@ -79,11 +79,13 @@ export class PipelineServ {
         ],
       );
       const dashboards = await pipeline.getReportDashboardsUrl();
+      const metricsDashboardName = await pipeline.getMetricsDashboardName();
       return res.json(new ApiSuccess({
         ...latestPipeline,
         endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
         dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
         dashboards,
+        metricsDashboardName,
       }));
     } catch (error) {
       next(error);

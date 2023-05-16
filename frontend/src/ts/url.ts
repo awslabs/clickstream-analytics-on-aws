@@ -73,3 +73,7 @@ export const buildReshiftLink = (
 export const buildQuickSightDashboardLink = (region: string, dashboardId: string): string => {
   return `https://${region}.quicksight.aws.amazon.com/sn/dashboards/${dashboardId}`;
 };
+
+export const buildMetricsDashboardLink = (region: string, dashboardName: string): string => {
+  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
+};

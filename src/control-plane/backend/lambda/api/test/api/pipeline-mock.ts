@@ -14,6 +14,7 @@
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { BASE_METRICS_PARAMETERS } from './workflow-mock';
 import {
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -483,6 +484,13 @@ const BASE_STATUS = {
       stackStatusReason: '',
       url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
     },
+    {
+      stackName: `Clickstream-Report-${MOCK_PIPELINE_ID}`,
+      stackType: PipelineStackType.METRICS,
+      stackStatus: StackStatus.CREATE_COMPLETE,
+      stackStatusReason: '',
+      url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+    },
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -600,6 +608,28 @@ export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
             },
           },
           StartAt: 'DataAnalytics',
+        },
+        {
+          StartAt: 'Metrics',
+          States: {
+            Metrics: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                },
+                Input: {
+                  Action: 'Create',
+                  Region: 'ap-southeast-1',
+                  Parameters: BASE_METRICS_PARAMETERS,
+                  StackName: 'Clickstream-Metrics-6666-6666',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                },
+              },
+              End: true,
+              Type: WorkflowStateType.STACK,
+            },
+          },
         },
       ],
     },
@@ -738,6 +768,28 @@ export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW: IPipeli
             },
           },
           StartAt: 'DataAnalytics',
+        },
+        {
+          StartAt: 'Metrics',
+          States: {
+            Metrics: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                },
+                Input: {
+                  Action: 'Create',
+                  Region: 'ap-southeast-1',
+                  Parameters: BASE_METRICS_PARAMETERS,
+                  StackName: 'Clickstream-Metrics-6666-6666',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                },
+              },
+              End: true,
+              Type: WorkflowStateType.STACK,
+            },
+          },
         },
       ],
     },

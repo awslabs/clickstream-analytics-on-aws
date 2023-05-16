@@ -157,6 +157,7 @@ declare global {
       stackDetails: IStackStatus[];
     };
     dashboards?: IDashboard[],
+    metricsDashboardName?: string,
     createAt?: string;
     updateAt?: string;
   }

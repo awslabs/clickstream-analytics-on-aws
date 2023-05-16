@@ -783,3 +783,22 @@ export const REPORT_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
 ];
 
+export const BASE_METRICS_PARAMETERS = [
+  {
+    ParameterKey: 'ProjectId',
+    ParameterValue: 'project_8888_8888',
+  },
+  {
+    ParameterKey: 'ColumnNumber',
+    ParameterValue: '4',
+  },
+  {
+    ParameterKey: 'LegendPosition',
+    ParameterValue: 'bottom',
+  },
+  {
+    ParameterKey: 'Version',
+    ParameterValue: '1',
+  },
+];
+
