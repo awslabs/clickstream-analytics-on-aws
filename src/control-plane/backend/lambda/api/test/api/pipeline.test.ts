@@ -1211,6 +1211,182 @@ describe('Pipeline test', () => {
       status: 'Updating',
     });
   });
+  it('Get pipeline list with report stack updating', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
+    cloudFormationClient
+      .on(DescribeStacksCommand)
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .on(DescribeStacksCommand, {
+        StackName: 'Clickstream-Report-6666-6666',
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+    ;
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'Clickstream-KafkaConnector-6666-6666',
+          stackType: 'KafkaConnector',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
+          stackType: 'Ingestion',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-ETL-6666-6666',
+          stackType: 'ETL',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_IN_PROGRESS',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-DataAnalytics-6666-6666',
+          stackType: 'DataAnalytics',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          stackType: 'Metrics',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Updating',
+    });
+  });
+  it('Get pipeline list with step function execution interval ', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
+    cloudFormationClient
+      .on(DescribeStacksCommand)
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.RUNNING,
+      input: '{"Type":"Parallel","End":true,"Branches":[{"States":{"Ingestion":{"Type":"Stack","Data":{"Input":{"Region":"ap-southeast-1","TemplateURL":"xxx","Action":"Update","Parameters":[],"StackName":"xxx","Tags":[]},"Callback":{"BucketPrefix":"xxx","BucketName":"xxx"}},"End":true}},"StartAt":"Ingestion"}]}',
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        output: 'SUCCEEDED',
+        status: 'RUNNING',
+      },
+      stackDetails: [
+        {
+          stackName: 'Clickstream-KafkaConnector-6666-6666',
+          stackType: 'KafkaConnector',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
+          stackType: 'Ingestion',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-ETL-6666-6666',
+          stackType: 'ETL',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-Report-6666-6666',
+          stackType: 'Report',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+        {
+          stackName: 'Clickstream-DataAnalytics-6666-6666',
+          stackType: 'DataAnalytics',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        }, {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackStatus: 'UPDATE_COMPLETE',
+          stackStatusReason: '',
+          stackType: 'Metrics',
+          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+        },
+      ],
+      status: 'Updating',
+    });
+  });
   it('Get pipeline list with stack deleting', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);

@@ -726,7 +726,6 @@ export class CPipeline {
     return undefined;
   }
 
-
   public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {
     const stack = await describeStack(this.pipeline.region, getStackName(this.pipeline.pipelineId, stackType));
     const res: Map<string, string> = new Map<string, string>();

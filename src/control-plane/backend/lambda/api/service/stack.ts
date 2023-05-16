@@ -135,6 +135,10 @@ export class StackManager {
     }
     if (!isEmpty(stackStatusDetails)) {
       let action: string = 'CREATE';
+      if (executionDetail?.input) {
+        const executionInput = JSON.parse(executionDetail?.input);
+        action = this.getWorkflowCurrentAction(executionInput as WorkflowState) ?? 'CREATE';
+      }
       let miss: boolean = false;
       let status: string = PipelineStatusType.ACTIVE;
       for (let s of stackStatusDetails) {
@@ -162,6 +166,16 @@ export class StackManager {
           status = PipelineStatusType.FAILED;
         } else {
           status = PipelineStatusType.CREATING;
+        }
+      } else {
+        if (executionDetail?.status === ExecutionStatus.RUNNING) {
+          if (action === 'CREATE') {
+            status = PipelineStatusType.CREATING;
+          } else if (action === 'DELETE') {
+            status = PipelineStatusType.DELETING;
+          } else {
+            status = PipelineStatusType.UPDATING;
+          }
         }
       }
       return {
@@ -278,6 +292,25 @@ export class StackManager {
       }
     }
     return state;
+  }
+
+  private getWorkflowCurrentAction(state: WorkflowState): string {
+    let res: string = '';
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          const action = this.getWorkflowCurrentAction(branch.States[key]);
+          if (action) {
+            res = action;
+          }
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK) {
+      if (state.Data?.Input.Action) {
+        res = state.Data?.Input.Action;
+      }
+    }
+    return res;
   }
 
 }

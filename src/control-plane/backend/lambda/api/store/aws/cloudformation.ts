@@ -12,7 +12,6 @@
  */
 
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
-import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const describeStack = async (region: string, stackName: string) => {
@@ -30,10 +29,6 @@ export const describeStack = async (region: string, stackName: string) => {
     }
     return undefined;
   } catch (error) {
-    logger.warn('Unexpected error occurred at Describe Stack.', {
-      error: error,
-      stackName: stackName,
-    });
     return undefined;
   }
 };

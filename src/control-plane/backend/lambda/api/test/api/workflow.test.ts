@@ -1459,7 +1459,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Region: 'ap-southeast-1',
-                    TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
                     StackName: 'Clickstream-Report-6666-6666',
@@ -1735,7 +1735,7 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Region: 'ap-southeast-1',
-                    TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                     Action: 'Delete',
                     Parameters: [],
                     StackName: 'Clickstream-Report-6666-6666',
