@@ -514,7 +514,7 @@ describe('Pipeline test', () => {
             dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
           },
         ],
-        metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy'
+        metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
       },
     });
   });

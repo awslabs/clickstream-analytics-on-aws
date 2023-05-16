@@ -127,6 +127,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     if (!props?.targetToCNRegions) {
       functionAssociations.push({
         function: new Function(this, 'FrontRewriteFunction', {
+          functionName: `FrontRewriteFunction-${Aws.REGION}-${getShortIdOfStack(this)}`,
           code: FunctionCode.fromInline(`function handler(event) {
   var request = event.request;
   var uri = request.uri;

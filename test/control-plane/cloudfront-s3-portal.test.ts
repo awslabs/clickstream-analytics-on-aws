@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Stack, App, DockerImage } from 'aws-cdk-lib';
+import { Stack, App, DockerImage, Aws } from 'aws-cdk-lib';
 import {
   Match,
   Template,
@@ -26,6 +26,7 @@ import {
   OriginRequestQueryStringBehavior,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { getShortIdOfStack } from '../../src/common/stack';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
 
@@ -45,6 +46,7 @@ new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
   distributionProps: {
     functionAssociations: [{
       function: new Function(commonTestStack, 'FrontRewriteFunction', {
+        functionName: `FrontRewriteFunction-${Aws.REGION}-${getShortIdOfStack(commonTestStack)}`,
         code: FunctionCode.fromInline('function handler(event) { return event; }'),
       }),
       eventType: FunctionEventType.VIEWER_REQUEST,
@@ -552,10 +554,34 @@ describe('CloudFrontS3Portal', () => {
           'Fn::Join': [
             '',
             [
+              'FrontRewriteFunction-',
               {
                 Ref: 'AWS::Region',
               },
-              'comTestStackFrontRewriteFunctionD446CE04',
+              '-',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           ],
         },
@@ -565,10 +591,34 @@ describe('CloudFrontS3Portal', () => {
         'Fn::Join': [
           '',
           [
+            'FrontRewriteFunction-',
             {
               Ref: 'AWS::Region',
             },
-            'comTestStackFrontRewriteFunctionD446CE04',
+            '-',
+            {
+              'Fn::Select': [
+                0,
+                {
+                  'Fn::Split': [
+                    '-',
+                    {
+                      'Fn::Select': [
+                        2,
+                        {
+                          'Fn::Split': [
+                            '/',
+                            {
+                              Ref: 'AWS::StackId',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         ],
       },
