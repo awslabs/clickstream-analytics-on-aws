@@ -90,6 +90,10 @@ export function createRedshiftAnalyticsStack(
     upsertUsersWorkflowData: {
       scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,
     },
+    clearExpiredEventsWorkflowData: {
+      scheduleExpression: props.clearExpiredEventsConfiguration.scheduleExpression,
+      retentionRangeDays: props.clearExpiredEventsConfiguration.retentionRangeDays,
+    },
   };
 
   props.odsEvents.bucket.enableEventBridgeNotification();
@@ -128,7 +132,7 @@ export function createRedshiftAnalyticsStack(
       ...nestStackProps,
       newRedshiftServerlessProps: {
         ...props.redshift.newServerless!,
-        databaseName: props.redshift.defaultDtabaseName,
+        databaseName: props.redshift.defaultDatabaseName,
       },
     },
   );
@@ -141,7 +145,7 @@ export function createRedshiftAnalyticsStack(
       ...nestStackProps,
       existingRedshiftServerlessProps: {
         createdInStack: false,
-        databaseName: props.redshift.defaultDtabaseName,
+        databaseName: props.redshift.defaultDatabaseName,
         ...props.redshift.existingServerless!,
         dataAPIRoleArn: props.redshift.existingServerless!.iamRole,
       },
@@ -155,7 +159,7 @@ export function createRedshiftAnalyticsStack(
     {
       ...nestStackProps,
       provisionedRedshiftProps: {
-        databaseName: props.redshift.defaultDtabaseName,
+        databaseName: props.redshift.defaultDatabaseName,
         ...props.redshift.provisioned!,
       },
     },

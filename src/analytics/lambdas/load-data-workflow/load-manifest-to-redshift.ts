@@ -15,12 +15,11 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 import { Context } from 'aws-lambda';
-import { REDSHIFT_MODE } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
-import { ProvisionedRedshiftProps, ManifestBody, ExistingRedshiftServerlessCustomProps } from '../../private/model';
-import { getRedshiftClient, executeStatements } from '../redshift-data';
+import { ManifestBody } from '../../private/model';
+import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 // Set the AWS Region.
 const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
@@ -81,24 +80,14 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   }
   logger.debug(`appId:${appId}`);
 
-  const redshiftMode = process.env.REDSHIFT_MODE!;
-
-  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
-    provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
-
-  if (redshiftMode == REDSHIFT_MODE.SERVERLESS) {
-    serverlessRedshiftProps = {
-      databaseName: REDSHIFT_DATABASE,
-      workgroupName: process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-      dataAPIRoleArn: REDSHIFT_DATA_API_ROLE_ARN,
-    };
-  } else if (redshiftMode == REDSHIFT_MODE.PROVISIONED) {
-    provisionedRedshiftProps = {
-      databaseName: REDSHIFT_DATABASE,
-      dbUser: process.env.REDSHIFT_DB_USER!,
-      clusterIdentifier: process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
-    };
-  }
+  const redshiftProps = getRedshiftProps(
+    process.env.REDSHIFT_MODE!,
+    REDSHIFT_DATABASE,
+    REDSHIFT_DATA_API_ROLE_ARN,
+    process.env.REDSHIFT_DB_USER!,
+    process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
+    process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
+  );
 
   for (var i=0;i < jobList.entries.length; i++) {
     await updateItem(DYNAMODB_TABLE_NAME, jobList.entries[i].url, JobStatus.JOB_PROCESSING);
@@ -123,7 +112,8 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     ;
 
   try {
-    const queryId = await executeStatements(redshiftDataApiClient, [sqlStatement], serverlessRedshiftProps, provisionedRedshiftProps);
+    const queryId = await executeStatements(
+      redshiftDataApiClient, [sqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
     logger.info('loadFileToRedshift response:', { queryId });
 

@@ -35,6 +35,11 @@ export type UpsertUsersWorkflowData = {
   readonly scheduleExpression: string;
 }
 
+export type ClearExpiredEventsWorkflowData = {
+  readonly scheduleExpression: string;
+  readonly retentionRangeDays: number;
+}
+
 interface RedshiftProps {
   readonly databaseName: string;
 }
@@ -125,6 +130,17 @@ export interface UpsertUsersBody {
 }
 
 export type CheckUpsertStatusEventDetail = {
+  id: string;
+  appId: string;
+  status: string;
+}
+
+export interface ClearExpiredEventsBody {
+  readonly appId: string;
+  readonly retentionRangeDays: number;
+}
+
+export type ClearExpiredEventsEventDetail = {
   id: string;
   appId: string;
   status: string;

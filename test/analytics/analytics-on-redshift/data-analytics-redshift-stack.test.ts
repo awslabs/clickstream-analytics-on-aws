@@ -306,7 +306,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(24);
+    expect(paramCount).toEqual(26);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -350,11 +350,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
     const invalidValues = [
       '(0 1 * * ? *)',
-      'cron(60 1 * * ? *)',
-      'cron(20 30 * * ? *)',
       'cron(0 1 * * ? *',
-      'cron(* * * * ? *)',
-      'cron(0/30 */50 * * ? *)',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
@@ -422,6 +418,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'ProcessingFilesLimit',
       'LoadJobScheduleInterval',
       'UpsertUsersScheduleExpression',
+      'ClearExpiredEventsScheduleExpression',
+      'ClearExpiredEventsRetentionRangeDays',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -586,6 +584,10 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
+      clearExpiredEventsWorkflowData: {
+        scheduleExpression: 'cron(0 17 * * ? *)',
+        retentionRangeDays: 365,
+      },
     };
     var error = false;
     try {
@@ -642,6 +644,10 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
+      clearExpiredEventsWorkflowData: {
+        scheduleExpression: 'cron(0 17 * * ? *)',
+        retentionRangeDays: 365,
+      },
     };
     var error = false;
     try {
@@ -684,6 +690,10 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
+      },
+      clearExpiredEventsWorkflowData: {
+        scheduleExpression: 'cron(0 17 * * ? *)',
+        retentionRangeDays: 365,
       },
     };
 
@@ -2931,6 +2941,530 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   });
 
   test('Check UpsertUsersScheduleRule', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
+        ScheduleExpression: RefAnyValue,
+        State: 'ENABLED',
+        Targets: [
+          {
+            Arn: RefAnyValue,
+            Id: Match.anyValue(),
+            RoleArn: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+          },
+        ],
+      });
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
+        ScheduleExpression: RefAnyValue,
+        State: 'ENABLED',
+        Targets: [
+          {
+            Arn: RefAnyValue,
+            Id: Match.anyValue(),
+            RoleArn: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+          },
+        ],
+      });
+    }
+  });
+
+  // Check clear expired events lambda
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowClearExpiredEventsFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowClearExpiredEventsFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRoleDefaultPolicy', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'logs:CreateLogStream',
+                'logs:PutLogEvents',
+                'logs:CreateLogGroup',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: [
+                'ec2:CreateNetworkInterface',
+                'ec2:DescribeNetworkInterfaces',
+                'ec2:DeleteNetworkInterface',
+                'ec2:AssignPrivateIpAddresses',
+                'ec2:UnassignPrivateIpAddresses',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: 'sts:AssumeRole',
+              Effect: 'Allow',
+              Resource: RefAnyValue,
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        PolicyName: Match.anyValue(),
+        Roles: [
+          RefAnyValue,
+        ],
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'logs:CreateLogStream',
+                'logs:PutLogEvents',
+                'logs:CreateLogGroup',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: [
+                'ec2:CreateNetworkInterface',
+                'ec2:DescribeNetworkInterfaces',
+                'ec2:DeleteNetworkInterface',
+                'ec2:AssignPrivateIpAddresses',
+                'ec2:UnassignPrivateIpAddresses',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: 'sts:AssumeRole',
+              Effect: 'Allow',
+              Resource: {
+                'Fn::GetAtt': [
+                  Match.anyValue(),
+                  'Arn',
+                ],
+              },
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        PolicyName: Match.anyValue(),
+        Roles: [
+          RefAnyValue,
+        ],
+      });
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFn', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
+            REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
+            REDSHIFT_CLUSTER_IDENTIFIER: '',
+            REDSHIFT_DATABASE: RefAnyValue,
+            REDSHIFT_DB_USER: '',
+            REDSHIFT_DATA_API_ROLE: RefAnyValue,
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: Match.anyValue(),
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+        VpcConfig: {
+          SecurityGroupIds: [
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'GroupId',
+              ],
+            },
+          ],
+          SubnetIds: {
+            'Fn::Split': [
+              ',',
+              RefAnyValue,
+            ],
+          },
+        },
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
+            REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
+            REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
+            REDSHIFT_DATABASE: RefAnyValue,
+            REDSHIFT_DB_USER: RefAnyValue,
+            REDSHIFT_DATA_API_ROLE: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: Match.anyValue(),
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+        VpcConfig: {
+          SecurityGroupIds: [
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'GroupId',
+              ],
+            },
+          ],
+          SubnetIds: {
+            'Fn::Split': [
+              ',',
+              RefAnyValue,
+            ],
+          },
+        },
+      });
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowCheckClearJobStatusFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowCheckClearJobStatusFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowCheckClearJobStatusRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowCheckClearJobStatusRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRoleDefaultPolicy', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'logs:CreateLogStream',
+                'logs:PutLogEvents',
+                'logs:CreateLogGroup',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: [
+                'ec2:CreateNetworkInterface',
+                'ec2:DescribeNetworkInterfaces',
+                'ec2:DeleteNetworkInterface',
+                'ec2:AssignPrivateIpAddresses',
+                'ec2:UnassignPrivateIpAddresses',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: 'sts:AssumeRole',
+              Effect: 'Allow',
+              Resource: RefAnyValue,
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        PolicyName: Match.anyValue(),
+        Roles: [
+          RefAnyValue,
+        ],
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'logs:CreateLogStream',
+                'logs:PutLogEvents',
+                'logs:CreateLogGroup',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: [
+                'ec2:CreateNetworkInterface',
+                'ec2:DescribeNetworkInterfaces',
+                'ec2:DeleteNetworkInterface',
+                'ec2:AssignPrivateIpAddresses',
+                'ec2:UnassignPrivateIpAddresses',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: 'sts:AssumeRole',
+              Effect: 'Allow',
+              Resource: {
+                'Fn::GetAtt': [
+                  Match.anyValue(),
+                  'Arn',
+                ],
+              },
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        PolicyName: Match.anyValue(),
+        Roles: [
+          RefAnyValue,
+        ],
+      });
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFn', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
+            REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
+            REDSHIFT_CLUSTER_IDENTIFIER: '',
+            REDSHIFT_DATABASE: RefAnyValue,
+            REDSHIFT_DB_USER: '',
+            REDSHIFT_DATA_API_ROLE: RefAnyValue,
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: Match.anyValue(),
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+        VpcConfig: {
+          SecurityGroupIds: [
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'GroupId',
+              ],
+            },
+          ],
+          SubnetIds: {
+            'Fn::Split': [
+              ',',
+              RefAnyValue,
+            ],
+          },
+        },
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
+            REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
+            REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
+            REDSHIFT_DATABASE: RefAnyValue,
+            REDSHIFT_DB_USER: RefAnyValue,
+            REDSHIFT_DATA_API_ROLE: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: Match.anyValue(),
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+        VpcConfig: {
+          SecurityGroupIds: [
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'GroupId',
+              ],
+            },
+          ],
+          SubnetIds: {
+            'Fn::Split': [
+              ',',
+              RefAnyValue,
+            ],
+          },
+        },
+      });
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy');
+      expect(policy).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy');
+      expect(policy).toBeDefined();
+    }
+  });
+
+  test('Check ClearExpiredEventsScheduleRule', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {

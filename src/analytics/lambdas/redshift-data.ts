@@ -12,6 +12,7 @@
  */
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { REDSHIFT_MODE } from '../../common/constant';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';
@@ -132,4 +133,34 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
 
 export const Sleep = (ms: number) => {
   return new Promise(resolve=>setTimeout(resolve, ms));
+};
+
+export function getRedshiftProps(
+  redshiftMode: string,
+  databaseName: string,
+  dataAPIRoleArn: string,
+  dbUser: string,
+  workgroupName: string,
+  clusterIdentifier: string,
+) {
+  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
+    provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
+
+  if (redshiftMode == REDSHIFT_MODE.SERVERLESS) {
+    serverlessRedshiftProps = {
+      databaseName: databaseName,
+      workgroupName: workgroupName,
+      dataAPIRoleArn: dataAPIRoleArn,
+    };
+  } else if (redshiftMode == REDSHIFT_MODE.PROVISIONED) {
+    provisionedRedshiftProps = {
+      databaseName: databaseName,
+      dbUser: dbUser,
+      clusterIdentifier: clusterIdentifier,
+    };
+  }
+  return {
+    serverlessRedshiftProps,
+    provisionedRedshiftProps,
+  };
 };

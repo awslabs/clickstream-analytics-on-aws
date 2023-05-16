@@ -12,7 +12,7 @@
  */
 
 import { logger } from '../../../common/powertools';
-import { UpsertUsersBody } from '../../private/model';
+import { ClearExpiredEventsBody } from '../../private/model';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -21,21 +21,11 @@ const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 // Create an Amazon service client object.
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
-export interface UpsertUsersEvent {
-  detail: UpsertUsersBody;
+export interface ClearExpiredEventsEvent {
+  detail: ClearExpiredEventsBody;
 }
 
-/**
- * The lambda function submit a SQL statement to upsert users.
- * @param event ScheduleEvent, the JSON format is as follows:
- {
-    "detail": {
-      "app_id": app1
-    }
-  }
-  @returns The query_id and relevant properties.
- */
-export const handler = async (event: UpsertUsersEvent) => {
+export const handler = async (event: ClearExpiredEventsEvent) => {
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
     REDSHIFT_DATABASE,
@@ -46,14 +36,15 @@ export const handler = async (event: UpsertUsersEvent) => {
   );
 
   const schema = event.detail.appId;
+  const retentionRangeDays = event.detail.retentionRangeDays;
   const sqlStatements : string[] = [];
-  sqlStatements.push(`CALL ${schema}.sp_upsert_users()`);
+  sqlStatements.push(`CALL ${schema}.sp_clear_expired_events(${retentionRangeDays})`);
 
   try {
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
-    logger.info('Upsert users response:', { queryId });
+    logger.info('Clear expired events response:', { queryId });
     return {
       detail: {
         appId: schema,
@@ -63,7 +54,7 @@ export const handler = async (event: UpsertUsersEvent) => {
 
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when upsert users.', err);
+      logger.error('Error when clear expired events.', err);
     }
     throw err;
   }

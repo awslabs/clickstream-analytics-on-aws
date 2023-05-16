@@ -45,9 +45,13 @@ export interface RedshiftAnalyticsStackProps {
   upsertUsersConfiguration: {
     scheduleExpression: string;
   };
+  clearExpiredEventsConfiguration: {
+    scheduleExpression: string;
+    retentionRangeDays: number;
+  };
   redshift: {
     mode: string;
-    defaultDtabaseName: string;
+    defaultDatabaseName: string;
     newServerless?: {
       vpcId: string;
       subnetIds: string;
@@ -169,7 +173,7 @@ export function createStackParameters(scope: Construct): {
   const redshiftServerlessSubnets = Parameters.createPrivateSubnetParameter(scope, 'RedshiftServerlessSubnets',
     SubnetParameterType.String, {
       allowedPattern: subnetsPattern,
-      constraintDescription: `The subnets of Redshift Serverless workgroup must have at least threee subnets crossing three AZs and match pattern ${subnetsPattern}`,
+      constraintDescription: `The subnets of Redshift Serverless workgroup must have at least three subnets crossing three AZs and match pattern ${subnetsPattern}`,
       default: '',
     });
   const redshiftServerlessSGs = Parameters.createSecurityGroupIdsParameter(scope, 'RedshiftServerlessSGs', true, {
@@ -254,7 +258,7 @@ export function createStackParameters(scope: Construct): {
   });
 
   const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftServerlessIAMRole', {
-    description: 'The ARN of IAM role of Redshift serverless user with superuser privillege.',
+    description: 'The ARN of IAM role of Redshift serverless user with superuser privilege.',
     type: 'String',
     default: '',
     allowedPattern: '^(arn:(aws|aws-cn):iam::[0-9]{12}:role/.*)?$',
@@ -404,8 +408,7 @@ export function createStackParameters(scope: Construct): {
   const upsertUsersWorkflowScheduleExpressionParam = new CfnParameter(scope, 'UpsertUsersScheduleExpression', {
     description: 'The schedule expression at which the upsert users job runs regularly. in days.',
     type: 'String',
-    // allowedPattern: '^cron\\(([0-5]?[0-9])\\s([01]?[0-9]|2[0-3])\\s\\*\\s\\*\\s\\?\\s\\*\\)$',
-    allowedPattern: '^cron\\((([0-5]?[0-9])|0/[0-5]?[0-9])\\s([01]?[0-9]|2[0-3]|\\*/([01]?[0-9]|2[0-3])|\\*)\\s\\*\\s\\*\\s\\?\\s\\*\\)$',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
     constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
     default: 'cron(0 1 * * ? *)',
   });
@@ -420,6 +423,40 @@ export function createStackParameters(scope: Construct): {
   const upsertUsersWorkflowParamsLabels = {
     [upsertUsersWorkflowScheduleExpressionParam.logicalId]: {
       default: 'Upsert users schedule expression',
+    },
+  };
+
+  // Set clear expired events job parameters
+  const clearExpiredEventsWorkflowParamsGroup = [];
+
+  const clearExpiredEventsWorkflowScheduleExpressionParam = new CfnParameter(scope, 'ClearExpiredEventsScheduleExpression', {
+    description: 'The schedule expression at which the clear expired events job runs regularly. in days.',
+    type: 'String',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
+    constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
+    default: 'cron(0 17 * * ? *)',
+  });
+
+  const clearExpiredEventsWorkflowRetentionRangeDaysParam = new CfnParameter(scope, 'ClearExpiredEventsRetentionRangeDays', {
+    description: 'The period of time which records saved in Redshift. in days.',
+    type: 'Number',
+    default: 365,
+  });
+
+  clearExpiredEventsWorkflowParamsGroup.push({
+    Label: { default: 'Clear expired events job' },
+    Parameters: [
+      clearExpiredEventsWorkflowScheduleExpressionParam.logicalId,
+      clearExpiredEventsWorkflowRetentionRangeDaysParam.logicalId,
+    ],
+  });
+
+  const clearExpiredEventsWorkflowParamsLabels = {
+    [clearExpiredEventsWorkflowScheduleExpressionParam.logicalId]: {
+      default: 'Clear expired events schedule expression',
+    },
+    [clearExpiredEventsWorkflowRetentionRangeDaysParam.logicalId]: {
+      default: 'Clear expired events retention range days',
     },
   };
 
@@ -461,6 +498,7 @@ export function createStackParameters(scope: Construct): {
         ...redshiftClusterParamsGroup,
         ...loadJobParamsGroup,
         ...upsertUsersWorkflowParamsGroup,
+        ...clearExpiredEventsWorkflowParamsGroup,
       ],
       ParameterLabels: {
         [networkProps.vpcId.logicalId]: {
@@ -497,6 +535,7 @@ export function createStackParameters(scope: Construct): {
         ...redshiftClusterParamsLabels,
         ...loadJobParamsLabels,
         ...upsertUsersWorkflowParamsLabels,
+        ...clearExpiredEventsWorkflowParamsLabels,
       },
     },
   };
@@ -541,9 +580,13 @@ export function createStackParameters(scope: Construct): {
       upsertUsersConfiguration: {
         scheduleExpression: upsertUsersWorkflowScheduleExpressionParam.valueAsString,
       },
+      clearExpiredEventsConfiguration: {
+        scheduleExpression: clearExpiredEventsWorkflowScheduleExpressionParam.valueAsString,
+        retentionRangeDays: clearExpiredEventsWorkflowRetentionRangeDaysParam.valueAsNumber,
+      },
       redshift: {
         mode: redshiftModeParam.valueAsString,
-        defaultDtabaseName: redshiftDefaultDatabaseParam.valueAsString,
+        defaultDatabaseName: redshiftDefaultDatabaseParam.valueAsString,
         newServerless: {
           vpcId: redshiftServerlessVPCId.valueAsString,
           subnetIds: redshiftServerlessSubnets.valueAsString,

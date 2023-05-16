@@ -558,6 +558,18 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: 'rate(5 minutes)',
   },
   {
+    ParameterKey: 'UpsertUsersScheduleExpression',
+    ParameterValue: 'rate(5 minutes)',
+  },
+  {
+    ParameterKey: 'ClearExpiredEventsScheduleExpression',
+    ParameterValue: 'cron(0 17 * * ? *)',
+  },
+  {
+    ParameterKey: 'ClearExpiredEventsRetentionRangeDays',
+    ParameterValue: '365',
+  },
+  {
     ParameterKey: 'RedshiftMode',
     ParameterValue: 'New_Serverless',
   },
@@ -610,6 +622,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
 export const MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,
   [
+    {
+      ParameterKey: 'UpsertUsersScheduleExpression',
+      ParameterValue: 'rate(7 minutes)',
+    },
     {
       ParameterKey: 'RedshiftMode',
       ParameterValue: 'Serverless',

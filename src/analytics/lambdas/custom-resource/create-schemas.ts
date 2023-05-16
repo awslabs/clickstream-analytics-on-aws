@@ -175,6 +175,8 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 
     sqlStatements.push(getSqlContent('dim-users.sql', mustacheParam));
     sqlStatements.push(getSqlContent('sp-upsert-users.sql', mustacheParam));
+
+    sqlStatements.push(getSqlContent('sp-clear-expired-events.sql', mustacheParam));
   };
 
   if (sqlStatements.length == 0) {

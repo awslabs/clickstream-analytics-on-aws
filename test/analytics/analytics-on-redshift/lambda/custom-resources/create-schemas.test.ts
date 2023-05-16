@@ -115,6 +115,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
       '/opt/dim-users.sql': testSqlContent(rootPath + 'dim-users.sql'),
       '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
+      '/opt/sp-clear-expired-events.sql': testSqlContent(rootPath + 'sp-clear-expired-events.sql'),
       '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
@@ -365,14 +366,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Updated schemas and views in Redshift provisioned cluster', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
+        console.log(`Sql is ${input.Sqls}`);
         if (input as BatchExecuteStatementCommandInput) {
           if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
           && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)
-          && input.Sqls[8].includes('CREATE SCHEMA IF NOT EXISTS app2')) {
+          && input.Sqls[9].includes('CREATE SCHEMA IF NOT EXISTS app2')) {
             return { Id: 'Id-1' };
           }
         }
-        console.log(`Sql is ${input.Sqls}`);
         throw new Error('Sqls are not expected');
       }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });

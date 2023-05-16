@@ -280,7 +280,7 @@ export const MSK_ETL_EXISTING_SERVERLESS_PIPELINE: IPipeline = {
       processingFilesLimit: 50,
     },
     upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
+      scheduleExpression: 'rate(7 minutes)',
     },
   },
 };

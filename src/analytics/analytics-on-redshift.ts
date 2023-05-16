@@ -25,13 +25,14 @@ import {
 import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
+import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
 import {
   REDSHIFT_ODS_TABLE_NAME,
 } from './private/constant';
 import { LoadODSEventToRedshiftWorkflow } from './private/load-ods-events-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metircs-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metircs-redshift-serverless';
-import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData } from './private/model';
+import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ClearExpiredEventsWorkflowData } from './private/model';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
@@ -49,6 +50,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
   readonly loadDataProps: LoadDataProps;
   readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
+  readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -246,6 +248,19 @@ export class RedshiftAnalyticsStack extends NestedStack {
       upsertUsersWorkflowData: props.upsertUsersWorkflowData,
     });
 
+    new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
+      appId: props.appIds,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: redshiftDataAPIExecRole!,
+      clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
+    });
+
     addCfnNag(this);
   }
 }
@@ -264,6 +279,9 @@ function addCfnNag(stack: Stack) {
     ruleRolePolicyWithWildcardResources(
       'UpsertUsersWorkflow/UpsertUsersStateMachine/Role/DefaultPolicy/Resource',
       'UpsertUsersWorkflow', 'logs/xray'),
+    ruleRolePolicyWithWildcardResources(
+      'ClearExpiredEventsWorkflow/ClearExpiredEventsStateMachine/Role/DefaultPolicy/Resource',
+      'ClearExpiredEventsWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
       'RedshiftDataExecRole/DefaultPolicy/Resource',
       'RedshiftDataExecRole', 'redshift-data'),

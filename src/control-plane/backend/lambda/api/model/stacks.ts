@@ -660,6 +660,24 @@ export class CDataAnalyticsStack extends JSONObject {
   })
     LoadJobScheduleInterval?: string;
 
+  @JSONObject.optional('cron(0 1 * * ? *)')
+  @JSONObject.custom( (_:any, key:string, value:any) => {
+    validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);
+    return value;
+  })
+    UpsertUsersScheduleExpression?: string;
+
+  @JSONObject.optional('cron(0 17 * * ? *)')
+  @JSONObject.custom( (_:any, key:string, value:any) => {
+    validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);
+    return value;
+  })
+    ClearExpiredEventsScheduleExpression?: string;
+
+  @JSONObject.optional(365)
+  @JSONObject.gte(1)
+    ClearExpiredEventsRetentionRangeDays?: number;
+
   @JSONObject.optional(REDSHIFT_MODE.NEW_SERVERLESS)
   @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
     if (stack._pipeline?.dataAnalytics?.redshift?.provisioned) {
@@ -813,6 +831,7 @@ export class CDataAnalyticsStack extends JSONObject {
       MaxFilesLimit: pipeline.dataAnalytics?.loadWorkflow?.maxFilesLimit,
       ProcessingFilesLimit: pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit,
       LoadJobScheduleInterval: pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
+      UpsertUsersScheduleExpression: pipeline.dataAnalytics?.upsertUsers.scheduleExpression,
 
     });
   }
