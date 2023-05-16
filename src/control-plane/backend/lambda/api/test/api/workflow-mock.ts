@@ -272,6 +272,10 @@ export const INGESTION_KINESIS_PROVISIONED_PARAMETERS = mergeParameters(
 
 const BASE_KAFKACONNECTOR_PARAMETERS = [
   {
+    ParameterKey: 'ProjectId',
+    ParameterValue: 'project_8888_8888',
+  },
+  {
     ParameterKey: 'DataS3Bucket',
     ParameterValue: 'EXAMPLE_BUCKET',
   },

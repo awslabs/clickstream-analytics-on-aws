@@ -343,6 +343,9 @@ export class CKafkaConnectorStack extends JSONObject {
     _resources?: CPipelineResources;
 
   @JSONObject.required
+  ProjectId?: string;
+
+  @JSONObject.required
     DataS3Bucket?: string;
 
   @JSONObject.required
@@ -438,6 +441,7 @@ export class CKafkaConnectorStack extends JSONObject {
       _pipeline: pipeline,
       _resources: resources,
 
+      ProjectId: pipeline.projectId,
       DataS3Bucket: pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? pipeline.bucket.name,
       DataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER,
         pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix),
