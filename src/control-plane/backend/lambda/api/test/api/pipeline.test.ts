@@ -753,9 +753,9 @@ describe('Pipeline test', () => {
               sinkType: 's3',
               size: {
                 scaleOnCpuUtilizationPercent: 50,
-                serverMax: 4,
-                serverMin: 2,
-                warmPoolSize: 1,
+                serverMax: 1,
+                serverMin: 1,
+                warmPoolSize: 0,
               },
             },
             network: {

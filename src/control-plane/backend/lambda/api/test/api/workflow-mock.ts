@@ -120,6 +120,18 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
   BASE_INGESTION_PARAMETERS,
   [
     {
+      ParameterKey: 'ServerMax',
+      ParameterValue: '1',
+    },
+    {
+      ParameterKey: 'ServerMin',
+      ParameterValue: '1',
+    },
+    {
+      ParameterKey: 'WarmPoolSize',
+      ParameterValue: '0',
+    },
+    {
       ParameterKey: 'AuthenticationSecretArn',
       ParameterValue: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
     },

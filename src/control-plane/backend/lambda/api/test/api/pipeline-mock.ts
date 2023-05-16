@@ -109,6 +109,12 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
   ...BASE_PIPELINE_ATTRIBUTES,
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+    size: {
+      serverMax: 1,
+      warmPoolSize: 0,
+      serverMin: 1,
+      scaleOnCpuUtilizationPercent: 50,
+    },
     sinkType: PipelineSinkType.S3,
     sinkS3: {
       sinkBucket: {

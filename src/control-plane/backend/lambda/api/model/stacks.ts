@@ -108,7 +108,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.required
   @JSONObject.gt(0)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:number) => {
-    if (stack.ServerMax && stack.ServerMax <= value) {
+    if (stack.ServerMax && stack.ServerMax < value) {
       throw new ClickStreamBadRequestError('ServerMax must greater than or equal ServerMin.');
     }
     return value;
@@ -405,7 +405,7 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.optional(1)
   @JSONObject.gte(1)
   @JSONObject.custom( (stack:CKafkaConnectorStack, _key:string, value:number) => {
-    if (stack.MaxWorkerCount && stack.MaxWorkerCount <= value) {
+    if (stack.MaxWorkerCount && stack.MaxWorkerCount < value) {
       throw new ClickStreamBadRequestError('MaxWorkerCount must greater than or equal MinWorkerCount.');
     }
     return value;
