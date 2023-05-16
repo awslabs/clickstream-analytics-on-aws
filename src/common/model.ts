@@ -25,7 +25,7 @@ export interface BIUserCredential {
   readonly password: string;
 }
 
-export enum BuildInTagKeys {
+export enum BuiltInTagKeys {
   AWS_SOLUTION = 'aws-solution/name',
   AWS_SOLUTION_VERSION = 'aws-solution/version',
   CLICKSTREAM_PROJECT = 'aws-solution/clickstream/project',

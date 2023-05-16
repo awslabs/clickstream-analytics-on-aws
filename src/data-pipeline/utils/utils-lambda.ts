@@ -26,7 +26,7 @@ import { Construct } from 'constructs';
 import { RoleUtil } from './utils-role';
 
 import { addCfnNagToSecurityGroup } from '../../common/cfn-nag';
-import { listTags } from '../../common/lambda';
+import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 
@@ -196,7 +196,7 @@ export class LambdaUtil {
       ...functionSettings,
       memorySize: 256,
     });
-    listTags('EmrSparkJobSubmitterFunctionListTagsPolicy', fn);
+    attachListTagsPolicyForFunction(this.scope, 'EmrSparkJobSubmitterFunction', fn);
     return fn;
   }
 

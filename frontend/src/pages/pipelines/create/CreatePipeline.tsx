@@ -88,7 +88,7 @@ const Content: React.FC = () => {
     tags: [
       {
         key: 'aws-solution/name',
-        value: 'clickstream',
+        value: 'Clickstream',
         existing: true,
       },
       {

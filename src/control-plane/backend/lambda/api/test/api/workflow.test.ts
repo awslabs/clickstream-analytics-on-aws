@@ -59,6 +59,7 @@ import {
   MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS, REPORT_WITH_NEW_REDSHIFT_PARAMETERS, REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
 } from './workflow-mock';
 import { dictionaryTableName } from '../../common/constants';
+import { SolutionInfo } from '../../common/solution-info-ln';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
@@ -84,11 +85,11 @@ const Tags = [
   },
   {
     Key: 'aws-solution/name',
-    Value: 'clickstream',
+    Value: SolutionInfo.SOLUTION_SHORT_NAME,
   },
   {
     Key: 'aws-solution/version',
-    Value: 'v1.0.0',
+    Value: SolutionInfo.SOLUTION_VERSION,
   },
   {
     Key: 'aws-solution/clickstream/project',

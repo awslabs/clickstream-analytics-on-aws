@@ -104,6 +104,7 @@ export interface RedshiftServerlessWorkgroupProps {
   readonly baseCapacity: number;
   readonly workgroupName: string;
   readonly databaseName: string;
+  readonly projectId: string;
 }
 export type NewNamespaceCustomProperties = RedshiftProps & {
   readonly adminRoleArn: string;

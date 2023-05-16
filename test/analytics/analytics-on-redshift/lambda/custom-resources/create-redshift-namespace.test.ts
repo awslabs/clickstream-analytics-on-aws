@@ -10,7 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { CreateNamespaceCommand, DeleteNamespaceCommand, GetNamespaceCommand, Namespace, NamespaceStatus, RedshiftServerlessClient, ResourceNotFoundException, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
+import { CreateNamespaceCommand, CreateNamespaceCommandInput, DeleteNamespaceCommand, GetNamespaceCommand, Namespace, NamespaceStatus, RedshiftServerlessClient, ResourceNotFoundException, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../../src/analytics/lambdas/custom-resource/create-redshift-namespace';
@@ -24,6 +25,7 @@ describe('Custom resource - Create redshift serverless namespace', () => {
   const callback: CdkCustomResourceCallback = async (_response) => {};
 
   const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
+  const lambdaMock = mockClient(LambdaClient);
 
   const namespaceName = 'clickstream';
   const dbName = 'myDB';
@@ -61,6 +63,10 @@ describe('Custom resource - Create redshift serverless namespace', () => {
 
   beforeEach(() => {
     redshiftServerlessMock.reset();
+    lambdaMock.reset();
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: {},
+    });
   });
 
   const mockNamespace: Namespace = {
@@ -73,8 +79,21 @@ describe('Custom resource - Create redshift serverless namespace', () => {
   };
 
   test('Create a new namespace for Redshift serverless workgroup with waiting for status check.', async () => {
-    redshiftServerlessMock.on(CreateNamespaceCommand).resolvesOnce({
-      namespace: mockNamespace,
+    const tags = {
+      name: 'myName',
+      version: 'v1',
+    };
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: tags });
+    redshiftServerlessMock.callsFakeOnce(input => {
+      if (input as CreateNamespaceCommandInput) {
+        const expectedTags = Object.entries(tags).map(([key, value]) => ({ key, value }));
+        const actualTags = input.tags;
+        expect(actualTags).toEqual(expect.arrayContaining(expectedTags));
+        return {
+          namespace: mockNamespace,
+        };
+      }
+      throw new Error('The create namespace without expected tags.');
     });
     redshiftServerlessMock.on(GetNamespaceCommand).resolvesOnce({
       namespace: {

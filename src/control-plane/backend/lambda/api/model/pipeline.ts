@@ -27,6 +27,7 @@ import {
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { logger } from '../common/powertools';
+import { SolutionInfo } from '../common/solution-info-ln';
 import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
@@ -443,18 +444,9 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({
-        key: BuiltInTagKeys.AWS_SOLUTION,
-        value: 'clickstream',
-      });
-      this.pipeline.tags.push({
-        key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: this.resources!.solution.data.version,
-      });
-      this.pipeline.tags.push({
-        key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
-        value: this.resources!.project?.id!,
-      });
+      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION, value: SolutionInfo.SOLUTION_SHORT_NAME });
+      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: this.resources!.solution.data.version });
+      this.pipeline.tags.push({ key: BuiltInTagKeys.CLICKSTREAM_PROJECT, value: this.resources!.project?.id! });
     }
   };
 

@@ -96,6 +96,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         baseCapacity: props.newRedshiftServerlessProps.baseCapacity,
         databaseName: props.newRedshiftServerlessProps.databaseName,
         workgroupName: props.newRedshiftServerlessProps.workgroupName,
+        projectId: props.projectId,
       });
       redshiftDataAPIExecRole = this.redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
       existingRedshiftServerlessProps = {

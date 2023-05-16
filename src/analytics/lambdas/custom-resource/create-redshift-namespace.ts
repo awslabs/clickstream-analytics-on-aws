@@ -11,10 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CreateNamespaceCommand, DeleteNamespaceCommand, Namespace, NamespaceStatus, RedshiftServerlessClient, ResourceNotFoundException } from '@aws-sdk/client-redshift-serverless';
+import { CreateNamespaceCommand, DeleteNamespaceCommand, Namespace, NamespaceStatus, RedshiftServerlessClient, ResourceNotFoundException, Tag } from '@aws-sdk/client-redshift-serverless';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { CdkCustomResourceEvent, CdkCustomResourceHandler, CdkCustomResourceResponse } from 'aws-lambda';
+import { CdkCustomResourceEvent, CdkCustomResourceHandler, CdkCustomResourceResponse, Context } from 'aws-lambda';
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
+import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { NewNamespaceCustomProperties } from '../../private/model';
@@ -24,7 +25,7 @@ type ResourcePropertiesType = NewNamespaceCustomProperties & {
   readonly ServiceToken: string;
 }
 
-export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent) => {
+export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent, context: Context) => {
   logger.info(JSON.stringify(event));
 
   const resourceProps = event.ResourceProperties as ResourcePropertiesType;
@@ -40,7 +41,9 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
           // can not update the namespace name and default database of redshift-serverless
           namespace = await waitForRedshiftServerlessNamespaceStatus(client, resourceProps.namespaceName);
         } else {
-          namespace = (await createNamespace(client, resourceProps))!;
+          const funcTags = await getFunctionTags(context);
+          const tags: Tag[] = funcTags ? Object.entries(funcTags).map(([key, value]) => ({ key, value })) : [];
+          namespace = (await createNamespace(client, resourceProps, tags))!;
           if (namespace.status != NamespaceStatus.AVAILABLE) {
             await waitForRedshiftServerlessNamespaceStatus(client, namespace.namespaceName!);
           }
@@ -76,10 +79,11 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
   return response;
 };
 
-async function createNamespace(client: RedshiftServerlessClient, props: ResourcePropertiesType): Promise<Namespace | undefined> {
+async function createNamespace(client: RedshiftServerlessClient, props: ResourcePropertiesType, tags: Tag[]): Promise<Namespace | undefined> {
   const input = { // CreateNamespace
     dbName: props.databaseName,
     namespaceName: props.namespaceName,
+    tags,
   };
   logger.info('Creating redshift serverless namespace with input', { input });
   const command = new CreateNamespaceCommand(input);

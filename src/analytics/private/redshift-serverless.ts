@@ -23,7 +23,10 @@ import { Construct } from 'constructs';
 import { CreateMappingRoleUser, NewNamespaceCustomProperties, RedshiftServerlessWorkgroupProps } from './model';
 import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
+import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
+import { BuiltInTagKeys } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionInfo } from '../../common/solution-info';
 
 export class RedshiftServerless extends Construct {
 
@@ -51,6 +54,20 @@ export class RedshiftServerless extends Construct {
                 'redshift-serverless:GetNamespace',
               ],
               resources: ['*'],
+            }),
+            new PolicyStatement({
+              actions: [
+                'redshift-serverless:TagResource',
+                'redshift-serverless:UntagResource',
+              ],
+              resources: [
+                Arn.format({
+                  service: 'redshift-serverless',
+                  resource: 'namespace',
+                  resourceName: '*',
+                  arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+                }, Stack.of(this)),
+              ],
             }),
           ],
         }),
@@ -104,8 +121,21 @@ export class RedshiftServerless extends Construct {
       port: Number(this.workgroupPort),
       securityGroupIds: Fn.split(',', props.securityGroupIds),
       subnetIds: props.vpc.selectSubnets(props.subnetSelection).subnetIds,
+      tags: [
+        {
+          key: BuiltInTagKeys.AWS_SOLUTION,
+          value: SolutionInfo.SOLUTION_SHORT_NAME,
+        },
+        {
+          key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+          value: SolutionInfo.SOLUTION_VERSION,
+        },
+        {
+          key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+          value: props.projectId,
+        },
+      ],
     });
-
     this.redshiftUserCR = this.createRedshiftMappingUserCustomResource();
 
     this.addCfnNagSuppression();
@@ -214,6 +244,7 @@ export class RedshiftServerless extends Construct {
 
   private createRedshiftNamespaceCustomResource(props: RedshiftServerlessWorkgroupProps): CustomResource {
     const eventHandler = this.createCreateNamespaceFunction();
+    const policy = attachListTagsPolicyForFunction(this, 'CreateNamespaceFunc', eventHandler);
     this.workgroupDefaultAdminRole.grantAssumeRole(eventHandler.grantPrincipal);
 
     const provider = new Provider(
@@ -234,6 +265,8 @@ export class RedshiftServerless extends Construct {
       serviceToken: provider.serviceToken,
       properties: customProps,
     });
+
+    cr.node.addDependency(policy!);
 
     return cr;
   }

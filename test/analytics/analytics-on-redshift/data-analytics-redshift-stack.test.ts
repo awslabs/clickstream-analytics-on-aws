@@ -21,6 +21,8 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
 import { REDSHIFT_MODE, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
+import { BuiltInTagKeys } from '../../../src/common/model';
+import { SolutionInfo } from '../../../src/common/solution-info';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
@@ -3780,6 +3782,55 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     });
   });
 
+  test('Custom resource - creating namespace with permissions to list tags of lambda function', () => {
+    newServerlessStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'lambda:ListTags',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'RedshiftServerelssWorkgroupCreateNamespaceFnDFB451B3',
+                'Arn',
+              ],
+            },
+          },
+        ],
+      },
+      Roles: [
+        {
+          Ref: 'RedshiftServerelssWorkgroupCreateRedshiftNamespaceRole1AD307CB',
+        },
+      ],
+    });
+
+    newServerlessStackTemplate.hasResource('AWS::CloudFormation::CustomResource', {
+      Properties: {
+        adminRoleArn: Match.anyValue(),
+        namespaceName: Match.anyValue(),
+        databaseName: Match.anyValue(),
+      },
+      DependsOn: [
+        'RedshiftServerelssWorkgroupCreateNamespaceFunclistTagsPolicy4F76CE76',
+      ],
+    });
+  });
+
+  test('Force to add built-in tags in serverless workgroup', () => {
+    newServerlessStackTemplate.hasResourceProperties('AWS::RedshiftServerless::Workgroup', {
+      Tags: Match.arrayWith([
+        Match.objectEquals({
+          Key: BuiltInTagKeys.AWS_SOLUTION,
+          Value: SolutionInfo.SOLUTION_SHORT_NAME,
+        }),
+        Match.objectEquals({
+          Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+          Value: SolutionInfo.SOLUTION_VERSION,
+        }),
+      ]),
+    });
+  });
 });
 
 
@@ -3831,6 +3882,4 @@ describe('Should set metrics widgets', () => {
       },
     });
   });
-
-},
-);
+});
