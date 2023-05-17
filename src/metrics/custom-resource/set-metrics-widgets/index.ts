@@ -124,15 +124,15 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
 
 function splitParamValues(widgetsProps: MetricsWidgetsProps): IndexMetricsWidgetsProps[] {
   logger.info('splitParamValues, input widgets lenth = ' + widgetsProps.widgets.length);
-  const splitMaxLength = 5;
 
   const widgetsArrArr: InputWidgetElement[][] = [];
   let widgetsArr: InputWidgetElement[] = [];
   for (const w of widgetsProps.widgets) {
-    widgetsArr.push(w);
-    if (widgetsArr.length == splitMaxLength) {
+    if (JSON.stringify([... widgetsArr, w]).length < 4000) {
+      widgetsArr.push(w);
+    } else {
       widgetsArrArr.push([...widgetsArr]);
-      widgetsArr = [];
+      widgetsArr = [w];
     }
   }
 

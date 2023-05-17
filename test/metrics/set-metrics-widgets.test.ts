@@ -223,8 +223,8 @@ test('Can set parameters when Create', async () => {
 
   await handler(event, c);
 
-  expect(ssmClientMock).toHaveReceivedCommandTimes(PutParameterCommand, 2);
-  expect(ssmClientMock).toHaveReceivedCommandTimes(AddTagsToResourceCommand, 2);
+  expect(ssmClientMock).toHaveReceivedCommandTimes(PutParameterCommand, 1);
+  expect(ssmClientMock).toHaveReceivedCommandTimes(AddTagsToResourceCommand, 1);
 
   const paramValue1 = JSON.stringify(
     {
@@ -316,94 +316,70 @@ test('Can set parameters when Create', async () => {
             title: 'Kinesis to S3 Lambda Error count',
           },
         },
+        {
+          type: 'metric',
+          properties: {
+            period: '60',
+            stat: 'Sum',
+            view: 'gauge',
+            yAxis: {
+              left: {
+                min: '0',
+                max: '100',
+              },
+            },
+            metrics: [
+              [
+                'AWS/Lambda',
+                'Errors',
+                'FunctionName',
+                'testFnName',
+                {
+                  stat: 'Sum',
+                  visible: 'false',
+                  id: 'errors',
+                },
+              ],
+              [
+                '.',
+                'Invocations',
+                '.',
+                '.',
+                {
+                  stat: 'Sum',
+                  visible: 'false',
+                  id: 'invocations',
+                },
+              ],
+              [
+                {
+                  yAxis: 'left',
+                  expression: '100 - 100 * errors / MAX([errors, invocations])',
+                  label: 'Success rate (%)',
+                  id: 'availability',
+                },
+              ],
+            ],
+            title: 'Kinesis to S3 Lambda success rate (%)',
+          },
+        },
       ],
       projectId: 'test_proj_001',
       order: '200',
       index: 1,
-      total: 2,
+      total: 1,
     },
   );
-  const paramValue2 = JSON.stringify({
-    name: 'lambda',
-    description: {
-      markdown: '## Lambda Executions',
-    },
-    widgets: [
-      {
-        type: 'metric',
-        properties: {
-          period: '60',
-          stat: 'Sum',
-          view: 'gauge',
-          yAxis: {
-            left: {
-              min: '0',
-              max: '100',
-            },
-          },
-          metrics: [
-            [
-              'AWS/Lambda',
-              'Errors',
-              'FunctionName',
-              'testFnName',
-              {
-                stat: 'Sum',
-                visible: 'false',
-                id: 'errors',
-              },
-            ],
-            [
-              '.',
-              'Invocations',
-              '.',
-              '.',
-              {
-                stat: 'Sum',
-                visible: 'false',
-                id: 'invocations',
-              },
-            ],
-            [
-              {
-                yAxis: 'left',
-                expression: '100 - 100 * errors / MAX([errors, invocations])',
-                label: 'Success rate (%)',
-                id: 'availability',
-              },
-            ],
-          ],
-          title: 'Kinesis to S3 Lambda success rate (%)',
-        },
-      },
-    ],
-    projectId: 'test_proj_001',
-    order: '200',
-    index: 2,
-    total: 2,
-  });
 
   expect(ssmClientMock).toHaveReceivedNthCommandWith(1, PutParameterCommand, {
-    Name: '/Clickstream/metrics/test_proj_001/teststackid001/lambda/2',
-    Overwrite: true,
-    Type: 'String',
-    Value: paramValue2,
-  });
-
-  expect(ssmClientMock).toHaveReceivedNthCommandWith(2, AddTagsToResourceCommand, {
-    Tags: [{ Key: 'tag_1_key', Value: 'tag_1_value' }, { Key: 'tag_2_key', Value: 'tag_2_value' }],
-    ResourceId: '/Clickstream/metrics/test_proj_001/teststackid001/lambda/2',
-    ResourceType: ResourceTypeForTagging.PARAMETER,
-  });
-
-  expect(ssmClientMock).toHaveReceivedNthCommandWith(3, PutParameterCommand, {
     Name: '/Clickstream/metrics/test_proj_001/teststackid001/lambda/1',
     Overwrite: true,
     Type: 'String',
     Value: paramValue1,
   });
 
-  expect(ssmClientMock).toHaveReceivedNthCommandWith(4, AddTagsToResourceCommand, {
+
+  expect(ssmClientMock).toHaveReceivedNthCommandWith(2, AddTagsToResourceCommand, {
     Tags: [{ Key: 'tag_1_key', Value: 'tag_1_value' }, { Key: 'tag_2_key', Value: 'tag_2_value' }],
     ResourceId: '/Clickstream/metrics/test_proj_001/teststackid001/lambda/1',
     ResourceType: ResourceTypeForTagging.PARAMETER,

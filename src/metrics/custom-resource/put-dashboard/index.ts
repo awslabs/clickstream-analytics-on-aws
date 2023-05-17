@@ -150,10 +150,16 @@ async function _handler(
 
     // merge splitted widgets which have the same `name`
     const existingWidgetsProps = widgetsAll.find(wp => wp.name == widgetsProps.name);
-    if (existingWidgetsProps && existingWidgetsProps.total == widgetsProps.total) {
-      existingWidgetsProps.widgets.push(...widgetsProps.widgets);
+    if (existingWidgetsProps) {
+      if (existingWidgetsProps.total == widgetsProps.total) {
+        existingWidgetsProps.widgets.push(...widgetsProps.widgets);
+        logger.info('add to existing name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
+      } else {
+        logger.info('ignore name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' new total=' + widgetsProps.total);
+      }
     } else {
       widgetsAll.push(widgetsProps);
+      logger.info('add new name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
     }
   }
 
@@ -177,13 +183,14 @@ async function _handler(
 
   logger.info('dashboardBody', { dashboardBody });
 
-  await cwClient.send(
+  const response = await cwClient.send(
     new PutDashboardCommand({
       DashboardName: dashboardName,
       DashboardBody: JSON.stringify(dashboardBody),
     }),
   );
 
+  logger.info('response', { response });
   logger.info('PutDashboardCommand done');
 
   return {

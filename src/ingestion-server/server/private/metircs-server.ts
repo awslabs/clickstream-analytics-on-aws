@@ -34,8 +34,14 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     props.albFullName,
   ];
 
-  const ecsNamespace = 'ECS/ContainerInsights';
-  const ecsDimension = [
+  const ecsNamespace = 'AWS/ECS';
+  const ecsClusterDimension = [
+    'ClusterName',
+    props.ecsClusterName,
+  ];
+
+  const ecsContainerInsightsNamespace = 'ECS/ContainerInsights';
+  const ecsServiceDimension = [
     'ClusterName',
     props.ecsClusterName,
     'ServiceName',
@@ -55,7 +61,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     evaluationPeriods: 2,
     metric: new Metric({
       metricName: 'PendingTaskCount',
-      namespace: ecsNamespace,
+      namespace: ecsContainerInsightsNamespace,
       period: Duration.seconds(300),
       statistic: 'Average',
       dimensionsMap: {
@@ -67,22 +73,21 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     alarmName: getAlarmName(scope, props.projectId, 'ECS Pending Task Count'),
   });
 
-  const ecsCpuUtilizedAlarm = new Alarm(scope, 'ecsCpuUtilizedAlarm', {
+  const ecsCpuUtilizedAlarm = new Alarm(scope, 'ecsClusterCpuUtilizedAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
     threshold: 85,
     evaluationPeriods: 1,
     metric: new Metric({
-      metricName: 'CpuUtilized',
+      metricName: 'CPUUtilization',
       namespace: ecsNamespace,
       period: Duration.seconds(300),
       statistic: 'Average',
       dimensionsMap: {
         ClusterName: props.ecsClusterName,
-        ServiceName: props.ecsServiceName,
       },
     }),
-    alarmDescription: 'ECS Cpu Utilized more than 85%',
-    alarmName: getAlarmName(scope, props.projectId, 'ECS CPU Utilized'),
+    alarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+    alarmName: getAlarmName(scope, props.projectId, 'ECS Cluster CPUUtilization'),
   });
 
   setCfnNagForAlarms([ecsPendingTaskCountAlarm, ecsCpuUtilizedAlarm]);
@@ -132,7 +137,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
           [
             albNamespace,
             'HTTPCode_ELB_4XX_Count',
-            ...albDimension,
+            '.', '.',
           ],
         ],
       },
@@ -150,75 +155,43 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
             'TargetResponseTime',
             ...albDimension,
           ],
-
         ],
-
       },
     },
-
     {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Server(ECS) CPU Utilization',
+        title: 'Server(ECS) Cluster CPUUtilization',
         metrics: [
           [
             ecsNamespace,
-            'CpuUtilized',
-            ...ecsDimension,
+            'CPUUtilization',
+            ...ecsClusterDimension,
             {
-              id: 'cpu',
-              yAxis: 'right',
+              stat: 'Average',
+              label: 'CPUUtilization Average',
             },
           ],
 
           [
-            ecsNamespace,
-            'CpuReserved',
-            ...ecsDimension,
-          ],
-        ],
-        yAxis: {
-          right: {
-            min: 0,
-            max: 100,
-          },
-        },
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Average',
-        title: 'Server(ECS) Memory Utilization',
-        metrics: [
-          [
-            ecsNamespace,
-            'MemoryUtilized',
-            ...ecsDimension,
+            '.', '.', '.', '.',
             {
-              id: 'mem',
-              yAxis: 'right',
+              stat: 'Maximum',
+              label: 'CPUUtilization Maximum',
+            },
+          ],
+          [
+            '.', '.', '.', '.',
+            {
+              stat: 'Minimum',
+              label: 'CPUUtilization Minimum',
             },
           ],
 
-          [
-            ecsNamespace,
-            'MemoryReserved',
-            ...ecsDimension,
-          ],
         ],
-        yAxis: {
-          right: {
-            min: 0,
-            max: 100,
-          },
-        },
-
       },
     },
-
 
     {
       type: 'metric',
@@ -227,24 +200,23 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
         title: 'Server(ECS) Tasks',
         metrics: [
           [
-            ecsNamespace,
+            ecsContainerInsightsNamespace,
             'RunningTaskCount',
-            ...ecsDimension,
+            ...ecsServiceDimension,
           ],
 
           [
-            ecsNamespace,
+            ecsContainerInsightsNamespace,
             'DesiredTaskCount',
-            ...ecsDimension,
+            '.', '.', '.', '.',
           ],
 
           [
-            ecsNamespace,
+            ecsContainerInsightsNamespace,
             'PendingTaskCount',
-            ...ecsDimension,
+            '.', '.', '.', '.',
           ],
         ],
-
       },
     },
 
@@ -258,9 +230,69 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
             asgNamespace,
             'CPUUtilization',
             ...asgDimension,
+            {
+              stat: 'Average',
+              label: 'CPUUtilization Average',
+            },
+          ],
+
+          [
+            '.', '.', '.', '.',
+            {
+              stat: 'Maximum',
+              label: 'CPUUtilization Maximum',
+            },
+          ],
+
+          [
+            '.', '.', '.', '.',
+            {
+              stat: 'Minimum',
+              label: 'CPUUtilization Minimum',
+            },
           ],
         ],
+      },
+    },
 
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Average',
+        title: 'Server(ECS) Container CpuUtilized',
+        metrics: [
+          [
+            ecsContainerInsightsNamespace,
+            'CpuUtilized',
+            ...ecsServiceDimension,
+          ],
+
+          [
+            ecsContainerInsightsNamespace,
+            'CpuReserved',
+            '.', '.', '.', '.',
+          ],
+        ],
+      },
+    },
+
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Average',
+        title: 'Server(ECS) Container Memory Utilization',
+        metrics: [
+          [
+            ecsContainerInsightsNamespace,
+            'MemoryUtilized',
+            ...ecsServiceDimension,
+          ],
+          [
+            ecsContainerInsightsNamespace,
+            'MemoryReserved',
+            '.', '.', '.', '.',
+          ],
+        ],
       },
     },
   ];
