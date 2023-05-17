@@ -23,12 +23,8 @@ import {
   DataSetReference,
   TransformOperation,
   ColumnTag,
-  CreateDataSourceCommandOutput,
-  VpcConnectionProperties,
 } from '@aws-sdk/client-quicksight';
-import { SSM } from '@aws-sdk/client-ssm';
 import { Context, CloudFormationCustomResourceEvent } from 'aws-lambda';
-import { BIUserCredential } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import {
@@ -42,9 +38,6 @@ import {
   waitForDataSetDeleteCompleted,
   QuickSightDashboardDefProps,
   DataSetProps,
-  waitForDataSourceDeleteCompleted,
-  waitForDataSourceCreateCompleted,
-  RedShiftDataSourceProps,
   truncateString,
 } from '../../../private/dashboard';
 
@@ -75,12 +68,6 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
     ...aws_sdk_client_common_config,
   });
 
-  const ssm = new SSM({
-    region,
-    ...aws_sdk_client_common_config,
-  });
-
-
   const awsAccountId = props.awsAccountId;
   const namespace: string = props.quickSightNamespace;
   const quickSightUser: string = props.quickSightUser;
@@ -92,9 +79,6 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   let dashboards = [];
 
   if (event.RequestType === 'Create' || event.RequestType === 'Update' ) {
-    const dataSource = props.dashboardDefProps.dataSource;
-    const datasource = await createDataSource(quickSight, ssm, awsAccountId, principalArn, dataSource);
-
     const databaseSchemaNames = props.schemas;
     if ( databaseSchemaNames.trim().length > 0 ) {
       for (const schemaName of databaseSchemaNames.split(',')) {
@@ -104,9 +88,6 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
         const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn,
           schemaName,
-          props.dashboardDefProps.dataSource.databaseName,
-          props.templateArn,
-          datasource?.Arn!,
           dashboardDefProps);
         logger.info('created dashboard:', JSON.stringify(dashboard));
         dashboards.push({
@@ -127,103 +108,6 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
     },
   };
 };
-
-const createDataSource = async (quickSight: QuickSight, ssm: SSM, awsAccountId: string, principalArn: string, props: RedShiftDataSourceProps)
-: Promise<CreateDataSourceCommandOutput|undefined> => {
-  try {
-
-    //truncate to 40 length if databaseName is too long.
-    //suffix is short stackid.
-    const templateIdentifer = truncateString(props.databaseName, 40);
-    const datasourceId = `clickstream_datasource_v1_${templateIdentifer}_${props.suffix}`;
-
-    //delete datasource if it exist.
-    try {
-      const datasource = await quickSight.describeDataSource({
-        AwsAccountId: awsAccountId,
-        DataSourceId: datasourceId,
-      });
-      logger.info('exist datasource: ', datasource.DataSource?.Arn!);
-
-      if (datasource.DataSource?.DataSourceId === datasourceId) {
-        logger.info('delete exist datasource');
-        await quickSight.deleteDataSource({
-          AwsAccountId: awsAccountId,
-          DataSourceId: datasourceId,
-        });
-        await waitForDataSourceDeleteCompleted(quickSight, awsAccountId, datasourceId);
-      }
-    } catch (err: any) {
-      if ((err as Error) instanceof ResourceNotFoundException) {
-        logger.info('Datasource not exist. skip delete operation.');
-      } else {
-        throw err;
-      }
-    }
-
-    //whether to use quicksight vpc connection
-    let vpcConnectionPropertiesProperty: VpcConnectionProperties | undefined;
-    if (props.vpcConnectionArn !== 'public') {
-      vpcConnectionPropertiesProperty = {
-        VpcConnectionArn: props.vpcConnectionArn,
-      };
-    } else {
-      vpcConnectionPropertiesProperty = undefined;
-    }
-
-    //create datasource
-    const secretInfo = await ssm.getParameter({
-      Name: `/${props.credentialParameter}`,
-      WithDecryption: true,
-    });
-    const biUserCredential = JSON.parse(secretInfo.Parameter?.Value!) as BIUserCredential;
-
-    logger.info('start to create datasource');
-    const dataSource = await quickSight.createDataSource({
-      AwsAccountId: awsAccountId,
-      DataSourceId: datasourceId,
-      Name: datasourceId,
-      Type: 'REDSHIFT',
-      Credentials: {
-        CredentialPair: {
-          Username: biUserCredential.username,
-          Password: biUserCredential.password,
-        },
-      },
-      DataSourceParameters: {
-        RedshiftParameters: {
-          Database: props.databaseName,
-          Host: props.endpoint,
-          Port: Number(props.port),
-        },
-      },
-      Permissions: [{
-        Principal: principalArn,
-        Actions: [
-          'quicksight:UpdateDataSourcePermissions',
-          'quicksight:DescribeDataSourcePermissions',
-          'quicksight:PassDataSource',
-          'quicksight:DescribeDataSource',
-          'quicksight:DeleteDataSource',
-          'quicksight:UpdateDataSource',
-        ],
-      }],
-      VpcConnectionProperties: vpcConnectionPropertiesProperty,
-    });
-    await waitForDataSourceCreateCompleted(quickSight, awsAccountId, datasourceId);
-    logger.info('datasource id: ', JSON.stringify(dataSource));
-
-    const datasourceArn = dataSource.Arn!;
-    logger.info('create datasource finished with arn: ', datasourceArn);
-
-    return dataSource;
-
-  } catch (err: any) {
-    logger.error(`Create QuickSight datasource failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
 
 const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
@@ -504,16 +388,14 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   principalArn: string,
   schema: string,
-  databaseName: string,
-  templeteArn: string,
-  datasourceArn: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
+  const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
-    const createdDataset = await createDataSet(quickSight, accountId, principalArn, datasourceArn, schema, databaseName, dataSet);
+    const createdDataset = await createDataSet(quickSight, accountId, principalArn, dashboardDef.dataSourceArn, schema, databaseName, dataSet);
     logger.info('data set arn:', createdDataset?.Arn!);
 
     datasetRefs.push({
@@ -524,7 +406,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   const sourceEntity = {
     SourceTemplate: {
-      Arn: templeteArn,
+      Arn: dashboardDef.templateArn,
       DataSetReferences: datasetRefs,
     },
   };

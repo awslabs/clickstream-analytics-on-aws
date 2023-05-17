@@ -19,7 +19,8 @@ import {
   Stack,
 } from 'aws-cdk-lib';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
+import { CfnDataSource, CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import {
   addCfnNagForLogRetention,
@@ -101,24 +102,61 @@ export class DataReportingQuickSightStack extends Stack {
           arn: stackParames.quickSightTemplateArnParam.valueAsString,
         },
       },
+
+      // definition: lowercaseKeys(TEMPLATE_DEF_V1),
     });
+
+    const userSecret = Secret.fromSecretNameV2(this, 'Clickstrem-Redshift-Secret', `${stackParames.redshiftParameterKeyParam.valueAsString}`);
+
+    const datasourceId = `clickstream_datasource_v1_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const dataSource = new CfnDataSource(this, 'Clickstream-DataSource', {
+      awsAccountId: Aws.ACCOUNT_ID,
+      dataSourceId: datasourceId,
+      name: `Clicksteam DataSource ${stackParames.redshiftDBParam.valueAsString}`,
+      type: 'REDSHIFT',
+      credentials: {
+        credentialPair: {
+          username: userSecret.secretValueFromJson('username').toString(),
+          password: userSecret.secretValueFromJson('password').toString(),
+        },
+      },
+      dataSourceParameters: {
+        redshiftParameters: {
+          database: stackParames.redshiftDBParam.valueAsString,
+          host: stackParames.redshiftEndpointParam.valueAsString,
+          port: stackParames.redshiftPortParam.valueAsNumber,
+        },
+      },
+      permissions: [
+        {
+          principal: principalArn,
+          actions: [
+            'quicksight:UpdateDataSourcePermissions',
+            'quicksight:DescribeDataSourcePermissions',
+            'quicksight:PassDataSource',
+            'quicksight:DescribeDataSource',
+            'quicksight:DeleteDataSource',
+            'quicksight:UpdateDataSource',
+          ],
+        },
+      ],
+      vpcConnectionProperties: {
+        vpcConnectionArn,
+      },
+    });
+    dataSource.node.addDependency(vPCConnectionResource);
 
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
+      dataSourceArn: dataSource.attrArn,
       databaseName: stackParames.redshiftDBParam.valueAsString,
-      identifer: `${getShortIdOfStack(Stack.of(this))}`,
       quickSightProps: {
         userName: stackParames.quickSightUserParam.valueAsString,
         namespace: stackParames.quickSightNamespaceParam.valueAsString,
-        vpcConnectionArn: vpcConnectionArn,
         principalArn: stackParames.quickSightPrincipalParam.valueAsString,
       },
       redshiftProps: {
-        host: stackParames.redshiftEndpointParam.valueAsString,
-        port: stackParames.redshiftPortParam.valueAsNumber,
-        databaseName: stackParames.redshiftDBParam.valueAsString,
         databaseSchemaNames: stackParames.redShiftDBSchemaParam.valueAsString,
-        ssmParameterName: stackParames.redshiftParameterKeyParam.valueAsString,
       },
     });
     cr.node.addDependency(vPCConnectionResource);
@@ -145,7 +183,7 @@ export class DataReportingQuickSightStack extends Stack {
 function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightDatasourceCustomResource', 'QuicksightDatasourceCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider', undefined);
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {

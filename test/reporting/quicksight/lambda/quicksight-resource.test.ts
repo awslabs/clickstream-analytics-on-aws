@@ -15,15 +15,12 @@ import {
   CreateAnalysisCommand,
   CreateDashboardCommand,
   CreateDataSetCommand,
-  CreateDataSourceCommand,
   DeleteAnalysisCommand,
   DeleteDashboardCommand,
   DeleteDataSetCommand,
-  DeleteDataSourceCommand,
   DescribeAnalysisCommand,
   DescribeDashboardCommand,
   DescribeDataSetCommand,
-  DescribeDataSourceCommand,
   QuickSightClient,
   ResourceNotFoundException,
 } from '@aws-sdk/client-quicksight';
@@ -55,7 +52,6 @@ describe('QuickSight Lambda function', () => {
   const context = getMockContext();
   const quickSightClientMock = mockClient(QuickSightClient);
   const ssmClientMock = mockClient(SSMClient);
-  const suffix = 'test1';
 
   const commonProps = {
     awsAccountId: 'xxxxxxxxxx',
@@ -72,15 +68,7 @@ describe('QuickSight Lambda function', () => {
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
       databaseName: 'test-database-name',
-      dataSource: {
-        name: 'Clickstream Quicksight Data Source',
-        suffix,
-        endpoint: 'test.example.com',
-        port: 5439,
-        databaseName: ['test-database-name'],
-        credentialParameter: 'test-parameter',
-        vpcConnectionArn: 'test-vpc-connection',
-      },
+      dataSourceArn: 'test-datasource',
       dataSets: [
         {
           name: 'User Dim Data Set',
@@ -209,22 +197,6 @@ describe('QuickSight Lambda function', () => {
 
   test('Create QuichSight dashboard', async () => {
 
-    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    });
-
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -268,9 +240,6 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(vpcConnectionAccessEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
@@ -292,22 +261,6 @@ describe('QuickSight Lambda function', () => {
 
 
   test('Create QuichSight dashboard - public access', async () => {
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    });
 
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
@@ -352,9 +305,6 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(publicAccessEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
@@ -380,28 +330,6 @@ describe('QuickSight Lambda function', () => {
     const error = new ResourceNotFoundException({
       message: 'ResourceNotFoundException',
       $metadata: {},
-    });
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    }).rejectsOnce(error).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
     });
 
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
@@ -471,9 +399,6 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(publicAccessEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 3);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 6);
@@ -494,51 +419,7 @@ describe('QuickSight Lambda function', () => {
 
   }, 10000);
 
-  test('Create QuichSight datasource - create data source exception', async () => {
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolvesOnce({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).rejects();
-
-    try {
-      await handler(vpcConnectionAccessEvent, context) as CdkCustomResourceResponse;
-    } catch (e) {
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 1);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
-      return;
-    }
-
-    fail('No exception happened when CreateDataSourceCommand failed');
-
-  });
-
   test('Custom resource update', async () => {
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    });
 
     quickSightClientMock.on(DescribeDataSetCommand).resolves({
       DataSet: {
@@ -583,9 +464,6 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(updateEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
@@ -608,9 +486,6 @@ describe('QuickSight Lambda function', () => {
   test('Custom resource delete', async () => {
 
     const resp = await handler(deleteEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
@@ -625,27 +500,8 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Empty app ids', async () => {
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
-      DataSource: {
-        DataSourceId: 'datasource_123456',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/test_datasource',
-      Status: 200,
-    });
-
     const resp = await handler(emptyAppIdEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
 
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(0);
   });
@@ -655,28 +511,6 @@ describe('QuickSight Lambda function', () => {
     const error = new ResourceNotFoundException({
       message: 'ResourceNotFoundException',
       $metadata: {},
-    });
-
-    quickSightClientMock.on(DescribeDataSourceCommand).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    }).rejectsOnce(error).resolvesOnce({
-      DataSource: {
-        DataSourceId: 'clickstream_datasource_v1_test-database-name_test1',
-      },
-      RequestId: 'request-123',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteDataSourceCommand).resolves({
-    });
-
-    quickSightClientMock.on(CreateDataSourceCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/clickstream_datasource_v1_test-database-name_test1',
-      Status: 200,
     });
 
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
@@ -798,10 +632,6 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(multiUpdateEvent, context) as CdkCustomResourceResponse;
-
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSourceCommand, 3);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSourceCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSourceCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 5);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 5);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 10);

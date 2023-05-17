@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Arn, ArnFormat, Duration, CustomResource, Stack } from 'aws-cdk-lib';
+import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Runtime, Function, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -21,6 +21,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, CreateDatabaseAndSchemas } from './model';
 import { createLambdaRole } from '../../common/lambda';
+import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface ApplicationSchemasProps {
@@ -84,20 +85,24 @@ export class ApplicationSchemas extends Construct {
   private createRedshiftSchemasLambda(): Function {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
 
-    const writeSSMParameterPolicy: PolicyStatement = new PolicyStatement({
+    const writeSecretPolicy: PolicyStatement = new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
         Arn.format(
           {
-            resource: 'parameter',
-            service: 'ssm',
-            resourceName: this.redshiftBIUserParameter.substring(1), // Name in ssm:PutParamter must start without '/'
-            arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+            resource: 'secret',
+            service: 'secretsmanager',
+            resourceName: `${this.redshiftBIUserParameter}*`,
+            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
           }, Stack.of(this),
         ),
       ],
       actions: [
-        'ssm:PutParameter',
+        'secretsmanager:DescribeSecret',
+        'secretsmanager:UpdateSecret',
+        'secretsmanager:CreateSecret',
+        'secretsmanager:DeleteSecret',
+        'secretsmanager:TagResource',
       ],
     });
 
@@ -120,12 +125,15 @@ export class ApplicationSchemas extends Construct {
       timeout: Duration.minutes(5),
       logRetention: RetentionDays.ONE_WEEK,
       role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
-        [writeSSMParameterPolicy]),
+        [writeSecretPolicy]),
       environment: {
         ... POWERTOOLS_ENVS,
       },
       layers: [sqlLayer],
     });
+
+    attachListTagsPolicyForFunction(this, 'CreateSchemaForApplicationsFn', fn);
+
     return fn;
   }
 }

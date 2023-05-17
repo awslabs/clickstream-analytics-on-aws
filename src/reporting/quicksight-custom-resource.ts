@@ -39,30 +39,23 @@ export function createQuicksightCustomResource(
   scope: Construct,
   props: QuicksightCustomResourceProps,
 ): CustomResource {
-  const fn = createQuicksightLambda(scope, props.redshiftProps.ssmParameterName, props.templateArn);
+  const fn = createQuicksightLambda(scope, props.templateArn);
   const provider = new Provider(
     scope,
-    'QuicksightDatasourceCustomResourceProvider',
+    'QuicksightCustomResourceProvider',
     {
       onEventHandler: fn,
       logRetention: RetentionDays.ONE_WEEK,
     },
   );
 
-  const databaseName = props.redshiftProps.databaseName;
+  const databaseName = props.databaseName;
   const dashboardDefProps: QuickSightDashboardDefProps = {
     analysisName: `Clickstream Analysis ${databaseName}`,
     dashboardName: `Clickstream Dashboard ${databaseName}`,
     templateArn: props.templateArn,
+    dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
-    dataSource: {
-      suffix: props.identifer,
-      endpoint: props.redshiftProps.host,
-      port: props.redshiftProps.port,
-      databaseName: databaseName,
-      credentialParameter: props.redshiftProps.ssmParameterName,
-      vpcConnectionArn: props.quickSightProps.vpcConnectionArn,
-    },
     dataSets: [
       {
         name: 'User Dim Data Set',
@@ -135,7 +128,6 @@ export function createQuicksightCustomResource(
       quickSightNamespace: props.quickSightProps.namespace,
       quickSightUser: props.quickSightProps.userName,
       quickSightPrincipalArn: props.quickSightProps.principalArn,
-      templateArn: props.templateArn,
       schemas: props.redshiftProps.databaseSchemaNames,
       dashboardDefProps,
     },
@@ -145,10 +137,9 @@ export function createQuicksightCustomResource(
 
 function createQuicksightLambda(
   scope: Construct,
-  ssmParameterName: string,
   templateArn: string,
 ): NodejsFunction {
-  const role = createRoleForQuicksightCustomResourceLambda(scope, ssmParameterName, templateArn);
+  const role = createRoleForQuicksightCustomResourceLambda(scope, templateArn);
   const fn = new NodejsFunction(scope, 'QuicksightCustomResourceLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(

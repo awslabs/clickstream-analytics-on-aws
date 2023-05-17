@@ -12,8 +12,9 @@
  */
 
 import { readFileSync } from 'fs';
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, BatchExecuteStatementCommand, BatchExecuteStatementCommandInput, ExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommandInput } from '@aws-sdk/client-redshift-data';
-import { PutParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { CreateSecretCommand, DescribeSecretCommand, ResourceNotFoundException, SecretsManagerClient, UpdateSecretCommand } from '@aws-sdk/client-secrets-manager';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
@@ -30,7 +31,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const callback: CdkCustomResourceCallback = async (_response) => {};
 
   const redshiftDataMock = mockClient(RedshiftDataClient);
-  const ssmMock = mockClient(SSMClient);
+  const smMock = mockClient(SecretsManagerClient);
+  const lambdaMock = mockClient(LambdaClient);
 
   const projectDBName = 'clickstream_project1';
   const roleName = 'MyRedshiftDBUserRole';
@@ -105,7 +107,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   beforeEach(async () => {
     redshiftDataMock.reset();
-    ssmMock.reset();
+    smMock.reset();
     const rootPath = __dirname+'/../../../../../src/analytics/private/sqls/';
     mockfs({
       '/opt/clickstream-daily-active-user-view.sql': testSqlContent(rootPath + 'clickstream-daily-active-user-view.sql'),
@@ -126,7 +128,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   afterEach(mockfs.restore);
 
   test('Only creating database and bi user are invoked if no application is given', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     const eventWithoutApp = {
       ...createServerlessEvent,
       ResourceProperties: {
@@ -151,7 +156,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('BI user is created in creation event', async () => {
-    ssmMock.on(PutParameterCommand).resolves({});
+    smMock.on(CreateSecretCommand).resolves({});
+    smMock.on(DescribeSecretCommand).rejects(new ResourceNotFoundException({
+      message: 'ResourceNotFoundException',
+      $metadata: {},
+    }));
     const eventWithoutApp = {
       ...createServerlessEvent,
       ResourceProperties: {
@@ -172,13 +181,50 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(eventWithoutApp, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(ssmMock).toHaveReceivedCommandTimes(PutParameterCommand, 1);
+    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 1);
+    expect(smMock).toHaveReceivedCommandTimes(DescribeSecretCommand, 1);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 2);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
+  });
+
+  test('BI user is created in creation event - secret already exist', async () => {
+    smMock.on(CreateSecretCommand).resolves({});
+    smMock.on(DescribeSecretCommand).resolves({
+      Name: 'test-secret',
+    });
+    smMock.on(UpdateSecretCommand).resolves({});
+    const eventWithoutApp = {
+      ...createServerlessEvent,
+      ResourceProperties: {
+        ...createServerlessEvent.ResourceProperties,
+        appIds: '',
+      },
+    };
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'id-1' })
+      .callsFake(input => {
+        if (input as ExecuteStatementCommandInput) {
+          if (input.Sql.includes('CREATE USER')) {
+            return { Id: 'id-2' };
+          }
+        }
+        throw new Error('Sqls are not expected');
+      }).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+    const resp = await handler(eventWithoutApp, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
+    expect(smMock).toHaveReceivedCommandTimes(UpdateSecretCommand, 1);
+    expect(smMock).toHaveReceivedCommandTimes(DescribeSecretCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
   });
 
   test('Created bi user with lower case characters only', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     const regex = new RegExp(`^CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD 'md5[a-f0-9]{32}'$`);
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'Id-1' })
       .callsFakeOnce(input => {
@@ -194,7 +240,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Created database, bi user, schemas and views in Redshift serverless', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
@@ -241,7 +290,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait success', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand)
@@ -258,7 +310,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait with failure', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand)
@@ -278,7 +333,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Updated schemas and views only in Redshift serverless in update stack', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
         if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
@@ -292,7 +350,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
-    expect(ssmMock).toHaveReceivedCommandTimes(PutParameterCommand, 0);
+    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
@@ -317,13 +375,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
     };
     const resp = await handler(deleteEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(ssmMock).toHaveReceivedCommandTimes(PutParameterCommand, 0);
+    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
   });
 
   test('Data api exception in Redshift serverless', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).rejects();
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
@@ -339,7 +400,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Created database, bi user, schemas and views in Redshift provisioned cluster', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
@@ -390,7 +454,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Data api exception in Redshift provisioned cluster', async () => {
-    ssmMock.onAnyCommand().resolves({});
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).rejects();
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });

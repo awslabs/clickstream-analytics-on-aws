@@ -15,27 +15,22 @@ import { InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/cli
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
-  databaseName: string;
   databaseSchemaNames: string;
-  host: string;
-  port: number;
-  ssmParameterName: string;
-}
+};
 
 export interface QuickSightProps {
   namespace: string;
   userName: string;
-  vpcConnectionArn: string;
   principalArn: string;
-}
+};
 
 export interface QuicksightCustomResourceProps {
-  readonly identifer: string;
   readonly templateArn: string;
+  readonly dataSourceArn: string;
   readonly databaseName: string;
   readonly quickSightProps: QuickSightProps;
   readonly redshiftProps: RedShiftProps;
-}
+};
 
 export interface QuicksightCustomResourceLabmdaProps {
   readonly awsAccountId: string;
@@ -45,27 +40,17 @@ export interface QuicksightCustomResourceLabmdaProps {
   readonly quickSightUser: string;
   readonly quickSightPrincipalArn: string;
   readonly schemas: string;
-  readonly templateArn: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
-}
+};
 
 export interface TagColumnOperationProps {
   columnName: string;
   columnGeographicRoles: string[];
-}
+};
 
 export interface ColumnGroupsProps {
   geoSpatialColumnGroupName: string;
   geoSpatialColumnGroupColumns: string[];
-}
-
-export interface RedShiftDataSourceProps {
-  suffix: string;
-  endpoint: string;
-  port: number;
-  databaseName: string;
-  credentialParameter: string;
-  vpcConnectionArn: string | undefined;
 };
 
 export interface DataSetProps {
@@ -82,8 +67,8 @@ export interface QuickSightDashboardDefProps {
   dashboardName: string;
   analysisName: string;
   templateArn: string;
+  dataSourceArn: string;
   databaseName: string;
-  dataSource: RedShiftDataSourceProps;
   dataSets: DataSetProps[];
 };
 
@@ -125,26 +110,6 @@ export async function waitForDataSetCreateCompleted(quickSight: QuickSight, acco
 
     } catch (err: any) {
       logger.info('DataSetCreate catch: sleep 1 second');
-      await sleep(1000);
-    }
-  }
-};
-
-export async function waitForDataSourceCreateCompleted(quickSight: QuickSight, accountId: string, datasourceId: string) {
-  for (const _i of Array(60).keys()) {
-    try {
-      const datasource = await quickSight.describeDataSource({
-        AwsAccountId: accountId,
-        DataSourceId: datasourceId,
-      });
-      if ( datasource.DataSource !== undefined && datasource.DataSource?.DataSourceId !== undefined ) {
-        return;
-      }
-      logger.info('DataSourceCreate: sleep 1 second');
-      await sleep(1000);
-
-    } catch (err: any) {
-      logger.info('DataSourceCreate catch: sleep 1 second');
       await sleep(1000);
     }
   }
@@ -228,26 +193,6 @@ export async function waitForDataSetDeleteCompleted(quickSight: QuickSight, acco
       }
 
       logger.info('delete dataset catch: sleep 1 second');
-      await sleep(1000);
-    }
-  }
-};
-
-export async function waitForDataSourceDeleteCompleted(quickSight: QuickSight, accountId: string, datasourceId: string) {
-  for (const _i of Array(60).keys()) {
-    try {
-      await quickSight.describeDataSource({
-        AwsAccountId: accountId,
-        DataSourceId: datasourceId,
-      });
-      logger.info('DataSourceDelete: sleep 1 second');
-      await sleep(1000);
-
-    } catch (err: any) {
-      if ((err as Error) instanceof ResourceNotFoundException) {
-        return;
-      }
-      logger.info('DataSourceDelete catch: sleep 1 second');
       await sleep(1000);
     }
   }

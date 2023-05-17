@@ -13,8 +13,22 @@
 
 import crypto from 'crypto';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { DeleteParameterCommand, DeleteParameterCommandInput, ParameterNotFound, ParameterTier, ParameterType, PutParameterCommand, PutParameterCommandInput, SSMClient } from '@aws-sdk/client-ssm';
-import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
+import {
+  CreateSecretCommand,
+  CreateSecretCommandInput,
+  DeleteSecretCommand,
+  DeleteSecretCommandInput,
+  DescribeSecretCommand,
+  DescribeSecretCommandInput,
+  ResourceNotFoundException,
+  SecretsManagerClient,
+  Tag,
+  TagResourceCommand,
+  UpdateSecretCommand,
+  UpdateSecretCommandInput,
+} from '@aws-sdk/client-secrets-manager';
+import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -27,11 +41,12 @@ export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
   readonly ServiceToken: string;
 }
 
-const ssmClient = new SSMClient({
+const secretManagerClient = new SecretsManagerClient({
   ...aws_sdk_client_common_config,
 });
+
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
-export const handler: CdkCustomResourceHandler = async (event) => {
+export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
   logger.info(JSON.stringify(event));
   const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
     `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
@@ -46,7 +61,7 @@ export const handler: CdkCustomResourceHandler = async (event) => {
   };
 
   try {
-    await _handler(event, biUsername);
+    await _handler(event, biUsername, context);
   } catch (e) {
     if (e instanceof Error) {
       logger.error('Error when creating database and schema in redshift', e);
@@ -56,12 +71,22 @@ export const handler: CdkCustomResourceHandler = async (event) => {
   return response;
 };
 
-async function _handler(event: CdkCustomResourceEvent, biUsername: string) {
+async function _handler(event: CdkCustomResourceEvent, biUsername: string, context: Context) {
   const requestType = event.RequestType;
 
   logger.info('RequestType: ' + requestType);
   if (requestType == 'Create') {
-    await onCreate(event, biUsername);
+    const funcTags = await getFunctionTags(context);
+    const tags: Tag[] = [];
+    for (let [key, value] of Object.entries(funcTags as any)) {
+      tags.push({
+        Key: key,
+        Value: value as string,
+      });
+    }
+    logger.info('tags', { tags });
+
+    await onCreate(event, biUsername, tags);
   }
 
   if (requestType == 'Update') {
@@ -73,13 +98,13 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string) {
   }
 }
 
-async function onCreate(event: CdkCustomResourceEvent, biUsername: string) {
+async function onCreate(event: CdkCustomResourceEvent, biUsername: string, tags: Tag[]) {
   logger.info('onCreate()');
 
   const props = event.ResourceProperties as ResourcePropertiesType;
 
   // 0. generate password and save to parameter store
-  const credential = await createBIUserCredentialParameter(props.redshiftBIUserParameter, biUsername, props.projectId);
+  const credential = await createBIUserCredentialSecret(props.redshiftBIUserParameter, biUsername, props.projectId, tags);
 
   // 1. create database in Redshift
   const client = getRedshiftClient(props.dataAPIRole);
@@ -97,32 +122,69 @@ async function onCreate(event: CdkCustomResourceEvent, biUsername: string) {
   await createViewForReporting(props);
 }
 
-async function createBIUserCredentialParameter(parameterName: string, biUsername: string, projectId: string): Promise<BIUserCredential> {
+async function createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string, tags: Tag[]): Promise<BIUserCredential> {
   const credential: BIUserCredential = {
     username: biUsername,
     password: generateRedshiftUserPassword(32),
   };
-  const input: PutParameterCommandInput = {
-    Name: parameterName,
-    DataType: 'text',
-    Description: `Managed by Clickstream for storing credential of Quicksight reporting user for project ${projectId}.`,
-    Tier: ParameterTier.STANDARD,
-    Type: ParameterType.SECURE_STRING,
-    Value: JSON.stringify(credential),
-    Overwrite: true,
+
+  const readParams: DescribeSecretCommandInput = {
+    SecretId: secretName,
   };
-  logger.info(`Creating the credential of BI user '${biUsername}' of Redshift to parameter ${parameterName}.`);
-  await ssmClient.send(new PutParameterCommand(input));
+
+  try {
+    await secretManagerClient.send(new DescribeSecretCommand(readParams));
+
+    const params: UpdateSecretCommandInput = {
+      SecretId: secretName,
+      SecretString: JSON.stringify(credential),
+      Description: `Managed by Clickstream for storing credential of Quicksight reporting user for project ${projectId}.`,
+    };
+    logger.info(`Updating the credential of BI user '${biUsername}' of Redshift to parameter ${secretName}.`);
+
+    await secretManagerClient.send(new UpdateSecretCommand(params));
+
+  } catch (err: any) {
+    if (err as Error instanceof ResourceNotFoundException) {
+      await _createBIUserCredentialSecret(secretName, biUsername, projectId, credential);
+    } else {
+      throw err;
+    }
+  }
+
+  await secretManagerClient.send(new TagResourceCommand({
+    SecretId: secretName,
+    Tags: tags,
+  }));
+  logger.info(`add tag ${secretName}`, { tags });
 
   return credential;
 }
 
-async function deleteBIUserCredentialParameter(parameterName: string, biUsername: string) {
-  const input: DeleteParameterCommandInput = {
-    Name: parameterName,
+
+async function _createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string,
+  credential: BIUserCredential): Promise<BIUserCredential> {
+  const params: CreateSecretCommandInput = {
+    Name: secretName,
+    SecretString: JSON.stringify(credential),
+    Description: `Managed by Clickstream for storing credential of Quicksight reporting user for project ${projectId}.`,
   };
-  logger.info(`Deleting the credential of BI user '${biUsername}' of Redshift to parameter ${parameterName}.`);
-  await ssmClient.send(new DeleteParameterCommand(input));
+  logger.info(`Creating the credential of BI user '${biUsername}' of Redshift to parameter ${secretName}.`);
+
+  await secretManagerClient.send(new CreateSecretCommand(params));
+
+  return credential;
+}
+
+
+async function deleteBIUserCredentialSecret(secretName: string, biUsername: string) {
+  const params: DeleteSecretCommandInput = {
+    SecretId: secretName,
+    ForceDeleteWithoutRecovery: true,
+  };
+
+  logger.info(`Deleting the credential of BI user '${biUsername}' of Redshift to parameter ${secretName}.`);
+  await secretManagerClient.send(new DeleteSecretCommand(params));
 }
 
 async function onUpdate(event: CdkCustomResourceEvent, biUsername: string) {
@@ -138,10 +200,10 @@ async function onDelete(event: CdkCustomResourceEvent, biUsername: string) {
   logger.info('onDelete()');
   const props = event.ResourceProperties as ResourcePropertiesType;
   try {
-    await deleteBIUserCredentialParameter(props.redshiftBIUserParameter, biUsername);
+    await deleteBIUserCredentialSecret(props.redshiftBIUserParameter, biUsername);
   } catch (error) {
-    if (error instanceof ParameterNotFound) {
-      logger.warn(`The parameter ${props.redshiftBIUserParameter} already is deleted.`);
+    if (error instanceof ResourceNotFoundException) {
+      logger.warn(`The parameter ${props.redshiftBIUserParameter} already deleted.`);
     }
   }
   logger.info('doNothing to keep the database and schema');

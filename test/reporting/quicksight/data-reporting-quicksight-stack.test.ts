@@ -307,9 +307,6 @@ describe('DataReportingQuickSightStack resource test', () => {
         {
           Action: [
             'quicksight:DescribeDataSource',
-            'quicksight:DeleteDataSource',
-            'quicksight:CreateDataSource',
-            'quicksight:UpdateDataSource',
             'quicksight:PassDataSource',
           ],
           Effect: 'Allow',
@@ -335,12 +332,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
         },
         {
-          Action: [
-            'quicksight:DescribeTemplate',
-            'quicksight:DeleteTemplate',
-            'quicksight:CreateTemplate',
-            'quicksight:UpdateTemplate',
-          ],
+          Action: 'quicksight:DescribeTemplate',
           Effect: 'Allow',
           Resource: [
             {
@@ -460,33 +452,6 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
         },
-        {
-          Action: 'ssm:GetParameter',
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':ssm:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':parameter/',
-                {
-                  Ref: 'RedshiftParameterKeyParam',
-                },
-              ],
-            ],
-          },
-        },
       ],
       Version: '2012-10-17',
     },
@@ -564,7 +529,7 @@ describe('DataReportingQuickSightStack resource test', () => {
     Code: Match.anyValue(),
     Role: {
       'Fn::GetAtt': [
-        Match.stringLikeRegexp('QuicksightDatasourceCustomResourceProviderframeworkonEventServiceRole[A-Z0-9]+'),
+        Match.stringLikeRegexp('QuicksightCustomResourceProviderframeworkonEventServiceRole[A-Z0-9]+'),
         'Arn',
       ],
     },
@@ -603,10 +568,255 @@ describe('DataReportingQuickSightStack resource test', () => {
     RetentionInDays: 7,
   }, 1);
 
+
+  template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
+    AwsAccountId: {
+      Ref: 'AWS::AccountId',
+    },
+    TemplateId: {
+      'Fn::Join': [
+        '',
+        [
+          'clickstream_template_v1_',
+          {
+            Ref: 'RedshiftDBParam',
+          },
+          '_',
+          {
+            'Fn::Select': [
+              0,
+              {
+                'Fn::Split': [
+                  '-',
+                  {
+                    'Fn::Select': [
+                      2,
+                      {
+                        'Fn::Split': [
+                          '/',
+                          {
+                            Ref: 'AWS::StackId',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      ],
+    },
+    Permissions: [
+      {
+        Actions: [
+          'quicksight:UpdateTemplatePermissions',
+          'quicksight:DescribeTemplatePermissions',
+          'quicksight:DescribeTemplate',
+          'quicksight:DeleteTemplate',
+          'quicksight:UpdateTemplate',
+        ],
+        Principal: {
+          'Fn::Join': [
+            '',
+            [
+              'arn:',
+              {
+                Ref: 'AWS::Partition',
+              },
+              ':quicksight:us-east-1:',
+              {
+                Ref: 'AWS::AccountId',
+              },
+              ':user/',
+              {
+                Ref: 'QuickSightNamespaceParam',
+              },
+              '/',
+              {
+                Ref: 'QuickSightUserParam',
+              },
+            ],
+          ],
+        },
+      },
+    ],
+    SourceEntity: {
+      SourceTemplate: {
+        Arn: {
+          Ref: 'QuickSightTemplateArnParam',
+        },
+      },
+    },
+  }, 1);
+
+
+  template.resourcePropertiesCountIs('AWS::QuickSight::DataSource', {
+    AwsAccountId: {
+      Ref: 'AWS::AccountId',
+    },
+    Credentials: {
+      CredentialPair: {
+        Password: {
+          'Fn::Join': [
+            '',
+            [
+              '{{resolve:secretsmanager:arn:',
+              {
+                Ref: 'AWS::Partition',
+              },
+              ':secretsmanager:',
+              {
+                Ref: 'AWS::Region',
+              },
+              ':',
+              {
+                Ref: 'AWS::AccountId',
+              },
+              ':secret:',
+              {
+                Ref: 'RedshiftParameterKeyParam',
+              },
+              ':SecretString:password::}}',
+            ],
+          ],
+        },
+        Username: {
+          'Fn::Join': [
+            '',
+            [
+              '{{resolve:secretsmanager:arn:',
+              {
+                Ref: 'AWS::Partition',
+              },
+              ':secretsmanager:',
+              {
+                Ref: 'AWS::Region',
+              },
+              ':',
+              {
+                Ref: 'AWS::AccountId',
+              },
+              ':secret:',
+              {
+                Ref: 'RedshiftParameterKeyParam',
+              },
+              ':SecretString:username::}}',
+            ],
+          ],
+        },
+      },
+    },
+    DataSourceId: {
+      'Fn::Join': [
+        '',
+        [
+          'clickstream_datasource_v1_',
+          {
+            Ref: 'RedshiftDBParam',
+          },
+          '_',
+          {
+            'Fn::Select': [
+              0,
+              {
+                'Fn::Split': [
+                  '-',
+                  {
+                    'Fn::Select': [
+                      2,
+                      {
+                        'Fn::Split': [
+                          '/',
+                          {
+                            Ref: 'AWS::StackId',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      ],
+    },
+    DataSourceParameters: {
+      RedshiftParameters: {
+        Database: {
+          Ref: 'RedshiftDBParam',
+        },
+        Host: {
+          Ref: 'RedshiftEndpointParam',
+        },
+        Port: {
+          Ref: 'RedshiftPortParam',
+        },
+      },
+    },
+    Name: {
+      'Fn::Join': [
+        '',
+        [
+          'Clicksteam DataSource ',
+          {
+            Ref: 'RedshiftDBParam',
+          },
+        ],
+      ],
+    },
+    Permissions: [
+      {
+        Actions: [
+          'quicksight:UpdateDataSourcePermissions',
+          'quicksight:DescribeDataSourcePermissions',
+          'quicksight:PassDataSource',
+          'quicksight:DescribeDataSource',
+          'quicksight:DeleteDataSource',
+          'quicksight:UpdateDataSource',
+        ],
+        Principal: {
+          'Fn::Join': [
+            '',
+            [
+              'arn:',
+              {
+                Ref: 'AWS::Partition',
+              },
+              ':quicksight:us-east-1:',
+              {
+                Ref: 'AWS::AccountId',
+              },
+              ':user/',
+              {
+                Ref: 'QuickSightNamespaceParam',
+              },
+              '/',
+              {
+                Ref: 'QuickSightUserParam',
+              },
+            ],
+          ],
+        },
+      },
+    ],
+    Type: 'REDSHIFT',
+    VpcConnectionProperties: {
+      VpcConnectionArn: {
+        'Fn::GetAtt': [
+          'ClickstreamVPCConnectionResource',
+          'Arn',
+        ],
+      },
+    },
+  }, 1);
+
   template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource', {
     ServiceToken: {
       'Fn::GetAtt': [
-        Match.stringLikeRegexp('QuicksightDatasourceCustomResourceProviderframeworkonEvent[0-9A-Z]+'),
+        Match.stringLikeRegexp('QuicksightCustomResourceProviderframeworkonEvent[0-9A-Z]+'),
         'Arn',
       ],
     },
@@ -627,12 +837,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     },
     quickSightPrincipalArn: {
       Ref: 'QuickSightPrincipalParam',
-    },
-    templateArn: {
-      'Fn::GetAtt': [
-        'ClickstreamTemplate',
-        'Arn',
-      ],
     },
     schemas: {
       Ref: 'RedShiftDBSchemaParam',
@@ -666,51 +870,14 @@ describe('DataReportingQuickSightStack resource test', () => {
           'Arn',
         ],
       },
+      dataSourceArn: {
+        'Fn::GetAtt': [
+          'ClickstreamDataSource',
+          'Arn',
+        ],
+      },
       databaseName: {
         Ref: 'RedshiftDBParam',
-      },
-      dataSource: {
-        suffix: {
-          'Fn::Select': [
-            0,
-            {
-              'Fn::Split': [
-                '-',
-                {
-                  'Fn::Select': [
-                    2,
-                    {
-                      'Fn::Split': [
-                        '/',
-                        {
-                          Ref: 'AWS::StackId',
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        endpoint: {
-          Ref: 'RedshiftEndpointParam',
-        },
-        port: {
-          Ref: 'RedshiftPortParam',
-        },
-        databaseName: {
-          Ref: 'RedshiftDBParam',
-        },
-        credentialParameter: {
-          Ref: 'RedshiftParameterKeyParam',
-        },
-        vpcConnectionArn: {
-          'Fn::GetAtt': [
-            'ClickstreamVPCConnectionResource',
-            'Arn',
-          ],
-        },
       },
       dataSets: [
         {

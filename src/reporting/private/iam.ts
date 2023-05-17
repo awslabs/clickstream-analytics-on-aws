@@ -16,23 +16,10 @@ import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { createLambdaRole } from '../../common/lambda';
 
-
 export function createRoleForQuicksightCustomResourceLambda(
   scope: Construct,
-  parameterName: string,
   parentTemplateArn: string,
 ) {
-  const ssmRes = Arn.format(
-    {
-      resource: 'parameter',
-      service: 'ssm',
-      resourceName: parameterName,
-      arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
-      region: Aws.REGION,
-      account: Aws.ACCOUNT_ID,
-      partition: Aws.PARTITION,
-    },
-  );
   const logGroupArn = Arn.format(
     {
       resource: 'log-group',
@@ -55,9 +42,6 @@ export function createRoleForQuicksightCustomResourceLambda(
       ],
       actions: [
         'quicksight:DescribeDataSource',
-        'quicksight:DeleteDataSource',
-        'quicksight:CreateDataSource',
-        'quicksight:UpdateDataSource',
         'quicksight:PassDataSource',
       ],
     }),
@@ -70,9 +54,6 @@ export function createRoleForQuicksightCustomResourceLambda(
       ],
       actions: [
         'quicksight:DescribeTemplate',
-        'quicksight:DeleteTemplate',
-        'quicksight:CreateTemplate',
-        'quicksight:UpdateTemplate',
       ],
     }),
 
@@ -114,14 +95,6 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:DeleteDashboard',
         'quicksight:CreateDashboard',
         'quicksight:UpdateDashboard',
-      ],
-    }),
-
-    new PolicyStatement({
-      effect: Effect.ALLOW,
-      resources: [ssmRes],
-      actions: [
-        'ssm:GetParameter',
       ],
     }),
 

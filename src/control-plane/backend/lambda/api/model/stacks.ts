@@ -343,7 +343,7 @@ export class CKafkaConnectorStack extends JSONObject {
     _resources?: CPipelineResources;
 
   @JSONObject.required
-  ProjectId?: string;
+    ProjectId?: string;
 
   @JSONObject.required
     DataS3Bucket?: string;
