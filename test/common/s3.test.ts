@@ -11,8 +11,7 @@
  *  and limitations under the License.
  */
 
-import fs from 'fs';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 import util from 'util';
 import zlib from 'zlib';
 import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -152,14 +151,10 @@ test('processS3GzipObjectLineByLine()', async ()=> {
     '23/04/04 02:44:32 INFO ETLRunner: [ETLMetric]sink dataset count:3',
   ].join('\n');
 
-  const testFile = '/tmp/test-processS3GzipObjectLineByLine.gz';
-  const outStream = fs.createWriteStream(testFile);
   const zipBuff = await gzip(logText);
-  outStream.write(zipBuff);
-  outStream.close();
-
+  const bufferStream = new PassThrough();
   s3ClientMock.on(GetObjectCommand).resolves({
-    Body: fs.createReadStream(testFile),
+    Body: bufferStream.end(zipBuff),
   } as any);
 
   let lineCount = 0;
@@ -170,7 +165,6 @@ test('processS3GzipObjectLineByLine()', async ()=> {
   };
   await processS3GzipObjectLineByLine(testBucketName, testPrefix, testProcess);
   expect(lineCount).toEqual(4);
-  fs.unlinkSync(testFile);
 
 });
 
