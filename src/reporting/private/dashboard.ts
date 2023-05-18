@@ -61,6 +61,7 @@ export interface DataSetProps {
   columnGroups?: ColumnGroupsProps[];
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
+  customSql: string;
 };
 
 export interface QuickSightDashboardDefProps {

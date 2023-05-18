@@ -577,7 +577,7 @@ describe('DataReportingQuickSightStack resource test', () => {
       'Fn::Join': [
         '',
         [
-          'clickstream_template_v1_',
+          'clickstream_template_',
           {
             Ref: 'RedshiftDBParam',
           },
@@ -712,7 +712,7 @@ describe('DataReportingQuickSightStack resource test', () => {
       'Fn::Join': [
         '',
         [
-          'clickstream_datasource_v1_',
+          'clickstream_datasource_',
           {
             Ref: 'RedshiftDBParam',
           },
@@ -842,28 +842,8 @@ describe('DataReportingQuickSightStack resource test', () => {
       Ref: 'RedShiftDBSchemaParam',
     },
     dashboardDefProps: {
-      analysisName: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream Analysis ',
-            {
-              Ref: 'RedshiftDBParam',
-            },
-          ],
-        ],
-      },
-      dashboardName: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream Dashboard ',
-            {
-              Ref: 'RedshiftDBParam',
-            },
-          ],
-        ],
-      },
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
       templateArn: {
         'Fn::GetAtt': [
           'ClickstreamTemplate',
@@ -942,6 +922,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               Type: 'STRING',
             },
           ],
+          customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -986,6 +967,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           name: 'ODS Flattened Data Set',
           tableName: 'clickstream_ods_flattened_view',
           importMode: 'DIRECT_QUERY',
+          customSql: 'SELECT * FROM {{schema}}.clickstream_ods_flattened_view',
           columns: [
             {
               Name: 'event_parameter_value',
@@ -1029,6 +1011,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           name: 'Session Data Set',
           tableName: 'clickstream_session_view',
           importMode: 'DIRECT_QUERY',
+          customSql: 'SELECT * FROM {{schema}}.clickstream_session_view',
           columns: [
             {
               Name: 'session_engagement_time_min',
@@ -1072,6 +1055,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           name: 'ODS Event Data Set',
           tableName: 'clickstream_ods_events_view',
           importMode: 'DIRECT_QUERY',
+          customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_view',
           columns: [
             {
               Name: 'event_id',

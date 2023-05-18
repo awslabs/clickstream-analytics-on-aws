@@ -82,7 +82,7 @@ export class DataReportingQuickSightStack extends Stack {
     const quickSightUser = stackParames.quickSightUserParam.valueAsString;
     const principalArn = `${principalPrefix}:user/${quickSightNamespace}/${quickSightUser}`;
 
-    const templateId = `clickstream_template_v1_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const templateId = `clickstream_template_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const template = new CfnTemplate(this, 'Clickstream-Template', {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
@@ -108,7 +108,7 @@ export class DataReportingQuickSightStack extends Stack {
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstrem-Redshift-Secret', `${stackParames.redshiftParameterKeyParam.valueAsString}`);
 
-    const datasourceId = `clickstream_datasource_v1_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const datasourceId = `clickstream_datasource_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const dataSource = new CfnDataSource(this, 'Clickstream-DataSource', {
       awsAccountId: Aws.ACCOUNT_ID,
       dataSourceId: datasourceId,

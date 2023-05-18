@@ -51,8 +51,8 @@ export function createQuicksightCustomResource(
 
   const databaseName = props.databaseName;
   const dashboardDefProps: QuickSightDashboardDefProps = {
-    analysisName: `Clickstream Analysis ${databaseName}`,
-    dashboardName: `Clickstream Dashboard ${databaseName}`,
+    analysisName: 'Clickstream Analysis',
+    dashboardName: 'Clickstream Dashboard',
     templateArn: props.templateArn,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
@@ -62,6 +62,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         columns: clickstream_user_dim_view_columns,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}`,
         columnGroups: [
           {
             geoSpatialColumnGroupName: 'geo',
@@ -102,18 +103,21 @@ export function createQuicksightCustomResource(
         name: 'ODS Flattened Data Set',
         tableName: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}`,
         columns: clickstream_ods_flattened_view_columns,
       },
       {
         name: 'Session Data Set',
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
         columns: clickstream_session_view_columns,
       },
       {
         name: 'ODS Event Data Set',
         tableName: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}`,
         columns: clickstream_ods_events_view_columns,
       },
     ],
