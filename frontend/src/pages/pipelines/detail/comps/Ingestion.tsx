@@ -17,7 +17,6 @@ import {
   SpaceBetween,
   Link,
 } from '@cloudscape-design/components';
-import CopyText from 'components/common/CopyIcon';
 import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -145,17 +144,20 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             pipelineId={pipelineInfo?.pipelineId}
             dns={pipelineInfo?.dns}
             customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+            fetch={
+              pipelineInfo?.ingestionServer.domain.domainName !== undefined &&
+              pipelineInfo?.ingestionServer.domain.domainName !== ''
+            }
           />
         </div>
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.endpoint')}</Box>
-          <div>
-            {pipelineInfo?.endpoint && (
-              <CopyText text={pipelineInfo?.endpoint || ''} />
-            )}
-            {pipelineInfo?.endpoint || '-'}
-          </div>
+          <DomainNameWithStatus
+            pipelineId={pipelineInfo?.pipelineId}
+            endpoint={pipelineInfo?.endpoint}
+            fetch
+          />
         </div>
 
         <div>

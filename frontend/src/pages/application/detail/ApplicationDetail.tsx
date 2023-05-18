@@ -25,7 +25,6 @@ import {
 } from '@cloudscape-design/components';
 import { getApplicationDetail } from 'apis/application';
 import { getProjectDetail } from 'apis/project';
-import CopyText from 'components/common/CopyIcon';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
@@ -200,20 +199,22 @@ const ApplicationDetail: React.FC = () => {
                         pipelineId={applicationInfo?.pipeline?.id}
                         dns={applicationInfo?.pipeline?.dns}
                         customDomain={applicationInfo?.pipeline?.customDomain}
+                        fetch={
+                          applicationInfo?.pipeline?.customDomain !==
+                            undefined &&
+                          applicationInfo?.pipeline?.customDomain !== ''
+                        }
                       />
                     </div>
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:detail.serverEdp')}
                       </Box>
-                      <div>
-                        {applicationInfo?.pipeline?.endpoint && (
-                          <CopyText
-                            text={applicationInfo?.pipeline?.endpoint || ''}
-                          />
-                        )}
-                        {applicationInfo?.pipeline?.endpoint || '-'}
-                      </div>
+                      <DomainNameWithStatus
+                        pipelineId={applicationInfo?.pipeline?.id}
+                        endpoint={applicationInfo?.pipeline?.endpoint}
+                        fetch
+                      />
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">

@@ -42,11 +42,17 @@ const Monitoring: React.FC<TabContentProps> = (props: TabContentProps) => {
           <SpaceBetween direction="vertical" size="s">
             <div className="mt-10">
               <Button
-                href={buildMetricsDashboardLink(pipelineInfo?.region || '', pipelineInfo?.metricsDashboardName || '')}
+                href={buildMetricsDashboardLink(
+                  pipelineInfo?.region || '',
+                  pipelineInfo?.metricsDashboardName || ''
+                )}
                 iconAlign="right"
                 iconName="external"
                 target="_blank"
-                disabled={pipelineInfo?.region === undefined || pipelineInfo?.metricsDashboardName === undefined}
+                disabled={
+                  pipelineInfo?.region === undefined ||
+                  pipelineInfo?.metricsDashboardName === undefined
+                }
               >
                 {t('button.viewInCloudWatch')}
               </Button>

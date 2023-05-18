@@ -11,30 +11,48 @@
  *  and limitations under the License.
  */
 
-import { StatusIndicator, Spinner } from '@cloudscape-design/components';
+import {
+  StatusIndicator,
+  Spinner,
+  Popover,
+} from '@cloudscape-design/components';
 import { fetchOutsideLink } from 'apis/resource';
 import CopyText from 'components/common/CopyIcon';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface DomainNameWithStatusProps {
   pipelineId?: string;
   dns?: string;
   customDomain?: string;
+  endpoint?: string;
+  fetch?: boolean;
 }
 
 const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
   props: DomainNameWithStatusProps
 ) => {
-  const { pipelineId, dns, customDomain } = props;
+  const { t } = useTranslation();
+  const { pipelineId, dns, customDomain, endpoint, fetch } = props;
   const [domainResolved, setDomainResolved] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [showText, setShowText] = useState('-');
 
   useEffect(() => {
+    let requestUrl = '';
     if (dns) {
-      let requestUrl = `http://${dns}`;
-      if (customDomain) {
-        requestUrl = `https://${customDomain}`;
-      }
+      requestUrl = `http://${dns}`;
+      setShowText(dns);
+    }
+    if (customDomain) {
+      requestUrl = `https://${customDomain}`;
+      setShowText(customDomain);
+    }
+    if (endpoint) {
+      requestUrl = endpoint;
+      setShowText(endpoint);
+    }
+    if (fetch) {
       setLoadingData(true);
       fetchOutsideLink({ method: 'get', url: `${requestUrl}` })
         .then((response: ApiResponse<FetchOutsideResponse>) => {
@@ -54,25 +72,40 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
 
   return (
     <div>
-      {(dns || customDomain) && <CopyText text={dns || customDomain || ''} />}
-      {dns || customDomain || '-'}
-      {loadingData ? (
-        <span className="ml-5">
-          <Spinner />
-        </span>
-      ) : (
-        pipelineId &&
-        dns &&
-        (domainResolved ? (
-          <span className="ml-5">
-            <StatusIndicator type="success" />
-          </span>
-        ) : (
-          <span className="ml-5">
-            <StatusIndicator type="error" />
-          </span>
-        ))
-      )}
+      <CopyText text={showText === '-' ? '' : showText} />
+      {showText}
+      {fetch ? (
+        <>
+          {loadingData ? (
+            <span className="ml-5">
+              <Spinner />
+            </span>
+          ) : (
+            pipelineId &&
+            (domainResolved ? (
+              <span className="ml-5">
+                <StatusIndicator type="success" />
+              </span>
+            ) : (
+              <Popover
+                dismissButton={false}
+                position="top"
+                size="small"
+                triggerType="custom"
+                content={
+                  <StatusIndicator type="error">
+                    {t('common:status.dnsError')}
+                  </StatusIndicator>
+                }
+              >
+                <span className="ml-5">
+                  <StatusIndicator type="error" />
+                </span>
+              </Popover>
+            ))
+          )}
+        </>
+      ) : null}
     </div>
   );
 };

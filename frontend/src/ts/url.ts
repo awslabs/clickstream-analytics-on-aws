@@ -70,15 +70,20 @@ export const buildReshiftLink = (
   return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };
 
-export const buildQuickSightDashboardLink = (region: string, dashboardId: string): string => {
+export const buildQuickSightDashboardLink = (
+  region: string,
+  dashboardId: string
+): string => {
   return `https://${region}.quicksight.aws.amazon.com/sn/dashboards/${dashboardId}`;
 };
 
-export const buildMetricsDashboardLink = (region: string, dashboardName: string): string => {
+export const buildMetricsDashboardLink = (
+  region: string,
+  dashboardName: string
+): string => {
   return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
 };
 
 export const buildQuickSightSubscriptionLink = (): string => {
   return 'https://us-east-1.quicksight.aws.amazon.com/sn/start';
 };
-

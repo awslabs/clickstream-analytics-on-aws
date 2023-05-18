@@ -51,17 +51,20 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.dashboards')}</Box>
           {pipelineInfo?.dashboards?.map((element) => {
-              return (
-                <div key={element.appId}>
-                  <Link
-                    external
-                    href={buildQuickSightDashboardLink(pipelineInfo.region || '', element.dashboardId)}
-                  >
-                    {element.appId}
-                  </Link>
-                </div>
-              );
-            }) || '-'}
+            return (
+              <div key={element.appId}>
+                <Link
+                  external
+                  href={buildQuickSightDashboardLink(
+                    pipelineInfo.region || '',
+                    element.dashboardId
+                  )}
+                >
+                  {element.appId}
+                </Link>
+              </div>
+            );
+          }) || '-'}
         </div>
       </SpaceBetween>
 
