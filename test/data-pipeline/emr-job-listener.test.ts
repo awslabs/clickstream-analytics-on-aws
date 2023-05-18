@@ -12,7 +12,7 @@
  *  and limitations under the License.
  */
 
-import fs from 'fs';
+import { PassThrough } from 'stream';
 import util from 'util';
 import zlib from 'zlib';
 
@@ -113,13 +113,10 @@ test('lambda should record SUCCESS job state', async () => {
     '23/04/04 02:44:32 INFO ETLRunner: [ETLMetric]sink dataset count:3',
   ].join('\n');
 
-  const outStream = fs.createWriteStream('/tmp/test-log.gz');
   const zipBuff = await gzip(logText);
-  outStream.write(zipBuff);
-  outStream.close();
-
+  const bufferStream = new PassThrough();
   s3ClientMock.on(GetObjectCommand).resolves({
-    Body: fs.createReadStream('/tmp/test-log.gz'),
+    Body: bufferStream.end(zipBuff),
   } as any);
 
   s3ClientMock.on(CopyObjectCommand).callsFake((input: { Key: string; Bucket: string }) => {
@@ -153,8 +150,6 @@ test('lambda should record SUCCESS job state', async () => {
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 1);
   //@ts-ignore
   expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 1);
-
-  fs.unlinkSync('/tmp/test-log.gz');
 });
 
 
