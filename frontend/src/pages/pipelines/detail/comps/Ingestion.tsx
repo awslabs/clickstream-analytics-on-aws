@@ -143,11 +143,6 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           <DomainNameWithStatus
             pipelineId={pipelineInfo?.pipelineId}
             dns={pipelineInfo?.dns}
-            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-            fetch={
-              pipelineInfo?.ingestionServer.domain.domainName !== undefined &&
-              pipelineInfo?.ingestionServer.domain.domainName !== ''
-            }
           />
         </div>
 
@@ -156,7 +151,11 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           <DomainNameWithStatus
             pipelineId={pipelineInfo?.pipelineId}
             endpoint={pipelineInfo?.endpoint}
-            fetch
+            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+            fetch={
+              pipelineInfo?.ingestionServer.domain.domainName !== undefined &&
+              pipelineInfo?.ingestionServer.domain.domainName !== ''
+            }
           />
         </div>
 

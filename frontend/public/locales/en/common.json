@@ -245,7 +245,7 @@
     "deleting": "Deleting",
     "pending": "Pending",
     "unknown": "Unknown",
-    "dnsError": "DNS resolving probably is missing or not right."
+    "dnsError": "DNS resolution is not resolving the domain name correctly."
   },
   "upload": {
     "dropFileToUpload": "Drop file to upload",

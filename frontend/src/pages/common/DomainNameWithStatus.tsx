@@ -44,13 +44,13 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
       requestUrl = `http://${dns}`;
       setShowText(dns);
     }
-    if (customDomain) {
-      requestUrl = `https://${customDomain}`;
-      setShowText(customDomain);
-    }
     if (endpoint) {
       requestUrl = endpoint;
       setShowText(endpoint);
+    }
+    if (customDomain) {
+      requestUrl = `https://${customDomain}`;
+      setShowText(customDomain);
     }
     if (fetch) {
       setLoadingData(true);
