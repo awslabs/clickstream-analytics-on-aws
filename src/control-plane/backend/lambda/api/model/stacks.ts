@@ -419,9 +419,6 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.gte(1)
     WorkerMcuCount?: number;
 
-  @JSONObject.optional('')
-    PluginUrl?: string;
-
   @JSONObject.optional(3000000)
   @JSONObject.gte(0)
   @JSONObject.lte(3000000)
@@ -459,7 +456,6 @@ export class CKafkaConnectorStack extends JSONObject {
       MinWorkerCount: pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount,
       WorkerMcuCount: pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount,
 
-      PluginUrl: pipeline.ingestionServer.sinkKafka?.kafkaConnector.pluginUrl,
       RotateIntervalMS: pipeline.ingestionServer.sinkBatch?.intervalSeconds ? pipeline.ingestionServer.sinkBatch?.intervalSeconds * 1000 : 3000000,
       FlushSize: pipeline.ingestionServer.sinkBatch?.size ?? 50000,
     });

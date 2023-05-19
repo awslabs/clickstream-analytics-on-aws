@@ -332,10 +332,6 @@ const BASE_KAFKACONNECTOR_PARAMETERS = [
     ParameterValue: '1',
   },
   {
-    ParameterKey: 'PluginUrl',
-    ParameterValue: '',
-  },
-  {
     ParameterKey: 'RotateIntervalMS',
     ParameterValue: '3000000',
   },
