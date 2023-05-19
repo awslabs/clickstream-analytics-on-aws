@@ -473,7 +473,10 @@ describe('CloudFrontS3Portal', () => {
             Compress: true,
             ViewerProtocolPolicy: 'redirect-to-https',
             ForwardedValues: {
-              QueryString: false,
+              QueryString: true,
+              Cookies: {
+                Forward: 'none',
+              },
             },
           },
         ],

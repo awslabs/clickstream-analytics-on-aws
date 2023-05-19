@@ -419,7 +419,8 @@ export class CloudFrontS3Portal extends Construct {
         compress: behaviorOptions?.compress ?? true,
         viewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         forwardedValues: {
-          queryString: false,
+          queryString: true,
+          cookies: { forward: 'none' },
         },
       };
 
