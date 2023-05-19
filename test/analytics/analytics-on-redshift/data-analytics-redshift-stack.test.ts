@@ -3853,6 +3853,15 @@ describe('Should set metrics widgets', () => {
         widgets: Match.anyValue(),
       },
     });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Load events workflow failed',
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Upsert users workflow failed',
+    });
+
   });
 
   test('Should set metrics widgets for existing redshiftServerless', () => {
@@ -3867,6 +3876,15 @@ describe('Should set metrics widgets', () => {
         widgets: Match.anyValue(),
       },
     });
+
+    existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Load events workflow failed',
+    });
+
+    existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Upsert users workflow failed',
+    });
+
   });
 
   test('Should set metrics widgets for provisioned Redshift Cluster', () => {
@@ -3881,5 +3899,15 @@ describe('Should set metrics widgets', () => {
         widgets: Match.anyValue(),
       },
     });
+
+    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Load events workflow failed',
+    });
+
+    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Upsert users workflow failed',
+    });
+
+
   });
 });

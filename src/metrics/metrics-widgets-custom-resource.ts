@@ -75,6 +75,7 @@ export interface TextWidgetElement {
   type: 'text';
   properties: {
     markdown: string;
+    background?: 'transparent'|'solid';
   };
 }
 

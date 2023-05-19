@@ -45,18 +45,19 @@ export interface ClearExpiredEventsWorkflowProps {
 
 export class ClearExpiredEventsWorkflow extends Construct {
   private readonly lambdaRootPath = __dirname + '/../lambdas/clear-expired-events-workflow';
+  public readonly clearExpiredEventsWorkflow: IStateMachine;
 
   constructor(scope: Construct, id: string, props: ClearExpiredEventsWorkflowProps) {
     super(scope, id);
 
     // create Step function workflow to orchestrate the workflow to clear expired events.
-    const clearExpiredEventsWorkflow = this.createWorkflow(props);
+    this.clearExpiredEventsWorkflow = this.createWorkflow(props);
 
     // Create an EventBridge Rule to trigger the workflow periodically
     const rule = new Rule(scope, 'ClearExpiredEventsScheduleRule', {
       schedule: Schedule.expression(props.clearExpiredEventsWorkflowData.scheduleExpression),
     });
-    rule.addTarget(new SfnStateMachine(clearExpiredEventsWorkflow));
+    rule.addTarget(new SfnStateMachine(this.clearExpiredEventsWorkflow));
   }
 
   private createWorkflow(props: ClearExpiredEventsWorkflowProps): IStateMachine {

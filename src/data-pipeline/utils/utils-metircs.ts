@@ -92,11 +92,8 @@ export function createMetricsWidget(scope: Construct, props: {
         title: 'Data Pipeline ETL Jobs',
         metrics: [
           [emrServerlessNamespace, 'SubmittedJobs', ...appIdDimension],
-          [emrServerlessNamespace, 'FailedJobs', ...appIdDimension, { id: 'errors', stat: 'Sum', color: '#d13212' }],
-          [emrServerlessNamespace, 'SuccessJobs', ...appIdDimension],
-          [emrServerlessNamespace, 'RunningJobs', ...appIdDimension],
-          [emrServerlessNamespace, 'ScheduledJobs', ...appIdDimension],
-          [emrServerlessNamespace, 'PendingJobs', ...appIdDimension],
+          ['.', 'FailedJobs', '.', '.', { id: 'errors', stat: 'Sum', color: '#d13212' }],
+          ['.', 'SuccessJobs', '.', '.'],
         ],
       },
     },
@@ -108,7 +105,7 @@ export function createMetricsWidget(scope: Construct, props: {
         title: 'Data Pipeline ETL Job success rate (%)',
         metrics: [
           [emrServerlessNamespace, 'SuccessJobs', ...appIdDimension, { id: 'succ', stat: 'Sum', visible: false }],
-          [emrServerlessNamespace, 'FailedJobs', ...appIdDimension, { id: 'fail', stat: 'Sum', visible: false }],
+          ['.', 'FailedJobs', '.', '.', { id: 'fail', stat: 'Sum', visible: false }],
           [{ expression: 'SUM(METRICS())', label: 'Completed Jobs', id: 'all', visible: false }],
           [{
             expression: '100 * succ / all',
@@ -201,17 +198,17 @@ export function createMetricsWidget(scope: Construct, props: {
           [
             dataPipelineNamespace,
             'ETL flatted source count',
-            ...appIdDimension,
+            '.', '.',
           ],
           [
             dataPipelineNamespace,
             'ETL corrupted count',
-            ...appIdDimension,
+            '.', '.',
           ],
           [
             dataPipelineNamespace,
             'ETL sink count',
-            ...appIdDimension,
+            '.', '.',
           ],
         ],
       },

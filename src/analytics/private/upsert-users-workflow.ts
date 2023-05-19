@@ -45,19 +45,20 @@ export interface UpsertUsersWorkflowProps {
 
 export class UpsertUsersWorkflow extends Construct {
   private readonly lambdaRootPath = __dirname + '/../lambdas/upsert-users-workflow';
+  public readonly upsertUsersWorkflow: IStateMachine;
 
   constructor(scope: Construct, id: string, props: UpsertUsersWorkflowProps) {
     super(scope, id);
 
     // create Step function workflow to orchestrate the workflow to upsert users.
-    const upsertUsersWorkflow = this.createWorkflow(props);
+    this.upsertUsersWorkflow = this.createWorkflow(props);
 
     // Create an EventBridge Rule to trigger the workflow periodically
     const rule = new Rule(scope, 'UpsertUsersScheduleRule', {
       // schedule: Schedule.expression('cron(0 1 * * ? *)'),
       schedule: Schedule.expression(props.upsertUsersWorkflowData.scheduleExpression),
     });
-    rule.addTarget(new SfnStateMachine(upsertUsersWorkflow));
+    rule.addTarget(new SfnStateMachine(this.upsertUsersWorkflow));
   }
 
   private createWorkflow(props: UpsertUsersWorkflowProps): IStateMachine {

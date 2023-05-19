@@ -109,24 +109,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
       };
       redshiftUserCR = this.redshiftServerlessWorkgroup.redshiftUserCR;
 
-      createMetricsWidgetForRedshiftServerless(this, {
-        projectId: props.projectId,
-        redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
-        redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
-      });
-
-
     } else if (props.existingRedshiftServerlessProps) {
       redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
         props.existingRedshiftServerlessProps.dataAPIRoleArn, {
           mutable: true,
         });
 
-      createMetricsWidgetForRedshiftServerless(this, {
-        projectId: props.projectId,
-        redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
-        redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
-      });
     } else if (props.provisionedRedshiftProps) {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
@@ -198,10 +186,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
         resources: ['*'],
       }));
 
-      createMetricsWidgetForRedshiftCluster(this, {
-        projectId: props.projectId,
-        redshiftClusterIdentifier: props.provisionedRedshiftProps!.clusterIdentifier,
-      });
     }
 
     const odsTableName = REDSHIFT_ODS_TABLE_NAME;
@@ -236,7 +220,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
 
-    new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
+    const upsertUsersWorkflow = new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
       appId: props.appIds,
       networkConfig: {
         vpc: props.vpc,
@@ -249,7 +233,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       upsertUsersWorkflowData: props.upsertUsersWorkflowData,
     });
 
-    new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
+    const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
       networkConfig: {
         vpc: props.vpc,
@@ -261,6 +245,41 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: redshiftDataAPIExecRole!,
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
+
+    if (this.redshiftServerlessWorkgroup) {
+      createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
+        projectId: props.projectId,
+        redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
+        redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
+        loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
+        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+
+      });
+    }
+
+    if (props.existingRedshiftServerlessProps) {
+      createMetricsWidgetForRedshiftServerless(this, 'existingServerless', {
+        projectId: props.projectId,
+        redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
+        redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
+        loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
+        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+      });
+    }
+
+    if (props.provisionedRedshiftProps) {
+      createMetricsWidgetForRedshiftCluster(this, {
+        projectId: props.projectId,
+        redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
+
+        loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
+        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+
+      });
+    }
 
     addCfnNag(this);
   }

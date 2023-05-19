@@ -213,9 +213,20 @@ function convertMetricsWidgetsToDashboardWidgets(startY: number, w: MetricsWidge
     properties: w.description,
   };
 
+  const textPlaceHolderWidget: TextWidgetElement = {
+    type: 'text',
+    properties: {
+      markdown: '',
+      background: 'transparent',
+    },
+  };
   widgets.push(descriptionWidget);
 
   startY = startY + DESCRIPTION_HEIGHT;
+
+  while (w.widgets.length % columnNumber !=0) {
+    w.widgets.push(textPlaceHolderWidget);
+  }
 
   for (let i = 0; i < w.widgets.length; i++) {
     const metricsWidget = w.widgets[i];

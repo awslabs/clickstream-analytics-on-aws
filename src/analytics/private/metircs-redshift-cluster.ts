@@ -12,14 +12,19 @@
  */
 
 
+import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
+import { buildMetricsWidgetForWorkflows } from './metrics-common-workflow';
+import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 
 
 export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   projectId: string;
   redshiftClusterIdentifier: string;
+  loadEventsWorkflow: IStateMachine;
+  upsertUsersWorkflow: IStateMachine;
+  clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
   const namespace = 'AWS/Redshift';
@@ -28,7 +33,11 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
     props.redshiftClusterIdentifier,
   ];
 
-  const widgets: MetricWidgetElement[] = [
+  const { workflowAlarms, workflowMetrics } = buildMetricsWidgetForWorkflows(scope, '', props);
+
+  const widgets: (MetricWidgetElement | AlarmsWidgetElement)[] = [
+    ... workflowAlarms,
+    ... workflowMetrics,
     {
       type: 'metric',
       properties: {
@@ -41,9 +50,9 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
             ...dimension,
           ],
           [
-            namespace,
+            '.',
             'MaintenanceMode',
-            ...dimension,
+            '.', '.',
           ],
 
         ],
@@ -111,9 +120,9 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
           ],
 
           [
-            namespace,
+            '.',
             'ReadIOPS',
-            ...dimension,
+            '.', '.',
           ],
 
         ],
@@ -134,9 +143,9 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
           ],
 
           [
-            namespace,
+            '.',
             'ReadThroughput',
-            ...dimension,
+            '.', '.',
           ],
 
         ],
@@ -189,9 +198,9 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
             ...dimension,
           ],
           [
-            namespace,
+            '.',
             'TotalTableCount',
-            ...dimension,
+            '.', '.',
           ],
         ],
       },
@@ -212,38 +221,38 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
             'long',
           ],
           [
-            namespace,
+            '.',
             'QueriesCompletedPerSecond',
-            ...dimension,
+            '.', '.',
             'latency',
             'medium',
           ],
           [
-            namespace,
+            '.',
             'QueriesCompletedPerSecond',
-            ...dimension,
+            '.', '.',
             'latency',
             'short',
           ],
 
           [
-            namespace,
+            '.',
             'QueryDuration',
-            ...dimension,
+            '.', '.',
             'latency',
             'long',
           ],
           [
-            namespace,
+            '.',
             'QueryDuration',
-            ...dimension,
+            '.', '.',
             'latency',
             'medium',
           ],
           [
-            namespace,
+            '.',
             'QueryDuration',
-            ...dimension,
+            '.', '.',
             'latency',
             'short',
           ],

@@ -91,6 +91,7 @@ export function createPutDashboardCustomResource(
       columnNumber: props.columnNumber,
       legendPosition: props.legendPosition,
       version: props.version,
+      buildTime: new Date().getTime(),
     },
   });
   return { customResource: cr, fn };

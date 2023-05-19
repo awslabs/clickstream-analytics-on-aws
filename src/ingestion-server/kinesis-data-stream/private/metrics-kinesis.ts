@@ -13,7 +13,7 @@
 
 
 import { Construct } from 'constructs';
-import { MetricWidgetElement, MetricsWidgets } from '../../../metrics/metrics-widgets-custom-resource';
+import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets, TextWidgetElement } from '../../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../../metrics/settings';
 
 
@@ -35,7 +35,7 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
   ];
 
 
-  const widgets: MetricWidgetElement[] = [
+  const widgets: (MetricWidgetElement | AlarmsWidgetElement | TextWidgetElement)[] = [
     {
       type: 'metric',
       properties: {
@@ -43,7 +43,7 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
         title: 'Kinesis Incoming Records',
         metrics: [
           [kinesisNamespace, 'IncomingRecords', ...kinesisDimension],
-          [kinesisNamespace, 'GetRecords.Records', ...kinesisDimension],
+          ['.', 'GetRecords.Records', '.', '.'],
         ],
       },
     },
@@ -55,8 +55,7 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
         title: 'Kinesis Incoming Bytes',
         metrics: [
           [kinesisNamespace, 'IncomingBytes', ...kinesisDimension],
-          [kinesisNamespace, 'GetRecords.Bytes', ...kinesisDimension],
-
+          ['.', 'GetRecords.Bytes', '.', '.'],
         ],
       },
     },
@@ -73,9 +72,9 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
           ],
 
           [
-            kinesisNamespace,
+            '.',
             'PutRecords.FailedRecords',
-            ...kinesisDimension,
+            '.', '.',
           ],
         ],
       },
@@ -90,9 +89,9 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
         metrics: [
           [kinesisNamespace, 'PutRecords.Latency', ...kinesisDimension],
           [
-            kinesisNamespace,
+            '.',
             'GetRecords.IteratorAgeMilliseconds',
-            ...kinesisDimension,
+            '.', '.',
           ],
 
         ],
@@ -112,15 +111,14 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
           ],
 
           [
-            kinesisNamespace,
+            '.',
             'ReadProvisionedThroughputExceeded',
-            ...kinesisDimension,
+            '.', '.',
           ],
 
         ],
       },
     },
-
     {
       type: 'metric',
       properties: {

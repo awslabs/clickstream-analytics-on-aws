@@ -428,6 +428,28 @@ const dashboardBody ={
       width: 6,
       height: 6,
     },
+    {
+      type: 'text',
+      properties: {
+        markdown: '',
+        background: 'transparent',
+      },
+      x: 12,
+      y: 3,
+      width: 6,
+      height: 6,
+    },
+    {
+      type: 'text',
+      properties: {
+        markdown: '',
+        background: 'transparent',
+      },
+      x: 18,
+      y: 3,
+      width: 6,
+      height: 6,
+    },
   ],
 };
 

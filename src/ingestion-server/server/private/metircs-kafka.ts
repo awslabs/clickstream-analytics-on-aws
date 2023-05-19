@@ -51,9 +51,9 @@ export function createMetricsWidgetForKafka(scope: Construct, props: {
         metrics: brokerIdList.flatMap((brokerId) => {
           return [
             [namespace, 'CpuIdle', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
-            [namespace, 'CpuSystem', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
-            [namespace, 'CpuUser', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
-            [namespace, 'CpuIoWait', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
+            ['.', 'CpuSystem', '.', '.', 'Broker ID', `${brokerId}`],
+            ['.', 'CpuUser', '.', '.', 'Broker ID', `${brokerId}`],
+            ['.', 'CpuIoWait', '.', '.', 'Broker ID', `${brokerId}`],
           ];
         }),
       },
@@ -67,7 +67,7 @@ export function createMetricsWidgetForKafka(scope: Construct, props: {
         metrics: brokerIdList.flatMap((brokerId) => {
           return [
             [namespace, 'MemoryFree', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
-            [namespace, 'MemoryUsed', ...clusterNameDimension, 'Broker ID', `${brokerId}`],
+            ['.', 'MemoryUsed', '.', '.', 'Broker ID', `${brokerId}`],
           ];
         }),
       },

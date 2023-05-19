@@ -12,15 +12,20 @@
  */
 
 
+import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
+import { buildMetricsWidgetForWorkflows } from './metrics-common-workflow';
+import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 
 
-export function createMetricsWidgetForRedshiftServerless(scope: Construct, props: {
+export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: string, props: {
   projectId: string;
   redshiftServerlessNamespace?: string;
   redshiftServerlessWorkgroupName: string;
+  loadEventsWorkflow: IStateMachine;
+  upsertUsersWorkflow: IStateMachine;
+  clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
   const namespace = 'AWS/Redshift-Serverless';
@@ -28,15 +33,18 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, props
     'Workgroup', props.redshiftServerlessWorkgroupName,
   ];
 
-  const widgets: MetricWidgetElement[] = [
+  const { workflowAlarms, workflowMetrics } = buildMetricsWidgetForWorkflows(scope, id + 'serverless', props);
+
+  const widgets: (MetricWidgetElement | AlarmsWidgetElement)[] = [
+    ... workflowAlarms,
+    ... workflowMetrics,
     {
       type: 'metric',
       properties: {
         stat: 'Average',
         title: 'Redshift-Serverless ComputeSeconds',
         metrics: [
-          [namespace, 'ComputeSeconds', ...workgroupDimension],
-
+          [namespace, 'ComputeSeconds', ...workgroupDimension, { id: 'm1', visible: true }],
         ],
       },
     },
@@ -47,7 +55,7 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, props
         stat: 'Average',
         title: 'Redshift-Serverless ComputeCapacity',
         metrics: [
-          [namespace, 'ComputeCapacity', ...workgroupDimension],
+          [namespace, 'ComputeCapacity', ...workgroupDimension, { id: 'm1', visible: true }],
         ],
       },
     },
@@ -61,7 +69,7 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, props
           stat: 'Average',
           title: 'Redshift-Serverless DataStorage',
           metrics: [
-            [namespace, 'DataStorage', 'Namespace', props.redshiftServerlessNamespace],
+            [namespace, 'DataStorage', 'Namespace', props.redshiftServerlessNamespace, { id: 'm1', visible: true }],
           ],
         },
       });

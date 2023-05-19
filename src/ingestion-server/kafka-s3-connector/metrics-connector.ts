@@ -105,14 +105,14 @@ export function createMetricsWidgetForS3Connector(scope: Construct, props: {
             ...topicDimension,
           ],
           [
-            kafkaNamespace,
+            '.',
             'MaxOffsetLag',
-            ...topicDimension,
+            '.', '.', '.', '.', '.', '.',
           ],
           [
-            kafkaNamespace,
+            '.',
             'SumOffsetLag',
-            ...topicDimension,
+            '.', '.', '.', '.', '.', '.',
           ],
 
         ],

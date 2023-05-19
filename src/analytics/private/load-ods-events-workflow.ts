@@ -55,6 +55,8 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
   public readonly crForModifyClusterIAMRoles: CustomResource;
 
+  public readonly loadEventWorkflow: IStateMachine;
+
   constructor(scope: Construct, id: string, props: LoadODSEventToRedshiftWorkflowProps) {
     super(scope, id);
 
@@ -91,13 +93,13 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
     this.crForModifyClusterIAMRoles = this.createCustomResourceAssociateIAMRole(props, redshiftRoleForCopyFromS3);
 
     // create Step function workflow to orchestrate the workflow to load data from s3 to redshift
-    const loadEventWorkflow = this.createWorkflow(odsEventTable, props, redshiftRoleForCopyFromS3);
+    this.loadEventWorkflow = this.createWorkflow(odsEventTable, props, redshiftRoleForCopyFromS3);
 
     // Create an EventBridge Rule to trigger the workflow periodically
     const rule = new Rule(scope, 'LoadScheduleRule', {
       schedule: Schedule.expression(props.loadDataProps.scheduleInterval),
     });
-    rule.addTarget(new SfnStateMachine(loadEventWorkflow));
+    rule.addTarget(new SfnStateMachine(this.loadEventWorkflow ));
   }
 
   private odsEventTable() : ITable {
