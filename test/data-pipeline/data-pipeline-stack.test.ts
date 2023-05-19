@@ -305,8 +305,8 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter DataBufferedSeconds', () => {
     template.hasParameter('DataBufferedSeconds', {
-      Default: 360,
-      MinValue: 30,
+      Default: 30,
+      MinValue: 5,
       Type: 'Number',
     });
   });
@@ -955,10 +955,19 @@ describe ('ETL job submitter', () => {
           },
           {
             Action: [
-              'glue:CreateDatabase',
               'glue:GetDatabase',
+              'glue:CreateDatabase',
+              'glue:GetDataBases',
+              'glue:CreateTable',
               'glue:GetTable',
+              'glue:UpdateTable',
+              'glue:DeleteTable',
+              'glue:GetTables',
+              'glue:GetPartition',
               'glue:GetPartitions',
+              'glue:CreatePartition',
+              'glue:BatchCreatePartition',
+              'glue:GetUserDefinedFunctions',
             ],
             Effect: 'Allow',
             Resource: [
@@ -1022,6 +1031,30 @@ describe ('ETL job submitter', () => {
                     {
                       Ref: Match.anyValue(),
                     },
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':glue:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':table/',
+                    {
+                      Ref: Match.anyValue(),
+                    },
+                    '/etl*',
                   ],
                 ],
               },

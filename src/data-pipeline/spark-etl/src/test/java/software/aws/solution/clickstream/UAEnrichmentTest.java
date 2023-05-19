@@ -47,12 +47,12 @@ class UAEnrichmentTest extends BaseSparkTest {
         String osVersion = device.getString(device.fieldIndex("ua_os_version"));
 
         assertEquals("Other", os);
-        assertEquals("", osVersion);
+        assertEquals(null, osVersion);
 
         String deviceCategory = device.getString(device.fieldIndex("ua_device_category"));
         String uaDevice = device.getString(device.fieldIndex("ua_device"));
         assertEquals("Other", uaDevice);
-        assertEquals("", deviceCategory);
+        assertEquals(null, deviceCategory);
     }
 
     @Test
@@ -71,6 +71,6 @@ class UAEnrichmentTest extends BaseSparkTest {
         String browser_version = device.getString(device.fieldIndex("ua_browser_version"));
 
         assertEquals("Other", browser);
-        assertEquals("", browser_version);
+        assertEquals(null, browser_version);
     }
 }

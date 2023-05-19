@@ -22,19 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.shaded.org.apache.http.util.Asserts;
 import org.apache.logging.log4j.util.Strings;
 import org.apache.spark.api.java.function.FilterFunction;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
-import org.apache.spark.sql.types.ArrayType;
-import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -57,16 +54,24 @@ public class Cleaner {
     @NotNull
     private static UDF1<String, String> extractData() {
         return data -> {
+            // input data is not compress, is raw json array
+            String dataTrim = data.trim();
+            if (dataTrim.startsWith("[") && dataTrim.endsWith("]")) {
+                return dataTrim;
+            }
             try {
                 byte[] binGzipData = Base64.getDecoder().decode(data);
                 return decompress(binGzipData);
             } catch (Exception e) {
                 log.error("extractData error:" + e.getMessage());
-                log.error(data);
-                return "extractData error:" + e.getMessage();
+                return "[\"error: extractData error"
+                        + ", message: " + e.getMessage()
+                        + ", inputData: " + data
+                        + "\"]";
             }
         };
     }
+
 
     private static String decompress(final byte[] str) {
         if (str == null) {
@@ -84,15 +89,23 @@ public class Cleaner {
             return outStr.toString();
         } catch (IOException e) {
             log.error("decompress error:" + e.getMessage());
-            return "decompress error: " + e.getMessage();
+            throw new RuntimeException(e);
         }
     }
 
     private static Dataset<Row> flatDataColumn(final Dataset<Row> dataset) {
         ArrayType arrayType = new ArrayType(StringType, true);
-        return dataset.withColumn("data", from_json(col("data"), arrayType).alias("data"))
-                .withColumn("exploded_data", explode(col("data")))
+        Dataset<Row> dataset1 = dataset.withColumn("data", from_json(col("data"), arrayType).alias("data"));
+        Dataset<Row> explodedDataDateset = dataset1.withColumn("exploded_data", explode(col("data")))
                 .drop("data").withColumnRenamed("exploded_data", "data");
+
+        if (ContextUtil.isDebugLocal()) {
+            dataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-0-flatDataColumn-input/");
+            dataset1.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-1-jsonArray/");
+            explodedDataDateset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-2-explodedDataDateset/");
+        }
+        return explodedDataDateset;
+
     }
 
     public Dataset<Row> clean(final Dataset<Row> dataset) {
@@ -106,8 +119,7 @@ public class Cleaner {
         log.info(new ETLMetric(structuredDataset, "after processDataColumnSchema").toString());
         Dataset<Row> filteredDataSet = filter(structuredDataset);
         log.info(new ETLMetric(filteredDataSet, "after filter").toString());
-        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
-        if (debugLocal) {
+        if (ContextUtil.isDebugLocal()) {
             decodedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-0-decodedDataset/");
             flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-flattedDataset/");
             structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-2-structuredDataset/");
@@ -118,7 +130,7 @@ public class Cleaner {
     private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset) {
         String schemaString;
         try {
-            schemaString = Resources.toString(requireNonNull(getClass().getResource("/schema.json")), Charsets.UTF_8);
+            schemaString = Resources.toString(requireNonNull(getClass().getResource("/data_schema.json")), Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -129,8 +141,7 @@ public class Cleaner {
         options.put("columnNameOfCorruptRecord", "_corrupt_record");
         Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
         log.info(new ETLMetric(rowDataset, "after load data schema").toString());
-        boolean debugLocal = Boolean.parseBoolean(System.getProperty("debug.local"));
-        if (debugLocal) {
+        if (ContextUtil.isDebugLocal()) {
             rowDataset.write().mode(SaveMode.Overwrite)
                     .json(DEBUG_LOCAL_PATH + "/clean-schemaDataset/");
         }
@@ -141,21 +152,43 @@ public class Cleaner {
     }
 
     private Dataset<Row> processCorruptRecords(final Dataset<Row> dataset) {
-        Dataset<Row> corruptedDataset = dataset.filter(col("data").getItem("_corrupt_record").isNotNull());
+        Column corruptCondition = col("data").getItem("_corrupt_record").isNotNull()
+                .or(col("data").getItem("event_id").isNull())
+                .or(col("data").getItem("app_id").isNull())
+                .or(col("data").getItem("timestamp").isNull());
+
+        Dataset<Row> corruptedDataset = dataset.filter(corruptCondition);
+
         long corruptedDatasetCount = corruptedDataset.count();
+        log.info(new ETLMetric(corruptedDatasetCount, "corrupted").toString());
         if (corruptedDatasetCount > 0) {
-            String outputPath = System.getProperty("job.data.uri");
-            String corruptedOutPath = outputPath + "/corrupted_records/";
-            log.info(new ETLMetric(corruptedDataset, "corrupted").toString());
-            log.info("corruptedDataset corruptedOutPath:" + corruptedOutPath);
-            corruptedDataset.select("data")
-                    .write().mode(SaveMode.Append)
-                    .json(corruptedOutPath);
-            log.info("write corruptedDataset to " + outputPath);
+            String database = System.getProperty("database", "default");
+            String jobName = System.getProperty("job.name");
+            corruptedDataset = corruptedDataset.withColumn("jobName", lit(jobName));
+
+            corruptedDataset = corruptedDataset.coalesce((int) (1 + corruptedDatasetCount/10000));
+
+            if (ContextUtil.isSaveToWarehouse()) {
+                String tablePath = System.getProperty("warehouse.dir") + "/etl_corrupted_data";
+                log.info("save corruptedDataset to table " + database + ".etl_corrupted_data");
+                corruptedDataset.write().partitionBy("jobName")
+                        .option("path", tablePath)
+                        .mode(SaveMode.Append).saveAsTable(database + ".etl_corrupted_data");
+            } else {
+                String s3FilePath = System.getProperty("warehouse.dir") + "/etl_corrupted_json_data";
+                log.info("save corruptedDataset to " + s3FilePath);
+                corruptedDataset.write().partitionBy("jobName")
+                        .option("compression", "gzip")
+                        .mode(SaveMode.Append).json(s3FilePath);
+            }
+
+            if (ContextUtil.isDebugLocal()) {
+                corruptedDataset.write().mode(SaveMode.Overwrite)
+                        .json(DEBUG_LOCAL_PATH + "/clean-corruptedDataset/");
+            }
         }
-        Dataset<Row> normalDataset = dataset.filter(col("data").getItem("_corrupt_record").isNull())
+        return dataset.filter(not(corruptCondition))
                 .drop(col("data").getItem("_corrupt_record"));
-        return normalDataset;
     }
 
     private Dataset<Row> filter(final Dataset<Row> dataset) {

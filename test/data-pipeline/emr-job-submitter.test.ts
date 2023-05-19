@@ -68,6 +68,8 @@ process.env.S3_PATH_ENTRY_POINT_JAR = 's3://test/main.jar';
 process.env.OUTPUT_FORMAT = 'json';
 process.env.OUTPUT_PARTITIONS ='128';
 process.env.RE_PARTITIONS ='96';
+process.env.JOB_NAME = 'test-job-name-123456';
+process.env.SAVE_INFO_TO_WAREHOUSE = '1';
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -105,11 +107,13 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
         sparkSubmit: {
           entryPoint: 's3://test/main.jar',
           entryPointArguments: [
+            'true',
             'test_db',
             'source_table',
             '1678613606572',
             '1678700006572',
-            `s3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/corrupted_records/${(new Date()).toISOString().split('T')[0]}/1678613606572-1678700006572`, // pipeline data path
+            's3://test-bucket-src/src-prefix/',
+            's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-job-name-123456', // pipeline data path
             'com.test.ClassMain,com.test.ClassMainTest',
             's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
             'test_proj_001',

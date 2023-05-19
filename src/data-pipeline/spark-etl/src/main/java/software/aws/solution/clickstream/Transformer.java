@@ -47,8 +47,8 @@ public final class Transformer {
         Dataset<Row> dataset10 = convertUri(dataset9);
 
         log.info(new ETLMetric(dataset10, "transform return").toString());
-        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
-        if (debugLocal) {
+
+        if (ContextUtil.isDebugLocal()) {
             dataset10.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/transformed/");
         }
         return dataset10;
@@ -74,7 +74,9 @@ public final class Transformer {
 
     private Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
         return dataset.withColumn("event_date",
-                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000).$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd"))
+                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000)
+                                .$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd"))
+
                 .withColumn("ingest_timestamp", col("ingest_time").cast(DataTypes.LongType))
                 .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem("timestamp"))).cast(DataTypes.LongType))
 
@@ -98,13 +100,13 @@ public final class Transformer {
     private Dataset<Row> convertGeo(final Dataset<Row> dataset) {
         return dataset.withColumn("geo",
                         struct(
-                                lit("").alias("country"),
-                                lit("").alias("continent"),
-                                lit("").alias("sub_continent"),
+                                lit(null).cast(DataTypes.StringType).alias("country"),
+                                lit(null).cast(DataTypes.StringType).alias("continent"),
+                                lit(null).cast(DataTypes.StringType).alias("sub_continent"),
                                 col("data").getItem("locale").alias("locale"),
-                                lit("").alias("region"),
-                                lit("").alias("metro"),
-                                lit("").alias("city")))
+                                lit(null).cast(DataTypes.StringType).alias("region"),
+                                lit(null).cast(DataTypes.StringType).alias("metro"),
+                                lit(null).cast(DataTypes.StringType).alias("city")))
                 .withColumn("geo_for_enrich", struct(col("ip"), col("data").getItem("locale").alias("locale")));
     }
 
@@ -160,12 +162,12 @@ public final class Transformer {
                         (col("data").getItem("platform")).alias("operating_system"),
 
                         // placeholder for ua enrich fields
-                        lit("").alias("ua_browser"),
-                        lit("").alias("ua_browser_version"),
-                        lit("").alias("ua_os"),
-                        lit("").alias("ua_os_version"),
-                        lit("").alias("ua_device"),
-                        lit("").alias("ua_device_category"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_browser"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_browser_version"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_os"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_os_version"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_device"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_device_category"),
 
                         (col("data").getItem("system_language")).alias("system_language"),
                         (col("data").getItem("zone_offset").$div(1000)).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),

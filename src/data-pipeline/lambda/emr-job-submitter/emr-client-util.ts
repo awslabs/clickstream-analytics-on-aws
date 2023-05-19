@@ -76,26 +76,28 @@ export class EMRServerlessUtil {
       config,
     );
 
-    const jobName =`${startTimestamp}-${uuid()}`;
+    const jobName = process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
 
     const sinkPrefix = getSinkTableLocationPrefix(config.sinkS3Prefix, config.projectId, config.sinkTableName);
 
-    const corruptedRecordsDir = `corrupted_records/${(new Date()).toISOString().split('T')[0]}/${startTimestamp}-${endTimestamp}`;
+    const jobDataDir = `${config.projectId}/job-data/${jobName}`;
 
     const entryPointArguments = [
-      config.databaseName, // [0] glue catalog database.
-      config.sourceTableName, // [1] glue catalog source table name.
-      `${startTimestamp}`, // [2] start timestamp of event.
-      `${endTimestamp}`, // [3] end timestamp of event.
-      `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}${config.projectId}/${corruptedRecordsDir}`, // [4] job data path to save corrupted_records
-      config.transformerAndEnrichClassNames, // [5] transformer class names with comma-separated
-      `s3://${config.sinkBucketName}/${sinkPrefix}`, // [6] output path.
-      config.projectId, // [7] projectId
-      config.appIds, // [8] app_ids
-      `${config.dataFreshnessInHour}`, // [9] dataFreshnessInHour,
-      config.outputFormat, // [10] outputFormat,
-      config.outputPartitions, // [11] outputPartitions
-      config.rePartitions, // [12] rePartitions.
+      config.saveInfoToWarehouse,
+      config.databaseName, // [1] glue catalog database.
+      config.sourceTableName, // [2] glue catalog source table name.
+      `${startTimestamp}`, // [3] start timestamp of event.
+      `${endTimestamp}`, // [4] end timestamp of event.
+      `s3://${config.sourceBucketName}/${config.sourceS3Prefix}`, // [5] source path
+      `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}${jobDataDir}`, // [6] job data path to save temp data
+      config.transformerAndEnrichClassNames, // [7] transformer class names with comma-separated
+      `s3://${config.sinkBucketName}/${sinkPrefix}`, // [8] output path.
+      config.projectId, // [9] projectId
+      config.appIds, // [10] app_ids
+      `${config.dataFreshnessInHour}`, // [11] dataFreshnessInHour,
+      config.outputFormat, // [12] outputFormat,
+      config.outputPartitions, // [13] outputPartitions
+      config.rePartitions, // [14] rePartitions.
     ];
 
     const jars = Array.from(
@@ -192,6 +194,7 @@ export class EMRServerlessUtil {
 
   private static getConfig() {
     return {
+      saveInfoToWarehouse: process.env.SAVE_INFO_TO_WAREHOUSE == '1' || process.env.SAVE_INFO_TO_WAREHOUSE?.toLocaleLowerCase() == 'true' ? 'true': 'false',
       emrServerlessApplicationId: process.env.EMR_SERVERLESS_APPLICATION_ID!,
       stackId: process.env.STACK_ID!,
       projectId: process.env.PROJECT_ID!,

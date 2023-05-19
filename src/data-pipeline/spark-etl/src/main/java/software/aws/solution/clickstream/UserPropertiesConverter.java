@@ -174,8 +174,7 @@ public class UserPropertiesConverter {
                 .withColumn("user_first_touch_timestamp",
                         get_json_object(col("data").getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType));
 
-        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
-        if (debugLocal) {
+        if (ContextUtil.isDebugLocal()) {
             userDataset3.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/UserPropertiesConverter/");
         }
         return userDataset3;

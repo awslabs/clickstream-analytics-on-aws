@@ -27,6 +27,7 @@ class CleanerTest extends BaseSparkTest {
     public void should_clean_normal_data() {
         System.setProperty("debug.local", "true");
         System.setProperty("app.ids", "uba-app");
+        System.setProperty("save.info.to.warehouse", "false");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
@@ -59,7 +60,7 @@ class CleanerTest extends BaseSparkTest {
     @Test
     public void should_clean_when_data_has_corrupt_records() {
         String path = requireNonNull(getClass().getResource("/")).getPath();
-        System.setProperty("job.data.uri", path);
+        System.setProperty("job.data.dir", path);
         System.setProperty("app.ids", "uba-app");
 
         Dataset<Row> dataset =

@@ -12,6 +12,7 @@
  */
 
 
+
 package software.aws.solution.clickstream;
 
 import com.google.common.base.Preconditions;
@@ -33,53 +34,59 @@ public final class DataProcessor {
 
     /**
      * This job accept input argument with length 6.
-     * args[0] means glue catalog database.
-     * args[1] means glue catalog source table name.
-     * args[2] means start timestamp of event.
-     * args[3] means end timestamp of event.
-     * args[4] means job data path, you can write files into this path while job running.
-     * args[5] represents a list of transformer class names with comma-separated.
-     * args[6] means output path.
-     * args[7] means projectId.
-     * args[8] means valid app_ids .
-     * args[9] means dataFreshnessInHour.
-     * args[10] means outputFormat.
-     * args[11] means outputPartitions.
-     * args[12] means rePartitions.
+     * args[0] means save info to warehouse flag 'true' or 'false'
+     * args[1] means glue catalog database.
+     * args[2] means glue catalog source table name.
+     * args[3] means start timestamp of event.
+     * args[4] means end timestamp of event.
+     * args[5] means source path.
+     * args[6] means job data path, you can write files into this path while job running.
+     * args[7] represents a list of transformer class names with comma-separated.
+     * args[8] means output path.
+     * args[9] means projectId.
+     * args[10] means valid app_ids .
+     * args[11] means dataFreshnessInHour.
+     * args[12] means outputFormat.
+     * args[13] means outputPartitions.
+     * args[14] means rePartitions.
      * @param args input arguments
      */
     public static void main(final String[] args) {
-        Preconditions.checkArgument(args.length == 13, "This job can only accept input argument with length 13");
+        Preconditions.checkArgument(args.length == 15, "This job can only accept input argument with length 15");
 
-        SparkSession spark = SparkSession.builder().config("spark.hadoop.hive.metastore.client.factory.class",
-                        "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
-                .enableHiveSupport().appName(APP_NAME).getOrCreate();
+        String debug = args[0];
+        String database = args[1];
+        String sourceTable = args[2];
+        String startTimestamp = args[3];
+        String endTimestamp = args[4];
+        String sourcePath = args[5];
+        String jobDataDir = args[6];
+        String transformerClassNames = args[7];
+        String outputPath = args[8];
+        String projectId = args[9];
+        String validAppIds = args[10];
+        String dataFreshnessInHour = args[11];
+        String outPutFormat = args[12];
+        String outputPartitions = args[13];
+        String rePartitions = args[14];
 
-        Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
-            log.info(c._1 + " -> " + c._2);
-        });
-
-
-        String database = args[0];
-        String sourceTable = args[1];
-        String jobDataUri = args[4];
-        String transformerClassNames = args[5];
-        String outputPath = args[6];
-        String projectId = args[7];
-        String validAppIds = args[8];
-        String outPutFormat = args[10];
-        String startTimestamp = args[2];
-        String endTimestamp = args[3];
-        String dataFreshnessInHour = args[9];
-        String outputPartitions = args[11];
-        String rePartitions = args[12];
-
-        ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
+       ETLRunnerConfig runnerConfig = new ETLRunnerConfig(debug, database, sourceTable, sourcePath,
+                jobDataDir,
                 newArrayList(transformerClassNames.split(",")),
                 outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
                 Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour),
                 Integer.valueOf(outputPartitions), Integer.valueOf(rePartitions)
         );
+        ContextUtil.setJobAndWarehouseInfo(jobDataDir);
+
+        SparkSession spark = SparkSession.builder().config("spark.hadoop.hive.metastore.client.factory.class",
+                        "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
+                .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                .enableHiveSupport().appName(APP_NAME).getOrCreate();
+
+        Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
+            log.info(c._1 + " -> " + c._2);
+        });
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();

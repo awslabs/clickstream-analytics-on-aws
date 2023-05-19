@@ -58,8 +58,7 @@ public class IPEnrichment {
                         col("geo_for_enrich").getItem("ip"),
                         col("geo_for_enrich").getItem("locale")
                 ));
-        boolean debugLocal = Boolean.parseBoolean(System.getProperty("debug.local"));
-        if (debugLocal) {
+        if (ContextUtil.isDebugLocal()) {
             ipEnrichDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ip-Dataset/");
         }
         return ipEnrichDataset.drop("geo_for_enrich");
@@ -68,19 +67,19 @@ public class IPEnrichment {
     private UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
             GenericRow defaultRow = new GenericRow(
-                    new Object[]{"", "", "", "", "", "", localeValue}
+                    new Object[]{null, null, null, null, null, null, localeValue}
             );
             try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")))) {
                 InetAddress address = InetAddress.getByName(ipValue);
                 LookupResult result = reader.get(address, LookupResult.class);
                 return Optional.ofNullable(result)
                         .map(geo -> new GenericRow(new Object[]{
-                                Optional.ofNullable(geo.getCity()).map(LookupResult.City::getName).orElse(""),
-                                Optional.ofNullable(geo.getContinent()).map(LookupResult.Continent::getName).orElse(""),
-                                Optional.ofNullable(geo.getCountry()).map(LookupResult.Country::getName).orElse(""),
-                                "",
-                                "",
-                                "",
+                                Optional.ofNullable(geo.getCity()).map(LookupResult.City::getName).orElse(null),
+                                Optional.ofNullable(geo.getContinent()).map(LookupResult.Continent::getName).orElse(null),
+                                Optional.ofNullable(geo.getCountry()).map(LookupResult.Country::getName).orElse(null),
+                                null,
+                                null,
+                                null,
                                 localeValue
                         }))
                         .orElse(defaultRow);
@@ -120,7 +119,7 @@ public class IPEnrichment {
             @MaxMindDbConstructor
             public Country(final @MaxMindDbParameter(name = "names") Map<String, String> names,
                            final @MaxMindDbParameter(name = "iso_code") String isoCode) {
-                this.name = names.getOrDefault("en", "");
+                this.name = names.getOrDefault("en", null);
                 this.isoCode = isoCode;
             }
 
@@ -139,7 +138,7 @@ public class IPEnrichment {
 
             @MaxMindDbConstructor
             public Continent(final @MaxMindDbParameter(name = "names") Map<String, String> names) {
-                this.name = names.getOrDefault("en", "");
+                this.name = names.getOrDefault("en", null);
             }
         }
 
@@ -149,7 +148,7 @@ public class IPEnrichment {
 
             @MaxMindDbConstructor
             public City(final @MaxMindDbParameter(name = "names") Map<String, String> names) {
-                this.name = names.getOrDefault("en", "");
+                this.name = names.getOrDefault("en", null);
             }
         }
 

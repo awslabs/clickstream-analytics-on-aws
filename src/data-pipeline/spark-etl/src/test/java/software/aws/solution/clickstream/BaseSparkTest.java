@@ -68,6 +68,9 @@ public class BaseSparkTest {
                 .master("local[*]")
                 .config("spark.driver.bindAddress", "127.0.0.1")
                 .getOrCreate();
+
+        System.setProperty("job.name", "test-job");
+        System.setProperty("warehouse.dir", "/tmp/warehouse");
     }
 
     @AfterEach

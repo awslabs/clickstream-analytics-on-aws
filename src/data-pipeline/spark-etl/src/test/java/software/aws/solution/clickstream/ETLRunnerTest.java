@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream;
 
 import com.clearspring.analytics.util.Lists;
@@ -27,14 +28,84 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ETLRunnerTest extends BaseSparkTest {
 
     @Test
-    public void should_executeTransformers() throws URISyntaxException, IOException {
+    public void should_readDataset() {
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
+        String jobDataDir = "/tmp/job-data";
+        String transformerClassNames = String.join(",");
+        String outputPath = "/tmp/test-output";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
+        String endTimestamp = "1667969999000"; // 2022-11-09T07:46:39.000Z
+        String dataFreshnessInHour = "72";
+        String outputPartitions = "-1";
+
+      ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                "true",
+                database, 
+                sourceTable,
+                sourcePath,
+                jobDataDir,
+                newArrayList(transformerClassNames.split(",")),
+                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
+                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        Dataset<Row> dataset = runner.readInputDataset(true);
+        assertEquals(0, dataset.count());
+        dataset = runner.readInputDataset(false);
+        assertEquals(2, dataset.count());
+    }
+
+
+    @Test
+    public void should_read_corrupt_dataset() {
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
+        String jobDataDir = "/tmp/job-data";
+        String transformerClassNames = String.join(",");
+        String outputPath = "/tmp/test-output";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1668128460000"; // '2022-11-11T01:01:00Z'
+        String endTimestamp = "1668153660000"; // '2022-11-11T08:01:00Z'
+        String dataFreshnessInHour = "72";
+        String outputPartitions = "-1";
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                "true",
+                database,
+                sourceTable,
+                sourcePath,
+                jobDataDir,
+                newArrayList(transformerClassNames.split(",")),
+                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
+                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        Dataset<Row> dataset = runner.readInputDataset(true);
+        assertEquals(0, dataset.count());
+        dataset = runner.readInputDataset(false);
+        assertEquals("\"abc\"", dataset.first().getAs("_corrupt_record"));
+    }
+
+    @Test
+    public void should_executeTransformers() throws IOException {
         System.setProperty("debug.local", "true");
+        System.setProperty("app.ids", "id1,id2,uba-app");
+        System.setProperty("project.id", "projectId1");
+        System.setProperty("save.info.to.warehouse", "true");
+
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
         List<String> transformers = Lists.newArrayList();
@@ -43,32 +114,32 @@ class ETLRunnerTest extends BaseSparkTest {
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "fakeDatabase";
+        String database = "default";
         String sourceTable = "fakeSourceTable";
-        String jobDataUri = "/tmp/job-data";
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+        String jobDataDir = "/tmp/job-data";
         String transformerClassNames = String.join(",");
         String outputPath = "/tmp/test-output";
         String projectId = "projectId1";
         String validAppIds = "id1,id2,uba-app";
         String outPutFormat = "json";
-        String startTimestamp = "1667963966000";
-        String endTimestamp = "1667969999000";
+        String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
+        String endTimestamp = "1667969999000"; // 2022-11-09T07:46:39.000Z
         String dataFreshnessInHour = "72";
         String outputPartitions = "-1";
 
-        ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                "false",
+                database,
+                sourceTable,
+                sourcePath,
+                jobDataDir,
                 newArrayList(transformerClassNames.split(",")),
                 outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
                 Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
-        String sql = runner.configAndSQL();
 
-        String expectedSql = "select * from `fakeDatabase`.fakeSourceTable where (\n" +
-                "(year='2022' AND month='11' AND day='09')\n" +
-                ") AND ingest_time >= 1667963966000 AND ingest_time < 1667969999000";
-
-        assertEquals(expectedSql, sql);
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
 
@@ -149,9 +220,11 @@ class ETLRunnerTest extends BaseSparkTest {
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "fakeDatabase";
+        String database = "default";
         String sourceTable = "fakeSourceTable";
-        String jobDataUri = "/tmp/etl-debug/";
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+
+        String jobDataDir = "/tmp/etl-debug/";
         String transformerClassNames = String.join(",");
         String outputPath = "/tmp/test-output";
         String projectId = "projectId1";
@@ -161,13 +234,17 @@ class ETLRunnerTest extends BaseSparkTest {
         String endTimestamp = "1667969999000";
         String dataFreshnessInHour = "72";
 
-        ETLRunner.ETLRunnerConfig runnerConfig = new ETLRunner.ETLRunnerConfig(database, sourceTable, jobDataUri,
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                "false",
+                database,
+                sourceTable,
+                sourcePath,
+                jobDataDir,
                 newArrayList(transformerClassNames.split(",")),
                 outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
                 Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), -1, -1);
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
-        runner.configAndSQL();
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());
         assertEquals(sourceDataset.count(), 1);

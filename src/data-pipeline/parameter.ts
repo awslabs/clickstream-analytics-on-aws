@@ -59,9 +59,9 @@ export function createStackParameters(scope: Construct) {
   });
 
   const dataBufferedSecondsParam = new CfnParameter(scope, 'DataBufferedSeconds', {
-    description: 'Max time for data in buffer (time from ingestion server to S3)',
-    default: 360,
-    minValue: 30,
+    description: 'S3 object stable wait time',
+    default: 30,
+    minValue: 5,
     type: 'Number',
   });
 

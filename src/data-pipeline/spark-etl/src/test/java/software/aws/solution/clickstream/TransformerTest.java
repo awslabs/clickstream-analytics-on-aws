@@ -30,7 +30,6 @@ class TransformerTest extends BaseSparkTest {
     public void should_transform() {
         System.setProperty("app.ids", "uba-app");
         System.setProperty("project.id", "test_project_id_01");
-        System.setProperty("debug.local", "true");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
@@ -47,7 +46,7 @@ class TransformerTest extends BaseSparkTest {
 
         assertEquals(-44, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
 
-        assertEquals("", device.getString(device.fieldIndex("ua_browser")));
+        assertEquals(null, device.getString(device.fieldIndex("ua_browser")));
 
         Row geo_for_enrich = row.getStruct(row.fieldIndex("geo_for_enrich"));
         assertEquals("13.212.229.59", geo_for_enrich.getString(geo_for_enrich.fieldIndex("ip")));
@@ -75,7 +74,28 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(0, rows.get(0).getLong(rows.get(0).fieldIndex("event_bundle_sequence_id")));
         assertEquals(0, rows.get(1).getLong(rows.get(1).fieldIndex("event_bundle_sequence_id")));
         assertEquals(123456, rows.get(2).getLong(rows.get(2).fieldIndex("event_bundle_sequence_id")));
+    }
+
+    @Test
+    public void should_transform_without_error_for_raw_text_data() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_raw_text_error.json")).getPath());
+        Dataset<Row> transformedDataset = transformer.transform(dataset);
+        assertEquals(0, transformedDataset.count());
 
     }
 
+    @Test
+    public void should_transform_without_error_for_raw_json_data() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_raw_json_error.json")).getPath());
+        Dataset<Row> transformedDataset = transformer.transform(dataset);
+        assertEquals(0, transformedDataset.count());
+    }
 }

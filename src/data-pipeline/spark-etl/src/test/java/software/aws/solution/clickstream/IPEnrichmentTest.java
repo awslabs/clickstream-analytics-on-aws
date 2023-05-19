@@ -51,9 +51,9 @@ class IPEnrichmentTest extends BaseSparkTest {
 
         Row row = transformedDataset.first();
         Row geo = row.getStruct(row.fieldIndex("geo"));
-        assertEquals(geo.getString(geo.fieldIndex("country")), "");
-        assertEquals(geo.getString(geo.fieldIndex("continent")), "");
-        assertEquals(geo.getString(geo.fieldIndex("city")), "");
+        assertEquals(geo.getString(geo.fieldIndex("country")), null);
+        assertEquals(geo.getString(geo.fieldIndex("continent")), null);
+        assertEquals(geo.getString(geo.fieldIndex("city")), null);
     }
 
     @Test
@@ -65,8 +65,8 @@ class IPEnrichmentTest extends BaseSparkTest {
 
         Row row = transformedDataset.first();
         Row geo = row.getStruct(row.fieldIndex("geo"));
-        assertEquals(geo.getString(geo.fieldIndex("country")), "");
-        assertEquals(geo.getString(geo.fieldIndex("continent")), "");
-        assertEquals(geo.getString(geo.fieldIndex("city")), "");
+        assertEquals(geo.getString(geo.fieldIndex("country")), null);
+        assertEquals(geo.getString(geo.fieldIndex("continent")), null);
+        assertEquals(geo.getString(geo.fieldIndex("city")), null);
     }
 }

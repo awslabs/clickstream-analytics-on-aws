@@ -37,16 +37,16 @@ public class UAEnrichment {
     private static UDF1<String, Row> enrich() {
         return value -> {
             Client client = UA_PARSER.parse(value);
-            String uaBrowser = Optional.ofNullable(client.userAgent).map(a -> a.family).orElse("");
+            String uaBrowser = Optional.ofNullable(client.userAgent).map(a -> a.family).orElse(null);
             String uaBrowserVersion = Optional.ofNullable(client.userAgent)
-                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
+                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse(null);
 
-            String uaOs = Optional.ofNullable(client.os).map(a -> a.family).orElse("");
+            String uaOs = Optional.ofNullable(client.os).map(a -> a.family).orElse(null);
             String uaOsVersion = Optional.ofNullable(client.os)
-                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse("");
+                    .map(a -> getVersion(a.major, a.major, a.patch)).orElse(null);
 
-            String uaDevice = Optional.ofNullable(client.device).map(a -> a.family).orElse("");
-            String uaDeviceCategory = ""; // PC|Tablet|Mobile|Bot|Other
+            String uaDevice = Optional.ofNullable(client.device).map(a -> a.family).orElse(null);
+            String uaDeviceCategory = null; // PC|Tablet|Mobile|Bot|Other
             return new GenericRow(
                     new String[]{uaBrowser, uaBrowserVersion, uaOs, uaOsVersion, uaDevice, uaDeviceCategory}
             );
@@ -57,7 +57,7 @@ public class UAEnrichment {
         if (major != null && minor != null && patch != null) {
             return String.format("%s.%s.%s", major, minor, patch);
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -85,8 +85,7 @@ public class UAEnrichment {
                 .withField("ua_device_category", col("ua_enrich").getField("ua_device_category"))
         ).drop("ua_enrich");
 
-        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
-        if (debugLocal) {
+        if (ContextUtil.isDebugLocal()) {
             enrichedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ua-Dataset/");
         }
         return enrichedDataset;
