@@ -87,3 +87,7 @@ export const buildMetricsDashboardLink = (
 export const buildQuickSightSubscriptionLink = (): string => {
   return 'https://us-east-1.quicksight.aws.amazon.com/sn/start';
 };
+
+export const buildAlarmsLink = (region: string, projectId: string): string => {
+  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
+};

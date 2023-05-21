@@ -230,7 +230,9 @@
     "unsubscribe": "Unsubscribe",
     "retry": "Retry",
     "confirm": "Confirm",
-    "addPlugin": "Add Plugin"
+    "addPlugin": "Add Plugin",
+    "enable": "Enable All",
+    "disable": "Disable All"
   },
   "item": "item",
   "items": "items",

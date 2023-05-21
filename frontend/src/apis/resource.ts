@@ -153,6 +153,37 @@ const getSTSUploadRole = async () => {
   return result;
 };
 
+const getAlarmList = async (params: {
+  region: string;
+  pid: string;
+  pageNumber: number;
+  pageSize: number;
+}) => {
+  const result: any = await apiRequest('get', '/env/cloudwatch/alarms', params);
+  return result;
+};
+
+const disableAlarms = async (data: {
+  region: string;
+  alarmNames: string[];
+}) => {
+  const result: any = await apiRequest(
+    'post',
+    `/env/cloudwatch/alarms/disable`,
+    data
+  );
+  return result;
+};
+
+const enableAlarms = async (data: { region: string; alarmNames: string[] }) => {
+  const result: any = await apiRequest(
+    'post',
+    `/env/cloudwatch/alarms/enable`,
+    data
+  );
+  return result;
+};
+
 export {
   fetchOutsideLink,
   createQuickSightUser,
@@ -176,4 +207,7 @@ export {
   subscribQuickSight,
   unsubscribQuickSight,
   getSTSUploadRole,
+  getAlarmList,
+  disableAlarms,
+  enableAlarms,
 };

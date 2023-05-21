@@ -37,7 +37,7 @@ const commonDevDeps = [
   '@types/mock-fs@^4.13.1',
 ];
 
-const awsSDKVersion = '3.310.0';
+const awsSDKVersion = '3.329.0';
 const awsSDKDeps = [
   '@aws-sdk/credential-providers',
   '@aws-sdk/client-kafkaconnect',
@@ -70,6 +70,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
+  '@aws-sdk/client-cloudwatch',
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',

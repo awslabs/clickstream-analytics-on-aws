@@ -232,11 +232,8 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                       header={t('pipeline:create.quickSightNotSub')}
                     >
                       {t('pipeline:create.quickSightNotSubDesc1')}
-                      <Link 
-                      external
-                      href={buildQuickSightSubscriptionLink()}
-                      > 
-                      {t('pipeline:create.quickSightSubscription')}
+                      <Link external href={buildQuickSightSubscriptionLink()}>
+                        {t('pipeline:create.quickSightSubscription')}
                       </Link>
                       {t('pipeline:create.quickSightNotSubDesc2')}
                     </Alert>

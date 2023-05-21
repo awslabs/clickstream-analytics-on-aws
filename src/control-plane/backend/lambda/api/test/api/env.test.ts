@@ -14,6 +14,11 @@
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
 import {
+  CloudWatchClient,
+  DescribeAlarmsCommand,
+  DisableAlarmActionsCommand, EnableAlarmActionsCommand,
+} from '@aws-sdk/client-cloudwatch';
+import {
   EC2Client,
   DescribeRegionsCommand,
   DescribeVpcsCommand,
@@ -37,7 +42,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
-import { MOCK_TOKEN, tokenMock } from './ddb-mock';
+import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { app, server } from '../../index';
 
 
@@ -52,6 +57,7 @@ const route53Client = mockClient(Route53Client);
 const athenaClient = mockClient(AthenaClient);
 const iamClient = mockClient(IAMClient);
 const acmClient = mockClient(ACMClient);
+const cloudWatchClient = mockClient(CloudWatchClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
@@ -65,6 +71,7 @@ describe('Account Env test', () => {
     athenaClient.reset();
     iamClient.reset();
     acmClient.reset();
+    cloudWatchClient.reset();
   });
   it('Get regions', async () => {
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
@@ -467,7 +474,10 @@ describe('Account Env test', () => {
             Main: true,
           }],
           Routes: [
-            { DestinationCidrBlock: '0.0.0.0/0', NatGatewayId: 'local' },
+            {
+              DestinationCidrBlock: '0.0.0.0/0',
+              NatGatewayId: 'local',
+            },
           ],
         },
       ],
@@ -1354,6 +1364,92 @@ describe('Account Env test', () => {
       ],
     });
 
+  });
+  it('List alarms by project', async () => {
+    cloudWatchClient.on(DescribeAlarmsCommand).resolves({
+      MetricAlarms: [
+        {
+          AlarmName: 'Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          AlarmArn: 'arn:aws:cloudwatch:ap-northeast-1:555555555555:alarm:Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          AlarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+          ActionsEnabled: true,
+          OKActions: [],
+          AlarmActions: [],
+          InsufficientDataActions: [],
+          StateValue: 'OK',
+          MetricName: 'CPUUtilization',
+          Namespace: 'AWS/ECS',
+          Statistic: 'Average',
+          Period: 300,
+          EvaluationPeriods: 1,
+          Threshold: 85,
+          ComparisonOperator: 'GreaterThanThreshold',
+        },
+      ],
+    });
+    projectExistedMock(ddbMock, true);
+    const res = await request(app).get(`/api/env/cloudwatch/alarms?region=ap-northeast-1&pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        totalCount: 1,
+        items: [{
+          ActionsEnabled: true,
+          AlarmActions: [],
+          AlarmArn: 'arn:aws:cloudwatch:ap-northeast-1:555555555555:alarm:Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          AlarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+          AlarmName: 'Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          ComparisonOperator: 'GreaterThanThreshold',
+          EvaluationPeriods: 1,
+          InsufficientDataActions: [],
+          MetricName: 'CPUUtilization',
+          Namespace: 'AWS/ECS',
+          OKActions: [],
+          Period: 300,
+          StateValue: 'OK',
+          Statistic: 'Average',
+          Threshold: 85,
+        }],
+      },
+    });
+
+  });
+  it('Disable alarms', async () => {
+    cloudWatchClient.on(DisableAlarmActionsCommand).resolves({});
+    projectExistedMock(ddbMock, true);
+    const res = await request(app)
+      .post('/api/env/cloudwatch/alarms/disable')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        region: 'us-east-1',
+        alarmNames: [],
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+    });
+  });
+  it('Enable alarms', async () => {
+    cloudWatchClient.on(EnableAlarmActionsCommand).resolves({});
+    projectExistedMock(ddbMock, true);
+    const res = await request(app)
+      .post('/api/env/cloudwatch/alarms/enable')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        region: 'us-east-1',
+        alarmNames: [],
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+    });
   });
 
   afterAll((done) => {

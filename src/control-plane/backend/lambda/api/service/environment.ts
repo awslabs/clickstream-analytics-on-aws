@@ -14,9 +14,10 @@
 import fetch from 'node-fetch';
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
-import { getRegionAccount } from '../common/utils';
+import { getRegionAccount, paginateData } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
+import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
 import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeSecurityGroups } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
@@ -243,6 +244,39 @@ export class EnvironmentServ {
     try {
       const requestId = req.get('X-Click-Stream-Request-Id');
       const result = await AssumeUploadRole(requestId);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async alarms(req: any, res: any, next: any) {
+    try {
+      const { region, pid, pageNumber, pageSize } = req.query;
+      const result = await describeAlarmsByProjectId(region, pid);
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: paginateData(result, true, pageSize, pageNumber),
+      }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async alarmsDisable(req: any, res: any, next: any) {
+    try {
+      const { region, alarmNames } = req.body;
+      const result = await disableAlarms(region, alarmNames);
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async alarmsEnable(req: any, res: any, next: any) {
+    try {
+      const { region, alarmNames } = req.body;
+      const result = await enableAlarms(region, alarmNames);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

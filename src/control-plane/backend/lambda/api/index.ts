@@ -90,13 +90,19 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
     const authorization = req.get('authorization');
     if (authorization === undefined) {
       logger.info('Missing authentication token.');
-      return res.status(401).send({ auth: false, message: 'No token provided.' });
+      return res.status(401).send({
+        auth: false,
+        message: 'No token provided.',
+      });
     } else {
       const isAuthorized = await JWTAuthorizer.auth(client, issuer, authorization);
       if (!isAuthorized[0]) {
         const requestId = req.get('X-Click-Stream-Request-Id');
         logger.warn(`Authentication failed. Request ID: ${requestId}`);
-        return res.status(403).send({ auth: false, message: 'Invalid token provided.' });
+        return res.status(403).send({
+          auth: false,
+          message: 'Invalid token provided.',
+        });
       }
       email = isAuthorized[2]!.toString();
     }
@@ -141,7 +147,11 @@ app.get(
 app.get(
   '/api/env/vpc',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeVpcs(req, res, next);
@@ -150,7 +160,11 @@ app.get(
 app.get(
   '/api/env/vpc3az',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeVpcs3AZ(req, res, next);
@@ -160,8 +174,16 @@ app.get(
   '/api/env/vpc/subnet',
   validate([
     query('vpcId').custom(isValidEmpty),
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => defaultSubnetTypeValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    }))
+      .custom((value, { req }) => defaultSubnetTypeValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeSubnets(req, res, next);
@@ -171,7 +193,11 @@ app.get(
   '/api/env/vpc/securitygroups',
   validate([
     query('vpcId').custom(isValidEmpty),
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeSecurityGroups(req, res, next);
@@ -193,7 +219,11 @@ app.get(
   '/api/env/msk/clusters',
   validate([
     query('vpcId').custom(isValidEmpty),
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listMSKCluster(req, res, next);
@@ -202,7 +232,11 @@ app.get(
 app.get(
   '/api/env/msk/ping',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.mskPing(req, res, next);
@@ -212,7 +246,11 @@ app.get(
   '/api/env/redshift/clusters',
   validate([
     query('vpcId').custom(isValidEmpty),
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeRedshiftClusters(req, res, next);
@@ -221,7 +259,11 @@ app.get(
 app.get(
   '/api/env/redshift-serverless/workgroups',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRedshiftServerlessWorkgroups(req, res, next);
@@ -258,7 +300,11 @@ app.get(
 app.get(
   '/api/env/athena/workgroups',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listWorkGroups(req, res, next);
@@ -267,7 +313,11 @@ app.get(
 app.get(
   '/api/env/athena/ping',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.athenaPing(req, res, next);
@@ -276,7 +326,11 @@ app.get(
 app.get(
   '/api/env/iam/roles',
   validate([
-    query().custom((value, { req }) => defaultAssumeRoleTypeValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultAssumeRoleTypeValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRoles(req, res, next);
@@ -291,7 +345,11 @@ app.get(
 app.get(
   '/api/env/acm/certificates',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listCertificates(req, res, next);
@@ -300,7 +358,11 @@ app.get(
 app.get(
   '/api/env/ssm/secrets',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listSecrets(req, res, next);
@@ -313,6 +375,42 @@ app.get(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.AssumeUploadRole(req, res, next);
+  });
+
+app.get(
+  '/api/env/cloudwatch/alarms',
+  validate([
+    query().custom((value, { req }) => defaultPageValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
+    query().custom((value, { req }) => defaultRegionValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.alarms(req, res, next);
+  });
+
+app.post(
+  '/api/env/cloudwatch/alarms/disable',
+  validate([
+    body('region').custom(isValidEmpty),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.alarmsDisable(req, res, next);
+  });
+
+app.post(
+  '/api/env/cloudwatch/alarms/enable',
+  validate([
+    body('region').custom(isValidEmpty),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.alarmsEnable(req, res, next);
   });
 
 app.post(
@@ -336,8 +434,16 @@ app.get('/api/project/verification/:id', async (req: express.Request, res: expre
 app.get(
   '/api/project',
   validate([
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    }))
+      .custom((value, { req }) => defaultOrderValueValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.list(req, res, next);
@@ -365,7 +471,11 @@ app.put(
     body().custom(isValidEmpty),
     body('id')
       .custom(isProjectExisted)
-      .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
+      .custom((value, { req }) => validMatchParamId(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.update(req, res, next);
@@ -384,8 +494,16 @@ app.get(
   '/api/app',
   validate([
     query('pid').custom(isProjectExisted),
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    }))
+      .custom((value, { req }) => defaultOrderValueValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.list(req, res, next);
@@ -418,8 +536,16 @@ app.put(
   '/api/app/:id',
   validate([
     body('appId')
-      .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => isApplicationExisted(value, { req, location: 'body', path: 'projectId' })),
+      .custom((value, { req }) => validMatchParamId(value, {
+        req,
+        location: 'body',
+        path: '',
+      }))
+      .custom((value, { req }) => isApplicationExisted(value, {
+        req,
+        location: 'body',
+        path: 'projectId',
+      })),
     body('projectId')
       .custom(isProjectExisted),
   ]),
@@ -430,7 +556,11 @@ app.put(
 app.delete(
   '/api/app/:id',
   validate([
-    param('id').custom((value, { req }) => isApplicationExisted(value, { req, location: 'query', path: 'pid' })),
+    param('id').custom((value, { req }) => isApplicationExisted(value, {
+      req,
+      location: 'query',
+      path: 'pid',
+    })),
     query('pid')
       .custom(isProjectExisted),
   ]),
@@ -462,8 +592,16 @@ app.post(
 app.get(
   '/api/pipeline',
   validate([
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    }))
+      .custom((value, { req }) => defaultOrderValueValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pipelineServ.list(req, res, next);
@@ -482,7 +620,11 @@ app.put(
   '/api/pipeline/:id',
   validate([
     body('pipelineId').custom(isValidEmpty)
-      .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
+      .custom((value, { req }) => validMatchParamId(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
     body('projectId')
       .custom(isProjectExisted),
     body('version').custom(isValidEmpty),
@@ -494,7 +636,11 @@ app.put(
 app.delete(
   '/api/pipeline/:id',
   validate([
-    param('id').custom((value, { req }) => isPipelineExisted(value, { req, location: 'query', path: 'pid' })),
+    param('id').custom((value, { req }) => isPipelineExisted(value, {
+      req,
+      location: 'query',
+      path: 'pid',
+    })),
     query('pid')
       .custom(isProjectExisted),
   ]),
@@ -505,8 +651,16 @@ app.delete(
 app.get(
   '/api/plugin',
   validate([
-    query().custom((value, { req }) => defaultPageValueValid(value, { req, location: 'body', path: '' }))
-      .custom((value, { req }) => defaultOrderValueValid(value, { req, location: 'body', path: '' })),
+    query().custom((value, { req }) => defaultPageValueValid(value, {
+      req,
+      location: 'body',
+      path: '',
+    }))
+      .custom((value, { req }) => defaultOrderValueValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pluginServ.list(req, res, next);
@@ -535,7 +689,11 @@ app.put(
   validate([
     body('id')
       .custom(isPluginIdValid)
-      .custom((value, { req }) => validMatchParamId(value, { req, location: 'body', path: '' })),
+      .custom((value, { req }) => validMatchParamId(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pluginServ.update(req, res, next);

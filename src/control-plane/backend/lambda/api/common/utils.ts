@@ -162,6 +162,19 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources ) {
   };
 }
 
+function paginateData(data: any[], pagination: boolean, pageSize: number, pageNumber: number) {
+  const totalCount = data.length;
+  if (pagination) {
+    if (totalCount) {
+      pageNumber = Math.min(Math.ceil(totalCount / pageSize), pageNumber);
+      const startIndex = pageSize * (pageNumber - 1);
+      const endIndex = Math.min(pageSize * pageNumber, totalCount);
+      return data?.slice(startIndex, endIndex);
+    }
+  }
+  return data;
+}
+
 export {
   isEmpty,
   tryToJson,
@@ -173,4 +186,5 @@ export {
   getStackName,
   getKafkaTopic,
   getPluginInfo,
+  paginateData,
 };

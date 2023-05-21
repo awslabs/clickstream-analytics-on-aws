@@ -156,8 +156,8 @@ declare global {
       status: string;
       stackDetails: IStackStatus[];
     };
-    dashboards?: IDashboard[],
-    metricsDashboardName?: string,
+    dashboards?: IDashboard[];
+    metricsDashboardName?: string;
     createAt?: string;
     updateAt?: string;
   }
@@ -218,5 +218,14 @@ declare global {
     upsertCronExp: string;
     selectedDataLoadType: SelectProps.Option | null;
     dataLoadCronExp: string;
+  }
+
+  interface IAlarm {
+    AlarmName: string;
+    AlarmArn: string;
+    AlarmDescription: string;
+    ActionsEnabled: boolean;
+    StateValue: string;
+    StateReason: string;
   }
 }
