@@ -296,7 +296,7 @@ export class GlueUtil {
         },
         {
           name: 'event_date',
-          type: Schema.STRING,
+          type: Schema.DATE,
         },
         {
           name: 'event_dimensions',

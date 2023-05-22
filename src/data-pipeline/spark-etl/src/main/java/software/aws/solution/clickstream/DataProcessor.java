@@ -79,7 +79,9 @@ public final class DataProcessor {
         );
         ContextUtil.setJobAndWarehouseInfo(jobDataDir);
 
-        SparkSession spark = SparkSession.builder().config("spark.hadoop.hive.metastore.client.factory.class",
+        SparkSession spark = SparkSession.builder()
+                .config("spark.sql.session.timeZone", "UTC")
+                .config("spark.hadoop.hive.metastore.client.factory.class",
                         "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
                 .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
                 .enableHiveSupport().appName(APP_NAME).getOrCreate();

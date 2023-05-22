@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_ods_events}}(
     device SUPER, 
     ecommerce SUPER,
     event_bundle_sequence_id BIGINT,
-    event_date VARCHAR(255), 
+    event_date DATE, 
     event_dimensions SUPER,
     event_id VARCHAR(255)  DEFAULT RANDOM(),
     event_name VARCHAR(255),

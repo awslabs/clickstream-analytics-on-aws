@@ -17,6 +17,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -40,6 +41,9 @@ class TransformerTest extends BaseSparkTest {
         transformedDataset.printSchema();
 
         Row row = transformedDataset.first();
+        Date eventDate = row.getDate(row.fieldIndex("event_date"));
+        assertEquals(Date.valueOf("2023-04-24"), eventDate);
+
         Row device = row.getStruct(row.fieldIndex("device"));
         assertEquals("Brand HUAWEI", device.getString(device.fieldIndex("mobile_brand_name")));
         assertEquals(28800, device.getLong(device.fieldIndex("time_zone_offset_seconds")));

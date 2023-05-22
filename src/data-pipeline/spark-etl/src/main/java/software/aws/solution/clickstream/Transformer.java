@@ -73,10 +73,8 @@ public final class Transformer {
     }
 
     private Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
-        return dataset.withColumn("event_date",
-                        date_format(from_unixtime(col("data").getItem("timestamp").$div(1000)
-                                .$plus(col("data").getItem("zone_offset").$div(1000))), "yyyMMdd"))
-
+        return dataset
+                .withColumn("event_date", to_date(timestamp_seconds(col("data").getItem("timestamp").$div(1000))))
                 .withColumn("ingest_timestamp", col("ingest_time").cast(DataTypes.LongType))
                 .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem("timestamp"))).cast(DataTypes.LongType))
 

@@ -112,16 +112,21 @@ describe('Custom resource - Create schemas for applications in Redshift database
     mockfs({
       '/opt/clickstream-daily-active-user-view.sql': testSqlContent(rootPath + 'clickstream-daily-active-user-view.sql'),
       '/opt/clickstream-dau-wau-view.sql': testSqlContent(rootPath + 'clickstream-dau-wau-view.sql'),
+      '/opt/clickstream-device-view.sql': testSqlContent(rootPath + 'clickstream-device-view.sql'),
+      '/opt/clickstream-lifecycle-daily-view.sql': testSqlContent(rootPath + 'clickstream-lifecycle-daily-view.sql'),
+      '/opt/clickstream-lifecycle-weekly-view.sql': testSqlContent(rootPath + 'clickstream-lifecycle-weekly-view.sql'),
+      '/opt/clickstream-ods-events-parameter-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-view.sql'),
+      '/opt/clickstream-ods-events-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-view.sql'),
       '/opt/clickstream-ods-flattened-view.sql': testSqlContent(rootPath + 'clickstream-ods-flattened-view.sql'),
       '/opt/clickstream-retention-view.sql': testSqlContent(rootPath + 'clickstream-retention-view.sql'),
       '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
+      '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
       '/opt/dim-users.sql': testSqlContent(rootPath + 'dim-users.sql'),
+      '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
       '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
       '/opt/sp-clear-expired-events.sql': testSqlContent(rootPath + 'sp-clear-expired-events.sql'),
       '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
-      '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
-      '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
     });
   });
 

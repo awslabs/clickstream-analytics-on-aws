@@ -3,7 +3,7 @@ CREATE EXTERNAL TABLE `ods_events`(
   `device` struct<mobile_brand_name:string,mobile_model_name:string,manufacturer:string,screen_width:bigint,screen_height:bigint,carrier:string,network_type:string,operating_system_version:string,operating_system:string,ua_browser:string,ua_browser_version:string,ua_os:string,ua_os_version:string,ua_device:string,ua_device_category:string,system_language:string,time_zone_offset_seconds:bigint,vendor_id:string,advertising_id:string>, 
   `ecommerce` struct<total_item_quantity:bigint,purchase_revenue_in_usd:double,purchase_revenue:double,refund_value_in_usd:double,refund_value:double,shipping_value_in_usd:double,shipping_value:double,tax_value_in_usd:double,tax_value:double,transaction_id:string,unique_items:bigint>, 
   `event_bundle_sequence_id` bigint, 
-  `event_date` string, 
+  `event_date` date,
   `event_dimensions` array<struct<key:string,value:struct<double_value:string,float_value:string,int_value:string,string_value:string>>>, 
   `event_id` string, 
   `event_name` string, 

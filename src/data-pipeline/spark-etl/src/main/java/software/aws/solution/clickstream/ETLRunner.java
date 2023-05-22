@@ -224,9 +224,9 @@ public class ETLRunner {
 
     private Dataset<Row> prepareForPartition(final Dataset<Row> dataset) {
         return dataset.withColumn("partition_app", col("app_info").getItem("app_id"))
-                .withColumn("partition_year", substring(col("event_date"), 1, 4))
-                .withColumn("partition_month", substring(col("event_date"), 5, 2))
-                .withColumn("partition_day", substring(col("event_date"), 7, 2));
+                .withColumn("partition_year", date_format(col("event_date"), "yyyy"))
+                .withColumn("partition_month", date_format(col("event_date"), "MM"))
+                .withColumn("partition_day", date_format(col("event_date"), "dd"));
     }
 
     private List<String[]> getSourcePartition(final long milliSecStart, final long milliSecEnd) {

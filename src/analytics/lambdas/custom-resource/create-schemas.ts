@@ -260,11 +260,18 @@ async function createViewForReporting(props: ResourcePropertiesType) {
       ...SQL_TEMPLATE_PARAMETER,
     };
     // keep view order due to dependency between them.
-    sqlStatements.push(getSqlContent('clickstream-daily-active-user-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-ods-events-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-ods-events-parameter-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-lifecycle-daily-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-lifecycle-weekly-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-user-dim-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-ods-flattened-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-dau-wau-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-session-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-device-view.sql', mustacheParam));
+
+    // to be deleted by BI update
+    sqlStatements.push(getSqlContent('clickstream-daily-active-user-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-dau-wau-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-ods-flattened-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-retention-view.sql', mustacheParam));
   };
 
