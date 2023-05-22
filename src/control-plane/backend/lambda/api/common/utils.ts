@@ -219,9 +219,9 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
             reason: 'The route of vpc endpoint need attached in the route table',
           });
         }
-      } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface) {
-        const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId);
-        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId));
+      } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface && vpcEndpoint.Groups) {
+        const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
+        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId!));
         const vpcEndpointRule: SecurityGroupRule = {
           IsEgress: false,
           IpProtocol: 'tcp',
@@ -229,7 +229,7 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
           ToPort: 443,
           CidrIpv4: subnetCidr,
         };
-        if (!containRule(vpcEndpointSGRules, vpcEndpointRule)) {
+        if (!containRule(vpcEndpointSGIds, vpcEndpointSGRules, vpcEndpointRule)) {
           invalidServices.push({
             service: service,
             reason: 'The traffic is not allowed by security group rules',
@@ -252,7 +252,7 @@ function checkRoutesGatewayId(routes: Route[], gatewayId: String) {
   return result;
 }
 
-function containRule(securityGroupsRules: SecurityGroupRule[], rule: SecurityGroupRule) {
+function containRule(securityGroups: string[], securityGroupsRules: SecurityGroupRule[], rule: SecurityGroupRule) {
   for (let securityGroupsRule of securityGroupsRules) {
     if (securityGroupsRule.IsEgress === rule.IsEgress
       && securityGroupsRule.IpProtocol === '-1'
@@ -273,13 +273,18 @@ function containRule(securityGroupsRules: SecurityGroupRule[], rule: SecurityGro
     }
     if (securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
       return true;
-    } else {
-      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4!);
-      const ruleCidr = ip.cidr(rule.CidrIpv4!);
+    } else if (securityGroupsRule.CidrIpv4 && rule.CidrIpv4) {
+      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4);
+      const ruleCidr = ip.cidr(rule.CidrIpv4);
       if (!securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) || !securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
         continue;
       }
+    } else if (securityGroupsRule.ReferencedGroupInfo?.GroupId) {
+      if (!securityGroups.includes(securityGroupsRule.ReferencedGroupInfo.GroupId)) {
+        continue;
+      }
     }
+
     return true;
   }
   return false;

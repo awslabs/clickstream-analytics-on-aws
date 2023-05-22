@@ -369,6 +369,7 @@ describe('Network test', () => {
   const VPC_CIDR = '10.0.0.0/16';
   const SUBNET_CIDR = '10.0.128.0/20';
   const SUBNET_IP = '10.0.128.1/32';
+  const SECURITY_GROUPS = ['sg-00000000000000001', 'sg-00000000000000002'];
 
   const ALL_TRAFFIC_RULE: SecurityGroupRule = {
     IsEgress: false,
@@ -410,103 +411,153 @@ describe('Network test', () => {
     CidrIpv4: SUBNET_CIDR,
   };
 
+  const REFERENCED_GROUP_RULE = {
+    IsEgress: false,
+    IpProtocol: '-1',
+    FromPort: -1,
+    ToPort: -1,
+    ReferencedGroupInfo: { GroupId: 'sg-00000000000000002' },
+  };
+
   it('Check SecurityGroupRule list contain one rule', async () => {
     // All Traffic
-    expect(containRule([ALL_TRAFFIC_RULE], ALL_TRAFFIC_RULE)).toEqual(true);
-    expect(containRule([ALL_TRAFFIC_RULE], VPC_CIDR_RUlE)).toEqual(true);
-    expect(containRule([ALL_TRAFFIC_RULE], SUBNET_CIDR_RUlE)).toEqual(true);
-    expect(containRule([ALL_TRAFFIC_RULE], {
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], ALL_TRAFFIC_RULE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], VPC_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], {
       ...SUBNET_CIDR_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
-    expect(containRule([ALL_TRAFFIC_RULE], PORT_RUlE)).toEqual(true);
-    expect(containRule([ALL_TRAFFIC_RULE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], PORT_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [ALL_TRAFFIC_RULE], PORT_RANGE_RUlE)).toEqual(true);
     // Vpc Traffic
-    expect(containRule([VPC_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
-    expect(containRule([VPC_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], {
       ...SUBNET_CIDR_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE], PORT_RUlE)).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
     // Subnet Traffic
-    expect(containRule([SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
-    expect(containRule([SUBNET_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(false);
-    expect(containRule([SUBNET_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
-    expect(containRule([SUBNET_CIDR_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], {
       ...SUBNET_CIDR_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
-    expect(containRule([SUBNET_CIDR_RUlE], PORT_RUlE)).toEqual(true);
-    expect(containRule([SUBNET_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [SUBNET_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
     // Port Traffic
-    expect(containRule([PORT_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
-    expect(containRule([PORT_RUlE], VPC_CIDR_RUlE)).toEqual(false);
-    expect(containRule([PORT_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
-    expect(containRule([PORT_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], {
       ...SUBNET_CIDR_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(false);
-    expect(containRule([PORT_RUlE], PORT_RUlE)).toEqual(true);
-    expect(containRule([{
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [{
       ...PORT_RUlE,
       CidrIpv4: '0.0.0.0/0',
     }], PORT_RUlE)).toEqual(true);
-    expect(containRule([PORT_RUlE], PORT_RANGE_RUlE)).toEqual(false);
-    expect(containRule([PORT_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], PORT_RANGE_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], {
       ...PORT_RUlE,
       FromPort: 5001,
       ToPort: 5001,
     })).toEqual(false);
-    expect(containRule([PORT_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RUlE], {
       ...PORT_RUlE,
       IpProtocol: 'udp',
     })).toEqual(false);
     // Port Range Traffic
-    expect(containRule([PORT_RANGE_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
-    expect(containRule([PORT_RANGE_RUlE], VPC_CIDR_RUlE)).toEqual(false);
-    expect(containRule([PORT_RANGE_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
-    expect(containRule([PORT_RANGE_RUlE], PORT_RUlE)).toEqual(false);
-    expect(containRule([PORT_RANGE_RUlE], PORT_RANGE_RUlE)).toEqual(true);
-    expect(containRule([{
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], PORT_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [{
       ...PORT_RANGE_RUlE,
       CidrIpv4: '0.0.0.0/0',
     }], PORT_RANGE_RUlE)).toEqual(true);
-    expect(containRule([PORT_RANGE_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], {
       ...PORT_RUlE,
       FromPort: 8001,
       ToPort: 8001,
     })).toEqual(true);
-    expect(containRule([PORT_RANGE_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], {
       ...PORT_RUlE,
       FromPort: 8001,
       ToPort: 8999,
     })).toEqual(true);
-    expect(containRule([PORT_RANGE_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], {
       ...PORT_RUlE,
       FromPort: 7001,
       ToPort: 9001,
     })).toEqual(false);
-    expect(containRule([PORT_RANGE_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [PORT_RANGE_RUlE], {
       ...PORT_RUlE,
       IpProtocol: 'udp',
     })).toEqual(false);
     // Mutil rules
-    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
-    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
       ...SUBNET_CIDR_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
       ...PORT_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
-    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+    expect(containRule(SECURITY_GROUPS, [VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
       ...PORT_RANGE_RUlE,
       CidrIpv4: SUBNET_IP,
     })).toEqual(true);
+
+    // Referenced Group Traffic
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], ALL_TRAFFIC_RULE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], VPC_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], PORT_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], {
+      ...PORT_RUlE,
+      FromPort: 8001,
+      ToPort: 8001,
+    })).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], {
+      ...PORT_RUlE,
+      FromPort: 8001,
+      ToPort: 8999,
+    })).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], {
+      ...PORT_RUlE,
+      FromPort: 7001,
+      ToPort: 9001,
+    })).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [REFERENCED_GROUP_RULE], {
+      ...PORT_RUlE,
+      IpProtocol: 'udp',
+    })).toEqual(true);
+    expect(containRule(SECURITY_GROUPS, [{
+      ...REFERENCED_GROUP_RULE,
+      ReferencedGroupInfo: { GroupId: 'sg-00000000000000003' },
+    }], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [{
+      ...REFERENCED_GROUP_RULE,
+      ReferencedGroupInfo: { GroupId: 'sg-00000000000000003' },
+    }], SUBNET_CIDR_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [{
+      ...REFERENCED_GROUP_RULE,
+      ReferencedGroupInfo: { GroupId: 'sg-00000000000000003' },
+    }], PORT_RUlE)).toEqual(false);
+    expect(containRule(SECURITY_GROUPS, [{
+      ...REFERENCED_GROUP_RULE,
+      ReferencedGroupInfo: { GroupId: 'sg-00000000000000003' },
+    }], PORT_RANGE_RUlE)).toEqual(false);
   });
 
 });

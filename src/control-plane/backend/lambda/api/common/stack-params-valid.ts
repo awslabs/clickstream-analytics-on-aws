@@ -66,7 +66,7 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
   }
   if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the network for pipeline at least two subnets. ' +
+      'Validate error, the Data ingestion network for pipeline at least two subnets. ' +
       'Please check and try again.',
     );
   }
@@ -79,7 +79,7 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
   const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
   if (azInPublic.length !== privateSubnetsAZ.length || privateSubnetsAZ.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the public subnets AZ must contain private subnets AZ and cross two AZ. ' +
+      'Validate error, the Data ingestion public subnets AZ must contain private subnets AZ and cross two AZ. ' +
       'Please check and try again.',
     );
   }
@@ -188,15 +188,16 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
 
     const validSubnets = [];
     for (let quickSightSubnet of quickSightSubnets) {
-      const redshiftRule: SecurityGroupRule = {
+      const redshiftCidrRule: SecurityGroupRule = {
         IsEgress: false,
         IpProtocol: 'tcp',
         FromPort: portOfRedshift,
         ToPort: portOfRedshift,
         CidrIpv4: quickSightSubnet.cidr,
       };
-      if (containRule(redshiftSecurityGroupsRules, redshiftRule)) {
+      if (containRule(redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftCidrRule)) {
         validSubnets.push(quickSightSubnet.id);
+        break;
       }
     }
     if (isEmpty(validSubnets)) {

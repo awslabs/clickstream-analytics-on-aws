@@ -117,7 +117,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the public subnets AZ must contain private subnets AZ and cross two AZ. Please check and try again.');
+    expect(res.body.message).toEqual('Validate error, the Data ingestion public subnets AZ must contain private subnets AZ and cross two AZ. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
