@@ -40,6 +40,7 @@ import {
   CloudFrontAllowedMethods,
   OriginSslPolicy,
   OriginProtocolPolicy,
+  ResponseHeadersPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
@@ -73,6 +74,7 @@ export interface DistributionProps {
   readonly cachedMethods?: CachedMethods;
   readonly logProps?: LogProps;
   readonly functionAssociations?: FunctionAssociation[];
+  readonly responseHeadersPolicy?: ResponseHeadersPolicy;
 }
 
 export interface FrontendProps {
@@ -273,6 +275,13 @@ export class CloudFrontS3Portal extends Construct {
         },
       });
 
+      let responseHeadersPolicy = undefined;
+      if (props.distributionProps?.responseHeadersPolicy) {
+        responseHeadersPolicy = {
+          responseHeadersPolicyId: props.distributionProps?.responseHeadersPolicy.responseHeadersPolicyId,
+        };
+      }
+
       this.distribution = new Distribution(this, 'PortalDistribution', {
         certificate,
         minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2019,
@@ -289,6 +298,7 @@ export class CloudFrontS3Portal extends Construct {
             maxTtl: Duration.days(30),
           }),
           functionAssociations: props.distributionProps?.functionAssociations,
+          responseHeadersPolicy: responseHeadersPolicy,
         },
         defaultRootObject: 'index.html',
         priceClass: PriceClass.PRICE_CLASS_ALL,
@@ -411,23 +421,29 @@ export class CloudFrontS3Portal extends Construct {
         id: `origin${originsNum + 1}`,
         originPath: props.originPath,
       };
-      const behavior: CfnDistribution.CacheBehaviorProperty = {
-        pathPattern: pathPattern,
-        targetOriginId: `origin${originsNum + 1}`,
-        allowedMethods: behaviorOptions?.allowedMethods?.methods ?? AllowedMethods.ALLOW_ALL.methods,
-        cachedMethods: behaviorOptions?.cachedMethods?.methods ?? AllowedMethods.ALLOW_GET_HEAD.methods,
-        compress: behaviorOptions?.compress ?? true,
-        viewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        forwardedValues: {
-          queryString: true,
-          cookies: { forward: 'none' },
+
+      const behavior: any = {
+        PathPattern: pathPattern,
+        TargetOriginId: `origin${originsNum + 1}`,
+        AllowedMethods: behaviorOptions?.allowedMethods?.methods ?? AllowedMethods.ALLOW_ALL.methods,
+        CachedMethods: behaviorOptions?.cachedMethods?.methods ?? AllowedMethods.ALLOW_GET_HEAD.methods,
+        Compress: behaviorOptions?.compress ?? true,
+        ViewerProtocolPolicy: behaviorOptions?.viewerProtocolPolicy ?? ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        ForwardedValues: {
+          QueryString: true,
+          Cookies: { Forward: 'none' },
+          Headers: ['Origin', 'Authorization', 'Accept', 'Cache-Control', 'Access-Control-Request-Mehod', 'Access-Control-Request-Headers', 'Referer'],
         },
+        MaxTTL: 0,
+        MinTTL: 0,
+        DefaultTTL: 0,
       };
 
       (this.origins as Array<CfnDistribution.OriginProperty>).push(origin);
       (this.cacheBehaviors as Array<CfnDistribution.CacheBehaviorProperty>).push(behavior);
       cfnDistribution.addPropertyOverride('DistributionConfig.Origins', capitalizePropertyNames(this, this.origins));
-      cfnDistribution.addPropertyOverride('DistributionConfig.CacheBehaviors', capitalizePropertyNames(this, this.cacheBehaviors));
+      cfnDistribution.addPropertyOverride('DistributionConfig.CacheBehaviors', this.cacheBehaviors);
     }
+
   }
 }

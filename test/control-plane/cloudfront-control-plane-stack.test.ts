@@ -771,4 +771,162 @@ describe('CloudFrontS3PotalStack', () => {
 
   });
 
+  test('Test CloudFront disabled API call cache in China regions', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      targetToCNRegions: true,
+    });
+
+    const template = Template.fromStack(portalStack);
+
+    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
+    template.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        CacheBehaviors: [
+          {
+            PathPattern: {
+              'Fn::Join': [
+                '',
+                [
+                  '/',
+                  {
+                    Ref: Match.stringLikeRegexp('ClickStreamApiDeploymentStageapi[0-9A-Za-z]+'),
+                  },
+                  '/*',
+                ],
+              ],
+            },
+            TargetOriginId: 'origin2',
+            AllowedMethods: [
+              'GET',
+              'HEAD',
+              'OPTIONS',
+              'PUT',
+              'PATCH',
+              'POST',
+              'DELETE',
+            ],
+            CachedMethods: [
+              'GET',
+              'HEAD',
+            ],
+            Compress: true,
+            ViewerProtocolPolicy: 'redirect-to-https',
+            ForwardedValues: {
+              QueryString: true,
+              Cookies: {
+                Forward: 'none',
+              },
+              Headers: [
+                'Origin',
+                'Authorization',
+                'Accept',
+                'Cache-Control',
+                'Access-Control-Request-Mehod',
+                'Access-Control-Request-Headers',
+                'Referer',
+              ],
+            },
+            MaxTTL: 0,
+            MinTTL: 0,
+            DefaultTTL: 0,
+          },
+        ],
+      },
+    }, 1);
+
+
+  });
+
+
+  test('Test security responose headers ', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      targetToCNRegions: false,
+    });
+    const template = Template.fromStack(portalStack);
+
+    template.resourcePropertiesCountIs('AWS::CloudFront::ResponseHeadersPolicy', {
+      ResponseHeadersPolicyConfig: {
+        Name: {
+          'Fn::Join': [
+            '',
+            [
+              'clickstream-response_header-policy-',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
+        SecurityHeadersConfig: {
+          ContentSecurityPolicy: {
+            ContentSecurityPolicy: {
+              'Fn::Join': [
+                '',
+                [
+                  "default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://cognito-idp.",
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  '.amazonaws.com *.auth.',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  '.amazoncognito.com',
+                ],
+              ],
+            },
+            Override: true,
+          },
+          ContentTypeOptions: {
+            Override: true,
+          },
+          FrameOptions: {
+            FrameOption: 'DENY',
+            Override: true,
+          },
+          ReferrerPolicy: {
+            Override: true,
+            ReferrerPolicy: 'no-referrer',
+          },
+          StrictTransportSecurity: {
+            AccessControlMaxAgeSec: 600,
+            IncludeSubdomains: true,
+            Override: true,
+          },
+          XSSProtection: {
+            ModeBlock: true,
+            Override: true,
+            Protection: true,
+          },
+        },
+      },
+    }, 1);
+  });
+
 });

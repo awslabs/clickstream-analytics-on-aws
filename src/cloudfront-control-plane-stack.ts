@@ -24,6 +24,9 @@ import {
   OriginRequestPolicy,
   OriginRequestQueryStringBehavior,
   Function,
+  ResponseHeadersPolicy,
+  HeadersFrameOption,
+  HeadersReferrerPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
@@ -146,6 +149,30 @@ export class CloudFrontControlPlaneStack extends Stack {
       });
     }
 
+    const createCognitoUserPool = !props?.useExistingOIDCProvider && !props?.targetToCNRegions;
+    let responseHeadersPolicy: ResponseHeadersPolicy | undefined = undefined;
+    const cspUrl = [
+      `https://cognito-idp.${Aws.REGION}.amazonaws.com`,
+      `*.auth.${Aws.REGION}.amazoncognito.com`,
+    ].join(' ');
+
+    if (createCognitoUserPool) {
+      responseHeadersPolicy = new ResponseHeadersPolicy(this, 'response_headers_policy', {
+        responseHeadersPolicyName: `clickstream-response_header-policy-${getShortIdOfStack(this)}`,
+        securityHeadersBehavior: {
+          contentSecurityPolicy: {
+            contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}`,
+            override: true,
+          },
+          contentTypeOptions: { override: true },
+          frameOptions: { frameOption: HeadersFrameOption.DENY, override: true },
+          referrerPolicy: { referrerPolicy: HeadersReferrerPolicy.NO_REFERRER, override: true },
+          strictTransportSecurity: { accessControlMaxAge: Duration.seconds(600), includeSubdomains: true, override: true },
+          xssProtection: { protection: true, modeBlock: true, override: true },
+        },
+      });
+    }
+
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
         assetPath: join(__dirname, '../frontend'),
@@ -168,6 +195,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           bucket: solutionBucket.bucket,
         },
         functionAssociations: functionAssociations,
+        responseHeadersPolicy,
       },
     });
 
@@ -175,7 +203,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     let clientId: string;
     let jwksUriSuffix: string;
     //Create Cognito user pool and client for backend api
-    if (!props?.useExistingOIDCProvider && !props?.targetToCNRegions) {
+    if (createCognitoUserPool) {
       const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
       this.addToParamLabels('Admin User Email', emailParamerter.logicalId);
       this.addToParamGroups('Authentication Information', emailParamerter.logicalId);
