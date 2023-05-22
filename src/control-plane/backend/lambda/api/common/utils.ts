@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
-import { Tag } from '@aws-sdk/client-ec2';
+import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
+import { ipv4 as ip } from 'cidr-block';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, PipelineStackType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
@@ -73,7 +74,10 @@ function getEmailFromRequestContext(requestContext: string | undefined) {
       email = context.authorizer.email ?? 'unknown';
     }
   } catch (err) {
-    logger.warn('unknown user', { requestContext, err });
+    logger.warn('unknown user', {
+      requestContext,
+      err,
+    });
   }
   return email;
 }
@@ -107,7 +111,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   return names.get(key) ?? '';
 }
 
-function getKafkaTopic(pipeline: IPipeline):string {
+function getKafkaTopic(pipeline: IPipeline): string {
   let kafkaTopic = pipeline.projectId;
   if (!isEmpty(pipeline.ingestionServer.sinkKafka?.topic)) {
     kafkaTopic = pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId;
@@ -115,7 +119,7 @@ function getKafkaTopic(pipeline: IPipeline):string {
   return kafkaTopic;
 }
 
-function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources ) {
+function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
   let s3PathPluginFiles: string[] = [];
@@ -162,6 +166,135 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources ) {
   };
 }
 
+function getSubnetType(routeTable: RouteTable) {
+  const routes = routeTable.Routes;
+  let subnetType = SubnetType.ISOLATED;
+  for (let route of routes as Route[]) {
+    if (route.GatewayId?.startsWith('igw-')) {
+      subnetType = SubnetType.PUBLIC;
+      break;
+    }
+    if (route.DestinationCidrBlock === '0.0.0.0/0') {
+      subnetType = SubnetType.PRIVATE;
+      break;
+    }
+  }
+  return subnetType;
+}
+
+function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
+  let mainRouteTable: RouteTable = {};
+  let subnetRouteTable: RouteTable = {};
+  for (let routeTable of routeTables as RouteTable[]) {
+    for (let association of routeTable.Associations as RouteTableAssociation[]) {
+      if (association.Main) {
+        mainRouteTable = routeTable;
+      } else if (association.SubnetId === subnetId) {
+        subnetRouteTable = routeTable;
+      }
+    }
+  }
+  return !isEmpty(subnetRouteTable) ? subnetRouteTable : mainRouteTable;
+}
+
+function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
+  securityGroupsRules: SecurityGroupRule[],
+  subnetCidr: string,
+  services: string[]) {
+  const vpcEndpointServices = vpcEndpoints.map(endpoint => endpoint.ServiceName!);
+  const invalidServices = [];
+  for (let service of services) {
+    const index = vpcEndpointServices.indexOf(service);
+    if (index === -1) {
+      invalidServices.push({
+        service: service,
+        reason: 'Miss vpc endpoint',
+      });
+    } else {
+      const vpcEndpoint = vpcEndpoints[index];
+      if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Gateway) {
+        if (!checkRoutesGatewayId(routeTable.Routes!, vpcEndpoint.VpcEndpointId!)) {
+          invalidServices.push({
+            service: service,
+            reason: 'The route of vpc endpoint need attached in the route table',
+          });
+        }
+      } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface) {
+        const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId);
+        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId));
+        const vpcEndpointRule: SecurityGroupRule = {
+          IsEgress: false,
+          IpProtocol: 'tcp',
+          FromPort: 443,
+          ToPort: 443,
+          CidrIpv4: subnetCidr,
+        };
+        if (!containRule(vpcEndpointSGRules, vpcEndpointRule)) {
+          invalidServices.push({
+            service: service,
+            reason: 'The traffic is not allowed by security group rules',
+          });
+        }
+      }
+    }
+  }
+  return invalidServices;
+}
+
+function checkRoutesGatewayId(routes: Route[], gatewayId: String) {
+  let result = false;
+  for (let route of routes) {
+    if (route.GatewayId === gatewayId) {
+      result = true;
+      break;
+    }
+  }
+  return result;
+}
+
+function containRule(securityGroupsRules: SecurityGroupRule[], rule: SecurityGroupRule) {
+  for (let securityGroupsRule of securityGroupsRules) {
+    if (securityGroupsRule.IsEgress === rule.IsEgress
+      && securityGroupsRule.IpProtocol === '-1'
+      && securityGroupsRule.FromPort === -1
+      && securityGroupsRule.ToPort === -1
+      && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
+      return true;
+    }
+    if (securityGroupsRule.IsEgress !== rule.IsEgress) {
+      continue;
+    }
+    if (securityGroupsRule.IpProtocol !== '-1' && securityGroupsRule.IpProtocol !== rule.IpProtocol) {
+      continue;
+    }
+    if (securityGroupsRule.FromPort! !== -1 && securityGroupsRule.ToPort! !== -1
+      && (securityGroupsRule.FromPort! > rule.FromPort! || securityGroupsRule.ToPort! < rule.ToPort!)) {
+      continue;
+    }
+    if (securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
+      return true;
+    } else {
+      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4!);
+      const ruleCidr = ip.cidr(rule.CidrIpv4!);
+      if (!securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) || !securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
+        continue;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
+  const azArray = new Array<string>();
+  for (let subnet of subnets) {
+    if (!azArray.includes(subnet.availabilityZone)) {
+      azArray.push(subnet.availabilityZone);
+    }
+  }
+  return azArray;
+}
+
 function paginateData(data: any[], pagination: boolean, pageSize: number, pageNumber: number) {
   const totalCount = data.length;
   if (pagination) {
@@ -186,5 +319,10 @@ export {
   getStackName,
   getKafkaTopic,
   getPluginInfo,
+  getSubnetType,
+  getSubnetRouteTable,
+  checkVpcEndpoint,
+  containRule,
+  getSubnetsAZ,
   paginateData,
 };

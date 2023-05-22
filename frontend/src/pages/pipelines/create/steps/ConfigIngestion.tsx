@@ -77,7 +77,10 @@ interface ConfigIngestionProps {
 
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
-  changeSelectedMSK: (mskOption: SelectProps.Option, mskCluster: MSKResponse) => void;
+  changeSelectedMSK: (
+    mskOption: SelectProps.Option,
+    mskCluster: MSKResponse
+  ) => void;
   changeSecurityGroup: (sg: SelectProps.Option) => void;
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
@@ -171,7 +174,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           (element) => element.type === 'public'
         );
         const privateSubnets = data.filter(
-          (element) => element.type === 'private'
+          (element) => element.type === 'private' || element.type === 'isolated'
         );
         const publicSubnetOptions = publicSubnets.map((element) => ({
           label: `${element.name}(${element.id})`,
@@ -698,9 +701,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                         ? DEFAULT_KDS_SINK_INTERVAL
                         : DEFAULT_MSK_SINK_INTERVAL
                     }
-                    value={
-                      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds.toString()
-                    }
+                    value={pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds.toString()}
                     onChange={(e) => {
                       changeSinkMaxInterval(e.detail.value);
                     }}

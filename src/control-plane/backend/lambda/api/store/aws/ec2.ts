@@ -16,29 +16,36 @@ import {
   paginateDescribeVpcs,
   paginateDescribeSubnets,
   paginateDescribeSecurityGroups,
-  DescribeRouteTablesCommand,
+  paginateDescribeVpcEndpoints,
+  paginateDescribeRouteTables,
+  paginateDescribeSecurityGroupRules,
   Vpc,
+  VpcEndpoint,
   Filter,
   Subnet,
-  Route,
-  DescribeRouteTablesCommandOutput,
   RouteTable, DescribeRegionsCommand,
-  RouteTableAssociation,
   Region,
 } from '@aws-sdk/client-ec2';
 
+import { SecurityGroupRule } from '@aws-sdk/client-ec2/dist-types/models/models_0';
 import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup } from '../../common/types';
-import { getValueFromTags, isEmpty } from '../../common/utils';
+import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup, SubnetType } from '../../common/types';
+import { getSubnetRouteTable, getSubnetType, getValueFromTags } from '../../common/utils';
 
-export const describeVpcs = async (region: string) => {
+export const describeVpcs = async (region: string, vpcId?: string) => {
   const ec2Client = new EC2Client({
     ...aws_sdk_client_common_config,
     region,
   });
   const records: Vpc[] = [];
-  for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId!],
+  }];
+  for await (const page of paginateDescribeVpcs({ client: ec2Client }, {
+    Filters: vpcId ? filters : undefined,
+  })) {
     records.push(...page.Vpcs as Vpc[]);
   }
   const vpcs: ClickStreamVpc[] = [];
@@ -89,74 +96,54 @@ export const describeSubnets = async (region: string, vpcId: string) => {
     region,
   });
   const records: Subnet[] = [];
-  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId],
+  }];
   for await (const page of paginateDescribeSubnets({ client: ec2Client }, { Filters: filters })) {
     records.push(...page.Subnets as Subnet[]);
   }
   return records;
 };
 
-export const describeSubnetsWithType = async (region: string, vpcId: string, type: string) => {
-  const records = await describeSubnets(region, vpcId);
-  let subnets: ClickStreamSubnet[] = [];
-  for (let subnet of records as Subnet[]) {
-    let subnetType = 'isolated';
-    const subnetId = subnet.SubnetId;
-    if (subnetId) {
-      const routeTable = await getSubnetRouteTable(region, vpcId, subnetId);
-      const routes = routeTable.Routes;
-      for (let route of routes as Route[]) {
-        if (route.GatewayId?.startsWith('igw-')) {
-          subnetType = 'public';
-          break;
-        }
-        if (route.DestinationCidrBlock === '0.0.0.0/0') {
-          subnetType = 'private';
-          break;
-        }
-      }
-      const clickStreamSubnet = {
-        id: subnetId,
-        name: getValueFromTags('Name', subnet.Tags!),
-        cidr: subnet.CidrBlock ?? '',
-        availabilityZone: subnet.AvailabilityZone ?? '',
-        type: subnetType,
-      };
-      if (type === 'all' || type === subnetType || (type === 'private' && subnetType === 'isolated')) {
-        subnets.push(clickStreamSubnet);
-      }
-    }
-  }
-  return subnets;
-};
-
-export const getSubnetRouteTable = async (region: string, vpcId: string, subnetId: string) => {
+export const describeRouteTables = async (region: string, vpcId: string) => {
   const ec2Client = new EC2Client({
     ...aws_sdk_client_common_config,
     region,
   });
-  // Each subnet in VPC must be associated with a route table.
-  // If a subnet is not explicitly associated with any route table,
-  // it is implicitly associated with the main route table.
-  let mainRouteTable: RouteTable = {};
-  let subnetRouteTable: RouteTable = {};
-  const filters: Filter[] = [
-    { Name: 'vpc-id', Values: [vpcId] },
-  ];
-  const params: DescribeRouteTablesCommand = new DescribeRouteTablesCommand({
-    Filters: filters,
-  });
-  const res: DescribeRouteTablesCommandOutput = await ec2Client.send(params);
-  for (let routeTable of res.RouteTables as RouteTable[]) {
-    for (let association of routeTable.Associations as RouteTableAssociation[]) {
-      if (association.Main) {
-        mainRouteTable = routeTable;
-      } else if (association.SubnetId === subnetId) {
-        subnetRouteTable = routeTable;
-      }
+  const records: RouteTable[] = [];
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId],
+  }];
+  for await (const page of paginateDescribeRouteTables({ client: ec2Client }, { Filters: filters })) {
+    records.push(...page.RouteTables as RouteTable[]);
+  }
+  return records;
+};
+
+export const describeSubnetsWithType = async (region: string, vpcId: string, type: SubnetType) => {
+  const subnets = await describeSubnets(region, vpcId);
+  const routeTables = await describeRouteTables(region, vpcId);
+  const result: ClickStreamSubnet[] = [];
+  for (let subnet of subnets as Subnet[]) {
+    const subnetId = subnet.SubnetId!;
+    // Find the routeTable of subnet
+    const routeTable = getSubnetRouteTable(routeTables, subnetId);
+    const subnetType = getSubnetType(routeTable);
+    const clickStreamSubnet = {
+      id: subnetId,
+      name: getValueFromTags('Name', subnet.Tags!),
+      cidr: subnet.CidrBlock ?? '',
+      availabilityZone: subnet.AvailabilityZone ?? '',
+      type: subnetType,
+      routeTable,
+    };
+    if (type === SubnetType.ALL || type === subnetType) {
+      result.push(clickStreamSubnet);
     }
   }
-  return !isEmpty(subnetRouteTable)? subnetRouteTable: mainRouteTable;
+  return result;
 };
 
 export const getSubnet = async (region: string, subnetId: string) => {
@@ -190,18 +177,8 @@ export const listRegions = async () => {
   return regions;
 };
 
-export const describeSecurityGroups = async (region: string, vpcId: string) => {
-  const ec2Client = new EC2Client({
-    ...aws_sdk_client_common_config,
-    region,
-  });
-  const records: SecurityGroup[] = [];
-  const filters: Filter[] = [{ Name: 'vpc-id', Values: [vpcId] }];
-  for await (const page of paginateDescribeSecurityGroups({ client: ec2Client }, {
-    Filters: filters,
-  })) {
-    records.push(...page.SecurityGroups as SecurityGroup[]);
-  }
+export const describeVpcSecurityGroups = async (region: string, vpcId: string) => {
+  const records = await describeSecurityGroups(region, vpcId);
   const securityGroups: ClickStreamSecurityGroup[] = [];
   for (let sg of records as SecurityGroup[]) {
     securityGroups.push({
@@ -212,3 +189,59 @@ export const describeSecurityGroups = async (region: string, vpcId: string) => {
   }
   return securityGroups;
 };
+
+export const describeSecurityGroups = async (region: string, vpcId: string) => {
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
+  const records: SecurityGroup[] = [];
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId],
+  }];
+  for await (const page of paginateDescribeSecurityGroups({ client: ec2Client }, {
+    Filters: filters,
+  })) {
+    records.push(...page.SecurityGroups as SecurityGroup[]);
+  }
+  return records;
+};
+
+export const describeVpcEndpoints = async (region: string, vpcId: string) => {
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
+  const records: VpcEndpoint[] = [];
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId],
+  }];
+  for await (const page of paginateDescribeVpcEndpoints(
+    { client: ec2Client },
+    { Filters: filters })) {
+    records.push(...page.VpcEndpoints as VpcEndpoint[]);
+  }
+  return records;
+};
+
+export const describeSecurityGroupsWithRules = async (region: string, groupIds: string[]) => {
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
+  const records: SecurityGroupRule[] = [];
+  const filters: Filter[] = [{
+    Name: 'group-id',
+    Values: groupIds,
+  }];
+  for await (const page of paginateDescribeSecurityGroupRules(
+    { client: ec2Client },
+    { Filters: filters })) {
+    records.push(...page.SecurityGroupRules as SecurityGroupRule[]);
+  }
+  return records;
+};
+
+

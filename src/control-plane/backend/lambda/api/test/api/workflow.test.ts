@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DescribeSubnetsCommand, EC2Client } from '@aws-sdk/client-ec2';
+import { EC2Client } from '@aws-sdk/client-ec2';
 import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
   RedshiftClient,
@@ -19,14 +19,20 @@ import {
 import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
-import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import {
   StartExecutionCommand,
   SFNClient,
 } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { dictionaryMock, MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, projectExistedMock, stackParameterMock } from './ddb-mock';
+import {
+  createPipelineMock,
+  dictionaryMock,
+  MOCK_APP_ID,
+  MOCK_EXECUTION_ID,
+  MOCK_PROJECT_ID,
+} from './ddb-mock';
 import {
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
@@ -36,11 +42,10 @@ import {
   KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
   KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
-  MSK_ETL_EXISTING_SERVERLESS_PIPELINE,
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW, RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS,
   S3_ETL_PIPELINE,
-  S3_INGESTION_PIPELINE,
+  S3_INGESTION_PIPELINE, MSK_ETL_NEW_SERVERLESS_PIPELINE,
 } from './pipeline-mock';
 import {
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
@@ -53,10 +58,12 @@ import {
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
   INGESTION_KINESIS_PROVISIONED_PARAMETERS,
   INGESTION_MSK_PARAMETERS,
-  INGESTION_S3_PARAMETERS, mergeParameters,
-  MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS,
+  INGESTION_S3_PARAMETERS,
   MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-  MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS, REPORT_WITH_NEW_REDSHIFT_PARAMETERS, REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+  MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+  REPORT_WITH_NEW_REDSHIFT_PARAMETERS,
+  REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+  mergeParameters,
 } from './workflow-mock';
 import { dictionaryTableName } from '../../common/constants';
 import { SolutionInfo } from '../../common/solution-info-ln';
@@ -68,10 +75,10 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
-const redshiftClient = mockClient(RedshiftClient);
-const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
-const sfnClient = mockClient(SFNClient);
-const secretsManagerClient = mockClient(SecretsManagerClient);
+const redshiftMock = mockClient(RedshiftClient);
+const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
+const sfnMock = mockClient(SFNClient);
+const secretsManagerMock = mockClient(SecretsManagerClient);
 const ec2Mock = mockClient(EC2Client);
 
 const Tags = [
@@ -101,18 +108,17 @@ describe('Workflow test', () => {
   beforeEach(() => {
     ddbMock.reset();
     kafkaMock.reset();
-    redshiftClient.reset();
-    redshiftServerlessClient.reset();
-    sfnClient.reset();
-    secretsManagerClient.reset();
+    redshiftMock.reset();
+    redshiftServerlessMock.reset();
+    sfnMock.reset();
+    secretsManagerMock.reset();
     ec2Mock.reset();
   });
 
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -175,9 +181,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(KAFKA_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -240,9 +245,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka with connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -324,9 +328,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -408,9 +411,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -473,9 +475,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(KINESIS_PROVISIONED_INGESTION_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -538,9 +539,8 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-s3 + ETL', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const pipeline: CPipeline = new CPipeline(S3_ETL_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -626,11 +626,12 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow kafka msk + ETL + redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsIsolated: true,
+      subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(MSK_ETL_EXISTING_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(MSK_ETL_NEW_SERVERLESS_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -712,7 +713,7 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                    Parameters: MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
                     StackName: 'Clickstream-DataAnalytics-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
@@ -755,19 +756,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + new redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    ec2Mock.on(DescribeSubnetsCommand)
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
-      });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
     });
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_NEW_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
@@ -876,7 +867,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -984,7 +977,9 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1110,17 +1105,10 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + new redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient);
-    ec2Mock.on(DescribeSubnetsCommand)
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
-      });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+    });
     const pipeline: CPipeline = new CPipeline(KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1246,11 +1234,13 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
-    stackParameterMock(ddbMock, kafkaMock, redshiftServerlessClient, redshiftClient, { noApp: true });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      noApp: true,
     });
-    const pipeline: CPipeline = new CPipeline(MSK_ETL_EXISTING_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(MSK_ETL_NEW_SERVERLESS_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1333,7 +1323,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: mergeParameters(
-                      MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                      MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
                       [
                         {
                           ParameterKey: 'AppIds',
@@ -1384,7 +1374,7 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow', async () => {
     dictionaryMock(ddbMock);
-    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
     await stackManager.retryWorkflow();
     const expected = {
@@ -1522,7 +1512,7 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow with undefined stack status', async () => {
     dictionaryMock(ddbMock);
-    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS);
     await stackManager.retryWorkflow();
     const expected = {
@@ -1660,7 +1650,7 @@ describe('Workflow test', () => {
   });
   it('Generate Delete Workflow', async () => {
     dictionaryMock(ddbMock);
-    sfnClient.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
     await stackManager.deleteWorkflow();
     const expected = {
@@ -1797,22 +1787,10 @@ describe('Workflow test', () => {
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
   it('Pipeline template url with version', async () => {
-    projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          id: 1,
-          appId: `${MOCK_APP_ID}_1`,
-        },
-        {
-          id: 2,
-          appId: `${MOCK_APP_ID}_2`,
-        },
-      ],
-    });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
     });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
     await pipeline.generateWorkflow();
@@ -1822,7 +1800,6 @@ describe('Workflow test', () => {
     expect(templateURL).toEqual(undefined);
   });
   it('Pipeline template url with latest', async () => {
-    projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
@@ -1853,8 +1830,9 @@ describe('Workflow test', () => {
         },
       ],
     });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
     });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
     await pipeline.generateWorkflow();

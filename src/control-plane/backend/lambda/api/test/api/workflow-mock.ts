@@ -674,7 +674,7 @@ export const MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'RedshiftServerlessSubnets',
-      ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+      ParameterValue: 'subnet-00000000000000010,subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
     },
     {
       ParameterKey: 'RedshiftServerlessSGs',
@@ -727,7 +727,7 @@ const BASE_REPORT_PARAMETERS = [
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
-    ParameterValue: 'subnet-00000000000000022',
+    ParameterValue: 'subnet-00000000000000010,subnet-00000000000000011',
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSGParam',
@@ -783,7 +783,7 @@ export const REPORT_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
-    ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+    ParameterValue: 'subnet-00000000000000010,subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSGParam',

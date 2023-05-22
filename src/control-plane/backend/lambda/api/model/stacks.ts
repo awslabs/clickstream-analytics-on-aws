@@ -906,13 +906,9 @@ export class CReportStack extends JSONObject {
   })
     RedshiftPortParam?: string;
 
-  @JSONObject.optional('')
-  @JSONObject.custom( (stack :CReportStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
-      return stack._resources?.redshift?.network.subnetIds?.join(',');
-    } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return stack._pipeline?.dataAnalytics?.redshift.newServerless.network.subnetIds.join(',');
-    }
+  @JSONObject.required
+  @JSONObject.custom( (_:any, key:string, value:any) => {
+    validatePattern(key, SUBNETS_PATTERN, value);
     return value;
   })
     QuickSightVpcConnectionSubnetParam?: string;
@@ -952,6 +948,7 @@ export class CReportStack extends JSONObject {
       RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightTemplateArnParam: resources.quickSightTemplateArn?.data,
+      QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
 
     });
   }

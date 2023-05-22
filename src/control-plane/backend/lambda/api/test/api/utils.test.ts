@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import {
   MUTIL_APP_ID_PATTERN,
@@ -27,7 +28,7 @@ import {
 } from '../../common/constants-ln';
 import { validatePattern, validateSinkBatch } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { isEmpty } from '../../common/utils';
+import { containRule, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -251,26 +252,261 @@ describe('Utils test', () => {
 
   it('Sink batch valid', async () => {
     const validValues = [
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1000, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 3000 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 0 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 50000, intervalSeconds: 0 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1000, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: 300 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 10000, intervalSeconds: 0 } },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 1000,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: 3000,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: 0,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 50000,
+          intervalSeconds: 0,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 1000,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: 300,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 10000,
+          intervalSeconds: 0,
+        },
+      },
     ];
     validValues.map(v => expect(validateSinkBatch(v.sinkType, v.sinkBatch)).toEqual(true));
     const invalidValues = [
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: -1, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 0, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: 3001 } },
-      { sinkType: PipelineSinkType.KAFKA, sinkBatch: { size: 1, intervalSeconds: -1 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: -1, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 0, intervalSeconds: 100 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: 301 } },
-      { sinkType: PipelineSinkType.KINESIS, sinkBatch: { size: 1, intervalSeconds: -1 } },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: -1,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 0,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: 3001,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KAFKA,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: -1,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: -1,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 0,
+          intervalSeconds: 100,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: 301,
+        },
+      },
+      {
+        sinkType: PipelineSinkType.KINESIS,
+        sinkBatch: {
+          size: 1,
+          intervalSeconds: -1,
+        },
+      },
     ];
     invalidValues.map(v => expect(() => validateSinkBatch(v.sinkType, v.sinkBatch)).toThrow(ClickStreamBadRequestError));
+  });
+
+});
+describe('Network test', () => {
+  const VPC_CIDR = '10.0.0.0/16';
+  const SUBNET_CIDR = '10.0.128.0/20';
+  const SUBNET_IP = '10.0.128.1/32';
+
+  const ALL_TRAFFIC_RULE: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: '-1',
+    FromPort: -1,
+    ToPort: -1,
+    CidrIpv4: '0.0.0.0/0',
+  };
+
+  const VPC_CIDR_RUlE: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: '-1',
+    FromPort: -1,
+    ToPort: -1,
+    CidrIpv4: VPC_CIDR,
+  };
+
+  const SUBNET_CIDR_RUlE: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: '-1',
+    FromPort: -1,
+    ToPort: -1,
+    CidrIpv4: SUBNET_CIDR,
+  };
+
+  const PORT_RUlE: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: 'tcp',
+    FromPort: 5000,
+    ToPort: 5000,
+    CidrIpv4: SUBNET_CIDR,
+  };
+
+  const PORT_RANGE_RUlE: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: 'tcp',
+    FromPort: 8000,
+    ToPort: 9000,
+    CidrIpv4: SUBNET_CIDR,
+  };
+
+  it('Check SecurityGroupRule list contain one rule', async () => {
+    // All Traffic
+    expect(containRule([ALL_TRAFFIC_RULE], ALL_TRAFFIC_RULE)).toEqual(true);
+    expect(containRule([ALL_TRAFFIC_RULE], VPC_CIDR_RUlE)).toEqual(true);
+    expect(containRule([ALL_TRAFFIC_RULE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule([ALL_TRAFFIC_RULE], {
+      ...SUBNET_CIDR_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
+    expect(containRule([ALL_TRAFFIC_RULE], PORT_RUlE)).toEqual(true);
+    expect(containRule([ALL_TRAFFIC_RULE], PORT_RANGE_RUlE)).toEqual(true);
+    // Vpc Traffic
+    expect(containRule([VPC_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule([VPC_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE], {
+      ...SUBNET_CIDR_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    // Subnet Traffic
+    expect(containRule([SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule([SUBNET_CIDR_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule([SUBNET_CIDR_RUlE], SUBNET_CIDR_RUlE)).toEqual(true);
+    expect(containRule([SUBNET_CIDR_RUlE], {
+      ...SUBNET_CIDR_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
+    expect(containRule([SUBNET_CIDR_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule([SUBNET_CIDR_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    // Port Traffic
+    expect(containRule([PORT_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule([PORT_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule([PORT_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
+    expect(containRule([PORT_RUlE], {
+      ...SUBNET_CIDR_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(false);
+    expect(containRule([PORT_RUlE], PORT_RUlE)).toEqual(true);
+    expect(containRule([{
+      ...PORT_RUlE,
+      CidrIpv4: '0.0.0.0/0',
+    }], PORT_RUlE)).toEqual(true);
+    expect(containRule([PORT_RUlE], PORT_RANGE_RUlE)).toEqual(false);
+    expect(containRule([PORT_RUlE], {
+      ...PORT_RUlE,
+      FromPort: 5001,
+      ToPort: 5001,
+    })).toEqual(false);
+    expect(containRule([PORT_RUlE], {
+      ...PORT_RUlE,
+      IpProtocol: 'udp',
+    })).toEqual(false);
+    // Port Range Traffic
+    expect(containRule([PORT_RANGE_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule([PORT_RANGE_RUlE], VPC_CIDR_RUlE)).toEqual(false);
+    expect(containRule([PORT_RANGE_RUlE], SUBNET_CIDR_RUlE)).toEqual(false);
+    expect(containRule([PORT_RANGE_RUlE], PORT_RUlE)).toEqual(false);
+    expect(containRule([PORT_RANGE_RUlE], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule([{
+      ...PORT_RANGE_RUlE,
+      CidrIpv4: '0.0.0.0/0',
+    }], PORT_RANGE_RUlE)).toEqual(true);
+    expect(containRule([PORT_RANGE_RUlE], {
+      ...PORT_RUlE,
+      FromPort: 8001,
+      ToPort: 8001,
+    })).toEqual(true);
+    expect(containRule([PORT_RANGE_RUlE], {
+      ...PORT_RUlE,
+      FromPort: 8001,
+      ToPort: 8999,
+    })).toEqual(true);
+    expect(containRule([PORT_RANGE_RUlE], {
+      ...PORT_RUlE,
+      FromPort: 7001,
+      ToPort: 9001,
+    })).toEqual(false);
+    expect(containRule([PORT_RANGE_RUlE], {
+      ...PORT_RUlE,
+      IpProtocol: 'udp',
+    })).toEqual(false);
+    // Mutil rules
+    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], ALL_TRAFFIC_RULE)).toEqual(false);
+    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+      ...SUBNET_CIDR_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+      ...PORT_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
+    expect(containRule([VPC_CIDR_RUlE, SUBNET_CIDR_RUlE], {
+      ...PORT_RANGE_RUlE,
+      CidrIpv4: SUBNET_IP,
+    })).toEqual(true);
   });
 
 });

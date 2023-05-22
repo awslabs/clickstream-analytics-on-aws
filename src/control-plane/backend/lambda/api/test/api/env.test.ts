@@ -259,6 +259,18 @@ describe('Account Env test', () => {
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
           type: 'public',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'igw-xxxx',
+              },
+            ],
+          },
         },
         {
           id: 'subnet-09ae522e85bbee5c5',
@@ -266,6 +278,18 @@ describe('Account Env test', () => {
           cidr: '10.255.1.0/24',
           availabilityZone: 'us-east-1b',
           type: 'public',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'igw-xxxx',
+              },
+            ],
+          },
         },
       ],
     });
@@ -324,6 +348,18 @@ describe('Account Env test', () => {
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
           type: 'isolated',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'local',
+              },
+            ],
+          },
         },
         {
           id: 'subnet-09ae522e85bbee5c5',
@@ -331,6 +367,18 @@ describe('Account Env test', () => {
           cidr: '10.255.1.0/24',
           availabilityZone: 'us-east-1b',
           type: 'isolated',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'local',
+              },
+            ],
+          },
         },
       ],
     });
@@ -377,6 +425,18 @@ describe('Account Env test', () => {
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
           type: 'public',
+          routeTable: {
+            Associations: [
+              {
+                SubnetId: 'subnet-0b9fa05e061084b37',
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'igw-xxxx',
+              },
+            ],
+          },
         },
       ],
     });
@@ -423,6 +483,18 @@ describe('Account Env test', () => {
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
           type: 'public',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'igw-xxxx',
+              },
+            ],
+          },
         },
       ],
     });
@@ -456,18 +528,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    ec2ClientMock.on(DescribeRouteTablesCommand).resolvesOnce({
-      RouteTables: [
-        {
-          Associations: [{
-            Main: true,
-          }],
-          Routes: [
-            { GatewayId: 'local' },
-          ],
-        },
-      ],
-    }).resolves({
+    ec2ClientMock.on(DescribeRouteTablesCommand).resolves({
       RouteTables: [
         {
           Associations: [{
@@ -494,7 +555,20 @@ describe('Account Env test', () => {
           name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
-          type: 'isolated',
+          type: 'private',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                DestinationCidrBlock: '0.0.0.0/0',
+                NatGatewayId: 'local',
+              },
+            ],
+          },
         },
         {
           availabilityZone: 'us-east-1b',
@@ -502,6 +576,19 @@ describe('Account Env test', () => {
           id: 'subnet-0b9fa05e061084b38',
           name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/privateSubnet1',
           type: 'private',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                DestinationCidrBlock: '0.0.0.0/0',
+                NatGatewayId: 'local',
+              },
+            ],
+          },
         },
       ],
     });
@@ -548,6 +635,18 @@ describe('Account Env test', () => {
           cidr: '10.255.0.0/24',
           availabilityZone: 'us-east-1a',
           type: 'isolated',
+          routeTable: {
+            Associations: [
+              {
+                Main: true,
+              },
+            ],
+            Routes: [
+              {
+                GatewayId: 'local',
+              },
+            ],
+          },
         },
       ],
     });

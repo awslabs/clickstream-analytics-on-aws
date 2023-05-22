@@ -241,7 +241,7 @@ export const S3_ETL_PIPELINE: IPipeline = {
   },
 };
 
-export const MSK_ETL_EXISTING_SERVERLESS_PIPELINE: IPipeline = {
+export const MSK_ETL_NEW_SERVERLESS_PIPELINE: IPipeline = {
   ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   etl: {
     dataFreshnessInHour: 7,
@@ -272,9 +272,21 @@ export const MSK_ETL_EXISTING_SERVERLESS_PIPELINE: IPipeline = {
     athena: true,
     redshift: {
       dataRange: 'rate(6 months)',
-      existingServerless: {
-        workgroupName: 'test',
-        iamRoleArn: 'arn:aws:iam::555555555555:role/data-analytics-redshift',
+      newServerless: {
+        network: {
+          vpcId: 'vpc-00000000000000001',
+          subnetIds: [
+            'subnet-00000000000000010',
+            'subnet-00000000000000011',
+            'subnet-00000000000000012',
+            'subnet-00000000000000013',
+          ],
+          securityGroups: [
+            'sg-00000000000000030',
+            'sg-00000000000000031',
+          ],
+        },
+        baseCapacity: 8,
       },
     },
     loadWorkflow: {
@@ -287,7 +299,7 @@ export const MSK_ETL_EXISTING_SERVERLESS_PIPELINE: IPipeline = {
       processingFilesLimit: 50,
     },
     upsertUsers: {
-      scheduleExpression: 'rate(7 minutes)',
+      scheduleExpression: 'rate(5 minutes)',
     },
   },
 };
@@ -327,6 +339,7 @@ export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE: IPipeline = {
         network: {
           vpcId: 'vpc-00000000000000001',
           subnetIds: [
+            'subnet-00000000000000010',
             'subnet-00000000000000011',
             'subnet-00000000000000012',
             'subnet-00000000000000013',

@@ -210,6 +210,11 @@
       "type": "runtime"
     },
     {
+      "name": "cidr-block",
+      "version": "^1.3.2",
+      "type": "runtime"
+    },
+    {
       "name": "express-validator",
       "version": "^6.14.3",
       "type": "runtime"

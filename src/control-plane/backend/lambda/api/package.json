@@ -63,6 +63,7 @@
     "@aws-sdk/util-dynamodb": "^3.329.0",
     "@aws-sdk/util-stream-node": "^3.329.0",
     "@types/aws-lambda": "^8.10.110",
+    "cidr-block": "^1.3.2",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
     "jsonwebtoken": "^9.0.0",

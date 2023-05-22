@@ -294,6 +294,10 @@ const Content: React.FC = () => {
       setPublicSubnetError(true);
       return false;
     }
+    if (pipelineInfo.selectedPrivateSubnet.length <= 0) {
+      setPrivateSubnetError(true);
+      return false;
+    }
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
     ) {
@@ -320,7 +324,8 @@ const Content: React.FC = () => {
       return false;
     }
 
-    const sinkIntervalNum = pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
+    const sinkIntervalNum =
+      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
     const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch.size;
     if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
       // check kds batch interval

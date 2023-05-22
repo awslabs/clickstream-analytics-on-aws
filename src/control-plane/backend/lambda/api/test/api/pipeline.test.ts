@@ -13,26 +13,28 @@
 
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
-import { EC2Client, DescribeSubnetsCommand } from '@aws-sdk/client-ec2';
-import { KafkaClient, ListNodesCommand } from '@aws-sdk/client-kafka';
+import {
+  EC2Client,
+  DescribeSubnetsCommand,
+  DescribeRouteTablesCommand,
+  DescribeVpcEndpointsCommand,
+  DescribeSecurityGroupRulesCommand,
+} from '@aws-sdk/client-ec2';
+import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
   RedshiftClient,
-  DescribeClustersCommand,
-  DescribeClusterSubnetGroupsCommand,
 } from '@aws-sdk/client-redshift';
 import {
   RedshiftServerlessClient,
-  GetWorkgroupCommand,
-  GetNamespaceCommand,
 } from '@aws-sdk/client-redshift-serverless';
-import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import {
+  createPipelineMock,
   dictionaryMock,
-  MOCK_APP_ID,
   MOCK_PIPELINE_ID,
   MOCK_PROJECT_ID,
   MOCK_TOKEN,
@@ -53,78 +55,35 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
-const cloudFormationClient = mockClient(CloudFormationClient);
+const cloudFormationMock = mockClient(CloudFormationClient);
 const kafkaMock = mockClient(KafkaClient);
 const redshiftMock = mockClient(RedshiftClient);
-const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
-const secretsManagerClient = mockClient(SecretsManagerClient);
-const ec2Client = mockClient(EC2Client);
+const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
+const secretsManagerMock = mockClient(SecretsManagerClient);
+const ec2Mock = mockClient(EC2Client);
 
 
 describe('Pipeline test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
-    cloudFormationClient.reset();
+    cloudFormationMock.reset();
     kafkaMock.reset();
     redshiftMock.reset();
-    redshiftServerlessClient.reset();
-    secretsManagerClient.reset();
-    ec2Client.reset();
+    redshiftServerlessMock.reset();
+    secretsManagerMock.reset();
+    ec2Mock.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    kafkaMock.on(ListNodesCommand).resolves({
-      NextToken: 'token01',
-      NodeInfoList: [{
-        BrokerNodeInfo: {
-          Endpoints: ['node1,node2'],
-        },
-      }],
-      $metadata: {},
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
     });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'workgroupId',
-        workgroupArn: 'workgroupArn',
-        workgroupName: 'workgroupName',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: 'namespaceId',
-        namespaceArn: 'namespaceArn',
-        namespaceName: 'namespaceName',
-      },
-    });
-    ec2Client.on(DescribeSubnetsCommand)
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1a' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1b' }],
-      })
-      .resolvesOnce({
-        Subnets: [{ AvailabilityZone: 'us-east-1c' }],
-      });
     ddbMock.on(PutCommand).resolves({});
-    ddbMock.on(QueryCommand)
-      .resolvesOnce({ Items: [] })
-      .resolves({
-        Items: [
-          {
-            id: 1,
-            appId: `${MOCK_APP_ID}_1`,
-          },
-          {
-            id: 2,
-            appId: `${MOCK_APP_ID}_2`,
-          },
-        ],
-      });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -136,55 +95,20 @@ describe('Pipeline test', () => {
     expect(res.body.data).toHaveProperty('id');
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
-    expect(ec2Client).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 3);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
-  it('Create pipeline with new Redshift serverless subnets not cross three AZ', async () => {
+  it('Create pipeline public subnets AZ not contain private subnets AZ', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    kafkaMock.on(ListNodesCommand).resolves({
-      NextToken: 'token01',
-      NodeInfoList: [{
-        BrokerNodeInfo: {
-          Endpoints: ['node1,node2'],
-        },
-      }],
-      $metadata: {},
-    });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'workgroupId',
-        workgroupArn: 'workgroupArn',
-        workgroupName: 'workgroupName',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: 'namespaceId',
-        namespaceArn: 'namespaceArn',
-        namespaceName: 'namespaceName',
-      },
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: false,
     });
     ddbMock.on(PutCommand).resolves({});
-    ec2Client.on(DescribeSubnetsCommand).resolves({
-      Subnets: [{ AvailabilityZone: 'us-east-1a' }],
-    });
-    ddbMock.on(QueryCommand)
-      .resolvesOnce({ Items: [] })
-      .resolves({
-        Items: [
-          {
-            id: 1,
-            appId: `${MOCK_APP_ID}_1`,
-          },
-          {
-            id: 2,
-            appId: `${MOCK_APP_ID}_2`,
-          },
-        ],
-      });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -193,65 +117,196 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the network for deploying Redshift serverless workgroup at least three subnets that cross three AZs. Please check and try again.');
-    expect(ec2Client).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 3);
+    expect(res.body.message).toEqual('Validate error, the public subnets AZ must contain private subnets AZ and cross two AZ. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+  });
+  it('Create pipeline with new Redshift serverless subnets not cross three AZ', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: false,
+      subnetsIsolated: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, the network for deploying New_Serverless Redshift at least three subnets that cross three AZs. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline with vpc endpoint SG error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsIsolated: true,
+      subnetsCross3AZ: true,
+      sgError: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline with new Redshift serverless SG error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      sgError: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, security groups error of New_Serverless Redshift. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with s3 endpoint route table error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      s3EndpointRouteError: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"The route of vpc endpoint need attached in the route table\"}]. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with glue endpoint sg error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      glueEndpointSGError: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets miss vpc endpoint', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      missVpcEndpoint: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"Miss vpc endpoint\"}]. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
   });
   it('Create pipeline with provisioned redshift empty dbuser', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    kafkaMock.on(ListNodesCommand).resolves({
-      NextToken: 'token01',
-      NodeInfoList: [{
-        BrokerNodeInfo: {
-          Endpoints: ['node1,node2'],
-        },
-      }],
-      $metadata: {},
-    });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    redshiftMock.on(DescribeClustersCommand).resolves({
-      Clusters: [
-        {
-          ClusterIdentifier: 'cluster-1',
-          NodeType: '',
-          Endpoint: {
-            Address: 'https://redshift/xxx/yyy',
-            Port: 5002,
-          },
-          ClusterStatus: 'Active',
-          MasterUsername: 'awsuser',
-          PubliclyAccessible: false,
-          VpcSecurityGroups: [{ VpcSecurityGroupId: 'sg-00000000000000031' }],
-        },
-      ],
-    });
-    redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
-      ClusterSubnetGroups: [
-        {
-          ClusterSubnetGroupName: 'group-1',
-          Subnets: [{ SubnetIdentifier: 'subnet-00000000000000022' }],
-        },
-      ],
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
     });
     ddbMock.on(PutCommand).resolves({});
-    ec2Client.on(DescribeSubnetsCommand).resolves({
-      Subnets: [{ AvailabilityZone: 'us-east-1a' }],
-    });
-    ddbMock.on(QueryCommand)
-      .resolvesOnce({ Items: [] })
-      .resolves({
-        Items: [
-          {
-            id: 1,
-            appId: `${MOCK_APP_ID}_1`,
-          },
-          {
-            id: 2,
-            appId: `${MOCK_APP_ID}_2`,
-          },
-        ],
-      });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -265,32 +320,6 @@ describe('Pipeline test', () => {
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          id: 1,
-          appId: `${MOCK_APP_ID}_1`,
-        },
-        {
-          id: 2,
-          appId: `${MOCK_APP_ID}_2`,
-        },
-      ],
-    });
-    ddbMock.on(QueryCommand)
-      .resolvesOnce({ Items: [] })
-      .resolves({
-        Items: [
-          {
-            id: 1,
-            appId: `${MOCK_APP_ID}_1`,
-          },
-          {
-            id: 2,
-            appId: `${MOCK_APP_ID}_2`,
-          },
-        ],
-      });
     dictionaryMock(ddbMock, 'BuiltInPlugins');
     dictionaryMock(ddbMock, 'QuickSightTemplateArn');
     ddbMock.on(GetCommand, {
@@ -309,8 +338,8 @@ describe('Pipeline test', () => {
     }).resolves({
       Item: undefined,
     });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
     const res = await request(app)
       .post('/api/pipeline')
@@ -328,47 +357,9 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    kafkaMock.on(ListNodesCommand).resolves({
-      NextToken: 'token01',
-      NodeInfoList: [{
-        BrokerNodeInfo: {
-          Endpoints: ['node1,node2'],
-        },
-      }],
-      $metadata: {},
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
     });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    secretsManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
-    });
-    redshiftServerlessClient.on(GetWorkgroupCommand).resolves({
-      workgroup: {
-        workgroupId: 'workgroupId',
-        workgroupArn: 'workgroupArn',
-        workgroupName: 'workgroupName',
-      },
-    });
-    redshiftServerlessClient.on(GetNamespaceCommand).resolves({
-      namespace: {
-        namespaceId: 'namespaceId',
-        namespaceArn: 'namespaceArn',
-        namespaceName: 'namespaceName',
-      },
-    });
-    ddbMock.on(QueryCommand)
-      .resolvesOnce({ Items: [] })
-      .resolves({
-        Items: [
-          {
-            id: 1,
-            appId: `${MOCK_APP_ID}_1`,
-          },
-          {
-            id: 2,
-            appId: `${MOCK_APP_ID}_2`,
-          },
-        ],
-      });
     // Mock DynamoDB error
     ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
@@ -466,7 +457,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
-    cloudFormationClient.on(DescribeStacksCommand).resolves({
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
           StackName: 'xxx',
@@ -523,7 +514,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
-    cloudFormationClient.on(DescribeStacksCommand).resolves({
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
           StackName: 'xxx',
@@ -574,7 +565,7 @@ describe('Pipeline test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: S3_INGESTION_PIPELINE,
     });
-    cloudFormationClient
+    cloudFormationMock
       .on(DescribeStacksCommand, {
         StackName: 'Clickstream-Ingestion-s3-6666-6666',
       })
@@ -599,7 +590,7 @@ describe('Pipeline test', () => {
       });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 3);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 3);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -997,7 +988,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
         Stacks: [{
           StackName: 'test',
@@ -1085,7 +1076,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
         Stacks: [{
           StackName: 'test',
@@ -1173,7 +1164,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
         Stacks: [{
           StackName: 'test',
@@ -1261,7 +1252,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient
+    cloudFormationMock
       .on(DescribeStacksCommand)
       .resolves({
         Stacks: [{
@@ -1293,7 +1284,7 @@ describe('Pipeline test', () => {
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.items[0].status).toEqual({
@@ -1355,7 +1346,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient
+    cloudFormationMock
       .on(DescribeStacksCommand)
       .resolves({
         Stacks: [{
@@ -1376,7 +1367,7 @@ describe('Pipeline test', () => {
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationClient).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.items[0].status).toEqual({
@@ -1437,7 +1428,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
         Stacks: [{
           StackName: 'test',
@@ -1525,7 +1516,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolves({
         Stacks: [{
           StackName: 'test',
@@ -1605,7 +1596,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolves({
         Stacks: [{
           StackName: 'test',
@@ -1685,7 +1676,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({})
       .resolves({
         Stacks: [{
@@ -1765,7 +1756,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
-    cloudFormationClient.on(DescribeStacksCommand)
+    cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
         Stacks: [{
           StackName: 'test',

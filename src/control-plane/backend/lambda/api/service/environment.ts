@@ -18,7 +18,7 @@ import { getRegionAccount, paginateData } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
-import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeSecurityGroups } from '../store/aws/ec2';
+import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
@@ -74,7 +74,7 @@ export class EnvironmentServ {
   public async describeSecurityGroups(req: any, res: any, next: any) {
     try {
       const { region, vpcId } = req.query;
-      const result = await describeSecurityGroups(region, vpcId);
+      const result = await describeVpcSecurityGroups(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

@@ -12,6 +12,7 @@
  */
 
 import { Parameter, Tag, StackStatus } from '@aws-sdk/client-cloudformation';
+import { RouteTable } from '@aws-sdk/client-ec2';
 import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
@@ -153,7 +154,8 @@ export interface ClickStreamSubnet {
   readonly name: string;
   readonly cidr: string;
   readonly availabilityZone: string;
-  readonly type: string;
+  readonly type: SubnetType;
+  readonly routeTable?: RouteTable;
 }
 
 export interface IamRole {
@@ -347,5 +349,12 @@ export enum MetricsLegendPosition {
   RIGHT = 'right',
   BOTTOM = 'bottom',
   HIDDEN = 'hidden',
+}
+
+export enum SubnetType {
+  ALL = 'all',
+  PUBLIC = 'public',
+  PRIVATE = 'private',
+  ISOLATED = 'isolated',
 }
 

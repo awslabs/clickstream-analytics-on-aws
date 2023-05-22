@@ -28,7 +28,7 @@ import {
 import { BuiltInTagKeys } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SolutionInfo } from '../common/solution-info-ln';
-import { validatePattern, validateSecretModel, validateSubnetCrossThreeAZ } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel, validatePipelineNetwork } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
   KinesisStreamMode,
@@ -101,7 +101,7 @@ interface IngestionServerDomainProps {
 interface NetworkProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string[];
-  readonly privateSubnetIds: string[];
+  privateSubnetIds: string[];
 }
 
 interface RedshiftNetworkProps {
@@ -243,19 +243,20 @@ export interface CPipelineResources {
   solution?: IDictionary;
   templates?: IDictionary;
   quickSightTemplateArn?: IDictionary;
+  quickSightSubnetIds?: string[];
 }
 
 export class CPipeline {
   private pipeline: IPipeline;
   private stackManager: StackManager;
   private resources?: CPipelineResources;
-  private validateSubnetCrossThreeAZOnce: boolean;
+  private validateNetworkOnce: boolean;
   private stackTags?: Tag[];
 
   constructor(pipeline: IPipeline) {
     this.pipeline = pipeline;
     this.stackManager = new StackManager(pipeline);
-    this.validateSubnetCrossThreeAZOnce = false;
+    this.validateNetworkOnce = false;
   }
 
   public async create(): Promise<void> {
@@ -345,7 +346,7 @@ export class CPipeline {
     }
 
     if (!this.resources || !this.resources.appIds) {
-      const apps = await store.listApplication('asc', this.pipeline.projectId, false, 1, 1);
+      const apps = await store.listApplication(this.pipeline.projectId, 'asc', false, 1, 1);
       const appIds = apps.items.map(a => a.appId);
       if (!isEmpty(appIds)) {
         validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
@@ -377,7 +378,7 @@ export class CPipeline {
     }
 
     if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
-      await this.setTags();
+      this.setTags();
       this.stackTags = this.getStackTags();
     }
 
@@ -392,7 +393,7 @@ export class CPipeline {
 
     const workgroupName = this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName;
     const clusterIdentifier = this.pipeline.dataAnalytics?.redshift?.provisioned?.clusterIdentifier;
-    if (!this.resources || (!this.resources!.redshift && (workgroupName || clusterIdentifier))) {
+    if (!this.resources || (!this.resources?.redshift && (workgroupName || clusterIdentifier))) {
       const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
       if (!redshift) {
         throw new ClickStreamBadRequestError('Redshift info no found. Please check and try again.');
@@ -402,9 +403,9 @@ export class CPipeline {
         redshift,
       };
     }
-    if (!this.validateSubnetCrossThreeAZOnce && this.pipeline.dataAnalytics?.redshift?.newServerless) {
-      this.validateSubnetCrossThreeAZOnce = true;
-      await validateSubnetCrossThreeAZ(this.pipeline.region, this.pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds);
+    if (!this.validateNetworkOnce) {
+      this.validateNetworkOnce = true;
+      await validatePipelineNetwork(this.pipeline, this.resources);
     }
 
     if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
@@ -414,26 +415,26 @@ export class CPipeline {
   }
 
   public async getTemplateUrl(name: string) {
-    if (this.resources!.solution && this.resources!.templates) {
-      if (isEmpty(this.resources!.templates.data[name])) {
+    if (this.resources?.solution && this.resources?.templates) {
+      if (isEmpty(this.resources?.templates.data[name])) {
         return undefined;
       }
-      const s3Host = `https://${this.resources!.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
-      if (this.resources!.solution.data.version === 'latest') {
-        const target = this.resources!.solution.data.target;
-        const prefix = this.resources!.solution.data.prefix;
-        return `${s3Host}/${this.resources!.solution.data.name}/${target}/${prefix}/${this.resources!.templates.data[name]}`;
+      const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
+      if (this.resources?.solution.data.version === 'latest') {
+        const target = this.resources?.solution.data.target;
+        const prefix = this.resources?.solution.data.prefix;
+        return `${s3Host}/${this.resources?.solution.data.name}/${target}/${prefix}/${this.resources?.templates.data[name]}`;
       } else {
-        const version = this.resources!.solution.data.version;
-        const prefix = this.resources!.solution.data.prefix;
-        return `${s3Host}/${this.resources!.solution.data.name}/${version}/${prefix}/${this.resources!.templates.data[name]}`;
+        const version = this.resources?.solution.data.version;
+        const prefix = this.resources?.solution.data.prefix;
+        return `${s3Host}/${this.resources?.solution.data.name}/${version}/${prefix}/${this.resources?.templates.data[name]}`;
       }
     }
     return undefined;
   };
 
-  public async setTags() {
-    if (this.resources!.solution) {
+  private setTags() {
+    if (this.resources?.solution) {
       const builtInTagKeys = [
         BuiltInTagKeys.AWS_SOLUTION,
         BuiltInTagKeys.AWS_SOLUTION_VERSION,
@@ -447,9 +448,18 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION, value: SolutionInfo.SOLUTION_SHORT_NAME });
-      this.pipeline.tags.push({ key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: this.resources!.solution.data.version });
-      this.pipeline.tags.push({ key: BuiltInTagKeys.CLICKSTREAM_PROJECT, value: this.resources!.project?.id! });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.AWS_SOLUTION,
+        value: SolutionInfo.SOLUTION_SHORT_NAME,
+      });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+        value: this.resources?.solution.data.version,
+      });
+      this.pipeline.tags.push({
+        key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+        value: this.pipeline.projectId,
+      });
     }
   };
 

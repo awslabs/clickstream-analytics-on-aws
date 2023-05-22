@@ -84,6 +84,7 @@
     "aws-cdk-lib": "^2.73.0",
     "cdk-bootstrapless-synthesizer": "^2.2.11",
     "cdk-nag": "^2.20.6",
+    "cidr-block": "^1.3.2",
     "constructs": "^10.0.5",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
