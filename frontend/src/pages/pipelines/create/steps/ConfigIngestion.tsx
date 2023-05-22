@@ -65,6 +65,7 @@ interface ConfigIngestionProps {
   changeEnableAGA: (enable: boolean) => void;
   changeProtocal: (protocal: string) => void;
   changeServerEdp: (endpoint: string) => void;
+  changeServerCors: (endpoint: string) => void;
   changeCertificate: (cert: SelectProps.Option) => void;
   changeSSMSecret: (secret: SelectProps.Option) => void;
   changeBufferType: (type: string) => void;
@@ -118,6 +119,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeEnableAGA,
     changeProtocal,
     changeServerEdp,
+    changeServerCors,
     changeCertificate,
     changeSSMSecret,
     changeBufferType,
@@ -469,6 +471,21 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }
                   onChange={(e) => {
                     changeServerEdp(e.detail.value);
+                  }}
+                />
+              </FormField>
+
+              <FormField
+                label={t('pipeline:create.cors')}
+                description={t('pipeline:create.corsDesc')}
+              >
+                <Input
+                  placeholder={t('pipeline:create.corsPlaceholder') || ''}
+                  value={
+                    pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin
+                  }
+                  onChange={(e) => {
+                    changeServerCors(e.detail.value);
                   }}
                 />
               </FormField>

@@ -861,6 +861,20 @@ const Content: React.FC = () => {
                   };
                 });
               }}
+              changeServerCors={(cors) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        serverCorsOrigin: cors,
+                      },
+                    },
+                  };
+                });
+              }}
               changeCertificate={(cert) => {
                 setCertificateEmptyError(false);
                 setPipelineInfo((prev) => {
