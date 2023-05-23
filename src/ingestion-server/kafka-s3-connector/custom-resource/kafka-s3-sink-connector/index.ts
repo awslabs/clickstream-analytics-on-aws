@@ -133,7 +133,7 @@ function getResourceName(event: ResourceEvent) {
   const awsPartition = event.StackId.split(':')[1];
   const pluginUrl = props.pluginUrl;
   const fileName = path.basename(pluginUrl);
-  const fileS3Key = `${props.pluginS3Prefix}/${uid}-${fileName}`;
+  const fileS3Key = `${props.pluginS3Prefix}${uid}-${fileName}`;
 
   return {
     connectorName,

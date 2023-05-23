@@ -33,7 +33,7 @@ const event = {
     dataS3Bucket: 'test-data-bucket',
     dataS3Prefix: 'data/',
     pluginS3Bucket: 'test-plugin-bucket',
-    pluginS3Prefix: 'plugin',
+    pluginS3Prefix: 'plugin/',
     logS3Bucket: 'test-log-bucket',
     logS3Prefix: 'log',
     kafkaTopics: 'test-topic1',
