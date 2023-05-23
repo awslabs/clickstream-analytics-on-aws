@@ -310,6 +310,7 @@ export class RedshiftServerless extends Construct {
     role.addToPolicy(new PolicyStatement({
       actions: [
         'redshift-data:DescribeStatement',
+        'redshift-data:GetStatementResult',
       ],
       resources: ['*'],
     }));

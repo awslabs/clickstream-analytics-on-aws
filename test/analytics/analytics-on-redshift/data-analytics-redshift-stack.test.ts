@@ -2573,6 +2573,89 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
+  test('Check RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRoleDefaultPolicy', ()=>{
+    if (stack.nestedStacks.newRedshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'redshift-data:ExecuteStatement',
+                'redshift-data:BatchExecuteStatement',
+              ],
+              Effect: 'Allow',
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    RefAnyValue,
+                    ':redshift-serverless:',
+                    RefAnyValue,
+                    ':',
+                    RefAnyValue,
+                    ':workgroup/*',
+                  ],
+                ],
+              },
+            },
+            {
+              Action: [
+                'redshift-data:DescribeStatement',
+                'redshift-data:GetStatementResult',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+            {
+              Action: 'redshift-serverless:GetCredentials',
+              Effect: 'Allow',
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    RefAnyValue,
+                    ':redshift-serverless:',
+                    RefAnyValue,
+                    ':',
+                    RefAnyValue,
+                    ':workgroup/*',
+                  ],
+                ],
+              },
+            },
+          ],
+          Version: '2012-10-17',
+        },
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                'redshift-data:DescribeStatement',
+                'redshift-data:GetStatementResult',
+              ],
+              Effect: 'Allow',
+              Resource: '*',
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        PolicyName: Match.anyValue(),
+        Roles: [
+          RefAnyValue,
+        ],
+      });
+    }
+  });
+
   test('Check UpsertUsersWorkflowUpsertUsersFn', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
