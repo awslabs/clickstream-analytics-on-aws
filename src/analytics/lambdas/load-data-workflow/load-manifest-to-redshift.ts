@@ -11,14 +11,17 @@
  *  and limitations under the License.
  */
 
+import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 import { Context } from 'aws-lambda';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 import { ManifestBody } from '../../private/model';
+//import { putMetricsData } from '../../private/put-analytics-custom-metrics';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 // Set the AWS Region.
@@ -34,6 +37,14 @@ const REDSHIFT_ROLE_ARN = process.env.REDSHIFT_ROLE!;
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+const PROJECT_ID = process.env.PROJECT_ID!;
+
+const metrics = new Metrics({ namespace: MetricsNamespace.REDSHIFT_ANALYTICS, serviceName: MetricsService.WORKFLOW });
+
+metrics.addDimensions({
+  ProjectId: PROJECT_ID,
+});
+
 
 type LoadManifestEventDetail = ManifestBody & {
   execution_id: string;
@@ -117,6 +128,9 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
 
     logger.info('loadFileToRedshift response:', { queryId });
 
+    metrics.addMetric(AnalyticsCustomMetricsName.FILE_LOADED, MetricUnits.Count, jobList.entries.length);
+    metrics.publishStoredMetrics();
+
     return {
       detail: {
         id: queryId,
@@ -131,7 +145,6 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     }
     throw err;
   }
-
 
 };
 

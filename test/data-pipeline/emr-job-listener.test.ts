@@ -16,7 +16,6 @@ import { PassThrough } from 'stream';
 import util from 'util';
 import zlib from 'zlib';
 
-import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
 import { EMRServerlessClient, GetJobRunCommand } from '@aws-sdk/client-emr-serverless';
 import { CopyObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
@@ -30,7 +29,6 @@ const gzip = util.promisify(zlib.gzip);
 const s3ClientMock = mockClient(S3Client);
 
 //@ts-ignore
-const cwClientMock = mockClient(CloudWatchClient);
 const emrClientMock = mockClient(EMRServerlessClient);
 //@ts-ignore
 const sqsClientMock = mockClient(SQSClient);
@@ -42,13 +40,42 @@ process.env.PIPELINE_S3_BUCKET_NAME = 'bucket1';
 process.env.PIPELINE_S3_PREFIX = 'prefix1/';
 process.env.DL_QUEUE_URL = 'dl_sqs_url';
 
+const addMetricMock = jest.fn(() => {});
+const publishStoredMetricsMock = jest.fn(() => {});
+
+const MetricsMock = jest.fn(() => {
+  return {
+    addMetric: addMetricMock,
+    addDimensions: jest.fn(()=>{}),
+    publishStoredMetrics: publishStoredMetricsMock,
+  };
+});
+
+jest.mock('@aws-lambda-powertools/metrics', () => {
+  return {
+    Metrics: MetricsMock,
+    MetricUnits: {
+      Count: 'Count',
+      Seconds: 'Seconds',
+    },
+  };
+});
+
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../src/common/constant';
 import { handler } from '../../src/data-pipeline/lambda/emr-job-state-listener';
+
+//@ts-ignore
+expect(MetricsMock.mock.calls[0][0]).toEqual(
+  {
+    namespace: MetricsNamespace.DATAPIPELINE,
+    serviceName: MetricsService.EMR_SERVERLESS,
+  });
 
 beforeEach(() => {
   s3ClientMock.reset();
-  cwClientMock.reset();
   emrClientMock.reset();
   sqsClientMock.reset();
+  MetricsMock.mockReset();
 });
 
 test('lambda should not record SUBMITTED job', async () => {
@@ -131,25 +158,21 @@ test('lambda should record SUCCESS job state', async () => {
     },
   } as any);
 
-  //@ts-ignore
-  cwClientMock.on(PutMetricDataCommand).callsFake((input: any) => {
-    // [ETLMetric]source dataset count
-    expect(input.MetricData![0].Value).toEqual(1);
-    // [ETLMetric]flatted source dataset count
-    expect(input.MetricData![1].Value).toEqual(2);
-    // [ETLMetric]sink dataset count
-    expect(input.MetricData![2].Value).toEqual(3);
-    // [ETLMetric]corrupted dataset count
-    expect(input.MetricData![3].Value).toEqual(4);
-    // job run time
-    expect(input.MetricData![4].Value).toEqual(3600);
-  });
-
   await handler(event);
 
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 1);
-  //@ts-ignore
-  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 1);
+
+  expect(addMetricMock.mock.calls).toEqual(
+    [
+      [DataPipelineCustomMetricsName.SOURCE, 'Count', 1],
+      [DataPipelineCustomMetricsName.FLATTED_SOURCE, 'Count', 2],
+      [DataPipelineCustomMetricsName.SINK, 'Count', 3],
+      [DataPipelineCustomMetricsName.CORRUPTED, 'Count', 4],
+      [DataPipelineCustomMetricsName.RUN_TIME, 'Seconds', 3600],
+    ],
+  );
+  expect(publishStoredMetricsMock).toBeCalledTimes(1);
+
 });
 
 
@@ -171,8 +194,8 @@ test('lambda should not record job from other emr application', async () => {
   };
   await handler(event);
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 0);
-  //@ts-ignore
-  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 0);
+
+  expect(addMetricMock).toBeCalledTimes(0);
 
 });
 
@@ -195,8 +218,7 @@ test('lambda should not record PENDING job', async () => {
   };
   await handler(event);
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 0);
-  //@ts-ignore
-  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricDataCommand, 0);
+  expect(addMetricMock).toBeCalledTimes(0);
 
 });
 
@@ -236,6 +258,9 @@ test('lambda should send FAILDE job info to dead letter queue', async () => {
     QueueUrl: 'dl_sqs_url',
     MessageBody: jobInfoMsg,
   } as any);
+
+  expect(addMetricMock).toBeCalledTimes(0);
+
 
 });
 

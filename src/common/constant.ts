@@ -143,8 +143,6 @@ export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_ODS_EVENT = 'ods_events';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
 
-// Metrics
-export const METRIC_NAMESPACE_DATAPIPELINE = 'Clickstream/DataPipeline ETL';
 
 // the outputs of stacks
 export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
@@ -164,5 +162,31 @@ export enum REDSHIFT_MODE {
   NEW_SERVERLESS='New_Serverless',
 }
 
+// Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
 export const ALARM_NAME_PREFIX = 'Clickstream';
+
+export enum MetricsNamespace {
+  DATAPIPELINE = 'DataPipeline/ETL',
+  REDSHIFT_ANALYTICS ='DataPipeline/DataModeling/Redshift',
+}
+
+export enum MetricsService {
+  EMR_SERVERLESS = 'EMR-Serverless',
+  WORKFLOW = 'workflow',
+}
+
+export enum DataPipelineCustomMetricsName {
+  SOURCE='ETL source count',
+  FLATTED_SOURCE ='ETL flatted source count',
+  SINK='ETL sink count',
+  CORRUPTED='ETL corrupted count',
+  RUN_TIME='ETL job run time seconds',
+};
+
+export enum AnalyticsCustomMetricsName {
+  FILE_NEW='New files count',
+  FILE_PROCESSING='Processing files count',
+  FILE_LOADED='Loaded files count',
+  FILE_MAX_AGE='File max age'
+}

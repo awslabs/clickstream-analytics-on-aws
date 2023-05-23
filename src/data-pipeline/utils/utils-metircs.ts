@@ -15,7 +15,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
-import { METRIC_NAMESPACE_DATAPIPELINE } from '../../common/constant';
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/constant';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 import { setCfnNagForAlarms, getAlarmName } from '../../metrics/util';
@@ -24,11 +24,16 @@ export function createMetricsWidget(scope: Construct, props: {
   projectId: string;
   emrApplicationId: string;
 }) {
-  const dataPipelineNamespace = METRIC_NAMESPACE_DATAPIPELINE;
+  const dataPipelineNamespace = MetricsNamespace.DATAPIPELINE;
   const emrServerlessNamespace = 'AWS/EMRServerless';
   const appIdDimension = [
     'ApplicationId',
     props.emrApplicationId,
+  ];
+
+  const customDimension = [
+    'ApplicationId', props.emrApplicationId,
+    'service', MetricsService.EMR_SERVERLESS,
   ];
 
   // Alrams
@@ -57,12 +62,13 @@ export function createMetricsWidget(scope: Construct, props: {
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: new Metric({
-      metricName: 'ETL sink count',
+      metricName: DataPipelineCustomMetricsName.SINK,
       namespace: dataPipelineNamespace,
       period: Duration.hours(24),
       statistic: 'Sum',
       dimensionsMap: {
         ApplicationId: props.emrApplicationId,
+        service: MetricsService.EMR_SERVERLESS,
       },
     }),
     alarmDescription: 'No data loaded in past 24 hours',
@@ -192,23 +198,23 @@ export function createMetricsWidget(scope: Construct, props: {
         metrics: [
           [
             dataPipelineNamespace,
-            'ETL source count',
-            ...appIdDimension,
+            DataPipelineCustomMetricsName.SOURCE,
+            ...customDimension,
           ],
           [
             dataPipelineNamespace,
-            'ETL flatted source count',
-            '.', '.',
+            DataPipelineCustomMetricsName.FLATTED_SOURCE,
+            '.', '.', '.', '.',
           ],
           [
             dataPipelineNamespace,
-            'ETL corrupted count',
-            '.', '.',
+            DataPipelineCustomMetricsName.CORRUPTED,
+            '.', '.', '.', '.',
           ],
           [
             dataPipelineNamespace,
-            'ETL sink count',
-            '.', '.',
+            DataPipelineCustomMetricsName.SINK,
+            '.', '.', '.', '.',
           ],
         ],
       },
@@ -221,8 +227,8 @@ export function createMetricsWidget(scope: Construct, props: {
         metrics: [
           [
             dataPipelineNamespace,
-            'ETL job run time seconds',
-            ...appIdDimension,
+            DataPipelineCustomMetricsName.RUN_TIME,
+            ...customDimension,
           ],
         ],
       },

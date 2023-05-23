@@ -16,11 +16,41 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { ScheduledEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+
+const addMetricMock = jest.fn(() => {});
+const publishStoredMetricsMock = jest.fn(() => {});
+const MetricsMock = jest.fn(() => {
+  return {
+    addMetric: addMetricMock,
+    addDimensions: jest.fn(()=>{}),
+    publishStoredMetrics: publishStoredMetricsMock,
+  };
+});
+
+jest.mock('@aws-lambda-powertools/metrics', () => {
+  return {
+    Metrics: MetricsMock,
+    MetricUnits: {
+      Count: 'Count',
+      Seconds: 'Seconds',
+    },
+  };
+});
+
+
 import { handler, ODSEventItem } from '../../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
 import { JobStatus } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
-import { PARTITION_APP } from '../../../../../src/common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, PARTITION_APP } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
+
+//@ts-ignore
+expect(MetricsMock.mock.calls[0][0]).toEqual(
+  {
+    namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
+    serviceName: MetricsService.WORKFLOW,
+  });
+
 
 describe('Lambda - Create manifest for Redshift COPY', () => {
 
@@ -46,13 +76,11 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
   beforeEach(() => {
     dynamoDBClientMock.reset();
     s3ClientMock.reset();
+    MetricsMock.mockReset();
   });
 
   test('Get 1 new item from store then create manifest', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
-      Count: 0,
-      Items: [],
-    }).resolvesOnce({
       Count: 1,
       Items: [
         {
@@ -61,9 +89,14 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
           job_status: JobStatus.JOB_NEW,
         },
       ],
+
+    }).resolvesOnce({
+      Count: 0,
+      Items: [],
     });
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     s3ClientMock.on(PutObjectCommand).resolvesOnce({});
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       manifestList: [
@@ -88,39 +121,54 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+    expect(addMetricMock).toBeCalledTimes(3);
+    expect(publishStoredMetricsMock).toBeCalledTimes(1);
+
   });
 
   test('Get 4 new items with different applications from store then create three manifest', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
-      Count: 0,
-      Items: [],
-    }).resolvesOnce({
       Count: 4,
       Items: [
         {
           s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
           s3_object_size: 1823224,
           job_status: JobStatus.JOB_NEW,
+          timestamp: new Date(new Date().getTime() - 4 * 3600 * 1000).getTime(),
         },
         {
           s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00001.parquet.snappy`,
           s3_object_size: 232322,
           job_status: JobStatus.JOB_NEW,
+          timestamp: new Date(new Date().getTime() - 3 * 3600 * 1000).getTime(),
         },
         {
           s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app2/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
           s3_object_size: 200200,
           job_status: JobStatus.JOB_NEW,
+          timestamp: new Date(new Date().getTime() - 2 * 3600 * 1000).getTime(),
         },
         {
           s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
           s3_object_size: 1233232,
           job_status: JobStatus.JOB_NEW,
+          timestamp: new Date(new Date().getTime() - 1 * 3600 * 1000).getTime(),
+        },
+      ],
+    }).resolvesOnce({
+      Count: 1,
+      Items: [
+        {
+          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          s3_object_size: 1233232,
+          job_status: JobStatus.JOB_PROCESSING,
+          timestamp: new Date(new Date().getTime() - 5 * 3600 * 1000).getTime(),
         },
       ],
     });
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     s3ClientMock.on(PutObjectCommand).resolvesOnce({});
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       manifestList: expect.arrayContaining([
@@ -149,10 +197,18 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       ]),
       count: 3,
     }));
-
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 4);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 3);
+    expect(addMetricMock).toBeCalledTimes(3);
+    expect(addMetricMock.mock.calls[0]).toEqual([AnalyticsCustomMetricsName.FILE_NEW, 'Count', 4]);
+    expect(addMetricMock.mock.calls[1]).toEqual( [AnalyticsCustomMetricsName.FILE_PROCESSING, 'Count', 1]);
+    //@ts-ignore
+    expect(addMetricMock.mock.calls[2][0]).toEqual(AnalyticsCustomMetricsName.FILE_MAX_AGE);
+    //@ts-ignore
+    expect(addMetricMock.mock.calls[2][1]).toEqual('Seconds');
+    //@ts-ignore
+    expect(addMetricMock.mock.calls[2][2] - 5 * 3600 ).toBeLessThan(1);
   });
 
   test('Get 8 processing items from store that equals or greater than the PROCESSING_LIMIT', async () => {
@@ -162,20 +218,27 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
-    dynamoDBClientMock.on(QueryCommand).resolvesOnce({
-      Count: items.length,
-      Items: items,
-    });
+    dynamoDBClientMock.on(QueryCommand)
+      .resolvesOnce({
+        Count: 0,
+        Items: [],
+      }).resolvesOnce({
+        Count: items.length,
+        Items: items,
+      });
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       count: 0,
       manifestList: [],
     }));
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(addMetricMock).toBeCalledTimes(3);
   });
 
   test('Get more processing items from store processing with paging', async () => {
@@ -185,6 +248,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
     const secondBatchItems: ODSEventItem[] = [];
@@ -193,29 +257,37 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
     const lastEvaluatedKey = {
       s3_uri: 'nextToken',
     };
-    dynamoDBClientMock.on(QueryCommand).resolvesOnce({
-      Count: firstBatchItems.length,
-      Items: firstBatchItems,
-      LastEvaluatedKey: lastEvaluatedKey,
-    }).on(QueryCommand, {
-      ExclusiveStartKey: lastEvaluatedKey,
-    }).resolves({
-      Count: secondBatchItems.length,
-      Items: secondBatchItems,
-    });
+    dynamoDBClientMock.on(QueryCommand)
+      .resolvesOnce({
+        Count: 0,
+        Items: [],
+      })
+      .resolvesOnce({
+        Count: firstBatchItems.length,
+        Items: firstBatchItems,
+        LastEvaluatedKey: lastEvaluatedKey,
+      }).on(QueryCommand, {
+        ExclusiveStartKey: lastEvaluatedKey,
+      }).resolves({
+        Count: secondBatchItems.length,
+        Items: secondBatchItems,
+      });
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       count: 0,
       manifestList: [],
     }));
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 3);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(addMetricMock).toBeCalledTimes(3);
   });
 
   test('Get 5 new items from store with paging that the processing items are less than queryResultLimit', async () => {
@@ -226,6 +298,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0030${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
     const firstBatchNewItems: ODSEventItem[] = [];
@@ -234,6 +307,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
     const secondBatchNewItems: ODSEventItem[] = [];
@@ -242,6 +316,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
         s3_object_size: '1823224',
         job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
       },
     ));
     const lastEvaluatedKey = {
@@ -249,19 +324,17 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     };
     dynamoDBClientMock.on(QueryCommand)
       .resolvesOnce({
-        Count: processingItems.length,
-        Items: processingItems,
-      })
-      .resolvesOnce({
         Count: firstBatchNewItems.length,
         Items: firstBatchNewItems,
         LastEvaluatedKey: lastEvaluatedKey,
-      }).on(QueryCommand, {
-        ExclusiveStartKey: lastEvaluatedKey,
-      }).resolves({
+      }).resolvesOnce({
         Count: secondBatchNewItems.length,
         Items: secondBatchNewItems,
+      }).resolves({
+        Count: processingItems.length,
+        Items: processingItems,
       });
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       manifestList: expect.arrayContaining([
@@ -276,6 +349,8 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 3);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, parseInt(process.env.PROCESSING_LIMIT!) - processingCount);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+    expect(addMetricMock).toBeCalledTimes(3);
+
   });
 
   test('No processing or new items from store', async () => {
@@ -296,6 +371,8 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       Count: 0,
       Items: [],
     });
+
+
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
       count: 0,
@@ -304,6 +381,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(addMetricMock).toBeCalledTimes(3);
   });
 
   test('Get items from store with DDB error', async () => {
@@ -346,15 +424,13 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
       expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+      expect(addMetricMock).toBeCalledTimes(3);
     }
   });
 
   // TODO: redesign the error handling with the failure of putting manifest
   test('Put the manifest to S3 error after finding new items', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
-      Count: 0,
-      Items: [],
-    }).resolvesOnce({
       Count: 1,
       Items: [
         {
@@ -363,6 +439,9 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
           job_status: JobStatus.JOB_NEW,
         },
       ],
+    }).resolvesOnce({
+      Count: 0,
+      Items: [],
     });
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     s3ClientMock.on(PutObjectCommand).rejectsOnce({});
@@ -373,6 +452,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 2);
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
       expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+      expect(addMetricMock).toBeCalledTimes(3);
     }
   });
 

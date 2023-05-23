@@ -15,10 +15,39 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { ExecuteStatementCommand, ExecuteStatementCommandInput, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
+
+const addMetricMock = jest.fn(() => {});
+const publishStoredMetricsMock = jest.fn(() => {});
+const MetricsMock = jest.fn(() => {
+  return {
+    addMetric: addMetricMock,
+    addDimensions: jest.fn(()=>{}),
+    publishStoredMetrics: publishStoredMetricsMock,
+  };
+});
+
+jest.mock('@aws-lambda-powertools/metrics', () => {
+  return {
+    Metrics: MetricsMock,
+    MetricUnits: {
+      Count: 'Count',
+      Seconds: 'Seconds',
+    },
+  };
+});
+
 import { handler, LoadManifestEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/load-manifest-to-redshift';
-import { REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, REDSHIFT_MODE } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
+
+//@ts-ignore
+expect(MetricsMock.mock.calls[0][0]).toEqual(
+  {
+    namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
+    serviceName: MetricsService.WORKFLOW,
+  });
+
 
 const loadManifestEvent: LoadManifestEvent = {
   detail: {
@@ -48,6 +77,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
   beforeEach(() => {
     redshiftDataMock.reset();
     dynamoDBClientMock.reset();
+    MetricsMock.mockReset();
 
     // set the env before loading the source
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
@@ -58,6 +88,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     const exeuteId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
       detail: expect.objectContaining({
@@ -68,17 +99,24 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
     });
+    expect(addMetricMock).toBeCalledTimes(1);
+    expect(addMetricMock.mock.calls).toEqual([
+      [AnalyticsCustomMetricsName.FILE_LOADED, 'Count', 1],
+    ]);
+    expect(publishStoredMetricsMock).toBeCalledTimes(1);
   });
 
   test('Update DDB error when doing load Redshift', async () => {
     dynamoDBClientMock.on(UpdateCommand).rejectsOnce();
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'Id-1' });
+
     try {
       await handler(loadManifestEvent, context);
       fail('The error of DDB update was caught');
     } catch (error) {
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
       expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
+      expect(addMetricMock).toBeCalledTimes(0);
     }
   });
 
@@ -86,6 +124,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
   test('Execute command error in Redshift when doing load Redshift', async () => {
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).rejectsOnce();
+
     try {
       await handler(loadManifestEvent, context);
       fail('The error in executing statement of Redshift data was caught');
@@ -94,6 +133,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
       });
+      expect(addMetricMock).toBeCalledTimes(0);
     }
   });
 
@@ -109,6 +149,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
   beforeEach(() => {
     redshiftDataMock.reset();
     dynamoDBClientMock.reset();
+    addMetricMock.mockReset();
 
     // set the env before loading the source
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.PROVISIONED;
@@ -126,6 +167,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
       throw new Error(`Sql '${input.Sql}' is not expected.`);
     },
     );
+
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
       detail: expect.objectContaining({
@@ -137,5 +179,6 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
     });
+    expect(addMetricMock).toBeCalledTimes(1);
   });
 });

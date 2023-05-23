@@ -12,11 +12,11 @@
  */
 
 import path from 'path';
-import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
+import { MetricUnits, Metrics } from '@aws-lambda-powertools/metrics';
 import { GetJobRunCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { EventBridgeEvent } from 'aws-lambda';
-import { METRIC_NAMESPACE_DATAPIPELINE } from '../../../common/constant';
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { copyS3Object, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -28,14 +28,16 @@ const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
 const dlQueueUrl = process.env.DL_QUEUE_URL!;
 
-const cwClient = new CloudWatchClient({
-  ...aws_sdk_client_common_config,
-});
 const emrClient = new EMRServerlessClient({
   ...aws_sdk_client_common_config,
 });
 const sqsClient = new SQSClient({
   ...aws_sdk_client_common_config,
+});
+
+const jobMetrics = new Metrics({ namespace: MetricsNamespace.DATAPIPELINE, serviceName: MetricsService.EMR_SERVERLESS });
+jobMetrics.addDimensions({
+  ApplicationId: emrApplicationId,
 });
 
 export const handler = async (event: EventBridgeEvent<string, { jobRunId: string; applicationId: string; state: string }>) => {
@@ -155,58 +157,12 @@ async function sendMetrics(event: any) {
   logger.info('log file length: ' + n);
   logger.info('metrics', { metrics });
 
-  const Timestamp = new Date();
-  const Namespace = METRIC_NAMESPACE_DATAPIPELINE;
-  const Dimensions = [
-    {
-      Name: 'ApplicationId',
-      Value: `${emrApplicationId}`,
-    },
-  ];
 
-  const metricInput = {
-    Namespace,
-    MetricData: [
-      {
-        MetricName: 'ETL source count',
-        Dimensions,
-        Timestamp,
-        Value: metrics.source,
-        Unit: 'Count',
-      },
-      {
-
-        MetricName: 'ETL flatted source count',
-        Dimensions,
-        Timestamp,
-        Value: metrics.flattedSource,
-        Unit: 'Count',
-      },
-      {
-        MetricName: 'ETL sink count',
-        Dimensions,
-        Timestamp,
-        Value: metrics.sink,
-        Unit: 'Count',
-      },
-      {
-        MetricName: 'ETL corrupted count',
-        Dimensions,
-        Timestamp,
-        Value: metrics.corrupted,
-        Unit: 'Count',
-      },
-      {
-        MetricName: 'ETL job run time seconds',
-        Dimensions,
-        Timestamp,
-        Value: jobTimeSeconds,
-        Unit: 'Seconds',
-      },
-    ],
-  };
-
-  await cwClient.send(new PutMetricDataCommand(metricInput));
-  logger.info('sent metrics:', { metricInput });
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.SOURCE, MetricUnits.Count, metrics.source);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.FLATTED_SOURCE, MetricUnits.Count, metrics.flattedSource);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.SINK, MetricUnits.Count, metrics.sink);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.CORRUPTED, MetricUnits.Count, metrics.corrupted);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.RUN_TIME, MetricUnits.Seconds, jobTimeSeconds);
+  jobMetrics.publishStoredMetrics();
 
 }

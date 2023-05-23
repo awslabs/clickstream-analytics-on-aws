@@ -117,13 +117,20 @@
   resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-1.8.0.tgz#61ce2b8bdcb789465d362a9b05ea99a9b4587217"
   integrity sha512-r2XRAv+FZdVbzrx/Nu3yGyG5tijl7rRcDO7fj6jqh59mAsNL/r6J6Zh11zibtUsTEuRIqKg3LhL+Icy+gX4Aww==
 
-"@aws-lambda-powertools/logger@^1.5.1":
+"@aws-lambda-powertools/logger@^1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/logger/-/logger-1.8.0.tgz#74b229d72b904fcdf70cd76c15372d68fc0eacca"
   integrity sha512-TUwq0acVn+u2DHd+zQ9IXKwPeGrys6izKMoEVWVg0jVDS1ivUGfbtelzq7QcE2UvxGv2ODDWu0VzD/GfML0HNg==
   dependencies:
     "@aws-lambda-powertools/commons" "^1.8.0"
     lodash.merge "^4.6.2"
+
+"@aws-lambda-powertools/metrics@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/metrics/-/metrics-1.8.0.tgz#d4af9ac084b8ae7581f38475e00affedf2983c32"
+  integrity sha512-Ll7IsNkaMRoqaJaSkhv6EV9+u2pTBaoOhmblkz7pDeJaT/DOtHB2dOFF3UPNYf1xhcnATum96upJ/K3ve1i6zQ==
+  dependencies:
+    "@aws-lambda-powertools/commons" "^1.8.0"
 
 "@aws-sdk/abort-controller@3.329.0":
   version "3.329.0"

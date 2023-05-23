@@ -12,9 +12,10 @@
  */
 
 import { Duration } from 'aws-cdk-lib';
-import { Alarm, ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import { Alarm, ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/constant';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
 import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 
@@ -39,6 +40,11 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'StateMachineArn', props.clearExpiredEventsWorkflow.stateMachineArn,
   ];
 
+  const customNamespace = MetricsNamespace.REDSHIFT_ANALYTICS;
+  const customDimension = [
+    'ProjectId', props.projectId,
+    'service', MetricsService.WORKFLOW,
+  ];
 
   const loadEventsWorkflowAlarm = new Alarm(scope, id + 'loadEventsWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -58,7 +64,26 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
   });
 
-  setCfnNagForAlarms([loadEventsWorkflowAlarm, upsertUsersWorkflowAlarm]);
+  const newFilesCountAlarm = new Alarm(scope, id + 'maxFileAageAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1800, // half hour
+    evaluationPeriods: 1,
+    metric: new Metric({
+      metricName: AnalyticsCustomMetricsName.FILE_MAX_AGE,
+      namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
+      period: Duration.minutes(10),
+      statistic: 'Average',
+      dimensionsMap: {
+        ProjectId: props.projectId,
+        service: MetricsService.WORKFLOW,
+      },
+    }),
+    alarmDescription: 'Max file age more than 1800 seconds',
+    alarmName: getAlarmName(scope, props.projectId, 'Max file age'),
+  });
+
+
+  setCfnNagForAlarms([loadEventsWorkflowAlarm, upsertUsersWorkflowAlarm, newFilesCountAlarm]);
 
   const workflowAlarms : (MetricWidgetElement | AlarmsWidgetElement)[]= [
     {
@@ -67,10 +92,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         alarms: [
           loadEventsWorkflowAlarm.alarmArn,
           upsertUsersWorkflowAlarm.alarmArn,
+          newFilesCountAlarm.alarmArn,
         ],
         title: 'Analytics Alarms',
       },
-
     },
   ];
   const workflowMetrics: (MetricWidgetElement | AlarmsWidgetElement)[] = [
@@ -129,7 +154,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         title: 'Clear expired events workflow',
         view: 'timeSeries',
         metrics: [
-          [statesNamespace, 'ExecutionsSucceeded', ...clearExpiredEventsWorkflowDimension, { id: 'm1', visible: true }],
+          [statesNamespace, 'ExecutionsSucceeded', ...clearExpiredEventsWorkflowDimension],
           ['.', 'ExecutionsStarted', '.', '.'],
           ['.', 'ExecutionsFailed', '.', '.'],
         ],
@@ -143,11 +168,34 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         title: 'Clear expired events execution time',
         view: 'timeSeries',
         metrics: [
-          [statesNamespace, 'ExecutionTime', ...clearExpiredEventsWorkflowDimension, { id: 'm1', visible: true }],
+          [statesNamespace, 'ExecutionTime', ...clearExpiredEventsWorkflowDimension],
         ],
       },
     },
 
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Sum',
+        title: 'Files count',
+        metrics: [
+          [customNamespace, AnalyticsCustomMetricsName.FILE_NEW, ...customDimension],
+          ['.', AnalyticsCustomMetricsName.FILE_PROCESSING, '.', '.', '.', '.'],
+          ['.', AnalyticsCustomMetricsName.FILE_LOADED, '.', '.', '.', '.'],
+        ],
+      },
+    },
+
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Average',
+        title: 'File max age',
+        metrics: [
+          [customNamespace, AnalyticsCustomMetricsName.FILE_MAX_AGE, ...customDimension],
+        ],
+      },
+    },
   ];
   return { workflowAlarms, workflowMetrics };
 }

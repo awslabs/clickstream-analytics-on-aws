@@ -28,9 +28,10 @@ import { Construct } from 'constructs';
 import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition, getOrCreateNoNamespaceIdCondition, getOrCreateWithNamespaceIdCondition } from './condition';
 import { DYNAMODB_TABLE_INDEX_NAME } from './constant';
 import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadDataProps, LoadWorkflowData, AssociateIAMRoleToRedshift } from './model';
-import { REDSHIFT_MODE } from '../../common/constant';
+import { MetricsNamespace, REDSHIFT_MODE } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
+import { getPutMericsPolicyStatements } from '../../common/metrics';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
 
@@ -412,7 +413,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
   private createLoadManifestFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'CreateLoadManifestFnSG', props.networkConfig.vpc);
-
+    const cloudwatchPolicyStatements = getPutMericsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new NodejsFunction(this, 'CreateLoadManifestFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
@@ -424,7 +425,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(3),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'CreateLoadManifestFnRole', true, []),
+      role: createLambdaRole(this, 'CreateLoadManifestFnRole', true, [... cloudwatchPolicyStatements]),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
@@ -450,7 +451,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
   private loadManifestToRedshiftFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'LoadManifestToRedshiftFnSG', props.networkConfig.vpc);
-
+    const cloudwatchPolicyStatements = getPutMericsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new NodejsFunction(this, 'LoadManifestToRedshiftFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
@@ -462,7 +463,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(3),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'LoadManifestToRedshiftRole', true, []),
+      role: createLambdaRole(this, 'LoadManifestToRedshiftRole', true, [... cloudwatchPolicyStatements]),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
