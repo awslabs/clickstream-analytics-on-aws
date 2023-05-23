@@ -231,8 +231,8 @@
     "retry": "Retry",
     "confirm": "Confirm",
     "addPlugin": "Add Plugin",
-    "enable": "Enable All",
-    "disable": "Disable All"
+    "enableAll": "Enable All",
+    "disableAll": "Disable All"
   },
   "item": "item",
   "items": "items",

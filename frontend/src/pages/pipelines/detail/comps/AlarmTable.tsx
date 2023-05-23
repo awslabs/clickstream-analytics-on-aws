@@ -21,7 +21,6 @@ import {
   StatusIndicator,
   StatusIndicatorProps,
   Table,
-  TextFilter,
 } from '@cloudscape-design/components';
 import { disableAlarms, enableAlarms, getAlarmList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
@@ -249,12 +248,6 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
             </Box>
           </Box>
         }
-        filter={
-          <TextFilter
-            filteringPlaceholder={t('pipeline:detail:alarmFindAlarm') || ''}
-            filteringText=""
-          />
-        }
         header={
           <>
             <Header
@@ -274,19 +267,21 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
                   />
                   <Button
                     loading={loadingEnable}
+                    disabled={selectedItems.length <= 0}
                     onClick={() => {
                       enableAlarm();
                     }}
                   >
-                    {t('button.enableAlarm')}
+                    {t('button.enableAll')}
                   </Button>
                   <Button
                     loading={loadingDisable}
+                    disabled={selectedItems.length <= 0}
                     onClick={() => {
                       disableAlarm();
                     }}
                   >
-                    {t('button.disableAlarm')}
+                    {t('button.disableAll')}
                   </Button>
                   <Button
                     href={buildAlarmsLink(region, projectId)}
