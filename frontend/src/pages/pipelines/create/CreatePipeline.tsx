@@ -447,8 +447,6 @@ const Content: React.FC = () => {
       createPipelineObj.etl = null;
       // set dataAnalytics to null when disable data processing
       createPipelineObj.dataAnalytics = null;
-      // kafaka connector to false
-      createPipelineObj.ingestionServer.sinkKafka.kafkaConnector.enable = false;
     }
 
     // set sink batch to null when sink type is S3
