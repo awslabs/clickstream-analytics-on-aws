@@ -15,7 +15,7 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {
-  DOMAIN_NAME_PATTERN,
+  DOMAIN_NAME_PATTERN, EMAIL_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
@@ -979,6 +979,15 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.required
     ProjectId?: string;
 
+  @JSONObject.optional('')
+  @JSONObject.custom( (_:any, key:string, value:any) => {
+    if (value) {
+      validatePattern(key, EMAIL_PATTERN, value);
+    }
+    return value;
+  })
+    Emails?: string;
+
   @JSONObject.optional(4)
   @JSONObject.gte(1)
     ColumnNumber?: number;
@@ -990,9 +999,12 @@ export class CMetricsStack extends JSONObject {
     Version?: string;
 
   constructor(pipeline: IPipeline) {
+    const operators = pipeline.operator.split(',');
+    const emails = operators.filter(op => op !== 'unknown');
 
     super({
       ProjectId: pipeline.projectId,
+      Email: emails.join(','),
     });
   }
 

@@ -801,6 +801,10 @@ export const BASE_METRICS_PARAMETERS = [
     ParameterValue: 'project_8888_8888',
   },
   {
+    ParameterKey: 'Emails',
+    ParameterValue: '',
+  },
+  {
     ParameterKey: 'ColumnNumber',
     ParameterValue: '4',
   },

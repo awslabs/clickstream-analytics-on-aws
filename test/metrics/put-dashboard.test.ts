@@ -17,8 +17,9 @@ process.env.DASHBOARD_NAME = 'test-dashboard';
 process.env.PROJECT_ID = 'test_proj_001';
 process.env.COLUMN_NUMBER = '4';
 process.env.LEGEND_POSITION = 'bottom';
+process.env.SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456';
 
-import { CloudWatchClient, PutDashboardCommand } from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient, DescribeAlarmsCommand, PutDashboardCommand, PutMetricAlarmCommand } from '@aws-sdk/client-cloudwatch';
 import { SSMClient, GetParametersByPathCommand } from '@aws-sdk/client-ssm';
 
 import { CloudFormationCustomResourceEvent } from 'aws-lambda';
@@ -221,7 +222,7 @@ const paramValue3 = {
 };
 
 
-const dashboardBody ={
+const dashboardBody = {
   start: '-PT12H',
   periodOverride: 'inherit',
   widgets: [
@@ -453,6 +454,113 @@ const dashboardBody ={
   ],
 };
 
+
+const allAlarams1 = {
+  NextToken: 'next',
+  $metadata: {
+    httpStatusCode: 200,
+    requestId: '5146250d-5cc3-45d3-87e2-c5a376b5e839',
+    attempts: 1,
+    totalRetryDelay: 0,
+  },
+  CompositeAlarms: [],
+  MetricAlarms: [
+    {
+      AlarmName: 'Clickstream|test_project_007 ECS Cluster CPUUtilization cae00c80',
+      AlarmArn: 'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_project_007 ECS Cluster CPUUtilization cae00c80',
+      AlarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+      ActionsEnabled: true,
+      OKActions: [
+      ],
+      AlarmActions: [
+      ],
+      InsufficientDataActions: [],
+      StateValue: 'OK',
+      MetricName: 'CPUUtilization',
+      Namespace: 'AWS/ECS',
+      Statistic: 'Average',
+      Dimensions: [
+        {
+          Name: 'ClusterName',
+          Value: 'ClusterName1',
+        },
+      ],
+      Period: 300,
+      EvaluationPeriods: 1,
+      Threshold: 85,
+      ComparisonOperator: 'GreaterThanThreshold',
+    },
+
+    {
+      AlarmName: 'Clickstream|test_project_007 Upsert users workflow e868eaa0',
+      AlarmArn: 'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_project_007 Upsert users workflow e868eaa0',
+      AlarmDescription: 'Upsert users workflow failed',
+      ActionsEnabled: true,
+      OKActions: [
+        'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
+      ],
+      AlarmActions: [
+        'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
+      ],
+      InsufficientDataActions: [],
+      StateValue: 'OK',
+      MetricName: 'ExecutionsFailed',
+      Namespace: 'AWS/States',
+      Statistic: 'Sum',
+      Dimensions: [
+        {
+          Name: 'StateMachineArn',
+          Value: 'StateMachineArn1',
+        },
+      ],
+      Period: 86400,
+      EvaluationPeriods: 1,
+      Threshold: 1,
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+    },
+  ],
+};
+
+const allAlarams2 = {
+  $metadata: {
+    httpStatusCode: 200,
+    requestId: '5146250d-5cc3-45d3-87e2-c5a376b5e839',
+    attempts: 1,
+    totalRetryDelay: 0,
+  },
+  CompositeAlarms: [],
+  MetricAlarms: [
+    {
+      AlarmName: 'Clickstream|test_project_007 Upsert users workflow e868eaa0',
+      AlarmArn: 'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_project_007 Upsert users workflow e868eaa0',
+      AlarmDescription: 'Upsert users workflow failed',
+      ActionsEnabled: true,
+      OKActions: [
+        'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
+      ],
+      AlarmActions: [
+
+      ],
+      InsufficientDataActions: [],
+      StateValue: 'OK',
+      StateReason: 'Threshold Crossed: 1 datapoint [0.0 (23/05/23 01:02:00)] was not greater than or equal to the threshold (1.0).',
+      MetricName: 'ExecutionsFailed',
+      Namespace: 'AWS/States',
+      Statistic: 'Sum',
+      Dimensions: [
+        {
+          Name: 'StateMachineArn',
+          Value: 'StateMachineArn1',
+        },
+      ],
+      Period: 86400,
+      EvaluationPeriods: 1,
+      Threshold: 1,
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+    },
+  ],
+};
+
 test('Can put dashbaord - Create', async () => {
   const event: CloudFormationCustomResourceEvent = {
     RequestType: 'Create',
@@ -496,6 +604,8 @@ test('Can put dashbaord - Create', async () => {
     ],
   });
 
+  cwClientMock.on(DescribeAlarmsCommand).resolvesOnce(allAlarams1 as any).resolvesOnce(allAlarams2);
+
   await handler(event, c);
   expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 1);
   expect(cwClientMock).toHaveReceivedCommandWith(PutDashboardCommand, {
@@ -503,6 +613,28 @@ test('Can put dashbaord - Create', async () => {
     DashboardBody: JSON.stringify(dashboardBody),
   });
 
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, allAlarams1.MetricAlarms.length - 1 + allAlarams2.MetricAlarms.length);
+  expect(cwClientMock).toHaveReceivedNthCommandWith(3, PutMetricAlarmCommand,
+    {
+      ActionsEnabled: true,
+      AlarmActions: ['arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456'],
+      AlarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+      AlarmName: 'Clickstream|test_project_007 ECS Cluster CPUUtilization cae00c80',
+      ComparisonOperator: 'GreaterThanThreshold',
+      Dimensions: [{
+        Name: 'ClusterName',
+        Value: 'ClusterName1',
+      }],
+      EvaluationPeriods: 1,
+      InsufficientDataActions: [],
+      MetricName: 'CPUUtilization',
+      Namespace: 'AWS/ECS',
+      OKActions: ['arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456'],
+      Period: 300,
+      Statistic: 'Average',
+      Threshold: 85,
+    },
+  );
 });
 
 test('No action - Delete', async () => {
@@ -526,7 +658,7 @@ test('No action - Delete', async () => {
 
   await handler(event, c);
   expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 0);
-
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, 0);
 });
 
 
@@ -575,6 +707,7 @@ test('Put dashbaord can be triggered by cloudwatch ssm update(Parameter Store Ch
       },
     ],
   });
+  cwClientMock.on(DescribeAlarmsCommand).resolves(allAlarams2 as any);
 
   await handler(event, c);
   expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 1);
@@ -582,6 +715,7 @@ test('Put dashbaord can be triggered by cloudwatch ssm update(Parameter Store Ch
     DashboardName: 'test-dashboard',
     DashboardBody: JSON.stringify(dashboardBody),
   });
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, 0);
 
 });
 

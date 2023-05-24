@@ -53,6 +53,7 @@ const awsSDKDeps = [
   '@aws-sdk/client-ssm',
   '@aws-sdk/client-lambda',
   '@aws-sdk/node-http-handler',
+  '@aws-sdk/client-sns',
 ].map(dep => `${dep}@^${awsSDKVersion}`);
 
 const awsSDKDepsForApiProject = [

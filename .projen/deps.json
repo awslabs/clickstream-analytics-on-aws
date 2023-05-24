@@ -226,6 +226,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "version": "^3.329.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sqs",
       "version": "^3.329.0",
       "type": "runtime"

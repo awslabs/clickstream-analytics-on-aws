@@ -11,11 +11,14 @@
  *  and limitations under the License.
  */
 
-import { CfnOutput, CfnParameter, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, CfnParameter, CfnResource, Fn, Stack, StackProps } from 'aws-cdk-lib';
+//import { Key } from 'aws-cdk-lib/aws-kms';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention } from './common/cfn-nag';
-import { OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, PROJECT_ID_PATTERN } from './common/constant';
+import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, PROJECT_ID_PATTERN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { addSubscriptionCustomResource } from './metrics/add-sns-subscripton';
 import { MetricAndAlarm } from './metrics/metrics';
 
 
@@ -52,17 +55,33 @@ export class MetricsStack extends Stack {
       ],
     });
 
+    const emailsParam = new CfnParameter(this, 'Emails', {
+      description: 'Email list to receive alarms notification',
+      type: 'CommaDelimitedList',
+      default: '',
+      allowedPattern: `(^${EMAIL_PATTERN}$)?`,
+    });
+
     const versionParam = new CfnParameter(this, 'Version', {
       description: 'Version',
       default: '1',
       type: 'String',
     });
 
+    const snsTopic = new Topic(this, 'alarmNotificationSnsTopic', {
+      displayName: 'Clickstream alarms notification subscription topic [project:' + projectIdParam.valueAsString + ']',
+    });
+
+    (snsTopic.node.defaultChild as CfnResource).addPropertyOverride('KmsMasterKeyId', 'alias/aws/sns');
+
+    addSubscription(this, Fn.join(',', emailsParam.valueAsList), snsTopic);
+
     const metrics = new MetricAndAlarm(this, 'MetricAndAlarm', {
       projectId: projectIdParam.valueAsString,
       version: versionParam.valueAsString,
       columnNumber: columnNumberParam.valueAsNumber,
       legendPosition: legendPositionParam.valueAsString,
+      snsTopic,
     });
 
     new CfnOutput(this, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, {
@@ -70,12 +89,25 @@ export class MetricsStack extends Stack {
       value: metrics.dashboard.dashboardName,
     });
 
+    new CfnOutput(this, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, {
+      description: 'SNS Topic Arn',
+      value: snsTopic.topicArn,
+    });
+
     addCfnNag(this);
   }
 }
 
+function addSubscription(scope: Construct, emails: string, topic: Topic) {
+  addSubscriptionCustomResource(scope, {
+    snsTopic: topic,
+    emails: emails,
+  });
+}
 
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'PutDashboard', 'PutDashboardCustomResourceProvider', '');
+  addCfnNagForCustomResourceProvider(stack, 'addSubscription', 'addSubscriptionCustomResourceProvider', '');
 };
+

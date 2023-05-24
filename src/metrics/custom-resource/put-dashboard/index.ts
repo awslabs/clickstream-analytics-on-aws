@@ -16,6 +16,7 @@ import { CloudWatchClient, PutDashboardCommand } from '@aws-sdk/client-cloudwatc
 import { SSMClient, Parameter } from '@aws-sdk/client-ssm';
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 
+import { setAlarmsAction } from './set-alarms-action';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgetsProps, RenderingProperties, TextWidgetElement } from '../../metrics-widgets-custom-resource';
@@ -51,6 +52,7 @@ const dashboardName = process.env.DASHBOARD_NAME!;
 const projectId = process.env.PROJECT_ID!;
 const columnNumber = parseInt(process.env.COLUMN_NUMBER || '3');
 const legendPosition = (process.env.LEGEND_POSITION || 'bottom') as 'right' | 'bottom' | 'hidden';
+const snsToicArn = process.env.SNS_TOPIC_ARN!;
 
 const ssmClient = new SSMClient({
   ...aws_sdk_client_common_config,
@@ -117,6 +119,7 @@ async function _handler(
   logger.info('dashboardName: ' + dashboardName);
   logger.info('projectId: ' + projectId);
   logger.info('columnNumber: ' + columnNumber);
+  logger.info('snsToicArn: ' + snsToicArn);
 
   if (requestType == 'Delete') {
     logger.info('ignore requestType ' + requestType);
@@ -163,10 +166,14 @@ async function _handler(
     }
   }
 
-
   const dashboardWidgetsAll: DashboardWidgetElement[] = [];
+  const alarmArnsAll = [];
   let startY = 0;
   for (const w of widgetsAll) {
+    const alarmArns = w.widgets.filter(ww => ww.type == 'alarm')
+      .flatMap(a => (a as AlarmsWidgetElement).properties.alarms);
+    alarmArnsAll.push( ... alarmArns);
+
     const dashboardWidgets = convertMetricsWidgetsToDashboardWidgets(startY, w);
     dashboardWidgetsAll.push(...dashboardWidgets);
     // get y of last widget
@@ -174,6 +181,8 @@ async function _handler(
     startY = endY + 1;
   }
 
+  logger.info('alarmArnsAll', { alarmArnsAll });
+  await setAlarmsAction(cwClient, alarmArnsAll, snsToicArn);
 
   const dashboardBody = {
     start: '-PT12H',

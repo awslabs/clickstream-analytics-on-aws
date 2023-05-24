@@ -21,19 +21,23 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { PARAMETERS_DESCRIPTION } from './settings';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
+import { ALARM_NAME_PREFIX } from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
+
 
 interface MetricAndAlarmProps {
   readonly projectId: string;
   readonly columnNumber: number;
   readonly version: string;
   readonly legendPosition: string;
+  readonly snsTopic: Topic;
 }
 
 interface CustomResourceProps extends MetricAndAlarmProps {
@@ -45,11 +49,13 @@ export class MetricAndAlarm extends Construct {
   constructor(scope: Construct, id: string, props: MetricAndAlarmProps) {
     super(scope, id);
     const stackId = getShortIdOfStack(Stack.of(scope));
+
     const dashboard = new Dashboard(scope, 'Dashboard', {
       dashboardName: `Clickstream-${props.projectId}-Dashboard-${stackId}`,
       defaultInterval: Duration.hours(12),
       periodOverride: PeriodOverride.AUTO,
     });
+
 
     const { fn } = createPutDashboardCustomResource(scope, {
       dashboard,
@@ -67,7 +73,6 @@ export class MetricAndAlarm extends Construct {
       },
       targets: [new LambdaFunction(fn)],
     });
-
   }
 }
 
@@ -91,6 +96,7 @@ export function createPutDashboardCustomResource(
       columnNumber: props.columnNumber,
       legendPosition: props.legendPosition,
       version: props.version,
+      snsTopicArn: props.snsTopic.topicArn,
       buildTime: new Date().getTime(),
     },
   });
@@ -135,6 +141,24 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
         props.dashboard.dashboardArn,
       ],
     }),
+
+    new PolicyStatement({
+      actions: [
+        'cloudwatch:PutMetricAlarm',
+        'cloudwatch:DescribeAlarms',
+      ],
+      resources: [
+        Arn.format(
+          {
+            resourceName: ALARM_NAME_PREFIX + '*',
+            resource: 'alarm',
+            service: 'cloudwatch',
+            arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+          },
+          Stack.of(scope),
+        ),
+      ],
+    }),
   ]);
 
   const fn = new NodejsFunction(scope, 'PutDashboardLambda', {
@@ -155,6 +179,7 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
       PROJECT_ID: props.projectId,
       LEGEND_POSITION: props.legendPosition,
       COLUMN_NUMBER: props.columnNumber + '',
+      SNS_TOPIC_ARN: props.snsTopic.topicArn,
       ...POWERTOOLS_ENVS,
     },
   });

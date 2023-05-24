@@ -157,6 +157,7 @@ export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME = 'StackCr
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX = 'BIUserCredentialParameterName';
 
 export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME = 'ObservabilityDashboardName';
+export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
 export enum REDSHIFT_MODE {
   PROVISIONED='Provisioned',

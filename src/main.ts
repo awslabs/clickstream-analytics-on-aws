@@ -194,6 +194,8 @@ stackSuppressions([
   { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
   { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler with wildcard policy' },
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
+  { id: 'AwsSolutions-SNS2', reason: 'Server side encryption is enable as SSE' },
+  { id: 'AwsSolutions-SNS3', reason: 'Server side encryption is enable as SSE' },
 ]);
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));

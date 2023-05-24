@@ -50,6 +50,14 @@ test('Should has Parameter LegendPosition', () => {
 });
 
 
+test('Should has Parameter Emails', () => {
+  template.hasParameter('Emails', {
+    Type: 'CommaDelimitedList',
+    Default: '',
+    AllowedPattern: '(^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$)?',
+  });
+});
+
 test('has Events::Rule', () => {
   template.hasResourceProperties('AWS::Events::Rule', {
     EventPattern: {
@@ -104,6 +112,24 @@ test('has lambda Function to put dashbaord', () => {
         },
       },
     },
+  });
+});
+
+test('has SNS topic', () => {
+  template.hasResourceProperties('AWS::SNS::Topic', {
+    DisplayName: {
+      'Fn::Join': [
+        '',
+        [
+          'Clickstream alarms notification subscription topic [project:',
+          {
+            Ref: 'ProjectId',
+          },
+          ']',
+        ],
+      ],
+    },
+    KmsMasterKeyId: 'alias/aws/sns',
   });
 });
 
