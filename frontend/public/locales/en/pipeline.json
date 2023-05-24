@@ -360,7 +360,9 @@
     "action": "Action",
     "stackDetails": "Stack Details",
     "redshiftServerless": "Redshift Serverless",
-    "dashboards": "Dashboards"
+    "dashboards": "Dashboards",
+    "alarmDescription": "Description",
+    "tags": "Tags"
   },
   "list": {
     "id": "Pipeline ID",

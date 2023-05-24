@@ -118,6 +118,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
   return (
     <div>
       <Table
+        variant="embedded"
         onSelectionChange={({ detail }) => {
           setSelectedItems(detail.selectedItems);
         }}
@@ -140,21 +141,14 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
         columnDefinitions={[
           {
             id: 'name',
-            header: t('pipeline:detail:alarmTableColumnName'),
+            header: t('pipeline:detail.alarmTableColumnName'),
             cell: (e) => {
-              return (
-                <>
-                  {e.AlarmName.replace(`Clickstream|${projectId} `, '')}
-                  <br />
-                  <small>{e.AlarmDescription}</small>
-                </>
-              );
+              return e.AlarmName.replace(`Clickstream|${projectId} `, '');
             },
-            sortingField: 'name',
           },
           {
             id: 'state',
-            header: t('pipeline:detail:alarmTableColumnState'),
+            header: t('pipeline:detail.alarmTableColumnState'),
             cell: (item) => {
               let status = 'stopped' as StatusIndicatorProps.Type;
               if (item.StateValue === 'OK') {
@@ -183,53 +177,28 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
                 </SpaceBetween>
               );
             },
-            sortingField: 'state',
+          },
+          {
+            id: 'description',
+            header: t('pipeline:detail.alarmDescription'),
+            cell: (e) => {
+              return e.AlarmDescription;
+            },
           },
           {
             id: 'action',
-            header: t('pipeline:detail:alarmTableColumnAction'),
+            header: t('pipeline:detail.alarmTableColumnAction'),
             cell: (item) => {
               return (
                 <SpaceBetween direction="horizontal" size="xs">
                   {item.ActionsEnabled ? (
                     <StatusIndicator>
-                      {t('pipeline:detail:alarmTableActionEnable')}
+                      {t('pipeline:detail.alarmTableActionEnable')}
                     </StatusIndicator>
                   ) : (
                     <StatusIndicator type="stopped">
-                      {t('pipeline:detail:alarmTableActionDisable')}
+                      {t('pipeline:detail.alarmTableActionDisable')}
                     </StatusIndicator>
-                  )}
-                </SpaceBetween>
-              );
-            },
-          },
-          {
-            id: 'opration',
-            header: t('pipeline:detail:alarmTableColumnOpration'),
-            cell: (item) => {
-              return (
-                <SpaceBetween direction="horizontal" size="xs">
-                  {item.ActionsEnabled ? (
-                    <Button
-                      variant="link"
-                      loading={loadingDisable}
-                      onClick={() => {
-                        disableAlarm(item);
-                      }}
-                    >
-                      {t('button.disable')}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="link"
-                      loading={loadingEnable}
-                      onClick={(clickDetail) => {
-                        enableAlarm(item);
-                      }}
-                    >
-                      {t('button.enable')}
-                    </Button>
                   )}
                 </SpaceBetween>
               );
@@ -238,13 +207,13 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
         ]}
         trackBy="AlarmName"
         items={alarmList}
-        loadingText={t('pipeline:detail:alarmTableLoading') || 'Loading'}
+        loadingText={t('pipeline:detail.alarmTableLoading') || 'Loading'}
         selectionType={selectionType}
         empty={
           <Box textAlign="center" color="inherit">
-            <b>{t('pipeline:detail:alarmTableNoAlarm')}</b>
+            <b>{t('pipeline:detail.alarmTableNoAlarm')}</b>
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('pipeline:detail:alarmTableNoAlarmDisplay')}
+              {t('pipeline:detail.alarmTableNoAlarmDisplay')}
             </Box>
           </Box>
         }

@@ -33,6 +33,7 @@ import Ingestion from './comps/Ingestion';
 import Monitoring from './comps/Monitoring';
 import Processing from './comps/Processing';
 import Reporting from './comps/Reporting';
+import Tags from './comps/Tags';
 import BasicInfo from '../comps/BasicInfo';
 
 const PipelineDetail: React.FC = () => {
@@ -165,6 +166,15 @@ const PipelineDetail: React.FC = () => {
                       content: (
                         <div className="pd-20">
                           <Alarms pipelineInfo={projectPipeline} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('pipeline:detail.tags'),
+                      id: 'tags',
+                      content: (
+                        <div className="pd-20">
+                          <Tags pipelineInfo={projectPipeline} />
                         </div>
                       ),
                     },

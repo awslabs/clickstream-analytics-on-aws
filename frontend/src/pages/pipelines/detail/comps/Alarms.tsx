@@ -25,8 +25,8 @@ const Alarms: React.FC<TabContentProps> = (props: TabContentProps) => {
     <div>
       <AlarmTable
         selectionType="multi"
-        title={t('pipeline:detail:alarmTable')}
-        desc={t('pipeline:detail:alarmTableDesc')}
+        title={t('pipeline:detail.alarmTable')}
+        desc={t('pipeline:detail.alarmTableDesc')}
         region={pipelineInfo?.region || ''}
         projectId={pipelineInfo?.projectId || ''}
       />
