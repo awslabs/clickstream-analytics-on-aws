@@ -31,8 +31,9 @@ import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
 } from './common/cfn-nag';
-import { LogBucket } from './common/log-bucket';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
+import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
@@ -48,7 +49,7 @@ export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProp
    */
   existingVpc?: boolean;
 
-  /**
+  /**, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKE, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKETT
    * whether the application load balancer is internet facing or intranet.
    *
    */
@@ -104,7 +105,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       subnets = { subnets: vpcStack.vpc.privateSubnets };
     }
 
-    const solutionBucket = new LogBucket(this, 'solutionBucket');
+    const solutionBucket = new SolutionBucket(this, 'ClickstreamSolution');
     let domainProps = undefined;
     let protocol = ApplicationProtocol.HTTP;
 
@@ -249,10 +250,15 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       contentType: 'application/json',
     });
 
-    new CfnOutput(this, 'ControlPlaneUrl', {
-      description: 'The url of the controlPlane UI',
+    new CfnOutput(this, OUTPUT_CONTROL_PLANE_URL, {
+      description: 'The url of clickstream console',
       value: controlPlane.controlPlaneUrl,
-    }).overrideLogicalId('ControlPlaneUrl');
+    }).overrideLogicalId(OUTPUT_CONTROL_PLANE_URL);
+
+    new CfnOutput(this, OUTPUT_CONTROL_PLANE_BUCKET, {
+      description: 'Bucket to store solution console data and services logs',
+      value: solutionBucket.bucket.bucketName,
+    }).overrideLogicalId(OUTPUT_CONTROL_PLANE_BUCKET);
 
     if (!props.internetFacing && controlPlane.sourceSecurityGroupId != undefined) {
       new CfnOutput(this, 'SourceSecurityGroup', {

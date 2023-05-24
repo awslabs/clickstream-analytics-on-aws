@@ -18,6 +18,7 @@ import {
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
+import { OUTPUT_CONTROL_PLANE_URL } from '../../src/common/constant';
 import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-config';
 import { validateSubnetsRule } from '../rules';
 
@@ -65,9 +66,9 @@ describe('ALBLambdaPotalStack', () => {
     expect(findResourcesName(template, 'AWS::Route53::RecordSet'))
       .toEqual(['albcontrolplanealiasRecord2560DD98']);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
-      .toEqual(['solutionBucketLogBucket39CCA1AD']);
+      .toEqual(['ClickstreamSolutionDataBucket200465FE']);
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
 
   });
@@ -102,10 +103,10 @@ describe('ALBLambdaPotalStack', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'solutionBucketLogBucket39CCA1AD',
+        'ClickstreamSolutionDataBucket200465FE',
       ]);
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
 
   });
@@ -137,10 +138,10 @@ describe('ALBLambdaPotalStack', () => {
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'solutionBucketLogBucket39CCA1AD',
+        'ClickstreamSolutionDataBucket200465FE',
       ]);
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
     template.hasOutput('PublicSubnets', {});
     template.hasOutput('PrivateSubnets', {});
@@ -181,10 +182,10 @@ describe('ALBLambdaPotalStack', () => {
       ]);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'solutionBucketLogBucket39CCA1AD',
+        'ClickstreamSolutionDataBucket200465FE',
       ]);
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
     template.hasOutput('PublicSubnets', {});
     template.hasOutput('PrivateSubnets', {});
@@ -229,7 +230,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'solutionBucketLogBucket39CCA1AD',
+        'ClickstreamSolutionDataBucket200465FE',
       ]);
     expect(findResourcesName(template, 'AWS::Lambda::Function'))
       .toEqual([
@@ -246,7 +247,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
       ReservedConcurrentExecutions: 5,
     });
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
     template.hasOutput('SourceSecurityGroup', {});
 
@@ -288,10 +289,10 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'solutionBucketLogBucket39CCA1AD',
+        'ClickstreamSolutionDataBucket200465FE',
       ]);
 
-    template.hasOutput('ControlPlaneUrl', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput('VpcId', {});
     template.hasOutput('SourceSecurityGroup', {});
     template.hasOutput('PublicSubnets', {});
@@ -694,7 +695,7 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                   },
                   ':443/signin","solution_version":"v1","cotrol_plane_mode":"ALB","solution_data_bucket":"',
                   {
-                    Ref: 'solutionBucketLogBucket39CCA1AD',
+                    Ref: 'ClickstreamSolutionDataBucket200465FE',
                   },
                   '","solution_plugin_prefix":"plugins/","solution_region":"',
                   {

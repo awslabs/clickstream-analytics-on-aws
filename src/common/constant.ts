@@ -145,6 +145,8 @@ export const TABLE_NAME_INGESTION = 'ingestion_events';
 
 
 // the outputs of stacks
+export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';
+export const OUTPUT_CONTROL_PLANE_BUCKET = 'ControlPlaneBucket';
 export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
 export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
 export const OUTPUT_REPORT_DASHBOARDS_SUFFIX = 'Dashboards';

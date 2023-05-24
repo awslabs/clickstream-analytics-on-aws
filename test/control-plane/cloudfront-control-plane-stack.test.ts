@@ -17,6 +17,7 @@ import {
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
 
 describe('CloudFrontS3PotalStack', () => {
 
@@ -30,9 +31,8 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
-    commonTemplate.hasOutput('ControlPlaneUrl', {});
-    commonTemplate.hasOutput('PortalBucket', {});
-    commonTemplate.hasOutput('LogBucket', {});
+    commonTemplate.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
+    commonTemplate.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
 
     // Check Origin Request Policy
     commonTemplate.hasResourceProperties('AWS::CloudFront::OriginRequestPolicy', {
@@ -111,7 +111,7 @@ describe('CloudFrontS3PotalStack', () => {
         ],
       },
       LoggingConfiguration: {
-        LogFilePrefix: 'log-bucket-access-logs',
+        LogFilePrefix: 'data-bucket-access-logs',
       },
       PublicAccessBlockConfiguration: {
         BlockPublicAcls: true,
@@ -437,9 +437,8 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
-    template.hasOutput('ControlPlaneUrl', {});
-    template.hasOutput('PortalBucket', {});
-    template.hasOutput('LogBucket', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
 
     //lambda function to request certificate
     template.hasResourceProperties('AWS::Lambda::Function', {
@@ -498,9 +497,8 @@ describe('CloudFrontS3PotalStack', () => {
     // Check Origin Request Policy
     template.resourceCountIs('AWS::CloudFront::OriginRequestPolicy', 0);
 
-    template.hasOutput('ControlPlaneUrl', {});
-    template.hasOutput('PortalBucket', {});
-    template.hasOutput('LogBucket', {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
     template.hasOutput('CloudFrontDomainName', {});
   });
 

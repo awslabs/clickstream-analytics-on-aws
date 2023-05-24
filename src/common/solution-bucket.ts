@@ -12,36 +12,37 @@
  */
 
 import { RemovalPolicy } from 'aws-cdk-lib';
-import { BucketEncryption, BlockPublicAccess, IBucket, Bucket, ObjectOwnership, HttpMethods } from 'aws-cdk-lib/aws-s3';
+import { BucketEncryption, BlockPublicAccess, IBucket, Bucket, ObjectOwnership, HttpMethods, CorsRule } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
-export interface LogProps {
+export interface BucketProps {
   logPrefix?: string;
   encryption?: BucketEncryption;
   enforceSSL?: boolean;
   autoDeleteObjects?: boolean;
   removalPolicy?: RemovalPolicy;
+  cors?: CorsRule[];
 }
 
 /**
- * Create S3 buckt for service log
+ * Create S3 buckt for solution data and service log
  */
-export class LogBucket extends Construct {
+export class SolutionBucket extends Construct {
 
   public readonly bucket: IBucket;
 
-  constructor(scope: Construct, id: string, props?: LogProps) {
+  constructor(scope: Construct, id: string, props?: BucketProps) {
     super(scope, id);
 
-    this.bucket = new Bucket(this, 'LogBucket', {
+    this.bucket = new Bucket(this, 'DataBucket', {
       encryption: props?.encryption ?? BucketEncryption.S3_MANAGED,
       enforceSSL: props?.enforceSSL ?? true,
       autoDeleteObjects: props?.autoDeleteObjects ?? false,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       removalPolicy: props?.removalPolicy ?? RemovalPolicy.RETAIN,
-      serverAccessLogsPrefix: props?.logPrefix ?? 'log-bucket-access-logs',
+      serverAccessLogsPrefix: props?.logPrefix ?? 'data-bucket-access-logs',
       objectOwnership: ObjectOwnership.OBJECT_WRITER,
-      cors: [
+      cors: props?.cors ?? [
         {
           maxAge: 3000,
           allowedOrigins: ['*'],

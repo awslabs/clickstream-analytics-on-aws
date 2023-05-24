@@ -65,7 +65,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'testportallogbucketLogBucketD755C4BB',
+        'testportallogbucketA87968B8',
       ]);
     template.hasResourceProperties('AWS::S3::Bucket', {
       BucketEncryption: {
@@ -78,7 +78,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         ],
       },
       LoggingConfiguration: {
-        LogFilePrefix: 'log-bucket-access-logs',
+        LogFilePrefix: 'bucket-access-logs',
       },
       PublicAccessBlockConfiguration: {
         BlockPublicAcls: true,
@@ -726,7 +726,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     const template = Template.fromStack(testStack);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'LogBucketA5517498',
+        'SolutionBucketDataBucket3F8C8D7C',
       ]);
 
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
@@ -766,7 +766,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     const template = Template.fromStack(testStack);
     expect(findResourcesName(template, 'AWS::S3::Bucket'))
       .toEqual([
-        'LogBucketA5517498',
+        'SolutionBucketDataBucket3F8C8D7C',
       ]);
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
       LoadBalancerAttributes: Match.arrayWith([

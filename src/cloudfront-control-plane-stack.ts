@@ -38,9 +38,10 @@ import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack } from './common/cfn-nag';
-import { LogBucket } from './common/log-bucket';
+import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
+import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
@@ -81,7 +82,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     let domainProps: DomainProps | undefined = undefined;
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
-    const solutionBucket = new LogBucket(this, 'solutionBucket');
+    const solutionBucket = new SolutionBucket(this, 'ClickstreamSolution');
 
     if (props?.targetToCNRegions) {
       const iamCertificateId = Parameters.createIAMCertificateIdParameter(this);
@@ -336,20 +337,15 @@ export class CloudFrontControlPlaneStack extends Stack {
     //supress nag warnings
     supressWarningsForCloudFrontS3Portal(this);
 
-    new CfnOutput(this, 'ControlPlaneUrl', {
-      description: 'The CloudFront distribution domain name',
+    new CfnOutput(this, OUTPUT_CONTROL_PLANE_URL, {
+      description: 'The url of clickstream console',
       value: controlPlane.controlPlaneUrl,
-    }).overrideLogicalId('ControlPlaneUrl');
+    }).overrideLogicalId(OUTPUT_CONTROL_PLANE_URL);
 
-    new CfnOutput(this, 'PortalBucket', {
-      description: 'Bucket to store the portal asset',
-      value: controlPlane.bucket.bucketName,
-    }).overrideLogicalId('PortalBucket');
-
-    new CfnOutput(this, 'LogBucket', {
-      description: 'Bucket to store access log',
+    new CfnOutput(this, OUTPUT_CONTROL_PLANE_BUCKET, {
+      description: 'Bucket to store solution console data and services logs',
       value: controlPlane.logBucket.bucketName,
-    }).overrideLogicalId('LogBucket');
+    }).overrideLogicalId(OUTPUT_CONTROL_PLANE_BUCKET);
 
     if (cnCloudFrontS3PortalProps !== undefined) {
       new CfnOutput(this, 'CloudFrontDomainName', {

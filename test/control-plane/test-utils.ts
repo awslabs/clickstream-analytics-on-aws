@@ -22,7 +22,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { LogBucket } from '../../src/common/log-bucket';
+import { SolutionBucket } from '../../src/common/solution-bucket';
 import {
   ApplicationLoadBalancerLambdaPortal,
   ApplicationLoadBalancerProps,
@@ -149,7 +149,7 @@ export class TestEnv {
 
     const stack = props?.stack ?? new TestStack(new App(), 'testStack');
 
-    const bucket = props?.externalBucket ? new LogBucket(stack, 'LogBucket').bucket : undefined;
+    const bucket = props?.externalBucket ? new SolutionBucket(stack, 'SolutionBucket').bucket : undefined;
     const prefix = props?.prefix ?? undefined;
     const enableAccessLog = props?.applicationLoadBalancerProps?.logProps.enableAccessLog ?? true;
 

@@ -52,13 +52,12 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { IBucket, Bucket, BucketEncryption, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
-import { LogBucket } from '../common/log-bucket';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export interface RouteProps {
@@ -284,7 +283,13 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     if (props.applicationLoadBalancerProps.logProps.enableAccessLog) {
       let albLogBucket: IBucket;
       if (props.applicationLoadBalancerProps.logProps.bucket === undefined) {
-        albLogBucket = new LogBucket(this, 'logbucket', {}).bucket;
+        albLogBucket = new Bucket(this, 'logbucket', {
+          encryption: BucketEncryption.S3_MANAGED,
+          enforceSSL: true,
+          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+          serverAccessLogsPrefix: props.applicationLoadBalancerProps.logProps.enableAccessLog ?
+            (props.applicationLoadBalancerProps.logProps.prefix ?? 'bucket-access-logs') : undefined,
+        });
       } else {
         albLogBucket = props.applicationLoadBalancerProps.logProps.bucket;
       }
