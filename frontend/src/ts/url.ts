@@ -11,11 +11,14 @@
  *  and limitations under the License.
  */
 
+const CONSOLE_CHINA_DOMAIN = 'console.amazonaws.cn';
+const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
+
 export const buildVPCLink = (region: string, vpcId: string): string => {
   if (region.startsWith('cn')) {
-    return `https://${region}.console.amazonaws.cn/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
   }
-  return `https://${region}.console.aws.amazon.com/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
 };
 
 const getDirPrefixByPrefixStr = (prefix: string) => {
@@ -35,25 +38,25 @@ export const buildS3Link = (
     if (prefix) {
       const resPrefix = getDirPrefixByPrefixStr(prefix);
       if (resPrefix.endsWith('/')) {
-        return `https://console.amazonaws.cn/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
+        return `https://${CONSOLE_CHINA_DOMAIN}/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
       }
     }
-    return `https://console.amazonaws.cn/s3/buckets/${bucketName}`;
+    return `https://${CONSOLE_CHINA_DOMAIN}/s3/buckets/${bucketName}`;
   }
   if (prefix) {
     const resPrefix = getDirPrefixByPrefixStr(prefix);
     if (resPrefix.endsWith('/')) {
-      return `https://s3.console.aws.amazon.com/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
+      return `https://s3.${CONSOLE_GLOABL_DOMAIN}/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
     }
   }
-  return `https://s3.console.aws.amazon.com/s3/buckets/${bucketName}`;
+  return `https://s3.${CONSOLE_GLOABL_DOMAIN}/s3/buckets/${bucketName}`;
 };
 
 export const buildSubnetLink = (region: string, subnetId: string): string => {
   if (region.startsWith('cn')) {
-    return `https://${region}.console.amazonaws.cn/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
   }
-  return `https://${region}.console.aws.amazon.com/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
 };
 
 export const buildReshiftLink = (
@@ -62,12 +65,12 @@ export const buildReshiftLink = (
   type: string
 ) => {
   if (region.startsWith('cn')) {
-    return `https://${region}.console.amazonaws.cn/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
   }
   if (type === 'serverless') {
-    return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#serverless-dashboard`;
+    return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
   }
-  return `https://${region}.console.aws.amazon.com/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };
 
 export const buildQuickSightDashboardLink = (
@@ -81,7 +84,10 @@ export const buildMetricsDashboardLink = (
   region: string,
   dashboardName: string
 ): string => {
-  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
+  }
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
 };
 
 export const buildQuickSightSubscriptionLink = (): string => {
@@ -89,5 +95,18 @@ export const buildQuickSightSubscriptionLink = (): string => {
 };
 
 export const buildAlarmsLink = (region: string, projectId: string): string => {
-  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
+  }
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
+};
+
+export const buildCloudFormationStackLink = (
+  region: string,
+  stackId: string
+) => {
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
+  }
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
 };

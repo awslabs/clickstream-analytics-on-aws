@@ -23,6 +23,7 @@ import { getPipelineDetail } from 'apis/pipeline';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CLOUDFORMATION_STATUS_MAP } from 'ts/const';
+import { buildCloudFormationStackLink } from 'ts/url';
 
 export enum EPipelineStatus {
   Active = 'Active',
@@ -48,6 +49,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   let intervalId: any = 0;
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [updatedStatus, setUpdatedStatus] = useState(status);
+  const [pipelineRegion, setPipelineRegion] = useState('');
   const [stackStatusList, setStackStatusList] = useState<IStackStatus[]>([]);
   let indicatorType: StatusIndicatorProps.Type = 'loading';
   let displayStatus = '';
@@ -89,6 +91,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
         });
       if (success) {
         setUpdatedStatus(data.status?.status);
+        setPipelineRegion(data.region);
         setStackStatusList(data.status?.stackDetails || []);
         if (
           data.status?.status === EPipelineStatus.Active ||
@@ -145,7 +148,13 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                       {element.stackStatus || t('status.unknown')})
                       {element.stackStatus && (
                         <span className="ml-5">
-                          <Link external href={element.url}>
+                          <Link
+                            external
+                            href={buildCloudFormationStackLink(
+                              pipelineRegion,
+                              element.stackName
+                            )}
+                          >
                             {t('pipeline:detail.stackDetails')}
                           </Link>
                         </span>
