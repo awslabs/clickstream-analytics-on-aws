@@ -14,22 +14,22 @@
 import { CloudWatchClient, DescribeAlarmsCommand, PutMetricAlarmCommand, MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { logger } from '../../../common/powertools';
 
-export async function setAlarmsAction(cwClient: CloudWatchClient, alarmArns: string[], snsToicArn: string) {
+export async function setAlarmsAction(cwClient: CloudWatchClient, alarmArns: string[], snsTopicArn: string) {
   const allMetricAlarms: MetricAlarm[] = await listAllMetricsAlarms(cwClient, alarmArns);
 
   for (const m of allMetricAlarms) {
     let addAction = false;
-    if (!m.AlarmActions || (m.AlarmActions && !m.AlarmActions.includes(snsToicArn))) {
-      m.AlarmActions = [snsToicArn];
+    if (!m.AlarmActions || (m.AlarmActions && !m.AlarmActions.includes(snsTopicArn))) {
+      m.AlarmActions = [snsTopicArn];
       addAction = true;
     }
-    if (!m.OKActions || (m.OKActions && !m.OKActions.includes(snsToicArn))) {
-      m.OKActions = [snsToicArn];
+    if (!m.OKActions || (m.OKActions && !m.OKActions.includes(snsTopicArn))) {
+      m.OKActions = [snsTopicArn];
       addAction = true;
     }
 
     if (!addAction) {
-      logger.info("alarm '" + m.AlarmName + "' already has action for " + snsToicArn);
+      logger.info("alarm '" + m.AlarmName + "' already has action for " + snsTopicArn);
       continue;
     }
 

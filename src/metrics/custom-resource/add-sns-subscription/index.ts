@@ -18,7 +18,7 @@ import { aws_sdk_client_common_config } from '../../../common/sdk-client-config'
 
 
 const region = process.env.AWS_REGION!;
-const snsToicArn = process.env.SNS_TOPIC_ARN!;
+const snsTopicArn = process.env.SNS_TOPIC_ARN!;
 const emails = process.env.EMAILS;
 
 const snsClient = new SNSClient({
@@ -50,7 +50,7 @@ async function _handler(
 
   logger.info('functionName: ' + context.functionName);
   logger.info('region: ' + region);
-  logger.info('snsToicArn: ' + snsToicArn);
+  logger.info('snsTopicArn: ' + snsTopicArn);
 
   if (requestType == 'Delete') {
     logger.info('ignore requestType ' + requestType);
@@ -63,7 +63,7 @@ async function _handler(
   const subscriptionResponses = await Promise.all(emails.split(',').map(email => {
     logger.info('subscribe for email: ' + email.replace(/[a-zA-Z]/g, '#') );
     return snsClient.send(new SubscribeCommand({
-      TopicArn: snsToicArn,
+      TopicArn: snsTopicArn,
       Protocol: 'email',
       Endpoint: email,
       ReturnSubscriptionArn: true,

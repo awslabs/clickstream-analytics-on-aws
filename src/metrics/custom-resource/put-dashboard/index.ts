@@ -52,7 +52,7 @@ const dashboardName = process.env.DASHBOARD_NAME!;
 const projectId = process.env.PROJECT_ID!;
 const columnNumber = parseInt(process.env.COLUMN_NUMBER || '3');
 const legendPosition = (process.env.LEGEND_POSITION || 'bottom') as 'right' | 'bottom' | 'hidden';
-const snsToicArn = process.env.SNS_TOPIC_ARN!;
+const snsTopicArn = process.env.SNS_TOPIC_ARN!;
 
 const ssmClient = new SSMClient({
   ...aws_sdk_client_common_config,
@@ -119,7 +119,7 @@ async function _handler(
   logger.info('dashboardName: ' + dashboardName);
   logger.info('projectId: ' + projectId);
   logger.info('columnNumber: ' + columnNumber);
-  logger.info('snsToicArn: ' + snsToicArn);
+  logger.info('snsTopicArn: ' + snsTopicArn);
 
   if (requestType == 'Delete') {
     logger.info('ignore requestType ' + requestType);
@@ -182,7 +182,7 @@ async function _handler(
   }
 
   logger.info('alarmArnsAll', { alarmArnsAll });
-  await setAlarmsAction(cwClient, alarmArnsAll, snsToicArn);
+  await setAlarmsAction(cwClient, alarmArnsAll, snsTopicArn);
 
   const dashboardBody = {
     start: '-PT12H',
