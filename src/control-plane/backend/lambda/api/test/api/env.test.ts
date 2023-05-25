@@ -26,6 +26,8 @@ import {
   DescribeRouteTablesCommand,
   DescribeSecurityGroupsCommand,
 } from '@aws-sdk/client-ec2';
+import { EMRServerlessClient, ListApplicationsCommand } from '@aws-sdk/client-emr-serverless';
+import { GlobalAcceleratorClient, ListAcceleratorsCommand } from '@aws-sdk/client-global-accelerator';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import {
@@ -58,6 +60,9 @@ const athenaClient = mockClient(AthenaClient);
 const iamClient = mockClient(IAMClient);
 const acmClient = mockClient(ACMClient);
 const cloudWatchClient = mockClient(CloudWatchClient);
+const emrServerlessClient = mockClient(EMRServerlessClient);
+const globalAcceleratorClient = mockClient(GlobalAcceleratorClient);
+
 
 describe('Account Env test', () => {
   beforeEach(() => {
@@ -72,6 +77,8 @@ describe('Account Env test', () => {
     iamClient.reset();
     acmClient.reset();
     cloudWatchClient.reset();
+    emrServerlessClient.reset();
+    globalAcceleratorClient.reset();
   });
   it('Get regions', async () => {
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
@@ -1358,6 +1365,53 @@ describe('Account Env test', () => {
       success: true,
       message: '',
       data: false,
+    });
+  });
+  it('Ping Services', async () => {
+    emrServerlessClient.on(ListApplicationsCommand).resolves({
+      applications: [],
+    });
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [],
+    });
+    redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
+      workgroups: [],
+    });
+    globalAcceleratorClient.on(ListAcceleratorsCommand).resolves({
+      Accelerators: [],
+    });
+    const mockError = new Error('Mock DynamoDB error');
+    mockError.name = 'TimeoutError';
+    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
+    let res = await request(app).get(
+      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          service: 'emr-serverless',
+          available: true,
+        },
+        {
+          service: 'msk',
+          available: true,
+        },
+        {
+          service: 'quicksight',
+          available: false,
+        },
+        {
+          service: 'redshift-serverless',
+          available: true,
+        },
+        {
+          service: 'global-accelerator',
+          available: true,
+        },
+      ],
     });
   });
   it('Get Host Zones', async () => {

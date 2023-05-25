@@ -38,7 +38,7 @@ const commonDevDeps = [
   '@types/mock-fs@^4.13.1',
 ];
 
-const awsSDKVersion = '3.329.0';
+const awsSDKVersion = '3.338.0';
 const awsSDKDeps = [
   '@aws-sdk/credential-providers',
   '@aws-sdk/client-kafkaconnect',
@@ -76,6 +76,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
+  '@aws-sdk/client-global-accelerator',
   '@aws-sdk/util-stream-node',
   '@aws-sdk/node-http-handler',
 ].map(dep => `${dep}@^${awsSDKVersion}`);

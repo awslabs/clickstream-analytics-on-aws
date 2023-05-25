@@ -246,6 +246,8 @@ export class ClickStreamApiConstruct extends Construct {
             'cloudwatch:DescribeAlarms',
             'cloudwatch:EnableAlarmActions',
             'cloudwatch:DisableAlarmActions',
+            'emr-serverless:ListApplications',
+            'globalaccelerator:ListAccelerators',
           ],
         }),
       ],

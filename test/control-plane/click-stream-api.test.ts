@@ -536,6 +536,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'cloudwatch:DescribeAlarms',
               'cloudwatch:EnableAlarmActions',
               'cloudwatch:DisableAlarmActions',
+              'emr-serverless:ListApplications',
+              'globalaccelerator:ListAccelerators',
             ],
             Effect: 'Allow',
             Resource: '*',

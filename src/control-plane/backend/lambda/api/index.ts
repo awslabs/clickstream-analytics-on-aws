@@ -288,7 +288,7 @@ app.post(
 app.get(
   '/api/env/quicksight/ping',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.quicksightPing(req, res, next);
+    return environmentServ.quickSightIsSubscribed(req, res, next);
   });
 
 app.get(
@@ -411,6 +411,12 @@ app.post(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.alarmsEnable(req, res, next);
+  });
+
+app.get(
+  '/api/env/ping',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.servicesPing(req, res, next);
   });
 
 app.post(

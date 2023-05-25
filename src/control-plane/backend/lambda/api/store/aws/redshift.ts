@@ -23,6 +23,7 @@ import {
   GetWorkgroupCommand,
   Workgroup,
   GetNamespaceCommand,
+  ListWorkgroupsCommand,
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
@@ -194,4 +195,19 @@ export const getSubnetsByClusterSubnetGroup = async (region: string, clusterSubn
   return subnetIds;
 };
 
-
+export const redshiftServerlessPing = async (region: string): Promise<boolean> => {
+  try {
+    const redshiftServerlessClient = new RedshiftServerlessClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({});
+    await redshiftServerlessClient.send(params);
+  } catch (err) {
+    if ((err as Error).name === 'UnrecognizedClientException' ||
+      (err as Error).name === 'TimeoutError') {
+      return false;
+    }
+  }
+  return true;
+};

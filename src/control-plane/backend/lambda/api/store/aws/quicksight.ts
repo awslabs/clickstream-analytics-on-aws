@@ -86,7 +86,7 @@ export const registerQuickSightUser = async (email: string, username?: string) =
 };
 
 // Determine if QuickSight has already subscribed
-export const quickSightPing = async (): Promise<boolean> => {
+export const quickSightIsSubscribed = async (): Promise<boolean> => {
   const quickSightClient = new QuickSightClient({
     ...aws_sdk_client_common_config,
     region: QUICKSIGHT_CONTROL_PLANE_REGION,
@@ -104,6 +104,25 @@ export const quickSightPing = async (): Promise<boolean> => {
       return false;
     }
     throw err;
+  }
+  return true;
+};
+
+export const quickSightPing = async (region: string): Promise<boolean> => {
+  try {
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: region,
+    });
+    const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
+      AwsAccountId: awsAccountId,
+    });
+    await quickSightClient.send(command);
+  } catch (err) {
+    if ((err as Error).name === 'UnrecognizedClientException' ||
+      (err as Error).name === 'TimeoutError') {
+      return false;
+    }
   }
   return true;
 };

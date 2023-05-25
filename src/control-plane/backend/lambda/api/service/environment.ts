@@ -12,22 +12,25 @@
  */
 
 import fetch from 'node-fetch';
+import pLimit from 'p-limit';
 import { ALBLogServiceAccountMapping } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
 import { getRegionAccount, paginateData } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
+import { agaPing } from '../store/aws/aga';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
 import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
+import { emrServerlessPing } from '../store/aws/emr';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
   describeClickstreamAccountSubscription,
   listQuickSightUsers,
-  quickSightPing,
+  quickSightIsSubscribed, quickSightPing,
   registerQuickSightUser,
 } from '../store/aws/quicksight';
-import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
+import { describeRedshiftClusters, listRedshiftServerlessWorkgroups, redshiftServerlessPing } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
 import { listSecrets } from '../store/aws/secretsmanager';
@@ -47,6 +50,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async describeVpcs(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -56,6 +60,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async describeVpcs3AZ(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -65,24 +70,34 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async describeSubnets(req: any, res: any, next: any) {
     try {
-      const { region, vpcId, subnetType } = req.query;
+      const {
+        region,
+        vpcId,
+        subnetType,
+      } = req.query;
       const result = await describeSubnetsWithType(region, vpcId, subnetType);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async describeSecurityGroups(req: any, res: any, next: any) {
     try {
-      const { region, vpcId } = req.query;
+      const {
+        region,
+        vpcId,
+      } = req.query;
       const result = await describeVpcSecurityGroups(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async listBuckets(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -92,9 +107,13 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async checkALBLogPolicy(req: any, res: any, next: any) {
     try {
-      const { region, bucket } = req.query;
+      const {
+        region,
+        bucket,
+      } = req.query;
       const policyStr = await getS3BucketPolicy(bucket);
       const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
       if (policyStr) {
@@ -102,13 +121,19 @@ export class EnvironmentServ {
         if (accountId) {
           const check = this.checkPolicy(
             policyStr,
-            { key: 'AWS', value: `arn:${partition}:iam::${accountId}:root` },
+            {
+              key: 'AWS',
+              value: `arn:${partition}:iam::${accountId}:root`,
+            },
             `arn:${partition}:s3:::${bucket}/clickstream/*`);
           return res.json(new ApiSuccess({ check: check }));
         } else {
           const check = this.checkPolicy(
             policyStr,
-            { key: 'Service', value: 'logdelivery.elasticloadbalancing.amazonaws.com' },
+            {
+              key: 'Service',
+              value: 'logdelivery.elasticloadbalancing.amazonaws.com',
+            },
             `arn:${partition}:s3:::${bucket}/clickstream/*`);
           return res.json(new ApiSuccess({ check: check }));
         }
@@ -118,24 +143,33 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async listMSKCluster(req: any, res: any, next: any) {
     try {
-      const { region, vpcId } = req.query;
+      const {
+        region,
+        vpcId,
+      } = req.query;
       const result = await listMSKCluster(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async describeRedshiftClusters(req: any, res: any, next: any) {
     try {
-      const { region, vpcId } = req.query;
+      const {
+        region,
+        vpcId,
+      } = req.query;
       const result = await describeRedshiftClusters(region, vpcId);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async listRedshiftServerlessWorkgroups(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -145,15 +179,20 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async listRoles(req: any, res: any, next: any) {
     try {
-      const { type, key } = req.query;
+      const {
+        type,
+        key,
+      } = req.query;
       const result = await listRoles(type, key);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async listHostedZones(_req: any, res: any, next: any) {
     try {
       const result = await listHostedZones();
@@ -162,6 +201,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async listWorkGroups(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -171,6 +211,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async athenaPing(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -180,6 +221,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async mskPing(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -189,14 +231,16 @@ export class EnvironmentServ {
       next(error);
     }
   }
-  public async quicksightPing(_req: any, res: any, next: any) {
+
+  public async quickSightIsSubscribed(_req: any, res: any, next: any) {
     try {
-      const result = await quickSightPing();
+      const result = await quickSightIsSubscribed();
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async listQuickSightUsers(_req: any, res: any, next: any) {
     try {
       const result = await listQuickSightUsers();
@@ -205,15 +249,20 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async registerQuickSightUser(req: any, res: any, next: any) {
     try {
-      const { email, username } = req.body;
+      const {
+        email,
+        username,
+      } = req.body;
       const result = await registerQuickSightUser(email, username);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
   }
+
   public async describeAccountSubscription(_req: any, res: any, next: any) {
     try {
       const result = await describeClickstreamAccountSubscription();
@@ -225,6 +274,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async listCertificates(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -234,6 +284,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async listSecrets(req: any, res: any, next: any) {
     try {
       const { region } = req.query;
@@ -243,6 +294,7 @@ export class EnvironmentServ {
       next(error);
     }
   }
+
   public async AssumeUploadRole(req: any, res: any, next: any) {
     try {
       const requestId = req.get('X-Click-Stream-Request-Id');
@@ -255,7 +307,12 @@ export class EnvironmentServ {
 
   public async alarms(req: any, res: any, next: any) {
     try {
-      const { pid, pageNumber, pageSize } = req.query;
+      const {
+
+        pid,
+        pageNumber,
+        pageSize,
+      } = req.query;
       const latestPipelines = await store.listPipeline(pid, 'latest', 'asc', false, 1, 1);
       if (latestPipelines.totalCount === 0) {
         return res.json(new ApiSuccess({
@@ -276,7 +333,10 @@ export class EnvironmentServ {
 
   public async alarmsDisable(req: any, res: any, next: any) {
     try {
-      const { region, alarmNames } = req.body;
+      const {
+        region,
+        alarmNames,
+      } = req.body;
       const result = await disableAlarms(region, alarmNames);
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -286,7 +346,10 @@ export class EnvironmentServ {
 
   public async alarmsEnable(req: any, res: any, next: any) {
     try {
-      const { region, alarmNames } = req.body;
+      const {
+        region,
+        alarmNames,
+      } = req.body;
       const result = await enableAlarms(region, alarmNames);
       return res.json(new ApiSuccess(result));
     } catch (error) {
@@ -294,7 +357,85 @@ export class EnvironmentServ {
     }
   }
 
-  checkPolicy(policyStr: string, principal: {key: string; value: string}, resource: string): boolean {
+  public async servicesPing(req: any, res: any, next: any) {
+    try {
+      const {
+        region,
+        services,
+      } = req.query;
+      const result: any[] = [];
+      if (services) {
+        const serviceNames = services.split(',');
+        const promisePool = pLimit(serviceNames.length);
+        const reqs = [];
+        for (let serviceName of serviceNames) {
+          if (serviceName === 'emr-serverless') {
+            reqs.push(
+              promisePool(
+                () => emrServerlessPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'emr-serverless',
+                      available: available,
+                    });
+                  },
+                  )));
+          } else if (serviceName === 'msk') {
+            reqs.push(
+              promisePool(
+                () => mskPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'msk',
+                      available: available,
+                    });
+                  },
+                  )));
+          } else if (serviceName === 'redshift-serverless') {
+            reqs.push(
+              promisePool(
+                () => redshiftServerlessPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'redshift-serverless',
+                      available: available,
+                    });
+                  },
+                  )));
+          } else if (serviceName === 'quicksight') {
+            reqs.push(
+              promisePool(
+                () => quickSightPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'quicksight',
+                      available: available,
+                    });
+                  },
+                  )));
+          } else if (serviceName === 'global-accelerator') {
+            reqs.push(
+              promisePool(
+                () => agaPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'global-accelerator',
+                      available: available,
+                    });
+                  },
+                  )));
+          }
+        }
+        await Promise.all(reqs);
+      }
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  checkPolicy(policyStr: string, principal: { key: string; value: string }, resource: string): boolean {
     try {
       const policy = JSON.parse(policyStr) as Policy;
       let match: boolean = false;
@@ -326,7 +467,12 @@ export class EnvironmentServ {
 
   public async fetch(req: any, res: any, _next: any) {
     try {
-      const { url, method, body, headers } = req.body;
+      const {
+        url,
+        method,
+        body,
+        headers,
+      } = req.body;
       const response = await fetch(url, {
         method: method,
         body: body,
