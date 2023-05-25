@@ -101,7 +101,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         status: response.Status,
       },
     };
-  } else if (response.Status == StatusString.FAILED) {
+  } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
     return {
       detail: {

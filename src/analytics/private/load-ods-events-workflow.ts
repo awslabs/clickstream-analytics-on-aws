@@ -372,6 +372,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       .next(new Choice(this, `${this.node.id} - Check if job completes`)
       // Look at the "status" field
         .when(Condition.stringEquals('$.detail.status', 'FAILED'), jobFailed)
+        .when(Condition.stringEquals('$.detail.status', 'ABORTED'), jobFailed)
         .when(Condition.stringEquals('$.detail.status', 'FINISHED'), finalStatus)
         .when(Condition.stringEquals('$.detail.status', 'NO_JOBS'), finalStatus)
         .otherwise(waitX));

@@ -121,6 +121,25 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectCommand, 0);
   });
 
+  test('Check load status with response ABORTED', async () => {
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.ABORTED,
+    });
+    dynamoDBClientMock.on(DeleteCommand).resolves({});
+    s3ClientMock.on(DeleteObjectCommand).resolves({});
+    const resp = await handler(loadStatusEvent, context);
+    expect(resp).toEqual(expect.objectContaining({
+      detail: expect.objectContaining({
+        status: StatusString.ABORTED,
+      }),
+    }));
+    expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
+      Id: loadStatusEvent.detail.id,
+    });
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(DeleteCommand, 0);
+    expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectCommand, 0);
+  });
+
   test('Check load status with response FINISHED and DDB delete error', async () => {
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FINISHED,

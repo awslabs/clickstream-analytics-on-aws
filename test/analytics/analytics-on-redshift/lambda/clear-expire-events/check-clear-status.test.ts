@@ -99,6 +99,28 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
     });
   });
 
+  test('Check clear status with response ABORTED', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.ABORTED,
+    }).resolvesOnce({
+      Status: StatusString.FINISHED,
+    }).resolvesOnce({
+      Status: StatusString.FINISHED,
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
+    const resp = await handler(clearExpiredEventsEvent);
+    expect(resp).toEqual(expect.objectContaining({
+      detail: expect.objectContaining({
+        status: StatusString.ABORTED,
+      }),
+    }));
+    expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
+      Id: clearExpiredEventsEvent.detail.id,
+    });
+  });
+
   test('Execute command error in Redshift when checking clear status', async () => {
     redshiftDataMock.on(DescribeStatementCommand).rejectsOnce();
     try {
@@ -195,6 +217,28 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
     expect(resp).toEqual(expect.objectContaining({
       detail: expect.objectContaining({
         status: StatusString.FAILED,
+      }),
+    }));
+    expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
+      Id: clearExpiredEventsEvent.detail.id,
+    });
+  });
+
+  test('Check clear status with response ABORTED', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.ABORTED,
+    }).resolvesOnce({
+      Status: StatusString.FINISHED,
+    }).resolvesOnce({
+      Status: StatusString.FINISHED,
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
+    const resp = await handler(clearExpiredEventsEvent);
+    expect(resp).toEqual(expect.objectContaining({
+      detail: expect.objectContaining({
+        status: StatusString.ABORTED,
       }),
     }));
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {

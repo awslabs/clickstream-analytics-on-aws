@@ -51,7 +51,7 @@ export const handler = async (event: CheckUpsertStatusEvent) => {
         message: queryResult.detail.message,
       },
     };
-  } else if (response.Status == StatusString.FAILED) {
+  } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
     const queryResult = await queryUpsertLog(appId);
     return {
