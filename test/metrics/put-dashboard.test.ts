@@ -47,6 +47,15 @@ const paramValue1 = {
   },
   widgets: [
     {
+      type: 'alarm',
+      properties: {
+        alarms: [
+          'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_alarm1',
+          'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_alarm2',
+        ],
+      },
+    },
+    {
       type: 'metric',
       properties: {
         stat: 'Sum',
@@ -222,7 +231,8 @@ const paramValue3 = {
 };
 
 
-const dashboardBody = {
+const dashboardBody =
+{
   start: '-PT12H',
   periodOverride: 'inherit',
   widgets: [
@@ -235,6 +245,19 @@ const dashboardBody = {
       properties: {
         markdown: '## Lambda Executions',
       },
+    },
+    {
+      type: 'alarm',
+      properties: {
+        alarms: [
+          'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_alarm1',
+          'arn:aws:cloudwatch:us-east-1:1111111111:alarm:Clickstream|test_alarm2',
+        ],
+      },
+      x: 0,
+      y: 1,
+      width: 6,
+      height: 6,
     },
     {
       type: 'metric',
@@ -260,7 +283,7 @@ const dashboardBody = {
           position: 'bottom',
         },
       },
-      x: 0,
+      x: 6,
       y: 1,
       width: 6,
       height: 6,
@@ -284,7 +307,7 @@ const dashboardBody = {
           position: 'bottom',
         },
       },
-      x: 6,
+      x: 12,
       y: 1,
       width: 6,
       height: 6,
@@ -313,7 +336,7 @@ const dashboardBody = {
           position: 'bottom',
         },
       },
-      x: 12,
+      x: 18,
       y: 1,
       width: 6,
       height: 6,
@@ -368,15 +391,48 @@ const dashboardBody = {
           position: 'bottom',
         },
       },
+      x: 0,
+      y: 7,
+      width: 6,
+      height: 6,
+    },
+    {
+      type: 'text',
+      properties: {
+        markdown: '',
+        background: 'transparent',
+      },
+      x: 6,
+      y: 7,
+      width: 6,
+      height: 6,
+    },
+    {
+      type: 'text',
+      properties: {
+        markdown: '',
+        background: 'transparent',
+      },
+      x: 12,
+      y: 7,
+      width: 6,
+      height: 6,
+    },
+    {
+      type: 'text',
+      properties: {
+        markdown: '',
+        background: 'transparent',
+      },
       x: 18,
-      y: 1,
+      y: 7,
       width: 6,
       height: 6,
     },
     {
       type: 'text',
       x: 0,
-      y: 2,
+      y: 8,
       width: 24,
       height: 1,
       properties: {
@@ -402,7 +458,7 @@ const dashboardBody = {
         },
       },
       x: 0,
-      y: 3,
+      y: 9,
       width: 6,
       height: 6,
     },
@@ -425,7 +481,7 @@ const dashboardBody = {
         },
       },
       x: 6,
-      y: 3,
+      y: 9,
       width: 6,
       height: 6,
     },
@@ -436,7 +492,7 @@ const dashboardBody = {
         background: 'transparent',
       },
       x: 12,
-      y: 3,
+      y: 9,
       width: 6,
       height: 6,
     },
@@ -447,13 +503,12 @@ const dashboardBody = {
         background: 'transparent',
       },
       x: 18,
-      y: 3,
+      y: 9,
       width: 6,
       height: 6,
     },
   ],
 };
-
 
 const allAlarams1 = {
   NextToken: 'next',
@@ -561,7 +616,7 @@ const allAlarams2 = {
   ],
 };
 
-test('Can put dashbaord - Create', async () => {
+test('Can put dashboard with alarms - Create', async () => {
   const event: CloudFormationCustomResourceEvent = {
     RequestType: 'Create',
     ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
@@ -637,6 +692,40 @@ test('Can put dashbaord - Create', async () => {
   );
 });
 
+
+test('Can put dashboard without alarms - Create', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    RequestType: 'Create',
+    ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+    ResponseURL:
+      'https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/testUrl',
+    StackId:
+      'arn:aws:cloudformation:us-east-1:111111111111:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299',
+    RequestId: '6ffb9981-d1af-4177-aac1-34e11cdcccd8',
+    LogicalResourceId: 'create-test-custom-resource',
+    ResourceType: 'AWS::CloudFormation::CustomResource',
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+
+    },
+  };
+
+  ssmClientMock.on(GetParametersByPathCommand).resolvesOnce({
+    Parameters: [
+      {
+        Name: 'test3',
+        Value: JSON.stringify(paramValue3),
+      },
+    ],
+  });
+
+  await handler(event, c);
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 1);
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, 0);
+  expect(cwClientMock).toHaveReceivedCommandTimes(DescribeAlarmsCommand, 0);
+
+});
+
 test('No action - Delete', async () => {
 
   //@ts-ignore
@@ -662,7 +751,7 @@ test('No action - Delete', async () => {
 });
 
 
-test('Put dashbaord can be triggered by cloudwatch ssm update(Parameter Store Change) event', async () => {
+test('Put dashboard can be triggered by cloudwatch ssm update(Parameter Store Change) event', async () => {
   const event = {
     'version': '0',
     'id': '37431cfd-db5b-762c-4350-b9021c865c34',

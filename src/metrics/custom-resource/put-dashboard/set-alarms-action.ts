@@ -15,6 +15,7 @@ import { CloudWatchClient, DescribeAlarmsCommand, PutMetricAlarmCommand, MetricA
 import { logger } from '../../../common/powertools';
 
 export async function setAlarmsAction(cwClient: CloudWatchClient, alarmArns: string[], snsTopicArn: string) {
+  logger.info('setAlarmsAction for alarmArns: ' + alarmArns);
   const allMetricAlarms: MetricAlarm[] = await listAllMetricsAlarms(cwClient, alarmArns);
 
   for (const m of allMetricAlarms) {

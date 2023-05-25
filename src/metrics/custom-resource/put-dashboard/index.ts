@@ -182,7 +182,9 @@ async function _handler(
   }
 
   logger.info('alarmArnsAll', { alarmArnsAll });
-  await setAlarmsAction(cwClient, alarmArnsAll, snsTopicArn);
+  if (alarmArnsAll.length > 0) {
+    await setAlarmsAction(cwClient, alarmArnsAll, snsTopicArn);
+  }
 
   const dashboardBody = {
     start: '-PT12H',
