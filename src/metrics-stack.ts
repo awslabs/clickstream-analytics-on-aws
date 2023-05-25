@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { CfnOutput, CfnParameter, CfnResource, Fn, Stack, StackProps } from 'aws-cdk-lib';
-//import { Key } from 'aws-cdk-lib/aws-kms';
+import { CfnOutput, CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention } from './common/cfn-nag';
@@ -20,7 +21,6 @@ import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METR
 import { SolutionInfo } from './common/solution-info';
 import { addSubscriptionCustomResource } from './metrics/add-sns-subscription';
 import { MetricAndAlarm } from './metrics/metrics';
-
 
 export interface MetricsStackProps extends StackProps { }
 
@@ -68,11 +68,35 @@ export class MetricsStack extends Stack {
       type: 'String',
     });
 
-    const snsTopic = new Topic(this, 'alarmNotificationSnsTopic', {
-      displayName: 'Clickstream alarms notification subscription topic [project:' + projectIdParam.valueAsString + ']',
+    const snsKey = new Key(this, 'snsKey', {
+      enableKeyRotation: true,
     });
 
-    (snsTopic.node.defaultChild as CfnResource).addPropertyOverride('KmsMasterKeyId', 'alias/aws/sns');
+    snsKey.addToResourcePolicy(new PolicyStatement({
+      principals: [
+        new ServicePrincipal('cloudwatch.amazonaws.com'),
+      ],
+      actions: [
+        'kms:Decrypt',
+        'kms:GenerateDataKey*',
+      ],
+      resources: ['*'],
+    }));
+
+    const snsTopic = new Topic(this, 'alarmNotificationSnsTopic', {
+      displayName: 'Clickstream alarms notification [project:' + projectIdParam.valueAsString + ']',
+      masterKey: snsKey,
+    });
+
+    snsTopic.addToResourcePolicy(new PolicyStatement({
+      principals: [
+        new ServicePrincipal('cloudwatch.amazonaws.com'),
+      ],
+      actions: [
+        'sns:Publish',
+      ],
+      resources: [snsTopic.topicArn],
+    }));
 
     addSubscription(this, Fn.join(',', emailsParam.valueAsList), snsTopic);
 

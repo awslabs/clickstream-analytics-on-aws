@@ -115,13 +115,31 @@ test('has lambda Function to put dashbaord', () => {
   });
 });
 
+
+test('has lambda Function to create SNS subscriptions for emails', () => {
+  template.hasResourceProperties('AWS::Lambda::Function', {
+    Environment: {
+      Variables: {
+        EMAILS: {
+          'Fn::Join': [
+            ',',
+            {
+              Ref: 'Emails',
+            },
+          ],
+        },
+      },
+    },
+  });
+});
+
 test('has SNS topic', () => {
   template.hasResourceProperties('AWS::SNS::Topic', {
     DisplayName: {
       'Fn::Join': [
         '',
         [
-          'Clickstream alarms notification subscription topic [project:',
+          'Clickstream alarms notification [project:',
           {
             Ref: 'ProjectId',
           },
@@ -129,8 +147,84 @@ test('has SNS topic', () => {
         ],
       ],
     },
-    KmsMasterKeyId: 'alias/aws/sns',
+    KmsMasterKeyId: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        'Arn',
+      ],
+    },
   });
 });
 
 
+test('has SNS TopicPolicy', () => {
+  template.hasResourceProperties('AWS::SNS::TopicPolicy', {
+    PolicyDocument: {
+      Statement: [
+        {
+          Action: 'sns:Publish',
+          Effect: 'Allow',
+          Principal: {
+            Service: 'cloudwatch.amazonaws.com',
+          },
+          Resource: {
+            Ref: Match.anyValue(),
+          },
+          Sid: '0',
+        },
+      ],
+      Version: '2012-10-17',
+    },
+    Topics: [
+      {
+        Ref: Match.anyValue(),
+      },
+    ],
+  });
+});
+
+
+test('has Key for cloudwatch to Decrypt', () => {
+  template.hasResourceProperties('AWS::KMS::Key', {
+    KeyPolicy: {
+      Statement: [
+        {
+          Action: 'kms:*',
+          Effect: 'Allow',
+          Principal: {
+            AWS: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':iam::',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':root',
+                ],
+              ],
+            },
+          },
+          Resource: '*',
+        },
+        {
+          Action: [
+            'kms:Decrypt',
+            'kms:GenerateDataKey*',
+          ],
+          Effect: 'Allow',
+          Principal: {
+            Service: 'cloudwatch.amazonaws.com',
+          },
+          Resource: '*',
+        },
+      ],
+      Version: '2012-10-17',
+    },
+    EnableKeyRotation: true,
+  });
+});
