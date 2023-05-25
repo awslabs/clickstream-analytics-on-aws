@@ -1813,7 +1813,7 @@ describe('Workflow test', () => {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
-          prefix: 'default',
+          prefix: 'default/',
           version: 'latest',
         },
       },

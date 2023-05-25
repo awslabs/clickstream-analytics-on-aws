@@ -286,7 +286,7 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
-        S3_MAIN_REGION: props.s3MainRegion?? 'us-east-1',
+        S3_MAIN_REGION: props.targetToCNRegions? 'cn-north-1': 'us-east-1',
         ISSUER: props.authProps?.issuer ?? '',
         JWKS_URI: props.authProps?.jwksUri ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,

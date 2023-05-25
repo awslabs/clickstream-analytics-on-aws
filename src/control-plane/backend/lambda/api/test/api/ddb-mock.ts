@@ -228,7 +228,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
-          prefix: 'default',
+          prefix: 'default/',
           version: 'v1.0.0',
         },
       },

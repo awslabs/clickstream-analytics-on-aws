@@ -419,16 +419,14 @@ export class CPipeline {
       if (isEmpty(this.resources?.templates.data[name])) {
         return undefined;
       }
+      const solutionName = this.resources?.solution.data.name;
+      const templateName = this.resources?.templates.data[name] as string;
       const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
-      if (this.resources?.solution.data.version === 'latest') {
-        const target = this.resources?.solution.data.target;
-        const prefix = this.resources?.solution.data.prefix;
-        return `${s3Host}/${this.resources?.solution.data.name}/${target}/${prefix}/${this.resources?.templates.data[name]}`;
-      } else {
-        const version = this.resources?.solution.data.version;
-        const prefix = this.resources?.solution.data.prefix;
-        return `${s3Host}/${this.resources?.solution.data.name}/${version}/${prefix}/${this.resources?.templates.data[name]}`;
-      }
+      // default/ or cn/
+      const prefix = this.resources?.solution.data.prefix;
+      const version = this.resources?.solution.data.version === 'latest' ?
+        this.resources?.solution.data.target : this.resources?.solution.data.version;
+      return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
     }
     return undefined;
   };
