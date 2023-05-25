@@ -92,7 +92,6 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
               }
             },
             items: [
-              { id: 'profile', text: t('header.profile') || '' },
               {
                 id: 'support-group',
                 text: t('header.support') || '',

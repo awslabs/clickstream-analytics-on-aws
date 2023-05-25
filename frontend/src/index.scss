@@ -340,6 +340,24 @@ ul.menu-list li.checkbox-item {
   text-decoration: underline;
 }
 
+.alarm-title {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.alarm-value {
+  font-size: 40px;
+  margin-top: 10px;
+  font-weight: 800;
+  color: #999;
+  &.red {
+    color: red;
+  }
+  &.green {
+    color: green;
+  }
+}
+
 @media only screen and (max-width: 493px) {
   #f {
     padding: 10px 20px;

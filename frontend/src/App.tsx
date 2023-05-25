@@ -18,6 +18,7 @@ import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
+import AlarmsList from 'pages/alarms/AlarmList';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -88,6 +89,7 @@ const SignedInPage: React.FC = () => {
                 <Route path="/signin" element={<LoginCallback />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/alarms" element={<AlarmsList />} />
                 <Route path="/project/detail/:id" element={<ProjectDetail />} />
                 <Route
                   path="/project/:pid/pipeline/:id"

@@ -34,4 +34,19 @@ declare global {
     type?: string;
     status?: string;
   }
+
+  interface IAlarmPromiseResult {
+    status: string;
+    value?: {
+      success: boolean;
+      message: string;
+      data: ResponseTableData<IAlarm>;
+    };
+  }
+
+  interface IProjectWithAlarm {
+    project: IProject;
+    status: DisplayStatus;
+    alarms: IAlarm[];
+  }
 }

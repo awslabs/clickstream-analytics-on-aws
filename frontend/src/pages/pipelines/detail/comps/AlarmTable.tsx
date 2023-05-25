@@ -56,7 +56,6 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
     try {
       const { success, data }: ApiResponse<ResponseTableData<IAlarm>> =
         await getAlarmList({
-          region: region,
           pid: projectId,
           pageNumber: currentPage,
           pageSize: pageSize,

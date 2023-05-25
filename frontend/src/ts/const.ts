@@ -48,6 +48,18 @@ export enum ProjectStage {
   PROD = 'Prod',
 }
 
+export enum ALARM_STATUS {
+  INSUFFICIENT_DATA = 'INSUFFICIENT_DATA',
+  OK = 'OK',
+  ALARM = 'ALARM',
+}
+
+export enum ALARM_DISPLAY_STATUS {
+  HAS_ALARM = 1,
+  NO_ALARM = 0,
+  NO_PIPELINE = -1,
+}
+
 export const PROJECT_STAGE_LIST = [
   { label: 'Dev', value: ProjectStage.DEV },
   { label: 'Test', value: ProjectStage.TEST },

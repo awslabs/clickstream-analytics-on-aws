@@ -38,7 +38,7 @@ import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshif
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
@@ -1486,8 +1486,12 @@ describe('Account Env test', () => {
         },
       ],
     });
+    ddbMock.on(QueryCommand)
+      .resolves({
+        Items: [{ region: 'us-east-1' }],
+      });
     projectExistedMock(ddbMock, true);
-    const res = await request(app).get(`/api/env/cloudwatch/alarms?region=ap-northeast-1&pid=${MOCK_PROJECT_ID}`);
+    const res = await request(app).get(`/api/env/cloudwatch/alarms?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1512,6 +1516,46 @@ describe('Account Env test', () => {
           Statistic: 'Average',
           Threshold: 85,
         }],
+      },
+    });
+
+  });
+  it('List alarms by project without pipeline', async () => {
+    cloudWatchClient.on(DescribeAlarmsCommand).resolves({
+      MetricAlarms: [
+        {
+          AlarmName: 'Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          AlarmArn: 'arn:aws:cloudwatch:ap-northeast-1:555555555555:alarm:Clickstream|isolated_ing_s3_zwan ECS Cluster CPUUtilization 80c4b520',
+          AlarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+          ActionsEnabled: true,
+          OKActions: [],
+          AlarmActions: [],
+          InsufficientDataActions: [],
+          StateValue: 'OK',
+          MetricName: 'CPUUtilization',
+          Namespace: 'AWS/ECS',
+          Statistic: 'Average',
+          Period: 300,
+          EvaluationPeriods: 1,
+          Threshold: 85,
+          ComparisonOperator: 'GreaterThanThreshold',
+        },
+      ],
+    });
+    ddbMock.on(QueryCommand)
+      .resolves({
+        Items: [],
+      });
+    projectExistedMock(ddbMock, true);
+    const res = await request(app).get(`/api/env/cloudwatch/alarms?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        totalCount: -1,
+        items: [],
       },
     });
 

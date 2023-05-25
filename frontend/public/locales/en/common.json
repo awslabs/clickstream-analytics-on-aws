@@ -11,7 +11,8 @@
     "projects": "Projects",
     "plugins": "Plugins",
     "createPlugin": "Create Plugin",
-    "registerApp": "Register Application"
+    "registerApp": "Register Application",
+    "alarms": "Alarms"
   },
   "nav": {
     "home": "Home",
@@ -232,7 +233,8 @@
     "confirm": "Confirm",
     "addPlugin": "Add Plugin",
     "enableAll": "Enable All",
-    "disableAll": "Disable All"
+    "disableAll": "Disable All",
+    "viewAlarms": "View Alarms"
   },
   "item": "item",
   "items": "items",
@@ -298,6 +300,15 @@
     "me-south-1": "Middle East (Bahrain)",
     "me-central-1": "Middle East (UAE)",
     "sa-east-1": "South America (São Paulo)"
+  },
+  "alarm": {
+    "alarms": "Alarms",
+    "alarmsList": "Alarms List",
+    "inAlarm": "In alarm",
+    "ok": "OK",
+    "insufficientData": "Insufficient Data",
+    "noAlarmInPipeline": "No Alarm configuration in this project",
+    "projectNoPipeline": "This project did not configure pipeline"
   },
   "nextPage": "Next page",
   "prePage": "Previous page",

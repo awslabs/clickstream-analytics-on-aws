@@ -32,7 +32,10 @@ import { listHostedZones } from '../store/aws/route53';
 import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
 import { listSecrets } from '../store/aws/secretsmanager';
 import { AssumeUploadRole } from '../store/aws/sts';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
+const store: ClickStreamStore = new DynamoDbStore();
 
 export class EnvironmentServ {
 
@@ -252,8 +255,16 @@ export class EnvironmentServ {
 
   public async alarms(req: any, res: any, next: any) {
     try {
-      const { region, pid, pageNumber, pageSize } = req.query;
-      const result = await describeAlarmsByProjectId(region, pid);
+      const { pid, pageNumber, pageSize } = req.query;
+      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc', false, 1, 1);
+      if (latestPipelines.totalCount === 0) {
+        return res.json(new ApiSuccess({
+          totalCount: -1,
+          items: [],
+        }));
+      }
+      const latestPipeline = latestPipelines.items[0];
+      const result = await describeAlarmsByProjectId(latestPipeline.region, pid);
       return res.json(new ApiSuccess({
         totalCount: result.length,
         items: paginateData(result, true, pageSize, pageNumber),

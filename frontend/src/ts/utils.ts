@@ -128,3 +128,9 @@ export const extractAccountIdFromArn = (arn: string) => {
   const matchResult = arn.match(regex);
   return matchResult ? matchResult[1] : '';
 };
+
+export const extractRegionFromCloudWatchArn = (arn: string) => {
+  const regex = /^arn:aws.*:cloudwatch:(\w{2}-\w{1,10}-\d):[0-9]{12}:/;
+  const matchResult = arn.match(regex);
+  return matchResult ? matchResult[1] : '';
+};

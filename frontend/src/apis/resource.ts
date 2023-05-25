@@ -154,7 +154,6 @@ const getSTSUploadRole = async () => {
 };
 
 const getAlarmList = async (params: {
-  region: string;
   pid: string;
   pageNumber: number;
   pageSize: number;
