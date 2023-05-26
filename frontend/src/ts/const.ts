@@ -363,6 +363,16 @@ export const AWS_REGION_MAP: AWSRegionMap = {
     RegionName: 'region.sa-east-1',
     OptInStatus: 'opt-in-not-required',
   },
+  'cn-north-1': {
+    Endpoint: 'ec2.cn-north-1.amazonaws.cn',
+    RegionName: 'region.cn-north-1',
+    OptInStatus: 'opt-in-not-required',
+  },
+  'cn-northwest-1': {
+    Endpoint: 'ec2.cn-northwest-1.amazonaws.cn',
+    RegionName: 'region.cn-northwest-1',
+    OptInStatus: 'opt-in-not-required',
+  },
 };
 
 export const CLOUDFORMATION_STATUS_MAP: any = {
