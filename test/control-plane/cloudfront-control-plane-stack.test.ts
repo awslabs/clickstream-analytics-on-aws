@@ -224,7 +224,6 @@ describe('CloudFrontS3PotalStack', () => {
     );
   });
 
-
   test('at least two BucketDeployment sources', () => {
 
     const capture = new Capture();
@@ -838,7 +837,6 @@ describe('CloudFrontS3PotalStack', () => {
 
   });
 
-
   test('Test security responose headers ', () => {
     const app = new App();
 
@@ -925,6 +923,39 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
     }, 1);
+  });
+
+  test('Test CloudFront loging function ', () => {
+    const app = new App();
+
+    //WHEN
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+      targetToCNRegions: false,
+    });
+    const template = Template.fromStack(portalStack);
+
+    template.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        Logging: {
+          'Fn::If': [
+            'cloudfrontcontrolplanenotOpsInRegionFA8E79C7',
+            {
+              Bucket: {
+                'Fn::GetAtt': [
+                  'ClickstreamSolutionDataBucket200465FE',
+                  'RegionalDomainName',
+                ],
+              },
+              Prefix: 'cloudfront-access-log',
+            },
+            {
+              Ref: 'AWS::NoValue',
+            },
+          ],
+        },
+      },
+    }
+    , 1);
   });
 
 });

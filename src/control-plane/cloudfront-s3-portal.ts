@@ -21,7 +21,7 @@ import {
   Aws,
   Stack,
   Duration,
-  AssetHashType, IResolvable,
+  AssetHashType, IResolvable, CfnCondition,
 } from 'aws-cdk-lib';
 import { ICertificate, DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -282,6 +282,28 @@ export class CloudFrontS3Portal extends Construct {
         };
       }
 
+      const notOpsInRegion = new CfnCondition(this, 'notOpsInRegion', {
+        expression: Fn.conditionOr(
+          Fn.conditionEquals(Aws.REGION, 'us-east-1'),
+          Fn.conditionEquals(Aws.REGION, 'us-east-2'),
+          Fn.conditionEquals(Aws.REGION, 'us-west-1'),
+          Fn.conditionEquals(Aws.REGION, 'us-west-2'),
+          Fn.conditionEquals(Aws.REGION, 'ap-south-1'),
+          Fn.conditionEquals(Aws.REGION, 'ap-northeast-1'),
+          Fn.conditionEquals(Aws.REGION, 'ap-northeast-2'),
+          Fn.conditionEquals(Aws.REGION, 'ap-northeast-3'),
+          Fn.conditionEquals(Aws.REGION, 'ap-southeast-1'),
+          Fn.conditionEquals(Aws.REGION, 'ap-southeast-2'),
+          Fn.conditionEquals(Aws.REGION, 'ca-central-1'),
+          Fn.conditionEquals(Aws.REGION, 'eu-central-1'),
+          Fn.conditionEquals(Aws.REGION, 'eu-west-1'),
+          Fn.conditionEquals(Aws.REGION, 'eu-west-2'),
+          Fn.conditionEquals(Aws.REGION, 'eu-west-3'),
+          Fn.conditionEquals(Aws.REGION, 'eu-north-1'),
+          Fn.conditionEquals(Aws.REGION, 'sa-east-1'),
+        ),
+      });
+
       this.distribution = new Distribution(this, 'PortalDistribution', {
         certificate,
         minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2019,
@@ -303,13 +325,20 @@ export class CloudFrontS3Portal extends Construct {
         defaultRootObject: 'index.html',
         priceClass: PriceClass.PRICE_CLASS_ALL,
         enableIpv6: props.distributionProps?.enableIpv6 ?? false,
-        enableLogging: props.distributionProps?.logProps?.enableAccessLog,
-        logBucket: this.logBucket,
-        logFilePrefix: props.distributionProps?.logProps?.prefix ?? 'cloudfront-access-log',
         comment: distributionDescription,
       });
 
       const portalDist = this.distribution.node.defaultChild as CfnDistribution;
+
+      if (props.distributionProps?.logProps?.enableAccessLog) {
+        (portalDist.distributionConfig as any).logging =
+        Fn.conditionIf(notOpsInRegion.logicalId, {
+          Bucket: this.logBucket.bucketRegionalDomainName,
+          Prefix: props.distributionProps?.logProps?.prefix ?? 'cloudfront-access-log',
+        }, Aws.NO_VALUE);
+      } else {
+        (portalDist.distributionConfig as any).logging = Aws.NO_VALUE;
+      }
 
       addCfnNagSuppressRules(
         portalDist,
