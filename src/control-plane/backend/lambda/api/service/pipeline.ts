@@ -62,30 +62,39 @@ export class PipelineServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
-      const { pid } = req.query;
+      const { pid, cache } = req.query;
       const latestPipeline = await store.getPipeline(pid, id);
       if (!latestPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const stackManager: StackManager = new StackManager(latestPipeline);
-      latestPipeline.status = await stackManager.getPipelineStatus();
-      await store.updatePipelineAtCurrentVersion(latestPipeline);
-      const pipeline = new CPipeline(latestPipeline);
-      const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
-        PipelineStackType.INGESTION,
-        [
-          OUTPUT_INGESTION_SERVER_URL_SUFFIX,
-          OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
-        ],
-      );
-      const dashboards = await pipeline.getReportDashboardsUrl();
-      const metricsDashboardName = await pipeline.getMetricsDashboardName();
+      if (!cache || cache === 'false') {
+        const stackManager: StackManager = new StackManager(latestPipeline);
+        latestPipeline.status = await stackManager.getPipelineStatus();
+        await store.updatePipelineAtCurrentVersion(latestPipeline);
+        const pipeline = new CPipeline(latestPipeline);
+        const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
+          PipelineStackType.INGESTION,
+          [
+            OUTPUT_INGESTION_SERVER_URL_SUFFIX,
+            OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
+          ],
+        );
+        const dashboards = await pipeline.getReportDashboardsUrl();
+        const metricsDashboardName = await pipeline.getMetricsDashboardName();
+        return res.json(new ApiSuccess({
+          ...latestPipeline,
+          endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+          dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+          dashboards,
+          metricsDashboardName,
+        }));
+      }
       return res.json(new ApiSuccess({
         ...latestPipeline,
-        endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
-        dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
-        dashboards,
-        metricsDashboardName,
+        endpoint: null,
+        dns: null,
+        dashboards: null,
+        metricsDashboardName: null,
       }));
     } catch (error) {
       next(error);
@@ -97,14 +106,15 @@ export class PipelineServ {
       const { projectId } = req.body;
       req.body.id = projectId;
       req.body.operator = res.get('X-Click-Stream-Operator');
-      let pipeline: IPipeline = req.body;
+      let body: IPipeline = req.body;
       // Read current version from db
-      const curPipeline = await store.getPipeline(pipeline.id, pipeline.pipelineId);
+      const curPipeline = await store.getPipeline(body.id, body.pipelineId);
       if (!curPipeline) {
         return res.status(404).send(new ApiFail('Pipeline resource does not exist.'));
       }
-      await store.updatePipeline(pipeline, curPipeline);
-      return res.status(201).send(new ApiSuccess(null, 'Pipeline updated.'));
+      const newPipeline = new CPipeline(body);
+      await newPipeline.update(curPipeline);
+      return res.status(201).send(new ApiSuccess({ id: body.pipelineId }, 'Pipeline updated.'));
     } catch (error) {
       next(error);
     }

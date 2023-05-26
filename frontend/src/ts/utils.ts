@@ -12,7 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { ExecutionType } from './const';
+import { EPipelineStatus, ExecutionType } from './const';
 
 export const generateStr = (length: number) => {
   let randomString = '';
@@ -109,6 +109,28 @@ export const generateCronDateRange = (
   }
 };
 
+export const reverseCronDateRange = (value: string) => {
+  if (value.startsWith('cron')) {
+    return {
+      value: value.substring(5, value.length - 1),
+      unit: '',
+      type: ExecutionType.CRON_EXPRESS,
+    } as ICronFixed;
+  } else {
+    const indexSpace = value.indexOf(' ');
+    const fixedValue = value.substring(5, indexSpace);
+    let fixedUnitStr = value.substring(indexSpace + 1, value.length - 1);
+    if (fixedUnitStr.endsWith('s')) {
+      fixedUnitStr = fixedUnitStr.substring(0, fixedUnitStr.length - 1);
+    }
+    return {
+      value: fixedValue,
+      unit: fixedUnitStr,
+      type: ExecutionType.FIXED_RATE,
+    } as ICronFixed;
+  }
+};
+
 export const generateRedshiftInterval = (value?: number, unit?: string) => {
   if (value) {
     if (unit === 'month') {
@@ -123,14 +145,71 @@ export const generateRedshiftInterval = (value?: number, unit?: string) => {
   }
 };
 
+export const reverseRedshiftInterval = (value: number) => {
+  if (value) {
+    if (value / (60 * 24 * 30) >= 1 && value % (60 * 24 * 30) === 0) {
+      return {
+        value: (value / (60 * 24 * 30)).toString(),
+        unit: 'month',
+      } as IInterval;
+    }
+    if (value / (60 * 24) >= 1 && value % (60 * 24) === 0) {
+      return {
+        value: (value / (60 * 24)).toString(),
+        unit: 'day',
+      } as IInterval;
+    }
+  }
+  return {
+    value: '0',
+    unit: 'day',
+  } as IInterval;
+};
+
+export const reverseFreshnessInHour = (value: number) => {
+  if (value) {
+    if (value / 24 >= 1 && value % 24 === 0) {
+      return {
+        value: (value / 24).toString(),
+        unit: 'day',
+      } as IInterval;
+    }
+    return {
+      value: value.toString(),
+      unit: 'hour',
+    } as IInterval;
+  }
+  return {
+    value: '0',
+    unit: 'hour',
+  } as IInterval;
+};
+
 export const extractAccountIdFromArn = (arn: string) => {
   const regex = /^arn:aws.*:redshift-serverless:[^:]+:([0-9]{12}):/;
   const matchResult = arn.match(regex);
   return matchResult ? matchResult[1] : '';
 };
 
+export const isEmpty = (a: any) => {
+  if (a === '') return true; //Verify empty string
+  if (a === 'null') return true; //Verify null string
+  if (a === 'undefined') return true; //Verify undefined string
+  if (!a && a !== 0 && a !== '') return true; //Verify undefined and null
+  // eslint-disable-next-line no-prototype-builtins
+  if (Array.prototype.isPrototypeOf(a) && a.length === 0) return true; //Verify empty array
+  // eslint-disable-next-line no-prototype-builtins
+  if (Object.prototype.isPrototypeOf(a) && Object.keys(a).length === 0)
+    return true; //Verify empty objects
+  return false;
+};
+
 export const extractRegionFromCloudWatchArn = (arn: string) => {
   const regex = /^arn:aws.*:cloudwatch:(\w{2}-\w{1,10}-\d):[0-9]{12}:/;
   const matchResult = arn.match(regex);
   return matchResult ? matchResult[1] : '';
+};
+
+export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
+  return update && pipelineInfo?.status?.status !== EPipelineStatus.Failed;
 };

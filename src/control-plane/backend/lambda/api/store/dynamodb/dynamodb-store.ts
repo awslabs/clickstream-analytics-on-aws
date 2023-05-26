@@ -24,7 +24,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { marshall, NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { docClient } from '../../common/dynamodb-client';
+import { docClient, marshallOptions } from '../../common/dynamodb-client';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication, IApplicationList } from '../../model/application';
@@ -439,16 +439,8 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async updatePipeline(pipeline: IPipeline, curPipeline: IPipeline): Promise<void> {
     // Update new pipeline && Backup the current pipeline
-    const marshallCurPipeline = marshall(curPipeline, {
-      convertEmptyValues: true,
-      removeUndefinedValues: true,
-      convertClassInstanceToMap: true,
-    });
-    const marshallPipeline = marshall(pipeline, {
-      convertEmptyValues: true,
-      removeUndefinedValues: true,
-      convertClassInstanceToMap: true,
-    });
+    const marshallCurPipeline = marshall(curPipeline, marshallOptions);
+    const marshallPipeline = marshall(pipeline, marshallOptions);
     const params: TransactWriteItemsCommand = new TransactWriteItemsCommand({
       TransactItems: [
         {

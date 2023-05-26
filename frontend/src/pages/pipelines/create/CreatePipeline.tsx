@@ -12,20 +12,41 @@
  */
 
 import { AppLayout, Wizard } from '@cloudscape-design/components';
-import { createProjectPipeline } from 'apis/pipeline';
+import {
+  createProjectPipeline,
+  getPipelineDetail,
+  updateProjectPipeline,
+} from 'apis/pipeline';
+import { getPluginList } from 'apis/plugin';
+import {
+  get3AZVPCList,
+  getCertificates,
+  getMSKList,
+  getQuickSightUsers,
+  getRedshiftCluster,
+  getSSMSecrets,
+  getSecurityGroups,
+  getSubnetList,
+  getVPCList,
+} from 'apis/resource';
+import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import { AppContext } from 'context/AppContext';
 import cloneDeep from 'lodash/cloneDeep';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  AWS_REGION_MAP,
   DEFAULT_KDS_BATCH_SIZE,
   DEFAULT_KDS_SINK_INTERVAL,
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
+  EXCUTION_UNIT_LIST,
+  EXECUTION_TYPE_LIST,
   ExecutionType,
+  KDS_TYPE,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -35,13 +56,21 @@ import {
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
   ProtocalType,
+  REDSHIFT_CAPACITY_LIST,
+  REDSHIFT_UNIT_LIST,
   ResourceCreateMehod,
+  SDK_LIST,
   SinkType,
 } from 'ts/const';
+import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   extractAccountIdFromArn,
   generateCronDateRange,
   generateRedshiftInterval,
+  isEmpty,
+  reverseCronDateRange,
+  reverseFreshnessInHour,
+  reverseRedshiftInterval,
 } from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
@@ -49,7 +78,13 @@ import DataProcessing from './steps/DataProcessing';
 import Reporting from './steps/Reporting';
 import ReviewAndLaunch from './steps/ReviewAndLaunch';
 
-const Content: React.FC = () => {
+interface ContentProps {
+  update?: boolean;
+  updatePipeline?: IExtPipeline;
+}
+
+const Content: React.FC<ContentProps> = (props: ContentProps) => {
+  const { update, updatePipeline } = props;
   const { projectId } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -80,194 +115,31 @@ const Content: React.FC = () => {
   const [acknowledgedHTTPSecurity, setAcknowledgedHTTPSecurity] =
     useState(true);
 
-  const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>({
-    projectId: projectId ?? ''.toString(),
-    appIds: [],
-    region: 'us-east-1',
-    dataCollectionSDK: '',
-    tags: [
-      {
-        key: 'aws-solution/name',
-        value: 'Clickstream',
-        existing: true,
-      },
-      {
-        key: 'aws-solution/version',
-        value: appConfig?.solution_version,
-        existing: true,
-      },
-      {
-        key: 'aws-solution/clickstream/project',
-        value: projectId,
-        existing: true,
-      },
-    ],
-    network: {
-      vpcId: '',
-      publicSubnetIds: [],
-      privateSubnetIds: [],
-    },
-    bucket: {
-      name: '',
-      prefix: '',
-    },
-    ingestionServer: {
-      size: {
-        serverMin: 2,
-        serverMax: 4,
-        warmPoolSize: 1,
-        scaleOnCpuUtilizationPercent: 50,
-      },
-      domain: {
-        domainName: '',
-        certificateArn: '',
-      },
-      loadBalancer: {
-        serverEndpointPath: '/collect',
-        serverCorsOrigin: '',
-        protocol: ProtocalType.HTTPS,
-        enableGlobalAccelerator: false,
-        enableApplicationLoadBalancerAccessLog: false,
-        authenticationSecretArn: '',
-        logS3Bucket: {
-          name: '',
-          prefix: '',
-        },
-        notificationsTopicArn: '',
-      },
-      sinkType: SinkType.MSK,
-      sinkBatch: {
-        size: 50000,
-        intervalSeconds: 3000,
-      },
-      sinkS3: {
-        sinkBucket: {
-          name: '',
-          prefix: '',
-        },
-        s3BufferSize: 10,
-        s3BufferInterval: 300,
-      },
-      sinkKafka: {
-        brokers: [],
-        topic: '',
-        securityGroupId: '',
-        mskCluster: {
-          name: '',
-          arn: '',
-        },
-        kafkaConnector: {
-          enable: true,
-        },
-      },
-      sinkKinesis: {
-        kinesisStreamMode: '',
-        kinesisShardCount: 2,
-        sinkBucket: {
-          name: '',
-          prefix: '',
-        },
-      },
-    },
-    etl: {
-      dataFreshnessInHour: 72,
-      scheduleExpression: '',
-      sourceS3Bucket: {
-        name: '',
-        prefix: '',
-      },
-      sinkS3Bucket: {
-        name: '',
-        prefix: '',
-      },
-      pipelineBucket: {
-        name: '',
-        prefix: '',
-      },
-      transformPlugin: '',
-      enrichPlugin: [],
-    },
-    dataAnalytics: {
-      athena: false,
-      redshift: {
-        dataRange: '',
-        provisioned: {
-          clusterIdentifier: '',
-          dbUser: '',
-        },
-        newServerless: {
-          network: {
-            vpcId: '',
-            subnetIds: [],
-            securityGroups: [],
-          },
-          baseCapacity: 16,
-        },
-      },
-      loadWorkflow: {
-        loadJobScheduleIntervalExpression: '',
-      },
-      upsertUsers: {
-        scheduleExpression: '',
-      },
-    },
-    selectedRegion: null,
-    selectedVPC: null,
-    selectedSDK: null,
-    selectedPublicSubnet: [],
-    selectedPrivateSubnet: [],
-    selectedCertificate: null,
-    selectedSecret: null,
-    mskCreateMethod: ResourceCreateMehod.EXSITING,
-    selectedMSK: null,
-    selectedSelfHostedMSKSG: null,
-    seledtedKDKProvisionType: null,
-    kafkaSelfHost: false,
-    kafkaBrokers: '',
-
-    enableDataProcessing: true,
-    scheduleExpression: '',
-
-    exeCronExp: '',
-    excutionFixedValue: '1',
-    enableRedshift: true,
-    enableAthena: false,
-    eventFreshValue: '3',
-    redshiftExecutionValue: '6',
-
-    selectedExcutionType: null,
-    selectedExcutionUnit: null,
-    selectedEventFreshUnit: null,
-    selectedRedshiftCluster: null,
-    selectedRedshiftRole: null,
-    selectedRedshiftExecutionUnit: null,
-
-    selectedTransformPlugins: [],
-    selectedEnrichPlugins: [],
-    enableReporting: true,
-    selectedQuickSightUser: null,
-    arnAccountId: '',
-    report: {
-      quickSight: {
-        accountName: '',
-        user: '',
-      },
-    },
-    enableAuthentication: false,
-    redshiftType: 'serverless',
-    redshiftBaseCapacity: null,
-    redshiftServerlessVPC: null,
-    redshiftServerlessSG: [],
-    redshiftServerlessSubnets: [],
-    redshiftDataLoadValue: '5',
-    redshiftDataLoadUnit: null,
-    redshiftUpsertFreqValue: '1',
-    redshiftUpsertFreqUnit: null,
-    selectedUpsertType: null,
-    upsertCronExp: '',
-    selectedDataLoadType: null,
-    dataLoadCronExp: '',
-  });
+  const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>(
+    updatePipeline
+      ? updatePipeline
+      : {
+          ...INIT_EXT_PIPELINE_DATA,
+          projectId: projectId ?? ''.toString(),
+          tags: [
+            {
+              key: 'aws-solution/name',
+              value: 'Clickstream',
+              existing: true,
+            },
+            {
+              key: 'aws-solution/version',
+              value: appConfig?.solution_version,
+              existing: true,
+            },
+            {
+              key: 'aws-solution/clickstream/project',
+              value: projectId,
+              existing: true,
+            },
+          ],
+        }
+  );
 
   const validateBasicInfo = () => {
     if (!pipelineInfo.selectedRegion) {
@@ -326,7 +198,7 @@ const Content: React.FC = () => {
 
     const sinkIntervalNum =
       pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
-    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch.size;
+    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch?.size;
     if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
       // check kds batch interval
       if (
@@ -386,7 +258,7 @@ const Content: React.FC = () => {
       createPipelineObj.etl.dataFreshnessInHour =
         pipelineInfo.selectedEventFreshUnit?.value === 'day'
           ? parseInt(pipelineInfo.eventFreshValue) * 24
-          : pipelineInfo.eventFreshValue || 72;
+          : parseInt(pipelineInfo.eventFreshValue) || 72;
 
       createPipelineObj.etl.scheduleExpression = generateCronDateRange(
         pipelineInfo.selectedExcutionType?.value,
@@ -533,10 +405,20 @@ const Content: React.FC = () => {
 
     setLoadingCreate(true);
     try {
-      const { success, data }: ApiResponse<ResponseCreate> =
-        await createProjectPipeline(createPipelineObj);
-      if (success && data.id) {
-        navigate(`/project/detail/${projectId}`);
+      if (!update) {
+        const { success, data }: ApiResponse<ResponseCreate> =
+          await createProjectPipeline(createPipelineObj);
+        if (success && data.id) {
+          navigate(`/project/detail/${projectId}`);
+        }
+      } else {
+        const { success, data }: ApiResponse<ResponseCreate> =
+          await updateProjectPipeline(createPipelineObj);
+        if (success && data.id) {
+          navigate(
+            `/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`
+          );
+        }
       }
       setLoadingCreate(false);
     } catch (error) {
@@ -554,7 +436,7 @@ const Content: React.FC = () => {
         cancelButton: t('button.cancel') || '',
         previousButton: t('button.previous') || '',
         nextButton: t('button.next') || '',
-        submitButton: t('button.create'),
+        submitButton: update ? t('button.save') : t('button.create'),
         optional: t('optional') || 'optional',
       }}
       onNavigate={({ detail }) => {
@@ -590,6 +472,7 @@ const Content: React.FC = () => {
           title: t('pipeline:create.basicInfo'),
           content: (
             <BasicInformation
+              update={update}
               regionEmptyError={regionEmptyError}
               vpcEmptyError={vpcEmptyError}
               sdkEmptyError={sdkEmptyError}
@@ -693,6 +576,7 @@ const Content: React.FC = () => {
           title: t('pipeline:create.configIngestion'),
           content: (
             <ConfigIngestion
+              update={update}
               pipelineInfo={pipelineInfo}
               publicSubnetError={publicSubnetError}
               privateSubnetError={privateSubnetError}
@@ -1170,6 +1054,7 @@ const Content: React.FC = () => {
           isOptional: true,
           content: (
             <DataProcessing
+              update={update}
               pipelineInfo={pipelineInfo}
               dataProcessorIntervalInvalidError={
                 dataProcessorIntervalInvalidError
@@ -1499,6 +1384,7 @@ const Content: React.FC = () => {
           isOptional: true,
           content: (
             <Reporting
+              update={update}
               pipelineInfo={pipelineInfo}
               changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {
@@ -1530,7 +1416,7 @@ const Content: React.FC = () => {
                     report: {
                       ...prev.report,
                       quickSight: {
-                        ...prev.report.quickSight,
+                        ...prev.report?.quickSight,
                         accountName: name,
                       },
                     },
@@ -1549,22 +1435,665 @@ const Content: React.FC = () => {
   );
 };
 
-const CreatePipeline: React.FC = () => {
+interface CreatePipelineProps {
+  update?: boolean;
+}
+
+const CreatePipeline: React.FC<CreatePipelineProps> = (
+  props: CreatePipelineProps
+) => {
   const { t } = useTranslation();
+  const { update } = props;
+  const { id, pid } = useParams();
+
+  const [loadingData, setLoadingData] = useState(false);
+  const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
+
   const breadcrumbItems = [
     {
       text: t('breadCrumb.name'),
       href: '/',
     },
     {
-      text: t('breadCrumb.createPipeline'),
+      text: update
+        ? t('breadCrumb.updatePipeline')
+        : t('breadCrumb.createPipeline'),
       href: '/',
     },
   ];
+  const setUpdateRegion = async (pipelineInfo: IExtPipeline) => {
+    pipelineInfo.selectedRegion = {
+      label: AWS_REGION_MAP[pipelineInfo.region]?.RegionName
+        ? t(AWS_REGION_MAP[pipelineInfo.region].RegionName) || ''
+        : '-',
+      labelTag: pipelineInfo.region,
+      value: pipelineInfo.region,
+    };
+  };
+  const setUpdateVpc = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+        region: pipelineInfo.region,
+      });
+      if (success) {
+        const selectVpc = data.filter(
+          (element) => element.id === pipelineInfo.network.vpcId
+        )[0];
+        pipelineInfo.selectedVPC = {
+          label: `${selectVpc.name}(${selectVpc.id})`,
+          value: selectVpc.id,
+          description: selectVpc.cidr,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateSDK = async (pipelineInfo: IExtPipeline) => {
+    pipelineInfo.selectedSDK = SDK_LIST.filter(
+      (sdk) => sdk.value === pipelineInfo.dataCollectionSDK
+    )[0];
+  };
+  const setUpdateSubnetList = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<SubnetResponse[]> =
+        await getSubnetList({
+          region: pipelineInfo.region,
+          vpcId: pipelineInfo.network.vpcId,
+        });
+      if (success) {
+        const publicSubnets = data.filter((element) =>
+          pipelineInfo.network.publicSubnetIds.includes(element.id)
+        );
+        const privateSubnets = data.filter((element) =>
+          pipelineInfo.network.privateSubnetIds.includes(element.id)
+        );
+        pipelineInfo.selectedPublicSubnet = publicSubnets.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: `${element.availabilityZone}:${element.cidr}`,
+        }));
+        pipelineInfo.selectedPrivateSubnet = privateSubnets.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: `${element.availabilityZone}:${element.cidr}`,
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateCetificate = async (pipelineInfo: IExtPipeline) => {
+    try {
+      if (!pipelineInfo.ingestionServer.domain.certificateArn) {
+        return;
+      }
+      const { success, data }: ApiResponse<CetificateResponse[]> =
+        await getCertificates({ region: pipelineInfo.region });
+      if (success) {
+        const selectCert = data.filter(
+          (element) =>
+            element.arn === pipelineInfo.ingestionServer.domain.certificateArn
+        )[0];
+        pipelineInfo.selectedCertificate = {
+          label: selectCert.domain,
+          value: selectCert.arn,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateSSMSecret = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const enableAuthentication =
+        pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn !==
+          null &&
+        pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn !==
+          '';
+      pipelineInfo.enableAuthentication = enableAuthentication;
+      if (!enableAuthentication) {
+        return;
+      }
+      const { success, data }: ApiResponse<SSMSecretRepoose[]> =
+        await getSSMSecrets({ region: pipelineInfo.region });
+      if (success) {
+        const selectSecret = data.filter(
+          (element) =>
+            element.arn ===
+            pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn
+        )[0];
+        pipelineInfo.selectedSecret = {
+          label: selectSecret.name,
+          value: selectSecret.arn,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateMSKCluster = async (pipelineInfo: IExtPipeline) => {
+    try {
+      if (
+        pipelineInfo.ingestionServer.sinkType !== 'kafka' ||
+        pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn === null
+      ) {
+        return;
+      }
+      pipelineInfo.mskCreateMethod = ResourceCreateMehod.EXSITING;
+      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
+        vpcId: pipelineInfo.network.vpcId,
+        region: pipelineInfo.region,
+      });
+      if (success) {
+        const selectMsk = data.filter(
+          (element) =>
+            element.arn ===
+            pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
+        )[0];
+        pipelineInfo.selectedMSK = {
+          label: selectMsk.name,
+          value: selectMsk.arn,
+          description: `Authentication: ${selectMsk.authentication.join(',')}`,
+          labelTag: selectMsk.type,
+          iconAlt: selectMsk.arn,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateKafkaSelfHosted = async (pipelineInfo: IExtPipeline) => {
+    try {
+      if (
+        pipelineInfo.ingestionServer.sinkType !== 'kafka' ||
+        pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn !== null
+      ) {
+        return;
+      }
+      pipelineInfo.mskCreateMethod = ResourceCreateMehod.CREATE;
+      pipelineInfo.kafkaBrokers =
+        pipelineInfo.ingestionServer.sinkKafka.brokers.join(',');
+      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+        await getSecurityGroups({
+          region: pipelineInfo.region,
+          vpcId: pipelineInfo.network.vpcId,
+        });
+      if (success) {
+        const selectSG = data.filter(
+          (element) =>
+            element.id ===
+            pipelineInfo.ingestionServer.sinkKafka.securityGroupId
+        )[0];
+        pipelineInfo.selectedSelfHostedMSKSG = {
+          label: `${selectSG.name}(${selectSG.id})`,
+          value: selectSG.id,
+          description: selectSG.description,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateKDSType = async (pipelineInfo: IExtPipeline) => {
+    if (pipelineInfo.ingestionServer.sinkType !== 'kinesis') {
+      return;
+    }
+    pipelineInfo.seledtedKDKProvisionType = KDS_TYPE.filter(
+      (kds) =>
+        kds.value === pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode
+    )[0];
+  };
+  const setUpdateListPlugins = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+        await getPluginList({
+          pageNumber: 1,
+          pageSize: 1000,
+        });
+      if (success) {
+        pipelineInfo.selectedTransformPlugins = data.items.filter(
+          (item) => item.id === pipelineInfo.etl.transformPlugin
+        );
+        pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
+          pipelineInfo.etl.enrichPlugin.includes(item.id || '')
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateNewServerlessVpc = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<VPCResponse[]> = await get3AZVPCList(
+        {
+          region: pipelineInfo.region,
+        }
+      );
+      if (success) {
+        const selectVpc = data.filter(
+          (element) =>
+            element.id ===
+            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId
+        )[0];
+        pipelineInfo.redshiftServerlessVPC = {
+          label: `${selectVpc.name}(${selectVpc.id})`,
+          value: selectVpc.id,
+          description: selectVpc.cidr,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateNewServerlessSG = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+        await getSecurityGroups({
+          region: pipelineInfo.region,
+          vpcId:
+            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId,
+        });
+      if (success) {
+        const selectSGs = data.filter((element) =>
+          pipelineInfo.dataAnalytics.redshift.newServerless.network.securityGroups.includes(
+            element.id
+          )
+        );
+        pipelineInfo.redshiftServerlessSG = selectSGs.map((element) => ({
+          label: `${element.name}(${element.id})`,
+          value: element.id,
+          description: element.description,
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateNewServerlessSubnets = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<SubnetResponse[]> =
+        await getSubnetList({
+          region: pipelineInfo.region,
+          vpcId:
+            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId,
+        });
+      if (success) {
+        const selectSubnets = data.filter((element) =>
+          pipelineInfo.dataAnalytics.redshift.newServerless.network.subnetIds.includes(
+            element.id
+          )
+        );
+        pipelineInfo.redshiftServerlessSubnets = selectSubnets.map(
+          (element) => ({
+            label: `${element.name}(${element.id})`,
+            value: element.id,
+            description: `${element.availabilityZone}:${element.cidr}(${element.type})`,
+          })
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateProvisionedRedshiftCluster = async (
+    pipelineInfo: IExtPipeline
+  ) => {
+    try {
+      const { success, data }: ApiResponse<RedshiftResponse[]> =
+        await getRedshiftCluster({
+          region: pipelineInfo.region,
+          vpcId: pipelineInfo.network.vpcId,
+        });
+      if (success) {
+        const selectCluster = data.filter(
+          (element) =>
+            element.name ===
+            pipelineInfo.dataAnalytics.redshift.provisioned.clusterIdentifier
+        )[0];
+        pipelineInfo.selectedRedshiftCluster = {
+          label: selectCluster.name,
+          value: selectCluster.name,
+          description: selectCluster.endpoint.Address,
+          labelTag: selectCluster.status,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const setUpdateETL = async (pipelineInfo: IExtPipeline) => {
+    if (!pipelineInfo.enableDataProcessing) {
+      return;
+    }
+    const reverseScheduleExpression = reverseCronDateRange(
+      pipelineInfo.etl.scheduleExpression
+    );
+    pipelineInfo.selectedExcutionType = EXECUTION_TYPE_LIST.filter(
+      (type) => type.value === reverseScheduleExpression.type
+    )[0];
+    if (reverseScheduleExpression.type === ExecutionType.FIXED_RATE) {
+      pipelineInfo.excutionFixedValue = reverseScheduleExpression.value;
+      pipelineInfo.selectedExcutionUnit = EXCUTION_UNIT_LIST.filter(
+        (type) => type.value === reverseScheduleExpression.unit
+      )[0];
+    } else {
+      pipelineInfo.exeCronExp = reverseScheduleExpression.value;
+    }
+
+    const reverseFreshness = reverseFreshnessInHour(
+      pipelineInfo.etl.dataFreshnessInHour
+    );
+    pipelineInfo.eventFreshValue = reverseFreshness.value;
+    pipelineInfo.selectedEventFreshUnit = {
+      label: reverseFreshness.unit === 'hour' ? 'Hours' : 'Days',
+      value: reverseFreshness.unit,
+    };
+    setUpdateListPlugins(pipelineInfo);
+
+    pipelineInfo.enableRedshift = pipelineInfo.dataAnalytics.redshift !== null;
+    pipelineInfo.enableAthena = pipelineInfo.dataAnalytics.athena !== null;
+
+    pipelineInfo.redshiftType =
+      pipelineInfo.dataAnalytics.redshift.newServerless !== null
+        ? 'serverless'
+        : 'provisioned';
+    if (pipelineInfo.redshiftType === 'serverless') {
+      pipelineInfo.redshiftBaseCapacity = REDSHIFT_CAPACITY_LIST.filter(
+        (type) =>
+          type.value ===
+          pipelineInfo.dataAnalytics.redshift.newServerless.baseCapacity.toString()
+      )[0];
+      setUpdateNewServerlessVpc(pipelineInfo);
+      setUpdateNewServerlessSG(pipelineInfo);
+      setUpdateNewServerlessSubnets(pipelineInfo);
+    } else if (pipelineInfo.redshiftType === 'provisioned') {
+      setUpdateProvisionedRedshiftCluster(pipelineInfo);
+    }
+
+    const reverseRedshiftDataRange = reverseRedshiftInterval(
+      pipelineInfo.dataAnalytics.redshift.dataRange
+    );
+    pipelineInfo.redshiftExecutionValue = reverseRedshiftDataRange.value;
+    pipelineInfo.selectedRedshiftExecutionUnit = REDSHIFT_UNIT_LIST.filter(
+      (type) => type.value === reverseRedshiftDataRange.unit
+    )[0];
+
+    const reverseLoadJobScheduleExpression = reverseCronDateRange(
+      pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression
+    );
+    pipelineInfo.selectedDataLoadType = EXECUTION_TYPE_LIST.filter(
+      (type) => type.value === reverseLoadJobScheduleExpression.type
+    )[0];
+    if (reverseLoadJobScheduleExpression.type === ExecutionType.FIXED_RATE) {
+      pipelineInfo.redshiftDataLoadValue =
+        reverseLoadJobScheduleExpression.value;
+      pipelineInfo.redshiftDataLoadUnit = EXCUTION_UNIT_LIST.filter(
+        (type) => type.value === reverseLoadJobScheduleExpression.unit
+      )[0];
+    } else {
+      pipelineInfo.dataLoadCronExp = reverseLoadJobScheduleExpression.value;
+    }
+
+    const reverseUpsertUsersScheduleExpression = reverseCronDateRange(
+      pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression
+    );
+    pipelineInfo.selectedUpsertType = EXECUTION_TYPE_LIST.filter(
+      (type) => type.value === reverseUpsertUsersScheduleExpression.type
+    )[0];
+    if (
+      reverseUpsertUsersScheduleExpression.type === ExecutionType.FIXED_RATE
+    ) {
+      pipelineInfo.redshiftUpsertFreqValue =
+        reverseUpsertUsersScheduleExpression.value;
+      pipelineInfo.redshiftUpsertFreqUnit = EXCUTION_UNIT_LIST.filter(
+        (type) => type.value === reverseUpsertUsersScheduleExpression.unit
+      )[0];
+    } else {
+      pipelineInfo.upsertCronExp = reverseUpsertUsersScheduleExpression.value;
+    }
+  };
+
+  const setUpdateQuickSightUserList = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<QuickSightUserResponse[]> =
+        await getQuickSightUsers();
+      if (success) {
+        const selectUser = data.filter(
+          (element) => element.userName === pipelineInfo.report.quickSight.user
+        )[0];
+        pipelineInfo.selectedQuickSightUser = {
+          label: selectUser.userName,
+          value: selectUser.userName,
+          description: selectUser.email,
+          labelTag: selectUser.role,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const setUpdateReport = async (pipelineInfo: IExtPipeline) => {
+    if (!pipelineInfo.enableReporting) {
+      return;
+    }
+    if (pipelineInfo.report.quickSight.user) {
+      setUpdateQuickSightUserList(pipelineInfo);
+    }
+  };
+  const getDefaultExtPipeline = (data: IExtPipeline): IExtPipeline => {
+    const res: IExtPipeline = {
+      ...INIT_EXT_PIPELINE_DATA,
+      id: data.id ?? '',
+      type: data.type ?? '',
+      prefix: data.prefix ?? '',
+      projectId: data.projectId ?? '',
+      pipelineId: data.pipelineId ?? '',
+      region: data.region ?? '',
+      dataCollectionSDK: data.dataCollectionSDK ?? '',
+      tags: data.tags ?? [],
+      network: {
+        vpcId: data.network.vpcId ?? '',
+        publicSubnetIds: data.network.publicSubnetIds ?? [],
+        privateSubnetIds: data.network.privateSubnetIds ?? [],
+      },
+      bucket: {
+        name: data.bucket?.name ?? '',
+        prefix: data.bucket?.prefix ?? '',
+      },
+      ingestionServer: {
+        size: {
+          serverMin: data.ingestionServer.size.serverMin ?? 2,
+          serverMax: data.ingestionServer.size.serverMax ?? 4,
+          warmPoolSize: data.ingestionServer.size.warmPoolSize ?? 1,
+          scaleOnCpuUtilizationPercent:
+            data.ingestionServer.size.scaleOnCpuUtilizationPercent ?? 50,
+        },
+        domain: {
+          domainName: data.ingestionServer.domain.domainName ?? '',
+          certificateArn: data.ingestionServer.domain.certificateArn ?? '',
+        },
+        loadBalancer: {
+          serverEndpointPath:
+            data.ingestionServer.loadBalancer.serverEndpointPath ?? '/collect',
+          serverCorsOrigin:
+            data.ingestionServer.loadBalancer.serverCorsOrigin ?? '',
+          protocol:
+            data.ingestionServer.loadBalancer.protocol ?? ProtocalType.HTTPS,
+          enableGlobalAccelerator:
+            data.ingestionServer.loadBalancer.enableGlobalAccelerator ?? false,
+          enableApplicationLoadBalancerAccessLog:
+            data.ingestionServer.loadBalancer
+              .enableApplicationLoadBalancerAccessLog ?? false,
+          authenticationSecretArn:
+            data.ingestionServer.loadBalancer.authenticationSecretArn ?? '',
+          logS3Bucket: {
+            name: data.ingestionServer.loadBalancer.logS3Bucket.name ?? '',
+            prefix: data.ingestionServer.loadBalancer.logS3Bucket.prefix ?? '',
+          },
+          notificationsTopicArn:
+            data.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+        },
+        sinkType: data.ingestionServer.sinkType ?? SinkType.MSK,
+        sinkBatch: {
+          size: data.ingestionServer.sinkBatch?.size ?? 50000,
+          intervalSeconds:
+            data.ingestionServer.sinkBatch?.intervalSeconds ?? 3000,
+        },
+        sinkS3: {
+          sinkBucket: {
+            name: data.ingestionServer.sinkS3?.sinkBucket.name ?? '',
+            prefix: data.ingestionServer.sinkS3?.sinkBucket.prefix ?? '',
+          },
+          s3BufferSize: data.ingestionServer.sinkS3?.s3BufferSize ?? 10,
+          s3BufferInterval:
+            data.ingestionServer.sinkS3?.s3BufferInterval ?? 300,
+        },
+        sinkKafka: {
+          brokers: data.ingestionServer.sinkKafka?.brokers ?? [],
+          topic: data.ingestionServer.sinkKafka?.topic ?? '',
+          securityGroupId:
+            data.ingestionServer.sinkKafka?.securityGroupId ?? '',
+          mskCluster: {
+            name: data.ingestionServer.sinkKafka?.mskCluster.name ?? '',
+            arn: data.ingestionServer.sinkKafka?.mskCluster.arn ?? '',
+          },
+          kafkaConnector: {
+            enable:
+              data.ingestionServer.sinkKafka?.kafkaConnector.enable ?? true,
+          },
+        },
+        sinkKinesis: {
+          kinesisStreamMode:
+            data.ingestionServer.sinkKinesis?.kinesisStreamMode ?? '',
+          kinesisShardCount:
+            data.ingestionServer.sinkKinesis?.kinesisShardCount ?? 2,
+          sinkBucket: {
+            name: data.ingestionServer.sinkKinesis?.sinkBucket.name ?? '',
+            prefix: data.ingestionServer.sinkKinesis?.sinkBucket.prefix ?? '',
+          },
+        },
+      },
+      etl: {
+        dataFreshnessInHour: data.etl.dataFreshnessInHour ?? 72,
+        scheduleExpression: data.etl.scheduleExpression ?? '',
+        sourceS3Bucket: {
+          name: data.etl.sourceS3Bucket.name ?? '',
+          prefix: data.etl.sourceS3Bucket.prefix ?? '',
+        },
+        sinkS3Bucket: {
+          name: data.etl.sinkS3Bucket.name ?? '',
+          prefix: data.etl.sinkS3Bucket.prefix ?? '',
+        },
+        pipelineBucket: {
+          name: data.etl.pipelineBucket.name ?? '',
+          prefix: data.etl.pipelineBucket.prefix ?? '',
+        },
+        transformPlugin: data.etl.transformPlugin ?? '',
+        enrichPlugin: data.etl.enrichPlugin ?? [],
+      },
+      dataAnalytics: {
+        athena: data.dataAnalytics.athena ?? false,
+        redshift: {
+          dataRange: data.dataAnalytics.redshift.dataRange ?? 0,
+          provisioned: {
+            clusterIdentifier:
+              data.dataAnalytics.redshift.provisioned?.clusterIdentifier ?? '',
+            dbUser: data.dataAnalytics.redshift.provisioned?.dbUser ?? '',
+          },
+          newServerless: {
+            network: {
+              vpcId:
+                data.dataAnalytics.redshift.newServerless.network.vpcId ?? '',
+              subnetIds:
+                data.dataAnalytics.redshift.newServerless.network.subnetIds ??
+                [],
+              securityGroups:
+                data.dataAnalytics.redshift.newServerless.network
+                  .securityGroups ?? [],
+            },
+            baseCapacity:
+              data.dataAnalytics.redshift.newServerless.baseCapacity ?? 16,
+          },
+        },
+        loadWorkflow: {
+          loadJobScheduleIntervalExpression:
+            data.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression ??
+            '',
+        },
+        upsertUsers: {
+          scheduleExpression:
+            data.dataAnalytics.upsertUsers.scheduleExpression ?? '',
+        },
+      },
+      status: {
+        status: data.status?.status ?? '',
+        stackDetails: data.status?.stackDetails ?? [],
+      },
+      workflow: data.workflow,
+      executionName: data.executionName,
+      executionArn: data.executionArn,
+      version: data.version ?? '',
+      versionTag: data.versionTag ?? '',
+      createAt: data.createAt ?? 0,
+      updateAt: data.updateAt ?? 0,
+      operator: data.operator ?? '',
+      deleted: data.deleted ?? false,
+    };
+    res.enableDataProcessing = !isEmpty(data.etl);
+    res.enableReporting = !isEmpty(data.report);
+    if (res.enableReporting) {
+      res.report = data.report;
+    }
+    return res;
+  };
+  const getProjectPipelineDetail = async () => {
+    if (update) {
+      try {
+        setLoadingData(true);
+        const { success, data }: ApiResponse<IExtPipeline> =
+          await getPipelineDetail({
+            id: id ?? '',
+            pid: pid ?? '',
+            cache: true,
+          });
+        if (success) {
+          const extPipeline = getDefaultExtPipeline(data);
+          setUpdateRegion(extPipeline);
+          setUpdateVpc(extPipeline);
+          setUpdateSDK(extPipeline);
+          setUpdateSubnetList(extPipeline);
+          setUpdateCetificate(extPipeline);
+          setUpdateSSMSecret(extPipeline);
+          setUpdateMSKCluster(extPipeline);
+          setUpdateKafkaSelfHosted(extPipeline);
+          setUpdateKDSType(extPipeline);
+          setUpdateETL(extPipeline);
+          setUpdateReport(extPipeline);
+          setUpdatePipeline(extPipeline);
+
+          setLoadingData(false);
+        }
+      } catch (error) {
+        setLoadingData(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getProjectPipelineDetail();
+  }, []);
 
   return (
     <AppLayout
-      content={<Content />}
+      content={
+        loadingData ? (
+          <Loading />
+        ) : (
+          <Content update={update} updatePipeline={updatePipeline} />
+        )
+      }
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref="/pipelines" />}

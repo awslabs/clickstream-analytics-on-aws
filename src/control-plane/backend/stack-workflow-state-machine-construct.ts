@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aws, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
+import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -59,6 +59,18 @@ export class StackWorkflowStateMachine extends Construct {
     const workflowFunctionRole = new Role(this, 'WorkflowFunctionRole', {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
+    const cfnPolicy = new iam.Policy(this, 'WorkflowCFNPolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
+          actions: [
+            'cloudformation:DescribeStacks',
+          ],
+        }),
+      ],
+    });
+    cfnPolicy.attachToRole(workflowFunctionRole);
 
     const workflowFunction = new NodejsFunction(this, 'WorkflowFunction', {
       description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
@@ -73,7 +85,7 @@ export class StackWorkflowStateMachine extends Construct {
       },
       ...props.lambdaFuncProps,
     });
-    props.workflowBucket.grantRead(workflowFunction, 'clickstream/*');
+    props.workflowBucket.grantReadWrite(workflowFunction, 'clickstream/*');
 
     cloudWatchSendLogs('workflow-func-logs', workflowFunction);
     createENI('workflow-func-eni', workflowFunction);

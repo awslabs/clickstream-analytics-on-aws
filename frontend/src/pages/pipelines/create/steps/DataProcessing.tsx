@@ -53,8 +53,10 @@ import {
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
 } from 'ts/const';
+import { isDisabled } from 'ts/utils';
 
 interface DataProcessingProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeEnableDataProcessing: (enable: boolean) => void;
   changeExecutionType: (type: SelectProps.Option) => void;
@@ -95,6 +97,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 ) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changeEnableDataProcessing,
     changeExecutionType,
@@ -142,7 +145,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   );
 
   const [selectedUpsertType, setSelectedUpsertType] = useState(
-    pipelineInfo.selectedExcutionType || EXECUTION_TYPE_LIST[0]
+    pipelineInfo.selectedUpsertType || EXECUTION_TYPE_LIST[0]
   );
 
   const [selectDataLoadType, setSelectDataLoadType] = useState(
@@ -412,6 +415,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
         }
       >
         <Toggle
+          disabled={isDisabled(update, pipelineInfo)}
           onChange={({ detail }) => changeEnableDataProcessing(detail.checked)}
           checked={pipelineInfo.enableDataProcessing}
         >
@@ -529,7 +533,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               pluginType="Transform"
               selectionType="single"
               pluginSelectedItems={pipelineInfo.selectedTransformPlugins}
-              selectBuitInPlugins
+              selectBuitInPlugins={!update}
               changePluginSeletedItems={(items) => {
                 changeTransformPlugins(items);
               }}
@@ -550,7 +554,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             pluginType="Enrich"
             selectionType="multi"
             pluginSelectedItems={pipelineInfo.selectedEnrichPlugins}
-            selectBuitInPlugins
+            selectBuitInPlugins={!update}
             changePluginSeletedItems={(items) => {
               changeEnrichPlugins(items);
             }}
@@ -571,6 +575,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             <SpaceBetween direction="vertical" size="s">
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
+                  disabled={isDisabled(update, pipelineInfo)}
                   checked={pipelineInfo.enableRedshift}
                   onChange={(e) => {
                     changeEnableRedshift(e.detail.checked);
@@ -596,6 +601,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           'pipeline:create.redshiftServerlessDesc'
                         ),
                         value: 'serverless',
+                        disabled: isDisabled(update, pipelineInfo),
                       },
                       {
                         label: t('pipeline:create.redshiftProvisioned'),
@@ -603,6 +609,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           'pipeline:create.redshiftProvisionedDesc'
                         ),
                         value: 'provisioned',
+                        disabled: isDisabled(update, pipelineInfo),
                       },
                     ]}
                   />
@@ -704,6 +711,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             description={t('pipeline:create.redshiftVpcDesc')}
                           >
                             <Select
+                              disabled={
+                                update &&
+                                pipelineInfo.status?.status !== 'Failed'
+                              }
                               placeholder={
                                 t('pipeline:create.vpcPlaceholder') || ''
                               }
@@ -730,6 +741,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             )}
                           >
                             <Multiselect
+                              disabled={
+                                update &&
+                                pipelineInfo.status?.status !== 'Failed'
+                              }
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSG
                               }
@@ -759,6 +774,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             )}
                           >
                             <Multiselect
+                              disabled={
+                                update &&
+                                pipelineInfo.status?.status !== 'Failed'
+                              }
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSubnets
                               }
@@ -802,6 +821,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         }
                       >
                         <Select
+                          disabled={isDisabled(update, pipelineInfo)}
                           statusType={loadingRedshift ? 'loading' : 'finished'}
                           placeholder={
                             t(
@@ -1008,6 +1028,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <Divider height={2} />
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
+                  disabled={isDisabled(update, pipelineInfo)}
                   checked={pipelineInfo.enableAthena}
                   onChange={(e) => {
                     changeEnableAthena(e.detail.checked);

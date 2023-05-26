@@ -316,6 +316,10 @@
       "type": "runtime"
     },
     {
+      "name": "json-difference",
+      "type": "runtime"
+    },
+    {
       "name": "jsonpath-plus",
       "version": "^7.2.0",
       "type": "runtime"

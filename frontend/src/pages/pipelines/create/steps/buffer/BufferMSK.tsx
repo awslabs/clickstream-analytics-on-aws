@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { ResourceCreateMehod } from 'ts/const';
 
 interface BufferMSKProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
@@ -41,6 +42,7 @@ interface BufferMSKProps {
 const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changeSelfHosted,
     changeSelectedMSK,
@@ -54,9 +56,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const [mskOptionList, setMSKOptionList] = useState<AutosuggestProps.Options>(
     []
   );
-  const [mskClusterList, setMSKClusterList] = useState<MSKResponse[]>(
-    []
-  );
+  const [mskClusterList, setMSKClusterList] = useState<MSKResponse[]>([]);
   const [vpcSGOptionList, setVpcSGOptionList] = useState<SelectProps.Options>(
     []
   );
@@ -151,32 +151,43 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         <div className="flex">
                           <div className="flex-1">
                             <Select
+                              disabled={
+                                update &&
+                                pipelineInfo.status?.status !== 'Failed'
+                              }
                               placeholder={
                                 t('pipeline:create.msk.selectMSK') || ''
                               }
                               statusType={loadingMSK ? 'loading' : 'finished'}
                               selectedOption={pipelineInfo.selectedMSK}
                               onChange={({ detail }) => {
-                                const clusters: MSKResponse[] = mskClusterList.filter((cluster) =>
-                                  cluster.arn === detail.selectedOption.value
+                                const clusters: MSKResponse[] =
+                                  mskClusterList.filter(
+                                    (cluster) =>
+                                      cluster.arn ===
+                                      detail.selectedOption.value
+                                  );
+                                changeSelectedMSK(
+                                  detail.selectedOption,
+                                  clusters[0]
                                 );
-                                changeSelectedMSK(detail.selectedOption, clusters[0])
-                              }
-                              }
+                              }}
                               options={mskOptionList}
                               filteringType="auto"
                               selectedAriaLabel="Selected"
                             />
                           </div>
-                          <div className="ml-20">
-                            <Button
-                              loading={loadingMSK}
-                              iconName="refresh"
-                              onClick={() => {
-                                getAllMSKClusterList();
-                              }}
-                            />
-                          </div>
+                          {update ? (
+                            <div className="ml-20">
+                              <Button
+                                loading={loadingMSK}
+                                iconName="refresh"
+                                onClick={() => {
+                                  getAllMSKClusterList();
+                                }}
+                              />
+                            </div>
+                          ) : null}
                         </div>
                       </FormField>
                     )}

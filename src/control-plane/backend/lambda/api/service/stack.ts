@@ -52,6 +52,11 @@ export class StackManager {
     }
   }
 
+  public setExecWorkflow(workflow: WorkflowTemplate): undefined {
+    this.execWorkflow = JSON.parse(JSON.stringify(workflow));
+    return ;
+  }
+
   public getExecWorkflow(): WorkflowTemplate | undefined {
     return this.execWorkflow;
   }
@@ -93,6 +98,15 @@ export class StackManager {
     }
     const stackDetails = this.pipeline.status?.stackDetails;
     this.execWorkflow.Workflow = this.getRetryWorkflow(this.execWorkflow.Workflow, stackDetails);
+  }
+
+  public updateWorkflow(editStacks: string[]): void {
+    if (!this.execWorkflow || !this.pipeline.status?.stackDetails) {
+      throw new Error('Pipeline workflow or stack information is empty.');
+    }
+    const stackDetails = this.pipeline.status?.stackDetails;
+
+    this.execWorkflow.Workflow = this.getUpdateWorkflow(this.execWorkflow.Workflow, stackDetails, editStacks);
   }
 
   public async execute(workflow: WorkflowTemplate | undefined, executionName: string): Promise<string> {
@@ -248,6 +262,30 @@ export class StackManager {
     return state;
   }
 
+  private getUpdateWorkflow(state: WorkflowState, statusDetail: PipelineStatusDetail[], editStacks: string[]): WorkflowState {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this.getUpdateWorkflow(branch.States[key], statusDetail, editStacks);
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
+      const status = this.getStackStatusByName(state.Data?.Input.StackName, statusDetail);
+      if (status?.endsWith('_FAILED')) {
+        state.Data.Input.Action = 'Update';
+      } else if (status?.endsWith('_IN_PROGRESS')) {
+        state.Type = WorkflowStateType.PASS;
+      } else if (status?.endsWith('_COMPLETE')) {
+        if (editStacks.includes(state.Data?.Input.StackName)) {
+          state.Data.Input.Action = 'Update';
+        } else {
+          state.Type = WorkflowStateType.PASS;
+        }
+      }
+    }
+    return state;
+  }
+
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
     for (let detail of statusDetail) {
       if (detail.stackName === stackName) {
@@ -268,6 +306,38 @@ export class StackManager {
     } else if (state.Type === WorkflowStateType.STACK) {
       if (state.Data?.Input.StackName) {
         res.push(state.Data?.Input.StackName);
+      }
+    }
+    return res;
+  }
+
+  public getWorkflowStackParametersMap(state: WorkflowState) {
+    const compareWorkflow = JSON.parse(JSON.stringify(state));
+    const stacks = this.getWorkflowStackParameters(compareWorkflow);
+    const parametersMap: Map<string, string> = new Map<string, string>();
+    for (let stack of stacks) {
+      const stackName = stack.StackName;
+      for (let param of stack.Parameters) {
+        parametersMap.set(`${stackName}.${param.ParameterKey}`, param.ParameterValue);
+      }
+    }
+    return Object.fromEntries(parametersMap);
+  }
+
+  public getWorkflowStackParameters(state: WorkflowState): any[] {
+    let res: any[] = [];
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          res = res.concat(this.getWorkflowStackParameters(branch.States[key]));
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK) {
+      if (state.Data?.Input.StackName) {
+        res.push({
+          StackName: state.Data?.Input.StackName,
+          Parameters: state.Data?.Input.Parameters,
+        });
       }
     }
     return res;

@@ -60,6 +60,15 @@ export enum ALARM_DISPLAY_STATUS {
   NO_PIPELINE = -1,
 }
 
+export enum EPipelineStatus {
+  Active = 'Active',
+  Failed = 'Failed',
+  Creating = 'Creating',
+  Updating = 'Updating',
+  Deleting = 'Deleting',
+  Pending = 'Pending',
+}
+
 export const PROJECT_STAGE_LIST = [
   { label: 'Dev', value: ProjectStage.DEV },
   { label: 'Test', value: ProjectStage.TEST },
@@ -200,6 +209,17 @@ export const SDK_LIST: SelectProps.Option[] = [
     label: 'Third-Party SDK',
     value: 'thirdparty',
     iconName: 'settings',
+  },
+];
+
+export const KDS_TYPE: SelectProps.Option[] = [
+  {
+    label: 'On-Demand',
+    value: KDSProvisionType.ON_DEMAND,
+  },
+  {
+    label: 'Provisioned',
+    value: KDSProvisionType.PROVISIONED,
   },
 ];
 

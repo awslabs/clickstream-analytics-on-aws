@@ -21,8 +21,10 @@ import {
 import { getS3BucketList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isDisabled } from 'ts/utils';
 
 interface BufferS3Props {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeS3Bucket: (bucket: string) => void;
   changeS3Prefix: (prefix: string) => void;
@@ -34,6 +36,7 @@ interface BufferS3Props {
 const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changeS3Bucket,
     changeS3Prefix,
@@ -81,6 +84,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         }
       >
         <Autosuggest
+          disabled={isDisabled(update, pipelineInfo)}
           placeholder={t('pipeline:create.selectS3') || ''}
           statusType={loadingBucket ? 'loading' : 'finished'}
           onChange={({ detail }) => changeS3Bucket(detail.value)}
@@ -96,6 +100,7 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         constraintText={t('pipeline:create.s3.s3Constraint')}
       >
         <Input
+          disabled={isDisabled(update, pipelineInfo)}
           placeholder={t('pipeline:create.s3.enterAdditional') || ''}
           value={pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
           onChange={(e) => {

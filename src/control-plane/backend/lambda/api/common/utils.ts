@@ -84,7 +84,7 @@ function getEmailFromRequestContext(requestContext: string | undefined) {
 
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
-  if (value === undefined || value === '' || value === '/') {
+  if (isEmpty(value) || value === '/') {
     const prefixs: Map<string, string> = new Map();
     prefixs.set(BucketPrefix.LOGS_ALB, `clickstream/${projectId}/logs/alb/`);
     prefixs.set(BucketPrefix.LOGS_KAFKA_CONNECTOR, `clickstream/${projectId}/logs/kafka-connector/`);
@@ -94,7 +94,7 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixs.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
     return prefixs.get(key) ?? '';
   }
-  if (!value.endsWith('/')) {
+  if (!value?.endsWith('/')) {
     return `${value}/`;
   }
   return value;

@@ -25,6 +25,7 @@ import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { ProjectEnvironment } from '../../common/types';
+import { IPipeline } from '../../model/pipeline';
 
 const MOCK_TOKEN = '0000-0000';
 const MOCK_PROJECT_ID = 'project_8888_8888';
@@ -259,6 +260,8 @@ function createPipelineMock(
   secretsManagerMock: any,
   props?: {
     noApp?: boolean;
+    update?: boolean;
+    updatePipeline?: IPipeline;
     publicAZContainPrivateAZ?: boolean;
     subnetsCross3AZ?: boolean;
     subnetsIsolated?: boolean;
@@ -301,6 +304,17 @@ function createPipelineMock(
     .resolves({
       Items: [],
     });
+  if (props?.update) {
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+      },
+    }).resolves({
+      Item: props.updatePipeline,
+    });
+  }
   //app
   ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,

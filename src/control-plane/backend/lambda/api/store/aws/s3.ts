@@ -24,7 +24,7 @@ import pLimit from 'p-limit';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
 
-const promisePool = pLimit(50);
+const promisePool = pLimit(20);
 
 export const listBuckets = async (region: string) => {
   const s3Client = new S3Client({

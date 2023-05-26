@@ -29,7 +29,10 @@ declare global {
   }
 
   interface IPipeline {
-    pipelineId?: string;
+    id: string;
+    type: string;
+    prefix: string;
+    pipelineId: string;
     dns?: string;
     endpoint?: string;
     appIds: string[];
@@ -125,7 +128,7 @@ declare global {
     dataAnalytics: {
       athena: boolean;
       redshift: {
-        dataRange: string;
+        dataRange: number;
         provisioned: {
           clusterIdentifier: string;
           dbUser: string;
@@ -156,10 +159,17 @@ declare global {
       status: string;
       stackDetails: IStackStatus[];
     };
+    workflow?: WorkflowTemplate;
+    executionName?: string;
+    executionArn?: string;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
-    createAt?: string;
-    updateAt?: string;
+    version?: string;
+    versionTag?: string;
+    createAt?: number;
+    updateAt?: number;
+    operator?: string;
+    deleted?: boolean;
   }
 
   interface IExtPipeline extends IPipeline {
@@ -227,5 +237,16 @@ declare global {
     ActionsEnabled: boolean;
     StateValue: string;
     StateReason: string;
+  }
+
+  interface IInterval {
+    value: string;
+    unit: string;
+  }
+
+  interface ICronFixed {
+    value: string;
+    unit: string;
+    type: ExecutionType;
   }
 }

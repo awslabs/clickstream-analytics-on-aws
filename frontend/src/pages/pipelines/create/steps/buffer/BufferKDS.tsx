@@ -21,8 +21,10 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { KDSProvisionType } from 'ts/const';
+import { isDisabled } from 'ts/utils';
 
 interface BufferKDSProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeKDSProvisionType: (provision: SelectProps.Option) => void;
   changeKDSShardNumber: (num: string) => void;
@@ -30,7 +32,9 @@ interface BufferKDSProps {
 
 const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
   const { t } = useTranslation();
-  const { pipelineInfo, changeKDSProvisionType, changeKDSShardNumber } = props;
+  const { update, pipelineInfo, changeKDSProvisionType, changeKDSShardNumber } =
+    props;
+
   return (
     <SpaceBetween direction="vertical" size="l">
       <FormField
@@ -43,6 +47,7 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
         description={t('pipeline:create.kds.provisionModeDesc')}
       >
         <Select
+          disabled={isDisabled(update, pipelineInfo)}
           placeholder={t('pipeline:create.kds.selectMode') || ''}
           selectedOption={pipelineInfo.seledtedKDKProvisionType}
           onChange={({ detail }) =>

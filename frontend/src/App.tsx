@@ -96,6 +96,10 @@ const SignedInPage: React.FC = () => {
                   element={<PipelineDetail />}
                 />
                 <Route
+                  path="/project/:pid/pipeline/:id/update"
+                  element={<CreatePipeline update />}
+                />
+                <Route
                   path="/project/:projectId/pipelines/create"
                   element={<CreatePipeline />}
                 />

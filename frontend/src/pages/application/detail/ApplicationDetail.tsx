@@ -28,15 +28,13 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import PipelineStatus, {
-  EPipelineStatus,
-} from 'components/pipeline/PipelineStatus';
+import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
 

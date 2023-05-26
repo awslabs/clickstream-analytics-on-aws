@@ -49,11 +49,13 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
+import { isDisabled } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
 import BufferS3 from './buffer/BufferS3';
 
 interface ConfigIngestionProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changePublicSubnets: (subnets: OptionDefinition[]) => void;
   changePrivateSubnets: (subnets: OptionDefinition[]) => void;
@@ -108,6 +110,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 ) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changePublicSubnets,
     changePrivateSubnets,
@@ -245,8 +248,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
 
   useEffect(() => {
-    getCetificateListByRegion();
-    getSSMSecretListByReion();
+    if (!update) {
+      getCetificateListByRegion();
+      getSSMSecretListByReion();
+    }
   }, []);
 
   return (
@@ -271,8 +276,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             }
           >
             <Multiselect
+              disabled={isDisabled(update, pipelineInfo)}
               selectedOptions={pipelineInfo.selectedPublicSubnet}
-              tokenLimit={2}
+              tokenLimit={3}
               deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
               options={publicSubnetOptionList}
               placeholder={t('pipeline:create.subnetPlaceholder') || ''}
@@ -293,8 +299,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             }
           >
             <Multiselect
+              disabled={isDisabled(update, pipelineInfo)}
               selectedOptions={pipelineInfo.selectedPrivateSubnet}
-              tokenLimit={2}
+              tokenLimit={3}
               deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
               options={privateSubnetOptionList}
               placeholder={t('pipeline:create.subnetPlaceholder') || ''}
@@ -347,6 +354,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           <FormField>
             <Checkbox
+              disabled={isDisabled(update, pipelineInfo)}
               onChange={({ detail }) =>
                 changeProtocal(
                   detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP
@@ -407,6 +415,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }
                 >
                   <Input
+                    disabled={isDisabled(update, pipelineInfo)}
                     placeholder="example.domain.com"
                     value={pipelineInfo.ingestionServer.domain.domainName}
                     onChange={(e) => {
@@ -425,6 +434,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }
                 >
                   <Select
+                    disabled={isDisabled(update, pipelineInfo)}
                     statusType={loadingCertificate ? 'loading' : 'finished'}
                     placeholder={t('pipeline:create.selectCertificate') || ''}
                     selectedOption={pipelineInfo.selectedCertificate}
@@ -440,13 +450,15 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   paddingTop: 25,
                 }}
               >
-                <Button
-                  iconName="refresh"
-                  loading={loadingCertificate}
-                  onClick={() => {
-                    getCetificateListByRegion();
-                  }}
-                />
+                {!update ? (
+                  <Button
+                    iconName="refresh"
+                    loading={loadingCertificate}
+                    onClick={() => {
+                      getCetificateListByRegion();
+                    }}
+                  />
+                ) : null}
               </div>
             </Grid>
           )}
@@ -491,6 +503,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
 
               <Checkbox
+                disabled={isDisabled(update, pipelineInfo)}
                 onChange={({ detail }) => {
                   changeEnableAGA(detail.checked);
                 }}
@@ -505,6 +518,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
               <div>
                 <Checkbox
+                  disabled={isDisabled(update, pipelineInfo)}
                   onChange={({ detail }) =>
                     changeEnableALBAuthentication(detail.checked)
                   }
@@ -519,6 +533,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                       <div className="flex">
                         <div className="flex-1">
                           <Select
+                            disabled={isDisabled(update, pipelineInfo)}
                             statusType={loadingSecret ? 'loading' : 'finished'}
                             placeholder={
                               t('pipeline:create.selectSecret') || ''
@@ -546,6 +561,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </div>
 
               <Checkbox
+                disabled={isDisabled(update, pipelineInfo)}
                 onChange={({ detail }) =>
                   changeEnableALBAccessLog(detail.checked)
                 }
@@ -583,16 +599,19 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: t('pipeline:create.bufferMSK'),
                   description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
                 {
                   label: t('pipeline:create.bufferS3'),
                   description: t('pipeline:create.bufferS3Desc'),
                   value: SinkType.S3,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
                 {
                   label: t('pipeline:create.bufferKDS'),
                   description: t('pipeline:create.bufferKDSDesc'),
                   value: SinkType.KDS,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
               ]}
             />
@@ -600,6 +619,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           {pipelineInfo.ingestionServer.sinkType === SinkType.S3 && (
             <BufferS3
+              update={update}
               pipelineInfo={pipelineInfo}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
               changeS3Bucket={(bucket) => {
@@ -618,6 +638,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           )}
           {pipelineInfo.ingestionServer.sinkType === SinkType.MSK && (
             <BufferMSK
+              update={update}
               pipelineInfo={pipelineInfo}
               changeCreateMSKMethod={(type) => {
                 changeCreateMSKMethod(type);
@@ -644,6 +665,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           )}
           {pipelineInfo.ingestionServer.sinkType === SinkType.KDS && (
             <BufferKDS
+              update={update}
               pipelineInfo={pipelineInfo}
               changeKDSProvisionType={(type) => {
                 changeKDSProvisionType(type);
@@ -667,6 +689,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             >
               <FormField>
                 <Checkbox
+                  disabled={isDisabled(update, pipelineInfo)}
                   onChange={({ detail }) =>
                     changeEnableKafkaConnector(detail.checked)
                   }

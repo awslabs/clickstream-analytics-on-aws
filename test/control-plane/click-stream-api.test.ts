@@ -287,6 +287,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
+        'testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336',
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
         'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
         'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',

@@ -29,16 +29,33 @@ const getPipelineByProject = async (params: {
   return result;
 };
 
-const getPipelineDetail = async (params: { id: string; pid: string }) => {
+const getPipelineDetail = async (params: {
+  id: string;
+  pid: string;
+  cache?: boolean;
+}) => {
+  let cacheParam = 'false';
+  if (params.cache) {
+    cacheParam = 'true';
+  }
   const result: any = await apiRequest(
     'get',
-    `/pipeline/${params.id}?pid=${params.pid}`
+    `/pipeline/${params.id}?pid=${params.pid}&cache=${cacheParam}`
   );
   return result;
 };
 
 const createProjectPipeline = async (data: IPipeline) => {
   const result: any = await apiRequest('post', `/pipeline`, data);
+  return result;
+};
+
+const updateProjectPipeline = async (data: IPipeline) => {
+  const result: any = await apiRequest(
+    'put',
+    `/pipeline/${data.pipelineId}`,
+    data
+  );
   return result;
 };
 
@@ -60,6 +77,7 @@ const retryPipeline = async (params: { id: string; pid: string }) => {
 
 export {
   createProjectPipeline,
+  updateProjectPipeline,
   deletePipeline,
   getPipelineByProject,
   getPipelineDetail,

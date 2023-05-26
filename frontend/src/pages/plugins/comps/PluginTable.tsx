@@ -19,7 +19,6 @@ import {
   Pagination,
   SpaceBetween,
   Table,
-  TextFilter,
 } from '@cloudscape-design/components';
 import { deletePlugin, getPluginList } from 'apis/plugin';
 import moment from 'moment';
@@ -85,7 +84,11 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
         setPluginList(data.items);
         setTotalCount(data.totalCount);
         if (selectBuitInPlugins) {
-          setSelectedItems(data.items.filter(item => item.builtIn === true));
+          setSelectedItems(data.items.filter((item) => item.builtIn === true));
+          changePluginSeletedItems &&
+            changePluginSeletedItems(
+              data.items.filter((item) => item.builtIn === true)
+            );
         }
         setLoadingData(false);
       }
@@ -177,12 +180,6 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
               {t('plugin:list.noPluginDisplay')}
             </Box>
           </Box>
-        }
-        filter={
-          <TextFilter
-            filteringPlaceholder={t('plugin:list.findPlugin') || ''}
-            filteringText=""
-          />
         }
         header={
           <>

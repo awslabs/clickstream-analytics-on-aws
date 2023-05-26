@@ -38,9 +38,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ErrorCode } from 'ts/const';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
-import { alertMsg } from 'ts/utils';
+import { alertMsg, isDisabled } from 'ts/utils';
 
 interface ReportingProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeEnableReporting: (enable: boolean) => void;
   changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
@@ -50,6 +51,7 @@ interface ReportingProps {
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changeEnableReporting,
     changeQuickSightSelectedUser,
@@ -213,6 +215,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
           <SpaceBetween direction="vertical" size="l">
             <FormField>
               <Toggle
+                disabled={isDisabled(update, pipelineInfo)}
                 onChange={({ detail }) => changeEnableReporting(detail.checked)}
                 checked={pipelineInfo.enableReporting}
                 description={t('pipeline:create.createSampleQuickSightDesc')}

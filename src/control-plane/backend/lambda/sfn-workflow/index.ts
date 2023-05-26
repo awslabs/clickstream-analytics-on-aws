@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Output } from '@aws-sdk/client-cloudformation';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Parameter, Output, CloudFormationClient, DescribeStacksCommand, Stack } from '@aws-sdk/client-cloudformation';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
@@ -29,6 +29,7 @@ interface SfnStackEvent {
 }
 
 interface SfnStackInput {
+  readonly Region: string;
   readonly Action: string;
   readonly StackName: string;
   readonly TemplateURL: string;
@@ -45,6 +46,7 @@ export const handler = async (event: any): Promise<any> => {
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {
+      await callback(eventData.Data as SfnStackEvent);
       return eventData;
     } else if (eventData.Type === 'Stack') {
       const stack = eventData as WorkFlowStack;
@@ -81,6 +83,59 @@ export const handler = async (event: any): Promise<any> => {
   }
 };
 
+export const callback = async (event: SfnStackEvent) => {
+  if (!event.Callback || !event.Callback.BucketName || !event.Callback.BucketPrefix) {
+    logger.error('Save runtime to S3 failed, Parameter error.', {
+      event: event,
+    });
+    throw new Error('Save runtime to S3 failed, Parameter error.');
+  }
+
+  const stack = await describe(event.Input.Region, event.Input.StackName);
+  if (!stack) {
+    throw Error('Describe Stack failed.');
+  }
+
+  try {
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+    });
+    const input = {
+      Body: JSON.stringify({ [event.Input.StackName]: stack }),
+      Bucket: event.Callback.BucketName,
+      Key: `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
+      ContentType: 'application/json',
+    };
+    const command = new PutObjectCommand(input);
+    await s3Client.send(command);
+  } catch (err) {
+    logger.error((err as Error).message, { error: err, event: event });
+    throw Error((err as Error).message);
+  }
+  return event;
+};
+
+
+export const describe = async (region: string, stackName: string) => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: DescribeStacksCommand = new DescribeStacksCommand({
+      StackName: stackName,
+    });
+    const result = await cloudFormationClient.send(params);
+    if (result.Stacks) {
+      return result.Stacks[0] as Stack;
+    }
+    return undefined;
+  } catch (err) {
+    logger.error((err as Error).message, { error: err });
+    return undefined;
+  }
+};
+
 async function stackParametersResolve(stack: WorkFlowStack) {
   if (stack.Data.Callback.BucketName && stack.Data.Callback.BucketPrefix) {
     const bucket = stack.Data.Callback.BucketName;
@@ -92,10 +147,19 @@ async function stackParametersResolve(stack: WorkFlowStack) {
         const splitValues = param.ParameterValue.split('.');
         const stackName = splitValues[1];
         // get output from s3
-        const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+        let stackOutputs;
+        try {
+          const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+          stackOutputs = JSON.parse(output as string);
+        } catch (err) {
+          logger.error('Stack workflow output error.', {
+            error: err,
+            output: `${prefix}/${stackName}/output.json`,
+          });
+        }
         let value = '';
-        if (output) {
-          const values = JSONPath({ path: param.ParameterValue, json: JSON.parse(output as string) });
+        if (stackOutputs) {
+          const values = JSONPath({ path: param.ParameterValue, json: stackOutputs });
           if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
             value = values[0] as string;
           }
@@ -108,8 +172,16 @@ async function stackParametersResolve(stack: WorkFlowStack) {
         const splitValues = param.ParameterValue.split('.');
         const stackName = splitValues[1];
         // get output from s3
-        const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
-        const stackOutputs = JSON.parse(output as string)[stackName].Outputs;
+        let stackOutputs;
+        try {
+          const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+          stackOutputs = JSON.parse(output as string)[stackName].Outputs;
+        } catch (err) {
+          logger.error('Stack workflow output error.', {
+            error: err,
+            output: `${prefix}/${stackName}/output.json`,
+          });
+        }
         let value = '';
         if (stackOutputs) {
           for (let out of stackOutputs as Output[]) {

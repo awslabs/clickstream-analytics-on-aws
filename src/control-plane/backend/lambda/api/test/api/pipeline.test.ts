@@ -509,6 +509,27 @@ describe('Pipeline test', () => {
       },
     });
   });
+  it('Get pipeline with cache status in ddb', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(GetCommand).resolves({
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}&cache=true`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        dns: null,
+        endpoint: null,
+        dashboards: null,
+        metricsDashboardName: null,
+      },
+    });
+  });
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
@@ -1839,19 +1860,55 @@ describe('Pipeline test', () => {
     });
   });
   it('Update pipeline', async () => {
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
     });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 7);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
-      data: null,
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
       success: true,
       message: 'Pipeline updated.',
     });
@@ -1960,10 +2017,43 @@ describe('Pipeline test', () => {
     });
   });
   it('Update pipeline with error version', async () => {
+
+    tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
     });
     const mockError = new Error('TransactionCanceledException');
     mockError.name = 'TransactionCanceledException';

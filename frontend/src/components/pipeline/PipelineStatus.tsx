@@ -22,17 +22,8 @@ import {
 import { getPipelineDetail } from 'apis/pipeline';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CLOUDFORMATION_STATUS_MAP } from 'ts/const';
+import { CLOUDFORMATION_STATUS_MAP, EPipelineStatus } from 'ts/const';
 import { buildCloudFormationStackLink } from 'ts/url';
-
-export enum EPipelineStatus {
-  Active = 'Active',
-  Failed = 'Failed',
-  Creating = 'Creating',
-  Updating = 'Updating',
-  Deleting = 'Deleting',
-  Pending = 'Pending',
-}
 
 const CHECK_TIME_INTERVAL = 5000;
 

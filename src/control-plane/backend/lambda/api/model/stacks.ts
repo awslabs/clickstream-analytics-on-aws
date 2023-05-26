@@ -15,6 +15,7 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {
+  CORS_PATTERN,
   DOMAIN_NAME_PATTERN, EMAIL_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
@@ -43,6 +44,35 @@ import {
 import { getBucketPrefix, getStackName, getKafkaTopic, getPluginInfo, isEmpty } from '../common/utils';
 
 export class CIngestionServerStack extends JSONObject {
+
+  public static editWhitelist(): string[] {
+    const whitelist:string[] = [
+      'ServerEndpointPath',
+      'ServerCorsOrigin',
+      'ServerMax',
+      'ServerMin',
+      'WarmPoolSize',
+      'ScaleOnCpuUtilizationPercent',
+      'NotificationsTopicArn',
+      'LogS3Bucket',
+      'LogS3Prefix',
+      'S3DataBucket',
+      'S3DataPrefix',
+      'S3BatchMaxBytes',
+      'S3BatchTimeout',
+      'MskClusterName',
+      'MskSecurityGroupId',
+      'KafkaTopic',
+      'KafkaBrokers',
+      'KinesisShardCount',
+      'KinesisDataRetentionHours',
+      'KinesisBatchSize',
+      'KinesisMaxBatchingWindowSeconds',
+      'KinesisDataS3Bucket',
+      'KinesisDataS3Prefix',
+    ];
+    return whitelist;
+  }
 
   @JSONObject.required
     _pipeline?: IPipeline;
@@ -99,6 +129,12 @@ export class CIngestionServerStack extends JSONObject {
     ServerEndpointPath?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (_stack :CIngestionServerStack, key:string, value:any) => {
+    if (!isEmpty(value)) {
+      validatePattern(key, CORS_PATTERN, value);
+    }
+    return value;
+  })
     ServerCorsOrigin?: string;
 
   @JSONObject.required
@@ -324,7 +360,7 @@ export class CIngestionServerStack extends JSONObject {
       if (!k.startsWith('_') && v !== undefined) {
         parameters.push({
           ParameterKey: k,
-          ParameterValue: v.toString(),
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });
@@ -335,6 +371,27 @@ export class CIngestionServerStack extends JSONObject {
 
 
 export class CKafkaConnectorStack extends JSONObject {
+
+  public static editWhitelist(): string[] {
+    const whitelist:string[] = [
+      'DataS3Bucket',
+      'DataS3Prefix',
+      'LogS3Bucket',
+      'LogS3Prefix',
+      'PluginS3Bucket',
+      'PluginS3Prefix',
+      'SecurityGroupId',
+      'KafkaBrokers',
+      'KafkaTopic',
+      'MskClusterName',
+      'MaxWorkerCount',
+      'MinWorkerCount',
+      'WorkerMcuCount',
+      'RotateIntervalMS',
+      'FlushSize',
+    ];
+    return whitelist;
+  }
 
   @JSONObject.required
     _pipeline?: IPipeline;
@@ -467,7 +524,7 @@ export class CKafkaConnectorStack extends JSONObject {
       if (!k.startsWith('_')) {
         parameters.push({
           ParameterKey: k,
-          ParameterValue: v ? v.toString() : '',
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });
@@ -477,6 +534,24 @@ export class CKafkaConnectorStack extends JSONObject {
 }
 
 export class CETLStack extends JSONObject {
+
+  public static editWhitelist(): string[] {
+    const whitelist:string[] = [
+      'AppIds',
+      'SourceS3Bucket',
+      'SourceS3Prefix',
+      'SinkS3Bucket',
+      'SinkS3Prefix',
+      'PipelineS3Bucket',
+      'PipelineS3Prefix',
+      'DataFreshnessInHour',
+      'ScheduleExpression',
+      'TransformerAndEnrichClassNames',
+      'S3PathPluginJars',
+      'S3PathPluginFiles',
+    ];
+    return whitelist;
+  }
 
   @JSONObject.required
     _pipeline?: IPipeline;
@@ -526,7 +601,6 @@ export class CETLStack extends JSONObject {
     PipelineS3Prefix?: string;
 
   @JSONObject.required
-
   @JSONObject.optional(72)
   @JSONObject.gt(0)
     DataFreshnessInHour?: number;
@@ -594,7 +668,7 @@ export class CETLStack extends JSONObject {
       if (!k.startsWith('_')) {
         parameters.push({
           ParameterKey: k,
-          ParameterValue: v ? v.toString() : '',
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });
@@ -603,6 +677,26 @@ export class CETLStack extends JSONObject {
 }
 
 export class CDataAnalyticsStack extends JSONObject {
+
+  public static editWhitelist(): string[] {
+    const whitelist:string[] = [
+      'AppIds',
+      'ODSEventBucket',
+      'ODSEventPrefix',
+      'ODSEventFileSuffix',
+      'LoadWorkflowBucket',
+      'LoadWorkflowBucketPrefix',
+      'MaxFilesLimit',
+      'ProcessingFilesLimit',
+      'LoadJobScheduleInterval',
+      'UpsertUsersScheduleExpression',
+      'ClearExpiredEventsScheduleExpression',
+      'ClearExpiredEventsRetentionRangeDays',
+      'RedshiftDbUser',
+      'RedshiftServerlessRPU',
+    ];
+    return whitelist;
+  }
 
   @JSONObject.required
     _pipeline?: IPipeline;
@@ -842,7 +936,7 @@ export class CDataAnalyticsStack extends JSONObject {
       if (!k.startsWith('_')) {
         parameters.push({
           ParameterKey: k,
-          ParameterValue: v ? v.toString() : '',
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });
@@ -851,6 +945,18 @@ export class CDataAnalyticsStack extends JSONObject {
 }
 
 export class CReportStack extends JSONObject {
+
+  public static editWhitelist(): string[] {
+    const whitelist:string[] = [
+      'QuickSightUserParam',
+      'RedshiftDBParam',
+      'RedShiftDBSchemaParam',
+      'QuickSightTemplateArnParam',
+      'QuickSightVpcConnectionSubnetParam',
+      'RedshiftParameterKeyParam',
+    ];
+    return whitelist;
+  }
 
   @JSONObject.required
     _pipeline?: IPipeline;
@@ -966,7 +1072,7 @@ export class CReportStack extends JSONObject {
         }
         parameters.push({
           ParameterKey: key,
-          ParameterValue: v ? v.toString() : '',
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });
@@ -1014,7 +1120,7 @@ export class CMetricsStack extends JSONObject {
       if (!k.startsWith('_')) {
         parameters.push({
           ParameterKey: k,
-          ParameterValue: v ? v.toString() : '',
+          ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
     });

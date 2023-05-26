@@ -12,6 +12,7 @@
  */
 
 import { Output, Tag } from '@aws-sdk/client-cloudformation';
+import { getDiff } from 'json-difference';
 import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
@@ -41,7 +42,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps, ReportDashboardOutput,
+  IngestionServerSinkBatchProps, ReportDashboardOutput, PipelineStatusType,
 } from '../common/types';
 import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -273,6 +274,57 @@ export class CPipeline {
     const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
     pluginIds.concat(enrichIds!);
     await store.bindPlugins(pluginIds, 1);
+  }
+
+  public async update(oldPipeline: IPipeline): Promise<void> {
+    if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
+      throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
+    }
+    this.pipeline.status = await this.stackManager.getPipelineStatus();
+    if (this.pipeline.status.status === PipelineStatusType.CREATING ||
+      this.pipeline.status.status === PipelineStatusType.DELETING ||
+      this.pipeline.status.status === PipelineStatusType.UPDATING) {
+      throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
+    }
+    this.pipeline.executionName = `main-${uuidv4()}`;
+    const newWorkflow = await this.generateWorkflow();
+    const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
+    const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
+    const diffParameters = getDiff(newStackParameters, oldStackParameters);
+
+    // Whitelist
+    const Whitelist:string[] = [
+      ...CIngestionServerStack.editWhitelist(),
+      ...CKafkaConnectorStack.editWhitelist(),
+      ...CETLStack.editWhitelist(),
+      ...CDataAnalyticsStack.editWhitelist(),
+      ...CReportStack.editWhitelist(),
+    ];
+    const editKeys = diffParameters.edited.map(p => p[0]);
+    const notAllowEdit:string[] = [];
+    const editStacks:string[] = [];
+    for (let key of editKeys) {
+      const stackName = key.split('.')[0];
+      const paramName = key.split('.')[1];
+      if (!editStacks.includes(stackName)) {
+        editStacks.push(stackName);
+      }
+      if (!Whitelist.includes(paramName)) {
+        notAllowEdit.push(paramName);
+      }
+    }
+    if (!isEmpty(notAllowEdit) && this.pipeline.status.status === PipelineStatusType.ACTIVE) {
+      throw new ClickStreamBadRequestError(`Property modification not allowed: ${notAllowEdit.join(',')}.`);
+    }
+    // update workflow
+    this.stackManager.setExecWorkflow(newWorkflow);
+    this.stackManager.updateWorkflow(editStacks);
+    // create new execution
+    const execWorkflow = this.stackManager.getExecWorkflow();
+    this.pipeline.workflow = newWorkflow;
+    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
+
+    await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
   public async refreshStatus(): Promise<void> {
@@ -650,7 +702,7 @@ export class CPipeline {
         },
       };
 
-      if (this.pipeline.report) {
+      if (!isEmpty(this.pipeline.report)) {
         const reportTemplateURL = await this.getTemplateUrl('reporting');
         if (!reportTemplateURL) {
           throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');

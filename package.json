@@ -91,6 +91,7 @@
     "constructs": "^10.0.5",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
+    "json-difference": "^1.9.1",
     "jsonpath-plus": "^7.2.0",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^3.0.1",

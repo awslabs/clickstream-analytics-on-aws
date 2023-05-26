@@ -29,8 +29,10 @@ import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AWS_REGION_MAP, SDK_LIST } from 'ts/const';
+import { isDisabled } from 'ts/utils';
 
 interface BasicInformationProps {
+  update?: boolean;
   pipelineInfo: IExtPipeline;
   changeRegion: (region: SelectProps.Option) => void;
   changeVPC: (vpc: SelectProps.Option) => void;
@@ -48,6 +50,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
 ) => {
   const { t } = useTranslation();
   const {
+    update,
     pipelineInfo,
     changeRegion,
     changeVPC,
@@ -145,7 +148,9 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   }, [pipelineInfo.selectedRegion]);
 
   useEffect(() => {
-    getAllRegionList();
+    if (!update) {
+      getAllRegionList();
+    }
   }, []);
 
   return (
@@ -163,6 +168,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           errorText={regionEmptyError ? t('pipeline:valid.regionEmpty') : ''}
         >
           <Select
+            disabled={isDisabled(update, pipelineInfo)}
             filteringType="auto"
             placeholder={t('pipeline:create.awsRegionPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedRegion}
@@ -179,18 +185,21 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.vpc')}
           description={t('pipeline:create.vpcDesc')}
           secondaryControl={
-            <Button
-              disabled={!pipelineInfo.region}
-              loading={loadingVPC}
-              iconName="refresh"
-              onClick={() => {
-                getVPCListByRegion(pipelineInfo.region);
-              }}
-            />
+            !update || pipelineInfo.status?.status === 'Failed' ? (
+              <Button
+                disabled={!pipelineInfo.region}
+                loading={loadingVPC}
+                iconName="refresh"
+                onClick={() => {
+                  getVPCListByRegion(pipelineInfo.region);
+                }}
+              />
+            ) : null
           }
           errorText={vpcEmptyError ? t('pipeline:valid.vpcEmpty') : ''}
         >
           <Select
+            disabled={isDisabled(update, pipelineInfo)}
             placeholder={t('pipeline:create.vpcPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedVPC}
             options={vpcOptionList}
@@ -208,6 +217,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           errorText={sdkEmptyError ? t('pipeline:valid.sdkEmpty') : ''}
         >
           <Select
+            disabled={isDisabled(update, pipelineInfo)}
             placeholder={t('pipeline:create.dataSDKPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedSDK}
             options={SDK_LIST}
@@ -222,20 +232,23 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.s3Assets')}
           constraintText={t('pipeline:create.s3AssetsDesc')}
           secondaryControl={
-            <Button
-              disabled={!pipelineInfo.region}
-              loading={loadingBucket}
-              iconName="refresh"
-              onClick={() => {
-                getAllS3BucketList(pipelineInfo.region);
-              }}
-            />
+            !update || pipelineInfo.status?.status === 'Failed' ? (
+              <Button
+                disabled={!pipelineInfo.region}
+                loading={loadingBucket}
+                iconName="refresh"
+                onClick={() => {
+                  getAllS3BucketList(pipelineInfo.region);
+                }}
+              />
+            ) : null
           }
           errorText={
             assetsS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
           }
         >
           <Autosuggest
+            disabled={isDisabled(update, pipelineInfo)}
             placeholder={t('pipeline:create.selectS3') || ''}
             statusType={loadingBucket ? 'loading' : 'finished'}
             onChange={({ detail }) => changeS3Bucket(detail.value)}

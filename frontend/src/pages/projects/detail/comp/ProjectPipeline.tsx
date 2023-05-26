@@ -28,14 +28,12 @@ import {
   getApplicationListByPipeline,
 } from 'apis/application';
 import { retryPipeline } from 'apis/pipeline';
-import PipelineStatus, {
-  EPipelineStatus,
-} from 'components/pipeline/PipelineStatus';
+import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
 
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;

@@ -91,6 +91,7 @@ const depsForApiProject = [
   'node-fetch@^2.6.3',
   'ts-json-object@^0.4.0',
   'cidr-block@^1.3.2',
+  'json-difference',
   ...awsSDKDepsForApiProject,
 ];
 

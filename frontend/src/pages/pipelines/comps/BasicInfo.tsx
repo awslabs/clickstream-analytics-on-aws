@@ -21,13 +21,11 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { retryPipeline } from 'apis/pipeline';
-import PipelineStatus, {
-  EPipelineStatus,
-} from 'components/pipeline/PipelineStatus';
+import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TIME_FORMAT } from 'ts/const';
+import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 
 interface BasicInfoProps {
@@ -82,6 +80,16 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                   }}
                 >
                   {t('button.retry')}
+                </Button>
+              )}
+              {(pipelineInfo?.status?.status === EPipelineStatus.Active ||
+                pipelineInfo?.status?.status === EPipelineStatus.Failed) && (
+                <Button
+                  href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
+                  iconName="edit"
+                  variant="primary"
+                >
+                  {t('button.edit')}
                 </Button>
               )}
             </SpaceBetween>
