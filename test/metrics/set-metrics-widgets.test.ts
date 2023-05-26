@@ -45,6 +45,7 @@ const c: Context = {
 process.env.STACK_ID = 'teststackid001';
 
 import { handler } from '../../src/metrics/custom-resource/set-metrics-widgets';
+import { PARAMETERS_DESCRIPTION } from '../../src/metrics/settings';
 
 beforeEach(() => {
   ssmClientMock.reset();
@@ -423,4 +424,897 @@ test('Can delete parameters when Delete', async () => {
 
 });
 
+
+test('Can set parameters when Create - split large params', async () => {
+
+  const largeParams = {
+    name: 'redshiftProvisionedCluster',
+    description: {
+      markdown: '## Analytics Redshift Provisioned Cluster',
+    },
+    widgets: [
+      {
+        type: 'alarm',
+        properties: {
+          alarms: [
+            'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Load events workflow 14f29580',
+            'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Upsert users workflow 14f29580',
+            'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Max file age 14f29580',
+          ],
+          title: 'Analytics Alarms',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Sum',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionsSucceeded',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:LoadODSEventToRedshiftWorkflowLoadManifestStateMachine84565CBD-93eJohTxAcdV',
+            ],
+            [
+              '.',
+              'ExecutionsFailed',
+              '.',
+              '.',
+            ],
+            [
+              '.',
+              'ExecutionsStarted',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Load events workflow',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionTime',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:LoadODSEventToRedshiftWorkflowLoadManifestStateMachine84565CBD-93eJohTxAcdV',
+            ],
+          ],
+          title: 'Load events workflow execution time',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Sum',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionsSucceeded',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:UpsertUsersWorkflowUpsertUsersStateMachine1E797D4B-yCSP7Froc18F',
+            ],
+            [
+              '.',
+              'ExecutionsFailed',
+              '.',
+              '.',
+            ],
+            [
+              '.',
+              'ExecutionsStarted',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Upsert users workflow',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionTime',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:UpsertUsersWorkflowUpsertUsersStateMachine1E797D4B-yCSP7Froc18F',
+            ],
+          ],
+          title: 'Upsert users workflow execution time',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Sum',
+          view: 'timeSeries',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionsSucceeded',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:ClearExpiredEventsWorkflowClearExpiredEventsStateMachineE345A62E-hBroIlldsmVy',
+            ],
+            [
+              '.',
+              'ExecutionsStarted',
+              '.',
+              '.',
+            ],
+            [
+              '.',
+              'ExecutionsFailed',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Clear expired events workflow',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          view: 'timeSeries',
+          metrics: [
+            [
+              'AWS/States',
+              'ExecutionTime',
+              'StateMachineArn',
+              'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:ClearExpiredEventsWorkflowClearExpiredEventsStateMachineE345A62E-hBroIlldsmVy',
+            ],
+          ],
+          title: 'Clear expired events execution time',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Sum',
+          metrics: [
+            [
+              'DataPipeline/DataModeling/Redshift',
+              'New files count',
+              'ProjectId',
+              'p0526',
+              'service',
+              'workflow',
+            ],
+            [
+              '.',
+              'Processing files count',
+              '.',
+              '.',
+              '.',
+              '.',
+            ],
+            [
+              '.',
+              'Loaded files count',
+              '.',
+              '.',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Files count',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'DataPipeline/DataModeling/Redshift',
+              'File max age',
+              'ProjectId',
+              'p0526',
+              'service',
+              'workflow',
+            ],
+          ],
+          title: 'File max age',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'HealthStatus',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+            [
+              '.',
+              'MaintenanceMode',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Redshift Cluster Status',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'PercentageDiskSpaceUsed',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+          ],
+          title: 'Redshift Cluster PercentageDiskSpaceUsed',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'CPUUtilization',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+          ],
+          title: 'Redshift Cluster CPUUtilization',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'RedshiftManagedStorageTotalCapacity',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+          ],
+          title: 'Redshift Cluster RedshiftManagedStorageTotalCapacity',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'WriteIOPS',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+            [
+              '.',
+              'ReadIOPS',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Redshift Cluster Read/Write IOPS',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'WriteThroughput',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+            [
+              '.',
+              'ReadThroughput',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Redshift Cluster Read/Write Throughput',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'ReadLatency',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+          ],
+          title: 'Redshift Cluster ReadLatency',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'CommitQueueLength',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+          ],
+          title: 'Redshift Cluster CommitQueueLength',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'DatabaseConnections',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+            ],
+            [
+              '.',
+              'TotalTableCount',
+              '.',
+              '.',
+            ],
+          ],
+          title: 'Redshift Cluster Connections and Tables',
+        },
+      },
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          metrics: [
+            [
+              'AWS/Redshift',
+              'QueriesCompletedPerSecond',
+              'ClusterIdentifier',
+              'redshift-cluster-1',
+              'latency',
+              'long',
+            ],
+            [
+              '.',
+              'QueriesCompletedPerSecond',
+              '.',
+              '.',
+              'latency',
+              'medium',
+            ],
+            [
+              '.',
+              'QueriesCompletedPerSecond',
+              '.',
+              '.',
+              'latency',
+              'short',
+            ],
+            [
+              '.',
+              'QueryDuration',
+              '.',
+              '.',
+              'latency',
+              'long',
+            ],
+            [
+              '.',
+              'QueryDuration',
+              '.',
+              '.',
+              'latency',
+              'medium',
+            ],
+            [
+              '.',
+              'QueryDuration',
+              '.',
+              '.',
+              'latency',
+              'short',
+            ],
+          ],
+          title: 'Redshift Cluster Queries',
+        },
+      },
+    ],
+    projectId: 'p0526',
+    order: '450',
+  };
+
+  const event: CloudFormationCustomResourceEvent = {
+    RequestType: 'Create',
+    ServiceToken: 'lambda:token',
+    ResponseURL:
+      'https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/testUrl',
+    StackId: 'stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299',
+    RequestId: '6ffb9981-d1af-4177-aac1-34e11cdcccd8',
+    LogicalResourceId: 'create-test-custom-resource',
+    ResourceType: 'AWS::CloudFormation::CustomResource',
+    ResourceProperties: {
+      ServiceToken: 'lambda:token',
+      metricsWidgetsProps: largeParams,
+    },
+  };
+
+  lambdaClientMock.on(ListTagsCommand).resolves({
+    Tags: {
+      tag_1_key: 'tag_1_value',
+      tag_2_key: 'tag_2_value',
+    },
+  });
+
+  await handler(event, c);
+
+  expect(ssmClientMock).toHaveReceivedCommandTimes(PutParameterCommand, 2);
+  expect(ssmClientMock).toHaveReceivedCommandTimes(AddTagsToResourceCommand, 2);
+
+  expect(ssmClientMock).toHaveReceivedNthCommandWith(1, PutParameterCommand, {
+    Name: '/Clickstream/metrics/p0526/teststackid001/redshiftProvisionedCluster/2',
+    Value: JSON.stringify({
+      name: 'redshiftProvisionedCluster',
+      description: {
+        markdown: '## Analytics Redshift Provisioned Cluster',
+      },
+      widgets: [
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'PercentageDiskSpaceUsed',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+            ],
+            title: 'Redshift Cluster PercentageDiskSpaceUsed',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'CPUUtilization',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+            ],
+            title: 'Redshift Cluster CPUUtilization',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'RedshiftManagedStorageTotalCapacity',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+            ],
+            title: 'Redshift Cluster RedshiftManagedStorageTotalCapacity',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'WriteIOPS',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+              [
+                '.',
+                'ReadIOPS',
+                '.',
+                '.',
+              ],
+            ],
+            title: 'Redshift Cluster Read/Write IOPS',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'WriteThroughput',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+              [
+                '.',
+                'ReadThroughput',
+                '.',
+                '.',
+              ],
+            ],
+            title: 'Redshift Cluster Read/Write Throughput',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'ReadLatency',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+            ],
+            title: 'Redshift Cluster ReadLatency',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'CommitQueueLength',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+            ],
+            title: 'Redshift Cluster CommitQueueLength',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'DatabaseConnections',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+              ],
+              [
+                '.',
+                'TotalTableCount',
+                '.',
+                '.',
+              ],
+            ],
+            title: 'Redshift Cluster Connections and Tables',
+          },
+        },
+        {
+          type: 'metric',
+          properties: {
+            stat: 'Average',
+            metrics: [
+              [
+                'AWS/Redshift',
+                'QueriesCompletedPerSecond',
+                'ClusterIdentifier',
+                'redshift-cluster-1',
+                'latency',
+                'long',
+              ],
+              [
+                '.',
+                'QueriesCompletedPerSecond',
+                '.',
+                '.',
+                'latency',
+                'medium',
+              ],
+              [
+                '.',
+                'QueriesCompletedPerSecond',
+                '.',
+                '.',
+                'latency',
+                'short',
+              ],
+              [
+                '.',
+                'QueryDuration',
+                '.',
+                '.',
+                'latency',
+                'long',
+              ],
+              [
+                '.',
+                'QueryDuration',
+                '.',
+                '.',
+                'latency',
+                'medium',
+              ],
+              [
+                '.',
+                'QueryDuration',
+                '.',
+                '.',
+                'latency',
+                'short',
+              ],
+            ],
+            title: 'Redshift Cluster Queries',
+          },
+        },
+      ],
+      projectId: 'p0526',
+      order: '450',
+      index: 2,
+      total: 2,
+    }),
+    Type: 'String',
+    Overwrite: true,
+    Description: `${PARAMETERS_DESCRIPTION} p0526`,
+  },
+
+  );
+  expect(ssmClientMock).toHaveReceivedNthCommandWith(3, PutParameterCommand, {
+    Name: '/Clickstream/metrics/p0526/teststackid001/redshiftProvisionedCluster/1',
+    Value: JSON.stringify(
+      {
+        name: 'redshiftProvisionedCluster',
+        description: {
+          markdown: '## Analytics Redshift Provisioned Cluster',
+        },
+        widgets: [
+          {
+            type: 'alarm',
+            properties: {
+              alarms: [
+                'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Load events workflow 14f29580',
+                'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Upsert users workflow 14f29580',
+                'arn:aws:cloudwatch:ap-southeast-1:111111111111888:alarm:Clickstream|p0526 Max file age 14f29580',
+              ],
+              title: 'Analytics Alarms',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Sum',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionsSucceeded',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:LoadODSEventToRedshiftWorkflowLoadManifestStateMachine84565CBD-93eJohTxAcdV',
+                ],
+                [
+                  '.',
+                  'ExecutionsFailed',
+                  '.',
+                  '.',
+                ],
+                [
+                  '.',
+                  'ExecutionsStarted',
+                  '.',
+                  '.',
+                ],
+              ],
+              title: 'Load events workflow',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Average',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionTime',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:LoadODSEventToRedshiftWorkflowLoadManifestStateMachine84565CBD-93eJohTxAcdV',
+                ],
+              ],
+              title: 'Load events workflow execution time',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Sum',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionsSucceeded',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:UpsertUsersWorkflowUpsertUsersStateMachine1E797D4B-yCSP7Froc18F',
+                ],
+                [
+                  '.',
+                  'ExecutionsFailed',
+                  '.',
+                  '.',
+                ],
+                [
+                  '.',
+                  'ExecutionsStarted',
+                  '.',
+                  '.',
+                ],
+              ],
+              title: 'Upsert users workflow',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Average',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionTime',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:UpsertUsersWorkflowUpsertUsersStateMachine1E797D4B-yCSP7Froc18F',
+                ],
+              ],
+              title: 'Upsert users workflow execution time',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Sum',
+              view: 'timeSeries',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionsSucceeded',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:ClearExpiredEventsWorkflowClearExpiredEventsStateMachineE345A62E-hBroIlldsmVy',
+                ],
+                [
+                  '.',
+                  'ExecutionsStarted',
+                  '.',
+                  '.',
+                ],
+                [
+                  '.',
+                  'ExecutionsFailed',
+                  '.',
+                  '.',
+                ],
+              ],
+              title: 'Clear expired events workflow',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Average',
+              view: 'timeSeries',
+              metrics: [
+                [
+                  'AWS/States',
+                  'ExecutionTime',
+                  'StateMachineArn',
+                  'arn:aws:states:ap-southeast-1:111111111111888:stateMachine:ClearExpiredEventsWorkflowClearExpiredEventsStateMachineE345A62E-hBroIlldsmVy',
+                ],
+              ],
+              title: 'Clear expired events execution time',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Sum',
+              metrics: [
+                [
+                  'DataPipeline/DataModeling/Redshift',
+                  'New files count',
+                  'ProjectId',
+                  'p0526',
+                  'service',
+                  'workflow',
+                ],
+                [
+                  '.',
+                  'Processing files count',
+                  '.',
+                  '.',
+                  '.',
+                  '.',
+                ],
+                [
+                  '.',
+                  'Loaded files count',
+                  '.',
+                  '.',
+                  '.',
+                  '.',
+                ],
+              ],
+              title: 'Files count',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Average',
+              metrics: [
+                [
+                  'DataPipeline/DataModeling/Redshift',
+                  'File max age',
+                  'ProjectId',
+                  'p0526',
+                  'service',
+                  'workflow',
+                ],
+              ],
+              title: 'File max age',
+            },
+          },
+          {
+            type: 'metric',
+            properties: {
+              stat: 'Average',
+              metrics: [
+                [
+                  'AWS/Redshift',
+                  'HealthStatus',
+                  'ClusterIdentifier',
+                  'redshift-cluster-1',
+                ],
+                [
+                  '.',
+                  'MaintenanceMode',
+                  '.',
+                  '.',
+                ],
+              ],
+              title: 'Redshift Cluster Status',
+            },
+          },
+        ],
+        projectId: 'p0526',
+        order: '450',
+        index: 1,
+        total: 2,
+
+      }),
+    Type: 'String',
+    Overwrite: true,
+    Description: `${PARAMETERS_DESCRIPTION} p0526`,
+  });
+
+});
 

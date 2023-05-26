@@ -98,8 +98,8 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
         Description: `${PARAMETERS_DESCRIPTION} ${projectId}`,
         //Tags: tags, // tags and overwrite can't be used together.
       });
+      logger.info(`try to put ${namePath}`, { paramValue });
       await ssmClient.send(cmd);
-      logger.info(`put ${namePath}`, { paramValue });
 
       // tags and overwrite can't be used together.
       // To create a parameter with tags, please remove overwrite flag.
@@ -128,7 +128,7 @@ function splitParamValues(widgetsProps: MetricsWidgetsProps): IndexMetricsWidget
   const widgetsArrArr: InputWidgetElement[][] = [];
   let widgetsArr: InputWidgetElement[] = [];
   for (const w of widgetsProps.widgets) {
-    if (JSON.stringify([... widgetsArr, w]).length < 4000) {
+    if (JSON.stringify([... widgetsArr, w]).length < 3000) {
       widgetsArr.push(w);
     } else {
       widgetsArrArr.push([...widgetsArr]);
