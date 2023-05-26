@@ -130,6 +130,7 @@ export class StackActionStateMachine extends Construct {
             'states:*',
             'secretsmanager:*',
             'globalaccelerator:*',
+            'kms:*',
           ],
           resources: ['*'],
         }),

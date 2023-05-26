@@ -611,6 +611,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'states:*',
               'secretsmanager:*',
               'globalaccelerator:*',
+              'kms:*',
             ],
             Effect: 'Allow',
             Resource: '*',
