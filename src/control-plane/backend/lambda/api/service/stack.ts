@@ -234,9 +234,25 @@ export class StackManager {
   private getDeleteWorkflow(state: WorkflowState): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        const orderMap = new Map<string, string>();
         for (let key of Object.keys(branch.States)) {
+          if (branch.States[key].End) {
+            orderMap.set(key, 'End');
+          } else if (branch.States[key].Next) {
+            orderMap.set(key, branch.States[key].Next!);
+          }
           branch.States[key] = this.getDeleteWorkflow(branch.States[key]);
         }
+        orderMap.forEach((value, key, _map) => {
+          if (value !== 'End') {
+            branch.States[value].Next = key;
+          } else if (branch.StartAt !== key) {
+            branch.States[branch.StartAt].End = true;
+            delete branch.States[branch.StartAt].Next;
+            delete branch.States[key].End;
+            branch.StartAt = key;
+          }
+        });
       }
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';

@@ -1658,7 +1658,7 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'KafkaConnector',
             States: {
               Ingestion: {
                 Data: {
@@ -1674,7 +1674,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
-                Next: 'KafkaConnector',
+                End: true,
                 Type: 'Stack',
               },
               KafkaConnector: {
@@ -1691,7 +1691,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'Ingestion',
                 Type: 'Stack',
               },
             },
@@ -1719,7 +1719,7 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataAnalytics',
+            StartAt: 'Report',
             States: {
               Report: {
                 Type: 'Stack',
@@ -1736,7 +1736,7 @@ describe('Workflow test', () => {
                     BucketName: 'EXAMPLE_BUCKET',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
               },
               DataAnalytics: {
                 Data: {
@@ -1752,8 +1752,8 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
-                Next: 'Report',
                 Type: 'Stack',
+                End: true,
               },
             },
           },

@@ -114,7 +114,7 @@ export enum WorkflowStateType {
 }
 
 export interface WorkflowParallelBranch {
-  readonly StartAt: string;
+  StartAt: string;
   readonly States: {
     [name: string]: WorkflowState;
   };
