@@ -166,6 +166,7 @@
     "invalidKeyError": "Invalid key. Keys can only contain Unicode letters, digits, white space and any of the following: _.:/=+@-",
     "invalidValueError": "Invalid value. Values can only contain Unicode letters, digits, white space and any of the following: _.:/=+@-",
     "awsPrefixError": "Cannot start with aws:",
+    "deleteTips": "Default tags can not be modified or deleted",
     "tagLimit": {
       "add": "You can add up to ",
       "tags": "tags.",

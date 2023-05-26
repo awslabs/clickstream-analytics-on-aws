@@ -12,7 +12,8 @@
  */
 
 import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
-import React from 'react';
+import { isEqual } from 'lodash';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { alertMsg } from 'ts/utils';
 
@@ -24,6 +25,7 @@ interface TagsProps {
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { tags, changeTags } = props;
+  const prevItemsRef = useRef(tags.slice(0, 3));
   return (
     <TagEditor
       i18nStrings={{
@@ -74,17 +76,21 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
       }}
       tags={tags}
       onChange={(event) => {
-        if (
-          event.detail.tags.length >= 2 &&
-          (event.detail.tags[0].markedForRemoval === true ||
-            event.detail.tags[0].value === '' ||
-            event.detail.tags[1].markedForRemoval === true ||
-            event.detail.tags[1].value === '' ||
-            event.detail.tags[2].markedForRemoval === true ||
-            event.detail.tags[2].value === '')
-        ) {
-          alertMsg('Default tags can not be delete', 'error');
-          return;
+        if (event.detail.tags.length >= 3) {
+          const prevItems = prevItemsRef.current;
+          const currentItems = event.detail.tags.slice(0, 3);
+          let changeCount = 0;
+          for (let i = 0; i < currentItems.length; i++) {
+            if (!isEqual(prevItems[i], currentItems[i])) {
+              changeCount = changeCount + 1;
+            }
+          }
+          if (changeCount > 0) {
+            alertMsg(t('tag.deleteTips'), 'error');
+            return;
+          } else {
+            changeTags(event.detail.tags as any);
+          }
         } else {
           changeTags(event.detail.tags as any);
         }
