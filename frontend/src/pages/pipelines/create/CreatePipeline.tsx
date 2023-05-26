@@ -2087,6 +2087,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 
   return (
     <AppLayout
+      toolsHide
       content={
         loadingData ? (
           <Loading />

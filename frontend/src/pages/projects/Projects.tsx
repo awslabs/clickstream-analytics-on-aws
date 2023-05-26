@@ -201,6 +201,7 @@ const Projects: React.FC = () => {
 
   return (
     <AppLayout
+      toolsHide
       content={
         <Content
           refresh={refreshPage}

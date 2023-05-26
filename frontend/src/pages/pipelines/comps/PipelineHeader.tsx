@@ -11,17 +11,12 @@
  *  and limitations under the License.
  */
 import { Header } from '@cloudscape-design/components';
-import InfoLink from 'components/common/InfoLink';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const PipelineHeader: React.FC = () => {
   const { t } = useTranslation();
-  return (
-    <Header variant="h1" info={<InfoLink />}>
-      {t('pipeline:pipelines')}
-    </Header>
-  );
+  return <Header variant="h1">{t('pipeline:pipelines')}</Header>;
 };
 
 export default PipelineHeader;

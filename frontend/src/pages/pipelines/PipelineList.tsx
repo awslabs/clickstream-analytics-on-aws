@@ -214,6 +214,7 @@ const PipelineList: React.FC = () => {
   ];
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout header={<PipelineHeader />}>
           <Content />

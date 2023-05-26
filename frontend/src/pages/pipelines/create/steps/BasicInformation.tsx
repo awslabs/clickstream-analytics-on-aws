@@ -24,7 +24,6 @@ import {
   TagEditorProps,
 } from '@cloudscape-design/components';
 import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
-import InfoLink from 'components/common/InfoLink';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -155,11 +154,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
 
   return (
     <Container
-      header={
-        <Header variant="h2" info={<InfoLink />}>
-          {t('pipeline:create.pipeline')}
-        </Header>
-      }
+      header={<Header variant="h2">{t('pipeline:create.pipeline')}</Header>}
     >
       <SpaceBetween direction="vertical" size="l">
         <FormField

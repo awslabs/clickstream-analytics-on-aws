@@ -18,7 +18,6 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { deleteProject } from 'apis/project';
-import InfoLink from 'components/common/InfoLink';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -100,7 +99,6 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
       />
       <Header
         variant="h1"
-        info={<InfoLink />}
         counter={`(${totalProject})`}
         actions={
           <SpaceBetween size="xs" direction="horizontal">

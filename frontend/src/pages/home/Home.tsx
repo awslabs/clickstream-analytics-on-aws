@@ -64,6 +64,7 @@ const Home: React.FC = () => {
   ];
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout header={<HomeHeader />}>
           <Content />

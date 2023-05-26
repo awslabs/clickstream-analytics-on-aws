@@ -73,6 +73,7 @@ const CreateApplication = () => {
 
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout
           header={

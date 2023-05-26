@@ -33,6 +33,7 @@ const PluginList: React.FC = () => {
   ];
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout header={<PluginHeader />}>
           <PluginTable

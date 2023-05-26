@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 import { Button, Header, SpaceBetween } from '@cloudscape-design/components';
-import InfoLink from 'components/common/InfoLink';
 import CreateProject from 'pages/projects/create/CreateProject';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +28,6 @@ const HomeHeader: React.FC = () => {
       />
       <Header
         variant="h1"
-        info={<InfoLink />}
         actions={
           <SpaceBetween size="xs" direction="horizontal">
             <Button

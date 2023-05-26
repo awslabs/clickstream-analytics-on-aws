@@ -21,7 +21,6 @@ import {
 } from '@cloudscape-design/components';
 import { getPipelineDetail } from 'apis/pipeline';
 import { getProjectDetail } from 'apis/project';
-import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
@@ -100,13 +99,12 @@ const PipelineDetail: React.FC = () => {
 
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1" info={<InfoLink />}>
-                {projectPipeline?.pipelineId}
-              </Header>
+              <Header variant="h1">{projectPipeline?.pipelineId}</Header>
             </SpaceBetween>
           }
         >

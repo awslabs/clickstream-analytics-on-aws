@@ -37,6 +37,7 @@ const AlarmsList: React.FC = () => {
   ];
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout header={<AlarmsHeader />}>
           <Container>

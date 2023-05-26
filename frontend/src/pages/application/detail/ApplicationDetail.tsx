@@ -99,6 +99,7 @@ const ApplicationDetail: React.FC = () => {
 
   return (
     <AppLayout
+      toolsHide
       content={
         <ContentLayout
           header={
