@@ -1,4 +1,3 @@
--- increment refresh
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_user_dim_mv_1 
 BACKUP NO
 SORTKEY(first_visit_date)
@@ -6,68 +5,18 @@ AUTO REFRESH YES
 AS
 SELECT
 user_pseudo_id
-,
-user_id
-,
-event_date as first_visit_date
-,
-app_info.install_source::varchar as first_visit_install_source
-,
-device.system_language::varchar as first_visit_device_language
-,
-platform as first_platform
-,
-geo.country::varchar as first_visit_country
-,
-geo.city::varchar as first_visit_city
-,
-(
-    case when nullif
-    (
-        traffic_source.source::varchar,
-        ''
-    ) is null then '(direct)' else traffic_source.source::varchar end
-) as first_traffic_source_source
-,
-traffic_source.medium::varchar as first_traffic_source_medium
-,
-traffic_source.name::varchar as first_traffic_source_name
-,
-eu.key::varchar as custom_attr_key
-,
-coalesce 
-(
-    nullif
-    (
-        eu.value.string_value::varchar,
-        ''
-    )
-    ,
-    nullif
-    (
-        eu.value.int_value::varchar,
-        ''
-    )
-    ,
-    nullif
-    (
-        eu.value.float_value::varchar,
-        ''
-    )
-    ,
-    nullif
-    (
-        eu.value.double_value::varchar,
-        ''
-    )
-) as custom_attr_value
-FROM {{schema}}.ods_events e,
-e.user_properties eu
-where e.event_name in 
-(
-    '_first_open',
-    '_first_visit'
-);
+, user_id
+, event_date as first_visit_date
+, app_info.install_source::varchar as first_visit_install_source
+, device.system_language::varchar as first_visit_device_language
+, platform as first_platform
+, geo.country::varchar as first_visit_country
+, geo.city::varchar as first_visit_city
+, (case when nullif(traffic_source.source::varchar,'') is null then '(direct)' else traffic_source.source::varchar end) as first_traffic_source_source
+, traffic_source.medium::varchar as first_traffic_source_medium
+, traffic_source.name::varchar as first_traffic_source_name
+from {{schema}}.ods_events
+where event_name in ('_first_open','_first_visit');
 
 -- recompute refresh
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_user_dim_mv_2 
@@ -96,3 +45,18 @@ SELECT upid.*,
 ) as is_registered
 from {{schema}}.clickstream_user_dim_mv_1 as upid left outer join 
 {{schema}}.clickstream_user_dim_mv_2 as uid on upid.user_pseudo_id=uid.user_pseudo_id;
+
+CREATE MATERIALIZED VIEW {{schema}}.clickstream_user_attr_view
+BACKUP NO
+SORTKEY(user_pseudo_id)
+AUTO REFRESH YES
+AS
+select 
+user_pseudo_id
+, user_id
+, eu.key::varchar as custom_attr_key
+, coalesce (nullif(eu.value.string_value::varchar,'')
+    , nullif(eu.value.int_value::varchar,'')
+    , nullif(eu.value.float_value::varchar,'')
+    , nullif(eu.value.double_value::varchar,'')) as custom_attr_value
+from {{schema}}.dim_users u, u.user_properties eu;

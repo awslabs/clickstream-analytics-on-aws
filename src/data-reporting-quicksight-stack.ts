@@ -103,7 +103,6 @@ export class DataReportingQuickSightStack extends Stack {
         },
       },
 
-      // definition: lowercaseKeys(TEMPLATE_DEF_V1),
     });
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstrem-Redshift-Secret', `${stackParames.redshiftParameterKeyParam.valueAsString}`);

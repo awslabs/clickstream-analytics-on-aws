@@ -267,12 +267,9 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     sqlStatements.push(getSqlContent('clickstream-user-dim-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-session-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-device-view.sql', mustacheParam));
-
-    // to be deleted by BI update
-    sqlStatements.push(getSqlContent('clickstream-daily-active-user-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-dau-wau-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-ods-flattened-view.sql', mustacheParam));
+    sqlStatements.push(getSqlContent('clickstream-path-view.sql', mustacheParam));
     sqlStatements.push(getSqlContent('clickstream-retention-view.sql', mustacheParam));
+
   };
 
   if (sqlStatements.length == 0) {

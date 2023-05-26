@@ -1,49 +1,54 @@
-CREATE OR REPLACE VIEW {{schema}}.clickstream_retention_view AS 
-  with first_action as (
-    SELECT 
-      user_pseudo_id,
-      Date(date_trunc('day', TIMESTAMP 'epoch' + min(event_timestamp)/1000 * INTERVAL '1 second')) as day_cohort
-    FROM {{schema}}.{{table_ods_events}}
-    WHERE event_name='_session_start'
-    GROUP by user_pseudo_id
-  ), 
-  return_action as (
-    SELECT 
-      user_pseudo_id,
-      Date(date_trunc('day', TIMESTAMP 'epoch' + event_timestamp/1000 * INTERVAL '1 second')) as return_day
-    FROM {{schema}}.{{table_ods_events}}
-    WHERE event_name='_session_start'
-  ), 
-  retention as (
-    SELECT 
-      day_cohort, 
-      null as next_period, 
-      count(distinct user_pseudo_id) as users_num 
-    FROM first_action 
-    GROUP by 1
-    union all
-    SELECT 
-      first_action.day_cohort, 
-      DATEDIFF(day, first_action.day_cohort, return_action.return_day), 
-      count(distinct return_action.user_pseudo_id) as users_num
-    FROM first_action join return_action on first_action.user_pseudo_id = return_action.user_pseudo_id 
-    GROUP by 1, 2
-    ORDER by 1, 2
-  ) 
-  SELECT 
-    day_cohort,
-    max(case when next_period = 0 then users_num else 0 end) total_user_num,
-    max(case when next_period = 1 then users_num else 0 end) day_1,
-    max(case when next_period = 2 then users_num else 0 end) day_2,
-    max(case when next_period = 3 then users_num else 0 end) day_3,
-    max(case when next_period = 4 then users_num else 0 end) day_4,
-    max(case when next_period = 5 then users_num else 0 end) day_5,
-    max(case when next_period = 6 then users_num else 0 end) day_6,
-    max(case when next_period = 7 then users_num else 0 end) day_7,
-    max(case when next_period = 8 then users_num else 0 end) day_8,
-    max(case when next_period = 9 then users_num else 0 end) day_9,
-    max(case when next_period = 10 then users_num else 0 end) day_10,
-    max(case when next_period = 11 then users_num else 0 end) day_11
-  FROM retention 
-  GROUP by day_cohort 
-  ORDER by day_cohort
+CREATE MATERIALIZED VIEW {{schema}}.clickstream_retention_view
+BACKUP NO
+SORTKEY(first_date)
+AUTO REFRESH YES
+AS
+WITH user_first_date AS (
+  SELECT
+    user_pseudo_id,
+    -- to_date(dateadd(ms, event_timestamp, '1970-01-01')) AS first_date
+    min(event_date) as first_date
+  FROM {{schema}}ods_events
+  GROUP BY user_pseudo_id
+),
+
+retention_data AS (
+SELECT
+    user_pseudo_id,
+    -- event_date,
+    first_date,
+    DATE_DIFF('day', first_date, event_date) AS day_diff
+  FROM {{schema}}ods_events
+  JOIN user_first_date USING (user_pseudo_id)
+),
+
+retention_counts AS (
+  SELECT
+    first_date,
+    day_diff,
+    COUNT(DISTINCT user_pseudo_id) AS returned_user_count
+  FROM retention_data
+  WHERE day_diff <= 42 -- Calculate retention rate for the last 42 days
+  GROUP BY first_date, day_diff
+),
+
+total_users AS (
+  SELECT
+    first_date,
+    COUNT(DISTINCT user_pseudo_id) AS total_users
+  FROM user_first_date
+  group by 1
+),
+
+retention_rate AS (
+  SELECT
+    first_date,
+    day_diff,
+    returned_user_count,
+    total_users
+  FROM retention_counts join total_users using(first_date)
+)
+
+SELECT
+*
+FROM retention_rate;

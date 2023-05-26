@@ -392,7 +392,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name} - ${identifer.tableNameIdentifer} - ${identifer.schemaIdentifer} - ${identifer.tableNameIdentifer}`,
+      Name: `${props.name} - ${identifer.tableNameIdentifer} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
       Permissions: [{
         Principal: principalArn,
         Actions: dataSetActions,
@@ -411,6 +411,11 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
       },
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
+      DatasetParameters: props.datasetParameters,
+      DataSetUsageConfiguration: {
+        DisableUseAsDirectQuerySource: false,
+        DisableUseAsImportedSource: false,
+      },
     });
 
     await waitForDataSetCreateCompleted(quickSight, awsAccountId, datasetId);
@@ -436,7 +441,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
     const analysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${props.analysisName} ${identifer.databaseIdentifer} - ${identifer.schemaIdentifer}`,
+      Name: `${props.analysisName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -474,7 +479,7 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} ${identifer.databaseIdentifer} - ${identifer.schemaIdentifer}`,
+      Name: `${props.dashboardName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer} `,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -666,7 +671,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     dataset = await quickSight.updateDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name} - ${identifer.databaseIdentifer} - ${identifer.schemaIdentifer} - ${identifer.tableNameIdentifer}`,
+      Name: `${props.name} - ${identifer.tableNameIdentifer} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
 
       ImportMode: props.importMode,
       PhysicalTableMap: {
@@ -681,6 +686,11 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
       },
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
+      DatasetParameters: props.datasetParameters,
+      DataSetUsageConfiguration: {
+        DisableUseAsDirectQuerySource: false,
+        DisableUseAsImportedSource: false,
+      },
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
 
@@ -704,7 +714,7 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
     const analysis = await quickSight.updateAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${props.analysisName} ${identifer.databaseIdentifer} - ${identifer.schemaIdentifer}`,
+      Name: `${props.analysisName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
       SourceEntity: sourceEntity,
     });
     logger.info(`update analysis finished. Id: ${analysisId}`);
@@ -728,7 +738,7 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} ${identifer.databaseIdentifer} - ${identifer.schemaIdentifer}`,
+      Name: `${props.dashboardName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
 
       SourceEntity: sourceEntity,
 

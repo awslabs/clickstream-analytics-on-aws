@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { DatasetParameter, InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -62,6 +63,7 @@ export interface DataSetProps {
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
   customSql: string;
+  datasetParameters?: DatasetParameter[];
 };
 
 export interface QuickSightDashboardDefProps {
@@ -86,10 +88,16 @@ export const dataSetActions = [
   'quicksight:CancelIngestion',
 ];
 
-export const CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER = 'clickstream_ods_flattened_view';
+export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
 export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
 export const CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER = 'clickstream_ods_events_view';
+export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'clickstream_device_view';
+export const CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER = 'clickstream_ods_events_parameter_view';
+export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_daily_view';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_weekly_view';
+export const CLICKSTREAM_PATH_VIEW_PLACEHOLDER = 'clickstream_path_view';
+export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'clickstream_user_attr_view';
 
 function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
@@ -268,3 +276,39 @@ export function truncateString(source: string, length: number): string {
   }
   return source;
 };
+
+function _renderTemplate(jsonObj: any): any {
+  if (typeof jsonObj === 'object' && jsonObj !== null) {
+    if (Array.isArray(jsonObj)) {
+      return jsonObj.map(item => renderTemplate(item));
+    } else {
+      const newObject: { [key: string]: any } = {};
+      for (const key in jsonObj) {
+        if (Object.prototype.hasOwnProperty.call(jsonObj, key)) {
+          let newKey = key[0].toLowerCase() + key.substring(1);
+          if (newKey === 'screenCanvasSizeOption') {
+            newKey = 'screenCanvasSizeOptions';
+          }
+          if (newKey === 'kPIVisual') {
+            newKey = 'kpiVisual';
+          }
+          if (newKey === 'kPIOptions') {
+            newKey = 'kpiOptions';
+          }
+          if (newKey === 'collapsedRowDimensionsVisibility') {
+            continue;
+          }
+
+          newObject[newKey] = renderTemplate(jsonObj[key]);
+        }
+      }
+      return newObject;
+    }
+  }
+  return jsonObj;
+}
+
+export function renderTemplate(exportedTemplateDef: any): CfnTemplate.TemplateVersionDefinitionProperty {
+
+  return _renderTemplate(exportedTemplateDef) as CfnTemplate.TemplateVersionDefinitionProperty;
+}

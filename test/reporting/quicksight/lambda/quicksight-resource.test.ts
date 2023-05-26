@@ -33,13 +33,10 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
 import {
-  clickstream_ods_flattened_view_columns,
-  clickstream_user_dim_view_columns,
-} from '../../../../src/reporting/lambda/custom-resource/quicksight/resources-def';
-import {
-  CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
+  CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
   CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
 } from '../../../../src/reporting/private/dashboard';
+import { clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/template-def';
 import { getMockContext } from '../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 import {
@@ -124,10 +121,10 @@ describe('QuickSight Lambda function', () => {
         },
         {
           name: 'ODS Flattened Data Set',
-          tableName: CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER,
+          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_ODS_FLATTENED_VIEW_PLACEHOLDER}`,
-          columns: clickstream_ods_flattened_view_columns,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
+          columns: clickstream_session_view_columns,
         },
       ],
     },

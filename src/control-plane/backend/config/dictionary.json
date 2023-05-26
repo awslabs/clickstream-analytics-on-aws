@@ -11,7 +11,7 @@
   },
   {
     "name": "QuickSightTemplateArn",
-    "data": "arn:aws:quicksight:ap-northeast-1:432014048474:template/clickstream-quicksight-template-protype-v1-1-0"
+    "data": "arn:aws:quicksight:us-east-1:432014048474:template/clickstream-quicksight-template-protype-v1-2-0"
   },
   {
     "name": "Templates",
