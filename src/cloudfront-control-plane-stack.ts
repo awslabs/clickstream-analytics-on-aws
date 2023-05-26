@@ -156,6 +156,8 @@ export class CloudFrontControlPlaneStack extends Stack {
     const cspUrl = [
       `https://cognito-idp.${Aws.REGION}.amazonaws.com`,
       `*.auth.${Aws.REGION}.amazoncognito.com`,
+      solutionBucket.bucket.bucketDomainName,
+      solutionBucket.bucket.bucketRegionalDomainName,
     ].join(' ');
 
     if (createCognitoUserPool) {

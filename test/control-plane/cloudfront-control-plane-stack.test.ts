@@ -893,7 +893,20 @@ describe('CloudFrontS3PotalStack', () => {
                   {
                     Ref: 'AWS::Region',
                   },
-                  '.amazoncognito.com',
+                  '.amazoncognito.com ',
+                  {
+                    'Fn::GetAtt': [
+                      'ClickstreamSolutionDataBucket200465FE',
+                      'DomainName',
+                    ],
+                  },
+                  ' ',
+                  {
+                    'Fn::GetAtt': [
+                      'ClickstreamSolutionDataBucket200465FE',
+                      'RegionalDomainName',
+                    ],
+                  },
                 ],
               ],
             },

@@ -42,5 +42,5 @@ const docClient = DynamoDBDocumentClient.from(ddbClient, translateConfig);
 export {
   docClient,
   ddbClient,
-  marshallOptions
+  marshallOptions,
 };
