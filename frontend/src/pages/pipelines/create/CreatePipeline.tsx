@@ -19,6 +19,7 @@ import {
 } from 'apis/pipeline';
 import { getPluginList } from 'apis/plugin';
 import {
+  checkServicesAvailable,
   get3AZVPCList,
   getCertificates,
   getMSKList,
@@ -104,6 +105,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const [sinkBatchSizeError, setSinkBatchSizeError] = useState(false);
   const [sinkIntervalError, setSinkIntervalError] = useState(false);
+
+  const [loadingServiceAvailable, setLoadingServiceAvailable] = useState(false);
 
   const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
     useState(false);
@@ -250,6 +253,55 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       return false;
     }
     return true;
+  };
+
+  const validServiceAvailable = async (region: string) => {
+    if (region) {
+      try {
+        setLoadingServiceAvailable(true);
+        const { success, data }: ApiResponse<ServiceAvailableResponse[]> =
+          await checkServicesAvailable({ region });
+        if (success && data) {
+          // Set Service available
+          setPipelineInfo((prev) => {
+            return {
+              ...prev,
+              AGA:
+                data.find((element) => element.service === 'global-accelerator')
+                  ?.available || false,
+              EMR_SERVERLESS:
+                data.find((element) => element.service === 'emr-serverless')
+                  ?.available || false,
+              REDSHIFT_SERVERLESS:
+                data.find(
+                  (element) => element.service === 'redshift-serverless'
+                )?.available || false,
+              MSK:
+                data.find((element) => element.service === 'msk')?.available ||
+                false,
+              QUICK_SIGHT:
+                data.find((element) => element.service === 'quicksight')
+                  ?.available || false,
+            };
+          });
+
+          // Set QuickSight disabled
+          if (
+            !data.find((element) => element.service === 'quicksight')?.available
+          ) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                enableReporting: false,
+              };
+            });
+          }
+        }
+        setLoadingServiceAvailable(false);
+      } catch (error) {
+        setLoadingServiceAvailable(false);
+      }
+    }
   };
 
   const confirmCreatePipeline = async () => {
@@ -465,7 +517,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         }
         confirmCreatePipeline();
       }}
-      isLoadingNextStep={loadingCreate}
+      isLoadingNextStep={loadingCreate || loadingServiceAvailable}
       activeStepIndex={activeStepIndex}
       steps={[
         {
@@ -478,7 +530,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               sdkEmptyError={sdkEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
+              loadingServiceAvailable={loadingServiceAvailable}
               changeRegion={(region) => {
+                validServiceAvailable(region.value || '');
                 setRegionEmptyError(false);
                 setVPCEmptyError(false);
                 setPublicSubnetError(false);

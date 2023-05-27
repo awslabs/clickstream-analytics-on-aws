@@ -21,6 +21,7 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
+  StatusIndicator,
   TagEditorProps,
 } from '@cloudscape-design/components';
 import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
@@ -42,6 +43,7 @@ interface BasicInformationProps {
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
+  loadingServiceAvailable: boolean;
 }
 
 const BasicInformation: React.FC<BasicInformationProps> = (
@@ -60,6 +62,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     vpcEmptyError,
     sdkEmptyError,
     assetsS3BucketEmptyError,
+    loadingServiceAvailable,
   } = props;
   const [loadingRegion, setLoadingRegion] = useState(false);
   const [loadingVPC, setLoadingVPC] = useState(false);
@@ -174,6 +177,11 @@ const BasicInformation: React.FC<BasicInformationProps> = (
               changeRegion(e.detail.selectedOption);
             }}
           />
+          {loadingServiceAvailable && (
+            <StatusIndicator type="loading">
+              {t('checkingAvailable')}
+            </StatusIndicator>
+          )}
         </FormField>
 
         <FormField

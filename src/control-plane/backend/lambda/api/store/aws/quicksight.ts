@@ -112,6 +112,7 @@ export const quickSightPing = async (region: string): Promise<boolean> => {
   try {
     const quickSightClient = new QuickSightClient({
       ...aws_sdk_client_common_config,
+      maxAttempts: 1,
       region: region,
     });
     const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({

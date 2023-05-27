@@ -27,9 +27,9 @@ import {
   DescribeSecurityGroupsCommand,
 } from '@aws-sdk/client-ec2';
 import { EMRServerlessClient, ListApplicationsCommand } from '@aws-sdk/client-emr-serverless';
-import { GlobalAcceleratorClient, ListAcceleratorsCommand } from '@aws-sdk/client-global-accelerator';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
+import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
 import {
   QuickSightClient,
   ListUsersCommand,
@@ -61,8 +61,7 @@ const iamClient = mockClient(IAMClient);
 const acmClient = mockClient(ACMClient);
 const cloudWatchClient = mockClient(CloudWatchClient);
 const emrServerlessClient = mockClient(EMRServerlessClient);
-const globalAcceleratorClient = mockClient(GlobalAcceleratorClient);
-
+const kafkaConnectClient = mockClient(KafkaConnectClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
@@ -78,7 +77,7 @@ describe('Account Env test', () => {
     acmClient.reset();
     cloudWatchClient.reset();
     emrServerlessClient.reset();
-    globalAcceleratorClient.reset();
+    kafkaConnectClient.reset();
   });
   it('Get regions', async () => {
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
@@ -1374,11 +1373,11 @@ describe('Account Env test', () => {
     kafkaClient.on(ListClustersV2Command).resolves({
       ClusterInfoList: [],
     });
+    kafkaConnectClient.on(ListConnectorsCommand).resolves({
+      connectors: [],
+    });
     redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
       workgroups: [],
-    });
-    globalAcceleratorClient.on(ListAcceleratorsCommand).resolves({
-      Accelerators: [],
     });
     const mockError = new Error('Mock DynamoDB error');
     mockError.name = 'TimeoutError';
@@ -1392,11 +1391,15 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          service: 'emr-serverless',
-          available: true,
+          service: 'global-accelerator',
+          available: false,
         },
         {
-          service: 'msk',
+          service: 'redshift-serverless',
+          available: false,
+        },
+        {
+          service: 'emr-serverless',
           available: true,
         },
         {
@@ -1404,11 +1407,7 @@ describe('Account Env test', () => {
           available: false,
         },
         {
-          service: 'redshift-serverless',
-          available: true,
-        },
-        {
-          service: 'global-accelerator',
+          service: 'msk',
           available: true,
         },
       ],

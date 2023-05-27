@@ -12,6 +12,7 @@
  */
 
 import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, ListClustersV2Command, paginateListNodes, NodeInfo } from '@aws-sdk/client-kafka';
+import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
 import { getSubnet } from './ec2';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { MSKCluster } from '../../common/types';
@@ -112,12 +113,21 @@ export const mskPing = async (region: string): Promise<boolean> => {
   try {
     const kafkaClient = new KafkaClient({
       ...aws_sdk_client_common_config,
+      maxAttempts: 1,
       region,
     });
     const params: ListClustersV2Command = new ListClustersV2Command({});
     await kafkaClient.send(params);
+    const kafkaConnectClient = new KafkaConnectClient({
+      ...aws_sdk_client_common_config,
+      maxAttempts: 1,
+      region,
+    });
+    const paramsConnect: ListConnectorsCommand = new ListConnectorsCommand({});
+    await kafkaConnectClient.send(paramsConnect);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException') {
+    if ((err as Error).name === 'UnrecognizedClientException' ||
+      (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
       return false;
     }
   }

@@ -197,8 +197,12 @@ export const getSubnetsByClusterSubnetGroup = async (region: string, clusterSubn
 
 export const redshiftServerlessPing = async (region: string): Promise<boolean> => {
   try {
+    if (region.startsWith('cn')) {
+      return false;
+    }
     const redshiftServerlessClient = new RedshiftServerlessClient({
       ...aws_sdk_client_common_config,
+      maxAttempts: 1,
       region,
     });
     const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({});

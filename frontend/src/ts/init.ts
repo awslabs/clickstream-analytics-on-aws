@@ -199,4 +199,11 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   upsertCronExp: '',
   selectedDataLoadType: null,
   dataLoadCronExp: '',
+  serviceStatus: {
+    AGA: false,
+    EMR_SERVERLESS: false,
+    REDSHIFT_SERVERLESS: false,
+    MSK: false,
+    QUICK_SIGHT: false,
+  },
 };

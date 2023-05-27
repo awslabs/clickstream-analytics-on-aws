@@ -228,6 +228,14 @@ declare global {
     upsertCronExp: string;
     selectedDataLoadType: SelectProps.Option | null;
     dataLoadCronExp: string;
+
+    serviceStatus: {
+      AGA: boolean;
+      EMR_SERVERLESS: boolean;
+      REDSHIFT_SERVERLESS: boolean;
+      MSK: boolean;
+      QUICK_SIGHT: boolean;
+    };
   }
 
   interface IAlarm {

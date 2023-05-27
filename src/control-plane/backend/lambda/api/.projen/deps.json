@@ -140,17 +140,17 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-global-accelerator",
-      "version": "^3.338.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-iam",
       "version": "^3.338.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
+      "version": "^3.338.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-kafkaconnect",
       "version": "^3.338.0",
       "type": "runtime"
     },

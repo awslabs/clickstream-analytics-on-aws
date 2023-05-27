@@ -18,12 +18,14 @@ export const emrServerlessPing = async (region: string): Promise<boolean> => {
   try {
     const emrServerlessClient = new EMRServerlessClient({
       ...aws_sdk_client_common_config,
+      maxAttempts: 1,
       region,
     });
     const params: ListApplicationsCommand = new ListApplicationsCommand({});
     await emrServerlessClient.send(params);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException') {
+    if ((err as Error).name === 'UnrecognizedClientException' ||
+      (err as Error).name === 'AccessDeniedException') {
       return false;
     }
   }

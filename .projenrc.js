@@ -76,7 +76,7 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/lib-dynamodb',
   '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
-  '@aws-sdk/client-global-accelerator',
+  '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/util-stream-node',
   '@aws-sdk/node-http-handler',
 ].map(dep => `${dep}@^${awsSDKVersion}`);

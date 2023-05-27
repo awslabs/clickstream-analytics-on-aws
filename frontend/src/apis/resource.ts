@@ -183,6 +183,15 @@ const enableAlarms = async (data: { region: string; alarmNames: string[] }) => {
   return result;
 };
 
+const checkServicesAvailable = async (params: { region: string }) => {
+  const result: any = await apiRequest(
+    'get',
+    `/env/ping?region=${params.region}&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator`,
+    ``
+  );
+  return result;
+};
+
 export {
   fetchOutsideLink,
   createQuickSightUser,
@@ -209,4 +218,5 @@ export {
   getAlarmList,
   disableAlarms,
   enableAlarms,
+  checkServicesAvailable,
 };

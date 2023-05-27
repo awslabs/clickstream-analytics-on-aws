@@ -135,4 +135,9 @@ declare global {
     SecretAccessKey: string;
     SessionToken: string;
   }
+
+  interface ServiceAvailableResponse {
+    service: string;
+    available: true;
+  }
 }

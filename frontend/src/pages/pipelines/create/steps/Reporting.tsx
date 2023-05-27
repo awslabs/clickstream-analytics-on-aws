@@ -32,13 +32,11 @@ import {
   getQuickSightDetail,
   getQuickSightStatus,
   getQuickSightUsers,
-  subscribQuickSight,
 } from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ErrorCode } from 'ts/const';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
-import { alertMsg, isDisabled } from 'ts/utils';
+import { isDisabled } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -62,14 +60,9 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const [loadingQuickSight, setLoadingQuickSight] = useState(false);
-  const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [loadingCreateUser, setLoadingCreateUser] = useState(false);
   const [quickSightEnabled, setQuickSightEnabled] = useState(false);
   const [userActiveLink, setUserActiveLink] = useState('');
-
-  const [showSubQuickSight, setShowSubQuickSight] = useState(false);
-  const [subscriptionAccountName, setSubscriptionAccountName] = useState('');
-  const [subscriptionEmail, setSubscriptionEmail] = useState('');
 
   const [newUserEmail, setNewUserEmail] = useState('');
   const [showCreateUser, setShowCreateUser] = useState(false);
@@ -150,41 +143,9 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     }
   };
 
-  // subscribe quicksight
-  const subscribeTheQuickSight = async () => {
-    setLoadingSubscription(true);
-    try {
-      const { success, data }: ApiResponse<SubscribeQuickSightResponse> =
-        await subscribQuickSight({
-          email: subscriptionEmail,
-          accountName: subscriptionAccountName,
-        });
-      if (success && data) {
-        // Set QuickSight Account Name
-        setQuickSightEnabled(true);
-        setShowSubQuickSight(false);
-        changeQuickSightAccountName(data.accountName);
-        getQuickSightUserList();
-      } else {
-        setLoadingSubscription(false);
-      }
-    } catch (error: any) {
-      setLoadingSubscription(false);
-      if (error.toString().trim() === ErrorCode.QuickSightNameExists) {
-        alertMsg(t('quicksight.valid.accountExists'), 'error');
-      }
-    }
-  };
-
   const closeNewUserModal = () => {
     setUserActiveLink('');
     setShowCreateUser(false);
-  };
-
-  const closeSubQuickSightModal = () => {
-    setSubscriptionAccountName('');
-    setSubscriptionEmail('');
-    setShowSubQuickSight(false);
   };
 
   useEffect(() => {
@@ -194,7 +155,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   }, [quickSightEnabled]);
 
   useEffect(() => {
-    if (pipelineInfo.enableDataProcessing) {
+    if (pipelineInfo.enableDataProcessing && pipelineInfo.enableReporting) {
       checkTheQuickSightStatus();
     }
   }, []);
@@ -215,7 +176,10 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
           <SpaceBetween direction="vertical" size="l">
             <FormField>
               <Toggle
-                disabled={isDisabled(update, pipelineInfo)}
+                disabled={
+                  isDisabled(update, pipelineInfo) ||
+                  !pipelineInfo.serviceStatus?.QUICK_SIGHT
+                }
                 onChange={({ detail }) => changeEnableReporting(detail.checked)}
                 checked={pipelineInfo.enableReporting}
                 description={t('pipeline:create.createSampleQuickSightDesc')}
@@ -292,63 +256,6 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 </>
               ))}
           </SpaceBetween>
-
-          {/* Subscription Modal */}
-          <Modal
-            onDismiss={() => {
-              closeSubQuickSightModal();
-            }}
-            visible={showSubQuickSight}
-            footer={
-              <Box float="right">
-                <SpaceBetween direction="horizontal" size="xs">
-                  <Button
-                    variant="link"
-                    onClick={() => {
-                      closeSubQuickSightModal();
-                    }}
-                  >
-                    {t('button.close')}
-                  </Button>
-
-                  <Button
-                    loading={loadingSubscription}
-                    onClick={() => {
-                      subscribeTheQuickSight();
-                    }}
-                  >
-                    {t('button.subscribe')}
-                  </Button>
-                </SpaceBetween>
-              </Box>
-            }
-            header={t('pipeline:create.createQSSub')}
-          >
-            <FormField
-              label={t('pipeline:create.qsAccountName')}
-              description={t('pipeline:create.qsAccountNameDesc')}
-            >
-              <Input
-                placeholder="my-quicksight"
-                value={subscriptionAccountName}
-                onChange={(e) => {
-                  setSubscriptionAccountName(e.detail.value);
-                }}
-              />
-            </FormField>
-            <FormField
-              label={t('pipeline:create.qsUserEmail')}
-              description={t('pipeline:create.qsUserEmailDesc')}
-            >
-              <Input
-                placeholder="email@example.com"
-                value={subscriptionEmail}
-                onChange={(e) => {
-                  setSubscriptionEmail(e.detail.value);
-                }}
-              />
-            </FormField>
-          </Modal>
 
           {/* Create User Modal */}
           <Modal

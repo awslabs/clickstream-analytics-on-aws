@@ -39,7 +39,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       text: t('nav.tools'),
       type: 'section',
       defaultExpanded: true,
-      items: [{ type: 'link', text: t('nav.plugin'), href: '/plugins' }],
+      items: [{ type: 'link', text: t('nav.plugins'), href: '/plugins' }],
     },
     { type: 'divider' },
     {

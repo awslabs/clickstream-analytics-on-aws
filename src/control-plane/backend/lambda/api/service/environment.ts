@@ -414,16 +414,10 @@ export class EnvironmentServ {
                   },
                   )));
           } else if (serviceName === 'global-accelerator') {
-            reqs.push(
-              promisePool(
-                () => agaPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'global-accelerator',
-                      available: available,
-                    });
-                  },
-                  )));
+            result.push({
+              service: 'global-accelerator',
+              available: agaPing(region),
+            });
           }
         }
         await Promise.all(reqs);

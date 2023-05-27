@@ -161,11 +161,6 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-global-accelerator",
-      "version": "^3.338.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-glue",
       "version": "^3.338.0",
       "type": "runtime"
