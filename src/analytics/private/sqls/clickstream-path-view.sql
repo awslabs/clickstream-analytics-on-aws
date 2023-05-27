@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}clickstream_path_mv 
+CREATE MATERIALIZED VIEW {{schema}}.clickstream_path_mv 
 BACKUP NO
 SORTKEY(event_date)
 AUTO REFRESH YES
@@ -13,15 +13,15 @@ select
     ,platform
     ,(select 
         ep.value.string_value as value 
-    from {{schema}}ods_events e, e.event_params ep 
+    from {{schema}}.ods_events e, e.event_params ep 
     where 
         ep.key = '_session_id' and e.event_id = ods.event_id)::varchar session_id
     ,(select 
             ep.value.string_value::varchar as screen_name 
-        from {{schema}}ods_events e, e.event_params ep 
+        from {{schema}}.ods_events e, e.event_params ep 
         where 
             ep.key = '_screen_name' and event_name = '_screen_view' and e.event_id = ods.event_id) as current_screen
-from {{schema}}ods_events ods), ranked_events as ( select 
+from {{schema}}.ods_events ods), ranked_events as ( select 
     *,
     DENSE_RANK() OVER (PARTITION BY user_pseudo_id, session_id ORDER BY event_timestamp ASC) event_rank,
     LAG(event_name,1) OVER (PARTITION BY user_pseudo_id, session_id ORDER BY event_timestamp ASC) previous_event,
