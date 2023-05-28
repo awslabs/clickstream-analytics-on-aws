@@ -266,22 +266,25 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           setPipelineInfo((prev) => {
             return {
               ...prev,
-              AGA:
-                data.find((element) => element.service === 'global-accelerator')
-                  ?.available || false,
-              EMR_SERVERLESS:
-                data.find((element) => element.service === 'emr-serverless')
-                  ?.available || false,
-              REDSHIFT_SERVERLESS:
-                data.find(
-                  (element) => element.service === 'redshift-serverless'
-                )?.available || false,
-              MSK:
-                data.find((element) => element.service === 'msk')?.available ||
-                false,
-              QUICK_SIGHT:
-                data.find((element) => element.service === 'quicksight')
-                  ?.available || false,
+              serviceStatus: {
+                AGA:
+                  data.find(
+                    (element) => element.service === 'global-accelerator'
+                  )?.available || false,
+                EMR_SERVERLESS:
+                  data.find((element) => element.service === 'emr-serverless')
+                    ?.available || false,
+                REDSHIFT_SERVERLESS:
+                  data.find(
+                    (element) => element.service === 'redshift-serverless'
+                  )?.available || false,
+                MSK:
+                  data.find((element) => element.service === 'msk')
+                    ?.available || false,
+                QUICK_SIGHT:
+                  data.find((element) => element.service === 'quicksight')
+                    ?.available || false,
+              },
             };
           });
 
