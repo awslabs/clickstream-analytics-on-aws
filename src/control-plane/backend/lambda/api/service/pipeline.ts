@@ -68,10 +68,10 @@ export class PipelineServ {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       if (!cache || cache === 'false') {
+        const pipeline = new CPipeline(latestPipeline);
         const stackManager: StackManager = new StackManager(latestPipeline);
         latestPipeline.status = await stackManager.getPipelineStatus();
         await store.updatePipelineAtCurrentVersion(latestPipeline);
-        const pipeline = new CPipeline(latestPipeline);
         const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
           PipelineStackType.INGESTION,
           [
@@ -81,8 +81,14 @@ export class PipelineServ {
         );
         const dashboards = await pipeline.getReportDashboardsUrl();
         const metricsDashboardName = await pipeline.getMetricsDashboardName();
+        const pluginsInfo = await pipeline.getPluginsInfo();
         return res.json(new ApiSuccess({
           ...latestPipeline,
+          etl: {
+            ...latestPipeline.etl,
+            transformPlugin: pluginsInfo.transformPlugin,
+            enrichPlugin: pluginsInfo.enrichPlugin,
+          },
           endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
           dashboards,

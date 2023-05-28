@@ -293,7 +293,7 @@ export class CPipeline {
     const diffParameters = getDiff(newStackParameters, oldStackParameters);
 
     // Whitelist
-    const Whitelist:string[] = [
+    const Whitelist: string[] = [
       ...CIngestionServerStack.editWhitelist(),
       ...CKafkaConnectorStack.editWhitelist(),
       ...CETLStack.editWhitelist(),
@@ -301,8 +301,8 @@ export class CPipeline {
       ...CReportStack.editWhitelist(),
     ];
     const editKeys = diffParameters.edited.map(p => p[0]);
-    const notAllowEdit:string[] = [];
-    const editStacks:string[] = [];
+    const notAllowEdit: string[] = [];
+    const editStacks: string[] = [];
     for (let key of editKeys) {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
@@ -834,5 +834,21 @@ export class CPipeline {
     );
     return metricsOutputs.get(OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME);
   }
+
+  public async getPluginsInfo() {
+    if (!this.resources || !this.resources.plugins) {
+      const plugins = await store.listPlugin('', 'asc', false, 1, 1);
+      this.resources = {
+        ...this.resources,
+        plugins: plugins.items,
+      };
+    }
+    const transformPlugins = this.resources.plugins?.filter(plugin => plugin.id === this.pipeline.etl?.transformPlugin);
+    const enrichPlugin = this.resources.plugins?.filter(plugin => this.pipeline.etl?.enrichPlugin?.includes(plugin.id));
+    return {
+      transformPlugin: transformPlugins?.length === 1? transformPlugins[0] : null,
+      enrichPlugin,
+    };
+  };
 }
 

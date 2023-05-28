@@ -321,7 +321,7 @@ export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILT-IN_1',
+    transformPlugin: 'BUILT-IN-1',
     enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataAnalytics: {

@@ -260,25 +260,57 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
 
   const getEnrichPluginDisplay = () => {
     if (pipelineInfo?.selectedEnrichPlugins) {
+      // Create Pipeline
       return (
         pipelineInfo?.selectedEnrichPlugins
           ?.map((element) => element.name)
           .join(', ') || '-'
       );
     } else {
-      return pipelineInfo?.etl.enrichPlugin.map((element) => element) || '-';
+      // Pipeline detail
+      if (
+        pipelineInfo?.etl.enrichPlugin &&
+        pipelineInfo?.etl.enrichPlugin.length > 0
+      ) {
+        const enrichPluginData: IPlugin[] = pipelineInfo.etl
+          .enrichPlugin as any;
+        console.info('enrichPluginData:', enrichPluginData);
+        const returnElement = enrichPluginData.map((element) => {
+          return (
+            <div key={element.id}>
+              {element.name} <Box variant="small">{element.description}</Box>
+            </div>
+          );
+        });
+        return returnElement;
+      } else {
+        return '-';
+      }
     }
   };
 
   const getTransformPluginDisplay = () => {
     if (pipelineInfo?.selectedTransformPlugins) {
+      // Create pipeline
       return (
         pipelineInfo?.selectedTransformPlugins
           ?.map((element) => element.name)
           .join(', ') || '-'
       );
     } else {
-      return pipelineInfo?.etl.transformPlugin || '-';
+      // pipeline detail
+      if (pipelineInfo?.etl.transformPlugin) {
+        const transformPluginData: IPlugin = pipelineInfo?.etl
+          .transformPlugin as any;
+        return (
+          <div>
+            <div>{transformPluginData.name}</div>
+            <Box variant="small">{transformPluginData.description}</Box>
+          </div>
+        );
+      } else {
+        return '-';
+      }
     }
   };
 

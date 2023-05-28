@@ -36,6 +36,7 @@ import {
   createPipelineMock,
   dictionaryMock,
   MOCK_PIPELINE_ID,
+  MOCK_PLUGIN_ID,
   MOCK_PROJECT_ID,
   MOCK_TOKEN,
   pipelineExistedMock,
@@ -484,6 +485,27 @@ describe('Pipeline test', () => {
         },
       ],
     });
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: new Map<string, any>([
+        [':d', false],
+        [':prefix', 'PLUGIN'],
+      ]),
+      FilterExpression: 'deleted = :d',
+      IndexName: undefined,
+      KeyConditionExpression:
+    '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: undefined,
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -493,6 +515,65 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        etl: {
+          ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.etl,
+          enrichPlugin: [
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: 'Description of UAEnrichment',
+              id: 'BUILT-IN-2',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              name: 'UAEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-2',
+              updateAt: 1667355960000,
+            },
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: 'Description of IPEnrichment',
+              id: 'BUILT-IN-3',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              name: 'IPEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-3',
+              updateAt: 1667355960000,
+            },
+            {
+              id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2`,
+            },
+          ],
+          transformPlugin: {
+            bindCount: 0,
+            builtIn: true,
+            createAt: 1667355960000,
+            deleted: false,
+            dependencyFiles: [],
+            description: 'Description of Transformer',
+            id: 'BUILT-IN-1',
+            jarFile: '',
+            mainFunction: 'software.aws.solution.clickstream.Transformer',
+            name: 'Transformer',
+            operator: '',
+            pluginType: 'Transform',
+            prefix: 'PLUGIN',
+            type: 'PLUGIN#BUILT-IN-1',
+            updateAt: 1667355960000,
+          },
+        },
         dns: 'http://yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [
@@ -544,6 +625,27 @@ describe('Pipeline test', () => {
         },
       ],
     });
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      "ExclusiveStartKey": undefined,
+      "ExpressionAttributeNames":
+        {"#prefix": "prefix"},
+      "ExpressionAttributeValues": new Map<string, any>([
+        [':d', false],
+        [':prefix', 'PLUGIN'],
+      ]),
+      "FilterExpression": "deleted = :d",
+      "IndexName": undefined,
+      "KeyConditionExpression":
+        "#prefix= :prefix",
+      "Limit": undefined,
+      "ScanIndexForward": true,
+      "TableName": undefined
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`,name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -553,6 +655,65 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        etl: {
+          ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.etl,
+          enrichPlugin: [
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: 'Description of UAEnrichment',
+              id: 'BUILT-IN-2',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              name: 'UAEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-2',
+              updateAt: 1667355960000,
+            },
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: 'Description of IPEnrichment',
+              id: 'BUILT-IN-3',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              name: 'IPEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-3',
+              updateAt: 1667355960000,
+            },
+            {
+              id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2`,
+            },
+          ],
+          transformPlugin: {
+            bindCount: 0,
+            builtIn: true,
+            createAt: 1667355960000,
+            deleted: false,
+            dependencyFiles: [],
+            description: 'Description of Transformer',
+            id: 'BUILT-IN-1',
+            jarFile: '',
+            mainFunction: 'software.aws.solution.clickstream.Transformer',
+            name: 'Transformer',
+            operator: '',
+            pluginType: 'Transform',
+            prefix: 'PLUGIN',
+            type: 'PLUGIN#BUILT-IN-1',
+            updateAt: 1667355960000,
+          },
+        },
         dns: '',
         endpoint: '',
         dashboards: [],
@@ -609,6 +770,27 @@ describe('Pipeline test', () => {
           },
         ],
       });
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      "ExclusiveStartKey": undefined,
+      "ExpressionAttributeNames":
+        {"#prefix": "prefix"},
+      "ExpressionAttributeValues": new Map<string, any>([
+        [':d', false],
+        [':prefix', 'PLUGIN'],
+      ]),
+      "FilterExpression": "deleted = :d",
+      "IndexName": undefined,
+      "KeyConditionExpression":
+        "#prefix= :prefix",
+      "Limit": undefined,
+      "ScanIndexForward": true,
+      "TableName": undefined
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`,name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 3);
@@ -619,6 +801,11 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...S3_INGESTION_PIPELINE,
+        etl: {
+          ...S3_INGESTION_PIPELINE.etl,
+          enrichPlugin: [],
+          transformPlugin: null,
+        },
         dns: 'http://yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [],
