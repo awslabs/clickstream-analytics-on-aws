@@ -1,5 +1,6 @@
 {
   "plugins": "Plugins",
+  "description": "The solution supports user bring in its own data process plugins to customize the data processing workflow.",
   "list": {
     "id": "Plugin ID",
     "name": "Plugin name",

@@ -39,7 +39,7 @@ const PluginList: React.FC = () => {
           <PluginTable
             selectionType="single"
             title={t('plugin:list.pluginList')}
-            desc={t('plugin:list.desc')}
+            desc={t('plugin:description')}
           />
         </ContentLayout>
       }

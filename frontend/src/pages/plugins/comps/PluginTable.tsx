@@ -25,7 +25,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 
 interface PluginTableProps {
   pluginType?: string;
@@ -239,12 +239,14 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
             </Header>
             {desc}
             <>
-              <div className="maxmind-copyright">
-                * {t('maxmindCopyRight')}
-                <Link external href="https://www.maxmind.com">
-                  https://www.maxmind.com
-                </Link>
-              </div>
+              {pluginType !== 'Transform' && (
+                <div className="maxmind-copyright">
+                  * {t('maxmindCopyRight')}
+                  <Link external href={XMIND_LINK}>
+                    {XMIND_LINK}
+                  </Link>
+                </div>
+              )}
             </>
           </>
         }

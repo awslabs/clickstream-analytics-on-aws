@@ -24,6 +24,8 @@ export const COMMON_ALERT_TYPE = {
   Info: 'info',
 };
 
+export const XMIND_LINK = 'https://www.maxmind.com';
+
 export const MIN_KDS_BATCH_SIZE = 1;
 export const MAX_KDS_BATCH_SIZE = 10000;
 export const DEFAULT_KDS_BATCH_SIZE = '10000';
