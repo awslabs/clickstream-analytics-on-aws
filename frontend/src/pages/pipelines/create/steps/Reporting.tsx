@@ -34,7 +34,11 @@ import {
   getQuickSightUsers,
 } from 'apis/resource';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  PIPLINE_QUICKSIGHT_GUIDE_LINK,
+  PIPLINE_QUICKSIGHT_LEARNMORE_LINK,
+} from 'ts/const';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
 import { isDisabled } from 'ts/utils';
 
@@ -182,7 +186,24 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 }
                 onChange={({ detail }) => changeEnableReporting(detail.checked)}
                 checked={pipelineInfo.enableReporting}
-                description={t('pipeline:create.createSampleQuickSightDesc')}
+                description={
+                  <div>
+                    <Trans
+                      i18nKey="pipeline:create.createSampleQuickSightDesc"
+                      components={{
+                        learnmore_anchor: (
+                          <Link
+                            external
+                            href={PIPLINE_QUICKSIGHT_LEARNMORE_LINK}
+                          />
+                        ),
+                        guide_anchor: (
+                          <Link external href={PIPLINE_QUICKSIGHT_GUIDE_LINK} />
+                        ),
+                      }}
+                    />
+                  </div>
+                }
               >
                 <b>{t('pipeline:create.createSampleQuickSight')}</b>
               </Toggle>

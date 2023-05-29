@@ -189,7 +189,7 @@
     "reportSettings": "Reporting settings",
     "reportSettingsDesc": "Select a QuickSight account for the solution create reporting for you",
     "createSampleQuickSight": "Create sample dashboard in QuickSight",
-    "createSampleQuickSightDesc": "Note that enabling this functionality will allow solution to automatically sign up your AWS account to QuickSight (Enterprise) if your account havn’t signed up yet.",
+    "createSampleQuickSightDesc": "Enabling this feature will allow the solution to create sample dashboards (<learnmore_anchor>Learn More</learnmore_anchor>) in your QuickSight Account. If your AWS account hasn't sign up for QuickSight, you will be asked to sign up first by following this <guide_anchor>guide</guide_anchor>.",
     "quickSightNotSub": "No QuickSight subscription in your account",
     "quickSightNotSubDesc1": "The solution detects that your account has not subscribed to QuickSight, please ",
     "quickSightNotSubDesc2": ". Note additional costs apply.",
