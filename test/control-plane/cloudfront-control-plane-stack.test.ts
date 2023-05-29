@@ -288,7 +288,6 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
-      ReservedConcurrentExecutions: 3,
       Runtime: 'nodejs18.x',
     },
     );
@@ -558,7 +557,6 @@ describe('CloudFrontS3PotalStack', () => {
         },
       },
       Handler: 'index.handler',
-      ReservedConcurrentExecutions: 3,
       Runtime: 'nodejs18.x',
     },
     );
@@ -736,7 +734,6 @@ describe('CloudFrontS3PotalStack', () => {
       },
       Architectures: Match.absent(),
       Handler: 'index.handler',
-      ReservedConcurrentExecutions: 3,
       Runtime: 'nodejs16.x',
     },
     );

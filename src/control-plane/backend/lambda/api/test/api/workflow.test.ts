@@ -2470,126 +2470,126 @@ describe('Workflow test', () => {
     let workflowTemplate: WorkflowTemplate = {
       Version: '2022-03-15',
       Workflow: {
-        "Type": WorkflowStateType.PARALLEL,
-        "End": true,
-        "Branches": [
+        Type: WorkflowStateType.PARALLEL,
+        End: true,
+        Branches: [
           {
-            "StartAt": "Ingestion",
-            "States": {
-              "Ingestion": {
-                "Type": WorkflowStateType.STACK,
-                "Data": {
-                  "Input": {
-                    "Action": "Create",
-                    "Region": "ap-northeast-1",
-                    "StackName": "Clickstream-Ingestion-kinesis-80a00964678e487d8425bca0000f5d08",
-                    "TemplateURL": "https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/ingestion-server-kinesis-stack.template.json",
-                    "Parameters": [],
-                    "Tags": []
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-northeast-1',
+                    StackName: 'Clickstream-Ingestion-kinesis-80a00964678e487d8425bca0000f5d08',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/ingestion-server-kinesis-stack.template.json',
+                    Parameters: [],
+                    Tags: [],
                   },
-                  "Callback": {
-                    "BucketName": "clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h",
-                    "BucketPrefix": "clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d"
-                  }
-                },
-                "End": true
-              }
-            }
-          },
-          {
-            "StartAt": "ETL",
-            "States": {
-              "ETL": {
-                "Type": WorkflowStateType.STACK,
-                "Data": {
-                  "Input": {
-                    "Action": "Create",
-                    "Region": "ap-northeast-1",
-                    "StackName": "Clickstream-ETL-80a00964678e487d8425bca0000f5d08",
-                    "TemplateURL": "https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-pipeline-stack.template.json",
-                    "Parameters": [],
-                    "Tags": []
+                  Callback: {
+                    BucketName: 'clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h',
+                    BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
                   },
-                  "Callback": {
-                    "BucketName": "clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h",
-                    "BucketPrefix": "clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d"
-                  }
                 },
-                "End": true
-              }
-            }
-          },
-          {
-            "StartAt": "DataAnalytics",
-            "States": {
-              "DataAnalytics": {
-                "Type": WorkflowStateType.STACK,
-                "Data": {
-                  "Input": {
-                    "Action": "Create",
-                    "Region": "ap-northeast-1",
-                    "StackName": "Clickstream-DataAnalytics-80a00964678e487d8425bca0000f5d08",
-                    "TemplateURL": "https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-analytics-redshift-stack.template.json",
-                    "Parameters": [],
-                    "Tags": []
-                  },
-                  "Callback": {
-                    "BucketName": "clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h",
-                    "BucketPrefix": "clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d"
-                  }
-                },
-                "Next": "Report"
+                End: true,
               },
-              "Report": {
-                "Type": WorkflowStateType.STACK,
-                "Data": {
-                  "Input": {
-                    "Action": "Create",
-                    "Region": "ap-northeast-1",
-                    "StackName": "Clickstream-Report-80a00964678e487d8425bca0000f5d08",
-                    "TemplateURL": "https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-reporting-quicksight-stack.template.json",
-                    "Parameters": [],
-                    "Tags": []
-                  },
-                  "Callback": {
-                    "BucketName": "clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h",
-                    "BucketPrefix": "clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d"
-                  }
-                },
-                "End": true
-              }
-            }
+            },
           },
           {
-            "StartAt": "Metrics",
-            "States": {
-              "Metrics": {
-                "Type": WorkflowStateType.STACK,
-                "Data": {
-                  "Input": {
-                    "Action": "Create",
-                    "Region": "ap-northeast-1",
-                    "StackName": "Clickstream-Metrics-80a00964678e487d8425bca0000f5d08",
-                    "TemplateURL": "https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/metrics-stack.template.json",
-                    "Parameters": [],
-                    "Tags": []
+            StartAt: 'ETL',
+            States: {
+              ETL: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-northeast-1',
+                    StackName: 'Clickstream-ETL-80a00964678e487d8425bca0000f5d08',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-pipeline-stack.template.json',
+                    Parameters: [],
+                    Tags: [],
                   },
-                  "Callback": {
-                    "BucketName": "clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h",
-                    "BucketPrefix": "clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d"
-                  }
+                  Callback: {
+                    BucketName: 'clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h',
+                    BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
+                  },
                 },
-                "End": true
-              }
-            }
-          }
-        ]
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'DataAnalytics',
+            States: {
+              DataAnalytics: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-northeast-1',
+                    StackName: 'Clickstream-DataAnalytics-80a00964678e487d8425bca0000f5d08',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-analytics-redshift-stack.template.json',
+                    Parameters: [],
+                    Tags: [],
+                  },
+                  Callback: {
+                    BucketName: 'clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h',
+                    BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
+                  },
+                },
+                Next: 'Report',
+              },
+              Report: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-northeast-1',
+                    StackName: 'Clickstream-Report-80a00964678e487d8425bca0000f5d08',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-reporting-quicksight-stack.template.json',
+                    Parameters: [],
+                    Tags: [],
+                  },
+                  Callback: {
+                    BucketName: 'clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h',
+                    BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Type: WorkflowStateType.STACK,
+                Data: {
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-northeast-1',
+                    StackName: 'Clickstream-Metrics-80a00964678e487d8425bca0000f5d08',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/metrics-stack.template.json',
+                    Parameters: [],
+                    Tags: [],
+                  },
+                  Callback: {
+                    BucketName: 'clickstream-develop-ap-n-clickstreamsolutiondatab-1mebxa8xtn32h',
+                    BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
+                  },
+                },
+                End: true,
+              },
+            },
+          },
+        ],
       },
     };
     const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
     const res = await stackManager.getWorkflowCurrentAction(workflowTemplate.Workflow);
     expect(res).toEqual('CREATE');
-  })
+  });
 
   afterAll((done) => {
     server.close();

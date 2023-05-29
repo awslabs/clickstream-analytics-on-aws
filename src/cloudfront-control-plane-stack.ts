@@ -30,14 +30,14 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
-import { Architecture, CfnFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack } from './common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
@@ -238,18 +238,11 @@ export class CloudFrontControlPlaneStack extends Stack {
         ... POWERTOOLS_ENVS,
       },
       architecture: props?.targetToCNRegions ? undefined : Architecture.ARM_64,
-      reservedConcurrentExecutions: 3,
       logRetention: RetentionDays.TEN_YEARS,
     });
-    addCfnNagSuppressRules(
-      authFunction.node.defaultChild as CfnFunction,
-      [
-        {
-          id: 'W89', //Lambda functions should be deployed inside a VPC
-          reason: Constant.NAG_REASON_NO_VPC_INVOLVED,
-        },
-      ],
-    );
+    addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
+    ]);
 
     const authorizer = new TokenAuthorizer(this, 'JWTAuthorizer', {
       handler: authFunction,
