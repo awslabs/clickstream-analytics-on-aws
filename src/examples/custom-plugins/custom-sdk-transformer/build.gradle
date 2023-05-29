@@ -1,0 +1,87 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "org.barfuin.gradle.jacocolog:gradle-jacoco-log:${jacocoLogVersion}"
+  }
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'org.barfuin.gradle.jacocolog'
+
+apply from: "${rootProject.projectDir}/gradle/config/scripts/idea.gradle"
+apply from: "${rootProject.projectDir}/gradle/config/scripts/style.gradle"
+apply from: "${rootProject.projectDir}/gradle/config/scripts/coverage.gradle"
+
+group = "$group"
+version = "$projectVersion"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+
+    // This dependency is used by the application.
+    implementation "com.google.guava:guava:$guavaVersion"
+
+    // For running spark basics
+    implementation "org.apache.spark:spark-sql_2.13:$sparkVersion"
+
+    // For Ip to Geo.
+    implementation "com.maxmind.db:maxmind-db:$maxmindDbVersion"
+
+    // For UA.
+    implementation "com.github.ua-parser:uap-java:$uapJavaVersion"
+
+    // lombok related.
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    // test related
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+    filter {
+      // includeTestsMatching "ETL*Test"
+    }
+}
+
+jacocoTestReport {
+    reports {
+            xml.enabled true
+            csv.enabled true
+            html.enabled true
+            // html.destination "${buildDir}/reports/jacoco/test/"
+    }
+}
+
+jar {
+    from {
+        configurations
+                .runtimeClasspath
+                .collect {
+                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java")) {
+                        zipTree(it)
+                    }
+                }
+    }
+}

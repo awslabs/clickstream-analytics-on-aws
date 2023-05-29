@@ -14,6 +14,7 @@
 /.gitlab/ci-templates/cfn-nag.yml linguist-generated
 /.gitlab/ci-templates/data-pipeline-spark-etl.yml linguist-generated
 /.gitlab/ci-templates/docs.yml linguist-generated
+/.gitlab/ci-templates/etl-plugin-samples.yml linguist-generated
 /.gitlab/ci-templates/git-secrets-scan.yml linguist-generated
 /.gitlab/ci-templates/license-check.yml linguist-generated
 /.gitlab/ci-templates/prlint.yml linguist-generated

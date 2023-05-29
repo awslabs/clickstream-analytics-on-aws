@@ -13,6 +13,7 @@ include:
   - local: .gitlab/ci-templates/license-check.yml
   - local: .gitlab/ci-templates/viperlight.yml
   - local: .gitlab/ci-templates/data-pipeline-spark-etl.yml
+  - local: .gitlab/ci-templates/etl-plugin-samples.yml
   - local: .gitlab/ci-templates/cfn-nag.yml
   - local: .gitlab/ci-templates/cfn-lint.yml
 workflow:

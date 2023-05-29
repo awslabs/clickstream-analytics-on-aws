@@ -1,0 +1,62 @@
+class CoverageExtension {
+    boolean enabled = true
+    List<String> excludePackages;
+    List<String> excludeClasses;
+}
+
+project.extensions.create('coverage', CoverageExtension)
+
+apply plugin: 'jacoco'
+
+jacoco.toolVersion = jacocoVersion
+
+task coverageCheck(dependsOn: test) {
+    doLast {
+        if (!coverage.enabled) {
+            return
+        }
+
+        if (!file("$buildDir/classes/java/test").exists()) {
+            return
+        }
+
+        ant.taskdef(name: 'jacocoReport',
+                classname: 'org.jacoco.ant.ReportTask',
+                classpath: configurations.jacocoAnt.asPath)
+
+        ant.jacocoReport {
+            executiondata {
+                fileset(dir: "$buildDir/jacoco") {
+                    include name: 'test.exec'
+                }
+            }
+
+            structure(name: project.name) {
+                classfiles {
+                    fileset(dir: "$buildDir/classes/java/main") {
+                        coverage.excludePackages.each() {
+                            exclude name: "${it.replaceAll('\\.', '/') + '/*'}"
+                        }
+                        coverage.excludeClasses.each() {
+                            exclude name: "${it.replaceAll('\\.', '/') + '.class'}"
+                        }
+                    }
+                }
+                sourcefiles {
+                    fileset dir: "src/main/java"
+                }
+            }
+
+            html(destdir: "$buildDir/reports/jacoco")
+
+            check(failOnViolation: true) {
+                rule(element: 'PACKAGE') {
+                    limit(counter: "LINE", value: "COVEREDRATIO", minimum: "0.80")
+                    limit(counter: "CLASS", value: "COVEREDRATIO", minimum: "0.80")
+                }
+            }
+        }
+    }
+}
+
+check.dependsOn "coverageCheck"
