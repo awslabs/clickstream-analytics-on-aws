@@ -49,7 +49,7 @@ import {
 } from './pipeline-mock';
 import {
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-  BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_PARAMETERS,
+  BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
   ETL_PLUGIN1_PARAMETERS,
   ETL_PLUGIN2_PARAMETERS,
   ETL_PLUGIN3_PARAMETERS,
@@ -161,7 +161,7 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
+                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
@@ -606,7 +606,7 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
+                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',

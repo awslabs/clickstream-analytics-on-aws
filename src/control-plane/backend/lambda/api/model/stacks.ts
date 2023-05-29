@@ -16,7 +16,7 @@ import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {
   CORS_PATTERN,
-  DOMAIN_NAME_PATTERN, EMAIL_PATTERN,
+  DOMAIN_NAME_PATTERN, MUTIL_EMAIL_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
@@ -1088,7 +1088,7 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('')
   @JSONObject.custom( (_:any, key:string, value:any) => {
     if (value) {
-      validatePattern(key, EMAIL_PATTERN, value);
+      validatePattern(key, MUTIL_EMAIL_PATTERN, value);
     }
     return value;
   })
@@ -1104,13 +1104,15 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('1')
     Version?: string;
 
-  constructor(pipeline: IPipeline) {
+  constructor(pipeline: IPipeline, resources: CPipelineResources) {
+    const projectEmails = resources.project?.emails?.split(',');
     const operators = pipeline.operator.split(',');
-    const emails = operators.filter(op => op !== 'unknown');
+    const emailList = projectEmails?.concat(operators);
+    const emails = emailList?.filter(op => op !== 'unknown' && !isEmpty(op));
 
     super({
       ProjectId: pipeline.projectId,
-      Email: emails.join(','),
+      Emails: emails?.join(','),
     });
   }
 

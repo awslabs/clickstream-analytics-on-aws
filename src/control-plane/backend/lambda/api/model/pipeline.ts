@@ -752,7 +752,7 @@ export class CPipeline {
         throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
       }
 
-      const metricsStack = new CMetricsStack(this.pipeline);
+      const metricsStack = new CMetricsStack(this.pipeline, this.resources!);
       const metricsStackParameters = metricsStack.parameters();
       const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
       const metricsState: WorkflowState = {

@@ -129,6 +129,7 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
       authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
     },
   },
+  operator: 'u3@example.com',
 };
 
 export const KAFKA_INGESTION_PIPELINE: IPipeline = {
@@ -149,6 +150,7 @@ export const KAFKA_INGESTION_PIPELINE: IPipeline = {
       },
     },
   },
+  operator: 'unknown',
 };
 
 export const KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE: IPipeline = {
