@@ -627,23 +627,23 @@ describe('Pipeline test', () => {
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
-      "ExclusiveStartKey": undefined,
-      "ExpressionAttributeNames":
-        {"#prefix": "prefix"},
-      "ExpressionAttributeValues": new Map<string, any>([
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: new Map<string, any>([
         [':d', false],
         [':prefix', 'PLUGIN'],
       ]),
-      "FilterExpression": "deleted = :d",
-      "IndexName": undefined,
-      "KeyConditionExpression":
-        "#prefix= :prefix",
-      "Limit": undefined,
-      "ScanIndexForward": true,
-      "TableName": undefined
+      FilterExpression: 'deleted = :d',
+      IndexName: undefined,
+      KeyConditionExpression:
+        '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: undefined,
     }).resolves({
       Items: [
-        { id: `${MOCK_PLUGIN_ID}_2`,name: `${MOCK_PLUGIN_ID}_2` },
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
       ],
     });
     let res = await request(app)
@@ -772,23 +772,23 @@ describe('Pipeline test', () => {
       });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
-      "ExclusiveStartKey": undefined,
-      "ExpressionAttributeNames":
-        {"#prefix": "prefix"},
-      "ExpressionAttributeValues": new Map<string, any>([
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: new Map<string, any>([
         [':d', false],
         [':prefix', 'PLUGIN'],
       ]),
-      "FilterExpression": "deleted = :d",
-      "IndexName": undefined,
-      "KeyConditionExpression":
-        "#prefix= :prefix",
-      "Limit": undefined,
-      "ScanIndexForward": true,
-      "TableName": undefined
+      FilterExpression: 'deleted = :d',
+      IndexName: undefined,
+      KeyConditionExpression:
+        '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: undefined,
     }).resolves({
       Items: [
-        { id: `${MOCK_PLUGIN_ID}_2`,name: `${MOCK_PLUGIN_ID}_2` },
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
       ],
     });
     let res = await request(app)

@@ -292,13 +292,13 @@ export class CPipeline {
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
     const diffParameters = getDiff(newStackParameters, oldStackParameters);
 
-    // Whitelist
-    const Whitelist: string[] = [
-      ...CIngestionServerStack.editWhitelist(),
-      ...CKafkaConnectorStack.editWhitelist(),
-      ...CETLStack.editWhitelist(),
-      ...CDataAnalyticsStack.editWhitelist(),
-      ...CReportStack.editWhitelist(),
+    // AllowedList
+    const AllowedList: string[] = [
+      ...CIngestionServerStack.editAllowedList(),
+      ...CKafkaConnectorStack.editAllowedList(),
+      ...CETLStack.editAllowedList(),
+      ...CDataAnalyticsStack.editAllowedList(),
+      ...CReportStack.editAllowedList(),
     ];
     const editKeys = diffParameters.edited.map(p => p[0]);
     const notAllowEdit: string[] = [];
@@ -309,7 +309,7 @@ export class CPipeline {
       if (!editStacks.includes(stackName)) {
         editStacks.push(stackName);
       }
-      if (!Whitelist.includes(paramName)) {
+      if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
       }
     }

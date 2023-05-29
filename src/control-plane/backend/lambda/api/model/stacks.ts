@@ -45,8 +45,8 @@ import { getBucketPrefix, getStackName, getKafkaTopic, getPluginInfo, isEmpty } 
 
 export class CIngestionServerStack extends JSONObject {
 
-  public static editWhitelist(): string[] {
-    const whitelist:string[] = [
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
       'ServerEndpointPath',
       'ServerCorsOrigin',
       'ServerMax',
@@ -71,7 +71,7 @@ export class CIngestionServerStack extends JSONObject {
       'KinesisDataS3Bucket',
       'KinesisDataS3Prefix',
     ];
-    return whitelist;
+    return allowedList;
   }
 
   @JSONObject.required
@@ -372,8 +372,8 @@ export class CIngestionServerStack extends JSONObject {
 
 export class CKafkaConnectorStack extends JSONObject {
 
-  public static editWhitelist(): string[] {
-    const whitelist:string[] = [
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
       'DataS3Bucket',
       'DataS3Prefix',
       'LogS3Bucket',
@@ -390,7 +390,7 @@ export class CKafkaConnectorStack extends JSONObject {
       'RotateIntervalMS',
       'FlushSize',
     ];
-    return whitelist;
+    return allowedList;
   }
 
   @JSONObject.required
@@ -535,8 +535,8 @@ export class CKafkaConnectorStack extends JSONObject {
 
 export class CETLStack extends JSONObject {
 
-  public static editWhitelist(): string[] {
-    const whitelist:string[] = [
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
       'AppIds',
       'SourceS3Bucket',
       'SourceS3Prefix',
@@ -550,7 +550,7 @@ export class CETLStack extends JSONObject {
       'S3PathPluginJars',
       'S3PathPluginFiles',
     ];
-    return whitelist;
+    return allowedList;
   }
 
   @JSONObject.required
@@ -678,8 +678,8 @@ export class CETLStack extends JSONObject {
 
 export class CDataAnalyticsStack extends JSONObject {
 
-  public static editWhitelist(): string[] {
-    const whitelist:string[] = [
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
       'AppIds',
       'ODSEventBucket',
       'ODSEventPrefix',
@@ -695,7 +695,7 @@ export class CDataAnalyticsStack extends JSONObject {
       'RedshiftDbUser',
       'RedshiftServerlessRPU',
     ];
-    return whitelist;
+    return allowedList;
   }
 
   @JSONObject.required
@@ -946,8 +946,8 @@ export class CDataAnalyticsStack extends JSONObject {
 
 export class CReportStack extends JSONObject {
 
-  public static editWhitelist(): string[] {
-    const whitelist:string[] = [
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
       'QuickSightUserParam',
       'RedshiftDBParam',
       'RedShiftDBSchemaParam',
@@ -955,7 +955,7 @@ export class CReportStack extends JSONObject {
       'QuickSightVpcConnectionSubnetParam',
       'RedshiftParameterKeyParam',
     ];
-    return whitelist;
+    return allowedList;
   }
 
   @JSONObject.required
