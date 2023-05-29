@@ -299,6 +299,7 @@ export class CPipeline {
       ...CETLStack.editAllowedList(),
       ...CDataAnalyticsStack.editAllowedList(),
       ...CReportStack.editAllowedList(),
+      ...CMetricsStack.editAllowedList(),
     ];
     const editKeys = diffParameters.edited.map(p => p[0]);
     const notAllowEdit: string[] = [];

@@ -819,10 +819,10 @@ export const BASE_METRICS_PARAMETERS = [
 ];
 
 export const BASE_METRICS_EMAILS_PARAMETERS = mergeParameters(
-  BASE_METRICS_PARAMETERS,[
-  {
-    ParameterKey: 'Emails',
-    ParameterValue: 'u1@example.com,u2@example.com,u3@example.com',
-  },
-]);
+  BASE_METRICS_PARAMETERS, [
+    {
+      ParameterKey: 'Emails',
+      ParameterValue: 'u1@example.com,u2@example.com,u3@example.com',
+    },
+  ]);
 

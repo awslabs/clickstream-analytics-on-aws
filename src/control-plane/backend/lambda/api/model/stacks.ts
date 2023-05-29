@@ -1082,6 +1082,13 @@ export class CReportStack extends JSONObject {
 
 export class CMetricsStack extends JSONObject {
 
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [
+      'Emails',
+    ];
+    return allowedList;
+  }
+
   @JSONObject.required
     ProjectId?: string;
 
