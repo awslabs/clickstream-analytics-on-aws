@@ -758,7 +758,7 @@ export const KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW: IPipeli
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
                   StackName: 'Clickstream-Report-e9a8f34fbf734ca4950787f1ad818989',

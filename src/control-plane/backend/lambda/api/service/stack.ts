@@ -380,7 +380,7 @@ export class StackManager {
     return state;
   }
 
-  private getWorkflowCurrentAction(state: WorkflowState): string {
+  public getWorkflowCurrentAction(state: WorkflowState): string {
     let res: string = '';
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
@@ -396,7 +396,7 @@ export class StackManager {
         res = state.Data?.Input.Action;
       }
     }
-    return res;
+    return res.toUpperCase();
   }
 
 }
