@@ -225,11 +225,11 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',
-      ReservedConcurrentExecutions: 3,
       VpcConfig: Match.objectLike({
         SubnetIds: Match.anyValue(),
         SecurityGroupIds: Match.anyValue(),
       }),
+      Timeout: 10,
       Architectures: [
         'x86_64',
       ],

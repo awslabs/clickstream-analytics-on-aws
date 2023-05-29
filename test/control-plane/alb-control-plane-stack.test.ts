@@ -244,7 +244,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',
-      ReservedConcurrentExecutions: 5,
+      Timeout: 10,
     });
 
     template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});

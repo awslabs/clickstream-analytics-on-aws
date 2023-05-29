@@ -34,7 +34,7 @@ import {
   isValidAppId, isEmails,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
-import { getEmailFromRequestContext } from './common/utils';
+import { getEmailFromRequestContext, isEmpty } from './common/utils';
 import { JWTAuthorizer } from './middle-ware/authorizer';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
@@ -104,7 +104,9 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
           message: 'Invalid token provided.',
         });
       }
-      email = isAuthorized[2]!.toString();
+      if (!isEmpty(isAuthorized[2])) {
+        email = isAuthorized[2]!.toString();
+      }
     }
   } else {
     // Cloudfront control plane

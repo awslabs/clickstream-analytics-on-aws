@@ -14,7 +14,7 @@
 import {
   Duration,
   IgnoreMode,
-  Fn,
+  Fn, CfnResource,
 } from 'aws-cdk-lib';
 import { Certificate, ICertificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -56,7 +56,7 @@ import { IBucket, Bucket, BucketEncryption, BlockPublicAccess } from 'aws-cdk-li
 import { Construct } from 'constructs';
 import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
-import { addCfnNagSuppressRules } from '../common/cfn-nag';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 
@@ -178,8 +178,8 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
         platform: props.frontendProps.plaform,
       }),
       role: fnRole,
-      reservedConcurrentExecutions: props.frontendProps.reservedConcurrentExecutions ?? 5,
       vpc: props.networkProps.vpc,
+      timeout: Duration.seconds(10),
       allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
@@ -190,6 +190,10 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     });
 
     createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));
+
+    addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
+    ]);
 
     this.securityGroup = new SecurityGroup(this, 'portal_sg', {
       vpc: props.networkProps.vpc,
