@@ -306,6 +306,7 @@ function getConnectorConfiguration(
     'topics.dir': `${props.dataS3Prefix.slice(0, -1)}`,
     'flush.size': `${props.flushSize}`,
     'rotate.interval.ms': `${props.rotateIntervalMS}`,
+    'rotate.schedule.interval.ms': `${props.rotateIntervalMS}`,
     's3.compression.type': 'gzip',
     'storage.class': 'io.confluent.connect.s3.storage.S3Storage',
     'format.class': 'io.confluent.connect.s3.format.json.JsonFormat',

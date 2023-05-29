@@ -385,6 +385,8 @@ test('Check connector hardcode configurations are correct', async () => {
     expect(cmd.connectorConfiguration['partitioner.class']).toEqual('io.confluent.connect.storage.partitioner.TimeBasedPartitioner');
     expect(cmd.connectorConfiguration['path.format']).toEqual("'year'=YYYY/'month'=MM/'day'=dd/'hour'=HH");
     expect(cmd.connectorConfiguration['partition.duration.ms']).toEqual('60000');
+    expect(cmd.connectorConfiguration['rotate.interval.ms']).toEqual('60000');
+    expect(cmd.connectorConfiguration['rotate.schedule.interval.ms']).toEqual('60000');
     expect(cmd.connectorConfiguration.timezone).toEqual('UTC');
     expect(cmd.connectorConfiguration.locale).toEqual('en-US');
     expect(cmd.connectorConfiguration['key.converter']).toEqual('org.apache.kafka.connect.storage.StringConverter');
