@@ -32,7 +32,7 @@ import {
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   DEFAULT_KDS_BATCH_SIZE,
   DEFAULT_KDS_SINK_INTERVAL,
@@ -46,6 +46,8 @@ import {
   MIN_KDS_SINK_INTERVAL,
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
+  PIPELINE_SINK_CONNECTOR_GUIDE,
+  PIPELINE_SINK_CONNECTOR_LINK,
   ProtocalType,
   SinkType,
 } from 'ts/const';
@@ -698,9 +700,23 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }
                   description={
                     <div>
-                      {t('pipeline:create.connectorCheck1')}
-                      <Link external> {t('pipeline:create.s3Connector')}</Link>
-                      {t('pipeline:create.connectorCheck2')}
+                      <Trans
+                        i18nKey="pipeline:create.connectorCheck"
+                        components={{
+                          connector_anchor: (
+                            <Link
+                              external
+                              href={PIPELINE_SINK_CONNECTOR_LINK}
+                            />
+                          ),
+                          guide_anchor: (
+                            <Link
+                              external
+                              href={PIPELINE_SINK_CONNECTOR_GUIDE}
+                            />
+                          ),
+                        }}
+                      />
                     </div>
                   }
                 >

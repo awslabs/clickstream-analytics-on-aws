@@ -36,8 +36,8 @@ import {
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
-  PIPLINE_QUICKSIGHT_GUIDE_LINK,
-  PIPLINE_QUICKSIGHT_LEARNMORE_LINK,
+  PIPELINE_QUICKSIGHT_GUIDE_LINK,
+  PIPELINE_QUICKSIGHT_LEARNMORE_LINK,
 } from 'ts/const';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
 import { isDisabled } from 'ts/utils';
@@ -194,11 +194,14 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                         learnmore_anchor: (
                           <Link
                             external
-                            href={PIPLINE_QUICKSIGHT_LEARNMORE_LINK}
+                            href={PIPELINE_QUICKSIGHT_LEARNMORE_LINK}
                           />
                         ),
                         guide_anchor: (
-                          <Link external href={PIPLINE_QUICKSIGHT_GUIDE_LINK} />
+                          <Link
+                            external
+                            href={PIPELINE_QUICKSIGHT_GUIDE_LINK}
+                          />
                         ),
                       }}
                     />
