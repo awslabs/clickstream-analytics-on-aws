@@ -1232,8 +1232,40 @@ test('AWS::Events::Rule for EMR Serverless Job Run State Change', ()=>{
       'detail-type': [
         'EMR Serverless Job Run State Change',
       ],
+      'detail': {
+        applicationId: [{
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'ApplicationId',
+          ],
+        }],
+        state: ['SUCCESS', 'FAILED'],
+      },
     },
     State: 'ENABLED',
+    Targets: [
+      {
+        Arn: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        DeadLetterConfig: {
+          Arn: {
+            'Fn::GetAtt': [
+              Match.anyValue(),
+              'Arn',
+            ],
+          },
+        },
+        Id: Match.anyValue(),
+        RetryPolicy: {
+          MaximumEventAgeInSeconds: 86400,
+          MaximumRetryAttempts: 180,
+        },
+      },
+    ],
   });
 });
 

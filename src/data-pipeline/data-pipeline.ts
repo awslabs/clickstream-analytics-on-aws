@@ -12,7 +12,7 @@
  */
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
-import { Fn, Stack, CfnResource } from 'aws-cdk-lib';
+import { Fn, Stack, CfnResource, Duration } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -266,8 +266,17 @@ export class DataPipelineConstruct extends Construct {
       eventPattern: {
         source: ['aws.emr-serverless'],
         detailType: ['EMR Serverless Job Run State Change'],
+        detail: {
+          applicationId: [applicationId],
+          state: ['SUCCESS', 'FAILED'],
+        },
       },
-      targets: [new LambdaFunction(emrJobStateListenerLambda)],
+      targets: [new LambdaFunction(emrJobStateListenerLambda, {
+        retryAttempts: 180,
+        maxEventAge: Duration.days(1),
+        deadLetterQueue: dlSQS,
+      })],
+
     });
   }
 
