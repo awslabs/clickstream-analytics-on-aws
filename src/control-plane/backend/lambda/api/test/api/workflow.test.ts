@@ -132,7 +132,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -155,7 +155,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -196,7 +196,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -219,7 +219,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -260,7 +260,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -278,7 +278,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -301,7 +301,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -343,7 +343,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -361,7 +361,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -384,7 +384,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -426,7 +426,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -449,7 +449,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -490,7 +490,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -513,7 +513,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -554,7 +554,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -577,7 +577,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -600,7 +600,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -643,7 +643,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -661,7 +661,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -684,7 +684,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -707,7 +707,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -730,7 +730,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -772,7 +772,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -795,7 +795,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -818,7 +818,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -841,7 +841,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -882,7 +882,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -905,7 +905,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -928,7 +928,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -951,7 +951,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -992,7 +992,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1015,7 +1015,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1038,7 +1038,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1056,7 +1056,7 @@ describe('Workflow test', () => {
               Report: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1079,7 +1079,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1121,7 +1121,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1144,7 +1144,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1167,7 +1167,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1185,7 +1185,7 @@ describe('Workflow test', () => {
               Report: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1208,7 +1208,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1252,7 +1252,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1270,7 +1270,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1293,7 +1293,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1316,7 +1316,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1347,7 +1347,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1387,7 +1387,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1404,7 +1404,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1426,7 +1426,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1457,7 +1457,7 @@ describe('Workflow test', () => {
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                   },
                 },
                 End: true,
@@ -1465,7 +1465,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1487,7 +1487,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1525,7 +1525,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1542,7 +1542,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1564,7 +1564,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1586,7 +1586,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1603,7 +1603,7 @@ describe('Workflow test', () => {
               Report: {
                 Data: {
                   Callback: {
-                    BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-1d45u2r5l3wkg',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-d6e73fc2-6211-4013-8c4d-a539c407f834',
                   },
                   Input: {
@@ -1625,7 +1625,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1663,7 +1663,7 @@ describe('Workflow test', () => {
               Ingestion: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1680,7 +1680,7 @@ describe('Workflow test', () => {
               KafkaConnector: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1702,7 +1702,7 @@ describe('Workflow test', () => {
               ETL: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1733,7 +1733,7 @@ describe('Workflow test', () => {
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                   },
                 },
                 Next: 'DataAnalytics',
@@ -1741,7 +1741,7 @@ describe('Workflow test', () => {
               DataAnalytics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1763,7 +1763,7 @@ describe('Workflow test', () => {
               Metrics: {
                 Data: {
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
@@ -1861,7 +1861,7 @@ describe('Workflow test', () => {
             ],
           },
           Callback: {
-            BucketName: 'EXAMPLE_BUCKET',
+            BucketName: 'TEST_EXAMPLE_BUCKET',
             BucketPrefix: 'clickstream/workflow/000000',
           },
         },
@@ -1872,7 +1872,7 @@ describe('Workflow test', () => {
     expect(res).toEqual({
       Data: {
         Callback: {
-          BucketName: 'EXAMPLE_BUCKET',
+          BucketName: 'TEST_EXAMPLE_BUCKET',
           BucketPrefix: 'clickstream/workflow/000000',
         },
         Input: {
@@ -1916,7 +1916,7 @@ describe('Workflow test', () => {
                   ],
                 },
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
               },
@@ -1939,7 +1939,7 @@ describe('Workflow test', () => {
                   ],
                 },
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
               },
@@ -1962,7 +1962,7 @@ describe('Workflow test', () => {
                   ],
                 },
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
               },
@@ -1981,7 +1981,7 @@ describe('Workflow test', () => {
             Stack11: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2004,7 +2004,7 @@ describe('Workflow test', () => {
             Stack22: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2027,7 +2027,7 @@ describe('Workflow test', () => {
             Stack33: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2078,7 +2078,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2106,7 +2106,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2134,7 +2134,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2154,7 +2154,7 @@ describe('Workflow test', () => {
             Stack11: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2182,7 +2182,7 @@ describe('Workflow test', () => {
             Stack22: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2210,7 +2210,7 @@ describe('Workflow test', () => {
             Stack33: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2261,7 +2261,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2284,7 +2284,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2312,7 +2312,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2340,7 +2340,7 @@ describe('Workflow test', () => {
                     ],
                   },
                   Callback: {
-                    BucketName: 'EXAMPLE_BUCKET',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
                     BucketPrefix: 'clickstream/workflow/000000',
                   },
                 },
@@ -2360,7 +2360,7 @@ describe('Workflow test', () => {
             Stack11: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2383,7 +2383,7 @@ describe('Workflow test', () => {
             Stack12: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2411,7 +2411,7 @@ describe('Workflow test', () => {
             Stack22: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {
@@ -2439,7 +2439,7 @@ describe('Workflow test', () => {
             Stack33: {
               Data: {
                 Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketName: 'TEST_EXAMPLE_BUCKET',
                   BucketPrefix: 'clickstream/workflow/000000',
                 },
                 Input: {

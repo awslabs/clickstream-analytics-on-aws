@@ -77,7 +77,7 @@ export interface ALBRegionMappingObject {
 
 export interface StackData {
   Input: SfnStackInput;
-  readonly Callback: SfnStackCallback;
+  Callback: SfnStackCallback;
 }
 
 export interface SfnStackInput {
@@ -90,7 +90,7 @@ export interface SfnStackInput {
 }
 
 export interface SfnStackCallback {
-  readonly BucketName: string;
+  BucketName: string;
   readonly BucketPrefix: string;
 }
 

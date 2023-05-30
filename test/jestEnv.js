@@ -15,7 +15,7 @@
 process.env.AWS_REGION = 'us-east-1'
 process.env.AWS_URL_SUFFIX = 'amazonaws.com'
 process.env.S3_MAIN_REGION = 'us-east-1'
-process.env.STACK_WORKFLOW_S3_BUCKET = 'EXAMPLE_BUCKET'
+process.env.STACK_WORKFLOW_S3_BUCKET = 'TEST_EXAMPLE_BUCKET'
 process.env.API_ROLE_NAME = 'api-role-name'
 
 // controlplane bundling

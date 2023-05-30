@@ -20,7 +20,7 @@ import {
   DescribeExecutionOutput,
   ExecutionStatus,
 } from '@aws-sdk/client-sfn';
-import { stackWorkflowStateMachineArn } from '../common/constants';
+import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { sfnClient } from '../common/sfn';
 import {
   PipelineStackType,
@@ -256,6 +256,7 @@ export class StackManager {
       }
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';
+      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
     }
     return state;
   }
@@ -274,6 +275,7 @@ export class StackManager {
       } else if (status?.endsWith('_IN_PROGRESS') || status?.endsWith('_COMPLETE')) {
         state.Type = WorkflowStateType.PASS;
       }
+      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
     }
     return state;
   }
@@ -298,6 +300,7 @@ export class StackManager {
           state.Type = WorkflowStateType.PASS;
         }
       }
+      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
     }
     return state;
   }
