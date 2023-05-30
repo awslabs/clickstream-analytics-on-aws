@@ -16,11 +16,7 @@ import {
   Button,
   Container,
   ExpandableSection,
-  FormField,
-  Grid,
-  Input,
   SpaceBetween,
-  TextContent,
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,49 +56,6 @@ const Monitoring: React.FC<TabContentProps> = (props: TabContentProps) => {
             <Box variant="p">{t('pipeline:detail.accessFromConsoleDesc')}</Box>
           </SpaceBetween>
         </ExpandableSection>
-      </Container>
-
-      <Container>
-        <ExpandableSection
-          defaultExpanded
-          headerText={t('pipeline:detail.accessFromSolution')}
-        >
-          <SpaceBetween direction="vertical" size="s">
-            <div className="mt-10">
-              <Box variant="p">
-                {t('pipeline:detail.accessFromSolutionDesc')}
-              </Box>
-            </div>
-            <div className="mt-10">
-              <TextContent>
-                <ol>
-                  <li>{t('pipeline:detail.accessFromSolutionStep1')}</li>
-                  <li>{t('pipeline:detail.accessFromSolutionStep2')}</li>
-                  <li>{t('pipeline:detail.accessFromSolutionStep3')}</li>
-                  <li>{t('pipeline:detail.accessFromSolutionStep4')}</li>
-                  <li>{t('pipeline:detail.accessFromSolutionStep5')}</li>
-                  <li>{t('pipeline:detail.accessFromSolutionStep6')}</li>
-                </ol>
-              </TextContent>
-            </div>
-          </SpaceBetween>
-        </ExpandableSection>
-
-        <FormField label={t('pipeline:detail.sharingUrl')} stretch>
-          <Grid gridDefinition={[{ colspan: 8 }, { colspan: 4 }]}>
-            <div>
-              <Input
-                placeholder="https://cloudwatch.aws.com/prefix/object"
-                value=""
-              />
-            </div>
-            <div>
-              <Button iconName="add-plus">
-                {t('button.integrateDashboard')}
-              </Button>
-            </div>
-          </Grid>
-        </FormField>
       </Container>
     </SpaceBetween>
   );
