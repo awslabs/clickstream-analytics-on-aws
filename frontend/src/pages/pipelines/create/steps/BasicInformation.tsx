@@ -187,11 +187,13 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           )}
 
           {pipelineInfo.showServiceStatus && unSupportedServices && (
-            <Alert>
-              {t('pipeline:create.notSupportedServices', {
-                unSupportedServices: unSupportedServices,
-              })}
-            </Alert>
+            <div className="mt-10">
+              <Alert type="warning">
+                {t('pipeline:create.notSupportedServices', {
+                  unSupportedServices: unSupportedServices,
+                })}
+              </Alert>
+            </div>
           )}
         </FormField>
 

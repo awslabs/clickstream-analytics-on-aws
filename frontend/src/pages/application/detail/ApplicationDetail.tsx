@@ -20,7 +20,6 @@ import {
   Header,
   Link,
   SpaceBetween,
-  Spinner,
   Tabs,
 } from '@cloudscape-design/components';
 import { getApplicationDetail } from 'apis/application';
@@ -34,7 +33,7 @@ import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
+import { TIME_FORMAT } from 'ts/const';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
 
@@ -131,19 +130,17 @@ const ApplicationDetail: React.FC = () => {
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
-                        {t('application:appDesc')}
+                        {t('application:appID')}
                       </Box>
-                      <div>{applicationInfo?.description}</div>
+                      <div>{applicationInfo?.appId}</div>
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
-                        {t('application:createdTime')}
+                        {t('application:appDesc')}
                       </Box>
-                      <div>
-                        {moment(applicationInfo?.createAt).format(TIME_FORMAT)}
-                      </div>
+                      <div>{applicationInfo?.description}</div>
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">
@@ -160,6 +157,16 @@ const ApplicationDetail: React.FC = () => {
                         {t('application:iosAppBundleId')}
                       </Box>
                       <div>{applicationInfo?.iosBundleId}</div>
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="l">
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('application:createdTime')}
+                      </Box>
+                      <div>
+                        {moment(applicationInfo?.createAt).format(TIME_FORMAT)}
+                      </div>
                     </div>
                   </SpaceBetween>
                 </ColumnLayout>
@@ -225,11 +232,7 @@ const ApplicationDetail: React.FC = () => {
                           pipelineId={applicationInfo?.pipeline?.id}
                           projectId={pid}
                           status={applicationInfo?.pipeline?.status?.status}
-                        />{' '}
-                        {(applicationInfo?.pipeline?.status?.status ===
-                          EPipelineStatus.Creating ||
-                          applicationInfo?.pipeline?.status?.status ===
-                            EPipelineStatus.Updating) && <Spinner />}
+                        />
                       </div>
                     </div>
                   </SpaceBetween>
