@@ -118,6 +118,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [acknowledgedHTTPSecurity, setAcknowledgedHTTPSecurity] =
     useState(true);
 
+  const [unSupportedServices, setUnSupportedServices] = useState('');
+
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>(
     updatePipeline
       ? updatePipeline
@@ -288,6 +290,22 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             };
           });
 
+          // Set show alert information when has unsupported services
+          const unSupportedServiceList = data.filter(
+            (service) => !service.available
+          );
+          if (unSupportedServiceList.length >= 0) {
+            setUnSupportedServices(
+              unSupportedServiceList.map((service) => service.service).join(',')
+            );
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                showServiceStatus: true,
+              };
+            });
+          }
+
           // Set QuickSight disabled
           if (
             !data.find((element) => element.service === 'quicksight')?.available
@@ -296,6 +314,70 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               return {
                 ...prev,
                 enableReporting: false,
+              };
+            });
+          }
+
+          // Set AGA disabled
+          if (
+            !data.find((element) => element.service === 'global-accelerator')
+              ?.available
+          ) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                ingestionServer: {
+                  ...prev.ingestionServer,
+                  loadBalancer: {
+                    ...prev.ingestionServer.loadBalancer,
+                    enableGlobalAccelerator: false,
+                  },
+                },
+              };
+            });
+          }
+
+          // Set MSK Disable and Apache Kafka connector Disabled
+          if (!data.find((element) => element.service === 'msk')?.available) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                kafkaSelfHost: true, // Change to self hosted as default
+                ingestionServer: {
+                  ...prev.ingestionServer,
+                  sinkKafka: {
+                    ...prev.ingestionServer.sinkKafka,
+                    kafkaConnector: {
+                      enable: false,
+                    },
+                  },
+                },
+              };
+            });
+          }
+
+          // Set redshift serverless Disabled
+          if (
+            !data.find((element) => element.service === 'redshift-serverless')
+              ?.available
+          ) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                redshiftType: 'provisioned', // change to provisioned as default
+              };
+            });
+          }
+
+          // Set data processing Disabled when emr-serverless not available
+          if (
+            !data.find((element) => element.service === 'emr-serverless')
+              ?.available
+          ) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                enableDataProcessing: false, // disabled all data processing
               };
             });
           }
@@ -534,12 +616,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
               loadingServiceAvailable={loadingServiceAvailable}
+              unSupportedServices={unSupportedServices}
               changeRegion={(region) => {
                 validServiceAvailable(region.value || '');
                 setRegionEmptyError(false);
                 setVPCEmptyError(false);
                 setPublicSubnetError(false);
                 setPrivateSubnetError(false);
+                setUnSupportedServices('');
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -548,6 +632,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedVPC: null,
                     selectedPublicSubnet: [],
                     selectedPrivateSubnet: [],
+                    showServiceStatus: false,
                   };
                 });
               }}

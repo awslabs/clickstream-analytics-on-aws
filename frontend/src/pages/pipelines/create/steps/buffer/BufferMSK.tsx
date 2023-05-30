@@ -26,6 +26,7 @@ import { getMSKList, getSecurityGroups } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceCreateMehod } from 'ts/const';
+import { isDisabled } from 'ts/utils';
 
 interface BufferMSKProps {
   update?: boolean;
@@ -137,6 +138,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
           activeTabId={pipelineInfo.kafkaSelfHost ? 'manual' : 'select'}
           tabs={[
             {
+              disabled: !pipelineInfo.serviceStatus.MSK,
               label: t('pipeline:create.msk.select'),
               id: 'select',
               content: (
@@ -152,8 +154,8 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           <div className="flex-1">
                             <Select
                               disabled={
-                                update &&
-                                pipelineInfo.status?.status !== 'Failed'
+                                isDisabled(update, pipelineInfo) ||
+                                !pipelineInfo.serviceStatus.MSK
                               }
                               placeholder={
                                 t('pipeline:create.msk.selectMSK') || ''
@@ -196,6 +198,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       description={t('pipeline:create.msk.topicDesc')}
                     >
                       <Input
+                        disabled={!pipelineInfo.serviceStatus.MSK}
                         placeholder={
                           t('pipeline:create.msk.enterTopicName') || ''
                         }

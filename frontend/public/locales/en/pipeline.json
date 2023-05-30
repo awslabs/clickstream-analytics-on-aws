@@ -285,7 +285,8 @@
     "redshiftProvisioned": "Provisioned",
     "redshiftProvisionedDesc": "Provisioned Redshift cluster that meet your cost and performance specifications",
     "reportNotSupported": "Not Supported",
-    "reportNotSupportedDesc": "Reporting is not supported if ETL is not enabled."
+    "reportNotSupportedDesc": "Reporting is not supported if ETL is not enabled.",
+    "notSupportedServices": "These service(s): {{unSupportedServices}} are not available in this region, some of features may not supported."
   },
   "detail": {
     "ingestion": "Ingestion",

@@ -12,6 +12,7 @@
  */
 
 import {
+  Alert,
   Autosuggest,
   AutosuggestProps,
   Button,
@@ -44,6 +45,7 @@ interface BasicInformationProps {
   sdkEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
   loadingServiceAvailable: boolean;
+  unSupportedServices: string;
 }
 
 const BasicInformation: React.FC<BasicInformationProps> = (
@@ -63,6 +65,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     sdkEmptyError,
     assetsS3BucketEmptyError,
     loadingServiceAvailable,
+    unSupportedServices,
   } = props;
   const [loadingRegion, setLoadingRegion] = useState(false);
   const [loadingVPC, setLoadingVPC] = useState(false);
@@ -181,6 +184,14 @@ const BasicInformation: React.FC<BasicInformationProps> = (
             <StatusIndicator type="loading">
               {t('checkingAvailable')}
             </StatusIndicator>
+          )}
+
+          {pipelineInfo.showServiceStatus && unSupportedServices && (
+            <Alert>
+              {t('pipeline:create.notSupportedServices', {
+                unSupportedServices: unSupportedServices,
+              })}
+            </Alert>
           )}
         </FormField>
 

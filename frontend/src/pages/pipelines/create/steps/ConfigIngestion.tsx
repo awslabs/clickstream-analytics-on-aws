@@ -505,7 +505,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
 
               <Checkbox
-                disabled={isDisabled(update, pipelineInfo)}
+                disabled={
+                  isDisabled(update, pipelineInfo) ||
+                  !pipelineInfo.serviceStatus.AGA
+                }
                 onChange={({ detail }) => {
                   changeEnableAGA(detail.checked);
                 }}
@@ -691,7 +694,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             >
               <FormField>
                 <Checkbox
-                  disabled={isDisabled(update, pipelineInfo)}
+                  disabled={
+                    isDisabled(update, pipelineInfo) ||
+                    !pipelineInfo.serviceStatus.MSK
+                  }
                   onChange={({ detail }) =>
                     changeEnableKafkaConnector(detail.checked)
                   }

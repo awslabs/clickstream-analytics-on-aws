@@ -126,8 +126,8 @@ export const mskPing = async (region: string): Promise<boolean> => {
     const paramsConnect: ListConnectorsCommand = new ListConnectorsCommand({});
     await kafkaConnectClient.send(paramsConnect);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException' ||
-      (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
+    if ((err as Error).name === 'TimeoutError' ||
+    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
       return false;
     }
   }

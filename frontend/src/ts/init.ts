@@ -206,4 +206,5 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     MSK: false,
     QUICK_SIGHT: false,
   },
+  showServiceStatus: false,
 };

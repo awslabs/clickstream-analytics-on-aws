@@ -415,7 +415,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
         }
       >
         <Toggle
-          disabled={isDisabled(update, pipelineInfo)}
+          disabled={
+            isDisabled(update, pipelineInfo) ||
+            !pipelineInfo.serviceStatus.EMR_SERVERLESS
+          }
           onChange={({ detail }) => changeEnableDataProcessing(detail.checked)}
           checked={pipelineInfo.enableDataProcessing}
         >
@@ -601,7 +604,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           'pipeline:create.redshiftServerlessDesc'
                         ),
                         value: 'serverless',
-                        disabled: isDisabled(update, pipelineInfo),
+                        disabled:
+                          isDisabled(update, pipelineInfo) ||
+                          !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS,
                       },
                       {
                         label: t('pipeline:create.redshiftProvisioned'),
@@ -697,6 +702,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             )}
                           >
                             <Select
+                              disabled={
+                                !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
+                              }
                               selectedOption={redshiftCapacity}
                               onChange={({ detail }) =>
                                 setRedshiftCapacity(detail.selectedOption)
@@ -712,8 +720,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           >
                             <Select
                               disabled={
-                                update &&
-                                pipelineInfo.status?.status !== 'Failed'
+                                isDisabled(update, pipelineInfo) ||
+                                !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
                               }
                               placeholder={
                                 t('pipeline:create.vpcPlaceholder') || ''
@@ -742,8 +750,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           >
                             <Multiselect
                               disabled={
-                                update &&
-                                pipelineInfo.status?.status !== 'Failed'
+                                isDisabled(update, pipelineInfo) ||
+                                !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
                               }
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSG
@@ -775,8 +783,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           >
                             <Multiselect
                               disabled={
-                                update &&
-                                pipelineInfo.status?.status !== 'Failed'
+                                isDisabled(update, pipelineInfo) ||
+                                !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
                               }
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSubnets
@@ -789,7 +797,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                               placeholder={
                                 t('pipeline:create.subnetPlaceholder') || ''
                               }
-                              selectedAriaLabel="Selected"
                               statusType={
                                 loadingSubnets ? 'loading' : 'finished'
                               }

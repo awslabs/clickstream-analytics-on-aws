@@ -919,8 +919,8 @@ describe('Account Env test', () => {
       message: '',
       data: true,
     });
-    const mockError = new Error('Mock DynamoDB error');
-    mockError.name = 'UnrecognizedClientException';
+    const mockError = new Error('Mock error');
+    mockError.name = 'TimeoutError';
     kafkaClient.on(ListClustersV2Command).rejects(mockError);
     res = await request(app).get('/api/env/msk/ping');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1405,6 +1405,55 @@ describe('Account Env test', () => {
         {
           service: 'quicksight',
           available: false,
+        },
+        {
+          service: 'msk',
+          available: true,
+        },
+      ],
+    });
+  });
+  it('Ping Services with ENOTFOUND', async () => {
+    emrServerlessClient.on(ListApplicationsCommand).resolves({
+      applications: [],
+    });
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [],
+    });
+    kafkaConnectClient.on(ListConnectorsCommand).resolves({
+      connectors: [],
+    });
+    const mockError = new Error('Mock ENOTFOUND error');
+    mockError.message = 'Error: getaddrinfo ENOTFOUND redshift-serverless.sa-east-1.amazonaws.com';
+    redshiftServerlessClient.on(ListWorkgroupsCommand).rejects(mockError);
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
+      AccountInfo: {
+        AccountName: '',
+      },
+    });
+    let res = await request(app).get(
+      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          service: 'global-accelerator',
+          available: false,
+        },
+        {
+          service: 'redshift-serverless',
+          available: false,
+        },
+        {
+          service: 'emr-serverless',
+          available: true,
+        },
+        {
+          service: 'quicksight',
+          available: true,
         },
         {
           service: 'msk',

@@ -208,8 +208,8 @@ export const redshiftServerlessPing = async (region: string): Promise<boolean> =
     const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({});
     await redshiftServerlessClient.send(params);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException' ||
-      (err as Error).name === 'TimeoutError') {
+    if ((err as Error).name === 'TimeoutError' ||
+    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
       return false;
     }
   }

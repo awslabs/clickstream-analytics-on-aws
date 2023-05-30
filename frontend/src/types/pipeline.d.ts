@@ -236,6 +236,7 @@ declare global {
       MSK: boolean;
       QUICK_SIGHT: boolean;
     };
+    showServiceStatus: boolean;
   }
 
   interface IAlarm {
