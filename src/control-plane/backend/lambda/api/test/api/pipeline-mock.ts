@@ -657,6 +657,144 @@ export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
   },
 };
 
+export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE: IPipeline = {
+  ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+  status: {
+    ...BASE_STATUS,
+  },
+  workflow: {
+    Version: '2022-03-15',
+    Workflow: {
+      Type: WorkflowStateType.PARALLEL,
+      End: true,
+      Branches: [
+        {
+          States: {
+            KafkaConnector: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+            Ingestion: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              Next: 'KafkaConnector',
+            },
+          },
+          StartAt: 'Ingestion',
+        },
+        {
+          States: {
+            ETL: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-ETL-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+          },
+          StartAt: 'ETL',
+        },
+        {
+          States: {
+            Report: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-Report-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              End: true,
+            },
+            DataAnalytics: {
+              Type: WorkflowStateType.STACK,
+              Data: {
+                Input: {
+                  Region: 'ap-southeast-1',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  Action: 'Create',
+                  Parameters: [],
+                  StackName: `Clickstream-DataAnalytics-${MOCK_PIPELINE_ID}`,
+                },
+                Callback: {
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketName: 'EXAMPLE_BUCKET',
+                },
+              },
+              Next: 'Report',
+            },
+          },
+          StartAt: 'DataAnalytics',
+        },
+        {
+          StartAt: 'Metrics',
+          States: {
+            Metrics: {
+              Data: {
+                Callback: {
+                  BucketName: 'EXAMPLE_BUCKET',
+                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                },
+                Input: {
+                  Action: 'Create',
+                  Region: 'ap-southeast-1',
+                  Parameters: BASE_METRICS_PARAMETERS,
+                  StackName: 'Clickstream-Metrics-6666-6666',
+                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                },
+              },
+              End: true,
+              Type: WorkflowStateType.STACK,
+            },
+          },
+        },
+      ],
+    },
+  },
+};
+
 export const KINESIS_ETL_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
   operator: 'u4@example.com',

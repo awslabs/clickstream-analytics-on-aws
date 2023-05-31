@@ -35,6 +35,7 @@ const MOCK_PIPELINE_ID = '6666-6666';
 const MOCK_PLUGIN_ID = '5555-5555';
 const MOCK_EXECUTION_ID = 'main-3333-3333';
 const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
+const MOCK_NEW_TEMPLATE_VERSION = '1.0.0-main-sdjes12';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -204,14 +205,14 @@ function dictionaryMock(ddbMock: any, name?: string): any {
       Item: {
         name: 'Templates',
         data: {
-          'ingestion_s3': 'ingestion-server-s3-stack.template.json',
-          'ingestion_kafka': 'ingestion-server-kafka-stack.template.json',
-          'ingestion_kinesis': 'ingestion-server-kinesis-stack.template.json',
-          'kafka-s3-sink': 'kafka-s3-sink-stack.template.json',
-          'data-pipeline': 'data-pipeline-stack.template.json',
-          'data-analytics': 'data-analytics-redshift-stack.template.json',
-          'reporting': 'data-reporting-quicksight-stack.template.json',
-          'metrics': 'metrics-stack.template.json',
+          Ingestion_s3: 'ingestion-server-s3-stack.template.json',
+          Ingestion_kafka: 'ingestion-server-kafka-stack.template.json',
+          Ingestion_kinesis: 'ingestion-server-kinesis-stack.template.json',
+          KafkaConnector: 'kafka-s3-sink-stack.template.json',
+          ETL: 'data-pipeline-stack.template.json',
+          DataAnalytics: 'data-analytics-redshift-stack.template.json',
+          Report: 'data-reporting-quicksight-stack.template.json',
+          Metrics: 'metrics-stack.template.json',
         },
       },
     });
@@ -685,6 +686,7 @@ export {
   MOCK_PLUGIN_ID,
   MOCK_EXECUTION_ID,
   MOCK_BUILT_IN_PLUGIN_ID,
+  MOCK_NEW_TEMPLATE_VERSION,
   tokenMock,
   projectExistedMock,
   appExistedMock,

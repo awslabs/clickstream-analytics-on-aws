@@ -50,6 +50,7 @@ import {
   KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
   KINESIS_ETL_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE,
   KINESIS_ETL_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+  KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
@@ -350,7 +351,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      message: 'Template: ingestion_s3 not found in dictionary.',
+      message: 'Template: Ingestion_s3 not found in dictionary.',
       success: false,
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
@@ -587,6 +588,10 @@ describe('Pipeline test', () => {
             dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
           },
         ],
+        templateInfo: {
+          isLatest: false,
+          solutionVersion: 'v1.0.0',
+        },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
       },
     });
@@ -609,6 +614,7 @@ describe('Pipeline test', () => {
         endpoint: null,
         dashboards: null,
         metricsDashboardName: null,
+        templateInfo: null,
       },
     });
   });
@@ -719,6 +725,10 @@ describe('Pipeline test', () => {
         endpoint: '',
         dashboards: [],
         metricsDashboardName: '',
+        templateInfo: {
+          isLatest: false,
+          solutionVersion: 'v1.0.0',
+        },
       },
     });
   });
@@ -810,6 +820,10 @@ describe('Pipeline test', () => {
         dns: 'http://yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [],
+        templateInfo: {
+          isLatest: false,
+          solutionVersion: 'v1.0.0',
+        },
       },
     });
   });
@@ -2217,6 +2231,55 @@ describe('Pipeline test', () => {
     expect(res.body).toEqual({
       success: false,
       message: 'Update error, check version and retry.',
+    });
+  });
+  it('Upgrade pipeline', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    // expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 7);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    // expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+  });
+  it('Upgrade pipeline with error status', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
+      Item: KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      success: false,
+      message: 'The pipeline current status does not allow upgrade.',
     });
   });
   it('Delete pipeline', async () => {

@@ -84,7 +84,7 @@ export interface SfnStackInput {
   Action: string;
   readonly Region: string;
   readonly StackName: string;
-  readonly TemplateURL: string;
+  TemplateURL: string;
   readonly Parameters: Parameter[];
   readonly Tags?: Tag[];
 }

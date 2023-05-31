@@ -375,5 +375,9 @@
     "findPipeline": "Find your pipeline",
     "pipelineDesc": "All the clickstream analytics data pipelines in your AWS account.",
     "pipelineList": "Pipeline List"
+  },
+  "upgrade": {
+    "title": "Upgrade Pipeline",
+    "tip": "Are you sure you want to upgrade the pipeline to this verison?"
   }
 }

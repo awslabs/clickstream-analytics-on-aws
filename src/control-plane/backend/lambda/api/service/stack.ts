@@ -32,7 +32,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { isEmpty } from '../common/utils';
+import { isEmpty, replaceTemplateVersion } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { describeStack } from '../store/aws/cloudformation';
 
@@ -90,6 +90,14 @@ export class StackManager {
       throw new Error('Pipeline workflow is empty.');
     }
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
+  }
+
+  public upgradeWorkflow(version: string): void {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
+    }
+    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, version, false);
+    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, version, true);
   }
 
   public retryWorkflow(): void {
@@ -257,6 +265,22 @@ export class StackManager {
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';
       state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
+    }
+    return state;
+  }
+
+  private getUpgradeWorkflow(state: WorkflowState, version: string, origin: boolean): WorkflowState {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], version, origin);
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input) {
+      state.Data.Input.TemplateURL = replaceTemplateVersion(state.Data.Input.TemplateURL, version);
+      if (!origin) {
+        state.Data.Input.Action = 'Upgrade';
+      }
     }
     return state;
   }

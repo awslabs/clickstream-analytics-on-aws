@@ -164,6 +164,11 @@ declare global {
     executionArn?: string;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
+    templateInfo?: {
+      isLatest: boolean;
+      pipelineVersion: string;
+      solutionVersion: string;
+    };
     version?: string;
     versionTag?: string;
     createAt?: number;

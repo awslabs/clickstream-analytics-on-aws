@@ -111,6 +111,13 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   return names.get(key) ?? '';
 }
 
+function replaceTemplateVersion(templateUrl: string, version: string): string {
+  const templateUrlSubstrings = templateUrl.split('/');
+  const urlPreffix = templateUrlSubstrings.slice(0, 4);
+  const urlSuffix = templateUrlSubstrings.slice(templateUrlSubstrings.length - 2, templateUrlSubstrings.length);
+  return `${urlPreffix.join('/')}/${version}/${urlSuffix.join('/')}`;
+};
+
 function getKafkaTopic(pipeline: IPipeline): string {
   let kafkaTopic = pipeline.projectId;
   if (!isEmpty(pipeline.ingestionServer.sinkKafka?.topic)) {
@@ -330,4 +337,5 @@ export {
   containRule,
   getSubnetsAZ,
   paginateData,
+  replaceTemplateVersion,
 };

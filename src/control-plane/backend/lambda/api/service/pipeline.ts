@@ -51,6 +51,8 @@ export class PipelineServ {
       const body: IPipeline = req.body;
       const pipeline = new CPipeline(body);
       await pipeline.create();
+      const templateInfo = await pipeline.getTemplateInfo();
+      body.templateVersion = templateInfo.solutionVersion;
       // save metadata
       const id = await store.addPipeline(body);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
@@ -82,6 +84,7 @@ export class PipelineServ {
         const dashboards = await pipeline.getReportDashboardsUrl();
         const metricsDashboardName = await pipeline.getMetricsDashboardName();
         const pluginsInfo = await pipeline.getPluginsInfo();
+        const templateInfo = await pipeline.getTemplateInfo();
         return res.json(new ApiSuccess({
           ...latestPipeline,
           etl: {
@@ -93,6 +96,7 @@ export class PipelineServ {
           dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
           dashboards,
           metricsDashboardName,
+          templateInfo,
         }));
       }
       return res.json(new ApiSuccess({
@@ -101,6 +105,7 @@ export class PipelineServ {
         dns: null,
         dashboards: null,
         metricsDashboardName: null,
+        templateInfo: null,
       }));
     } catch (error) {
       next(error);
@@ -121,6 +126,34 @@ export class PipelineServ {
       const newPipeline = new CPipeline(body);
       await newPipeline.update(curPipeline);
       return res.status(201).send(new ApiSuccess({ id: body.pipelineId }, 'Pipeline updated.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async upgrade(req: any, res: any, next: any) {
+    try {
+      const { id } = req.params;
+      const { pid } = req.query;
+      req.body.operator = res.get('X-Click-Stream-Operator');
+      // Read current version from db
+      const curPipeline = await store.getPipeline(pid, id);
+      if (!curPipeline) {
+        return res.status(404).send(new ApiFail('Pipeline resource does not exist.'));
+      }
+      // Check pipeline status
+      if (curPipeline.status?.status !== PipelineStatusType.ACTIVE) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow upgrade.'));
+      }
+      const newPipeline = JSON.parse(JSON.stringify(curPipeline));
+      const pipeline = new CPipeline(newPipeline);
+      const templateInfo = await pipeline.getTemplateInfo();
+      if (templateInfo.isLatest) {
+        return res.status(400).send(new ApiFail('Pipeline is already the latest version.'));
+      }
+      newPipeline.templateVersion = templateInfo.solutionVersion;
+      await pipeline.upgrade(curPipeline);
+      return res.status(201).send(new ApiSuccess({ id }, 'Pipeline upgraded.'));
     } catch (error) {
       next(error);
     }

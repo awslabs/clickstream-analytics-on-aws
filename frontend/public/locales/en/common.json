@@ -232,6 +232,7 @@
     "close": "Close",
     "unsubscribe": "Unsubscribe",
     "retry": "Retry",
+    "upgrade": "Upgrade",
     "confirm": "Confirm",
     "addPlugin": "Add Plugin",
     "enableAll": "Enable All",

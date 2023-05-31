@@ -221,6 +221,7 @@ export interface IPipeline {
   workflow?: WorkflowTemplate;
   executionName?: string;
   executionArn?: string;
+  templateVersion?: string;
 
   readonly version: string;
   readonly versionTag: string;
@@ -264,6 +265,8 @@ export class CPipeline {
     // state machine
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
+
+    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
 
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
     // bind plugin
@@ -325,6 +328,18 @@ export class CPipeline {
     this.pipeline.workflow = newWorkflow;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
 
+    await store.updatePipeline(this.pipeline, oldPipeline);
+  }
+
+  public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    // update workflow
+    this.stackManager.upgradeWorkflow(this.pipeline.templateVersion!);
+    // create new execution
+    const execWorkflow = this.stackManager.getExecWorkflow();
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
+    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    // update pipline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -477,7 +492,8 @@ export class CPipeline {
       const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
       // default/ or cn/
       const prefix = this.resources?.solution.data.prefix;
-      const version = this.resources?.solution.data.version === 'latest' ?
+
+      let version = this.resources?.solution.data.version === 'latest' ?
         this.resources?.solution.data.target : this.resources?.solution.data.version;
       return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
     }
@@ -566,9 +582,9 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
     }
     if (type === PipelineStackType.INGESTION) {
-      const ingestionTemplateURL = await this.getTemplateUrl(`ingestion_${this.pipeline.ingestionServer.sinkType}`);
+      const ingestionTemplateURL = await this.getTemplateUrl(`${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`);
       if (!ingestionTemplateURL) {
-        throw new ClickStreamBadRequestError(`Template: ingestion_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+        throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
       }
       const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
       const ingestionStackParameters = ingestionStack.parameters();
@@ -591,8 +607,8 @@ export class CPipeline {
         },
       };
 
-      if (this.pipeline.ingestionServer.sinkType === 'kafka' && this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
-        const kafkaConnectorTemplateURL = await this.getTemplateUrl('kafka-s3-sink');
+      if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+        const kafkaConnectorTemplateURL = await this.getTemplateUrl(PipelineStackType.KAFKA_CONNECTOR);
         if (!kafkaConnectorTemplateURL) {
           throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
         }
@@ -636,10 +652,10 @@ export class CPipeline {
       };
     }
     if (type === PipelineStackType.ETL) {
-      if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+      if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
         return undefined;
       }
-      const dataPipelineTemplateURL = await this.getTemplateUrl('data-pipeline');
+      const dataPipelineTemplateURL = await this.getTemplateUrl(PipelineStackType.ETL);
       if (!dataPipelineTemplateURL) {
         throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
       }
@@ -676,7 +692,7 @@ export class CPipeline {
       if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
         return undefined;
       }
-      const dataAnalyticsTemplateURL = await this.getTemplateUrl('data-analytics');
+      const dataAnalyticsTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_ANALYTICS);
       if (!dataAnalyticsTemplateURL) {
         throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
       }
@@ -704,7 +720,7 @@ export class CPipeline {
       };
 
       if (!isEmpty(this.pipeline.report)) {
-        const reportTemplateURL = await this.getTemplateUrl('reporting');
+        const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORT);
         if (!reportTemplateURL) {
           throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
         }
@@ -748,7 +764,7 @@ export class CPipeline {
       };
     }
     if (type === PipelineStackType.METRICS) {
-      const metricsTemplateURL = await this.getTemplateUrl('metrics');
+      const metricsTemplateURL = await this.getTemplateUrl(PipelineStackType.METRICS);
       if (!metricsTemplateURL) {
         throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
       }
@@ -849,6 +865,24 @@ export class CPipeline {
     return {
       transformPlugin: transformPlugins?.length === 1? transformPlugins[0] : null,
       enrichPlugin,
+    };
+  };
+
+  public async getTemplateInfo() {
+    if (!this.resources || !this.resources.solution) {
+      const solution = await store.getDictionary('Solution');
+      this.resources = {
+        ...this.resources,
+        solution,
+      };
+    }
+    if (!this.resources?.solution?.data.version) {
+      throw new ClickStreamBadRequestError('Error in obtaining the latest template version number.');
+    }
+    return {
+      isLatest: this.pipeline.templateVersion === this.resources?.solution?.data.version,
+      pipelineVersion: this.pipeline.templateVersion,
+      solutionVersion: this.resources?.solution?.data.version,
     };
   };
 }

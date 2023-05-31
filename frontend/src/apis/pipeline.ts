@@ -75,6 +75,14 @@ const retryPipeline = async (params: { id: string; pid: string }) => {
   return result;
 };
 
+const upgradePipeline = async (params: { id: string; pid: string }) => {
+  const result: any = await apiRequest(
+    'post',
+    `/pipeline/${params.id}/upgrade?pid=${params.pid}`
+  );
+  return result;
+};
+
 export {
   createProjectPipeline,
   updateProjectPipeline,
@@ -83,4 +91,5 @@ export {
   getPipelineDetail,
   getPipelineList,
   retryPipeline,
+  upgradePipeline,
 };

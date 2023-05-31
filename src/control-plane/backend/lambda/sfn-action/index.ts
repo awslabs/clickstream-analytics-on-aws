@@ -29,6 +29,7 @@ import { aws_sdk_client_common_config } from '../../../../common/sdk-client-conf
 export enum StackAction {
   CREATE = 'Create',
   UPDATE = 'Update',
+  UPGRADE = 'Upgrade',
   DELETE = 'Delete',
   DESCRIBE = 'Describe',
   CALLBACK = 'Callback',
@@ -61,6 +62,8 @@ export const handler = async (event: SfnStackEvent, _context: any): Promise<any>
     return createStack(event);
   } else if (event.Action === StackAction.UPDATE) {
     return updateStack(event);
+  } else if (event.Action === StackAction.UPGRADE) {
+    return upgradeStack(event);
   } else if (event.Action === StackAction.DELETE) {
     return deleteStack(event);
   } else if (event.Action === StackAction.DESCRIBE) {
@@ -114,6 +117,39 @@ export const updateStack = async (event: SfnStackEvent) => {
       Parameters: event.Input.Parameters,
       DisableRollback: true,
       UsePreviousTemplate: true,
+      Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Tags: event.Input.Tags,
+    });
+    const result = await cloudFormationClient.send(params);
+    return {
+      Action: StackAction.DESCRIBE,
+      Input: event.Input,
+      Callback: event.Callback,
+      Result: {
+        StackId: result.StackId,
+        StackName: event.Input.StackName,
+        StackStatus: StackStatus.UPDATE_IN_PROGRESS,
+        CreationTime: new Date(),
+      } as Stack,
+    } as SfnStackEvent;
+  } catch (err) {
+    logger.error((err as Error).message, { error: err, event: event });
+    throw Error((err as Error).message);
+  }
+};
+
+export const upgradeStack = async (event: SfnStackEvent) => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region: event.Input.Region,
+    });
+    const params: UpdateStackCommand = new UpdateStackCommand({
+      StackName: event.Input.StackName,
+      TemplateURL: event.Input.TemplateURL,
+      Parameters: event.Input.Parameters,
+      DisableRollback: false,
+      UsePreviousTemplate: false,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
       Tags: event.Input.Tags,
     });

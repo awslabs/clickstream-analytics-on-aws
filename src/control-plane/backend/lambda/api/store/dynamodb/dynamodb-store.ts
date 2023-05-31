@@ -408,6 +408,7 @@ export class DynamoDbStore implements ClickStreamStore {
         workflow: pipeline.workflow ?? {},
         executionName: pipeline.executionName ?? '',
         executionArn: pipeline.executionArn ?? '',
+        templateVersion: pipeline.templateVersion ?? '',
         version: pipeline.version ?? Date.now().toString(),
         versionTag: 'latest',
         createAt: pipeline.createAt ?? Date.now(),
@@ -469,6 +470,7 @@ export class DynamoDbStore implements ClickStreamStore {
               workflow: marshallCurPipeline.workflow ?? { M: {} },
               executionName: { S: curPipeline.executionName ?? '' },
               executionArn: { S: curPipeline.executionArn ?? '' },
+              templateVersion: { S: curPipeline.templateVersion ?? '' },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
@@ -502,6 +504,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'workflow = :workflow, ' +
               'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
+              'templateVersion = :templateVersion, ' +
               'version = :version, ' +
               'versionTag = :versionTag, ' +
               'updateAt = :updateAt, ' +
@@ -532,6 +535,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':workflow': marshallPipeline.workflow ?? { M: {} },
               ':executionName': { S: curPipeline.executionName ?? '' },
               ':executionArn': { S: curPipeline.executionArn ?? '' },
+              ':templateVersion': { S: pipeline.templateVersion ?? '' },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
@@ -566,6 +570,7 @@ export class DynamoDbStore implements ClickStreamStore {
         'workflow = :workflow, ' +
         'executionName = :executionName, ' +
         'executionArn = :executionArn, ' +
+        'templateVersion = :templateVersion, ' +
         'updateAt = :updateAt, ' +
         '#pipelineOperator = :operator ',
       ExpressionAttributeNames: {
@@ -590,6 +595,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':workflow': pipeline.workflow ?? {},
         ':executionName': pipeline.executionName ?? '',
         ':executionArn': pipeline.executionArn ?? '',
+        ':templateVersion': pipeline.templateVersion ?? '',
         ':updateAt': Date.now().toString(),
         ':operator': pipeline.operator,
       },

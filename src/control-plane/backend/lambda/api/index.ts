@@ -597,6 +597,16 @@ app.post(
     return pipelineServ.retry(req, res, next);
   });
 
+app.post(
+  '/api/pipeline/:id/upgrade',
+  validate([
+    query('pid').custom(isProjectExisted),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pipelineServ.upgrade(req, res, next);
+  });
+
 app.get(
   '/api/pipeline',
   validate([

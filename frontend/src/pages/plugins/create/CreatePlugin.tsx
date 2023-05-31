@@ -411,7 +411,9 @@ function Content() {
               <FormField
                 label={t('plugin:create.uploadJar')}
                 description={t('plugin:create.uploadJarDesc')}
-                errorText={uploadJarEmptyError ? t('plugin:valid.uploadJarEmpty') : ''}
+                errorText={
+                  uploadJarEmptyError ? t('plugin:valid.uploadJarEmpty') : ''
+                }
               >
                 <div>
                   <FileUpload
