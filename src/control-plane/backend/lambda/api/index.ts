@@ -232,19 +232,6 @@ app.get(
   });
 
 app.get(
-  '/api/env/msk/ping',
-  validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.mskPing(req, res, next);
-  });
-
-app.get(
   '/api/env/redshift/clusters',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
@@ -309,19 +296,6 @@ app.get(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listWorkGroups(req, res, next);
-  });
-
-app.get(
-  '/api/env/athena/ping',
-  validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.athenaPing(req, res, next);
   });
 
 app.get(

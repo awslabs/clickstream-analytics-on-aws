@@ -680,7 +680,7 @@ export class CPipeline {
         States: {
           [PipelineStackType.ETL]: etlState,
         },
-      }
+      };
       const dataAnalyticsState = await this.getDataAnalyticsState();
       if (dataAnalyticsState) {
         branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
@@ -733,7 +733,7 @@ export class CPipeline {
   }
 
   private async getDataAnalyticsState(): Promise<WorkflowState | undefined> {
-    if(isEmpty(this.pipeline.dataAnalytics)) {
+    if (isEmpty(this.pipeline.dataAnalytics)) {
       return undefined;
     }
     if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
@@ -770,35 +770,35 @@ export class CPipeline {
   }
 
   private async getReportingState(): Promise<WorkflowState | undefined> {
-    if(isEmpty(this.pipeline.report)) {
+    if (isEmpty(this.pipeline.report)) {
       return undefined;
     }
     const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORT);
-        if (!reportTemplateURL) {
-          throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
-        }
-        const reportStack = new CReportStack(this.pipeline, this.resources!);
-        const reportStackParameters = reportStack.parameters();
-        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
-        const reportState: WorkflowState = {
-          Type: WorkflowStateType.STACK,
-          Data: {
-            Input: {
-              Action: 'Create',
-              Region: this.pipeline.region,
-              StackName: reportStackName,
-              TemplateURL: reportTemplateURL,
-              Parameters: reportStackParameters,
-              Tags: this.stackTags,
-            },
-            Callback: {
-              BucketName: stackWorkflowS3Bucket ?? '',
-              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-            },
-          },
-          End: true,
-        };
-    
+    if (!reportTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
+    }
+    const reportStack = new CReportStack(this.pipeline, this.resources!);
+    const reportStackParameters = reportStack.parameters();
+    const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
+    const reportState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: reportStackName,
+          TemplateURL: reportTemplateURL,
+          Parameters: reportStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: stackWorkflowS3Bucket ?? '',
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      End: true,
+    };
+
     return reportState;
   }
 

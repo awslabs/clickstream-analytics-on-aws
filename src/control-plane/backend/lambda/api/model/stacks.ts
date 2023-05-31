@@ -892,7 +892,6 @@ export class CDataAnalyticsStack extends JSONObject {
   })
     RedshiftServerlessIAMRole?: string;
 
-  
 
   @JSONObject.optional('')
     EMRServerlessApplicationId?: string;
@@ -945,7 +944,7 @@ export class CDataAnalyticsStack extends JSONObject {
     Object.entries(this).forEach(([k, v]) => {
       if (!k.startsWith('_')) {
         let key = k;
-        let value = v.toString()
+        let value = v.toString();
         if (value.startsWith('#.')) {
           key = `${k}.#`;
         }

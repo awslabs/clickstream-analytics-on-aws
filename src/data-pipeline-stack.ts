@@ -21,10 +21,10 @@ import {
   addCfnNagForBucketDeployment,
   addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX } from './common/constant';
 
 export interface ETLStackProps extends StackProps {
 }

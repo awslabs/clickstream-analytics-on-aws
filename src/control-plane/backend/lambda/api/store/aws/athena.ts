@@ -45,7 +45,8 @@ export const athenaPing = async (region: string): Promise<boolean> => {
     const params: ListWorkGroupsCommand = new ListWorkGroupsCommand({});
     await athenaClient.send(params);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException') {
+    if ((err as Error).name === 'TimeoutError' ||
+    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
       return false;
     }
   }

@@ -24,8 +24,9 @@ export const emrServerlessPing = async (region: string): Promise<boolean> => {
     const params: ListApplicationsCommand = new ListApplicationsCommand({});
     await emrServerlessClient.send(params);
   } catch (err) {
-    if ((err as Error).name === 'UnrecognizedClientException' ||
-      (err as Error).name === 'AccessDeniedException') {
+    if ((err as Error).name === 'TimeoutError' ||
+    (err as Error).name === 'AccessDeniedException' ||
+    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
       return false;
     }
   }

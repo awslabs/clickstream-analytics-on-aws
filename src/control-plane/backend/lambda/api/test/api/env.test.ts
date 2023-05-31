@@ -907,30 +907,6 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Ping MSK', async () => {
-    kafkaClient.on(ListClustersV2Command).resolves({
-      ClusterInfoList: [],
-    });
-    let res = await request(app).get('/api/env/msk/ping');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: true,
-    });
-    const mockError = new Error('Mock error');
-    mockError.name = 'TimeoutError';
-    kafkaClient.on(ListClustersV2Command).rejects(mockError);
-    res = await request(app).get('/api/env/msk/ping');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: false,
-    });
-  });
   it('Get Redshift cluster', async () => {
     redshiftClient.on(DescribeClustersCommand).resolves({
       Clusters: [
@@ -1379,30 +1355,6 @@ describe('Account Env test', () => {
       ],
     });
   });
-  it('Ping Athena', async () => {
-    athenaClient.on(ListWorkGroupsCommand).resolves({
-      WorkGroups: [],
-    });
-    let res = await request(app).get('/api/env/athena/ping');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: true,
-    });
-    const mockError = new Error('Mock DynamoDB error');
-    mockError.name = 'UnrecognizedClientException';
-    athenaClient.on(ListWorkGroupsCommand).rejects(mockError);
-    res = await request(app).get('/api/env/athena/ping');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: false,
-    });
-  });
   it('Ping Services', async () => {
     emrServerlessClient.on(ListApplicationsCommand).resolves({
       applications: [],
@@ -1416,11 +1368,16 @@ describe('Account Env test', () => {
     redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
       workgroups: [],
     });
-    const mockError = new Error('Mock DynamoDB error');
-    mockError.name = 'TimeoutError';
-    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
-    let res = await request(app).get(
-      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator');
+    athenaClient.on(ListWorkGroupsCommand).resolves({
+      WorkGroups: [],
+    });
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
+      AccountInfo: {
+        AccountName: ''
+      },
+    });
+    const res = await request(app).get(
+      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1441,7 +1398,11 @@ describe('Account Env test', () => {
         },
         {
           service: 'quicksight',
-          available: false,
+          available: true,
+        },
+        {
+          service: 'athena',
+          available: true,
         },
         {
           service: 'msk',
@@ -1451,25 +1412,16 @@ describe('Account Env test', () => {
     });
   });
   it('Ping Services with ENOTFOUND', async () => {
-    emrServerlessClient.on(ListApplicationsCommand).resolves({
-      applications: [],
-    });
-    kafkaClient.on(ListClustersV2Command).resolves({
-      ClusterInfoList: [],
-    });
-    kafkaConnectClient.on(ListConnectorsCommand).resolves({
-      connectors: [],
-    });
     const mockError = new Error('Mock ENOTFOUND error');
-    mockError.message = 'Error: getaddrinfo ENOTFOUND redshift-serverless.sa-east-1.amazonaws.com';
+    mockError.message = 'Error: getaddrinfo ENOTFOUND xxx.sa-east-1.amazonaws.com';
+    emrServerlessClient.on(ListApplicationsCommand).rejects(mockError);
+    kafkaClient.on(ListClustersV2Command).rejects(mockError);
+    kafkaConnectClient.on(ListConnectorsCommand).rejects(mockError);
     redshiftServerlessClient.on(ListWorkgroupsCommand).rejects(mockError);
-    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
-      AccountInfo: {
-        AccountName: '',
-      },
-    });
+    athenaClient.on(ListWorkGroupsCommand).rejects(mockError);
+    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
     let res = await request(app).get(
-      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator');
+      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1486,15 +1438,19 @@ describe('Account Env test', () => {
         },
         {
           service: 'emr-serverless',
-          available: true,
-        },
-        {
-          service: 'quicksight',
-          available: true,
+          available: false,
         },
         {
           service: 'msk',
-          available: true,
+          available: false,
+        },
+        {
+          service: 'quicksight',
+          available: false,
+        },
+        {
+          service: 'athena',
+          available: false,
         },
       ],
     });

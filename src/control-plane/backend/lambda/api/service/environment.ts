@@ -212,26 +212,6 @@ export class EnvironmentServ {
     }
   }
 
-  public async athenaPing(req: any, res: any, next: any) {
-    try {
-      const { region } = req.query;
-      const result = await athenaPing(region);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async mskPing(req: any, res: any, next: any) {
-    try {
-      const { region } = req.query;
-      const result = await mskPing(region);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   public async quickSightIsSubscribed(_req: any, res: any, next: any) {
     try {
       const result = await quickSightIsSubscribed();
@@ -409,6 +389,17 @@ export class EnvironmentServ {
                   .then(available => {
                     result.push({
                       service: 'quicksight',
+                      available: available,
+                    });
+                  },
+                  )));
+          } else if (serviceName === 'athena') {
+            reqs.push(
+              promisePool(
+                () => athenaPing(region)
+                  .then(available => {
+                    result.push({
+                      service: 'athena',
                       available: available,
                     });
                   },
