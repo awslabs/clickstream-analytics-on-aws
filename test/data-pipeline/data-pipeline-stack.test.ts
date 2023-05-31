@@ -1285,3 +1285,21 @@ test('Should set metrics widgets', ()=>{
   });
 });
 
+
+test('Should have Cfn outputs for EMR Serverless Application Id', ()=>{
+  rootTemplate.hasOutput('WithPluginsEMRServerlessApplicationId', {
+    Description: 'EMR Serverless Application Id',
+    Value: Match.anyValue(),
+    Condition: 'withCustomPluginsCondition',
+  });
+
+
+  rootTemplate.hasOutput('WithoutPluginsEMRServerlessApplicationId', {
+    Description: 'EMR Serverless Application Id',
+    Value: Match.anyValue(),
+    Condition: 'withoutCustomPluginsCondition',
+  });
+
+
+});
+

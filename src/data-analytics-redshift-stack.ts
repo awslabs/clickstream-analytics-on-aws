@@ -134,6 +134,7 @@ export function createRedshiftAnalyticsStack(
         ...props.redshift.newServerless!,
         databaseName: props.redshift.defaultDatabaseName,
       },
+      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
     },
   );
   (newRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isNewRedshiftServerless;
@@ -149,6 +150,7 @@ export function createRedshiftAnalyticsStack(
         ...props.redshift.existingServerless!,
         dataAPIRoleArn: props.redshift.existingServerless!.iamRole,
       },
+      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
     },
   );
   (redshiftExistingServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
@@ -162,6 +164,7 @@ export function createRedshiftAnalyticsStack(
         databaseName: props.redshift.defaultDatabaseName,
         ...props.redshift.provisioned!,
       },
+      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;

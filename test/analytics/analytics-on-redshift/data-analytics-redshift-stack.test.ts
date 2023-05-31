@@ -149,6 +149,14 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     });
   });
 
+
+  test('Should has parameter EMRServerlessApplicationId', () => {
+    template.hasParameter('EMRServerlessApplicationId', {
+      Type: 'String',
+      Default: '',
+    });
+  });
+
   test('Should has parameter LoadWorkflowBucket', () => {
     template.hasParameter('LoadWorkflowBucket', {
       Type: 'String',
@@ -308,7 +316,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(26);
+    expect(paramCount).toEqual(27);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -422,6 +430,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'UpsertUsersScheduleExpression',
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
+      'EMRServerlessApplicationId',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -590,6 +599,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 17 * * ? *)',
         retentionRangeDays: 365,
       },
+      emrServerlessApplicationId: 'emrServerlessApplicationId001',
     };
     var error = false;
     try {
@@ -650,6 +660,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 17 * * ? *)',
         retentionRangeDays: 365,
       },
+      emrServerlessApplicationId: 'emrServerlessApplicationId001',
     };
     var error = false;
     try {
@@ -697,6 +708,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 17 * * ? *)',
         retentionRangeDays: 365,
       },
+      emrServerlessApplicationId: 'emrServerlessApplicationId001',
     };
 
     const nestedStack = new RedshiftAnalyticsStack(stack, testId+'redshiftAnalytics'+count++, nestStackProps);
@@ -792,6 +804,52 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
       Template.fromStack(stack.nestedStacks.redshiftProvisionedStack).resourceCountIs('AWS::DynamoDB::Table', 1);
     }
   });
+
+  test('Should states:ListExecutions Policy', () => {
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: 'states:ListExecutions',
+              Effect: 'Allow',
+              Resource: {
+                Ref: Match.anyValue(),
+              },
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        Roles: [
+          {
+            Ref: Match.anyValue(),
+          },
+        ],
+      });
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      Template.fromStack(stack.nestedStacks.redshiftProvisionedStack).hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: 'states:ListExecutions',
+              Effect: 'Allow',
+              Resource: {
+                Ref: Match.anyValue(),
+              },
+            },
+          ],
+          Version: '2012-10-17',
+        },
+        Roles: [
+          {
+            Ref: Match.anyValue(),
+          },
+        ],
+      });
+    }
+  });
+
 
   test('Should has LoadODSEventToRedshiftWorkflowODSEventProcessorLambdaSg', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
@@ -2488,6 +2546,86 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           {
             Arn: RefAnyValue,
             Id: Match.anyValue(),
+            RoleArn: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+          },
+        ],
+      });
+    }
+  });
+
+
+  test('Check EMR Serverless Job Run State Change Rule', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
+        EventPattern: {
+          'source': [
+            'aws.emr-serverless',
+          ],
+          'detail-type': [
+            'EMR Serverless Job Run State Change',
+          ],
+          'detail': {
+            state: [
+              'SUCCESS',
+            ],
+            applicationId: [
+              {
+                Ref: Match.anyValue(),
+              },
+            ],
+          },
+        },
+        State: 'ENABLED',
+        Targets: [
+          {
+            Arn: {
+              Ref: Match.anyValue(),
+            },
+            Id: 'Target0',
+            RoleArn: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+          },
+        ],
+      });
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
+        EventPattern: {
+          'source': [
+            'aws.emr-serverless',
+          ],
+          'detail-type': [
+            'EMR Serverless Job Run State Change',
+          ],
+          'detail': {
+            state: [
+              'SUCCESS',
+            ],
+            applicationId: [
+              {
+                Ref: Match.anyValue(),
+              },
+            ],
+          },
+        },
+        State: 'ENABLED',
+        Targets: [
+          {
+            Arn: {
+              Ref: Match.anyValue(),
+            },
+            Id: 'Target0',
             RoleArn: {
               'Fn::GetAtt': [
                 Match.anyValue(),

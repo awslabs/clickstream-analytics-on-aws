@@ -629,6 +629,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterKey: 'RedshiftServerlessIAMRole',
     ParameterValue: '',
   },
+  {
+    ParameterKey: 'EMRServerlessApplicationId.#',
+    ParameterValue: '#.Clickstream-ETL-6666-6666.EMRServerlessApplicationId',
+  },
 ];
 
 export const MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(

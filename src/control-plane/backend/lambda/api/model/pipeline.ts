@@ -562,12 +562,6 @@ export class CPipeline {
         workflowTemplate.Workflow.Branches?.push(branch);
       }
     }
-    if (!isEmpty(this.pipeline.dataAnalytics)) {
-      const branch = await this.getWorkflowStack(PipelineStackType.DATA_ANALYTICS);
-      if (branch) {
-        workflowTemplate.Workflow.Branches?.push(branch);
-      }
-    }
     const metricsBranch = await this.getWorkflowStack(PipelineStackType.METRICS);
     if (metricsBranch) {
       workflowTemplate.Workflow.Branches?.push(metricsBranch);
@@ -681,87 +675,25 @@ export class CPipeline {
         },
         End: true,
       };
-      return {
+      const branch: WorkflowParallelBranch = {
         StartAt: PipelineStackType.ETL,
         States: {
           [PipelineStackType.ETL]: etlState,
         },
-      };
-    }
-    if (type === PipelineStackType.DATA_ANALYTICS) {
-      if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
-        return undefined;
       }
-      const dataAnalyticsTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_ANALYTICS);
-      if (!dataAnalyticsTemplateURL) {
-        throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
+      const dataAnalyticsState = await this.getDataAnalyticsState();
+      if (dataAnalyticsState) {
+        branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
+        branch.States[PipelineStackType.ETL].Next = PipelineStackType.DATA_ANALYTICS;
+        delete branch.States[PipelineStackType.ETL].End;
       }
-
-      const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
-      const dataAnalyticsStackParameters = dataAnalyticsStack.parameters();
-      const dataAnalyticsStackName = getStackName(
-        this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
-      const dataAnalyticsState: WorkflowState = {
-        Type: WorkflowStateType.STACK,
-        Data: {
-          Input: {
-            Action: 'Create',
-            Region: this.pipeline.region,
-            StackName: dataAnalyticsStackName,
-            TemplateURL: dataAnalyticsTemplateURL,
-            Parameters: dataAnalyticsStackParameters,
-            Tags: this.stackTags,
-          },
-          Callback: {
-            BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-          },
-        },
-      };
-
-      if (!isEmpty(this.pipeline.report)) {
-        const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORT);
-        if (!reportTemplateURL) {
-          throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
-        }
-        const reportStack = new CReportStack(this.pipeline, this.resources!);
-        const reportStackParameters = reportStack.parameters();
-        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
-        const reportState: WorkflowState = {
-          Type: WorkflowStateType.STACK,
-          Data: {
-            Input: {
-              Action: 'Create',
-              Region: this.pipeline.region,
-              StackName: reportStackName,
-              TemplateURL: reportTemplateURL,
-              Parameters: reportStackParameters,
-              Tags: this.stackTags,
-            },
-            Callback: {
-              BucketName: stackWorkflowS3Bucket,
-              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-            },
-          },
-          End: true,
-        };
-        dataAnalyticsState.Next = PipelineStackType.REPORT;
-        return {
-          StartAt: PipelineStackType.DATA_ANALYTICS,
-          States: {
-            [PipelineStackType.DATA_ANALYTICS]: dataAnalyticsState,
-            [PipelineStackType.REPORT]: reportState,
-          },
-        };
+      const reportingState = await this.getReportingState();
+      if (reportingState) {
+        branch.States[PipelineStackType.REPORT] = reportingState;
+        branch.States[PipelineStackType.DATA_ANALYTICS].Next = PipelineStackType.REPORT;
+        delete branch.States[PipelineStackType.DATA_ANALYTICS].End;
       }
-
-      dataAnalyticsState.End = true;
-      return {
-        StartAt: PipelineStackType.DATA_ANALYTICS,
-        States: {
-          [PipelineStackType.DATA_ANALYTICS]: dataAnalyticsState,
-        },
-      };
+      return branch;
     }
     if (type === PipelineStackType.METRICS) {
       const metricsTemplateURL = await this.getTemplateUrl(PipelineStackType.METRICS);
@@ -798,6 +730,76 @@ export class CPipeline {
       };
     }
     return undefined;
+  }
+
+  private async getDataAnalyticsState(): Promise<WorkflowState | undefined> {
+    if(isEmpty(this.pipeline.dataAnalytics)) {
+      return undefined;
+    }
+    if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+      return undefined;
+    }
+    const dataAnalyticsTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_ANALYTICS);
+    if (!dataAnalyticsTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
+    }
+
+    const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
+    const dataAnalyticsStackParameters = dataAnalyticsStack.parameters();
+    const dataAnalyticsStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
+    const dataAnalyticsState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: dataAnalyticsStackName,
+          TemplateURL: dataAnalyticsTemplateURL,
+          Parameters: dataAnalyticsStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: stackWorkflowS3Bucket ?? '',
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      End: true,
+    };
+    return dataAnalyticsState;
+  }
+
+  private async getReportingState(): Promise<WorkflowState | undefined> {
+    if(isEmpty(this.pipeline.report)) {
+      return undefined;
+    }
+    const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORT);
+        if (!reportTemplateURL) {
+          throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
+        }
+        const reportStack = new CReportStack(this.pipeline, this.resources!);
+        const reportStackParameters = reportStack.parameters();
+        const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
+        const reportState: WorkflowState = {
+          Type: WorkflowStateType.STACK,
+          Data: {
+            Input: {
+              Action: 'Create',
+              Region: this.pipeline.region,
+              StackName: reportStackName,
+              TemplateURL: reportTemplateURL,
+              Parameters: reportStackParameters,
+              Tags: this.stackTags,
+            },
+            Callback: {
+              BucketName: stackWorkflowS3Bucket ?? '',
+              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+            },
+          },
+          End: true,
+        };
+    
+    return reportState;
   }
 
   public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {

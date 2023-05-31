@@ -32,6 +32,7 @@ export interface RedshiftAnalyticsStackProps {
     bucket: IBucket;
     prefix: string;
     fileSuffix: string;
+    emrServerlessApplicationId: string;
   };
   loadConfiguration: {
     workdir: {
@@ -98,6 +99,13 @@ export function createStackParameters(scope: Construct): {
     description: 'The S3 prefix for ODS events.',
     default: '',
   });
+
+  const emrServerlessApplicationIdParam = new CfnParameter(scope, 'EMRServerlessApplicationId', {
+    description: 'EMR Serverless Application Id',
+    type: 'String',
+    default: '',
+  });
+
 
   const odsEventFileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
     description: 'The suffix of the ODS event files on S3 to be imported.',
@@ -483,6 +491,13 @@ export function createStackParameters(scope: Construct): {
           ],
         },
         {
+          Label: { default: 'EMR Serverless Application Id' },
+          Parameters: [
+            emrServerlessApplicationIdParam.logicalId,
+          ],
+        },
+
+        {
           Label: { default: 'S3 Information' },
           Parameters: [
             odsEventBucketParam.logicalId,
@@ -513,6 +528,10 @@ export function createStackParameters(scope: Construct): {
         },
         [appIdsParam.logicalId]: {
           default: 'App Ids',
+        },
+
+        [emrServerlessApplicationIdParam.logicalId]: {
+          default: 'EMR Serverless Application Id',
         },
 
         [odsEventBucketParam.logicalId]: {
@@ -563,6 +582,7 @@ export function createStackParameters(scope: Construct): {
         ),
         prefix: odsEventBucketPrefixParam.valueAsString,
         fileSuffix: odsEventFileSuffixParam.valueAsString,
+        emrServerlessApplicationId: emrServerlessApplicationIdParam.valueAsString,
       },
       loadConfiguration: {
         workdir: {

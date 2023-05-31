@@ -51,6 +51,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly loadDataProps: LoadDataProps;
   readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
+  readonly emrServerlessApplicationId: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -216,6 +217,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       odsTableName,
       databaseName: projectDatabaseName,
       dataAPIRole: redshiftDataAPIExecRole!,
+      emrServerlessApplicationId: props.emrServerlessApplicationId,
     });
 
     loadEventsWorkflow.crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
@@ -293,9 +295,7 @@ function addCfnNag(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
   addCfnNagToStack(stack, [
-    ruleRolePolicyWithWildcardResources(
-      'LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource',
-      'LoadODSEventToRedshiftWorkflow', 'logs/xray'),
+
     ruleRolePolicyWithWildcardResources(
       'UpsertUsersWorkflow/UpsertUsersStateMachine/Role/DefaultPolicy/Resource',
       'UpsertUsersWorkflow', 'logs/xray'),
@@ -323,6 +323,20 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+
+    {
+      paths_endswith: ['LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource',
+          'LoadODSEventToRedshiftWorkflow', 'logs/xray').rules_to_suppress,
+        {
+          id: 'W76',
+          reason: 'ACK: SPCM for IAM policy document is higher than 25',
+        },
+      ],
+    },
+
   ]);
 
 }

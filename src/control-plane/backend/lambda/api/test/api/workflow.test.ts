@@ -697,14 +697,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {
@@ -808,14 +803,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {
@@ -918,14 +908,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {
@@ -1028,14 +1013,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {
@@ -1157,14 +1137,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {
@@ -1306,14 +1281,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataAnalytics',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataAnalytics',
-            States: {
               DataAnalytics: {
                 Data: {
                   Callback: {

@@ -182,6 +182,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
           [customNamespace, AnalyticsCustomMetricsName.FILE_NEW, ...customDimension],
           ['.', AnalyticsCustomMetricsName.FILE_PROCESSING, '.', '.', '.', '.'],
           ['.', AnalyticsCustomMetricsName.FILE_LOADED, '.', '.', '.', '.'],
+          ['.', AnalyticsCustomMetricsName.FILE_ENQUEUE, '.', '.', '.', '.'],
         ],
       },
     },

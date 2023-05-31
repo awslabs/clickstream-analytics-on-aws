@@ -151,6 +151,7 @@ export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';
 export const OUTPUT_CONTROL_PLANE_BUCKET = 'ControlPlaneBucket';
 export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
 export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
+export const OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX = 'EMRServerlessApplicationId';
 export const OUTPUT_REPORT_DASHBOARDS_SUFFIX = 'Dashboards';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'StackCreatedRedshiftServerlessWorkgroupName';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS = 'StackCreatedRedshiftServerlessWorkgroupEndpointAddress';
@@ -166,6 +167,9 @@ export enum REDSHIFT_MODE {
   SERVERLESS='Serverless',
   NEW_SERVERLESS='New_Serverless',
 }
+
+export const ETL_APPLICATION_NAME_PREFIX = 'ClickStream';
+
 
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
@@ -192,6 +196,7 @@ export enum DataPipelineCustomMetricsName {
 export enum AnalyticsCustomMetricsName {
   FILE_NEW='New files count',
   FILE_PROCESSING='Processing files count',
+  FILE_ENQUEUE ='Enqueue files count',
   FILE_LOADED='Loaded files count',
   FILE_MAX_AGE='File max age'
 }

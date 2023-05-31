@@ -19,7 +19,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
-import { Context, ScheduledEvent } from 'aws-lambda';
+import { Context } from 'aws-lambda';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, PARTITION_APP } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -62,30 +62,39 @@ metrics.addDimensions({
 });
 
 /**
- * The lambda function get maximum 50 items with status NEW from Dynamodb table,
- * and it is invoked by EventBridge which trigged by S3 object create events.
- * @param event ScheduleEvent, the JSON format is as follows:
- {
+{
   "version": "0",
-  "id": "e073f888-c8d4-67ac-2b2c-f858903d4e7c",
-  "detail-type": "Scheduled Event",
-  "source": "aws.events",
-  "account": "xxxxxxxxxxxx",
-  "time": "2023-02-24T13:14:18Z",
-  "region": "us-east-2",
-  "resources": [
-    "arn:aws:events:us-east-2:xxxxxxxxxxxx:rule/load-data-to-redshift-loaddatatoredshiftManifestOn-RQHE7PBBA2KD"
-  ],
-  "detail": {}
+  "id": "b13537d9-b14a-6ef1-bd26-fb1090329744",
+  "detail-type": "EMR Serverless Job Run State Change",
+  "source": "aws.emr-serverless",
+  "account": "xxxxxxxxx",
+  "time": "2023-05-29T07:49:25Z",
+  "region": "us-east-1",
+  "resources": [],
+  "detail": {
+    "jobRunId": "00fag0b74fhau80a",
+    "jobRunName": "1685345723122-ac3e0971-8c7c-444e-bc60-3388bee9afef",
+    "applicationId": "00faddrcc3p0sf09",
+    "arn": "arn:aws:emr-serverless:us-east-1:xxxxxxxxx:/applications/00faddrcc3p0sf09/jobruns/00fag0b74fhau80a",
+    "releaseLabel": "emr-6.9.0",
+    "state": "SUCCESS",
+    "previousState": "RUNNING",
+    "createdBy": "arn:aws:sts::xxxxxxxxx:assumed-role/dp-kinesis-DataPipelineWi-EmrSparkJobSubmitterLamb-5UVKIGJQO9FE/dp-kinesis-DataPipelineWi-EmrSparkJobSubmitterFunc-2QNLgF5pu4Z8",
+    "updatedAt": "2023-05-29T07:49:25.283071Z",
+    "createdAt": "2023-05-29T07:45:43.780900Z"
+  }
 }
  * @param context The context of lambda function.
  * @returns The list of manifest file.
  */
-export const handler = async (_event: ScheduledEvent, context: Context) => {
+export const handler = async (_event: any, context: Context) => {
   const requestId = context.awsRequestId;
+  const nowMillis = new Date().getTime(); //.getMilliseconds;
+
 
   logger.debug(`context.awsRequestId:${requestId}.`);
-
+  logger.debug('triggered by job', _event.detail);
+  logger.info('nowMilis: ' + nowMillis);
 
   const tableName = DYNAMODB_TABLE_NAME;
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
@@ -95,7 +104,7 @@ export const handler = async (_event: ScheduledEvent, context: Context) => {
 
   const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}`;
 
-  let oldestFileTimestamp = 0;
+  let newMinFileTimestamp = nowMillis;
 
   // Get all items with status=NEW
   var candidateItems: Array<ODSEventItem> = [];
@@ -105,8 +114,10 @@ export const handler = async (_event: ScheduledEvent, context: Context) => {
   logger.info('queryItems response: ', newRecordResp);
 
   if (newRecordResp.Count! > 0) {
-    oldestFileTimestamp = newRecordResp.Items[0].timestamp;
+    newMinFileTimestamp = newRecordResp.Items[0].timestamp;
   }
+
+  logger.info(`checked JOB_NEW, oldestFileTimestamp: ${newMinFileTimestamp}`);
 
   while (newRecordResp.Count! > 0) {
     candidateItems = candidateItems.concat(newRecordResp.Items!);
@@ -121,36 +132,25 @@ export const handler = async (_event: ScheduledEvent, context: Context) => {
     }
   }
 
-  // Get items with status=PROCESSING
-  let processJobNum = 0;
-  let processingResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, undefined);
+  logger.info(`allJobNewCount: ${allJobNewCount}`);
 
-  if (processingResp.Count > 0) {
-    oldestFileTimestamp = Math.min(processingResp.Items[0].timestamp, oldestFileTimestamp);
-  }
+  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
+  const enQueueInfo= await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
 
-  while (processingResp.Count > 0) {
-    processJobNum += processingResp.Count;
-
-    if (processingResp.LastEvaluatedKey) {
-      processingResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, processingResp.LastEvaluatedKey);
-    } else {
-      break;
-    }
-  }
+  const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
 
   let maxFileAgeSeconds = 0;
-  if (oldestFileTimestamp > 0) {
-    maxFileAgeSeconds = (new Date().getTime() - oldestFileTimestamp)/1000;
-    logger.info('oldestFileTimestamp:' + oldestFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
-  }
+  maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
+  logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
 
   metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processJobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processInfo.jobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_ENQUEUE, MetricUnits.Count, enQueueInfo.jobNum);
   metrics.addMetric(AnalyticsCustomMetricsName.FILE_MAX_AGE, MetricUnits.Seconds, maxFileAgeSeconds);
   metrics.publishStoredMetrics();
 
-  if (processJobNum >= processingLimit) {
+  const processJobNum = processInfo.jobNum;
+  if ( processJobNum >= processingLimit) {
     const msg = `Abort this loading data due to jobs with JobStatus=JOB_PROCESSING [${processJobNum}] exceeded the allowed quota [${processingLimit}]`;
     logger.warn(msg);
     return {
@@ -162,11 +162,12 @@ export const handler = async (_event: ScheduledEvent, context: Context) => {
 
   const groupedManifestItems: { [key: string]: ManifestItem[] } = {};
   const manifestFiles: ManifestBody[] = [];
+  logger.info('candidateItems', { candidateItems });
   if (candidateItems.length > 0) {
     const loadItemsLength = candidateItems.length > (queryResultLimit - processJobNum) ? (queryResultLimit - processJobNum) : candidateItems.length;
 
     const itemsToBeLoaded = candidateItems.slice(0, loadItemsLength);
-    logger.debug('Queried candidate to be loaded ', { itemsToBeLoaded });
+    logger.info('Queried candidate to be loaded ', { itemsToBeLoaded });
     const updateItemsPromise = itemsToBeLoaded.map(
       (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE));
     await Promise.all(updateItemsPromise);
@@ -230,7 +231,8 @@ function getAppIdFromS3Object(s3Object: string) {
  * @param s3Bucket The partition key in the table.
  * @param s3Object The sort key in the table.
  */
-const queryItems = async (tableName: string, indexName: string, prefix: string, jobStatus: string, lastEvaluatedKey: any): Promise<{
+
+export const queryItems = async (tableName: string, indexName: string, prefix: string, jobStatus: string, lastEvaluatedKey: any): Promise<{
   Count: number;
   Items: ODSEventItem[];
   LastEvaluatedKey?: Record<string, NativeAttributeValue>;
@@ -349,3 +351,35 @@ const uploadFileToS3 = async (s3Bucket: string, s3Prefix: string, filename: stri
     throw err;
   }
 };
+
+export async function queryJobCountAndMinTimestamp(
+  tableName: string,
+  indexName: string,
+  odsEventBucketWithPrefix: string,
+  jobStatus: string,
+  nowMillis: number) {
+
+  let minFileTimestamp = nowMillis;
+  let jobNum = 0;
+  let jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, undefined);
+  if (jobResp.Count > 0) {
+    minFileTimestamp = jobResp.Items[0].timestamp;
+  }
+
+  while (jobResp.Count > 0) {
+    jobNum += jobResp.Count;
+
+    if (jobResp.LastEvaluatedKey) {
+      jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, jobResp.LastEvaluatedKey);
+    } else {
+      break;
+    }
+  }
+  logger.info(`queryJobCountAndMinTimestamp, checked ${jobStatus}`, { jobStatus, minFileTimestamp, jobNum });
+
+  return {
+    minFileTimestamp,
+    jobNum,
+  };
+
+}

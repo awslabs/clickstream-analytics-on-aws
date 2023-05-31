@@ -32,7 +32,7 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { createMetricsWidget } from './utils/utils-metircs';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
-import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
+import { ETL_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
 const EMR_VERSION = 'emr-6.9.0';
 
@@ -61,6 +61,8 @@ export class DataPipelineConstruct extends Construct {
   private readonly roleUtil: RoleUtil;
   private readonly lambdaUtil: LambdaUtil;
   private readonly glueUtil: GlueUtil;
+
+  public readonly emrServerlessApp: CfnApplication;
 
   constructor(scope: Construct, id: string, props: DataPipelineProps) {
     super(scope, id);
@@ -135,7 +137,7 @@ export class DataPipelineConstruct extends Construct {
       this.roleUtil,
     );
 
-    const emrServerlessApp = this.createEmrServerlessApplication();
+    this.emrServerlessApp = this.createEmrServerlessApplication();
     const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
       scope,
       this.props,
@@ -144,12 +146,12 @@ export class DataPipelineConstruct extends Construct {
       glueDatabase,
       sourceTable,
       sinkTable,
-      emrServerlessApp.attrApplicationId,
+      this.emrServerlessApp.attrApplicationId,
     );
 
-    this.createEmrServerlessJobStateEventListener(emrServerlessApp.attrApplicationId, dlQueue);
+    this.createEmrServerlessJobStateEventListener(this.emrServerlessApp.attrApplicationId, dlQueue);
 
-    const emrApplicationId = emrServerlessApp.attrApplicationId;
+    const emrApplicationId = this.emrServerlessApp.attrApplicationId;
     // Metrics
     createMetricsWidget(this, {
       projectId: props.projectId,
@@ -238,7 +240,7 @@ export class DataPipelineConstruct extends Construct {
     addCfnNagToSecurityGroup(emrSg, ['W40', 'W5']);
 
     const serverlessApp = new CfnApplication(this, 'ClickStream-ETL-APP', {
-      name: `ClickStream-Spark-ETL-APP-${this.props.projectId}`,
+      name: `${ETL_APPLICATION_NAME_PREFIX}-Spark-ETL-APP-${this.props.projectId}`,
       releaseLabel: EMR_VERSION,
       type: 'SPARK',
       networkConfiguration: {

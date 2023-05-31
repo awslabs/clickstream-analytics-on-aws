@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { CfnCondition, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
@@ -23,6 +24,7 @@ import {
 import { SolutionInfo } from './common/solution-info';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX } from './common/constant';
 
 export interface ETLStackProps extends StackProps {
 }
@@ -136,6 +138,11 @@ export class DataPipelineStack extends Stack {
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
     this.nestedStacks.push(dataPipelineStackWithCustomPlugins);
 
+    new CfnOutput(this, `WithPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
+      description: 'EMR Serverless Application Id',
+      value: dataPipelineStackWithCustomPlugins.emrServerlessApp.attrApplicationId,
+    }).condition = withCustomPluginsCondition;
+
     const dataPipelineStackWithoutCustomPlugins = new DataPipelineNestedStack(this, 'DataPipelineWithoutCustomPlugins', {
       vpc: vpc,
       vpcSubnets: subnetSelection,
@@ -156,6 +163,11 @@ export class DataPipelineStack extends Stack {
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
     this.nestedStacks.push(dataPipelineStackWithoutCustomPlugins);
+
+    new CfnOutput(this, `WithoutPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
+      description: 'EMR Serverless Application Id',
+      value: dataPipelineStackWithoutCustomPlugins.emrServerlessApp.attrApplicationId,
+    }).condition = withoutCustomPluginsCondition;
   }
 }
 
@@ -163,14 +175,19 @@ interface DataPipelineNestedStackProps extends NestedStackProps, DataPipelinePro
 }
 
 class DataPipelineNestedStack extends NestedStack {
+  public readonly emrServerlessApp: CfnApplication;
+
   constructor(scope: Construct, id: string, props: DataPipelineNestedStackProps) {
     super(scope, id, props);
     const featureName = 'DataPipeline ' + id;
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
 
-    new DataPipelineConstruct(this, 'NestedStack', {
+    const dataPipeline = new DataPipelineConstruct(this, 'NestedStack', {
       ... props,
     });
+
+    this.emrServerlessApp = dataPipeline.emrServerlessApp;
+
     addCfnNag(this);
   }
 }

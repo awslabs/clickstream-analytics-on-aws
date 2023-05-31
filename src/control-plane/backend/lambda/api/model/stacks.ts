@@ -30,6 +30,7 @@ import {
   SUBNETS_PATTERN,
   SUBNETS_THREE_AZ_PATTERN,
   VPC_ID_PATTERN,
+  OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
 } from '../common/constants-ln';
 import { validatePattern, validateSinkBatch } from '../common/stack-params-valid';
 import {
@@ -891,6 +892,11 @@ export class CDataAnalyticsStack extends JSONObject {
   })
     RedshiftServerlessIAMRole?: string;
 
+  
+
+  @JSONObject.optional('')
+    EMRServerlessApplicationId?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataAnalytics?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier) ||
@@ -906,6 +912,8 @@ export class CDataAnalyticsStack extends JSONObject {
         throw new ClickStreamBadRequestError('VpcId, SubnetIds, SecurityGroups required for provisioning new Redshift Serverless.');
       }
     }
+
+    const dataProcessingStackName = getStackName(pipeline.pipelineId, PipelineStackType.ETL, pipeline.ingestionServer.sinkType);
 
     super({
       _pipeline: pipeline,
@@ -927,6 +935,8 @@ export class CDataAnalyticsStack extends JSONObject {
       LoadJobScheduleInterval: pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
       UpsertUsersScheduleExpression: pipeline.dataAnalytics?.upsertUsers.scheduleExpression,
 
+      EMRServerlessApplicationId: `#.${dataProcessingStackName}.${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`,
+
     });
   }
 
@@ -934,8 +944,16 @@ export class CDataAnalyticsStack extends JSONObject {
     const parameters: Parameter[] = [];
     Object.entries(this).forEach(([k, v]) => {
       if (!k.startsWith('_')) {
+        let key = k;
+        let value = v.toString()
+        if (value.startsWith('#.')) {
+          key = `${k}.#`;
+        }
+        if (value.startsWith('$.')) {
+          key = `${k}.$`;
+        }
         parameters.push({
-          ParameterKey: k,
+          ParameterKey: key,
           ParameterValue: v || v===0 ? v.toString() : '',
         });
       }
