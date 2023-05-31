@@ -271,6 +271,7 @@ function createPipelineMock(
     s3EndpointRouteError?: boolean;
     glueEndpointSGError?: boolean;
     sgError?: boolean;
+    vpcEndpointSubnetErr?: boolean;
   }): any {
   // project
   ddbMock.on(GetCommand, {
@@ -592,60 +593,70 @@ function createPipelineMock(
       ServiceName: 'com.amazonaws.ap-southeast-1.emr-serverless',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-logs',
       ServiceName: 'com.amazonaws.ap-southeast-1.logs',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-redshift-data',
       ServiceName: 'com.amazonaws.ap-southeast-1.redshift-data',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-sts',
       ServiceName: 'com.amazonaws.ap-southeast-1.sts',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-ecr-dkr',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecr.dkr',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-ecr-api',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecr.api',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-ecs',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecs',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-ecs-agent',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecs-agent',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-ecs-telemetry',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecs-telemetry',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
       VpcEndpointId: 'vpce-kinesis-streams',
       ServiceName: 'com.amazonaws.ap-southeast-1.kinesis-streams',
       VpcEndpointType: VpcEndpointType.Interface,
       Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
   ];
   ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
@@ -655,18 +666,21 @@ function createPipelineMock(
         ServiceName: 'com.amazonaws.ap-southeast-1.s3',
         VpcEndpointType: VpcEndpointType.Gateway,
         Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
       },
       {
         VpcEndpointId: 'vpce-dynamodb',
         ServiceName: 'com.amazonaws.ap-southeast-1.dynamodb',
         VpcEndpointType: VpcEndpointType.Gateway,
         Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
       },
       {
         VpcEndpointId: 'vpce-glue',
         ServiceName: 'com.amazonaws.ap-southeast-1.glue',
         VpcEndpointType: VpcEndpointType.Interface,
         Groups: [{ GroupId: 'sg-00000000000000031' }],
+        SubnetIds: props?.vpcEndpointSubnetErr ? [] : defaultSubnets.map(subnet => subnet.SubnetId),
       },
     ].concat(vpcEndpoints),
   });

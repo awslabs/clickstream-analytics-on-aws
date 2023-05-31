@@ -104,13 +104,55 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
-  it('Create pipeline public subnets AZ not contain private subnets AZ', async () => {
+  it('Create pipeline subnets not cross two AZ', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: false,
     });
+
+
+    ec2Mock.on(DescribeSubnetsCommand)
+      .resolves({
+        Subnets: [
+          {
+            SubnetId: 'subnet-00000000000000010',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.16.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000011',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.32.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000012',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.48.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000013',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000021',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000022',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000023',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.64.0/20',
+          },
+        ],
+      });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/pipeline')
@@ -120,7 +162,70 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the Data ingestion public subnets AZ must contain private subnets AZ and cross two AZ. Please check and try again.');
+    expect(res.body.message).toEqual('Validate error, the Data ingestion subnets AZ must cross two AZ. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+  });
+  it('Create pipeline subnets AZ can not meeting conditions', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: false,
+    });
+
+
+    ec2Mock.on(DescribeSubnetsCommand)
+      .resolves({
+        Subnets: [
+          {
+            SubnetId: 'subnet-00000000000000010',
+            AvailabilityZone: 'us-east-1a',
+            CidrBlock: '10.0.16.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000011',
+            AvailabilityZone: 'us-east-1b',
+            CidrBlock: '10.0.32.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000012',
+            AvailabilityZone: 'us-east-1c',
+            CidrBlock: '10.0.48.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000013',
+            AvailabilityZone: 'us-east-1d',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000021',
+            AvailabilityZone: 'us-east-1c',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000022',
+            AvailabilityZone: 'us-east-1d',
+            CidrBlock: '10.0.64.0/20',
+          },
+          {
+            SubnetId: 'subnet-00000000000000023',
+            AvailabilityZone: 'us-east-1e',
+            CidrBlock: '10.0.64.0/20',
+          },
+        ],
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, the Data ingestion subnets AZ can not meeting conditions. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
@@ -171,6 +276,32 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline with vpc endpoint subnets error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      subnetsIsolated: true,
+      subnetsCross3AZ: true,
+      vpcEndpointSubnetErr: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The VpcEndpoint not contain specify subnets\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);

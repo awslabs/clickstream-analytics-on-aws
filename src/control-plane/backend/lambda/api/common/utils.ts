@@ -206,7 +206,7 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
 
 function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
-  subnetCidr: string,
+  subnet: ClickStreamSubnet,
   services: string[]) {
   const vpcEndpointServices = vpcEndpoints.map(endpoint => endpoint.ServiceName!);
   const invalidServices = [];
@@ -227,6 +227,12 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
           });
         }
       } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface && vpcEndpoint.Groups) {
+        if (!vpcEndpoint.SubnetIds?.includes(subnet.id)) {
+          invalidServices.push({
+            service: service,
+            reason: 'The VpcEndpoint not contain specify subnets',
+          });
+        }
         const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
         const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId!));
         const vpcEndpointRule: SecurityGroupRule = {
@@ -234,7 +240,7 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
           IpProtocol: 'tcp',
           FromPort: 443,
           ToPort: 443,
-          CidrIpv4: subnetCidr,
+          CidrIpv4: subnet.cidr,
         };
         if (!containRule(vpcEndpointSGIds, vpcEndpointSGRules, vpcEndpointRule)) {
           invalidServices.push({

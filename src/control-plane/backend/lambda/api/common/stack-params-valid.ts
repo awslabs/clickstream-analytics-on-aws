@@ -76,10 +76,17 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
   const publicSubnets = allSubnets.filter(subnet => network.publicSubnetIds.includes(subnet.id));
   const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
   const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
-  const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
-  if (azInPublic.length !== privateSubnetsAZ.length || privateSubnetsAZ.length < 2) {
+  if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the Data ingestion public subnets AZ must contain private subnets AZ and cross two AZ. ' +
+      'Validate error, the Data ingestion subnets AZ must cross two AZ. ' +
+      'Please check and try again.',
+    );
+  }
+  const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
+  const azInPrivate = privateSubnetsAZ.filter(az => publicSubnetsAZ.includes(az));
+  if (azInPublic.length !== privateSubnetsAZ.length && azInPrivate.length !== privateSubnetsAZ.length) {
+    throw new ClickStreamBadRequestError(
+      'Validate error, the Data ingestion subnets AZ can not meeting conditions. ' +
       'Please check and try again.',
     );
   }
@@ -252,7 +259,7 @@ const validateVpcEndpoint = (region: string, subnet: ClickStreamSubnet, vpcEndpo
   }
   services = services.map(s => `${prefix}.${s}`);
   const invalidServices = checkVpcEndpoint(subnet.routeTable!, vpcEndpoints,
-    securityGroupsRules, subnet.cidr, services);
+    securityGroupsRules, subnet, services);
   if (!isEmpty(invalidServices)) {
     throw new ClickStreamBadRequestError(
       `Validate error, vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}. ` +
