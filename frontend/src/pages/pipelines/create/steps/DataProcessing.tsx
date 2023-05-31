@@ -52,6 +52,7 @@ import {
   REDSHIFT_FREQUENCY_UNIT,
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
+  SinkType,
 } from 'ts/const';
 import { isDisabled } from 'ts/utils';
 
@@ -416,7 +417,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
         <Toggle
           disabled={
             isDisabled(update, pipelineInfo) ||
-            !pipelineInfo.serviceStatus.EMR_SERVERLESS
+            !pipelineInfo.serviceStatus.EMR_SERVERLESS ||
+            (!pipelineInfo.serviceStatus.MSK &&
+              pipelineInfo.ingestionServer.sinkType === SinkType.MSK)
           }
           onChange={({ detail }) => changeEnableDataProcessing(detail.checked)}
           checked={pipelineInfo.enableDataProcessing}

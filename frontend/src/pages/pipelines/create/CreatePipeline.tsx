@@ -338,11 +338,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set MSK Disable and Apache Kafka connector Disabled
-          if (!data.find((element) => element.service === 'msk')?.available) {
+          if (
+            !data.find((element) => element.service === 'msk')?.available &&
+            pipelineInfo.ingestionServer.sinkType === SinkType.MSK
+          ) {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
                 kafkaSelfHost: true, // Change to self hosted as default
+                enableDataProcessing: false, // disabled all data processing
                 ingestionServer: {
                   ...prev.ingestionServer,
                   sinkKafka: {
