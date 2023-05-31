@@ -219,7 +219,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
       const { success, data }: ApiResponse<RedshiftResponse[]> =
         await getRedshiftCluster({
           region: pipelineInfo.region,
-          vpcId: pipelineInfo.selectedVPC?.value || '',
         });
       if (success) {
         const provisionedOptions: AutosuggestProps.Options = data.map(

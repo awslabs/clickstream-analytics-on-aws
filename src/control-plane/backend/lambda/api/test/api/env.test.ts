@@ -943,18 +943,18 @@ describe('Account Env test', () => {
           },
           ClusterStatus: 'available',
           VpcId: 'vpc-111',
-          MasterUsername: 'click',
+          MasterUsername: 'click1',
         },
         {
-          ClusterIdentifier: 'redshift-cluster-1',
+          ClusterIdentifier: 'redshift-cluster-2',
           NodeType: 'dc2.large',
           Endpoint: {
-            Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
-            Port: 5439,
+            Address: 'redshift-cluster-2.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
+            Port: 5438,
           },
           ClusterStatus: 'available',
           VpcId: 'vpc-222',
-          MasterUsername: 'click',
+          MasterUsername: 'click2',
         },
       ],
     });
@@ -974,9 +974,46 @@ describe('Account Env test', () => {
             Port: 5439,
           },
           publiclyAccessible: false,
-          masterUsername: 'click',
+          masterUsername: 'click1',
           status: 'available',
           vpcId: 'vpc-111',
+          vpcSecurityGroups: [],
+        },
+      ],
+    });
+    res = await request(app).get('/api/env/redshift/clusters');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          clusterSubnetGroupName: '',
+          name: 'redshift-cluster-1',
+          nodeType: 'dc2.large',
+          endpoint: {
+            Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
+            Port: 5439,
+          },
+          publiclyAccessible: false,
+          masterUsername: 'click1',
+          status: 'available',
+          vpcId: 'vpc-111',
+          vpcSecurityGroups: [],
+        },
+        {
+          clusterSubnetGroupName: '',
+          name: 'redshift-cluster-2',
+          nodeType: 'dc2.large',
+          endpoint: {
+            Address: 'redshift-cluster-2.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
+            Port: 5438,
+          },
+          publiclyAccessible: false,
+          masterUsername: 'click2',
+          status: 'available',
+          vpcId: 'vpc-222',
           vpcSecurityGroups: [],
         },
       ],

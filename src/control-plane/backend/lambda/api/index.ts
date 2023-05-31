@@ -247,7 +247,6 @@ app.get(
 app.get(
   '/api/env/redshift/clusters',
   validate([
-    query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
       location: 'body',

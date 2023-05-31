@@ -1885,7 +1885,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       const { success, data }: ApiResponse<RedshiftResponse[]> =
         await getRedshiftCluster({
           region: pipelineInfo.region,
-          vpcId: pipelineInfo.network.vpcId,
         });
       if (success) {
         const selectCluster = data.filter(
