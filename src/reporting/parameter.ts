@@ -138,8 +138,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     Parameters: [
       quickSightNamespaceParam.logicalId,
       quickSightUserParam.logicalId,
-      quickSightVpcConnectionSGParam,
-      quickSightVpcConnectionSubnetParam,
+      quickSightVpcConnectionSGParam.logicalId,
+      quickSightVpcConnectionSubnetParam.logicalId,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
     ],
