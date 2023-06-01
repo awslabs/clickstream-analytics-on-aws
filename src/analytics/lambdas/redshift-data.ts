@@ -12,7 +12,7 @@
  */
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { REDSHIFT_MODE } from '../../common/constant';
+import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';

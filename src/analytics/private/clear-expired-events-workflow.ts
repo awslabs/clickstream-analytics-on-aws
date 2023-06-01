@@ -24,9 +24,9 @@ import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succe
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { ClearExpiredEventsWorkflowData, ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from './model';
-import { REDSHIFT_MODE } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
+import { REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
 

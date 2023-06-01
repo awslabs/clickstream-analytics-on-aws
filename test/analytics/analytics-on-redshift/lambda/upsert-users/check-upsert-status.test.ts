@@ -15,7 +15,7 @@ import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCo
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckUpsertStatusEvent } from '../../../../../src/analytics/lambdas/upsert-users-workflow/check-upsert-status';
 import { CheckUpsertStatusEventDetail } from '../../../../../src/analytics/private/model';
-import { REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
 
 const checkUpsertStatusEventDetail: CheckUpsertStatusEventDetail = {

@@ -37,7 +37,7 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
 });
 
 import { handler, LoadManifestEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/load-manifest-to-redshift';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, REDSHIFT_MODE } from '../../../../../src/common/model';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 

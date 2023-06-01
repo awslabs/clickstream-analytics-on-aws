@@ -149,7 +149,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 {pipelineInfo?.status?.status === EPipelineStatus.Active && (
                   <Button
                     iconName="upload-download"
-                    disabled={disableUpgrade || pipelineInfo?.templateInfo?.isLatest}
+                    disabled={
+                      disableUpgrade || pipelineInfo?.templateInfo?.isLatest
+                    }
                     onClick={() => {
                       setShowUpgradeModal(true);
                     }}

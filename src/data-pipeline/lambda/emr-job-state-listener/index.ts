@@ -16,7 +16,7 @@ import { MetricUnits, Metrics } from '@aws-lambda-powertools/metrics';
 import { GetJobRunCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { EventBridgeEvent } from 'aws-lambda';
-import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/constant';
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { copyS3Object, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';

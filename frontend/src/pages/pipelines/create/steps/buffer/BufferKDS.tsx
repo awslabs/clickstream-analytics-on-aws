@@ -26,14 +26,22 @@ import { isDisabled } from 'ts/utils';
 interface BufferKDSProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
+  bufferKDSModeEmptyError: boolean;
+  bufferKDSShardNumFormatError: boolean;
   changeKDSProvisionType: (provision: SelectProps.Option) => void;
   changeKDSShardNumber: (num: string) => void;
 }
 
 const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
   const { t } = useTranslation();
-  const { update, pipelineInfo, changeKDSProvisionType, changeKDSShardNumber } =
-    props;
+  const {
+    update,
+    pipelineInfo,
+    changeKDSProvisionType,
+    changeKDSShardNumber,
+    bufferKDSModeEmptyError,
+    bufferKDSShardNumFormatError,
+  } = props;
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -45,6 +53,11 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
       <FormField
         label={t('pipeline:create.kds.provisionMode')}
         description={t('pipeline:create.kds.provisionModeDesc')}
+        errorText={
+          bufferKDSModeEmptyError
+            ? t('pipeline:valid.bufferKDSModeEmptyError')
+            : ''
+        }
       >
         <Select
           disabled={isDisabled(update, pipelineInfo)}
@@ -72,6 +85,11 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
         <FormField
           label={t('pipeline:create.kds.shardNum')}
           description={t('pipeline:create.kds.shardNumDesc')}
+          errorText={
+            bufferKDSShardNumFormatError
+              ? t('pipeline:valid.bufferKDSShardNumError')
+              : ''
+          }
         >
           <Input
             placeholder="2"

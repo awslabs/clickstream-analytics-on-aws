@@ -31,6 +31,9 @@ interface BufferS3Props {
   changeS3BufferSize: (size: string) => void;
   changeBufferInterval: (interval: string) => void;
   bufferS3BucketEmptyError: boolean;
+  bufferS3PrefixFormatError: boolean;
+  bufferS3SizeFormatError: boolean;
+  bufferS3IntervalFormatError: boolean;
 }
 
 const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
@@ -43,6 +46,9 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
     changeS3BufferSize,
     changeBufferInterval,
     bufferS3BucketEmptyError,
+    bufferS3PrefixFormatError,
+    bufferS3SizeFormatError,
+    bufferS3IntervalFormatError,
   } = props;
   const [loadingBucket, setLoadingBucket] = useState(false);
   const [s3BucketOptionList, setS3BucketOptionList] =
@@ -98,6 +104,11 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
         label={t('pipeline:create.s3.s3Prefix')}
         description={t('pipeline:create.s3.s3PrefixDesc')}
         constraintText={t('pipeline:create.s3.s3Constraint')}
+        errorText={
+          bufferS3PrefixFormatError
+            ? t('pipeline:valid.bufferS3PrefixError')
+            : ''
+        }
       >
         <Input
           disabled={isDisabled(update, pipelineInfo)}
@@ -112,6 +123,9 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
       <FormField
         label={t('pipeline:create.s3.bufferSize')}
         description={t('pipeline:create.s3.bufferSizeDesc')}
+        errorText={
+          bufferS3SizeFormatError ? t('pipeline:valid.bufferS3SizeError') : ''
+        }
       >
         <Input
           type="number"
@@ -126,6 +140,11 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
       <FormField
         label={t('pipeline:create.s3.bufferInterval')}
         description={t('pipeline:create.s3.bufferIntervalDesc')}
+        errorText={
+          bufferS3IntervalFormatError
+            ? t('pipeline:valid.bufferS3IntervalError')
+            : ''
+        }
       >
         <Input
           placeholder="300"

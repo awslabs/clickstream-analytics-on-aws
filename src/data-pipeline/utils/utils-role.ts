@@ -16,8 +16,8 @@ import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Arn, ArnFormat, Aws, Stack } from 'aws-cdk-lib';
 import { CompositePrincipal, Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { MetricsNamespace } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
+import { MetricsNamespace } from '../../common/model';
 
 export class RoleUtil {
   public static newInstance(scope: Construct) {

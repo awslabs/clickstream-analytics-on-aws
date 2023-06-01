@@ -100,11 +100,27 @@ interface ConfigIngestionProps {
   publicSubnetError: boolean;
   privateSubnetError: boolean;
   domainNameEmptyError: boolean;
+  domainNameFormatError: boolean;
   certificateEmptyError: boolean;
   bufferS3BucketEmptyError: boolean;
   acknowledgedHTTPSecurity: boolean;
   sinkBatchSizeError: boolean;
   sinkIntervalError: boolean;
+  minCapacityError: boolean;
+  maxCapacityError: boolean;
+  warmPoolError: boolean;
+  corsFormatError: boolean;
+  secretEmptyError: boolean;
+  mskEmptyError: boolean;
+  topicFormatError: boolean;
+  brokerLinkEmptyError: boolean;
+  brokerLinkFormatError: boolean;
+  kafkaSGEmptyError: boolean;
+  bufferS3PrefixFormatError: boolean;
+  bufferS3SizeFormatError: boolean;
+  bufferS3IntervalFormatError: boolean;
+  bufferKDSModeEmptyError: boolean;
+  bufferKDSShardNumFormatError: boolean;
 }
 
 const ConfigIngestion: React.FC<ConfigIngestionProps> = (
@@ -149,11 +165,27 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     publicSubnetError,
     privateSubnetError,
     domainNameEmptyError,
+    domainNameFormatError,
     certificateEmptyError,
     bufferS3BucketEmptyError,
     acknowledgedHTTPSecurity,
     sinkBatchSizeError,
     sinkIntervalError,
+    minCapacityError,
+    maxCapacityError,
+    warmPoolError,
+    corsFormatError,
+    secretEmptyError,
+    mskEmptyError,
+    topicFormatError,
+    brokerLinkEmptyError,
+    brokerLinkFormatError,
+    kafkaSGEmptyError,
+    bufferS3PrefixFormatError,
+    bufferS3SizeFormatError,
+    bufferS3IntervalFormatError,
+    bufferKDSModeEmptyError,
+    bufferKDSShardNumFormatError,
   } = props;
   const [loadingSubnet, setLoadingSubnet] = useState(false);
   const [loadingCertificate, setLoadingCertificate] = useState(false);
@@ -321,7 +353,12 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             stretch
           >
             <ColumnLayout columns={3}>
-              <div>
+              <FormField
+                stretch
+                errorText={
+                  minCapacityError ? t('pipeline:valid.minCapacityError') : ''
+                }
+              >
                 <div>{t('pipeline:create.minSize')}</div>
                 <Input
                   type="number"
@@ -330,8 +367,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     changeServerMin(e.detail.value);
                   }}
                 />
-              </div>
-              <div>
+              </FormField>
+              <FormField
+                stretch
+                errorText={
+                  maxCapacityError ? t('pipeline:valid.maxCapacityError') : ''
+                }
+              >
                 <div>{t('pipeline:create.maxSize')}</div>
                 <Input
                   type="number"
@@ -340,8 +382,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     changeServerMax(e.detail.value);
                   }}
                 />
-              </div>
-              <div>
+              </FormField>
+              <FormField
+                stretch
+                errorText={
+                  warmPoolError ? t('pipeline:valid.warmpoolError') : ''
+                }
+              >
                 <div>{t('pipeline:create.warmPool')}</div>
                 <Input
                   type="number"
@@ -350,7 +397,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     changeWarmSize(e.detail.value);
                   }}
                 />
-              </div>
+              </FormField>
             </ColumnLayout>
           </FormField>
 
@@ -413,6 +460,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   errorText={
                     domainNameEmptyError
                       ? t('pipeline:valid.domainNameEmpty')
+                      : domainNameFormatError
+                      ? t('pipeline:valid.domainNameInvalid')
                       : ''
                   }
                 >
@@ -492,6 +541,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               <FormField
                 label={t('pipeline:create.cors')}
                 description={t('pipeline:create.corsDesc')}
+                errorText={
+                  corsFormatError ? t('pipeline:valid.corsFormatError') : ''
+                }
               >
                 <Input
                   placeholder={t('pipeline:create.corsPlaceholder') || ''}
@@ -534,7 +586,14 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 </Checkbox>
                 <div className="plr-20">
                   {pipelineInfo.enableAuthentication && (
-                    <FormField label={t('pipeline:create.secret')}>
+                    <FormField
+                      label={t('pipeline:create.secret')}
+                      errorText={
+                        secretEmptyError
+                          ? t('pipeline:valid.secretEmptyError')
+                          : ''
+                      }
+                    >
                       <div className="flex">
                         <div className="flex-1">
                           <Select
@@ -627,6 +686,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               update={update}
               pipelineInfo={pipelineInfo}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
+              bufferS3PrefixFormatError={bufferS3PrefixFormatError}
+              bufferS3SizeFormatError={bufferS3SizeFormatError}
+              bufferS3IntervalFormatError={bufferS3IntervalFormatError}
               changeS3Bucket={(bucket) => {
                 changeBufferS3Bucket(bucket);
               }}
@@ -645,6 +707,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             <BufferMSK
               update={update}
               pipelineInfo={pipelineInfo}
+              mskEmptyError={mskEmptyError}
+              topicFormatError={topicFormatError}
+              brokerLinkEmptyError={brokerLinkEmptyError}
+              brokerLinkFormatError={brokerLinkFormatError}
+              kafkaSGEmptyError={kafkaSGEmptyError}
               changeCreateMSKMethod={(type) => {
                 changeCreateMSKMethod(type);
               }}
@@ -672,6 +739,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             <BufferKDS
               update={update}
               pipelineInfo={pipelineInfo}
+              bufferKDSModeEmptyError={bufferKDSModeEmptyError}
+              bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
               changeKDSProvisionType={(type) => {
                 changeKDSProvisionType(type);
               }}

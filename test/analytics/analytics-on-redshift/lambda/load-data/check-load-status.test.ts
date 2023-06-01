@@ -17,7 +17,7 @@ import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckLoadStatusEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/check-load-status';
-import { REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 

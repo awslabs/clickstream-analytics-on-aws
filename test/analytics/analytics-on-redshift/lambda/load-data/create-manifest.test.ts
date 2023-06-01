@@ -41,7 +41,8 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
 import { handler, ODSEventItem } from '../../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
 import { JobStatus } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, PARTITION_APP } from '../../../../../src/common/constant';
+import { PARTITION_APP } from '../../../../../src/common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../../../src/common/model';
 import { getMockContext } from '../../../../common/lambda-context';
 
 //@ts-ignore

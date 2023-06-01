@@ -47,6 +47,7 @@ import {
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
+  KDSProvisionType,
   KDS_TYPE,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
@@ -63,12 +64,20 @@ import {
   SDK_LIST,
   SinkType,
 } from 'ts/const';
+import {
+  CORS_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+} from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
+  checkStringValidRegex,
   extractAccountIdFromArn,
   generateCronDateRange,
   generateRedshiftInterval,
   isEmpty,
+  isPositiveInteger,
   reverseCronDateRange,
   reverseFreshnessInHour,
   reverseRedshiftInterval,
@@ -100,16 +109,67 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
+
+  const [minCapacityError, setMinCapacityError] = useState(false);
+  const [maxCapacityError, setMaxCapacityError] = useState(false);
+  const [warmPoolError, setWarmPoolError] = useState(false);
+
   const [domainNameEmptyError, setDomainNameEmptyError] = useState(false);
+  const [domainNameFormatError, setDomainNameFormatError] = useState(false);
   const [certificateEmptyError, setCertificateEmptyError] = useState(false);
+
+  const [corsFormatError, setCorsFormatError] = useState(false);
+  const [secretEmptyError, setSecretEmptyError] = useState(false);
 
   const [sinkBatchSizeError, setSinkBatchSizeError] = useState(false);
   const [sinkIntervalError, setSinkIntervalError] = useState(false);
 
   const [loadingServiceAvailable, setLoadingServiceAvailable] = useState(false);
 
+  const [mskEmptyError, setMskEmptyError] = useState(false);
+  const [topicFormatError, setTopicFormatError] = useState(false);
+  const [brokerLinkEmptyError, setBrokerLinkEmptyError] = useState(false);
+  const [brokerLinkFormatError, setBrokerLinkFormatError] = useState(false);
+  const [kafkaSGEmptyError, setKafkaSGEmptyError] = useState(false);
+
   const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
     useState(false);
+
+  const [bufferS3PrefixFormatError, setBufferS3PrefixFormatError] =
+    useState(false);
+  const [bufferS3SizeFormatError, setBufferS3SizeFormatError] = useState(false);
+  const [bufferS3IntervalFormatError, setBufferS3IntervalFormatError] =
+    useState(false);
+
+  const [bufferKDSModeEmptyError, setBufferKDSModeEmptyError] = useState(false);
+  const [bufferKDSShardNumFormatError, setBufferKDSShardNumFormatError] =
+    useState(false);
+
+  const [redshiftServerlessVpcEmptyError, setRedshiftServerlessVpcEmptyError] =
+    useState(false);
+  const [redshiftServerlessSGEmptyError, setRedshiftServerlessSGEmptyError] =
+    useState(false);
+  const [
+    redshiftServerlessSubnetEmptyError,
+    setRedshiftServerlessSubnetEmptyError,
+  ] = useState(false);
+  const [
+    redshiftServerlessSubnetInvalidError,
+    setRedshiftServerlessSubnetInvalidError,
+  ] = useState(false);
+
+  const [
+    redshiftProvisionedCulsterEmptyError,
+    setRedshiftProvisionedCulsterEmptyError,
+  ] = useState(false);
+  const [
+    redshiftProvisionedDBUserEmptyError,
+    setRedshiftProvisionedDBUserEmptyError,
+  ] = useState(false);
+
+  const [quickSightUserEmptyError, setQuickSightUserEmptyError] =
+    useState(false);
+
   const [
     dataProcessorIntervalInvalidError,
     setDataProcessorIntervalInvalidError,
@@ -167,19 +227,57 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   };
 
   const validateIngestionServer = () => {
+    // Validate public subnets
     if (pipelineInfo.selectedPublicSubnet.length <= 0) {
       setPublicSubnetError(true);
       return false;
     }
+    // Validate private subnets
     if (pipelineInfo.selectedPrivateSubnet.length <= 0) {
       setPrivateSubnetError(true);
       return false;
     }
+    // Validate ingestion server min capacity
+    if (!isPositiveInteger(pipelineInfo.ingestionServer.size.serverMin)) {
+      setMinCapacityError(true);
+      return false;
+    }
+
+    // Validate ingestion server max capacity
+    if (
+      !isPositiveInteger(pipelineInfo.ingestionServer.size.serverMax) ||
+      pipelineInfo.ingestionServer.size.serverMax <
+        pipelineInfo.ingestionServer.size.serverMin
+    ) {
+      setMaxCapacityError(true);
+      return false;
+    }
+
+    // Validate ingestion server warmpool
+    if (
+      pipelineInfo.ingestionServer.size.warmPoolSize < 0 ||
+      pipelineInfo.ingestionServer.size.serverMax <
+        pipelineInfo.ingestionServer.size.warmPoolSize
+    ) {
+      setWarmPoolError(true);
+      return false;
+    }
+
+    // Validate HTTPs with SSL Certificate
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
     ) {
       if (!pipelineInfo.ingestionServer.domain.domainName.trim()) {
         setDomainNameEmptyError(true);
+        return false;
+      }
+      if (
+        !checkStringValidRegex(
+          pipelineInfo.ingestionServer.domain.domainName,
+          new RegExp(DOMAIN_NAME_PATTERN)
+        )
+      ) {
+        setDomainNameFormatError(true);
         return false;
       }
       if (!pipelineInfo.selectedCertificate) {
@@ -192,6 +290,30 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         setBufferS3BucketEmptyError(true);
         return false;
       }
+
+      // Check prefix length
+      if (pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix.length > 1024) {
+        setBufferS3PrefixFormatError(true);
+        return false;
+      }
+
+      // check buffer size
+      if (
+        pipelineInfo.ingestionServer.sinkS3.s3BufferSize > 50 ||
+        pipelineInfo.ingestionServer.sinkS3.s3BufferSize < 1
+      ) {
+        setBufferS3SizeFormatError(true);
+        return false;
+      }
+
+      // check buffer interval
+      if (
+        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval > 3600 ||
+        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval < 60
+      ) {
+        setBufferS3IntervalFormatError(true);
+        return false;
+      }
     }
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol ===
@@ -199,6 +321,27 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       !acknowledgedHTTPSecurity
     ) {
       return false;
+    }
+
+    // check CORS domain when it's not empty
+    if (pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin.trim()) {
+      if (
+        !checkStringValidRegex(
+          pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin,
+          new RegExp(CORS_PATTERN)
+        )
+      ) {
+        setCorsFormatError(true);
+        return false;
+      }
+    }
+
+    // check secret selected when enable authentication
+    if (pipelineInfo.enableAuthentication) {
+      if (!pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn) {
+        setSecretEmptyError(true);
+        return false;
+      }
     }
 
     const sinkIntervalNum =
@@ -224,6 +367,51 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
 
     if (pipelineInfo.ingestionServer.sinkType === SinkType.MSK) {
+      // check msk select when not self hosted
+      if (!pipelineInfo.kafkaSelfHost) {
+        if (!pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn) {
+          setMskEmptyError(true);
+          return false;
+        }
+      }
+      // check kafka when self hosted
+      if (pipelineInfo.kafkaSelfHost) {
+        // Check brokers
+        if (!pipelineInfo.kafkaBrokers) {
+          setBrokerLinkEmptyError(true);
+          return false;
+        }
+        const brokerValidRes: boolean[] = [];
+        pipelineInfo.kafkaBrokers.split(',')?.forEach((element) => {
+          brokerValidRes.push(
+            checkStringValidRegex(element, new RegExp(KAFKA_BROKERS_PATTERN))
+          );
+        });
+        if (brokerValidRes.includes(false)) {
+          setBrokerLinkFormatError(true);
+          return false;
+        }
+
+        // Check security group
+        if (!pipelineInfo.ingestionServer.sinkKafka.securityGroupId) {
+          setKafkaSGEmptyError(true);
+          return false;
+        }
+      }
+
+      // check topic format if not empty
+      if (pipelineInfo.ingestionServer.sinkKafka.topic) {
+        if (
+          !checkStringValidRegex(
+            pipelineInfo.ingestionServer.sinkKafka.topic,
+            new RegExp(KAFKA_TOPIC_PATTERN)
+          )
+        ) {
+          setTopicFormatError(true);
+          return false;
+        }
+      }
+
       // check msk batch interval
       if (
         sinkIntervalNum < MIN_MSK_SINK_INTERVAL ||
@@ -241,18 +429,97 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         return false;
       }
     }
+
+    if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
+      // check provisioned mode
+      if (!pipelineInfo.seledtedKDKProvisionType?.value) {
+        setBufferKDSModeEmptyError(true);
+        return false;
+      }
+      // check Shard number when provision mode is provisioned
+      if (
+        pipelineInfo.seledtedKDKProvisionType.value ===
+        KDSProvisionType.PROVISIONED
+      ) {
+        if (
+          pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount > 10000 ||
+          pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount < 1
+        ) {
+          setBufferKDSShardNumFormatError(true);
+          return false;
+        }
+      }
+    }
+
     return true;
   };
 
   const validateDataProcessing = () => {
-    // check data processing interval
-    if (
-      pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
-      parseInt(pipelineInfo.excutionFixedValue) < 3 &&
-      pipelineInfo.selectedExcutionUnit?.value === 'minute'
-    ) {
-      setDataProcessorIntervalInvalidError(true);
-      return false;
+    if (pipelineInfo.enableDataProcessing) {
+      // check data processing interval
+      if (
+        pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
+        parseInt(pipelineInfo.excutionFixedValue) < 3 &&
+        pipelineInfo.selectedExcutionUnit?.value === 'minute'
+      ) {
+        setDataProcessorIntervalInvalidError(true);
+        return false;
+      }
+
+      // if redshift enabled
+      if (pipelineInfo.enableRedshift) {
+        // if redshift serverless
+        if (pipelineInfo.redshiftType === 'serverless') {
+          // Check VPC
+          if (!pipelineInfo.redshiftServerlessVPC?.value) {
+            setRedshiftServerlessVpcEmptyError(true);
+            return false;
+          }
+          // Check Security group
+          if (pipelineInfo.redshiftServerlessSG.length <= 0) {
+            setRedshiftServerlessSGEmptyError(true);
+            return false;
+          }
+          // Check subnets
+          if (pipelineInfo.redshiftServerlessSubnets.length <= 0) {
+            setRedshiftServerlessSubnetEmptyError(true);
+            return false;
+          }
+          // Check subnets valid
+          const subnetAZs = pipelineInfo.redshiftServerlessSubnets.map(
+            (element) => element.description.split(':')[0]
+          );
+          const subnetSets = new Set(subnetAZs);
+          if (subnetSets.size < 3) {
+            setRedshiftServerlessSubnetInvalidError(true);
+            return false;
+          }
+        }
+        if (pipelineInfo.redshiftType === 'provisioned') {
+          // Check redshift cluster
+          if (!pipelineInfo.selectedRedshiftCluster?.value) {
+            setRedshiftProvisionedCulsterEmptyError(true);
+            return false;
+          }
+          // Check DB user
+          if (!pipelineInfo.dataAnalytics.redshift.provisioned.dbUser.trim()) {
+            setRedshiftProvisionedDBUserEmptyError(true);
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const validateReporting = () => {
+    if (pipelineInfo.enableReporting) {
+      // check quick sight user
+      if (!pipelineInfo.selectedQuickSightUser?.value) {
+        setQuickSightUserEmptyError(true);
+        return false;
+      }
     }
     return true;
   };
@@ -590,6 +857,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
           return;
         }
+        if (detail.requestedStepIndex === 4 && !validateReporting()) {
+          return;
+        }
         setActiveStepIndex(detail.requestedStepIndex);
       }}
       onCancel={() => {
@@ -637,6 +907,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedPublicSubnet: [],
                     selectedPrivateSubnet: [],
                     showServiceStatus: false,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      loadBalancer: {
+                        ...prev.ingestionServer.loadBalancer,
+                        logS3Bucket: {
+                          ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                          name: '',
+                        },
+                      },
+                    },
                   };
                 });
               }}
@@ -727,11 +1007,27 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               publicSubnetError={publicSubnetError}
               privateSubnetError={privateSubnetError}
               domainNameEmptyError={domainNameEmptyError}
+              domainNameFormatError={domainNameFormatError}
               certificateEmptyError={certificateEmptyError}
               bufferS3BucketEmptyError={bufferS3BucketEmptyError}
+              bufferS3PrefixFormatError={bufferS3PrefixFormatError}
+              bufferS3SizeFormatError={bufferS3SizeFormatError}
+              bufferS3IntervalFormatError={bufferS3IntervalFormatError}
               acknowledgedHTTPSecurity={acknowledgedHTTPSecurity}
               sinkBatchSizeError={sinkBatchSizeError}
               sinkIntervalError={sinkIntervalError}
+              minCapacityError={minCapacityError}
+              maxCapacityError={maxCapacityError}
+              warmPoolError={warmPoolError}
+              corsFormatError={corsFormatError}
+              secretEmptyError={secretEmptyError}
+              mskEmptyError={mskEmptyError}
+              topicFormatError={topicFormatError}
+              brokerLinkEmptyError={brokerLinkEmptyError}
+              brokerLinkFormatError={brokerLinkFormatError}
+              kafkaSGEmptyError={kafkaSGEmptyError}
+              bufferKDSModeEmptyError={bufferKDSModeEmptyError}
+              bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
@@ -763,6 +1059,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeServerMin={(min) => {
+                setMinCapacityError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -777,6 +1074,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeServerMax={(max) => {
+                setMaxCapacityError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -791,6 +1089,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeWarmSize={(size) => {
+                setWarmPoolError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -806,6 +1105,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               }}
               changeDomainName={(name) => {
                 setDomainNameEmptyError(false);
+                setDomainNameFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -834,6 +1134,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeEnableALBAuthentication={(enable) => {
+                setSecretEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -856,6 +1157,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeProtocal={(protocal) => {
+                setDomainNameEmptyError(false);
+                setDomainNameFormatError(false);
+                setCertificateEmptyError(false);
                 if (protocal === ProtocalType.HTTP) {
                   setAcknowledgedHTTPSecurity(false);
                 }
@@ -890,6 +1194,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeServerCors={(cors) => {
+                setCorsFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -920,6 +1225,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeSSMSecret={(secret) => {
+                setSecretEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1010,6 +1316,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeBufferS3Prefix={(prefix) => {
+                setBufferS3PrefixFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1027,6 +1334,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeS3BufferSize={(size) => {
+                setBufferS3SizeFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1041,6 +1349,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeBufferInterval={(interval) => {
+                setBufferS3IntervalFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1063,6 +1372,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeSelectedMSK={(mskOption, mskCluster) => {
+                setMskEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1082,6 +1392,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeSecurityGroup={(sg) => {
+                setKafkaSGEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1097,6 +1408,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeMSKTopic={(topic) => {
+                setTopicFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1135,6 +1447,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeKafkaBrokers={(brokers) => {
+                setBrokerLinkEmptyError(false);
+                setBrokerLinkFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1150,6 +1464,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeKafkaTopic={(topic) => {
+                setTopicFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1164,6 +1479,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeKDSProvisionType={(type) => {
+                setBufferKDSModeEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1179,6 +1495,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeKDSShardNumber={(num) => {
+                setBufferKDSShardNumFormatError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1204,6 +1521,20 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               pipelineInfo={pipelineInfo}
               dataProcessorIntervalInvalidError={
                 dataProcessorIntervalInvalidError
+              }
+              redshiftServerlessVpcEmptyError={redshiftServerlessVpcEmptyError}
+              redshiftServerlessSGEmptyError={redshiftServerlessSGEmptyError}
+              redshiftServerlessSubnetEmptyError={
+                redshiftServerlessSubnetEmptyError
+              }
+              redshiftServerlessSubnetInvalidError={
+                redshiftServerlessSubnetInvalidError
+              }
+              redshiftProvisionedCulsterEmptyError={
+                redshiftProvisionedCulsterEmptyError
+              }
+              redshiftProvisionedDBUserEmptyError={
+                redshiftProvisionedDBUserEmptyError
               }
               changeEnableDataProcessing={(enable) => {
                 setPipelineInfo((prev) => {
@@ -1289,6 +1620,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeSelectedRedshift={(cluster) => {
+                setRedshiftProvisionedCulsterEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1354,6 +1686,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeDBUser={(user) => {
+                setRedshiftProvisionedDBUserEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1389,6 +1722,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeServerlessRedshiftVPC={(vpc) => {
+                setRedshiftServerlessVpcEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1411,6 +1745,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeSecurityGroup={(sg) => {
+                setRedshiftServerlessSGEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1435,6 +1770,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeReshiftSubnets={(subnets) => {
+                setRedshiftServerlessSubnetEmptyError(false);
+                setRedshiftServerlessSubnetInvalidError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1532,6 +1869,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             <Reporting
               update={update}
               pipelineInfo={pipelineInfo}
+              quickSightUserEmptyError={quickSightUserEmptyError}
               changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -1541,6 +1879,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeQuickSightSelectedUser={(user) => {
+                setQuickSightUserEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,

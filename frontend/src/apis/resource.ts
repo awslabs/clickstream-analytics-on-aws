@@ -59,9 +59,7 @@ const getMSKList = async (params: { vpcId: string; region?: string }) => {
   return result;
 };
 
-const getRedshiftCluster = async (params: {
-  region?: string;
-}) => {
+const getRedshiftCluster = async (params: { region?: string }) => {
   const result: any = await apiRequest('get', `/env/redshift/clusters`, params);
   return result;
 };

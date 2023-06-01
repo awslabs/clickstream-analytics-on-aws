@@ -34,7 +34,7 @@ import {
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
-import { REDSHIFT_MODE } from '../src/common/constant';
+import { REDSHIFT_MODE } from '../src/common/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {

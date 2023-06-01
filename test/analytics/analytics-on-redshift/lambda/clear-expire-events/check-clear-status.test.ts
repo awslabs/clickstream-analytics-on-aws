@@ -15,7 +15,7 @@ import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCo
 import { mockClient } from 'aws-sdk-client-mock';
 import { ClearExpiredEventsEvent, handler } from '../../../../../src/analytics/lambdas/clear-expired-events-workflow/check-clear-status';
 import { ClearExpiredEventsEventDetail } from '../../../../../src/analytics/private/model';
-import { REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
 
 const clearExpiredEventsEventDetail: ClearExpiredEventsEventDetail = {

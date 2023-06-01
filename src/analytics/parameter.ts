@@ -17,8 +17,9 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  REDSHIFT_MODE, S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
+  S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
 } from '../common/constant';
+import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export interface RedshiftAnalyticsStackProps {

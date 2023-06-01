@@ -38,6 +38,11 @@ interface BufferMSKProps {
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
   changeSecurityGroup: (sg: SelectProps.Option) => void;
+  mskEmptyError: boolean;
+  topicFormatError: boolean;
+  brokerLinkEmptyError: boolean;
+  brokerLinkFormatError: boolean;
+  kafkaSGEmptyError: boolean;
 }
 
 const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
@@ -51,6 +56,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
     changeKafkaBrokers,
     changeKafkaTopic,
     changeSecurityGroup,
+    mskEmptyError,
+    topicFormatError,
+    brokerLinkEmptyError,
+    brokerLinkFormatError,
+    kafkaSGEmptyError,
   } = props;
   const [loadingMSK, setLoadingMSK] = useState(false);
   const [loadingSG, setLoadingSG] = useState(false);
@@ -149,6 +159,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       <FormField
                         label={t('pipeline:create.msk.exsitingMSK')}
                         description={t('pipeline:create.msk.exsitingMSKDesc')}
+                        errorText={
+                          mskEmptyError ? t('pipeline:valid.mskEmptyError') : ''
+                        }
                       >
                         <div className="flex">
                           <div className="flex-1">
@@ -176,7 +189,6 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                               }}
                               options={mskOptionList}
                               filteringType="auto"
-                              selectedAriaLabel="Selected"
                             />
                           </div>
                           {update ? (
@@ -196,6 +208,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                     <FormField
                       label={t('pipeline:create.msk.topic')}
                       description={t('pipeline:create.msk.topicDesc')}
+                      errorText={
+                        topicFormatError
+                          ? t('pipeline:valid.topicFormatError')
+                          : ''
+                      }
                     >
                       <Input
                         disabled={!pipelineInfo.serviceStatus.MSK}
@@ -222,6 +239,13 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       <FormField
                         label={t('pipeline:create.msk.brokerLink')}
                         description={t('pipeline:create.msk.brokerLinkDesc')}
+                        errorText={
+                          brokerLinkEmptyError
+                            ? t('pipeline:valid.kafkaBrokerEmptyError')
+                            : brokerLinkFormatError
+                            ? t('pipeline:valid.kafkaBrokerFormatError')
+                            : ''
+                        }
                       >
                         <Input
                           placeholder={
@@ -236,6 +260,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       <FormField
                         label={t('pipeline:create.msk.topic')}
                         description={t('pipeline:create.msk.manualTopicDesc')}
+                        errorText={
+                          topicFormatError
+                            ? t('pipeline:valid.topicFormatError')
+                            : ''
+                        }
                       >
                         <Input
                           placeholder={
@@ -250,6 +279,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       <FormField
                         label={t('pipeline:create.securityGroup')}
                         description={t('pipeline:create.mskSecurityGroupDesc')}
+                        errorText={
+                          kafkaSGEmptyError
+                            ? t('pipeline:valid.kafkaSGEmptyError')
+                            : ''
+                        }
                       >
                         <Select
                           selectedOption={pipelineInfo.selectedSelfHostedMSKSG}

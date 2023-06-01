@@ -61,7 +61,7 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
   };
 });
 
-import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../src/common/constant';
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../src/common/model';
 import { handler } from '../../src/data-pipeline/lambda/emr-job-state-listener';
 
 //@ts-ignore

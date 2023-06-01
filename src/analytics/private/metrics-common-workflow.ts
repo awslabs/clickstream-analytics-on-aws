@@ -15,7 +15,7 @@ import { Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
 import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 

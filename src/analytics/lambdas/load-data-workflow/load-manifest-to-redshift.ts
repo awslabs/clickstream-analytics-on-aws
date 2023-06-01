@@ -16,7 +16,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 import { Context } from 'aws-lambda';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';

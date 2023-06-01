@@ -20,7 +20,8 @@ import {
 import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Context } from 'aws-lambda';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService, PARTITION_APP } from '../../../common/constant';
+import { PARTITION_APP } from '../../../common/constant';
+import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';

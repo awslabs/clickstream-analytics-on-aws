@@ -34,6 +34,14 @@ export const alertMsg = (alertTxt: string, alertType: AlertType) => {
   window.dispatchEvent(patchEvent);
 };
 
+export const isPositiveInteger = (num: number) => {
+  return Number.isInteger(num) && num > 0;
+};
+
+export const checkStringValidRegex = (str: string, regex: RegExp) => {
+  return regex.test(str);
+};
+
 export const validateEmails = (emails: string) => {
   const emailArray = emails.split(',');
   const regex = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;

@@ -91,6 +91,12 @@ interface DataProcessingProps {
   changeDataLoadType: (type: SelectProps.Option) => void;
   changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalInvalidError: boolean;
+  redshiftServerlessVpcEmptyError: boolean;
+  redshiftServerlessSGEmptyError: boolean;
+  redshiftServerlessSubnetEmptyError: boolean;
+  redshiftServerlessSubnetInvalidError: boolean;
+  redshiftProvisionedCulsterEmptyError: boolean;
+  redshiftProvisionedDBUserEmptyError: boolean;
 }
 
 const DataProcessing: React.FC<DataProcessingProps> = (
@@ -130,6 +136,12 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeDataLoadType,
     changeDataLoadCronExp,
     dataProcessorIntervalInvalidError,
+    redshiftServerlessVpcEmptyError,
+    redshiftServerlessSGEmptyError,
+    redshiftServerlessSubnetEmptyError,
+    redshiftServerlessSubnetInvalidError,
+    redshiftProvisionedCulsterEmptyError,
+    redshiftProvisionedDBUserEmptyError,
   } = props;
 
   const [selectedExecution, setSelectedExecution] = useState(
@@ -719,6 +731,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           <FormField
                             label={t('pipeline:create.redshiftVpc')}
                             description={t('pipeline:create.redshiftVpcDesc')}
+                            errorText={
+                              redshiftServerlessVpcEmptyError
+                                ? t(
+                                    'pipeline:valid.redshiftServerlessVpcEmptyError'
+                                  )
+                                : ''
+                            }
                           >
                             <Select
                               disabled={
@@ -749,6 +768,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             description={t(
                               'pipeline:create.redshiftSecurityGroupDesc'
                             )}
+                            errorText={
+                              redshiftServerlessSGEmptyError
+                                ? t(
+                                    'pipeline:valid.redshiftServerlessSGEmptyError'
+                                  )
+                                : ''
+                            }
                           >
                             <Multiselect
                               disabled={
@@ -767,7 +793,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 t('pipeline:create.securityGroupPlaceholder') ||
                                 ''
                               }
-                              selectedAriaLabel="Selected"
                               statusType={loadingSG ? 'loading' : 'finished'}
                               onChange={(e) => {
                                 changeSecurityGroup(
@@ -782,6 +807,17 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             description={t(
                               'pipeline:create.redshiftSubnetDesc'
                             )}
+                            errorText={
+                              redshiftServerlessSubnetEmptyError
+                                ? t(
+                                    'pipeline:valid.redshiftServerlessSubnetEmptyError'
+                                  )
+                                : redshiftServerlessSubnetInvalidError
+                                ? t(
+                                    'pipeline:valid.redshiftServerlessSubnetInvalidError'
+                                  )
+                                : ''
+                            }
                           >
                             <Multiselect
                               disabled={
@@ -819,6 +855,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       <FormField
                         label={t('pipeline:create.redshiftCluster')}
                         description={t('pipeline:create.redshiftClusterDesc')}
+                        errorText={
+                          redshiftProvisionedCulsterEmptyError
+                            ? t(
+                                'pipeline:valid.redshiftProvisionedCulsterEmptyError'
+                              )
+                            : ''
+                        }
                         secondaryControl={
                           <Button
                             loading={loadingRedshift}
@@ -857,6 +900,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         description={t(
                           'pipeline:create.redshiftDatabaseUserDesc'
                         )}
+                        errorText={
+                          redshiftProvisionedDBUserEmptyError
+                            ? t(
+                                'pipeline:valid.redshiftProvisionedDBUserEmptyError'
+                              )
+                            : ''
+                        }
                       >
                         <Input
                           placeholder={

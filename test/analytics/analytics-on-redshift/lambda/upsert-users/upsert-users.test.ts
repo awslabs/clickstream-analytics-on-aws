@@ -15,7 +15,7 @@ import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-red
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, UpsertUsersEvent } from '../../../../../src/analytics/lambdas/upsert-users-workflow/upsert-users';
 import { UpsertUsersBody } from '../../../../../src/analytics/private/model';
-import { REDSHIFT_MODE } from '../../../../../src/common/constant';
+import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
 
 const upsertUsersBody: UpsertUsersBody = {

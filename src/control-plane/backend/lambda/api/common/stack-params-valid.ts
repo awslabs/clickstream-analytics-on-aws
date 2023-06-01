@@ -12,7 +12,7 @@
  */
 
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
-import { REDSHIFT_MODE } from './constants-ln';
+import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';

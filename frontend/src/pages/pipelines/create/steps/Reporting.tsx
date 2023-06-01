@@ -39,8 +39,9 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK,
   PIPELINE_QUICKSIGHT_LEARNMORE_LINK,
 } from 'ts/const';
+import { EMAIL_PATTERN } from 'ts/constant-ln';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
-import { isDisabled } from 'ts/utils';
+import { checkStringValidRegex, isDisabled } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -48,6 +49,7 @@ interface ReportingProps {
   changeEnableReporting: (enable: boolean) => void;
   changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
   changeQuickSightAccountName: (accountName: string) => void;
+  quickSightUserEmptyError: boolean;
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
@@ -58,6 +60,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     changeEnableReporting,
     changeQuickSightSelectedUser,
     changeQuickSightAccountName,
+    quickSightUserEmptyError,
   } = props;
   const [quickSightRoleOptions, setQuickSightRoleOptions] =
     useState<SelectProps.Options>([]);
@@ -69,6 +72,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const [userActiveLink, setUserActiveLink] = useState('');
 
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [emailInvalid, setEmailInvalid] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
 
   // get quicksight details
@@ -129,6 +133,10 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
 
   // create quicksight user
   const createNewQuickSightUser = async () => {
+    if (!checkStringValidRegex(newUserEmail, new RegExp(EMAIL_PATTERN))) {
+      setEmailInvalid(true);
+      return;
+    }
     setLoadingCreateUser(true);
     try {
       const { success, data }: ApiResponse<string> = await createQuickSightUser(
@@ -162,7 +170,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     if (pipelineInfo.enableDataProcessing && pipelineInfo.enableReporting) {
       checkTheQuickSightStatus();
     }
-  }, []);
+  }, [pipelineInfo.enableReporting]);
 
   return (
     <Container
@@ -235,6 +243,11 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                       <FormField
                         label={t('pipeline:create.quickSightUser')}
                         description={t('pipeline:create.quickSightUserDesc')}
+                        errorText={
+                          quickSightUserEmptyError
+                            ? t('pipeline:valid.quickSightUserEmptyError')
+                            : ''
+                        }
                       >
                         <div className="flex">
                           <div className="flex-1">
@@ -306,6 +319,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
             <FormField
               label={t('pipeline:create.qsUserEmail')}
               description={t('pipeline:create.qsCreateUserDesc')}
+              errorText={emailInvalid ? t('pipeline:valid.emailInvalid') : ''}
             >
               <div className="flex">
                 <div className="flex-1">
@@ -313,6 +327,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                     placeholder="email@example.com"
                     value={newUserEmail}
                     onChange={(e) => {
+                      setEmailInvalid(false);
                       setNewUserEmail(e.detail.value);
                     }}
                   />

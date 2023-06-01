@@ -15,7 +15,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
-import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/constant';
+import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 import { setCfnNagForAlarms, getAlarmName } from '../../metrics/util';

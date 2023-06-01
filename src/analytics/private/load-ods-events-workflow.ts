@@ -28,10 +28,10 @@ import { Construct } from 'constructs';
 import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition, getOrCreateNoNamespaceIdCondition, getOrCreateWithNamespaceIdCondition } from './condition';
 import { DYNAMODB_TABLE_INDEX_NAME } from './constant';
 import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadDataProps, LoadWorkflowData, AssociateIAMRoleToRedshift } from './model';
-import { MetricsNamespace, REDSHIFT_MODE } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { getPutMericsPolicyStatements } from '../../common/metrics';
+import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
 
