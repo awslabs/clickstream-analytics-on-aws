@@ -73,15 +73,15 @@ public class UserPropertiesConverter {
             String attrValue = attrValueNode.get("value").asText();
             Long setTimestamp = attrValueNode.get("set_timestamp").asLong(0L);
 
-            String doubleValue = null;
-            String longValue = null;
+            Double doubleValue = null;
+            Long longValue = null;
             String stringValue = null;
             Long setTimestampMicros = setTimestamp * 1000L;
 
             if (attrValue.matches("^\\d+$")) {
-                longValue = String.valueOf(Long.parseLong(attrValue));
+                longValue = Long.parseLong(attrValue);
             } else if (attrValue.matches("^[\\d.]+$")) {
-                doubleValue = String.valueOf(Double.parseDouble(attrValue));
+                doubleValue = Double.parseDouble(attrValue);
             } else {
                 stringValue = attrValue;
             }
@@ -139,9 +139,9 @@ public class UserPropertiesConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField("double_value", DataTypes.StringType, true),
-                DataTypes.createStructField("float_value", DataTypes.StringType, true),
-                DataTypes.createStructField("int_value", DataTypes.StringType, true),
+                DataTypes.createStructField("double_value", DataTypes.DoubleType, true),
+                DataTypes.createStructField("float_value", DataTypes.FloatType, true),
+                DataTypes.createStructField("int_value", DataTypes.LongType, true),
                 DataTypes.createStructField("string_value", DataTypes.StringType, true),
                 DataTypes.createStructField("set_timestamp_micros", DataTypes.LongType, true),
         });

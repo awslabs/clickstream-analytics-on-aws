@@ -41,6 +41,9 @@ class TransformerTest extends BaseSparkTest {
         transformedDataset.printSchema();
 
         Row row = transformedDataset.first();
+
+        assertEquals(true, row.isNullAt(row.fieldIndex("event_value_in_usd")));
+
         Date eventDate = row.getDate(row.fieldIndex("event_date"));
         assertEquals(Date.valueOf("2023-04-24"), eventDate);
 

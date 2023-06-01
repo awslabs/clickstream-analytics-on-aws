@@ -67,7 +67,7 @@ export const clickstream_ods_events_view_columns: InputColumn[] = [
   },
   {
     Name: 'event_value_in_usd',
-    Type: 'STRING',
+    Type: 'DECIMAL',
   },
   {
     Name: 'app_info_app_id',

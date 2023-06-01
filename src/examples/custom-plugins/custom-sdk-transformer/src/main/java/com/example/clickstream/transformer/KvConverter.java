@@ -61,14 +61,14 @@ public class KvConverter {
             JsonNode attrValueNode = jsonNode.get(attrName);
             String attrValue = attrValueNode.asText();
 
-            String doubleValue = null;
-            String longValue = null;
+            Double doubleValue = null;
+            Long longValue = null;
             String stringValue = null;
 
             if (attrValue.matches("^\\d+$")) {
-                longValue = String.valueOf(Long.parseLong(attrValue));
+                longValue = Long.parseLong(attrValue);
             } else if (attrValue.matches("^[\\d.]+$")) {
-                doubleValue = String.valueOf(Double.parseDouble(attrValue));
+                doubleValue = Double.parseDouble(attrValue);
             } else {
                 stringValue = attrValue;
             }
@@ -101,10 +101,10 @@ public class KvConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset, final String fromColName, final String toColName, final List<String> excludeAttributes) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField("double_value", DataTypes.StringType, true),
-                DataTypes.createStructField("float_value", DataTypes.StringType, true),
-                DataTypes.createStructField("int_value", DataTypes.StringType, true),
-                DataTypes.createStructField("string_value", DataTypes.StringType, true),
+            DataTypes.createStructField("double_value", DataTypes.DoubleType, true),
+            DataTypes.createStructField("float_value", DataTypes.FloatType, true),
+            DataTypes.createStructField("int_value", DataTypes.LongType, true),
+            DataTypes.createStructField("string_value", DataTypes.StringType, true),
         });
 
         UserDefinedFunction convertStringToKeyValueUdf = udf(convertJsonStringToKeyValue(excludeAttributes), DataTypes.createArrayType(

@@ -311,15 +311,15 @@ export class GlueUtil {
                 type: Schema.struct([
                   {
                     name: 'double_value',
-                    type: Schema.STRING,
+                    type: Schema.DOUBLE,
                   },
                   {
                     name: 'float_value',
-                    type: Schema.STRING,
+                    type: Schema.FLOAT,
                   },
                   {
                     name: 'int_value',
-                    type: Schema.STRING,
+                    type: Schema.BIG_INT,
                   },
                   {
                     name: 'string_value',
@@ -351,15 +351,15 @@ export class GlueUtil {
                 type: Schema.struct([
                   {
                     name: 'double_value',
-                    type: Schema.STRING,
+                    type: Schema.DOUBLE,
                   },
                   {
                     name: 'float_value',
-                    type: Schema.STRING,
+                    type: Schema.FLOAT,
                   },
                   {
                     name: 'int_value',
-                    type: Schema.STRING,
+                    type: Schema.BIG_INT,
                   },
                   {
                     name: 'string_value',
@@ -384,7 +384,7 @@ export class GlueUtil {
         },
         {
           name: 'event_value_in_usd',
-          type: Schema.STRING,
+          type: Schema.FLOAT,
         },
         {
           name: 'geo',
@@ -608,15 +608,15 @@ export class GlueUtil {
                 type: Schema.struct([
                   {
                     name: 'double_value',
-                    type: Schema.STRING,
+                    type: Schema.DOUBLE,
                   },
                   {
                     name: 'float_value',
-                    type: Schema.STRING,
+                    type: Schema.FLOAT,
                   },
                   {
                     name: 'int_value',
-                    type: Schema.STRING,
+                    type: Schema.BIG_INT,
                   },
                   {
                     name: 'string_value',

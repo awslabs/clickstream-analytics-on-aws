@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_ods_events}}(
     event_previous_timestamp BIGINT,
     event_server_timestamp_offset BIGINT,
     event_timestamp BIGINT,
-    event_value_in_usd VARCHAR(255),
+    event_value_in_usd FLOAT,
     geo SUPER, 
     ingest_timestamp BIGINT,
     items SUPER,
@@ -24,5 +24,5 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_ods_events}}(
     user_ltv SUPER,
     user_properties SUPER,
     user_pseudo_id VARCHAR(255)
-) DISTSTYLE AUTO 
-SORTKEY AUTO
+) DISTSTYLE EVEN 
+SORTKEY (event_date,event_name)

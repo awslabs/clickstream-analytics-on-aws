@@ -45,7 +45,7 @@ class MyTransformerTest extends BaseSparkTest {
 
         assertEquals(-44, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
 
-        assertEquals("", device.getString(device.fieldIndex("ua_browser")));
+        assertEquals(null, device.getString(device.fieldIndex("ua_browser")));
 
         Row geo_for_enrich = row.getStruct(row.fieldIndex("geo_for_enrich"));
         assertEquals("13.212.229.59", geo_for_enrich.getString(geo_for_enrich.fieldIndex("ip")));

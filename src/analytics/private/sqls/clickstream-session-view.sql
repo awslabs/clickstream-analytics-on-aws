@@ -25,17 +25,17 @@ FROM
         where 
             ep.key = '_session_id' and e.event_id = ods.event_id) session_id
         ,(select 
-            ep.value.int_value::int as value 
+            ep.value.int_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
             ep.key = '_session_duration' and e.event_id = ods.event_id) session_duration
         ,(select 
-            ep.value.int_value::bigint as value 
+            ep.value.int_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
             ep.key = '_session_start_timestamp' and e.event_id = ods.event_id) session_st
         ,(select 
-            ep.value.int_value::int as value 
+            ep.value.int_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
             ep.key = '_engagement_time_msec' and event_name = '_user_engagement' and e.event_id = ods.event_id) as engagement_time

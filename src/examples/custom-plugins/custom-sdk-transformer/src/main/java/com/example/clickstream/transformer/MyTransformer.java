@@ -80,7 +80,7 @@ public final class MyTransformer {
                 .withColumn("ecommerce", col("data").getField("ecommerce"))
                 .withColumn("items", col("data").getField("items"))
                 .withColumn("project_id", lit(projectId))
-                .withColumn("event_value_in_usd", lit("0"));
+                .withColumn("event_value_in_usd", lit(null).cast(DataTypes.FloatType));
 
         return new KvConverter().transform(dataset1, "event_dimensions", "event_dimensions");
     }
@@ -88,13 +88,13 @@ public final class MyTransformer {
     private Dataset<Row> convertGeo(final Dataset<Row> dataset) {
         return dataset.withColumn("geo",
                         struct(
-                                lit("").alias("country"),
-                                lit("").alias("continent"),
-                                lit("").alias("sub_continent"),
-                                col("data").getItem("locale").alias("locale"),
-                                lit("").alias("region"),
-                                lit("").alias("metro"),
-                                lit("").alias("city")))
+                            lit(null).cast(DataTypes.StringType).alias("country"),
+                            lit(null).cast(DataTypes.StringType).alias("continent"),
+                            lit(null).cast(DataTypes.StringType).alias("sub_continent"),
+                            col("data").getItem("locale").alias("locale"),
+                            lit(null).cast(DataTypes.StringType).alias("region"),
+                            lit(null).cast(DataTypes.StringType).alias("metro"),
+                            lit(null).cast(DataTypes.StringType).alias("city")))
                 .withColumn("geo_for_enrich", struct(col("ip"), col("data").getItem("locale").alias("locale")));
     }
 
@@ -150,12 +150,12 @@ public final class MyTransformer {
                         (col("data").getItem("platform")).alias("operating_system"),
 
                         // placeholder for ua enrich fields
-                        lit("").alias("ua_browser"),
-                        lit("").alias("ua_browser_version"),
-                        lit("").alias("ua_os"),
-                        lit("").alias("ua_os_version"),
-                        lit("").alias("ua_device"),
-                        lit("").alias("ua_device_category"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_browser"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_browser_version"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_os"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_os_version"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_device"),
+                        lit(null).cast(DataTypes.StringType).alias("ua_device_category"),
 
                         (col("data").getItem("system_language")).alias("system_language"),
                         (col("data").getItem("zone_offset").$div(1000)).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),

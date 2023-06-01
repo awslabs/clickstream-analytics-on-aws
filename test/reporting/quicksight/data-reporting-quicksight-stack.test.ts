@@ -1128,7 +1128,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             },
             {
               Name: 'event_value_in_usd',
-              Type: 'STRING',
+              Type: 'DECIMAL',
             },
             {
               Name: 'app_info_app_id',

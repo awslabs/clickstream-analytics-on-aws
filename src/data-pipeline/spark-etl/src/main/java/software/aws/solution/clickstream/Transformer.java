@@ -90,7 +90,7 @@ public final class Transformer {
                 .withColumn("ecommerce", col("data").getField("ecommerce"))
                 .withColumn("items", col("data").getField("items"))
                 .withColumn("project_id", lit(projectId))
-                .withColumn("event_value_in_usd", lit("0"));
+                .withColumn("event_value_in_usd", lit(null).cast(DataTypes.FloatType));
 
         return new KvConverter().transform(dataset1, "event_dimensions", "event_dimensions");
     }
