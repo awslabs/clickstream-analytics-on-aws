@@ -906,11 +906,26 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedVPC: null,
                     selectedPublicSubnet: [],
                     selectedPrivateSubnet: [],
+                    selectedSecret: null, // clear secret
+                    selectedCertificate: null, // clear certificates
                     showServiceStatus: false,
                     ingestionServer: {
                       ...prev.ingestionServer,
+                      sinkS3: {
+                        // set sink s3 to null
+                        ...prev.ingestionServer.sinkS3,
+                        sinkBucket: {
+                          name: '',
+                          prefix: '',
+                        },
+                      },
+                      domain: {
+                        ...prev.ingestionServer.domain,
+                        certificateArn: '', // set certificate arn to empty
+                      },
                       loadBalancer: {
                         ...prev.ingestionServer.loadBalancer,
+                        authenticationSecretArn: '', // set secret value to null
                         logS3Bucket: {
                           ...prev.ingestionServer.loadBalancer.logS3Bucket,
                           name: '',
@@ -926,9 +941,25 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedVPC: vpc,
+                    selectedMSK: null, // set selected msk to null,
+                    ingestionServer: {
+                      // set msk value to null
+                      ...prev.ingestionServer,
+                      sinkKafka: {
+                        ...prev.ingestionServer.sinkKafka,
+                        mskCluster: {
+                          name: '',
+                          arn: '',
+                        },
+                      },
+                    },
+                    selectedPublicSubnet: [], // set public subnets to empty
+                    selectedPrivateSubnet: [], // set private subnets to empty
                     network: {
                       ...prev.network,
                       vpcId: vpc.value || '',
+                      publicSubnetIds: [], // clear public subnets value
+                      privateSubnetIds: [], // clear private subnets value
                     },
                   };
                 });
@@ -1727,6 +1758,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     redshiftServerlessVPC: vpc,
+                    redshiftServerlessSG: [], // set selected security groups to empty
+                    redshiftServerlessSubnets: [], // set selected subnets to empty
                     dataAnalytics: {
                       ...prev.dataAnalytics,
                       redshift: {
@@ -1737,6 +1770,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                             ...prev.dataAnalytics.redshift.newServerless
                               .network,
                             vpcId: vpc.value || '',
+                            securityGroups: [], // set security group value to empty
+                            subnetIds: [], // set subnets value to empty
                           },
                         },
                       },

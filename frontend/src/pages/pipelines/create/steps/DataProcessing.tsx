@@ -298,6 +298,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   // get Security Groups By VPC
   const getSecurityGroupByVPC = async (vpcId: string) => {
     setLoadingSG(true);
+    setVpcSGOptionList([]);
     try {
       const { success, data }: ApiResponse<SecurityGroupResponse[]> =
         await getSecurityGroups({
@@ -321,6 +322,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   // get Subnets by redshift VPC
   const getSubnetsByRedshiftVPC = async (vpcId: string) => {
     setLoadingSubnets(true);
+    setVpcThreeAZSubnetsOptionList([]);
     try {
       const { success, data }: ApiResponse<SubnetResponse[]> =
         await getSubnetList({
