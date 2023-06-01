@@ -150,10 +150,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       if (pipelineInfo.selectedRedshiftExecutionUnit?.value) {
         return `${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit.label}`;
       } else {
-        const minutes = parseInt(
-          pipelineInfo.dataAnalytics.loadWorkflow
-            .loadJobScheduleIntervalExpression
-        );
+        const minutes = pipelineInfo.dataAnalytics.redshift.dataRange;
         if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
           const months = minutes / (60 * 24 * 30);
           return `${months} Months`;

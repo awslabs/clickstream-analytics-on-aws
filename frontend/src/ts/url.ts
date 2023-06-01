@@ -110,3 +110,10 @@ export const buildCloudFormationStackLink = (
   }
   return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
 };
+
+export const buildMSKLink = (region: string, arn: string) => {
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
+  }
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
+};

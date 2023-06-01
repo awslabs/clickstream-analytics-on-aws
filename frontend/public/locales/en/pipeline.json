@@ -385,7 +385,9 @@
     "redshiftServerless": "Redshift Serverless",
     "dashboards": "Dashboards",
     "alarmDescription": "Description",
-    "tags": "Tags"
+    "tags": "Tags",
+    "bufferSize": "Buffer size",
+    "bufferInterval": "Buffer interval"
   },
   "list": {
     "id": "Pipeline ID",

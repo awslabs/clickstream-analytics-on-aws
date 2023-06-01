@@ -21,7 +21,7 @@ import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
-import { buildSubnetLink } from 'ts/url';
+import { buildMSKLink, buildS3Link, buildSubnetLink } from 'ts/url';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -32,7 +32,23 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
 
   const buildBufferDisplay = (pipelineInfo?: IExtPipeline) => {
     if (pipelineInfo?.ingestionServer.sinkType === SinkType.S3) {
-      return `S3 (${pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}/${pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix})`;
+      return (
+        <div>
+          S3 (
+          <Link
+            href={buildS3Link(
+              pipelineInfo.region,
+              pipelineInfo.ingestionServer.sinkS3.sinkBucket.name,
+              pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix
+            )}
+            external
+          >
+            S3://{pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}/
+            {pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
+          </Link>
+          )
+        </div>
+      );
     }
     if (pipelineInfo?.ingestionServer.sinkType === SinkType.KDS) {
       return `KDS (${pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode})`;
@@ -46,14 +62,46 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             ','
           )})`;
         } else {
-          return `MSK (${pipelineInfo?.ingestionServer.sinkKafka.mskCluster.arn})`;
+          return (
+            <div>
+              MSK (
+              <Link
+                href={buildMSKLink(
+                  pipelineInfo.region,
+                  encodeURIComponent(
+                    pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
+                  )
+                )}
+                external
+              >
+                {pipelineInfo?.ingestionServer.sinkKafka.mskCluster.name}
+              </Link>
+              )
+            </div>
+          );
         }
       }
     } else {
       // pipeline detail page
       if (pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) {
         if (pipelineInfo?.ingestionServer.sinkKafka.mskCluster) {
-          return `MSK (${pipelineInfo?.ingestionServer.sinkKafka.mskCluster.arn})`;
+          return (
+            <div>
+              MSK (
+              <Link
+                href={buildMSKLink(
+                  pipelineInfo.region,
+                  encodeURIComponent(
+                    pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
+                  )
+                )}
+                external
+              >
+                {pipelineInfo?.ingestionServer.sinkKafka.mskCluster.name}
+              </Link>
+              )
+            </div>
+          );
         } else {
           return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
             ','
@@ -135,6 +183,13 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               : t('no')}
           </div>
         </div>
+
+        <div>
+          <Box variant="awsui-key-label">{t('pipeline:detail.acm')}</Box>
+          <div>
+            {pipelineInfo?.ingestionServer.domain.certificateArn || '-'}
+          </div>
+        </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
@@ -160,13 +215,6 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         </div>
 
         <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.acm')}</Box>
-          <div>
-            {pipelineInfo?.ingestionServer.domain.certificateArn || '-'}
-          </div>
-        </div>
-
-        <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enableAGA')}</Box>
           <div>
             {pipelineInfo?.ingestionServer.loadBalancer.enableGlobalAccelerator
@@ -183,6 +231,18 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               : t('no')}
           </div>
         </div>
+
+        <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:detail.enableALBLog')}
+          </Box>
+          <div>
+            {pipelineInfo?.ingestionServer.loadBalancer
+              .enableApplicationLoadBalancerAccessLog
+              ? t('yes')
+              : t('no')}
+          </div>
+        </div>
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
@@ -191,13 +251,29 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           <div>{buildBufferDisplay(pipelineInfo)}</div>
         </div>
 
-        {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
-          <div>
-            <Box variant="awsui-key-label">{t('pipeline:detail.topic')}</Box>
+        {pipelineInfo?.ingestionServer.sinkType === SinkType.S3 && (
+          <>
             <div>
-              <div>{pipelineInfo.ingestionServer.sinkKafka.topic || '-'}</div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.bufferSize')}
+              </Box>
+              <div>
+                <div>
+                  {pipelineInfo.ingestionServer.sinkS3.s3BufferSize || '-'}
+                </div>
+              </div>
             </div>
-          </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.bufferInterval')}
+              </Box>
+              <div>
+                <div>
+                  {pipelineInfo.ingestionServer.sinkS3.s3BufferInterval || '-'}
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {pipelineInfo?.ingestionServer.sinkType === SinkType.MSK && (
@@ -229,18 +305,6 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
           </>
         )}
-
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.enableALBLog')}
-          </Box>
-          <div>
-            {pipelineInfo?.ingestionServer.loadBalancer
-              .enableApplicationLoadBalancerAccessLog
-              ? t('yes')
-              : t('no')}
-          </div>
-        </div>
       </SpaceBetween>
     </ColumnLayout>
   );
