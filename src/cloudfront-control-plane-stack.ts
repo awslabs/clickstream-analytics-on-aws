@@ -179,11 +179,13 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
-        assetPath: join(__dirname, '../frontend'),
+        assetPath: join(__dirname, '..'),
+        
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',
-          'export APP_PATH=/tmp/app && mkdir $APP_PATH && find . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
+          'export APP_PATH=/tmp/app && mkdir $APP_PATH && cd ./frontend/ && find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" \
+          -exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',

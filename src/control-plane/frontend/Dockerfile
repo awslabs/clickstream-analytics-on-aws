@@ -2,6 +2,8 @@ FROM public.ecr.aws/docker/library/node:16 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY frontend .
+# copy the content of symbol link
+COPY frontend/src/ts/constant-ln.ts src/ts/constant-ln.ts 
 ARG GENERATE_SOURCEMAP=false
 ARG CHUNK_MIN_SIZE=102400
 ARG CHUNK_MAX_SIZE=204800
