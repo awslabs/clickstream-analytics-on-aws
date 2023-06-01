@@ -180,7 +180,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     const controlPlane = new CloudFrontS3Portal(this, 'cloudfront_control_plane', {
       frontendProps: {
         assetPath: join(__dirname, '..'),
-        
+
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
         buildCommand: [
           'bash', '-c',

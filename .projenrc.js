@@ -595,6 +595,33 @@ gitlabMain.createNestedTemplates({
     },
   },
 
+  'mutations-check': {
+    stages: [
+      'build',
+    ],
+    jobs: {
+      'mutations-check': {
+        stage: 'build',
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        script: [
+          'yarn install --check-files',
+          'npx projen',
+          'npx projen eslint',
+          'git add .',
+          'git diff --staged --patch --exit-code > .repo.patch || export mutations_happened=true',
+          'if [ "$mutations_happened" = "true" ]; then cat .repo.patch && exit 1; fi;',
+        ],
+      },
+    },
+  },
+
   'cfn-nag': {
     stages: [
       'qa',

@@ -1373,7 +1373,7 @@ describe('Account Env test', () => {
     });
     quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
       AccountInfo: {
-        AccountName: ''
+        AccountName: '',
       },
     });
     const res = await request(app).get(

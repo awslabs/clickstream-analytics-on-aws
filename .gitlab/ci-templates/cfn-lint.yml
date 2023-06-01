@@ -10,6 +10,6 @@ cfn-lint:
     - python3 -m pip install cfn-lint
   script:
     - cd build
-    - cfn-lint -i W3005 -e -r us-east-1,ap-northeast-1 --ignore-templates cdk.out/data-reporting-quicksight-stack.template.json -t cdk.out/*.template.json
+    - cfn-lint -i W3005 -e -r us-east-1,ap-northeast-1 -t cdk.out/*.template.json
     - cfn-lint -i W3005 -e -r ap-east-1 --ignore-templates cdk.out/data-reporting-quicksight-stack.template.json --ignore-templates cdk.out/*NewServerlessRedshift*.nested.template.json --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/datapipeline*.nested.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global* --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json -t cdk.out/*.template.json
     - cfn-lint -i W3005 -e -r cn-north-1,cn-northwest-1 --ignore-templates cdk.out/data-reporting-quicksight-stack.template.json --ignore-templates cdk.out/*NewServerlessRedshift*.nested.template.json --ignore-templates cdk.out/data-pipeline-stack.template.json --ignore-templates cdk.out/datapipeline*.nested.template.json --ignore-templates cdk.out/cloudfront-s3-control-plane-stack-global*.json --ignore-templates cdk.out/*cognito-control-plane-stack.template.json --ignore-templates cdk.out/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates cdk.out/ingestionserver*.nested.template.json  -t cdk.out/*.template.json
