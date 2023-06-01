@@ -269,14 +269,43 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
     serviceExecutionRoleArn: props.s3SinkConnectorRole,
   });
   logger.info(JSON.stringify(command));
-  let res = await kafkaConnectClient.send(command);
-  const connectorArn = res.connectorArn;
+  let resConnectorArn;
+  try {
+    let res = await kafkaConnectClient.send(command);
+    resConnectorArn = res.connectorArn;
+  } catch (e: any) {
+    if (
+      (e.message as string)
+        .indexOf(
+          'Invalid parameter connectorName: A resource with this name already exists.',
+        ) > -1
+    ) {
+      logger.info(e.message);
+      const listConnectorsInput = {
+        connectorNamePrefix: connectorName,
+        maxResults: 1,
+      };
+      const listConnectorCommand = new ListConnectorsCommand(listConnectorsInput);
+      const listConnectorResponse = await kafkaConnectClient.send(listConnectorCommand);
+      if (listConnectorResponse.connectors && listConnectorResponse.connectors.length > 0) {
+        logger.info(`the connector: ${connectorName} already exists`);
+        resConnectorArn = listConnectorResponse.connectors[0].connectorArn;
+      } else {
+        logger.error(e);
+        throw e;
+      }
+    } else {
+      logger.error(e);
+      throw e;
+    }
+  }
+  const connectorArn = resConnectorArn;
   logger.info('connectorArn: ' + connectorArn);
   let n = 0;
   while (n < MAX_N) {
     n++;
     await sleep();
-    res = await kafkaConnectClient.send(
+    let res = await kafkaConnectClient.send(
       new DescribeConnectorCommand({
         connectorArn,
       }),

@@ -182,6 +182,36 @@ process.env.LOG_LEVEL = 'WARN';
 
 import { handler as msk_sink_handler } from '../../../../src/ingestion-server/kafka-s3-connector/custom-resource/kafka-s3-sink-connector';
 
+test('Create connector, there is exsiting connector', async () => {
+  KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
+    if (command.command == 'CreateConnectorCommand') {
+      throw new Error(
+        'Invalid parameter connectorName: A resource with this name already exists.',
+      );
+    }
+    return {
+      connectors: [
+        {
+          connectorArn: 'arn:aws:test-connector',
+          currentVersion: '1',
+        },
+      ],
+      connectorState: 'RUNNING',
+      customPluginArn: 'arn:aws:test-plugin',
+      customPluginState: 'ACTIVE',
+      name: '54bce910-Plugin-create-test-custom-resource54bce910',
+    };
+  });
+  event.RequestType = 'Create';
+  let error = false;
+  try {
+    await msk_sink_handler(event as CloudFormationCustomResourceEvent, c);
+  } catch (e: any) {
+    error = true;
+  }
+  expect(error).toBeFalsy();
+});
+
 test('Create s3 sink - success', async () => {
   event.RequestType = 'Create';
   const response = await msk_sink_handler(
@@ -415,3 +445,4 @@ test('Create s3 sink - failed', async () => {
   }
   expect(error).toBeTruthy();
 });
+
