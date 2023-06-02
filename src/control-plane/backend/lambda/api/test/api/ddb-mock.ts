@@ -213,6 +213,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           DataAnalytics: 'data-analytics-redshift-stack.template.json',
           Report: 'data-reporting-quicksight-stack.template.json',
           Metrics: 'metrics-stack.template.json',
+          DataModelingAthena: 'data-analytics-athena-stack.template.json',
         },
       },
     });

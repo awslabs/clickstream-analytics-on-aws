@@ -46,9 +46,11 @@ import {
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW, RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS,
   S3_ETL_PIPELINE,
-  S3_INGESTION_PIPELINE, MSK_ETL_NEW_SERVERLESS_PIPELINE, KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+  S3_INGESTION_PIPELINE, MSK_ETL_NEW_SERVERLESS_PIPELINE,
+  KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
 } from './pipeline-mock';
 import {
+  BASE_ATHENA_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
   ETL_PLUGIN1_PARAMETERS,
@@ -697,6 +699,24 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
+                Next: 'DataModelingAthena',
+                Type: 'Stack',
+              },
+              DataModelingAthena: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_ATHENA_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                  },
+                },
                 Next: 'DataAnalytics',
                 Type: 'Stack',
               },
@@ -908,6 +928,24 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
+                Next: 'DataModelingAthena',
+                Type: 'Stack',
+              },
+              DataModelingAthena: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_ATHENA_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                  },
+                },
                 Next: 'DataAnalytics',
                 Type: 'Stack',
               },
@@ -1011,6 +1049,24 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-ETL-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                Next: 'DataModelingAthena',
+                Type: 'Stack',
+              },
+              DataModelingAthena: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_ATHENA_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
                   },
                 },
                 Next: 'DataAnalytics',
@@ -1279,6 +1335,24 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-ETL-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                Next: 'DataModelingAthena',
+                Type: 'Stack',
+              },
+              DataModelingAthena: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_ATHENA_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
                   },
                 },
                 Next: 'DataAnalytics',

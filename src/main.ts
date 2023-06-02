@@ -17,6 +17,7 @@ import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
+import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
 import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
@@ -204,6 +205,10 @@ stackSuppressions([
   { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
+
+new DataModelingAthenaStack(app, app.node.tryGetContext('stackName') ?? 'data-modeling-athena-stack', {
+  synthesizer: synthesizer(),
+}),
 
 stackSuppressions([
   new DataReportingQuickSightStack(app, 'data-reporting-quicksight-stack', {

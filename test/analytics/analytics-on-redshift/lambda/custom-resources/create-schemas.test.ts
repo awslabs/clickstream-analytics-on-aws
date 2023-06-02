@@ -108,7 +108,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   beforeEach(async () => {
     redshiftDataMock.reset();
     smMock.reset();
-    const rootPath = __dirname+'/../../../../../src/analytics/private/sqls/';
+    const rootPath = __dirname+'/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
       '/opt/clickstream-device-view.sql': testSqlContent(rootPath + 'clickstream-device-view.sql'),
       '/opt/clickstream-path-view.sql': testSqlContent(rootPath + 'clickstream-path-view.sql'),

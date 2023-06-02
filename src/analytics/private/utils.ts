@@ -12,20 +12,23 @@
  */
 
 import { readFileSync } from 'fs';
+import { join } from 'path';
 import Mustache from 'mustache';
-import { MustacheParamType } from './model';
+import { MustacheParamBaseType } from './model';
 
 export function getSqlContent(
   sqlFile: string,
-  mustacheParam: MustacheParamType,
+  mustacheParam: MustacheParamBaseType,
+  path: string = '/opt',
 ): string {
-  const sqlTemplate = readFileSync(`/opt/${sqlFile}`, 'utf8');
+  const sqlTemplate = readFileSync(join(path, `${sqlFile}`), 'utf8');
   return Mustache.render(sqlTemplate, mustacheParam);
 };
 
 export function getSqlContents(
   sqlFile: string,
-  mustacheParam: MustacheParamType,
+  mustacheParam: MustacheParamBaseType,
+  path: string = '/opt',
 ): string[] {
-  return getSqlContent(sqlFile, mustacheParam).split(';').filter(sql => sql.trim().length > 0).map(sql => sql.trim());
+  return getSqlContent(sqlFile, mustacheParam, path).split(';').filter(sql => sql.trim().length > 0).map(sql => sql.trim());
 };

@@ -147,6 +147,10 @@ export type ClearExpiredEventsEventDetail = {
   status: string;
 }
 
+export type MustacheParamBaseType = {
+  [key: string]: string;
+}
+
 export type MustacheParamType = {
   schema: string;
   table_ods_events: string;

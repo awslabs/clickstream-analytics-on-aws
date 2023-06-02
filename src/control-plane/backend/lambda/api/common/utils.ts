@@ -108,6 +108,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${pipelineId}`);
   names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${pipelineId}`);
   names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
+  names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 
@@ -326,6 +327,11 @@ function paginateData(data: any[], pagination: boolean, pageSize: number, pageNu
   return data;
 }
 
+function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineStackType, suffix: string) {
+  const stackName = getStackName(pipeline.pipelineId, stackType, pipeline.ingestionServer.sinkType);
+  return `#.${stackName}.${suffix}`;
+}
+
 export {
   isEmpty,
   tryToJson,
@@ -344,4 +350,5 @@ export {
   getSubnetsAZ,
   paginateData,
   replaceTemplateVersion,
+  getValueFromStackOutputSuffix,
 };

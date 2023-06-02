@@ -334,7 +334,7 @@ export const KINESIS_ETL_NEW_REDSHIFT_PIPELINE: IPipeline = {
       },
       fileSuffix: '.snappy.parquet',
     },
-    athena: true,
+    athena: false,
     redshift: {
       dataRange: 'rate(6 months)',
       newServerless: {

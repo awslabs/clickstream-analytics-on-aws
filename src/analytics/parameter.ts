@@ -74,6 +74,89 @@ export interface RedshiftAnalyticsStackProps {
   };
 }
 
+export interface AthenaAnalyticsStackProps {
+  database: string;
+  workGroup: string;
+  eventTable: string;
+}
+
+export function createAthenaStackParameters(scope: Construct): {
+  metadata: {
+    [key: string]: any;
+  };
+  params: AthenaAnalyticsStackProps;
+} {
+  // Set athena parameters
+  const athenaParamsGroup = [];
+
+  const athenaWorkGroupParam = new CfnParameter(scope, 'AthenaWorkGroup', {
+    description: 'The Athena workgroup name.',
+    type: 'String',
+    default: 'primary',
+  });
+
+  const athenaDatabaseParam = new CfnParameter(scope, 'AthenaDatabase', {
+    description: 'The Athena database name.',
+    type: 'String',
+  });
+
+  const athenaEventTableParam = new CfnParameter(scope, 'AthenaEventTable', {
+    description: 'The Athena event table name.',
+    type: 'String',
+    default: 'ods_events',
+  });
+
+  athenaParamsGroup.push({
+    Label: { default: 'Athena Information' },
+    Parameters: [
+      athenaWorkGroupParam.logicalId,
+      athenaDatabaseParam.logicalId,
+      athenaEventTableParam.logicalId,
+    ],
+  });
+
+  const athenaWorkGroupParamsLabels = {
+    [athenaWorkGroupParam.logicalId]: {
+      default: 'Athena Workgroup Name',
+    },
+  };
+
+  const athenaDatabaseParamsLabels = {
+    [athenaDatabaseParam.logicalId]: {
+      default: 'Athena Database Name',
+    },
+  };
+
+  const athenaEventTableParamsLabels = {
+    [athenaEventTableParam.logicalId]: {
+      default: 'Athena Event Table Name',
+    },
+  };
+
+  const metadata = {
+    'AWS::CloudFormation::Interface': {
+      ParameterGroups: [
+        ...athenaParamsGroup,
+      ],
+      ParameterLabels: {
+        ...athenaDatabaseParamsLabels,
+        ...athenaWorkGroupParamsLabels,
+        ...athenaEventTableParamsLabels,
+      },
+    },
+  };
+
+  return {
+    metadata,
+    params: {
+      database: athenaDatabaseParam.valueAsString,
+      workGroup: athenaWorkGroupParam.valueAsString,
+      eventTable: athenaEventTableParam.valueAsString,
+    },
+  };
+
+}
+
 export function createStackParameters(scope: Construct): {
   metadata: {
     [key: string]: any;

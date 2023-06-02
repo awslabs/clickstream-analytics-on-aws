@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportStack } from './stacks';
+import { CAthenaStack, CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportStack } from './stacks';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
@@ -681,14 +681,26 @@ export class CPipeline {
           [PipelineStackType.ETL]: etlState,
         },
       };
-      const dataAnalyticsState = await this.getDataAnalyticsState();
-      if (dataAnalyticsState) {
-        branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
-        branch.States[PipelineStackType.ETL].Next = PipelineStackType.DATA_ANALYTICS;
+      const athenaState = await this.getAthenaState();
+      if (athenaState) {
+        branch.States[PipelineStackType.ATHENA] = athenaState;
+        branch.States[PipelineStackType.ETL].Next = PipelineStackType.ATHENA;
         delete branch.States[PipelineStackType.ETL].End;
       }
+      const dataAnalyticsState = await this.getDataAnalyticsState();
+      if (dataAnalyticsState) {
+        if (athenaState) {
+          branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
+          branch.States[PipelineStackType.ATHENA].Next = PipelineStackType.DATA_ANALYTICS;
+          delete branch.States[PipelineStackType.ATHENA].End;
+        } else {
+          branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
+          branch.States[PipelineStackType.ETL].Next = PipelineStackType.DATA_ANALYTICS;
+          delete branch.States[PipelineStackType.ETL].End;
+        }
+      }
       const reportingState = await this.getReportingState();
-      if (reportingState) {
+      if (reportingState && dataAnalyticsState) {
         branch.States[PipelineStackType.REPORT] = reportingState;
         branch.States[PipelineStackType.DATA_ANALYTICS].Next = PipelineStackType.REPORT;
         delete branch.States[PipelineStackType.DATA_ANALYTICS].End;
@@ -800,6 +812,39 @@ export class CPipeline {
     };
 
     return reportState;
+  }
+
+  private async getAthenaState(): Promise<WorkflowState | undefined> {
+    if (!this.pipeline.dataAnalytics?.athena) {
+      return undefined;
+    }
+    const athenaTemplateURL = await this.getTemplateUrl(PipelineStackType.ATHENA);
+    if (!athenaTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: Athena not found in dictionary.');
+    }
+    const athenaStack = new CAthenaStack(this.pipeline);
+    const athenaStackParameters = athenaStack.parameters();
+    const athenaStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ATHENA, this.pipeline.ingestionServer.sinkType);
+    const athenaState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: athenaStackName,
+          TemplateURL: athenaTemplateURL,
+          Parameters: athenaStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: stackWorkflowS3Bucket ?? '',
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      End: true,
+    };
+
+    return athenaState;
   }
 
   public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {

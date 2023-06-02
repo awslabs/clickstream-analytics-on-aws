@@ -830,3 +830,13 @@ export const BASE_METRICS_EMAILS_PARAMETERS = mergeParameters(
     },
   ]);
 
+export const BASE_ATHENA_PARAMETERS = [
+  {
+    ParameterKey: 'AthenaDatabase.#',
+    ParameterValue: '#.Clickstream-ETL-6666-6666.GlueDatabase',
+  },
+  {
+    ParameterKey: 'AthenaEventTable.#',
+    ParameterValue: '#.Clickstream-ETL-6666-6666.GlueEventTable',
+  },
+];

@@ -261,6 +261,7 @@ export enum PipelineStackType {
   DATA_ANALYTICS = 'DataAnalytics',
   REPORT = 'Report',
   METRICS = 'Metrics',
+  ATHENA = 'DataModelingAthena',
 }
 
 export enum PipelineStatusType {

@@ -57,6 +57,10 @@ export interface DataPipelineProps {
 }
 
 export class DataPipelineConstruct extends Construct {
+  public readonly glueDatabase: Database;
+  public readonly glueEventTable: Table;
+  public readonly glueIngestionTable: Table;
+
   private readonly props: DataPipelineProps;
   private readonly roleUtil: RoleUtil;
   private readonly lambdaUtil: LambdaUtil;
@@ -148,6 +152,10 @@ export class DataPipelineConstruct extends Construct {
       sinkTable,
       this.emrServerlessApp.attrApplicationId,
     );
+
+    this.glueDatabase = glueDatabase;
+    this.glueIngestionTable = sourceTable;
+    this.glueEventTable = sinkTable;
 
     this.createEmrServerlessJobStateEventListener(this.emrServerlessApp.attrApplicationId, dlQueue);
 

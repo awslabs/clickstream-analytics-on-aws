@@ -27,7 +27,7 @@ import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
-import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition } from '../../utils';
+import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition, findConditionByName } from '../../utils';
 
 const logger = new Logger();
 
@@ -320,26 +320,25 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
-    const conditionObj = template.toJSON().Conditions;
-    const allConditions = Object.keys(conditionObj)
-      .map((ck) => {
-        logger.info(conditionObj[ck][CFN_FN.EQUALS]);
-        return {
-          cItems: (conditionObj[ck][CFN_FN.EQUALS] as any[]).map(
-            (it) => it,
-          ),
-          cKey: ck,
-        };
-      });
-    var conditionNum = 0;
-    for (const c of allConditions) {
-      if ((c.cKey as string).endsWith('RedshiftServerless')) {
-        conditionNum++;
-      } else if ((c.cKey as string) == 'redshiftProvisioned') {
-        conditionNum++;
-      }
-    };
-    expect(conditionNum).toEqual(3);
+
+    const condition1 = findConditionByName(template, 'newRedshiftServerless');
+    expect(condition1[CFN_FN.EQUALS][0]).toEqual({
+      Ref: 'RedshiftMode',
+    });
+    expect(condition1[CFN_FN.EQUALS][1]).toEqual('New_Serverless');
+
+    const condition2 = findConditionByName(template, 'existingRedshiftServerless');
+    expect(condition2[CFN_FN.EQUALS][0]).toEqual({
+      Ref: 'RedshiftMode',
+    });
+    expect(condition2[CFN_FN.EQUALS][1]).toEqual('Serverless');
+
+    const condition3 = findConditionByName(template, 'redshiftProvisioned');
+    expect(condition3[CFN_FN.EQUALS][0]).toEqual({
+      Ref: 'RedshiftMode',
+    });
+    expect(condition3[CFN_FN.EQUALS][1]).toEqual('Provisioned');
+
   });
 
   test('Check UpsertUsersScheduleExpression pattern', () => {
@@ -440,9 +439,9 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
     );
 
-    // logger.info(`templateParams: ${JSON.stringify(templateParams)}`);
+    logger.info(`templateParams: ${JSON.stringify(templateParams)}`);
     for (const ep of exceptedParams) {
-      // logger.info(`ep: ${ep}, ${templateParams.includes(ep)}`);
+      logger.info(`ep: ${ep}, ${templateParams.includes(ep)}`);
       expect(templateParams.includes(ep)).toBeTruthy();
     }
     expect(templateParams.length).toEqual(exceptedParams.length);

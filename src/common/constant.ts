@@ -159,8 +159,9 @@ export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';
 export const OUTPUT_CONTROL_PLANE_BUCKET = 'ControlPlaneBucket';
 export const OUTPUT_INGESTION_SERVER_DNS_SUFFIX = 'IngestionServerDNS';
 export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
-export const OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX =
-  'EMRServerlessApplicationId';
+export const OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX = 'EMRServerlessApplicationId';
+export const OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX = 'GlueDatabase';
+export const OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX = 'GlueEventTable';
 export const OUTPUT_REPORT_DASHBOARDS_SUFFIX = 'Dashboards';
 export const OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME =
   'StackCreatedRedshiftServerlessWorkgroupName';

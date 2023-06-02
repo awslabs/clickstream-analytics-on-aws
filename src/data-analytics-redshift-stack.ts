@@ -30,7 +30,6 @@ import {
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
-  // OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
@@ -66,8 +65,6 @@ export function createRedshiftAnalyticsStack(
   scope: Construct,
   props: RedshiftAnalyticsStackProps,
 ) {
-  // Vpc
-
   const nestStackProps = {
     vpc: props.network.vpc,
     subnetSelection: props.network.subnetSelection,
@@ -210,4 +207,3 @@ export function createRedshiftAnalyticsStack(
     redshiftProvisionedStack,
   };
 }
-

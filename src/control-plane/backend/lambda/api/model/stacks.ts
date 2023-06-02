@@ -30,6 +30,8 @@ import {
   SUBNETS_THREE_AZ_PATTERN,
   VPC_ID_PATTERN,
   OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
+  OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
+  OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
 import { validatePattern, validateSinkBatch } from '../common/stack-params-valid';
@@ -42,7 +44,7 @@ import {
   PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
-import { getBucketPrefix, getStackName, getKafkaTopic, getPluginInfo, isEmpty } from '../common/utils';
+import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix } from '../common/utils';
 
 export class CIngestionServerStack extends JSONObject {
 
@@ -912,8 +914,6 @@ export class CDataAnalyticsStack extends JSONObject {
       }
     }
 
-    const dataProcessingStackName = getStackName(pipeline.pipelineId, PipelineStackType.ETL, pipeline.ingestionServer.sinkType);
-
     super({
       _pipeline: pipeline,
       _resources: resources,
@@ -934,7 +934,11 @@ export class CDataAnalyticsStack extends JSONObject {
       LoadJobScheduleInterval: pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
       UpsertUsersScheduleExpression: pipeline.dataAnalytics?.upsertUsers.scheduleExpression,
 
-      EMRServerlessApplicationId: `#.${dataProcessingStackName}.${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`,
+      EMRServerlessApplicationId: getValueFromStackOutputSuffix(
+        pipeline,
+        PipelineStackType.ETL,
+        OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
+      ),
 
     });
   }
@@ -982,9 +986,6 @@ export class CReportStack extends JSONObject {
     _resources?: CPipelineResources;
 
   @JSONObject.required
-    _dataAnalyticsStackName?:string;
-
-  @JSONObject.required
   @JSONObject.custom( (_:any, key:string, value:any) => {
     validatePattern(key, QUICKSIGHT_USER_NAME_PATTERN, value);
     return value;
@@ -1012,7 +1013,11 @@ export class CReportStack extends JSONObject {
     if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
       return stack._resources?.redshift?.endpoint.address;
     } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return `#.${stack._dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS}`;
+      return getValueFromStackOutputSuffix(
+        stack._pipeline,
+        PipelineStackType.DATA_ANALYTICS,
+        OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+      );
     }
     return value;
   })
@@ -1023,7 +1028,11 @@ export class CReportStack extends JSONObject {
     if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
       return stack._resources?.redshift?.endpoint.port.toString();
     } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return `#.${stack._dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT}`;
+      return getValueFromStackOutputSuffix(
+        stack._pipeline,
+        PipelineStackType.DATA_ANALYTICS,
+        OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+      );
     }
     return value;
   })
@@ -1048,9 +1057,6 @@ export class CReportStack extends JSONObject {
     QuickSightVpcConnectionSGParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CReportStack, _key:string, _value:any) => {
-    return `#.${stack._dataAnalyticsStackName}.${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`;
-  })
     RedshiftParameterKeyParam?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
@@ -1064,7 +1070,6 @@ export class CReportStack extends JSONObject {
     super({
       _pipeline: pipeline,
       _resources: resources,
-      _dataAnalyticsStackName: getStackName(pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, pipeline.ingestionServer.sinkType),
 
       QuickSightUserParam: pipeline.report?.quickSight?.user,
       QuickSightNamespaceParam: pipeline.report?.quickSight?.namespace,
@@ -1072,7 +1077,62 @@ export class CReportStack extends JSONObject {
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightTemplateArnParam: resources.quickSightTemplateArn?.data,
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
+      RedshiftParameterKeyParam: getValueFromStackOutputSuffix(
+        pipeline,
+        PipelineStackType.DATA_ANALYTICS,
+        OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+      ),
 
+    });
+  }
+
+  public parameters() {
+    const parameters: Parameter[] = [];
+    Object.entries(this).forEach(([k, v]) => {
+      if (!k.startsWith('_')) {
+        let key = k;
+        if (v && v.startsWith('#.')) {
+          key = `${k}.#`;
+        }
+        if (v && v.startsWith('$.')) {
+          key = `${k}.$`;
+        }
+        parameters.push({
+          ParameterKey: key,
+          ParameterValue: v || v===0 ? v.toString() : '',
+        });
+      }
+    });
+    return parameters;
+  }
+}
+
+export class CAthenaStack extends JSONObject {
+
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [];
+    return allowedList;
+  }
+
+  @JSONObject.required
+    AthenaDatabase?: string;
+
+  @JSONObject.required
+    AthenaEventTable?: string;
+
+
+  constructor(pipeline: IPipeline) {
+    super({
+      AthenaDatabase: getValueFromStackOutputSuffix(
+        pipeline,
+        PipelineStackType.ETL,
+        OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
+      ),
+      AthenaEventTable: getValueFromStackOutputSuffix(
+        pipeline,
+        PipelineStackType.ETL,
+        OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
+      ),
     });
   }
 

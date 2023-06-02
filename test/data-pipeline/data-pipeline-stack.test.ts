@@ -13,7 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
@@ -60,7 +60,7 @@ function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
 }
 
-test('has two nested stacks', ()=> {
+test('has two nested stacks', () => {
   expect(nestedTemplates).toHaveLength(2);
 });
 
@@ -765,7 +765,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
     });
   });
 
-  test('Lambda has POWERTOOLS settings', ()=> {
+  test('Lambda has POWERTOOLS settings', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
         Variables: {
@@ -777,10 +777,10 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 });
 
-describe ('ETL job submitter', () => {
+describe('ETL job submitter', () => {
   const template = nestedTemplates[0];
 
-  test ('Has lambda and emr-serverless IAM role', ()=> {
+  test('Has lambda and emr-serverless IAM role', () => {
     template.hasResourceProperties('AWS::IAM::Role', {
       AssumeRolePolicyDocument: {
         Statement: [
@@ -803,7 +803,7 @@ describe ('ETL job submitter', () => {
     });
   });
 
-  test('Emr SparkJob Submitter Function', () =>{
+  test('Emr SparkJob Submitter Function', () => {
     template.hasResourceProperties('AWS::Lambda::Function', {
       VpcConfig: {
         SubnetIds: {
@@ -846,7 +846,7 @@ describe ('ETL job submitter', () => {
     });
   });
 
-  test('Has ScheduleExpression rule', ()=> {
+  test('Has ScheduleExpression rule', () => {
     template.hasResourceProperties('AWS::Events::Rule', {
       ScheduleExpression: {
         Ref: Match.anyValue(),
@@ -855,7 +855,7 @@ describe ('ETL job submitter', () => {
     });
   });
 
-  test('Has EMR EMRServerless Application', ()=> {
+  test('Has EMR EMRServerless Application', () => {
     template.hasResourceProperties('AWS::EMRServerless::Application', {
       Name: Match.anyValue(),
       ReleaseLabel: 'emr-6.9.0',
@@ -871,7 +871,7 @@ describe ('ETL job submitter', () => {
     });
   });
 
-  test('The role of EMR submitter function has lambda:ListTags permission', ()=> {
+  test('The role of EMR submitter function has lambda:ListTags permission', () => {
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -913,7 +913,7 @@ describe ('ETL job submitter', () => {
     });
   });
 
-  test('IAM::Policy for EMR job role has specified resource', ()=> {
+  test('IAM::Policy for EMR job role has specified resource', () => {
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -1144,7 +1144,7 @@ describe ('ETL job submitter', () => {
   });
 
 
-  test('IAM::Policy for copy asset lambda role has specified resource', ()=> {
+  test('IAM::Policy for copy asset lambda role has specified resource', () => {
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -1187,19 +1187,19 @@ describe ('ETL job submitter', () => {
 
 });
 
-test('Root stack has two nested stacks', ()=>{
+test('Root stack has two nested stacks', () => {
   rootTemplate.resourceCountIs('AWS::CloudFormation::Stack', 2);
 });
 
 
-test('All nested stacks has Custom::CDKBucketDeployment', ()=>{
+test('All nested stacks has Custom::CDKBucketDeployment', () => {
   nestedTemplates.forEach(template => {
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
   });
 });
 
 
-test('Plugins nested stack has CopyAssetsCustomResource Lambda', ()=>{
+test('Plugins nested stack has CopyAssetsCustomResource Lambda', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::Lambda::Function', {
     Environment: {
@@ -1213,7 +1213,7 @@ test('Plugins nested stack has CopyAssetsCustomResource Lambda', ()=>{
   });
 });
 
-test('Plugins nested stack has CopyAssetsCustomResource', ()=>{
+test('Plugins nested stack has CopyAssetsCustomResource', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     s3PathPluginJars: RefAnyValue,
@@ -1222,7 +1222,7 @@ test('Plugins nested stack has CopyAssetsCustomResource', ()=>{
 });
 
 
-test('AWS::Events::Rule for EMR Serverless Job Run State Change', ()=>{
+test('AWS::Events::Rule for EMR Serverless Job Run State Change', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::Events::Rule', {
     EventPattern: {
@@ -1270,7 +1270,7 @@ test('AWS::Events::Rule for EMR Serverless Job Run State Change', ()=>{
 });
 
 
-test('Should set metrics widgets', ()=>{
+test('Should set metrics widgets', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     metricsWidgetsProps: {
@@ -1286,20 +1286,61 @@ test('Should set metrics widgets', ()=>{
 });
 
 
-test('Should have Cfn outputs for EMR Serverless Application Id', ()=>{
-  rootTemplate.hasOutput('WithPluginsEMRServerlessApplicationId', {
+test('Root template has Cfn Outputs for Glue database and table', () => {
+
+  rootTemplate.hasOutput(`WithPlugins${OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX}`, {
+    Description: 'Glue Database',
+    Value: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        Match.anyValue(),
+      ],
+    },
+    Condition: 'withCustomPluginsCondition',
+  });
+  rootTemplate.hasOutput(`WithPlugins${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
+    Description: 'Glue Event Table',
+    Value: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        Match.anyValue(),
+      ],
+    },
+    Condition: 'withCustomPluginsCondition',
+  });
+
+  rootTemplate.hasOutput(`WithPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
     Description: 'EMR Serverless Application Id',
     Value: Match.anyValue(),
     Condition: 'withCustomPluginsCondition',
   });
 
+  rootTemplate.hasOutput(`WithoutPlugins${OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX}`, {
+    Description: 'Glue Database',
+    Value: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        Match.anyValue(),
+      ],
+    },
+    Condition: 'withoutCustomPluginsCondition',
+  });
 
-  rootTemplate.hasOutput('WithoutPluginsEMRServerlessApplicationId', {
+  rootTemplate.hasOutput(`WithoutPlugins${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
+    Description: 'Glue Event Table',
+    Value: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        Match.anyValue(),
+      ],
+    },
+    Condition: 'withoutCustomPluginsCondition',
+  });
+
+  rootTemplate.hasOutput(`WithoutPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
     Description: 'EMR Serverless Application Id',
     Value: Match.anyValue(),
     Condition: 'withoutCustomPluginsCondition',
   });
 
-
 });
-

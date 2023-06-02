@@ -106,7 +106,7 @@ export class ApplicationSchemas extends Construct {
       ],
     });
 
-    const codePath = __dirname + '/sqls';
+    const codePath = __dirname + '/sqls/redshift';
     const sqlLayer = new LayerVersion(this, 'SqlLayer', {
       compatibleRuntimes: [Runtime.NODEJS_18_X],
       code: Code.fromAsset(codePath),

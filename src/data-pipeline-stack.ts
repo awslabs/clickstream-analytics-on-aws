@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
@@ -21,7 +22,7 @@ import {
   addCfnNagForBucketDeployment,
   addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX } from './common/constant';
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
@@ -138,7 +139,18 @@ export class DataPipelineStack extends Stack {
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
     this.nestedStacks.push(dataPipelineStackWithCustomPlugins);
 
-    new CfnOutput(this, `WithPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX}`, {
+      description: 'Glue Database',
+      value: dataPipelineStackWithCustomPlugins.glueDatabase.databaseName,
+    }).condition = withCustomPluginsCondition;
+
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
+      description: 'Glue Event Table',
+      value: dataPipelineStackWithCustomPlugins.glueEventTable.tableName,
+    }).condition = withCustomPluginsCondition;
+
+
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
       value: dataPipelineStackWithCustomPlugins.emrServerlessApp.attrApplicationId,
     }).condition = withCustomPluginsCondition;
@@ -164,7 +176,17 @@ export class DataPipelineStack extends Stack {
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
     this.nestedStacks.push(dataPipelineStackWithoutCustomPlugins);
 
-    new CfnOutput(this, `WithoutPlugins${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX}`, {
+      description: 'Glue Database',
+      value: dataPipelineStackWithoutCustomPlugins.glueDatabase.databaseName,
+    }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
+      description: 'Glue Event Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueEventTable.tableName,
+    }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
       value: dataPipelineStackWithoutCustomPlugins.emrServerlessApp.attrApplicationId,
     }).condition = withoutCustomPluginsCondition;
@@ -175,6 +197,9 @@ interface DataPipelineNestedStackProps extends NestedStackProps, DataPipelinePro
 }
 
 class DataPipelineNestedStack extends NestedStack {
+  public readonly glueDatabase: Database;
+  public readonly glueEventTable: Table;
+  public readonly glueIngestionTable: Table;
   public readonly emrServerlessApp: CfnApplication;
 
   constructor(scope: Construct, id: string, props: DataPipelineNestedStackProps) {
@@ -189,6 +214,11 @@ class DataPipelineNestedStack extends NestedStack {
     this.emrServerlessApp = dataPipeline.emrServerlessApp;
 
     addCfnNag(this);
+
+    this.glueDatabase = dataPipeline.glueDatabase;
+    this.glueEventTable = dataPipeline.glueEventTable;
+    this.glueIngestionTable = dataPipeline.glueIngestionTable;
+
   }
 }
 
