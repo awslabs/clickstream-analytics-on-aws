@@ -30,7 +30,7 @@ FROM
         where 
             ep.key = '_session_duration' and e.event_id = ods.event_id) session_duration
         ,(select 
-            ep.value.int_value as value 
+            ep.value.int_value::bigint as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
             ep.key = '_session_start_timestamp' and e.event_id = ods.event_id) session_st
