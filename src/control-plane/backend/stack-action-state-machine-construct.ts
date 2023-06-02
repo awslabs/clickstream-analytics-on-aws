@@ -63,10 +63,10 @@ export class StackActionStateMachine extends Construct {
       description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
-      runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
       role: actionFunctionRole,
-      architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
+      architecture: Architecture.X86_64,
       timeout: Duration.seconds(10),
       environment: {
         ...POWERTOOLS_ENVS,

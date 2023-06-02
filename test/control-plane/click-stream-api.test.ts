@@ -175,14 +175,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'arm64',
+        'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'arm64',
+        'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
@@ -205,14 +205,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs16.x',
+      Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
-      Runtime: 'nodejs16.x',
+      Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
@@ -695,7 +695,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'arm64',
+        'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Environment: {
@@ -991,14 +991,14 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
 
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'arm64',
+        'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'arm64',
+        'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
@@ -1021,14 +1021,14 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs16.x',
+      Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
-      Runtime: 'nodejs16.x',
+      Runtime: 'nodejs18.x',
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [

@@ -12,10 +12,10 @@
  */
 
 
-import { Aws, CfnMapping } from 'aws-cdk-lib';
+import { Aws, CfnCondition, CfnMapping, CfnResource, Fn } from 'aws-cdk-lib';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { AccountPrincipal, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
+import { AccountPrincipal, PolicyStatement, ServicePrincipal, Effect, AnyPrincipal } from 'aws-cdk-lib/aws-iam';
+import { IBucket, Bucket, BucketPolicy } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { ALBLogServiceAccountMapping } from './constant';
@@ -83,21 +83,53 @@ export function createBucketPolicyForAlbAccessLog(
       'account',
     );
 
+    const albAccountsInRegion = new CfnCondition(scope, 'ALBAccountsInRegion', {
+      expression: Fn.conditionOr(
+        ...Object.keys(ALBLogServiceAccountMapping.mapping).map(r =>
+          Fn.conditionEquals(Aws.REGION, r)),
+      ),
+    });
+
     // the grantPut does not work if the bucket is not created in the same stack, e.g: Bucket.fromBucketName
-    props.albLogBucket.grantPut(
+    const grant = props.albLogBucket.grantPut(
       {
         grantPrincipal: new AccountPrincipal(albAccountId),
       },
       `${props.albLogPrefix}*`,
     );
+    (props.albLogBucket.policy?.node.defaultChild as CfnResource).cfnOptions.condition
+      = albAccountsInRegion;
 
-    props.albLogBucket.grantPut(
-      {
-        grantPrincipal: new ServicePrincipal(
-          'logdelivery.elasticloadbalancing.amazonaws.com',
-        ),
-      },
-      `${props.albLogPrefix}*`,
+    const albAccountsNotInRegion = new CfnCondition(scope, 'ALBAccountsNotInRegion', {
+      expression: Fn.conditionNot(albAccountsInRegion),
+    });
+
+    const bucketPolicy = new BucketPolicy(scope, 'ALBLogDeliveryPolicy', {
+      bucket: props.albLogBucket,
+    });
+    bucketPolicy.document.addStatements(
+      new PolicyStatement({
+        actions: ['s3:*'],
+        conditions: {
+          Bool: { 'aws:SecureTransport': 'false' },
+        },
+        effect: Effect.DENY,
+        resources: [
+          props.albLogBucket.bucketArn,
+          props.albLogBucket.arnForObjects('*'),
+        ],
+        principals: [new AnyPrincipal()],
+      }),
+      new PolicyStatement({
+        actions: grant.resourceStatement!.actions,
+        principals: [
+          new ServicePrincipal(
+            'logdelivery.elasticloadbalancing.amazonaws.com',
+          ),
+        ],
+        resources: grant.resourceStatement!.resources,
+      }),
     );
+    (bucketPolicy.node.defaultChild as CfnResource).cfnOptions.condition = albAccountsNotInRegion;
   }
 }

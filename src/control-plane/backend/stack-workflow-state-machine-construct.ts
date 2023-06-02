@@ -76,10 +76,10 @@ export class StackWorkflowStateMachine extends Construct {
       description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-workflow/index.ts'),
       handler: 'handler',
-      runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
       role: workflowFunctionRole,
-      architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
+      architecture: Architecture.X86_64,
       environment: {
         ...POWERTOOLS_ENVS,
       },

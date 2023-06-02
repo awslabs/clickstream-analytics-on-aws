@@ -40,11 +40,11 @@ export class BatchInsertDDBCustomResource extends Construct {
       entry: path.join(__dirname, './lambda/batch-insert-ddb/index.ts'),
       handler: 'handler',
       timeout: Duration.seconds(30),
-      runtime: props.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_18_X,
       memorySize: 256,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'DicInitCustomResourceRole', false, []),
-      architecture: props.targetToCNRegions ? Architecture.X86_64 : Architecture.ARM_64,
+      architecture: Architecture.X86_64,
       environment: {
         ... POWERTOOLS_ENVS,
       },

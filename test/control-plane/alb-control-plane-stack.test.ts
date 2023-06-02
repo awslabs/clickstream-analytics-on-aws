@@ -300,7 +300,183 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
 
   });
 
+  test('grant the ALB writing access log to solution\'s data bucket, support both ALB account name and logdeliver service', () => {
+    const app = new App();
 
+    //WHEN
+    const portalStack = new ApplicationLoadBalancerControlPlaneStack(app, 'ALBPrivateConstrolplaneTestStack02', {
+      existingVpc: true,
+      internetFacing: false,
+      useCustomDomain: false,
+    });
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasResource('AWS::S3::BucketPolicy', {
+      Properties: {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: 's3:*',
+              Condition: {
+                Bool: {
+                  'aws:SecureTransport': 'false',
+                },
+              },
+              Effect: 'Deny',
+              Principal: {
+                AWS: '*',
+              },
+              Resource: [
+                {
+                  'Fn::GetAtt': [
+                    'ClickstreamSolutionDataBucket200465FE',
+                    'Arn',
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      {
+                        'Fn::GetAtt': [
+                          'ClickstreamSolutionDataBucket200465FE',
+                          'Arn',
+                        ],
+                      },
+                      '/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:PutObject',
+                's3:PutObjectLegalHold',
+                's3:PutObjectRetention',
+                's3:PutObjectTagging',
+                's3:PutObjectVersionTagging',
+                's3:Abort*',
+              ],
+              Effect: 'Allow',
+              Principal: {
+                AWS: {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      {
+                        Ref: 'AWS::Partition',
+                      },
+                      ':iam::',
+                      {
+                        'Fn::FindInMap': [
+                          'ALBServiceAccountMapping',
+                          {
+                            Ref: 'AWS::Region',
+                          },
+                          'account',
+                        ],
+                      },
+                      ':root',
+                    ],
+                  ],
+                },
+              },
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'ClickstreamSolutionDataBucket200465FE',
+                        'Arn',
+                      ],
+                    },
+                    '/console-alb-access-logs/*',
+                  ],
+                ],
+              },
+            },
+          ],
+        },
+      },
+      Condition: 'ALBAccountsInRegion',
+    });
+
+    template.hasResource('AWS::S3::BucketPolicy', {
+      Properties: {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: 's3:*',
+              Condition: {
+                Bool: {
+                  'aws:SecureTransport': 'false',
+                },
+              },
+              Effect: 'Deny',
+              Principal: {
+                AWS: '*',
+              },
+              Resource: [
+                {
+                  'Fn::GetAtt': [
+                    'ClickstreamSolutionDataBucket200465FE',
+                    'Arn',
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      {
+                        'Fn::GetAtt': [
+                          'ClickstreamSolutionDataBucket200465FE',
+                          'Arn',
+                        ],
+                      },
+                      '/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:PutObject',
+                's3:PutObjectLegalHold',
+                's3:PutObjectRetention',
+                's3:PutObjectTagging',
+                's3:PutObjectVersionTagging',
+                's3:Abort*',
+              ],
+              Effect: 'Allow',
+              Principal: {
+                Service: 'logdelivery.elasticloadbalancing.amazonaws.com',
+              },
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'ClickstreamSolutionDataBucket200465FE',
+                        'Arn',
+                      ],
+                    },
+                    '/console-alb-access-logs/*',
+                  ],
+                ],
+              },
+            },
+          ],
+        },
+      },
+      Condition: 'ALBAccountsNotInRegion',
+    });
+  });
 });
 
 
