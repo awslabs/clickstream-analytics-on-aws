@@ -41,7 +41,7 @@
     },
     {
       "name": "aws-cdk",
-      "version": "^2.73.0",
+      "version": "^2.81.0",
       "type": "build"
     },
     {
@@ -112,7 +112,7 @@
     },
     {
       "name": "@aws-cdk/aws-glue-alpha",
-      "version": "^2.73.0-alpha.0",
+      "version": "^2.81.0-alpha.0",
       "type": "runtime"
     },
     {
@@ -277,7 +277,7 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "^2.73.0",
+      "version": "^2.81.0",
       "type": "runtime"
     },
     {

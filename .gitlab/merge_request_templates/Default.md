@@ -11,13 +11,14 @@
 - [ ] add new test cases
 - [ ] all code changes are covered by unit tests
 - [ ] end-to-end tests
-  - [ ] deploy control plane without error
-  - [ ] deploy ingestion server without error
+  - [ ] deploy control plane with CloudFront + S3 + API gateway
+  - [ ] deploy control plane within VPC
+  - [ ] deploy ingestion server
     - [ ] with MSK sink
     - [ ] with KDS sink
     - [ ] with S3 sink
-  - [ ] deploy data processing - etl
-  - [ ] deploy data processing - data modeling
+  - [ ] deploy data processing
+  - [ ] deploy data modeling
     - [ ] new Redshift Serverless
     - [ ] provisioned Redshift
     - [ ] Athena
@@ -27,3 +28,4 @@
 
 - [ ] add parameters without default value in stack
 - [ ] introduce new service permission in stack
+- [ ] introduce new top level stack module

@@ -121,29 +121,71 @@ stackSuppressions([
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
 ]);
 
-
-new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
-  synthesizer: synthesizer(),
-  deliverToKafka: true,
-  deliverToKinesis: false,
-  deliverToS3: false,
-});
-
-
-new IngestionServerStack(app, 'ingestion-server-kinesis-stack', { //To Kinesis
-  synthesizer: synthesizer(),
-  deliverToKafka: false,
-  deliverToKinesis: true,
-  deliverToS3: false,
-});
-
-
-new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
-  synthesizer: synthesizer(),
-  deliverToKafka: false,
-  deliverToKinesis: false,
-  deliverToS3: true,
-});
+stackSuppressions([
+  new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
+    synthesizer: synthesizer(),
+    deliverToKafka: true,
+    deliverToKinesis: false,
+    deliverToS3: false,
+  }),
+  new IngestionServerStack(app, 'ingestion-server-kinesis-stack', { //To Kinesis
+    synthesizer: synthesizer(),
+    deliverToKafka: false,
+    deliverToKinesis: true,
+    deliverToS3: false,
+  }),
+  new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
+    synthesizer: synthesizer(),
+    deliverToKafka: false,
+    deliverToKinesis: false,
+    deliverToS3: true,
+  }),
+], [
+  {
+    id: 'AwsSolutions-IAM4',
+    reason:
+        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
+  },
+  {
+    id: 'AwsSolutions-IAM5',
+    reason:
+        'LogRetention lambda policy which are created by CDK contains wildcard permissions',
+  },
+  {
+    id: 'AwsSolutions-AS3',
+    reason: 'notifications configuration for autoscaling group is optional',
+  },
+  {
+    id: 'AwsSolutions-ECS2',
+    reason: 'No secret data in environment variables',
+  },
+  {
+    id: 'AwsSolutions-EC23',
+    reason: 'The ALB should be public',
+  },
+  {
+    id: 'AwsSolutions-EC26',
+    reason: 'The EC2 instances used by ECS don\'t persist the customer\'s data',
+  },
+  {
+    id: 'AwsSolutions-ELB2',
+    reason: 'The ALB log is optional by the customer\'s selection',
+  },
+  {
+    id: 'AwsSolutions-SNS2',
+    reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
+  },
+  {
+    id: 'AwsSolutions-SNS3',
+    reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
+  },
+  {
+    id: 'AwsSolutions-L1',
+    // The non-container Lambda function is not configured to use the latest runtime version
+    reason:
+        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
+  },
+]);
 
 new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', { // Kafka S3 sink connector
   synthesizer: synthesizer(),

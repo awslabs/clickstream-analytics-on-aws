@@ -14,7 +14,7 @@ build:
     - apt update
     - apt install -y zip
     - zip /tmp/source-$CI_JOB_ID.zip -r9 ./
-    - npm install typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts
+    - yarn add typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts
     - mkdir -p output/
   script:
     - npx ts-node scripts/build.ts source-$CI_JOB_ID.zip

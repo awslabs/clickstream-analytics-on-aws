@@ -31,7 +31,6 @@ import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
-import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
@@ -53,62 +52,6 @@ import {
 } from './ingestion-server/server/ingestion-server';
 import { createStackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
-
-export function addCdkNagToStack(stack: Stack) {
-  NagSuppressions.addStackSuppressions(stack, [
-    {
-      id: 'AwsSolutions-IAM4',
-      reason:
-        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
-    },
-    {
-      id: 'AwsSolutions-IAM5',
-      reason:
-        'LogRetention lambda policy which are created by CDK contains wildcard permissions',
-    },
-    {
-      id: 'AwsSolutions-AS3',
-      reason: 'notifications configuration for autoscaling group is optional',
-    },
-
-    {
-      id: 'AwsSolutions-ECS2',
-      reason: 'No secret data in environment variables',
-    },
-
-    {
-      id: 'AwsSolutions-EC23',
-      reason: 'The ALB should be public',
-    },
-
-    {
-      id: 'AwsSolutions-ELB2',
-      reason: 'The ALB log is optional',
-    },
-
-    {
-      id: 'AwsSolutions-S10',
-      reason:
-        'aws:SecureTransport condition on Amazon S3 bucket policies is already set',
-    },
-
-    {
-      id: 'AwsSolutions-SNS2',
-      reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
-    },
-    {
-      id: 'AwsSolutions-SNS3',
-      reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
-    },
-    {
-      id: 'AwsSolutions-L1',
-      // The non-container Lambda function is not configured to use the latest runtime version
-      reason:
-        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
-    },
-  ]);
-}
-
 
 interface IngestionServerNestStackProps extends StackProps {
   readonly vpcId: string;
@@ -328,8 +271,6 @@ export class IngestionServerNestedStack extends NestedStack {
       value: ingestionServerUrl,
       description: 'Server Url',
     });
-
-    addCdkNagToStack(this);
   }
 }
 
@@ -484,8 +425,6 @@ export class IngestionServerStack extends Stack {
       );
       this.nestedStacks.push(nestedStack);
     }
-
-    addCdkNagToStack(this);
   }
 }
 

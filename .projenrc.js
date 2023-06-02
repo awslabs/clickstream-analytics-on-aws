@@ -13,7 +13,7 @@
 
 const { awscdk, gitlab, typescript } = require('projen');
 const version = '1.0.0';
-const cdkVersion = '2.73.0';
+const cdkVersion = '2.81.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
@@ -285,7 +285,7 @@ gitlabMain.createNestedTemplates({
           'apt update',
           'apt install -y zip',
           'zip /tmp/source-$CI_JOB_ID.zip -r9 ./',
-          'npm install typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts',
+          'yarn add typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts',
           'mkdir -p output/',
         ],
         script: [
