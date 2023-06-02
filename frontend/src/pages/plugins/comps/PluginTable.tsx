@@ -23,7 +23,7 @@ import {
 import { deletePlugin, getPluginList } from 'apis/plugin';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 
@@ -152,7 +152,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           {
             id: 'description',
             header: t('plugin:list.desc'),
-            cell: (e) => e.description,
+            cell: (e) => {
+              return <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>;
+            },
             sortingField: 'desc',
           },
           {

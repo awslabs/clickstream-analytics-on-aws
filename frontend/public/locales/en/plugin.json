@@ -1,6 +1,8 @@
 {
   "plugins": "Plugins",
   "description": "The solution supports user bring in its own data process plugins to customize the data processing workflow.",
+  "BUILT-IN-2": "Derive OS, device, browser information from User Agent string from the HTTP request header",
+  "BUILT-IN-3": "Derive location information (e.g., city, country, region) based on the request source IP",
   "list": {
     "id": "Plugin ID",
     "name": "Plugin name",
