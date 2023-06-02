@@ -414,8 +414,8 @@ export class CPipeline {
     }
 
     if (!this.resources || !this.resources.appIds) {
-      const apps = await store.listApplication(this.pipeline.projectId, 'asc', false, 1, 1);
-      const appIds = apps.items.map(a => a.appId);
+      const apps = await store.listApplication(this.pipeline.projectId, 'asc');
+      const appIds = apps.map(a => a.appId);
       if (!isEmpty(appIds)) {
         validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
       }
@@ -426,10 +426,10 @@ export class CPipeline {
     }
 
     if (!this.resources || !this.resources.plugins) {
-      const plugins = await store.listPlugin('', 'asc', false, 1, 1);
+      const plugins = await store.listPlugin('', 'asc');
       this.resources = {
         ...this.resources,
-        plugins: plugins.items,
+        plugins: plugins,
       };
     }
 
@@ -901,10 +901,10 @@ export class CPipeline {
 
   public async getPluginsInfo() {
     if (!this.resources || !this.resources.plugins) {
-      const plugins = await store.listPlugin('', 'asc', false, 1, 1);
+      const plugins = await store.listPlugin('', 'asc');
       this.resources = {
         ...this.resources,
-        plugins: plugins.items,
+        plugins: plugins,
       };
     }
     const transformPlugins = this.resources.plugins?.filter(plugin => plugin.id === this.pipeline.etl?.transformPlugin);

@@ -13,6 +13,7 @@
 
 import {
   Box,
+  Button,
   Header,
   SpaceBetween,
   Spinner,
@@ -21,7 +22,7 @@ import { getProjectList } from 'apis/project';
 import { getAlarmList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALARM_DISPLAY_STATUS } from 'ts/const';
+import { ALARM_DISPLAY_STATUS, ALARM_STATUS } from 'ts/const';
 import ProjectWithAlarm from './ProjectWithAlarm';
 
 const AlarmTableTable: React.FC = () => {
@@ -74,11 +75,21 @@ const AlarmTableTable: React.FC = () => {
           tmpProjectAlarmList.push({
             project: param.project,
             status: tmpStatus,
+            inAlarm:
+              result?.value?.data?.items?.filter(
+                (element) => element.StateValue === ALARM_STATUS.ALARM
+              ).length || 0,
             alarms: result?.value?.data?.items || [],
           });
         });
         setProjectWithAlarmList(
-          tmpProjectAlarmList.sort((a, b) => b.status - a.status)
+          tmpProjectAlarmList.sort((a, b) => {
+            if (a.status === b.status) {
+              return b.inAlarm - a.inAlarm; // in alarm
+            } else {
+              return b.status - a.status; // has alarm
+            }
+          })
         );
         setLoadingData(false);
       }
@@ -93,7 +104,20 @@ const AlarmTableTable: React.FC = () => {
 
   return (
     <div>
-      <Header variant="h2">{t('alarm.alarmsList')}</Header>
+      <Header
+        variant="h2"
+        actions={
+          <Button
+            loading={loadingData}
+            iconName="refresh"
+            onClick={() => {
+              listProjects();
+            }}
+          />
+        }
+      >
+        {t('alarm.alarmsList')}
+      </Header>
       <div className="mt-20">
         {loadingData ? (
           <Spinner />

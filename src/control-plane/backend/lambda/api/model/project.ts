@@ -24,6 +24,7 @@ export interface IProject {
   readonly platform: string;
   readonly region: string;
   readonly environment: ProjectEnvironment | string;
+  pipelineId: string;
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;

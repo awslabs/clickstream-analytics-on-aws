@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
+import { paginateData } from '../common/utils';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -26,12 +27,15 @@ export class PipelineServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { pid, version, order, pageNumber, pageSize } = req.query;
-      const result = await store.listPipeline(pid, version, order, true, pageSize, pageNumber);
-      for (let item of result.items as IPipeline[] ) {
+      const result = await store.listPipeline(pid, version, order);
+      for (let item of result as IPipeline[] ) {
         const pipeline = new CPipeline(item);
         await pipeline.refreshStatus();
       }
-      return res.json(new ApiSuccess(result));
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: paginateData(result, true, pageSize, pageNumber),
+      }));
     } catch (error) {
       next(error);
     }
@@ -44,8 +48,8 @@ export class PipelineServ {
       req.body.id = projectId;
       req.body.operator = res.get('X-Click-Stream-Operator');
       req.body.pipelineId = uuidv4().replace(/-/g, '');
-      const result = await store.listPipeline(projectId, 'latest', 'asc', false, 1, 1);
-      if (result.totalCount && result.totalCount > 0) {
+      const result = await store.listPipeline(projectId, 'latest', 'asc');
+      if (result.length && result.length > 0) {
         return res.status(400).send(new ApiFail('Pipeline already exists.'));
       }
       const body: IPipeline = req.body;
@@ -53,6 +57,11 @@ export class PipelineServ {
       await pipeline.create();
       const templateInfo = await pipeline.getTemplateInfo();
       body.templateVersion = templateInfo.solutionVersion;
+      body.status = {
+        status: PipelineStatusType.CREATING,
+        stackDetails: [],
+        executionDetail: {},
+      };
       // save metadata
       const id = await store.addPipeline(body);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));

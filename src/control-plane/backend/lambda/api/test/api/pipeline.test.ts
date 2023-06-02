@@ -102,7 +102,7 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline subnets not cross two AZ', async () => {
     tokenMock(ddbMock, false);
@@ -495,7 +495,7 @@ describe('Pipeline test', () => {
       publicAZContainPrivateAZ: true,
     });
     // Mock DynamoDB error
-    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(TransactWriteItemsCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -507,7 +507,7 @@ describe('Pipeline test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create pipeline 400', async () => {
     tokenMock(ddbMock, false);

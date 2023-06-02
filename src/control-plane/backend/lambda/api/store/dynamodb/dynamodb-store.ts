@@ -27,14 +27,11 @@ import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '..
 import { docClient, marshallOptions } from '../../common/dynamodb-client';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
-import { IApplication, IApplicationList } from '../../model/application';
+import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
-import {
-  IPipeline,
-  IPipelineList,
-} from '../../model/pipeline';
-import { IPlugin, IPluginList } from '../../model/plugin';
-import { IProject, IProjectList } from '../../model/project';
+import { IPipeline } from '../../model/pipeline';
+import { IPlugin } from '../../model/plugin';
+import { IProject } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
@@ -67,6 +64,7 @@ export class DynamoDbStore implements ClickStreamStore {
         platform: project.platform,
         region: project.region,
         environment: project.environment,
+        pipelineId: '',
         status: 'ACTIVED',
         createAt: Date.now(),
         updateAt: Date.now(),
@@ -150,6 +148,11 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':s', project.status);
       expressionAttributeNames['#status'] = 'status';
     }
+    if (project.pipelineId) {
+      updateExpression = `${updateExpression}, #pipelineId= :pipelineId`;
+      expressionAttributeValues.set(':pipelineId', project.pipelineId);
+      expressionAttributeNames['#pipelineId'] = 'pipelineId';
+    }
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -199,7 +202,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listProjects(order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IProjectList> {
+  public async listProjects(order: string): Promise<IProject[]> {
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
@@ -215,22 +218,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await this.query(input);
-    let projects: IProjectList = {
-      totalCount: 0,
-      items: [],
-    };
-    projects.totalCount = records?.length;
-    if (pagination) {
-      if (projects.totalCount) {
-        pageNumber = Math.min(Math.ceil(projects.totalCount / pageSize), pageNumber);
-        const startIndex = pageSize * (pageNumber - 1);
-        const endIndex = Math.min(pageSize * pageNumber, projects.totalCount);
-        projects.items = records?.slice(startIndex, endIndex) as IProject[];
-      }
-    } else {
-      projects.items = records as IProject[];
-    }
-    return projects;
+    return records as IProject[];
   };
 
   public async addApplication(app: IApplication): Promise<string> {
@@ -312,8 +300,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async listApplication(
-    projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IApplicationList> {
+  public async listApplication(projectId: string, order: string): Promise<IApplication[]> {
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
@@ -330,23 +317,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await this.query(input);
-
-    let apps: IApplicationList = {
-      totalCount: 0,
-      items: [],
-    };
-    apps.totalCount = records?.length;
-    if (pagination) {
-      if (apps.totalCount) {
-        pageNumber = Math.min(Math.ceil(apps.totalCount / pageSize), pageNumber);
-        const startIndex = pageSize * (pageNumber - 1);
-        const endIndex = Math.min(pageSize * pageNumber, apps.totalCount);
-        apps.items = records?.slice(startIndex, endIndex) as IApplication[];
-      }
-    } else {
-      apps.items = records as IApplication[];
-    }
-    return apps;
+    return records as IApplication[];
   };
 
   public async deleteApplication(projectId: string, appId: string, operator: string): Promise<void> {
@@ -387,35 +358,60 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async addPipeline(pipeline: IPipeline): Promise<string> {
-    const params: PutCommand = new PutCommand({
-      TableName: clickStreamTableName,
-      Item: {
-        id: pipeline.id,
-        type: `PIPELINE#${pipeline.pipelineId}#latest`,
-        prefix: 'PIPELINE',
-        pipelineId: pipeline.pipelineId,
-        projectId: pipeline.projectId,
-        region: pipeline.region,
-        dataCollectionSDK: pipeline.dataCollectionSDK,
-        status: pipeline.status,
-        tags: pipeline.tags ?? [],
-        network: pipeline.network,
-        bucket: pipeline.bucket,
-        ingestionServer: pipeline.ingestionServer,
-        etl: pipeline.etl ?? {},
-        dataAnalytics: pipeline.dataAnalytics ?? {},
-        report: pipeline.report ?? {},
-        workflow: pipeline.workflow ?? {},
-        executionName: pipeline.executionName ?? '',
-        executionArn: pipeline.executionArn ?? '',
-        templateVersion: pipeline.templateVersion ?? '',
-        version: pipeline.version ?? Date.now().toString(),
-        versionTag: 'latest',
-        createAt: pipeline.createAt ?? Date.now(),
-        updateAt: Date.now(),
-        operator: pipeline.operator ?? '',
-        deleted: pipeline.deleted ?? false,
-      },
+    const marshallPipeline = marshall(pipeline, marshallOptions);
+    const params: TransactWriteItemsCommand = new TransactWriteItemsCommand({
+      TransactItems: [
+        {
+          Update: {
+            TableName: clickStreamTableName,
+            Key: {
+              id: { S: pipeline.projectId },
+              type: { S: `METADATA#${pipeline.projectId}` },
+            },
+            // Define expressions for the new or updated attributes
+            UpdateExpression: 'SET pipelineId= :pipelineId',
+            ExpressionAttributeValues: {
+              ':pipelineId': { S: pipeline.pipelineId },
+            },
+          },
+        },
+        {
+          Put: {
+            TableName: clickStreamTableName,
+            ConditionExpression: 'attribute_not_exists(#ConditionType)',
+            ExpressionAttributeNames: {
+              '#ConditionType': 'type',
+            },
+            Item: {
+              id: { S: pipeline.id },
+              type: { S: `PIPELINE#${pipeline.pipelineId}#latest` },
+              prefix: { S: 'PIPELINE' },
+              pipelineId: { S: pipeline.pipelineId },
+              projectId: { S: pipeline.projectId },
+              region: { S: pipeline.region },
+              dataCollectionSDK: { S: pipeline.dataCollectionSDK },
+              status: marshallPipeline.status,
+              tags: marshallPipeline.tags,
+              network: marshallPipeline.network,
+              bucket: marshallPipeline.bucket,
+              ingestionServer: marshallPipeline.ingestionServer,
+              etl: marshallPipeline.etl ?? { M: {} },
+              dataAnalytics: marshallPipeline.dataAnalytics ?? { M: {} },
+              report: marshallPipeline.report ?? { M: {} },
+              workflow: marshallPipeline.workflow ?? { M: {} },
+              executionName: { S: pipeline.executionName ?? '' },
+              executionArn: { S: pipeline.executionArn ?? '' },
+              templateVersion: { S: pipeline.templateVersion ?? '' },
+              version: { S: Date.now().toString() },
+              versionTag: { S: 'latest' },
+              createAt: { N: Date.now().toString() },
+              updateAt: { N: Date.now().toString() },
+              operator: { S: pipeline.operator ?? '' },
+              deleted: { BOOL: false },
+            },
+          },
+        },
+      ],
     });
     await docClient.send(params);
     return pipeline.pipelineId;
@@ -648,8 +644,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listPipeline(
-    projectId: string, version: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IPipelineList> {
+  public async listPipeline(projectId: string, version: string, order: string): Promise<IPipeline[]> {
     let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
     expressionAttributeValues.set(':d', false);
@@ -674,23 +669,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await this.query(input);
-
-    let pipelines: IPipelineList = {
-      totalCount: 0,
-      items: [],
-    };
-    pipelines.totalCount = records?.length;
-    if (pagination) {
-      if (pipelines.totalCount) {
-        pageNumber = Math.min(Math.ceil(pipelines.totalCount / pageSize), pageNumber);
-        const startIndex = pageSize * (pageNumber - 1);
-        const endIndex = Math.min(pageSize * pageNumber, pipelines.totalCount);
-        pipelines.items = records?.slice(startIndex, endIndex) as IPipeline[];
-      }
-    } else {
-      pipelines.items = records as IPipeline[];
-    }
-    return pipelines;
+    return records as IPipeline[];
   };
 
   public async isPipelineExisted(projectId: string, pipelineId: string): Promise<boolean> {
@@ -880,8 +859,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listPlugin(
-    pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number): Promise<IPluginList> {
+  public async listPlugin(pluginType: string, order: string): Promise<IPlugin[]> {
     let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
     expressionAttributeValues.set(':d', false);
@@ -891,10 +869,7 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':pluginType', pluginType);
     }
 
-    let plugins: IPluginList = {
-      totalCount: 0,
-      items: [],
-    };
+    let plugins: IPlugin[] = [];
     const dic = await this.getDictionary('BuiltInPlugins');
     if (dic) {
       let builtInPlugins: IPlugin[] = [];
@@ -909,8 +884,7 @@ export class DynamoDbStore implements ClickStreamStore {
       if (!isEmpty(pluginType)) {
         builtInPlugins = builtInPlugins.filter(p => p.pluginType === pluginType);
       }
-      plugins.items = builtInPlugins;
-      plugins.totalCount = builtInPlugins.length;
+      plugins = builtInPlugins;
     }
 
     const input: QueryCommandInput = {
@@ -925,19 +899,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await this.query(input);
-
-    plugins.totalCount = plugins.totalCount + records?.length;
-    if (pagination) {
-      if (plugins.totalCount) {
-        pageNumber = Math.min(Math.ceil(plugins.totalCount / pageSize), pageNumber);
-        const startIndex = pageSize * (pageNumber - 1);
-        const endIndex = Math.min(pageSize * pageNumber, plugins.totalCount);
-        plugins.items = (plugins.items as IPlugin[]).concat(records as IPlugin[]).slice(startIndex, endIndex);
-      }
-    } else {
-      plugins.items = (plugins.items as IPlugin[]).concat(records as IPlugin[]);
-    }
-    return plugins;
+    return (plugins).concat(records as IPlugin[]);
   };
 
   public async deletePlugin(pluginId: string, operator: string): Promise<void> {

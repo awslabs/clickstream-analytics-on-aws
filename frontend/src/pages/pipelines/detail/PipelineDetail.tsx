@@ -26,7 +26,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Alarms from './comps/Alarms';
 import Ingestion from './comps/Ingestion';
 import Monitoring from './comps/Monitoring';
@@ -38,11 +38,16 @@ import BasicInfo from '../comps/BasicInfo';
 const PipelineDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id, pid } = useParams();
-
+  const location = useLocation();
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
   const [projectPipeline, setProjectPipeline] = useState<IExtPipeline>();
   const [loadingPipeline, setLoadingPipeline] = useState(false);
+
+  const { activeTab } = location.state || {};
+  const [detailActiveTab, setDetailActiveTab] = useState(
+    activeTab || 'ingestion'
+  );
 
   const getProjectPipelineDetail = async () => {
     try {
@@ -121,6 +126,10 @@ const PipelineDetail: React.FC = () => {
               />
               <Container disableContentPaddings>
                 <Tabs
+                  activeTabId={detailActiveTab}
+                  onChange={(e) => {
+                    setDetailActiveTab(e.detail.activeTabId);
+                  }}
                   tabs={[
                     {
                       label: t('pipeline:detail.ingestion'),

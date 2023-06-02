@@ -14,6 +14,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { paginateData } from '../common/utils';
 import { IPlugin } from '../model/plugin';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -24,8 +25,11 @@ export class PluginServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { type, order, pageNumber, pageSize } = req.query;
-      const result = await store.listPlugin(type, order, true, pageSize, pageNumber);
-      return res.json(new ApiSuccess(result));
+      const result = await store.listPlugin(type, order);
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: paginateData(result, true, pageSize, pageNumber),
+      }));
     } catch (error) {
       next(error);
     }

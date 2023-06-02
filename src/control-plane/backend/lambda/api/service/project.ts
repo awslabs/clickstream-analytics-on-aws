@@ -13,6 +13,7 @@
 
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { isEmpty, paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { IProject } from '../model/project';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -24,8 +25,23 @@ export class ProjectServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { order, pageNumber, pageSize } = req.query;
-      const result = await store.listProjects(order, true, pageSize, pageNumber);
-      return res.json(new ApiSuccess(result));
+      const result = await store.listProjects(order);
+      const items = paginateData(result, true, pageSize, pageNumber);
+      for (let project of items) {
+        if (isEmpty(project.pipelineId)) {
+          const latestPipelines = await store.listPipeline(project.id, 'latest', 'asc');
+          if (latestPipelines.length === 0) {
+            project.pipelineId = '';
+          } else {
+            project.pipelineId = latestPipelines[0].pipelineId;
+          }
+          await store.updateProject(project);
+        }
+      }
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: items,
+      }));
     } catch (error) {
       next(error);
     }
@@ -71,9 +87,9 @@ export class ProjectServ {
     try {
       const { id } = req.params;
       // Delete pipeline stacks
-      const latestPipelines = await store.listPipeline(id, 'latest', 'asc', false, 1, 1);
-      if (latestPipelines.totalCount && latestPipelines.totalCount > 0) {
-        const latestPipeline = latestPipelines.items[0];
+      const latestPipelines = await store.listPipeline(id, 'latest', 'asc');
+      if (latestPipelines.length === 1) {
+        const latestPipeline = latestPipelines[0];
         const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
       }

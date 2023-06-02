@@ -33,6 +33,7 @@ declare global {
     createAt?: number;
     type?: string;
     status?: string;
+    pipelineId?: string;
   }
 
   interface IAlarmPromiseResult {
@@ -47,6 +48,7 @@ declare global {
   interface IProjectWithAlarm {
     project: IProject;
     status: DisplayStatus;
+    inAlarm: number;
     alarms: IAlarm[];
   }
 }

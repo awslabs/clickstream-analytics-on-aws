@@ -22,8 +22,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ALARM_DISPLAY_STATUS, ALARM_STATUS } from 'ts/const';
-import { buildAlarmsLink } from 'ts/url';
-import { extractRegionFromCloudWatchArn } from 'ts/utils';
 
 interface ProjectWithAlarmProps {
   projectAlarmInfo: IProjectWithAlarm;
@@ -37,7 +35,6 @@ const ProjectWithAlarm: React.FC<ProjectWithAlarmProps> = (
   const navigate = useNavigate();
   const [inAlarmCount, setInAlarmCount] = useState(0);
   const [okCount, setOkCount] = useState(0);
-  const [pipelineRegion, setPipelineRegion] = useState('');
   const [insufficentCount, setInsufficentCount] = useState(0);
 
   const getStatusCountFromAlarmList = (alarmList: IAlarm[]) => {
@@ -61,14 +58,18 @@ const ProjectWithAlarm: React.FC<ProjectWithAlarmProps> = (
     setInsufficentCount(tmpInsufficientCount);
   };
 
+  const redirectToPipelineShowAlarm = () => {
+    navigate(
+      `/project/${projectAlarmInfo.project.id}/pipeline/${projectAlarmInfo.project.pipelineId}`,
+      {
+        state: { activeTab: 'alarms' },
+      }
+    );
+    return;
+  };
+
   useEffect(() => {
     if (projectAlarmInfo.alarms) {
-      if (projectAlarmInfo.alarms.length > 0) {
-        const region = extractRegionFromCloudWatchArn(
-          projectAlarmInfo.alarms[0].AlarmArn
-        );
-        setPipelineRegion(region);
-      }
       getStatusCountFromAlarmList(projectAlarmInfo.alarms);
     }
   }, [projectAlarmInfo.alarms]);
@@ -83,10 +84,9 @@ const ProjectWithAlarm: React.FC<ProjectWithAlarmProps> = (
             <>
               {projectAlarmInfo.status === ALARM_DISPLAY_STATUS.HAS_ALARM && (
                 <Button
-                  href={buildAlarmsLink(
-                    pipelineRegion,
-                    projectAlarmInfo.project.id
-                  )}
+                  onClick={() => {
+                    redirectToPipelineShowAlarm();
+                  }}
                   iconAlign="right"
                   iconName="external"
                   target="_blank"

@@ -11,24 +11,24 @@
  *  and limitations under the License.
  */
 
-import { IApplication, IApplicationList } from '../model/application';
+import { IApplication } from '../model/application';
 import { IDictionary } from '../model/dictionary';
-import { IPipeline, IPipelineList } from '../model/pipeline';
-import { IPlugin, IPluginList } from '../model/plugin';
-import { IProject, IProjectList } from '../model/project';
+import { IPipeline } from '../model/pipeline';
+import { IPlugin } from '../model/plugin';
+import { IProject } from '../model/project';
 
 export interface ClickStreamStore {
   createProject: (project: IProject) => Promise<string>;
   getProject: (id: string) => Promise<IProject | undefined>;
   updateProject: (project: IProject) => Promise<void>;
-  listProjects: (order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IProjectList>;
+  listProjects: (order: string) => Promise<IProject[]>;
   deleteProject: (id: string, operator: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
   addApplication: (app: IApplication) => Promise<string>;
   getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
   updateApplication: (app: IApplication) => Promise<void>;
-  listApplication: (projectId: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IApplicationList>;
+  listApplication: (projectId: string, order: string) => Promise<IApplication[]>;
   deleteApplication: (projectId: string, appId: string, operator: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 
@@ -36,15 +36,14 @@ export interface ClickStreamStore {
   getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<IPipeline | undefined>;
   updatePipeline: (pipeline: IPipeline, curPipeline: IPipeline) => Promise<void>;
   updatePipelineAtCurrentVersion: (pipeline: IPipeline) => Promise<void>;
-  listPipeline: (projectId: string, version: string, order: string,
-    pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPipelineList>;
+  listPipeline: (projectId: string, version: string, order: string) => Promise<IPipeline[]>;
   deletePipeline: (projectId: string, pipelineId: string, operator: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 
   addPlugin: (plugin: IPlugin) => Promise<string>;
   getPlugin: (pluginId: string) => Promise<IPlugin | undefined>;
   updatePlugin: (plugin: IPlugin) => Promise<void>;
-  listPlugin: (pluginType: string, order: string, pagination: boolean, pageSize: number, pageNumber: number) => Promise<IPluginList>;
+  listPlugin: (pluginType: string, order: string) => Promise<IPlugin[]>;
   deletePlugin: (pluginId: string, operator: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
   bindPlugins: (pluginIds: string[], count: number) => Promise<void>;

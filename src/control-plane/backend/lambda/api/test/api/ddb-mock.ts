@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   DescribeRouteTablesCommand, DescribeSecurityGroupRulesCommand,
   DescribeSubnetsCommand,
@@ -288,6 +289,7 @@ function createPipelineMock(
       emails: 'u1@example.com,u2@example.com',
     },
   });
+  ddbMock.on(TransactWriteItemsCommand).resolves({});
   // pipeline
   ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,

@@ -288,19 +288,18 @@ export class EnvironmentServ {
   public async alarms(req: any, res: any, next: any) {
     try {
       const {
-
         pid,
         pageNumber,
         pageSize,
       } = req.query;
-      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc', false, 1, 1);
-      if (latestPipelines.totalCount === 0) {
+      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
         return res.json(new ApiSuccess({
           totalCount: -1,
           items: [],
         }));
       }
-      const latestPipeline = latestPipelines.items[0];
+      const latestPipeline = latestPipelines[0];
       const result = await describeAlarmsByProjectId(latestPipeline.region, pid);
       return res.json(new ApiSuccess({
         totalCount: result.length,
