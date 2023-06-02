@@ -85,9 +85,9 @@ export const buildMetricsDashboardLink = (
   dashboardName: string
 ): string => {
   if (region.startsWith('cn')) {
-    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#dashboards:name=${dashboardName}`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#dashboards/dashboard/${dashboardName}`;
+  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#dashboards:name=${dashboardName}`;
 };
 
 export const buildQuickSightSubscriptionLink = (): string => {
