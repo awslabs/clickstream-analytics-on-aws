@@ -178,7 +178,7 @@ export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
-export const ETL_APPLICATION_NAME_PREFIX = 'ClickStream';
+export const ETL_APPLICATION_NAME_PREFIX = 'Clickstream';
 
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';

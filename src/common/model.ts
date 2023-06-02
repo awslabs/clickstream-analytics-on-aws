@@ -38,8 +38,8 @@ export enum REDSHIFT_MODE {
 }
 
 export enum MetricsNamespace {
-  DATAPIPELINE = 'DataPipeline/ETL',
-  REDSHIFT_ANALYTICS ='DataPipeline/DataModeling/Redshift',
+  DATAPIPELINE = 'Clickstream/DataPipeline',
+  REDSHIFT_ANALYTICS ='Clickstream/DataModeling/Redshift',
 }
 
 export enum MetricsService {
