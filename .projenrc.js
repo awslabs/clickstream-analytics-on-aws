@@ -586,7 +586,7 @@ gitlabMain.createNestedTemplates({
           },
         ],
         before_script: [
-          'cd ./src/examples/custom-plugins',
+          'cd ./examples/custom-plugins',
         ],
         script: [
           './build.sh',

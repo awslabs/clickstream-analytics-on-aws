@@ -11,6 +11,6 @@ etl-plugin-samples-unit-test:
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   before_script:
-    - cd ./src/examples/custom-plugins
+    - cd ./examples/custom-plugins
   script:
     - ./build.sh
