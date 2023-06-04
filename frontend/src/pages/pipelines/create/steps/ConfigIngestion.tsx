@@ -244,6 +244,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
         const certificateOptions: SelectProps.Options = data.map((element) => ({
           label: element.domain,
           value: element.arn,
+          disabled: element.status !== 'ISSUED',
         }));
         setCertificateOptionList(certificateOptions);
         setLoadingCertificate(false);

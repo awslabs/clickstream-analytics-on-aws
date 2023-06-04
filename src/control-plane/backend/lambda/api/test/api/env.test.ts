@@ -1550,10 +1550,12 @@ describe('Account Env test', () => {
         {
           arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
           domain: 'example0.com',
+          status: 'ISSUED',
         },
         {
           arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/7215dafa-2014-40d8-804b-c89ac8f136b4',
           domain: 'example1.com',
+          status: 'ISSUED',
         },
       ],
     });

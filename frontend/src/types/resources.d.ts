@@ -93,6 +93,14 @@ declare global {
   interface CetificateResponse {
     arn: string;
     domain: string;
+    status:
+      | 'EXPIRED'
+      | 'FAILED'
+      | 'INACTIVE'
+      | 'ISSUED'
+      | 'PENDING_VALIDATION'
+      | 'REVOKED'
+      | 'VALIDATION_TIMED_OUT';
   }
 
   interface QuickSightUserResponse {

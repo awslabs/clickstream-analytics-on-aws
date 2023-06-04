@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CertificateStatus } from '@aws-sdk/client-acm';
 import { Parameter, Tag, StackStatus } from '@aws-sdk/client-cloudformation';
 import { RouteTable } from '@aws-sdk/client-ec2';
 import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
@@ -133,6 +134,7 @@ export interface Certificate {
   readonly domain?: string;
   readonly id?: string;
   readonly name?: string;
+  readonly status?: CertificateStatus | string;
 }
 
 export interface WorkGroup {

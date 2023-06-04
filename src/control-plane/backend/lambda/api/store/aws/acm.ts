@@ -50,6 +50,7 @@ export const ListCertificates = async (region: string) => {
       certificates.push({
         arn: cert.CertificateArn,
         domain: cert.DomainName ?? '',
+        status: cert.Status ?? '',
       });
     }
   }
