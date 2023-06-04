@@ -18,7 +18,7 @@ select
     ,user_id
     ,eu.key as custom_attr_key
     ,coalesce (nullif(eu.value.string_value,'')
-    ,nullif(eu.value.int_value,'')
-    ,nullif(eu.value.float_value,'')
-    ,nullif(eu.value.double_value,'')) as custom_attr_value
+    ,nullif(cast(eu.value.int_value as varchar),'')
+    ,nullif(cast(eu.value.float_value as varchar),'')
+    ,nullif(cast(eu.value.double_value as varchar),'')) as custom_attr_value
 from base cross join unnest(user_properties) as t(eu)
