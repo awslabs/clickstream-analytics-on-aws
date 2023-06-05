@@ -558,6 +558,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
 
               <Checkbox
+                controlId="test-aga-id"
                 disabled={
                   isDisabled(update, pipelineInfo) ||
                   !pipelineInfo.serviceStatus.AGA

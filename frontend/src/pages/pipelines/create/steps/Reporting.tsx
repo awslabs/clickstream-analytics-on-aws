@@ -188,6 +188,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
           <SpaceBetween direction="vertical" size="l">
             <FormField>
               <Toggle
+                controlId="test-quicksight-id"
                 disabled={
                   isDisabled(update, pipelineInfo) ||
                   !pipelineInfo.serviceStatus?.QUICK_SIGHT

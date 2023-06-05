@@ -82,7 +82,7 @@
     "crabuild": "node scripts/build.js",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
     "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js --transformIgnorePatterns"
   },
   "eslintConfig": {
     "extends": [
@@ -171,6 +171,10 @@
     "watchPlugins": [
       "jest-watch-typeahead/filename",
       "jest-watch-typeahead/testname"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
     ],
     "resetMocks": true
   },

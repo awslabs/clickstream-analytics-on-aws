@@ -429,6 +429,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
         }
       >
         <Toggle
+          controlId="test-processing-id"
           disabled={
             isDisabled(update, pipelineInfo) ||
             !pipelineInfo.serviceStatus.EMR_SERVERLESS ||
@@ -615,6 +616,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                     value={pipelineInfo.redshiftType}
                     items={[
                       {
+                        controlId: 'test-redshift-serverless-id',
                         label: t('pipeline:create.redshiftServerless'),
                         description: t(
                           'pipeline:create.redshiftServerlessDesc'
@@ -625,6 +627,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS,
                       },
                       {
+                        controlId: 'test-redshift-provisioned-id',
                         label: t('pipeline:create.redshiftProvisioned'),
                         description: t(
                           'pipeline:create.redshiftProvisionedDesc'

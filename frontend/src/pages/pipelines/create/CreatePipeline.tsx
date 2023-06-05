@@ -526,33 +526,72 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const validServiceAvailable = async (region: string) => {
     if (region) {
+      // Reset Error Message
+      setRegionEmptyError(false);
+      setVPCEmptyError(false);
+      setPublicSubnetError(false);
+      setPrivateSubnetError(false);
+      setUnSupportedServices('');
       try {
         setLoadingServiceAvailable(true);
         const { success, data }: ApiResponse<ServiceAvailableResponse[]> =
           await checkServicesAvailable({ region });
         if (success && data) {
           // Set Service available
+          const agaAvailable =
+            data.find((element) => element.service === 'global-accelerator')
+              ?.available || false;
+          const emrAvailable =
+            data.find((element) => element.service === 'emr-serverless')
+              ?.available || false;
+          const redshiftServerlessAvailable =
+            data.find((element) => element.service === 'redshift-serverless')
+              ?.available || false;
+          const mskAvailable =
+            data.find((element) => element.service === 'msk')?.available ||
+            false;
+          const quickSightAvailable =
+            data.find((element) => element.service === 'quicksight')
+              ?.available || false;
           setPipelineInfo((prev) => {
             return {
               ...prev,
               serviceStatus: {
-                AGA:
-                  data.find(
-                    (element) => element.service === 'global-accelerator'
-                  )?.available || false,
-                EMR_SERVERLESS:
-                  data.find((element) => element.service === 'emr-serverless')
-                    ?.available || false,
-                REDSHIFT_SERVERLESS:
-                  data.find(
-                    (element) => element.service === 'redshift-serverless'
-                  )?.available || false,
-                MSK:
-                  data.find((element) => element.service === 'msk')
-                    ?.available || false,
-                QUICK_SIGHT:
-                  data.find((element) => element.service === 'quicksight')
-                    ?.available || false,
+                AGA: agaAvailable,
+                EMR_SERVERLESS: emrAvailable,
+                REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
+                MSK: mskAvailable,
+                QUICK_SIGHT: quickSightAvailable,
+              },
+              // Below to set resources to empty by regions
+              selectedVPC: null,
+              selectedPublicSubnet: [],
+              selectedPrivateSubnet: [],
+              selectedSecret: null, // clear secret
+              selectedCertificate: null, // clear certificates
+              showServiceStatus: false,
+              ingestionServer: {
+                ...prev.ingestionServer,
+                sinkS3: {
+                  // set sink s3 to null
+                  ...prev.ingestionServer.sinkS3,
+                  sinkBucket: {
+                    name: '',
+                    prefix: '',
+                  },
+                },
+                domain: {
+                  ...prev.ingestionServer.domain,
+                  certificateArn: '', // set certificate arn to empty
+                },
+                loadBalancer: {
+                  ...prev.ingestionServer.loadBalancer,
+                  authenticationSecretArn: '', // set secret value to null
+                  logS3Bucket: {
+                    ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                    name: '',
+                  },
+                },
               },
             };
           });
@@ -574,9 +613,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set QuickSight disabled
-          if (
-            !data.find((element) => element.service === 'quicksight')?.available
-          ) {
+          if (quickSightAvailable) {
+            // Set QuickSight Default Enable when QuickSight Available
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                enableReporting: true,
+              };
+            });
+          } else {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
@@ -586,10 +631,22 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set AGA disabled
-          if (
-            !data.find((element) => element.service === 'global-accelerator')
-              ?.available
-          ) {
+          if (agaAvailable) {
+            // Set AGA Default Enable when AGA Avaiable
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                ingestionServer: {
+                  ...prev.ingestionServer,
+                  loadBalancer: {
+                    ...prev.ingestionServer.loadBalancer,
+                    enableGlobalAccelerator: true,
+                  },
+                },
+              };
+            });
+          } else {
+            // Set AGA Disabled when AGA Not Avaiable
             setPipelineInfo((prev) => {
               return {
                 ...prev,
@@ -605,15 +662,32 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set MSK Disable and Apache Kafka connector Disabled
-          if (
-            !data.find((element) => element.service === 'msk')?.available &&
-            pipelineInfo.ingestionServer.sinkType === SinkType.MSK
-          ) {
+          if (mskAvailable) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                kafkaSelfHost: false, // Change to MSK as default
+                enableDataProcessing: true, // enable data processing
+                ingestionServer: {
+                  ...prev.ingestionServer,
+                  sinkKafka: {
+                    ...prev.ingestionServer.sinkKafka,
+                    kafkaConnector: {
+                      enable: true,
+                    },
+                  },
+                },
+              };
+            });
+          } else {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
                 kafkaSelfHost: true, // Change to self hosted as default
-                enableDataProcessing: false, // disabled all data processing
+                enableDataProcessing:
+                  pipelineInfo.ingestionServer.sinkType === SinkType.MSK
+                    ? false
+                    : true, // disabled all data processing when sink type is MSK and MSK not available
                 ingestionServer: {
                   ...prev.ingestionServer,
                   sinkKafka: {
@@ -628,10 +702,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set redshift serverless Disabled
-          if (
-            !data.find((element) => element.service === 'redshift-serverless')
-              ?.available
-          ) {
+          if (redshiftServerlessAvailable) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                redshiftType: 'serverless', // change to serverless as default
+              };
+            });
+          } else {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
@@ -641,10 +719,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set data processing Disabled when emr-serverless not available
-          if (
-            !data.find((element) => element.service === 'emr-serverless')
-              ?.available
-          ) {
+          if (emrAvailable) {
+            setPipelineInfo((prev) => {
+              return {
+                ...prev,
+                enableDataProcessing: true, // Default to enable data processing
+              };
+            });
+          } else {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
@@ -834,6 +916,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
   };
 
+  // Monitor Region Changed and validate Service Available
+  useEffect(() => {
+    if (pipelineInfo.region) {
+      validServiceAvailable(pipelineInfo.region);
+    }
+  }, [pipelineInfo.region]);
+
   return (
     <Wizard
       i18nStrings={{
@@ -892,46 +981,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               loadingServiceAvailable={loadingServiceAvailable}
               unSupportedServices={unSupportedServices}
               changeRegion={(region) => {
-                validServiceAvailable(region.value || '');
-                setRegionEmptyError(false);
-                setVPCEmptyError(false);
-                setPublicSubnetError(false);
-                setPrivateSubnetError(false);
-                setUnSupportedServices('');
+                // Change Region
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
                     selectedRegion: region,
                     region: region.value || '',
-                    selectedVPC: null,
-                    selectedPublicSubnet: [],
-                    selectedPrivateSubnet: [],
-                    selectedSecret: null, // clear secret
-                    selectedCertificate: null, // clear certificates
-                    showServiceStatus: false,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkS3: {
-                        // set sink s3 to null
-                        ...prev.ingestionServer.sinkS3,
-                        sinkBucket: {
-                          name: '',
-                          prefix: '',
-                        },
-                      },
-                      domain: {
-                        ...prev.ingestionServer.domain,
-                        certificateArn: '', // set certificate arn to empty
-                      },
-                      loadBalancer: {
-                        ...prev.ingestionServer.loadBalancer,
-                        authenticationSecretArn: '', // set secret value to null
-                        logS3Bucket: {
-                          ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                          name: '',
-                        },
-                      },
-                    },
                   };
                 });
               }}
@@ -1643,12 +1698,38 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeEnableRedshift={(enable) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    enableRedshift: enable,
-                  };
-                });
+                if (enable) {
+                  // if enable redshift, default to enable athena and quicksight
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableRedshift: true,
+                      // Enable QuickSight When QuickSight Available
+                      enableReporting: prev.serviceStatus.QUICK_SIGHT
+                        ? true
+                        : false,
+                      enableAthena: true,
+                      dataAnalytics: {
+                        ...prev.dataAnalytics,
+                        athena: true,
+                      },
+                    };
+                  });
+                } else {
+                  // if redshift not enable, disable athena and quicksight
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableRedshift: false,
+                      enableReporting: false,
+                      enableAthena: false,
+                      dataAnalytics: {
+                        ...prev.dataAnalytics,
+                        athena: false,
+                      },
+                    };
+                  });
+                }
               }}
               changeSelectedRedshift={(cluster) => {
                 setRedshiftProvisionedCulsterEmptyError(false);

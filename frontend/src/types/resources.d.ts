@@ -146,6 +146,6 @@ declare global {
 
   interface ServiceAvailableResponse {
     service: string;
-    available: true;
+    available: boolean;
   }
 }
