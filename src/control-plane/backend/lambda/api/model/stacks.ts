@@ -1193,10 +1193,11 @@ export class CMetricsStack extends JSONObject {
     const operators = pipeline.operator.split(',');
     const emailList = projectEmails?.concat(operators);
     const emails = emailList?.filter(op => op !== 'unknown' && !isEmpty(op));
+    const uniqueEmails = [...new Set(emails)];
 
     super({
       ProjectId: pipeline.projectId,
-      Emails: emails?.join(','),
+      Emails: uniqueEmails?.join(','),
     });
   }
 

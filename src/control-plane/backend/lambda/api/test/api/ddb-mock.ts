@@ -286,7 +286,7 @@ function createPipelineMock(
     Item: {
       id: MOCK_PROJECT_ID,
       environment: ProjectEnvironment.DEV,
-      emails: 'u1@example.com,u2@example.com',
+      emails: 'u1@example.com,u2@example.com,u2@example.com,u3@example.com',
     },
   });
   ddbMock.on(TransactWriteItemsCommand).resolves({});
