@@ -16,7 +16,7 @@ import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
-import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints } from '../store/aws/ec2';
+import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { getSecretValue } from '../store/aws/secretsmanager';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
@@ -185,7 +185,20 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     resources.quickSightSubnetIds = quickSightSubnets.map(subnet => subnet.id);
 
     if (redshiftType === REDSHIFT_MODE.NEW_SERVERLESS) {
-      if (azSet.size < 3) {
+      const azInRegion = await listAvailabilityZones(pipeline.region);
+      if (azInRegion.length < 2) {
+        throw new ClickStreamBadRequestError(
+          `Validate error, error in obtaining ${pipeline.region} availability zones information. ` +
+          'Please check and try again.',
+        );
+      } else if (azInRegion.length === 2) {
+        if (azSet.size < 2 || redshiftSubnets.length < 3) {
+          throw new ClickStreamBadRequestError(
+            `Validate error, the network for deploying ${redshiftType} Redshift at least three subnets that cross two AZs. ` +
+            'Please check and try again.',
+          );
+        }
+      } else if (azSet.size < 3) {
         throw new ClickStreamBadRequestError(
           `Validate error, the network for deploying ${redshiftType} Redshift at least three subnets that cross three AZs. ` +
           'Please check and try again.',

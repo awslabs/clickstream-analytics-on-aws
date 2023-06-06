@@ -13,6 +13,7 @@
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
+  DescribeAvailabilityZonesCommand,
   DescribeRouteTablesCommand, DescribeSecurityGroupRulesCommand,
   DescribeSubnetsCommand,
   DescribeVpcEndpointsCommand,
@@ -274,6 +275,7 @@ function createPipelineMock(
     glueEndpointSGError?: boolean;
     sgError?: boolean;
     vpcEndpointSubnetErr?: boolean;
+    twoAZsInRegion?: boolean;
   }): any {
   // project
   ddbMock.on(GetCommand, {
@@ -458,6 +460,27 @@ function createPipelineMock(
           FromPort: -1,
           ToPort: -1,
           CidrIpv4: props?.glueEndpointSGError || props?.sgError ? '11.11.11.11/32' : '0.0.0.0/0',
+        },
+      ],
+    });
+  ec2Mock.on(DescribeAvailabilityZonesCommand).
+    resolves({
+      AvailabilityZones: props?.twoAZsInRegion ? [
+        {
+          ZoneName: 'us-east-1a',
+        },
+        {
+          ZoneName: 'us-east-1b',
+        },
+      ] : [
+        {
+          ZoneName: 'us-east-1a',
+        },
+        {
+          ZoneName: 'us-east-1b',
+        },
+        {
+          ZoneName: 'us-east-1c',
         },
       ],
     });

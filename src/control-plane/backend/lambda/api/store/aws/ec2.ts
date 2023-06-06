@@ -24,6 +24,7 @@ import {
   Filter,
   Subnet,
   RouteTable, DescribeRegionsCommand,
+  DescribeAvailabilityZonesCommand,
   Region,
 } from '@aws-sdk/client-ec2';
 
@@ -175,6 +176,21 @@ export const listRegions = async () => {
     });
   }
   return regions;
+};
+
+export const listAvailabilityZones = async (region: string) => {
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+  });
+  const filters: Filter[] = [{
+    Name: 'region-name',
+    Values: [region],
+  }];
+  const params: DescribeAvailabilityZonesCommand = new DescribeAvailabilityZonesCommand({
+    Filters: filters,
+  });
+  const queryResponse = await ec2Client.send(params);
+  return queryResponse.AvailabilityZones ?? [];
 };
 
 export const describeVpcSecurityGroups = async (region: string, vpcId: string) => {

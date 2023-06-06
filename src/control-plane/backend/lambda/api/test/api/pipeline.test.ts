@@ -255,6 +255,132 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
   });
+  it('Create pipeline with new Redshift serverless in us-west-1', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      twoAZsInRegion: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    let res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+        dataAnalytics: {
+          ods: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            fileSuffix: '.snappy.parquet',
+          },
+          athena: false,
+          redshift: {
+            dataRange: 'rate(6 months)',
+            newServerless: {
+              network: {
+                vpcId: 'vpc-00000000000000001',
+                subnetIds: [
+                  'subnet-00000000000000010',
+                  'subnet-00000000000000011',
+                  'subnet-00000000000000021',
+                ],
+                securityGroups: [
+                  'sg-00000000000000030',
+                  'sg-00000000000000031',
+                ],
+              },
+              baseCapacity: 8,
+            },
+          },
+          loadWorkflow: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            loadJobScheduleIntervalExpression: 'rate(5 minutes)',
+            maxFilesLimit: 50,
+            processingFilesLimit: 50,
+          },
+          upsertUsers: {
+            scheduleExpression: 'rate(5 minutes)',
+          },
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Create pipeline with new Redshift serverless two subnets in us-west-1', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
+      publicAZContainPrivateAZ: true,
+      twoAZsInRegion: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+
+    let res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+        dataAnalytics: {
+          ods: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            fileSuffix: '.snappy.parquet',
+          },
+          athena: false,
+          redshift: {
+            dataRange: 'rate(6 months)',
+            newServerless: {
+              network: {
+                vpcId: 'vpc-00000000000000001',
+                subnetIds: [
+                  'subnet-00000000000000010',
+                  'subnet-00000000000000011',
+                ],
+                securityGroups: [
+                  'sg-00000000000000030',
+                  'sg-00000000000000031',
+                ],
+              },
+              baseCapacity: 8,
+            },
+          },
+          loadWorkflow: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            loadJobScheduleIntervalExpression: 'rate(5 minutes)',
+            maxFilesLimit: 50,
+            processingFilesLimit: 50,
+          },
+          upsertUsers: {
+            scheduleExpression: 'rate(5 minutes)',
+          },
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validate error, the network for deploying New_Serverless Redshift at least three subnets that cross two AZs. Please check and try again.');
+  });
   it('Create pipeline with vpc endpoint SG error', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
