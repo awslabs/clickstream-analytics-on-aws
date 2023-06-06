@@ -41,13 +41,13 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
             external
             href={buildReshiftLink(
               pipelineInfo?.region || '',
-              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+              pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier || '',
               'provisioned'
             )}
           >
             {
-              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+              pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier
             }
           </Link>
@@ -55,7 +55,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       }
     } else {
       // in detail page
-      if (pipelineInfo?.dataAnalytics.redshift.newServerless) {
+      if (pipelineInfo?.dataModeling.redshift.newServerless) {
         return (
           <Link
             external
@@ -74,13 +74,13 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
             external
             href={buildReshiftLink(
               pipelineInfo?.region || '',
-              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+              pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier || '',
               'provisioned'
             )}
           >
             {
-              pipelineInfo?.dataAnalytics?.redshift?.provisioned
+              pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier
             }
           </Link>
@@ -99,13 +99,13 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         } else {
           return `${pipelineInfo.exeCronExp}`;
         }
-      } else if (pipelineInfo.etl.scheduleExpression) {
-        if (pipelineInfo.etl.scheduleExpression) {
-          if (pipelineInfo.etl.scheduleExpression.startsWith('cron')) {
-            return pipelineInfo.etl.scheduleExpression;
+      } else if (pipelineInfo.dataProcessing.scheduleExpression) {
+        if (pipelineInfo.dataProcessing.scheduleExpression) {
+          if (pipelineInfo.dataProcessing.scheduleExpression.startsWith('cron')) {
+            return pipelineInfo.dataProcessing.scheduleExpression;
           } else {
             const pattern = /rate\((\d+\s\w+)\)/;
-            const match = pipelineInfo.etl.scheduleExpression.match(pattern);
+            const match = pipelineInfo.dataProcessing.scheduleExpression.match(pattern);
 
             if (match) {
               const rateValue = match[1];
@@ -129,8 +129,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       if (pipelineInfo.selectedEventFreshUnit?.value) {
         return `${pipelineInfo.eventFreshValue} ${pipelineInfo.selectedEventFreshUnit.label}`;
       } else {
-        if (pipelineInfo.etl.dataFreshnessInHour) {
-          const hours = pipelineInfo.etl.dataFreshnessInHour;
+        if (pipelineInfo.dataProcessing.dataFreshnessInHour) {
+          const hours = pipelineInfo.dataProcessing.dataFreshnessInHour;
           if (hours >= 24 && hours % 24 === 0) {
             const days = hours / 24;
             return `${days} Days`;
@@ -150,7 +150,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       if (pipelineInfo.selectedRedshiftExecutionUnit?.value) {
         return `${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit.label}`;
       } else {
-        const minutes = pipelineInfo.dataAnalytics.redshift.dataRange;
+        const minutes = pipelineInfo.dataModeling.redshift.dataRange;
         if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
           const months = minutes / (60 * 24 * 30);
           return `${months} Months`;
@@ -174,18 +174,18 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         } else {
           return `${pipelineInfo.upsertCronExp}`;
         }
-      } else if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
-        if (pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression) {
+      } else if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
+        if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
           if (
-            pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression.startsWith(
+            pipelineInfo.dataModeling.upsertUsers.scheduleExpression.startsWith(
               'cron'
             )
           ) {
-            return pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression;
+            return pipelineInfo.dataModeling.upsertUsers.scheduleExpression;
           } else {
             const pattern = /rate\((\d+\s\w+)\)/;
             const match =
-              pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression.match(
+              pipelineInfo.dataModeling.upsertUsers.scheduleExpression.match(
                 pattern
               );
 
@@ -217,24 +217,24 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
           return `${pipelineInfo.dataLoadCronExp}`;
         }
       } else if (
-        pipelineInfo.dataAnalytics.loadWorkflow
+        pipelineInfo.dataModeling.loadWorkflow
           .loadJobScheduleIntervalExpression
       ) {
         if (
-          pipelineInfo.dataAnalytics.loadWorkflow
+          pipelineInfo.dataModeling.loadWorkflow
             .loadJobScheduleIntervalExpression
         ) {
           if (
-            pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression.startsWith(
+            pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression.startsWith(
               'cron'
             )
           ) {
-            return pipelineInfo.dataAnalytics.loadWorkflow
+            return pipelineInfo.dataModeling.loadWorkflow
               .loadJobScheduleIntervalExpression;
           } else {
             const pattern = /rate\((\d+\s\w+)\)/;
             const match =
-              pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression.match(
+              pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression.match(
                 pattern
               );
 
@@ -266,10 +266,10 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     } else {
       // Pipeline detail
       if (
-        pipelineInfo?.etl.enrichPlugin &&
-        pipelineInfo?.etl.enrichPlugin.length > 0
+        pipelineInfo?.dataProcessing.enrichPlugin &&
+        pipelineInfo?.dataProcessing.enrichPlugin.length > 0
       ) {
-        const enrichPluginData: IPlugin[] = pipelineInfo.etl
+        const enrichPluginData: IPlugin[] = pipelineInfo.dataProcessing
           .enrichPlugin as any;
         console.info('enrichPluginData:', enrichPluginData);
         const returnElement = enrichPluginData.map((element) => {
@@ -296,8 +296,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       );
     } else {
       // pipeline detail
-      if (pipelineInfo?.etl.transformPlugin) {
-        const transformPluginData: IPlugin = pipelineInfo?.etl
+      if (pipelineInfo?.dataProcessing.transformPlugin) {
+        const transformPluginData: IPlugin = pipelineInfo?.dataProcessing
           .transformPlugin as any;
         return (
           <div>
@@ -317,7 +317,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.status')}</Box>
           <div>
-            {pipelineInfo?.etl ? (
+            {pipelineInfo?.dataProcessing ? (
               <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
             ) : (
               <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
@@ -361,7 +361,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
             {t('pipeline:detail.redshiftPermission')}
           </Box>
           <div>
-            {pipelineInfo?.dataAnalytics?.redshift?.provisioned?.dbUser || '-'}
+            {pipelineInfo?.dataModeling?.redshift?.provisioned?.dbUser || '-'}
           </div>
         </div>
 
@@ -387,7 +387,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.athena')}</Box>
           <div>
-            {pipelineInfo?.dataAnalytics.athena ? (
+            {pipelineInfo?.dataModeling.athena ? (
               <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
             ) : (
               <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>

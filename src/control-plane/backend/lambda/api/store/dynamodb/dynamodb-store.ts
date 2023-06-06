@@ -395,9 +395,9 @@ export class DynamoDbStore implements ClickStreamStore {
               network: marshallPipeline.network,
               bucket: marshallPipeline.bucket,
               ingestionServer: marshallPipeline.ingestionServer,
-              etl: marshallPipeline.etl ?? { M: {} },
-              dataAnalytics: marshallPipeline.dataAnalytics ?? { M: {} },
-              report: marshallPipeline.report ?? { M: {} },
+              dataProcessing: marshallPipeline.dataProcessing ?? { M: {} },
+              dataModeling: marshallPipeline.dataModeling ?? { M: {} },
+              reporting: marshallPipeline.reporting ?? { M: {} },
               workflow: marshallPipeline.workflow ?? { M: {} },
               executionName: { S: pipeline.executionName ?? '' },
               executionArn: { S: pipeline.executionArn ?? '' },
@@ -460,9 +460,9 @@ export class DynamoDbStore implements ClickStreamStore {
               network: marshallCurPipeline.network,
               bucket: marshallCurPipeline.bucket,
               ingestionServer: marshallCurPipeline.ingestionServer,
-              etl: marshallCurPipeline.etl,
-              dataAnalytics: marshallCurPipeline.dataAnalytics,
-              report: marshallCurPipeline.report,
+              dataProcessing: marshallCurPipeline.dataProcessing,
+              dataModeling: marshallCurPipeline.dataModeling,
+              reporting: marshallCurPipeline.reporting,
               workflow: marshallCurPipeline.workflow ?? { M: {} },
               executionName: { S: curPipeline.executionName ?? '' },
               executionArn: { S: curPipeline.executionArn ?? '' },
@@ -494,9 +494,9 @@ export class DynamoDbStore implements ClickStreamStore {
               '#network = :network, ' +
               '#bucket = :bucket, ' +
               'ingestionServer = :ingestionServer, ' +
-              'etl = :etl, ' +
-              'dataAnalytics = :dataAnalytics, ' +
-              'report = :report, ' +
+              'dataProcessing = :dataProcessing, ' +
+              'dataModeling = :dataModeling, ' +
+              'reporting = :reporting, ' +
               'workflow = :workflow, ' +
               'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
@@ -524,9 +524,9 @@ export class DynamoDbStore implements ClickStreamStore {
               ':network': marshallPipeline.network,
               ':bucket': marshallPipeline.bucket,
               ':ingestionServer': marshallPipeline.ingestionServer,
-              ':etl': marshallPipeline.etl,
-              ':dataAnalytics': marshallPipeline.dataAnalytics,
-              ':report': marshallPipeline.report,
+              ':dataProcessing': marshallPipeline.dataProcessing,
+              ':dataModeling': marshallPipeline.dataModeling,
+              ':reporting': marshallPipeline.reporting,
               ':ConditionVersionValue': { S: pipeline.version },
               ':workflow': marshallPipeline.workflow ?? { M: {} },
               ':executionName': { S: curPipeline.executionName ?? '' },
@@ -560,9 +560,9 @@ export class DynamoDbStore implements ClickStreamStore {
         '#network = :network, ' +
         '#bucket = :bucket, ' +
         'ingestionServer = :ingestionServer, ' +
-        'etl = :etl, ' +
-        'dataAnalytics = :dataAnalytics, ' +
-        'report = :report, ' +
+        'dataProcessing = :dataProcessing, ' +
+        'dataModeling = :dataModeling, ' +
+        'reporting = :reporting, ' +
         'workflow = :workflow, ' +
         'executionName = :executionName, ' +
         'executionArn = :executionArn, ' +
@@ -584,9 +584,9 @@ export class DynamoDbStore implements ClickStreamStore {
         ':network': pipeline.network,
         ':bucket': pipeline.bucket,
         ':ingestionServer': pipeline.ingestionServer,
-        ':etl': pipeline.etl ?? {},
-        ':dataAnalytics': pipeline.dataAnalytics ?? {},
-        ':report': pipeline.report ?? {},
+        ':dataProcessing': pipeline.dataProcessing ?? {},
+        ':dataModeling': pipeline.dataModeling ?? {},
+        ':reporting': pipeline.reporting ?? {},
         ':ConditionVersionValue': pipeline.version,
         ':workflow': pipeline.workflow ?? {},
         ':executionName': pipeline.executionName ?? '',

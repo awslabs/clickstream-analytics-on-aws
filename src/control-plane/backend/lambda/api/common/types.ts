@@ -259,9 +259,9 @@ export enum AssumeRoleType {
 export enum PipelineStackType {
   INGESTION = 'Ingestion',
   KAFKA_CONNECTOR = 'KafkaConnector',
-  ETL = 'ETL',
-  DATA_ANALYTICS = 'DataAnalytics',
-  REPORT = 'Report',
+  DATA_PROCESSING = 'DataProcessing',
+  DATA_MODELING_REDSHIFT = 'DataModelingRedshift',
+  REPORTING = 'Reporting',
   METRICS = 'Metrics',
   ATHENA = 'DataModelingAthena',
 }
@@ -334,7 +334,7 @@ export interface IngestionServerSinkBatchProps {
   readonly intervalSeconds: number;
 }
 
-export interface ReportDashboardOutput {
+export interface ReportingDashboardOutput {
   readonly appId: string;
   readonly dashboardId: string;
 }

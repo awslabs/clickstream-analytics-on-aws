@@ -142,7 +142,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       const { success, data }: ApiResponse<string> = await createQuickSightUser(
         {
           email: newUserEmail,
-          accountName: pipelineInfo.report.quickSight.accountName,
+          accountName: pipelineInfo.reporting.quickSight.accountName,
         }
       );
       setLoadingCreateUser(false);

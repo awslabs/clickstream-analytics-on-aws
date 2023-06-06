@@ -20,7 +20,7 @@ import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
-import { OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
+import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
@@ -4018,25 +4018,25 @@ describe('DataAnalyticsRedshiftStack tests', () => {
   });
 
   test('stack outputs', () => {
-    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
       Condition: 'redshiftProvisioned',
     });
-    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
       Condition: 'existingRedshiftServerless',
     });
-    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
+    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
       Condition: 'newRedshiftServerless',
     });
-    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {
+    stackTemplate.hasOutput(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {
       Condition: 'newRedshiftServerless',
     });
-    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_NAMESPACE_NAME, {
+    stackTemplate.hasOutput(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, {
       Condition: 'newRedshiftServerless',
     });
-    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, {
+    stackTemplate.hasOutput(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, {
       Condition: 'newRedshiftServerless',
     });
-    stackTemplate.hasOutput(OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
+    stackTemplate.hasOutput(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
       Value: '5439',
       Condition: 'newRedshiftServerless',
     });

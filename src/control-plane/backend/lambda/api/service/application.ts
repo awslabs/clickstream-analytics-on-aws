@@ -61,7 +61,7 @@ export class ApplicationServ {
       const id = await store.addApplication(app);
 
       const pipeline = new CPipeline(latestPipeline);
-      await pipeline.updateETL(appIds);
+      await pipeline.updateApp(appIds);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -151,7 +151,7 @@ export class ApplicationServ {
       await store.deleteApplication(pid, id, operator);
 
       const pipeline = new CPipeline(latestPipeline);
-      await pipeline.updateETL(appIds);
+      await pipeline.updateApp(appIds);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

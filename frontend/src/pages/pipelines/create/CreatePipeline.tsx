@@ -502,7 +502,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             return false;
           }
           // Check DB user
-          if (!pipelineInfo.dataAnalytics.redshift.provisioned.dbUser.trim()) {
+          if (!pipelineInfo.dataModeling.redshift.provisioned.dbUser.trim()) {
             setRedshiftProvisionedDBUserEmptyError(true);
             return false;
           }
@@ -745,12 +745,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const confirmCreatePipeline = async () => {
     const createPipelineObj: any = cloneDeep(pipelineInfo);
     if (createPipelineObj.enableDataProcessing) {
-      createPipelineObj.etl.dataFreshnessInHour =
+      createPipelineObj.dataProcessing.dataFreshnessInHour =
         pipelineInfo.selectedEventFreshUnit?.value === 'day'
           ? parseInt(pipelineInfo.eventFreshValue) * 24
           : parseInt(pipelineInfo.eventFreshValue) || 72;
 
-      createPipelineObj.etl.scheduleExpression = generateCronDateRange(
+      createPipelineObj.dataProcessing.scheduleExpression = generateCronDateRange(
         pipelineInfo.selectedExcutionType?.value,
         parseInt(pipelineInfo.excutionFixedValue),
         pipelineInfo.exeCronExp,
@@ -759,20 +759,20 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       );
 
       // set plugin value
-      createPipelineObj.etl.transformPlugin =
+      createPipelineObj.dataProcessing.transformPlugin =
         pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
-      createPipelineObj.etl.enrichPlugin =
+      createPipelineObj.dataProcessing.enrichPlugin =
         pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
 
       // set redshift schedule
-      createPipelineObj.dataAnalytics.redshift.dataRange =
+      createPipelineObj.dataModeling.redshift.dataRange =
         generateRedshiftInterval(
           parseInt(pipelineInfo.redshiftExecutionValue),
           pipelineInfo.selectedRedshiftExecutionUnit?.value
         );
 
       // set redshift dataload frequency
-      createPipelineObj.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression =
+      createPipelineObj.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression =
         generateCronDateRange(
           pipelineInfo.selectedDataLoadType?.value,
           parseInt(pipelineInfo.redshiftDataLoadValue),
@@ -782,7 +782,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         );
 
       // set redshift upsert frequency express
-      createPipelineObj.dataAnalytics.upsertUsers.scheduleExpression =
+      createPipelineObj.dataModeling.upsertUsers.scheduleExpression =
         generateCronDateRange(
           pipelineInfo.selectedUpsertType?.value,
           parseInt(pipelineInfo.redshiftUpsertFreqValue),
@@ -791,24 +791,24 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           'upsert'
         );
 
-      // set dataAnalytics to null when not enable Redshift
+      // set dataModeling to null when not enable Redshift
       if (!pipelineInfo.enableRedshift) {
-        createPipelineObj.dataAnalytics = null;
+        createPipelineObj.dataModeling = null;
       } else {
         // set serverless to null when user select provisioned
         if (pipelineInfo.redshiftType === 'provisioned') {
-          createPipelineObj.dataAnalytics.redshift.newServerless = null;
+          createPipelineObj.dataModeling.redshift.newServerless = null;
         }
 
         // set provisioned to null when user select serverless
         if (pipelineInfo.redshiftType === 'serverless') {
-          createPipelineObj.dataAnalytics.redshift.provisioned = null;
+          createPipelineObj.dataModeling.redshift.provisioned = null;
         }
       }
     } else {
-      createPipelineObj.etl = null;
-      // set dataAnalytics to null when disable data processing
-      createPipelineObj.dataAnalytics = null;
+      createPipelineObj.dataProcessing = null;
+      // set dataModeling to null when disable data processing
+      createPipelineObj.dataModeling = null;
     }
 
     // set sink batch to null when sink type is S3
@@ -827,9 +827,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         null;
     }
 
-    // set report empty when not enable report
+    // set reporting empty when not enable reporting
     if (!createPipelineObj.enableReporting) {
-      createPipelineObj.report = null;
+      createPipelineObj.reporting = null;
     }
 
     // remove temporary properties
@@ -1055,18 +1055,18 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         },
                       },
                     },
-                    etl: {
-                      ...prev.etl,
+                    dataProcessing: {
+                      ...prev.dataProcessing,
                       sourceS3Bucket: {
-                        ...prev.etl.sourceS3Bucket,
+                        ...prev.dataProcessing.sourceS3Bucket,
                         name: bucket,
                       },
                       sinkS3Bucket: {
-                        ...prev.etl.sinkS3Bucket,
+                        ...prev.dataProcessing.sinkS3Bucket,
                         name: bucket,
                       },
                       pipelineBucket: {
-                        ...prev.etl.pipelineBucket,
+                        ...prev.dataProcessing.pipelineBucket,
                         name: bucket,
                       },
                     },
@@ -1709,8 +1709,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ? true
                         : false,
                       enableAthena: true,
-                      dataAnalytics: {
-                        ...prev.dataAnalytics,
+                      dataModeling: {
+                        ...prev.dataModeling,
                         athena: true,
                       },
                     };
@@ -1723,8 +1723,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       enableRedshift: false,
                       enableReporting: false,
                       enableAthena: false,
-                      dataAnalytics: {
-                        ...prev.dataAnalytics,
+                      dataModeling: {
+                        ...prev.dataModeling,
                         athena: false,
                       },
                     };
@@ -1740,12 +1740,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     arnAccountId: extractAccountIdFromArn(
                       cluster.description || ''
                     ),
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         provisioned: {
-                          ...prev.dataAnalytics.redshift.provisioned,
+                          ...prev.dataModeling.redshift.provisioned,
                           clusterIdentifier: cluster.value || '',
                         },
                       },
@@ -1782,8 +1782,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     enableAthena: enable,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       athena: enable,
                     },
                   };
@@ -1802,12 +1802,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         provisioned: {
-                          ...prev.dataAnalytics.redshift.provisioned,
+                          ...prev.dataModeling.redshift.provisioned,
                           dbUser: user,
                         },
                       },
@@ -1820,12 +1820,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     redshiftBaseCapacity: capacity,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         newServerless: {
-                          ...prev.dataAnalytics.redshift.newServerless,
+                          ...prev.dataModeling.redshift.newServerless,
                           baseCapacity: parseInt(capacity.value || '16'),
                         },
                       },
@@ -1841,14 +1841,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     redshiftServerlessVPC: vpc,
                     redshiftServerlessSG: [], // set selected security groups to empty
                     redshiftServerlessSubnets: [], // set selected subnets to empty
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         newServerless: {
-                          ...prev.dataAnalytics.redshift.newServerless,
+                          ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataAnalytics.redshift.newServerless
+                            ...prev.dataModeling.redshift.newServerless
                               .network,
                             vpcId: vpc.value || '',
                             securityGroups: [], // set security group value to empty
@@ -1866,14 +1866,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     redshiftServerlessSG: sg,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         newServerless: {
-                          ...prev.dataAnalytics.redshift.newServerless,
+                          ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataAnalytics.redshift.newServerless
+                            ...prev.dataModeling.redshift.newServerless
                               .network,
                             securityGroups: sg.map(
                               (element) => element.value || ''
@@ -1892,14 +1892,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     redshiftServerlessSubnets: subnets,
-                    dataAnalytics: {
-                      ...prev.dataAnalytics,
+                    dataModeling: {
+                      ...prev.dataModeling,
                       redshift: {
-                        ...prev.dataAnalytics.redshift,
+                        ...prev.dataModeling.redshift,
                         newServerless: {
-                          ...prev.dataAnalytics.redshift.newServerless,
+                          ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataAnalytics.redshift.newServerless
+                            ...prev.dataModeling.redshift.newServerless
                               .network,
                             subnetIds: subnets.map(
                               (element) => element.value || ''
@@ -2000,10 +2000,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedQuickSightUser: user,
-                    report: {
-                      ...prev.report,
+                    reporting: {
+                      ...prev.reporting,
                       quickSight: {
-                        ...prev.report.quickSight,
+                        ...prev.reporting.quickSight,
                         user: user.value || '',
                       },
                     },
@@ -2014,10 +2014,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    report: {
-                      ...prev.report,
+                    reporting: {
+                      ...prev.reporting,
                       quickSight: {
-                        ...prev.report?.quickSight,
+                        ...prev.reporting?.quickSight,
                         accountName: name,
                       },
                     },
@@ -2254,10 +2254,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         });
       if (success) {
         pipelineInfo.selectedTransformPlugins = data.items.filter(
-          (item) => item.id === pipelineInfo.etl.transformPlugin
+          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin
         );
         pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
-          pipelineInfo.etl.enrichPlugin.includes(item.id || '')
+          pipelineInfo.dataProcessing.enrichPlugin.includes(item.id || '')
         );
       }
     } catch (error) {
@@ -2275,7 +2275,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         const selectVpc = data.filter(
           (element) =>
             element.id ===
-            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId
+            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId
         )[0];
         pipelineInfo.redshiftServerlessVPC = {
           label: `${selectVpc.name}(${selectVpc.id})`,
@@ -2293,11 +2293,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId:
-            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId,
+            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
         });
       if (success) {
         const selectSGs = data.filter((element) =>
-          pipelineInfo.dataAnalytics.redshift.newServerless.network.securityGroups.includes(
+          pipelineInfo.dataModeling.redshift.newServerless.network.securityGroups.includes(
             element.id
           )
         );
@@ -2317,11 +2317,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId:
-            pipelineInfo.dataAnalytics.redshift.newServerless.network.vpcId,
+            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
         });
       if (success) {
         const selectSubnets = data.filter((element) =>
-          pipelineInfo.dataAnalytics.redshift.newServerless.network.subnetIds.includes(
+          pipelineInfo.dataModeling.redshift.newServerless.network.subnetIds.includes(
             element.id
           )
         );
@@ -2349,7 +2349,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         const selectCluster = data.filter(
           (element) =>
             element.name ===
-            pipelineInfo.dataAnalytics.redshift.provisioned.clusterIdentifier
+            pipelineInfo.dataModeling.redshift.provisioned.clusterIdentifier
         )[0];
         pipelineInfo.selectedRedshiftCluster = {
           label: selectCluster.name,
@@ -2368,7 +2368,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     const reverseScheduleExpression = reverseCronDateRange(
-      pipelineInfo.etl.scheduleExpression
+      pipelineInfo.dataProcessing.scheduleExpression
     );
     pipelineInfo.selectedExcutionType = EXECUTION_TYPE_LIST.filter(
       (type) => type.value === reverseScheduleExpression.type
@@ -2383,7 +2383,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
 
     const reverseFreshness = reverseFreshnessInHour(
-      pipelineInfo.etl.dataFreshnessInHour
+      pipelineInfo.dataProcessing.dataFreshnessInHour
     );
     pipelineInfo.eventFreshValue = reverseFreshness.value;
     pipelineInfo.selectedEventFreshUnit = {
@@ -2392,18 +2392,18 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     };
     setUpdateListPlugins(pipelineInfo);
 
-    pipelineInfo.enableRedshift = pipelineInfo.dataAnalytics.redshift !== null;
-    pipelineInfo.enableAthena = pipelineInfo.dataAnalytics.athena !== null;
+    pipelineInfo.enableRedshift = pipelineInfo.dataModeling.redshift !== null;
+    pipelineInfo.enableAthena = pipelineInfo.dataModeling.athena !== null;
 
     pipelineInfo.redshiftType =
-      pipelineInfo.dataAnalytics.redshift.newServerless !== null
+      pipelineInfo.dataModeling.redshift.newServerless !== null
         ? 'serverless'
         : 'provisioned';
     if (pipelineInfo.redshiftType === 'serverless') {
       pipelineInfo.redshiftBaseCapacity = REDSHIFT_CAPACITY_LIST.filter(
         (type) =>
           type.value ===
-          pipelineInfo.dataAnalytics.redshift.newServerless.baseCapacity.toString()
+          pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];
       setUpdateNewServerlessVpc(pipelineInfo);
       setUpdateNewServerlessSG(pipelineInfo);
@@ -2413,7 +2413,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
 
     const reverseRedshiftDataRange = reverseRedshiftInterval(
-      pipelineInfo.dataAnalytics.redshift.dataRange
+      pipelineInfo.dataModeling.redshift.dataRange
     );
     pipelineInfo.redshiftExecutionValue = reverseRedshiftDataRange.value;
     pipelineInfo.selectedRedshiftExecutionUnit = REDSHIFT_UNIT_LIST.filter(
@@ -2421,7 +2421,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     )[0];
 
     const reverseLoadJobScheduleExpression = reverseCronDateRange(
-      pipelineInfo.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression
+      pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression
     );
     pipelineInfo.selectedDataLoadType = EXECUTION_TYPE_LIST.filter(
       (type) => type.value === reverseLoadJobScheduleExpression.type
@@ -2437,7 +2437,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
 
     const reverseUpsertUsersScheduleExpression = reverseCronDateRange(
-      pipelineInfo.dataAnalytics.upsertUsers.scheduleExpression
+      pipelineInfo.dataModeling.upsertUsers.scheduleExpression
     );
     pipelineInfo.selectedUpsertType = EXECUTION_TYPE_LIST.filter(
       (type) => type.value === reverseUpsertUsersScheduleExpression.type
@@ -2461,7 +2461,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         await getQuickSightUsers();
       if (success) {
         const selectUser = data.filter(
-          (element) => element.userName === pipelineInfo.report.quickSight.user
+          (element) => element.userName === pipelineInfo.reporting.quickSight.user
         )[0];
         pipelineInfo.selectedQuickSightUser = {
           label: selectUser.userName,
@@ -2478,7 +2478,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     if (!pipelineInfo.enableReporting) {
       return;
     }
-    if (pipelineInfo.report.quickSight.user) {
+    if (pipelineInfo.reporting.quickSight.user) {
       setUpdateQuickSightUserList(pipelineInfo);
     }
   };
@@ -2575,56 +2575,56 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           },
         },
       },
-      etl: {
-        dataFreshnessInHour: data.etl.dataFreshnessInHour ?? 72,
-        scheduleExpression: data.etl.scheduleExpression ?? '',
+      dataProcessing: {
+        dataFreshnessInHour: data.dataProcessing.dataFreshnessInHour ?? 72,
+        scheduleExpression: data.dataProcessing.scheduleExpression ?? '',
         sourceS3Bucket: {
-          name: data.etl.sourceS3Bucket.name ?? '',
-          prefix: data.etl.sourceS3Bucket.prefix ?? '',
+          name: data.dataProcessing.sourceS3Bucket.name ?? '',
+          prefix: data.dataProcessing.sourceS3Bucket.prefix ?? '',
         },
         sinkS3Bucket: {
-          name: data.etl.sinkS3Bucket.name ?? '',
-          prefix: data.etl.sinkS3Bucket.prefix ?? '',
+          name: data.dataProcessing.sinkS3Bucket.name ?? '',
+          prefix: data.dataProcessing.sinkS3Bucket.prefix ?? '',
         },
         pipelineBucket: {
-          name: data.etl.pipelineBucket.name ?? '',
-          prefix: data.etl.pipelineBucket.prefix ?? '',
+          name: data.dataProcessing.pipelineBucket.name ?? '',
+          prefix: data.dataProcessing.pipelineBucket.prefix ?? '',
         },
-        transformPlugin: data.etl.transformPlugin ?? '',
-        enrichPlugin: data.etl.enrichPlugin ?? [],
+        transformPlugin: data.dataProcessing.transformPlugin ?? '',
+        enrichPlugin: data.dataProcessing.enrichPlugin ?? [],
       },
-      dataAnalytics: {
-        athena: data.dataAnalytics.athena ?? false,
+      dataModeling: {
+        athena: data.dataModeling.athena ?? false,
         redshift: {
-          dataRange: data.dataAnalytics.redshift.dataRange ?? 0,
+          dataRange: data.dataModeling.redshift.dataRange ?? 0,
           provisioned: {
             clusterIdentifier:
-              data.dataAnalytics.redshift.provisioned?.clusterIdentifier ?? '',
-            dbUser: data.dataAnalytics.redshift.provisioned?.dbUser ?? '',
+              data.dataModeling.redshift.provisioned?.clusterIdentifier ?? '',
+            dbUser: data.dataModeling.redshift.provisioned?.dbUser ?? '',
           },
           newServerless: {
             network: {
               vpcId:
-                data.dataAnalytics.redshift.newServerless.network.vpcId ?? '',
+                data.dataModeling.redshift.newServerless.network.vpcId ?? '',
               subnetIds:
-                data.dataAnalytics.redshift.newServerless.network.subnetIds ??
+                data.dataModeling.redshift.newServerless.network.subnetIds ??
                 [],
               securityGroups:
-                data.dataAnalytics.redshift.newServerless.network
+                data.dataModeling.redshift.newServerless.network
                   .securityGroups ?? [],
             },
             baseCapacity:
-              data.dataAnalytics.redshift.newServerless.baseCapacity ?? 16,
+              data.dataModeling.redshift.newServerless.baseCapacity ?? 16,
           },
         },
         loadWorkflow: {
           loadJobScheduleIntervalExpression:
-            data.dataAnalytics.loadWorkflow.loadJobScheduleIntervalExpression ??
+            data.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression ??
             '',
         },
         upsertUsers: {
           scheduleExpression:
-            data.dataAnalytics.upsertUsers.scheduleExpression ?? '',
+            data.dataModeling.upsertUsers.scheduleExpression ?? '',
         },
       },
       status: {
@@ -2641,10 +2641,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       operator: data.operator ?? '',
       deleted: data.deleted ?? false,
     };
-    res.enableDataProcessing = !isEmpty(data.etl);
-    res.enableReporting = !isEmpty(data.report);
+    res.enableDataProcessing = !isEmpty(data.dataProcessing);
+    res.enableReporting = !isEmpty(data.reporting);
     if (res.enableReporting) {
-      res.report = data.report;
+      res.reporting = data.reporting;
     }
     return res;
   };

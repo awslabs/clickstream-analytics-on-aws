@@ -90,14 +90,14 @@ export class PipelineServ {
             OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
           ],
         );
-        const dashboards = await pipeline.getReportDashboardsUrl();
+        const dashboards = await pipeline.getReportingDashboardsUrl();
         const metricsDashboardName = await pipeline.getMetricsDashboardName();
         const pluginsInfo = await pipeline.getPluginsInfo();
         const templateInfo = await pipeline.getTemplateInfo();
         return res.json(new ApiSuccess({
           ...latestPipeline,
-          etl: {
-            ...latestPipeline.etl,
+          dataProcessing: {
+            ...latestPipeline.dataProcessing,
             transformPlugin: pluginsInfo.transformPlugin,
             enrichPlugin: pluginsInfo.enrichPlugin,
           },

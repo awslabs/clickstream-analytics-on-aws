@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CAthenaStack, CDataAnalyticsStack, CETLStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportStack } from './stacks';
+import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack } from './stacks';
 import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
@@ -42,7 +42,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps, ReportDashboardOutput, PipelineStatusType,
+  IngestionServerSinkBatchProps, ReportingDashboardOutput, PipelineStatusType,
 } from '../common/types';
 import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -122,7 +122,7 @@ interface IngestionServer {
   readonly sinkKinesis?: IngestionServerSinkKinesisProps;
 }
 
-export interface ETL {
+export interface DataProcessing {
   readonly dataFreshnessInHour: number;
   readonly scheduleExpression: string;
   readonly sourceS3Bucket: S3Bucket;
@@ -143,7 +143,7 @@ export interface KafkaS3Connector {
   readonly customConnectorConfiguration?: string;
 }
 
-export interface DataAnalytics {
+export interface DataModeling {
   readonly ods?: {
     readonly bucket: S3Bucket;
     readonly fileSuffix: string;
@@ -175,7 +175,7 @@ export interface DataAnalytics {
   };
 }
 
-export interface Report {
+export interface Reporting {
   readonly quickSight?: {
     readonly accountName: string;
     readonly user: string;
@@ -213,9 +213,9 @@ export interface IPipeline {
   readonly network: NetworkProps;
   readonly bucket: S3Bucket;
   readonly ingestionServer: IngestionServer;
-  readonly etl?: ETL;
-  readonly dataAnalytics?: DataAnalytics;
-  readonly report?: Report;
+  readonly dataProcessing?: DataProcessing;
+  readonly dataModeling?: DataModeling;
+  readonly reporting?: Reporting;
 
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
@@ -271,10 +271,10 @@ export class CPipeline {
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
     // bind plugin
     const pluginIds: string[] = [];
-    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
-      pluginIds.push(this.pipeline.etl?.transformPlugin);
+    if (this.pipeline.dataProcessing?.transformPlugin && !this.pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
+      pluginIds.push(this.pipeline.dataProcessing?.transformPlugin);
     }
-    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
+    const enrichIds = this.pipeline.dataProcessing?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
     pluginIds.concat(enrichIds!);
     await store.bindPlugins(pluginIds, 1);
   }
@@ -299,9 +299,9 @@ export class CPipeline {
     const AllowedList: string[] = [
       ...CIngestionServerStack.editAllowedList(),
       ...CKafkaConnectorStack.editAllowedList(),
-      ...CETLStack.editAllowedList(),
-      ...CDataAnalyticsStack.editAllowedList(),
-      ...CReportStack.editAllowedList(),
+      ...CDataProcessingStack.editAllowedList(),
+      ...CDataModelingStack.editAllowedList(),
+      ...CReportingStack.editAllowedList(),
       ...CMetricsStack.editAllowedList(),
     ];
     const editKeys = diffParameters.edited.map(p => p[0]);
@@ -348,17 +348,17 @@ export class CPipeline {
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
-  public async updateETL(appIds: string[]): Promise<void> {
+  public async updateApp(appIds: string[]): Promise<void> {
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
-    const etlStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.ETL, this.pipeline.ingestionServer.sinkType);
+    const dataProcessingStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
     const analyticsStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
+      this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType);
     const reportStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
+      this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType);
     // update workflow
-    this.stackManager.updateETLWorkflow(appIds, ingestionStackName, etlStackName, analyticsStackName, reportStackName);
+    this.stackManager.updateWorkflowForApp(appIds, ingestionStackName, dataProcessingStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionName = `main-${uuidv4()}`;
@@ -381,10 +381,10 @@ export class CPipeline {
 
     // bind plugin
     const pluginIds: string[] = [];
-    if (this.pipeline.etl?.transformPlugin && !this.pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
-      pluginIds.push(this.pipeline.etl?.transformPlugin);
+    if (this.pipeline.dataProcessing?.transformPlugin && !this.pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
+      pluginIds.push(this.pipeline.dataProcessing?.transformPlugin);
     }
-    const enrichIds = this.pipeline.etl?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
+    const enrichIds = this.pipeline.dataProcessing?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
     pluginIds.concat(enrichIds!);
     await store.bindPlugins(pluginIds, -1);
   }
@@ -461,8 +461,8 @@ export class CPipeline {
       };
     }
 
-    const workgroupName = this.pipeline.dataAnalytics?.redshift?.existingServerless?.workgroupName;
-    const clusterIdentifier = this.pipeline.dataAnalytics?.redshift?.provisioned?.clusterIdentifier;
+    const workgroupName = this.pipeline.dataModeling?.redshift?.existingServerless?.workgroupName;
+    const clusterIdentifier = this.pipeline.dataModeling?.redshift?.provisioned?.clusterIdentifier;
     if (!this.resources || (!this.resources?.redshift && (workgroupName || clusterIdentifier))) {
       const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
       if (!redshift) {
@@ -558,8 +558,8 @@ export class CPipeline {
         workflowTemplate.Workflow.Branches?.push(branch);
       }
     }
-    if (!isEmpty(this.pipeline.etl)) {
-      const branch = await this.getWorkflowStack(PipelineStackType.ETL);
+    if (!isEmpty(this.pipeline.dataProcessing)) {
+      const branch = await this.getWorkflowStack(PipelineStackType.DATA_PROCESSING);
       if (branch) {
         workflowTemplate.Workflow.Branches?.push(branch);
       }
@@ -647,19 +647,19 @@ export class CPipeline {
         },
       };
     }
-    if (type === PipelineStackType.ETL) {
+    if (type === PipelineStackType.DATA_PROCESSING) {
       if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
         return undefined;
       }
-      const dataPipelineTemplateURL = await this.getTemplateUrl(PipelineStackType.ETL);
+      const dataPipelineTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_PROCESSING);
       if (!dataPipelineTemplateURL) {
         throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
       }
 
-      const pipelineStack = new CETLStack(this.pipeline, this.resources!);
+      const pipelineStack = new CDataProcessingStack(this.pipeline, this.resources!);
       const pipelineStackParameters = pipelineStack.parameters();
-      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ETL, this.pipeline.ingestionServer.sinkType);
-      const etlState: WorkflowState = {
+      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
+      const dataProcessingState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
           Input: {
@@ -678,34 +678,34 @@ export class CPipeline {
         End: true,
       };
       const branch: WorkflowParallelBranch = {
-        StartAt: PipelineStackType.ETL,
+        StartAt: PipelineStackType.DATA_PROCESSING,
         States: {
-          [PipelineStackType.ETL]: etlState,
+          [PipelineStackType.DATA_PROCESSING]: dataProcessingState,
         },
       };
       const athenaState = await this.getAthenaState();
       if (athenaState) {
         branch.States[PipelineStackType.ATHENA] = athenaState;
-        branch.States[PipelineStackType.ETL].Next = PipelineStackType.ATHENA;
-        delete branch.States[PipelineStackType.ETL].End;
+        branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.ATHENA;
+        delete branch.States[PipelineStackType.DATA_PROCESSING].End;
       }
-      const dataAnalyticsState = await this.getDataAnalyticsState();
-      if (dataAnalyticsState) {
+      const dataModelingState = await this.getDataModelingState();
+      if (dataModelingState) {
         if (athenaState) {
-          branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
-          branch.States[PipelineStackType.ATHENA].Next = PipelineStackType.DATA_ANALYTICS;
+          branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
+          branch.States[PipelineStackType.ATHENA].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
           delete branch.States[PipelineStackType.ATHENA].End;
         } else {
-          branch.States[PipelineStackType.DATA_ANALYTICS] = dataAnalyticsState;
-          branch.States[PipelineStackType.ETL].Next = PipelineStackType.DATA_ANALYTICS;
-          delete branch.States[PipelineStackType.ETL].End;
+          branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
+          branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
+          delete branch.States[PipelineStackType.DATA_PROCESSING].End;
         }
       }
       const reportingState = await this.getReportingState();
-      if (reportingState && dataAnalyticsState) {
-        branch.States[PipelineStackType.REPORT] = reportingState;
-        branch.States[PipelineStackType.DATA_ANALYTICS].Next = PipelineStackType.REPORT;
-        delete branch.States[PipelineStackType.DATA_ANALYTICS].End;
+      if (reportingState && dataModelingState) {
+        branch.States[PipelineStackType.REPORTING] = reportingState;
+        branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
+        delete branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
       }
       return branch;
     }
@@ -746,31 +746,31 @@ export class CPipeline {
     return undefined;
   }
 
-  private async getDataAnalyticsState(): Promise<WorkflowState | undefined> {
-    if (isEmpty(this.pipeline.dataAnalytics)) {
+  private async getDataModelingState(): Promise<WorkflowState | undefined> {
+    if (isEmpty(this.pipeline.dataModeling)) {
       return undefined;
     }
     if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
       return undefined;
     }
-    const dataAnalyticsTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_ANALYTICS);
-    if (!dataAnalyticsTemplateURL) {
+    const dataModelingTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_MODELING_REDSHIFT);
+    if (!dataModelingTemplateURL) {
       throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
     }
 
-    const dataAnalyticsStack = new CDataAnalyticsStack(this.pipeline, this.resources!);
-    const dataAnalyticsStackParameters = dataAnalyticsStack.parameters();
-    const dataAnalyticsStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.DATA_ANALYTICS, this.pipeline.ingestionServer.sinkType);
-    const dataAnalyticsState: WorkflowState = {
+    const dataModelingStack = new CDataModelingStack(this.pipeline, this.resources!);
+    const dataModelingStackParameters = dataModelingStack.parameters();
+    const dataModelingStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType);
+    const dataModelingState: WorkflowState = {
       Type: WorkflowStateType.STACK,
       Data: {
         Input: {
           Action: 'Create',
           Region: this.pipeline.region,
-          StackName: dataAnalyticsStackName,
-          TemplateURL: dataAnalyticsTemplateURL,
-          Parameters: dataAnalyticsStackParameters,
+          StackName: dataModelingStackName,
+          TemplateURL: dataModelingTemplateURL,
+          Parameters: dataModelingStackParameters,
           Tags: this.stackTags,
         },
         Callback: {
@@ -780,20 +780,20 @@ export class CPipeline {
       },
       End: true,
     };
-    return dataAnalyticsState;
+    return dataModelingState;
   }
 
   private async getReportingState(): Promise<WorkflowState | undefined> {
-    if (isEmpty(this.pipeline.report)) {
+    if (isEmpty(this.pipeline.reporting)) {
       return undefined;
     }
-    const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORT);
+    const reportTemplateURL = await this.getTemplateUrl(PipelineStackType.REPORTING);
     if (!reportTemplateURL) {
       throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
     }
-    const reportStack = new CReportStack(this.pipeline, this.resources!);
+    const reportStack = new CReportingStack(this.pipeline, this.resources!);
     const reportStackParameters = reportStack.parameters();
-    const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
+    const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType);
     const reportState: WorkflowState = {
       Type: WorkflowStateType.STACK,
       Data: {
@@ -817,7 +817,7 @@ export class CPipeline {
   }
 
   private async getAthenaState(): Promise<WorkflowState | undefined> {
-    if (!this.pipeline.dataAnalytics?.athena) {
+    if (!this.pipeline.dataModeling?.athena) {
       return undefined;
     }
     const athenaTemplateURL = await this.getTemplateUrl(PipelineStackType.ATHENA);
@@ -872,10 +872,10 @@ export class CPipeline {
     return res;
   }
 
-  public async getReportDashboardsUrl() {
-    let dashboards: ReportDashboardOutput[] = [];
+  public async getReportingDashboardsUrl() {
+    let dashboards: ReportingDashboardOutput[] = [];
     const reportOutputs = await this.getStackOutputBySuffixs(
-      PipelineStackType.REPORT,
+      PipelineStackType.REPORTING,
       [
         OUTPUT_REPORT_DASHBOARDS_SUFFIX,
       ],
@@ -885,7 +885,7 @@ export class CPipeline {
       try {
         dashboards = JSON.parse(dashboardsOutputs);
       } catch (error) {
-        logger.warn('Report Outputs error.', { reportOutputs });
+        logger.warn('Reporting Outputs error.', { reportOutputs });
       }
     }
     return dashboards;
@@ -909,8 +909,8 @@ export class CPipeline {
         plugins: plugins,
       };
     }
-    const transformPlugins = this.resources.plugins?.filter(plugin => plugin.id === this.pipeline.etl?.transformPlugin);
-    const enrichPlugin = this.resources.plugins?.filter(plugin => this.pipeline.etl?.enrichPlugin?.includes(plugin.id));
+    const transformPlugins = this.resources.plugins?.filter(plugin => plugin.id === this.pipeline.dataProcessing?.transformPlugin);
+    const enrichPlugin = this.resources.plugins?.filter(plugin => this.pipeline.dataProcessing?.enrichPlugin?.includes(plugin.id));
     return {
       transformPlugin: transformPlugins?.length === 1? transformPlugins[0] : null,
       enrichPlugin,

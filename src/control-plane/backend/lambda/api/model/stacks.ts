@@ -18,9 +18,10 @@ import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MUTIL_EMAIL_PATTERN,
   KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN, OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
-  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
-  OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   QUICKSIGHT_NAMESPACE_PATTERN,
   QUICKSIGHT_USER_NAME_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
@@ -540,7 +541,7 @@ export class CKafkaConnectorStack extends JSONObject {
 
 }
 
-export class CETLStack extends JSONObject {
+export class CDataProcessingStack extends JSONObject {
 
   public static editAllowedList(): string[] {
     const allowedList:string[] = [
@@ -590,7 +591,7 @@ export class CETLStack extends JSONObject {
     SourceS3Bucket?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (stack:CETLStack, _key:string, value:string) => {
+  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
     return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? `${value}${stack._kafkaTopic}/` : value;
   })
     SourceS3Prefix?: string;
@@ -652,20 +653,20 @@ export class CETLStack extends JSONObject {
       ProjectId: pipeline.projectId,
       AppIds: resources.appIds?.join(','),
 
-      SourceS3Bucket: pipeline.etl?.sourceS3Bucket.name ?? pipeline.bucket.name,
-      SourceS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.etl?.sourceS3Bucket.prefix),
-      SinkS3Bucket: pipeline.etl?.sinkS3Bucket.name ?? pipeline.bucket.name,
-      SinkS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.etl?.sinkS3Bucket.prefix),
+      SourceS3Bucket: pipeline.dataProcessing?.sourceS3Bucket.name ?? pipeline.bucket.name,
+      SourceS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.dataProcessing?.sourceS3Bucket.prefix),
+      SinkS3Bucket: pipeline.dataProcessing?.sinkS3Bucket.name ?? pipeline.bucket.name,
+      SinkS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataProcessing?.sinkS3Bucket.prefix),
 
-      PipelineS3Bucket: pipeline.etl?.pipelineBucket.name ?? pipeline.bucket.name,
-      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.etl?.pipelineBucket.prefix),
-      DataFreshnessInHour: pipeline.etl?.dataFreshnessInHour,
-      ScheduleExpression: pipeline.etl?.scheduleExpression,
+      PipelineS3Bucket: pipeline.dataProcessing?.pipelineBucket.name ?? pipeline.bucket.name,
+      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
+      DataFreshnessInHour: pipeline.dataProcessing?.dataFreshnessInHour,
+      ScheduleExpression: pipeline.dataProcessing?.scheduleExpression,
 
       TransformerAndEnrichClassNames: pluginInfo.transformerAndEnrichClassNames.join(','),
       S3PathPluginJars: pluginInfo.s3PathPluginJars.join(','),
       S3PathPluginFiles: pluginInfo.s3PathPluginFiles.join(','),
-      OutputFormat: pipeline.etl?.outputFormat,
+      OutputFormat: pipeline.dataProcessing?.outputFormat,
     });
   }
 
@@ -683,7 +684,7 @@ export class CETLStack extends JSONObject {
   }
 }
 
-export class CDataAnalyticsStack extends JSONObject {
+export class CDataModelingStack extends JSONObject {
 
   public static editAllowedList(): string[] {
     const allowedList:string[] = [
@@ -780,10 +781,10 @@ export class CDataAnalyticsStack extends JSONObject {
     ClearExpiredEventsRetentionRangeDays?: number;
 
   @JSONObject.optional(REDSHIFT_MODE.NEW_SERVERLESS)
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
       return REDSHIFT_MODE.PROVISIONED;
-    } else if (stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+    } else if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return REDSHIFT_MODE.SERVERLESS;
     }
     return value;
@@ -791,26 +792,26 @@ export class CDataAnalyticsStack extends JSONObject {
     RedshiftMode?: REDSHIFT_MODE;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned) {
-      return stack._pipeline?.dataAnalytics?.redshift?.provisioned.clusterIdentifier;
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
+      return stack._pipeline?.dataModeling?.redshift?.provisioned.clusterIdentifier;
     }
     return value;
   })
     RedshiftClusterIdentifier?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned) {
-      return stack._pipeline?.dataAnalytics?.redshift?.provisioned.dbUser;
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
+      return stack._pipeline?.dataModeling?.redshift?.provisioned.dbUser;
     }
     return value;
   })
     RedshiftDbUser?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
       let workgroupName = `clickstream-${stack._resources!.project?.id.replace(/_/g, '-')}`;
       if (workgroupName.length > 120) {
         workgroupName = workgroupName.substring(0, 120);
@@ -822,30 +823,30 @@ export class CDataAnalyticsStack extends JSONObject {
     NewRedshiftServerlessWorkgroupName?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      validatePattern('NewServerlessVpcId', VPC_ID_PATTERN, stack._pipeline?.dataAnalytics?.redshift?.newServerless.network.vpcId);
-      return stack._pipeline?.dataAnalytics?.redshift?.newServerless.network.vpcId;
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
+      validatePattern('NewServerlessVpcId', VPC_ID_PATTERN, stack._pipeline?.dataModeling?.redshift?.newServerless.network.vpcId);
+      return stack._pipeline?.dataModeling?.redshift?.newServerless.network.vpcId;
     }
     return value;
   })
     RedshiftServerlessVPCId?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
       validatePattern('RedshiftServerlessSubnets', SUBNETS_THREE_AZ_PATTERN,
-        stack._pipeline?.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(','));
-      return stack._pipeline?.dataAnalytics?.redshift?.newServerless.network.subnetIds.join(',');
+        stack._pipeline?.dataModeling?.redshift?.newServerless.network.subnetIds.join(','));
+      return stack._pipeline?.dataModeling?.redshift?.newServerless.network.subnetIds.join(',');
     }
     return value;
   })
     RedshiftServerlessSubnets?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return stack._pipeline?.dataAnalytics?.redshift?.newServerless.network.securityGroups.join(',');
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
+      return stack._pipeline?.dataModeling?.redshift?.newServerless.network.securityGroups.join(',');
     }
     return value;
   })
@@ -854,17 +855,17 @@ export class CDataAnalyticsStack extends JSONObject {
   @JSONObject.optional(16)
   @JSONObject.gte(8)
   @JSONObject.lte(512)
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return stack._pipeline?.dataAnalytics?.redshift?.newServerless.baseCapacity;
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
+      return stack._pipeline?.dataModeling?.redshift?.newServerless.baseCapacity;
     }
     return value;
   })
     RedshiftServerlessRPU?: number;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.serverless?.namespaceId;
     }
     return value;
@@ -872,8 +873,8 @@ export class CDataAnalyticsStack extends JSONObject {
     RedshiftServerlessNamespaceId?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.serverless?.workgroupId;
     }
     return value;
@@ -881,8 +882,8 @@ export class CDataAnalyticsStack extends JSONObject {
     RedshiftServerlessWorkgroupId?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.serverless?.workgroupName;
     }
     return value;
@@ -890,9 +891,9 @@ export class CDataAnalyticsStack extends JSONObject {
     RedshiftServerlessWorkgroupName?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataAnalyticsStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
-      return stack._pipeline?.dataAnalytics?.redshift?.existingServerless.iamRoleArn;
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
+      return stack._pipeline?.dataModeling?.redshift?.existingServerless.iamRoleArn;
     }
     return value;
   })
@@ -903,17 +904,17 @@ export class CDataAnalyticsStack extends JSONObject {
     EMRServerlessApplicationId?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
-    if (pipeline.dataAnalytics?.redshift?.provisioned) {
-      if (isEmpty(pipeline.dataAnalytics?.redshift?.provisioned.clusterIdentifier) ||
-        isEmpty(pipeline.dataAnalytics?.redshift?.provisioned.dbUser)) {
+    if (pipeline.dataModeling?.redshift?.provisioned) {
+      if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
+        isEmpty(pipeline.dataModeling?.redshift?.provisioned.dbUser)) {
         throw new ClickStreamBadRequestError('Cluster Identifier and DbUser are required when using Redshift Provisioned cluster.');
       }
     }
 
-    if (pipeline.dataAnalytics?.redshift?.newServerless) {
-      if (isEmpty(pipeline.dataAnalytics?.redshift?.newServerless.network.vpcId) ||
-        isEmpty(pipeline.dataAnalytics?.redshift?.newServerless.network.subnetIds) ||
-        isEmpty(pipeline.dataAnalytics?.redshift?.newServerless.network.securityGroups)) {
+    if (pipeline.dataModeling?.redshift?.newServerless) {
+      if (isEmpty(pipeline.dataModeling?.redshift?.newServerless.network.vpcId) ||
+        isEmpty(pipeline.dataModeling?.redshift?.newServerless.network.subnetIds) ||
+        isEmpty(pipeline.dataModeling?.redshift?.newServerless.network.securityGroups)) {
         throw new ClickStreamBadRequestError('VpcId, SubnetIds, SecurityGroups required for provisioning new Redshift Serverless.');
       }
     }
@@ -927,20 +928,20 @@ export class CDataAnalyticsStack extends JSONObject {
       ProjectId: pipeline.projectId,
       AppIds: resources.appIds?.join(','),
 
-      ODSEventBucket: pipeline.dataAnalytics?.ods?.bucket.name ?? pipeline.bucket.name,
-      ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataAnalytics?.ods?.bucket.prefix),
-      ODSEventFileSuffix: pipeline.dataAnalytics?.ods?.fileSuffix,
+      ODSEventBucket: pipeline.dataModeling?.ods?.bucket.name ?? pipeline.bucket.name,
+      ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.ods?.bucket.prefix),
+      ODSEventFileSuffix: pipeline.dataModeling?.ods?.fileSuffix,
 
-      LoadWorkflowBucket: pipeline.dataAnalytics?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
-      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataAnalytics?.loadWorkflow?.bucket?.prefix),
-      MaxFilesLimit: pipeline.dataAnalytics?.loadWorkflow?.maxFilesLimit,
-      ProcessingFilesLimit: pipeline.dataAnalytics?.loadWorkflow?.processingFilesLimit,
-      LoadJobScheduleInterval: pipeline.dataAnalytics?.loadWorkflow?.loadJobScheduleIntervalExpression,
-      UpsertUsersScheduleExpression: pipeline.dataAnalytics?.upsertUsers.scheduleExpression,
+      LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
+      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
+      MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
+      ProcessingFilesLimit: pipeline.dataModeling?.loadWorkflow?.processingFilesLimit,
+      LoadJobScheduleInterval: pipeline.dataModeling?.loadWorkflow?.loadJobScheduleIntervalExpression,
+      UpsertUsersScheduleExpression: pipeline.dataModeling?.upsertUsers.scheduleExpression,
 
       EMRServerlessApplicationId: getValueFromStackOutputSuffix(
         pipeline,
-        PipelineStackType.ETL,
+        PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
       ),
 
@@ -969,7 +970,7 @@ export class CDataAnalyticsStack extends JSONObject {
   }
 }
 
-export class CReportStack extends JSONObject {
+export class CReportingStack extends JSONObject {
 
   public static editAllowedList(): string[] {
     const allowedList:string[] = [
@@ -1013,14 +1014,14 @@ export class CReportStack extends JSONObject {
     QuickSightTemplateArnParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CReportStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CReportingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned || stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.endpoint.address;
-    } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
+    } else if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
       return getValueFromStackOutputSuffix(
         stack._pipeline,
-        PipelineStackType.DATA_ANALYTICS,
-        OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
       );
     }
     return value;
@@ -1028,14 +1029,14 @@ export class CReportStack extends JSONObject {
     RedshiftEndpointParam?: string;
 
   @JSONObject.optional('5439')
-  @JSONObject.custom( (stack :CReportStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CReportingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned || stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.endpoint.port.toString();
-    } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
+    } else if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
       return getValueFromStackOutputSuffix(
         stack._pipeline,
-        PipelineStackType.DATA_ANALYTICS,
-        OUTPUT_DATA_ANALYTICS_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
       );
     }
     return value;
@@ -1050,11 +1051,11 @@ export class CReportStack extends JSONObject {
     QuickSightVpcConnectionSubnetParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CReportStack, _key:string, value:any) => {
-    if (stack._pipeline?.dataAnalytics?.redshift?.provisioned || stack._pipeline?.dataAnalytics?.redshift?.existingServerless) {
+  @JSONObject.custom( (stack :CReportingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned || stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.network.securityGroups?.join(',');
-    } else if (stack._pipeline?.dataAnalytics?.redshift?.newServerless) {
-      return stack._pipeline?.dataAnalytics?.redshift.newServerless.network.securityGroups.join(',');
+    } else if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
+      return stack._pipeline?.dataModeling?.redshift.newServerless.network.securityGroups.join(',');
     }
     return value;
   })
@@ -1067,7 +1068,7 @@ export class CReportStack extends JSONObject {
     if (!resources.quickSightTemplateArn) {
       throw new ClickStreamBadRequestError('QuickSightTemplateArn can not found in dictionary.');
     }
-    if (!pipeline.dataAnalytics) {
+    if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
     }
 
@@ -1075,16 +1076,16 @@ export class CReportStack extends JSONObject {
       _pipeline: pipeline,
       _resources: resources,
 
-      QuickSightUserParam: pipeline.report?.quickSight?.user,
-      QuickSightNamespaceParam: pipeline.report?.quickSight?.namespace,
+      QuickSightUserParam: pipeline.reporting?.quickSight?.user,
+      QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
       RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightTemplateArnParam: resources.quickSightTemplateArn?.data,
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
       RedshiftParameterKeyParam: getValueFromStackOutputSuffix(
         pipeline,
-        PipelineStackType.DATA_ANALYTICS,
-        OUTPUT_DATA_ANALYTICS_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
       ),
 
     });
@@ -1129,12 +1130,12 @@ export class CAthenaStack extends JSONObject {
     super({
       AthenaDatabase: getValueFromStackOutputSuffix(
         pipeline,
-        PipelineStackType.ETL,
+        PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
       ),
       AthenaEventTable: getValueFromStackOutputSuffix(
         pipeline,
-        PipelineStackType.ETL,
+        PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
       ),
     });

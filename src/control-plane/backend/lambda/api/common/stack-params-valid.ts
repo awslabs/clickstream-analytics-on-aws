@@ -123,14 +123,14 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
           }
           validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules, services);
         }
-        if (pipeline.etl) {
+        if (pipeline.dataProcessing) {
           validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
             [
               'emr-serverless',
               'glue',
             ]);
         }
-        if (pipeline.dataAnalytics) {
+        if (pipeline.dataModeling) {
           validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
             [
               'redshift-data',
@@ -143,7 +143,7 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
   }
 
 
-  if (pipeline.dataAnalytics?.redshift) {
+  if (pipeline.dataModeling?.redshift) {
     let redshiftType = '';
     let vpcSubnets = allSubnets;
     let redshiftSubnets: ClickStreamSubnet[] = [];
@@ -151,17 +151,17 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     let redshiftSecurityGroupsRules: SecurityGroupRule[] = [];
     let portOfRedshift = 5439;
 
-    if (pipeline.dataAnalytics?.redshift?.newServerless) {
+    if (pipeline.dataModeling?.redshift?.newServerless) {
       redshiftType = REDSHIFT_MODE.NEW_SERVERLESS;
-      if (pipeline.dataAnalytics?.redshift?.newServerless?.network.vpcId !== pipeline.network.vpcId) {
+      if (pipeline.dataModeling?.redshift?.newServerless?.network.vpcId !== pipeline.network.vpcId) {
         vpcSubnets = await describeSubnetsWithType(
-          pipeline.region, pipeline.dataAnalytics.redshift.newServerless.network.vpcId, SubnetType.ALL);
+          pipeline.region, pipeline.dataModeling.redshift.newServerless.network.vpcId, SubnetType.ALL);
       }
       redshiftSubnets = vpcSubnets.filter(
-        subnet => pipeline.dataAnalytics?.redshift?.newServerless?.network.subnetIds.includes(subnet.id));
-      redshiftSecurityGroups = pipeline.dataAnalytics?.redshift?.newServerless?.network.securityGroups;
+        subnet => pipeline.dataModeling?.redshift?.newServerless?.network.subnetIds.includes(subnet.id));
+      redshiftSecurityGroups = pipeline.dataModeling?.redshift?.newServerless?.network.securityGroups;
       redshiftSecurityGroupsRules = await describeSecurityGroupsWithRules(pipeline.region, redshiftSecurityGroups);
-    } else if (pipeline.dataAnalytics?.redshift?.provisioned) {
+    } else if (pipeline.dataModeling?.redshift?.provisioned) {
       redshiftType = REDSHIFT_MODE.PROVISIONED;
       if (resources?.redshift?.network.vpcId !== pipeline.network.vpcId) {
         vpcSubnets = await describeSubnetsWithType(

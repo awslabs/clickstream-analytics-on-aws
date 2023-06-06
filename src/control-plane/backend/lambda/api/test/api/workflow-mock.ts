@@ -399,7 +399,7 @@ export const BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS = mergeParameters(
   ],
 );
 
-const BASE_ETL_PARAMETERS = [
+const BASE_DATA_PROCESSING_PARAMETERS = [
   {
     ParameterKey: 'VpcId',
     ParameterValue: 'vpc-00000000000000001',
@@ -466,8 +466,8 @@ const BASE_ETL_PARAMETERS = [
   },
 ];
 
-export const ETL_PLUGIN1_PARAMETERS = mergeParameters(
-  BASE_ETL_PARAMETERS,
+export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
@@ -484,8 +484,8 @@ export const ETL_PLUGIN1_PARAMETERS = mergeParameters(
   ],
 );
 
-export const ETL_PLUGIN2_PARAMETERS = mergeParameters(
-  BASE_ETL_PARAMETERS,
+export const DATA_PROCESSING_PLUGIN2_PARAMETERS = mergeParameters(
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
     {
       ParameterKey: 'SourceS3Prefix',
@@ -506,8 +506,8 @@ export const ETL_PLUGIN2_PARAMETERS = mergeParameters(
   ],
 );
 
-export const ETL_PLUGIN3_PARAMETERS = mergeParameters(
-  BASE_ETL_PARAMETERS,
+export const DATA_PROCESSING_PLUGIN3_PARAMETERS = mergeParameters(
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
@@ -524,8 +524,8 @@ export const ETL_PLUGIN3_PARAMETERS = mergeParameters(
   ],
 );
 
-export const ETL_PLUGIN4_PARAMETERS = mergeParameters(
-  BASE_ETL_PARAMETERS,
+export const DATA_PROCESSING_PLUGIN4_PARAMETERS = mergeParameters(
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
     {
       ParameterKey: 'SourceS3Prefix',
@@ -661,11 +661,11 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'EMRServerlessApplicationId.#',
-    ParameterValue: '#.Clickstream-ETL-6666-6666.EMRServerlessApplicationId',
+    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.EMRServerlessApplicationId',
   },
 ];
 
-export const MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
+export const MSK_DATA_PROCESSING_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,
   [
     {
@@ -695,7 +695,7 @@ export const MSK_ETL_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParamet
   ],
 );
 
-export const MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
+export const MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,
   [
     {
@@ -720,7 +720,7 @@ export const MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
     },
   ],
 );
-export const MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS = mergeParameters(
+export const MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,
   [
     {
@@ -738,7 +738,7 @@ export const MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS = mergeParame
   ],
 );
 
-const BASE_REPORT_PARAMETERS = [
+const BASE_REPORTING_PARAMETERS = [
   {
     ParameterKey: 'QuickSightUserParam',
     ParameterValue: 'Admin/clickstream-user-xxx',
@@ -769,12 +769,12 @@ const BASE_REPORT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
   },
 ];
 
-export const REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
-  ...BASE_REPORT_PARAMETERS.slice(0, 5),
+export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
+  ...BASE_REPORTING_PARAMETERS.slice(0, 5),
   {
     ParameterKey: 'RedshiftEndpointParam',
     ParameterValue: 'https://redshift/xxx/yyy',
@@ -783,10 +783,10 @@ export const REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
     ParameterKey: 'RedshiftPortParam',
     ParameterValue: '5002',
   },
-  ...BASE_REPORT_PARAMETERS.slice(5, BASE_REPORT_PARAMETERS.length),
+  ...BASE_REPORTING_PARAMETERS.slice(5, BASE_REPORTING_PARAMETERS.length),
 ];
 
-export const REPORT_WITH_NEW_REDSHIFT_PARAMETERS = [
+export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'QuickSightUserParam',
     ParameterValue: 'clickstream-user-xxx@example.com',
@@ -809,11 +809,11 @@ export const REPORT_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftEndpointParam.#',
-    ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress',
+    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress',
   },
   {
     ParameterKey: 'RedshiftPortParam.#',
-    ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
+    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
@@ -825,7 +825,7 @@ export const REPORT_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataAnalytics-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
   },
 ];
 
@@ -863,10 +863,10 @@ export const BASE_METRICS_EMAILS_PARAMETERS = mergeParameters(
 export const BASE_ATHENA_PARAMETERS = [
   {
     ParameterKey: 'AthenaDatabase.#',
-    ParameterValue: '#.Clickstream-ETL-6666-6666.GlueDatabase',
+    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueDatabase',
   },
   {
     ParameterKey: 'AthenaEventTable.#',
-    ParameterValue: '#.Clickstream-ETL-6666-6666.GlueEventTable',
+    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueEventTable',
   },
 ];

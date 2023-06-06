@@ -37,36 +37,36 @@ import {
 import {
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
-  KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
-  KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE,
-  KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
-  KINESIS_ETL_NEW_REDSHIFT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
   KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW, RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS,
-  S3_ETL_PIPELINE,
-  S3_INGESTION_PIPELINE, MSK_ETL_NEW_SERVERLESS_PIPELINE,
-  KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+  S3_DATA_PROCESSING_PIPELINE,
+  S3_INGESTION_PIPELINE, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
 } from './pipeline-mock';
 import {
   BASE_ATHENA_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
-  ETL_PLUGIN1_PARAMETERS,
-  ETL_PLUGIN2_PARAMETERS,
-  ETL_PLUGIN3_PARAMETERS,
-  ETL_PLUGIN4_PARAMETERS,
+  DATA_PROCESSING_PLUGIN1_PARAMETERS,
+  DATA_PROCESSING_PLUGIN2_PARAMETERS,
+  DATA_PROCESSING_PLUGIN3_PARAMETERS,
+  DATA_PROCESSING_PLUGIN4_PARAMETERS,
   INGESTION_KAFKA_PARAMETERS,
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
   INGESTION_KINESIS_PROVISIONED_PARAMETERS,
   INGESTION_MSK_PARAMETERS,
   INGESTION_MSK_WITHOUT_APP_PARAMETERS,
   INGESTION_S3_PARAMETERS,
-  MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-  MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
-  REPORT_WITH_NEW_REDSHIFT_PARAMETERS,
-  REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+  MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+  MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+  REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+  REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
   mergeParameters,
 } from './workflow-mock';
 import { dictionaryTableName } from '../../common/constants';
@@ -541,12 +541,12 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-s3 + ETL', async () => {
+  it('Generate Workflow ingestion-server-s3 + DataProcessing', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(S3_ETL_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(S3_DATA_PROCESSING_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -576,9 +576,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -587,8 +587,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN1_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN1_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
@@ -628,14 +628,14 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow kafka msk + ETL + redshift', async () => {
+  it('Generate Workflow kafka msk + DataProcessing + redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
       subnetsIsolated: true,
       subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(MSK_ETL_NEW_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -683,9 +683,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -694,8 +694,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN2_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN2_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
@@ -715,13 +715,13 @@ describe('Workflow test', () => {
                     Parameters: BASE_ATHENA_PARAMETERS,
                     StackName: 'Clickstream-DataModelingAthena-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -730,8 +730,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
@@ -771,13 +771,13 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + new redshift', async () => {
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + new redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_NEW_REDSHIFT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -807,9 +807,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -818,16 +818,16 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -836,8 +836,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
@@ -877,12 +877,12 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift', async () => {
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + provisioned redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -912,9 +912,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -923,8 +923,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
@@ -944,13 +944,13 @@ describe('Workflow test', () => {
                     Parameters: BASE_ATHENA_PARAMETERS,
                     StackName: 'Clickstream-DataModelingAthena-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -959,8 +959,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Parameters: MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
@@ -1000,12 +1000,12 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + provisioned redshift + quicksight', async () => {
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + provisioned redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1035,9 +1035,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1046,8 +1046,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
@@ -1067,13 +1067,13 @@ describe('Workflow test', () => {
                     Parameters: BASE_ATHENA_PARAMETERS,
                     StackName: 'Clickstream-DataModelingAthena-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1082,16 +1082,16 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Parameters: MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
                 Type: 'Stack',
               },
-              Report: {
+              Reporting: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1100,8 +1100,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: REPORT_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
-                    StackName: 'Clickstream-Report-6666-6666',
+                    Parameters: REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+                    StackName: 'Clickstream-Reporting-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
                   },
@@ -1141,13 +1141,13 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
-  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + ETL + new redshift + quicksight', async () => {
+  it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + new redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock, ec2Mock, sfnMock, secretsManagerMock, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(KINESIS_ETL_NEW_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1177,9 +1177,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1188,16 +1188,16 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1206,16 +1206,16 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
                 Type: 'Stack',
               },
-              Report: {
+              Reporting: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1224,8 +1224,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: REPORT_WITH_NEW_REDSHIFT_PARAMETERS,
-                    StackName: 'Clickstream-Report-6666-6666',
+                    Parameters: REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+                    StackName: 'Clickstream-Reporting-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
                   },
@@ -1273,7 +1273,7 @@ describe('Workflow test', () => {
       subnetsIsolated: true,
       noApp: true,
     });
-    const pipeline: CPipeline = new CPipeline(MSK_ETL_NEW_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE);
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1321,9 +1321,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1332,8 +1332,8 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: ETL_PLUGIN4_PARAMETERS,
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    Parameters: DATA_PROCESSING_PLUGIN4_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
                   },
@@ -1353,13 +1353,13 @@ describe('Workflow test', () => {
                     Parameters: BASE_ATHENA_PARAMETERS,
                     StackName: 'Clickstream-DataModelingAthena-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-athena-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
-              DataAnalytics: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1369,7 +1369,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: mergeParameters(
-                      MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                      MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
                       [
                         {
                           ParameterKey: 'AppIds',
@@ -1377,7 +1377,7 @@ describe('Workflow test', () => {
                         },
                       ],
                     ),
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
@@ -1467,9 +1467,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1479,7 +1479,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -1489,9 +1489,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataAnalytics',
+            StartAt: 'DataModeling',
             States: {
-              Report: {
+              Reporting: {
                 Type: 'Pass',
                 Data: {
                   Input: {
@@ -1499,7 +1499,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
-                    StackName: 'Clickstream-Report-6666-6666',
+                    StackName: 'Clickstream-Reporting-6666-6666',
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -1508,7 +1508,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataAnalytics: {
+              DataModeling: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1518,11 +1518,11 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
                 Type: 'Pass',
               },
             },
@@ -1605,9 +1605,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1617,7 +1617,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Parameters: [],
                     Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -1627,9 +1627,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataAnalytics',
+            StartAt: 'DataModeling',
             States: {
-              DataAnalytics: {
+              DataModeling: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1639,14 +1639,14 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Parameters: [],
                     Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
                 Type: 'Pass',
               },
-              Report: {
+              Reporting: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1656,7 +1656,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Parameters: [],
                     Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-Report-e9a8f34fbf734ca4950787f1ad818989',
+                    StackName: 'Clickstream-Reporting-e9a8f34fbf734ca4950787f1ad818989',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   },
                 },
@@ -1697,7 +1697,7 @@ describe('Workflow test', () => {
   it('Generate Upgrade Workflow', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const stackManager: StackManager = new StackManager(KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
+    const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
     await stackManager.upgradeWorkflow(MOCK_NEW_TEMPLATE_VERSION);
     const expected = {
       Version: '2022-03-15',
@@ -1743,9 +1743,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
@@ -1755,7 +1755,7 @@ describe('Workflow test', () => {
                     Action: 'Upgrade',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_NEW_TEMPLATE_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
@@ -1765,9 +1765,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataAnalytics',
+            StartAt: 'DataModeling',
             States: {
-              Report: {
+              Reporting: {
                 Type: 'Stack',
                 Data: {
                   Input: {
@@ -1775,7 +1775,7 @@ describe('Workflow test', () => {
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_NEW_TEMPLATE_VERSION}/default/data-reporting-quicksight-stack.template.json`,
                     Action: 'Upgrade',
                     Parameters: [],
-                    StackName: 'Clickstream-Report-6666-6666',
+                    StackName: 'Clickstream-Reporting-6666-6666',
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -1784,7 +1784,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataAnalytics: {
+              DataModeling: {
                 Data: {
                   Callback: {
                     BucketName: 'EXAMPLE_BUCKET',
@@ -1794,11 +1794,11 @@ describe('Workflow test', () => {
                     Action: 'Upgrade',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_NEW_TEMPLATE_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
                 Type: 'Stack',
               },
             },
@@ -1881,9 +1881,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1893,7 +1893,7 @@ describe('Workflow test', () => {
                     Action: 'Delete',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-ETL-6666-6666',
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
@@ -1903,9 +1903,9 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'Report',
+            StartAt: 'Reporting',
             States: {
-              Report: {
+              Reporting: {
                 Type: 'Stack',
                 Data: {
                   Input: {
@@ -1913,16 +1913,16 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                     Action: 'Delete',
                     Parameters: [],
-                    StackName: 'Clickstream-Report-6666-6666',
+                    StackName: 'Clickstream-Reporting-6666-6666',
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                     BucketName: 'TEST_EXAMPLE_BUCKET',
                   },
                 },
-                Next: 'DataAnalytics',
+                Next: 'DataModeling',
               },
-              DataAnalytics: {
+              DataModeling: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1932,7 +1932,7 @@ describe('Workflow test', () => {
                     Action: 'Delete',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: 'Clickstream-DataAnalytics-6666-6666',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
@@ -2681,15 +2681,15 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'ETL',
+            StartAt: 'DataProcessing',
             States: {
-              ETL: {
+              DataProcessing: {
                 Type: WorkflowStateType.STACK,
                 Data: {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-northeast-1',
-                    StackName: 'Clickstream-ETL-80a00964678e487d8425bca0000f5d08',
+                    StackName: 'Clickstream-DataProcessing-80a00964678e487d8425bca0000f5d08',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-pipeline-stack.template.json',
                     Parameters: [],
                     Tags: [],
@@ -2704,15 +2704,15 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataAnalytics',
+            StartAt: 'DataModeling',
             States: {
-              DataAnalytics: {
+              DataModeling: {
                 Type: WorkflowStateType.STACK,
                 Data: {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-northeast-1',
-                    StackName: 'Clickstream-DataAnalytics-80a00964678e487d8425bca0000f5d08',
+                    StackName: 'Clickstream-DataModelingRedshift-80a00964678e487d8425bca0000f5d08',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-analytics-redshift-stack.template.json',
                     Parameters: [],
                     Tags: [],
@@ -2722,15 +2722,15 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-bbaff5ef-dfaa-49b0-86b3-4ea12842669d',
                   },
                 },
-                Next: 'Report',
+                Next: 'Reporting',
               },
-              Report: {
+              Reporting: {
                 Type: WorkflowStateType.STACK,
                 Data: {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-northeast-1',
-                    StackName: 'Clickstream-Report-80a00964678e487d8425bca0000f5d08',
+                    StackName: 'Clickstream-Reporting-80a00964678e487d8425bca0000f5d08',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/data-reporting-quicksight-stack.template.json',
                     Parameters: [],
                     Tags: [],

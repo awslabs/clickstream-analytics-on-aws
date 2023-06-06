@@ -22,7 +22,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
-import { KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -441,7 +441,7 @@ describe('Project test', () => {
       ],
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_ETL_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});

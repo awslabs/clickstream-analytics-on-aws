@@ -104,9 +104,9 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   const names: Map<string, string> = new Map();
   names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
   names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
-  names.set(PipelineStackType.ETL, `Clickstream-${PipelineStackType.ETL}-${pipelineId}`);
-  names.set(PipelineStackType.DATA_ANALYTICS, `Clickstream-${PipelineStackType.DATA_ANALYTICS}-${pipelineId}`);
-  names.set(PipelineStackType.REPORT, `Clickstream-${PipelineStackType.REPORT}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_PROCESSING, `Clickstream-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `Clickstream-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
+  names.set(PipelineStackType.REPORTING, `Clickstream-${PipelineStackType.REPORTING}-${pipelineId}`);
   names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
   names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
   return names.get(key) ?? '';
@@ -132,8 +132,8 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const s3PathPluginJars: string[] = [];
   let s3PathPluginFiles: string[] = [];
   // Transformer
-  if (!isEmpty(pipeline.etl?.transformPlugin) && !pipeline.etl?.transformPlugin?.startsWith('BUILT-IN')) {
-    const transformer = resources!.plugins?.filter(p => p.id === pipeline.etl?.transformPlugin)[0];
+  if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
+    const transformer = resources!.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
     if (transformer?.mainFunction) {
       transformerAndEnrichClassNames.push(transformer?.mainFunction);
     }
@@ -150,8 +150,8 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
     }
   }
   // Enrich
-  if (pipeline.etl?.enrichPlugin) {
-    for (let enrichPluginId of pipeline.etl?.enrichPlugin) {
+  if (pipeline.dataProcessing?.enrichPlugin) {
+    for (let enrichPluginId of pipeline.dataProcessing?.enrichPlugin) {
       const enrich = resources.plugins?.filter(p => p.id === enrichPluginId)[0];
       if (!enrich?.id.startsWith('BUILT-IN')) {
         if (enrich?.jarFile) {

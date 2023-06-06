@@ -920,7 +920,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             ) || ''
                           }
                           value={
-                            pipelineInfo.dataAnalytics.redshift.provisioned
+                            pipelineInfo.dataModeling.redshift.provisioned
                               .dbUser
                           }
                           onChange={(e) => {

@@ -100,7 +100,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       },
     },
   },
-  etl: {
+  dataProcessing: {
     dataFreshnessInHour: 72,
     scheduleExpression: '',
     sourceS3Bucket: {
@@ -118,7 +118,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     transformPlugin: '',
     enrichPlugin: [],
   },
-  dataAnalytics: {
+  dataModeling: {
     athena: false,
     redshift: {
       dataRange: 0,
@@ -142,7 +142,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       scheduleExpression: '',
     },
   },
-  report: {
+  reporting: {
     quickSight: {
       accountName: '',
       user: '',

@@ -39,7 +39,7 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
             ) : (
               <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
             )
-          ) : pipelineInfo.report ? (
+          ) : pipelineInfo.reporting ? (
             <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
           ) : (
             <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
@@ -73,13 +73,13 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
           <Box variant="awsui-key-label">
             {t('pipeline:create.qsAccountName')}
           </Box>
-          <div>{pipelineInfo?.report.quickSight.accountName || '-'}</div>
+          <div>{pipelineInfo?.reporting.quickSight.accountName || '-'}</div>
         </div>
         <div>
           <Box variant="awsui-key-label">
             {t('pipeline:create.quickSightUser')}
           </Box>
-          <div>{pipelineInfo?.report.quickSight.user || '-'}</div>
+          <div>{pipelineInfo?.reporting.quickSight.user || '-'}</div>
         </div>
       </SpaceBetween>
     </ColumnLayout>

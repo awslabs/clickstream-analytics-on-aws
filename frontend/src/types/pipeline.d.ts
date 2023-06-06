@@ -107,7 +107,7 @@ declare global {
         };
       };
     };
-    etl: {
+    dataProcessing: {
       dataFreshnessInHour: number;
       scheduleExpression: string;
       sourceS3Bucket: {
@@ -125,7 +125,7 @@ declare global {
       transformPlugin: string;
       enrichPlugin: string[];
     };
-    dataAnalytics: {
+    dataModeling: {
       athena: boolean;
       redshift: {
         dataRange: number;
@@ -149,7 +149,7 @@ declare global {
         scheduleExpression: string;
       };
     };
-    report: {
+    reporting: {
       quickSight: {
         accountName: string;
         user: string;
