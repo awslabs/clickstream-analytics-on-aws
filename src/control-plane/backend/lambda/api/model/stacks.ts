@@ -90,6 +90,9 @@ export class CIngestionServerStack extends JSONObject {
     ProjectId?: string;
 
   @JSONObject.required
+    AppIds?: string;
+
+  @JSONObject.required
   @JSONObject.custom( (_:any, key:string, value:any) => {
     validatePattern(key, VPC_ID_PATTERN, value);
     return value;
@@ -313,6 +316,7 @@ export class CIngestionServerStack extends JSONObject {
 
       DevMode: resources.project?.environment == ProjectEnvironment.DEV ? 'Yes' : 'No',
       ProjectId: pipeline.projectId,
+      AppIds: resources.appIds?.join(','),
       // VPC Information
       VpcId: pipeline.network.vpcId,
       PublicSubnetIds: pipeline.network.publicSubnetIds.join(','),

@@ -294,6 +294,8 @@ export class TestStack extends Stack {
       enableGlobalAccelerator,
       devMode,
       projectId: 'test_proj_001',
+      appIds: 'appId',
+      clickStreamSDK: 'Yes',
     };
 
     const ingestionServer = new IngestionServer(

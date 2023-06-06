@@ -75,6 +75,8 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
   readonly projectId: string;
+  readonly appIds: string;
+  readonly clickStreamSDK: string;
 
   // authentication parameters
   readonly enableAuthentication?: string;
@@ -242,6 +244,8 @@ export class IngestionServerNestedStack extends NestedStack {
       devMode: props.devMode,
       authenticationSecretArn,
       projectId: props.projectId,
+      appIds: props.appIds,
+      clickStreamSDK: props.clickStreamSDK,
     };
 
     const ingestionServer = new IngestionServer(
@@ -324,6 +328,8 @@ export class IngestionServerStack extends Stack {
         enableGlobalAcceleratorParam,
         devModeParam,
         projectIdParam,
+        appIdsParam,
+        clickStreamSDKParam,
         enableAuthenticationParam,
         authenticationSecretArnParam,
       },
@@ -357,6 +363,8 @@ export class IngestionServerStack extends Stack {
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
       devMode: devModeParam.valueAsString,
       projectId: projectIdParam.valueAsString,
+      clickStreamSDK: clickStreamSDKParam.valueAsString,
+      appIds: appIdsParam.valueAsString,
     };
 
     let nestStackProps = { ... nestStackCommonProps };

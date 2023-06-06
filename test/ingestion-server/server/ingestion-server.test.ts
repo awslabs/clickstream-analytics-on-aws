@@ -416,25 +416,6 @@ test('Server endpoint path can be configured in nginx task', () => {
   expect(hasEndpointEnv).toBeTruthy();
 });
 
-test('Server endpoint path can be configured in ALB', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withMskConfig: true,
-    serverEndpointPath: '/test_end_point',
-  });
-  const template = Template.fromStack(stack);
-
-  const listenerRule = findFirstResource(
-    template,
-    'AWS::ElasticLoadBalancingV2::ListenerRule',
-  )?.resource;
-  expect(
-    listenerRule.Properties.Conditions[0].PathPatternConfig.Values[0].startsWith(
-      '/test_end_point',
-    ),
-  ).toBeTruthy();
-});
-
 test('SecurityGroupIngress is added to Msk security group', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
@@ -536,42 +517,6 @@ test('enable Alb access log is configured', () => {
   expect(access_logs_s3_enabled).toBeTruthy();
 });
 
-test('enable authentication', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withS3SinkConfig: true,
-    withAuthentication: true,
-    protocol: ApplicationProtocol.HTTPS,
-    authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
-  });
-  const template = Template.fromStack(stack);
-  const listenerRules = findResources(
-    template,
-    'AWS::ElasticLoadBalancingV2::ListenerRule',
-  );
-  // check /login action rule
-  expect(listenerRules[0].Properties.Conditions[1].PathPatternConfig.Values).toEqual(['/login']);
-  expect(listenerRules[0].Properties.Actions[0].Type).toEqual('authenticate-oidc');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.AuthorizationEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:authorizationEndpoint::}}');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.ClientId).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:appClientId::}}');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.ClientSecret).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:appClientSecret::}}');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.Issuer).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:issuer::}}');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.OnUnauthenticatedRequest).toEqual('authenticate');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.TokenEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:tokenEndpoint::}}');
-  expect(listenerRules[0].Properties.Actions[0].AuthenticateOidcConfig.UserInfoEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:userEndpoint::}}');
-
-  // check /collect action rule
-  expect(listenerRules[1].Properties.Conditions[0].PathPatternConfig.Values).toEqual(['/collect*']);
-  expect(listenerRules[1].Properties.Actions[0].Type).toEqual('authenticate-oidc');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.AuthorizationEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:authorizationEndpoint::}}');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.ClientId).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:appClientId::}}');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.ClientSecret).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:appClientSecret::}}');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.Issuer).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:issuer::}}');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.OnUnauthenticatedRequest).toEqual('deny');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.TokenEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:tokenEndpoint::}}');
-  expect(listenerRules[1].Properties.Actions[0].AuthenticateOidcConfig.UserInfoEndpoint).toEqual('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx:SecretString:userEndpoint::}}');
-
-});
 
 test('S3 bucket policy is configured to allow ALB to write files when Alb access log is configured', () => {
   const app = new App();
@@ -756,33 +701,6 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   expect(devModeValue).not.toEqual('__NOT_SET__');
   expect(devModeValue).toEqual('Yes');
 
-});
-
-test('ALB Listener has rule to check host', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    withMskConfig: true,
-    domainName: 'www.example.com',
-    certificateArn: 'arn:aws:acm:us-east-1:111111111111:certificate/fake',
-    protocol: ApplicationProtocol.HTTPS,
-  });
-  const template = Template.fromStack(stack);
-  const listenerRule = findResources(template, 'AWS::ElasticLoadBalancingV2::ListenerRule');
-
-  expect(listenerRule[0].Properties.Conditions[1].HostHeaderConfig.Values).toEqual(['www.example.com']);
-});
-
-test('ALB Listener does not have rule to check host if the protocol is HTTP', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    protocol: ApplicationProtocol.HTTP,
-    serverEndpointPath: '/test_end_point',
-  });
-  const template = Template.fromStack(stack);
-  const listenerRule = findResources(template, 'AWS::ElasticLoadBalancingV2::ListenerRule');
-
-  expect(listenerRule[0].Properties.Conditions.length == 1).toBeTruthy();
-  expect(listenerRule[0].Properties.Conditions[0].PathPatternConfig.Values[0].startsWith('/test_end_point')).toBeTruthy();
 });
 
 test('Enable Global Accelerator feature', () => {

@@ -349,6 +349,8 @@ export class CPipeline {
   }
 
   public async updateETL(appIds: string[]): Promise<void> {
+    const ingestionStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
     const etlStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.ETL, this.pipeline.ingestionServer.sinkType);
     const analyticsStackName = getStackName(
@@ -356,7 +358,7 @@ export class CPipeline {
     const reportStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.REPORT, this.pipeline.ingestionServer.sinkType);
     // update workflow
-    this.stackManager.updateETLWorkflow(appIds, etlStackName, analyticsStackName, reportStackName);
+    this.stackManager.updateETLWorkflow(appIds, ingestionStackName, etlStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionName = `main-${uuidv4()}`;

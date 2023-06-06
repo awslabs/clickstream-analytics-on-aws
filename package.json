@@ -59,6 +59,7 @@
     "@aws-sdk/client-cloudwatch": "^3.338.0",
     "@aws-sdk/client-dynamodb": "^3.338.0",
     "@aws-sdk/client-ec2": "^3.338.0",
+    "@aws-sdk/client-elastic-load-balancing-v2": "^3.338.0",
     "@aws-sdk/client-emr-serverless": "^3.338.0",
     "@aws-sdk/client-glue": "^3.338.0",
     "@aws-sdk/client-iam": "^3.338.0",

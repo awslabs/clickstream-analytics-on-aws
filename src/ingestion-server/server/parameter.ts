@@ -104,7 +104,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
-  const projectIdParam = Parameters.createProjectIdParameter(scope);
+  const { projectIdParam, appIdsParam } = Parameters.createProjectAndAppsParameters(scope, 'ProjectId', 'AppIds');
 
   const logS3BucketParam = Parameters.createS3BucketParameter(scope, 'LogS3Bucket', {
     description: 'S3 bucket name to save log (optional)',
@@ -116,6 +116,16 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     default: 'ingestion-server-log/',
   });
 
+  const clickStreamSDKParam = new CfnParameter(
+    scope,
+    'ClickStreamSDK',
+    {
+      description: 'Indicate solution use click stream sdk or third party SDK',
+      type: 'String',
+      allowedValues: ['Yes', 'No'],
+      default: 'Yes',
+    },
+  );
 
   const notificationsTopicArnParam = new CfnParameter(
     scope,
@@ -693,6 +703,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       enableGlobalAcceleratorParam,
       devModeParam,
       projectIdParam,
+      appIdsParam,
+      clickStreamSDKParam,
       enableAuthenticationParam,
       authenticationSecretArnParam,
     },

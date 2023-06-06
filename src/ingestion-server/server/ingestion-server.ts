@@ -35,6 +35,7 @@ import { createMetricsWidgetForKafka } from './private/metircs-kafka';
 import { createMetricsWidgetForServer } from './private/metircs-server';
 import { createALBSecurityGroup, createECSSecurityGroup } from './private/sg';
 import { LogProps } from '../../common/alb';
+import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
 
@@ -119,6 +120,8 @@ export interface IngestionServerProps {
   readonly devMode: string;
   readonly authenticationSecretArn?: string;
   readonly projectId: string;
+  readonly appIds: string;
+  readonly clickStreamSDK: string;
 }
 
 export class IngestionServer extends Construct {
@@ -164,7 +167,7 @@ export class IngestionServer extends Construct {
     const albSg = createALBSecurityGroup(this, props.vpc, ports, props.authenticationSecretArn);
     ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
 
-    const alb = createApplicationLoadBalancer(this, {
+    const { alb, targetGroup, listener }= createApplicationLoadBalancer(this, {
       vpc: props.vpc,
       service: ecsService,
       sg: albSg,
@@ -204,6 +207,15 @@ export class IngestionServer extends Construct {
       });
     }
 
+    updateAlbRules(this,
+      props.appIds,
+      props.clickStreamSDK,
+      targetGroup.targetGroupArn,
+      listener.listenerArn,
+      props.serverEndpointPath,
+      props.protocol,
+      props.domainName,
+      props.authenticationSecretArn);
 
     const acceleratorEnableCondition = new CfnCondition(
       scope,
@@ -228,4 +240,27 @@ export class IngestionServer extends Construct {
     this.acceleratorDNS = accelerator.dnsName;
     this.acceleratorEnableCondition = acceleratorEnableCondition;
   }
+}
+
+function updateAlbRules(
+  scope: Construct,
+  appIds: string,
+  clickStreamSDK: string,
+  targetGroupArn: string,
+  listenerArn: string,
+  endpointPath: string,
+  protocol: string,
+  domainName?: string,
+  authenticationSecretArn?: string,
+) {
+  updateAlbRulesCustomResource(scope, {
+    appIds,
+    clickStreamSDK,
+    targetGroupArn,
+    listenerArn,
+    authenticationSecretArn,
+    endpointPath,
+    domainName,
+    protocol,
+  });
 }

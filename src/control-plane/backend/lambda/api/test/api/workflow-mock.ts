@@ -39,6 +39,10 @@ const BASE_INGESTION_PARAMETERS: Parameter[] = [
     ParameterValue: 'project_8888_8888',
   },
   {
+    ParameterKey: 'AppIds',
+    ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
+  },
+  {
     ParameterKey: 'VpcId',
     ParameterValue: 'vpc-00000000000000001',
   },
@@ -183,6 +187,32 @@ export const INGESTION_KAFKA_PARAMETERS = mergeParameters(
 export const INGESTION_MSK_PARAMETERS = mergeParameters(
   BASE_INGESTION_PARAMETERS,
   [
+    {
+      ParameterKey: 'MskClusterName',
+      ParameterValue: 'mskClusterName',
+    },
+    {
+      ParameterKey: 'MskSecurityGroupId',
+      ParameterValue: 'sg-0000000000002',
+    },
+    {
+      ParameterKey: 'KafkaTopic',
+      ParameterValue: 'project_8888_8888',
+    },
+    {
+      ParameterKey: 'KafkaBrokers',
+      ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+    },
+  ],
+);
+
+export const INGESTION_MSK_WITHOUT_APP_PARAMETERS = mergeParameters(
+  BASE_INGESTION_PARAMETERS,
+  [
+    {
+      ParameterKey: 'AppIds',
+      ParameterValue: '',
+    },
     {
       ParameterKey: 'MskClusterName',
       ParameterValue: 'mskClusterName',

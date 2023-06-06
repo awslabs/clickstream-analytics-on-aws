@@ -544,6 +544,8 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'DevMode',
     'AuthenticationSecretArn',
     'ProjectId',
+    'AppIds',
+    'ClickStreamSDK',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -581,6 +583,9 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'EnableGlobalAccelerator',
     'DevMode',
     'ProjectId',
+    'DomainName',
+    'AppIds',
+    'ClickStreamSDK',
   ];
 
   console.log('');
@@ -623,6 +628,8 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'DevMode',
     'AuthenticationSecretArn',
     'ProjectId',
+    'AppIds',
+    'ClickStreamSDK',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -658,6 +665,9 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'EnableGlobalAccelerator',
     'DevMode',
     'ProjectId',
+    'DomainName',
+    'AppIds',
+    'ClickStreamSDK',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -702,6 +712,8 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'DevMode',
     'AuthenticationSecretArn',
     'ProjectId',
+    'AppIds',
+    'ClickStreamSDK',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -740,6 +752,9 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'EnableGlobalAccelerator',
     'DevMode',
     'ProjectId',
+    'DomainName',
+    'AppIds',
+    'ClickStreamSDK',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(

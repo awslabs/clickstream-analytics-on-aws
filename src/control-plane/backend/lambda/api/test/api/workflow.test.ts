@@ -61,6 +61,7 @@ import {
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
   INGESTION_KINESIS_PROVISIONED_PARAMETERS,
   INGESTION_MSK_PARAMETERS,
+  INGESTION_MSK_WITHOUT_APP_PARAMETERS,
   INGESTION_S3_PARAMETERS,
   MSK_ETL_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
   MSK_ETL_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
@@ -1290,7 +1291,7 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: INGESTION_MSK_PARAMETERS,
+                    Parameters: INGESTION_MSK_WITHOUT_APP_PARAMETERS,
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
