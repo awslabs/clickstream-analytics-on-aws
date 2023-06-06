@@ -69,6 +69,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const [loadingQuickSight, setLoadingQuickSight] = useState(false);
   const [loadingCreateUser, setLoadingCreateUser] = useState(false);
   const [quickSightEnabled, setQuickSightEnabled] = useState(false);
+  const [quickSightEnterprise, setQuickSightEnterprise] = useState(false);
   const [userActiveLink, setUserActiveLink] = useState('');
 
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -88,6 +89,13 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       ) {
         setQuickSightEnabled(true);
         changeQuickSightAccountName(data.accountName);
+      }
+      if (
+        success &&
+        data &&
+        data.edition.includes('ENTERPRISE')
+      ) {
+        setQuickSightEnterprise(true);
       }
     } catch (error) {
       setLoadingQuickSight(false);
@@ -239,7 +247,16 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                     </Alert>
                   )}
 
-                  {quickSightEnabled && (
+                  {quickSightEnabled && !quickSightEnterprise && (
+                    <Alert
+                      type="warning"
+                      header={t('pipeline:create.quickSightNotEnterprise')}
+                    >
+                      {t('pipeline:create.quickSightNotEnterpriseDesc')}
+                    </Alert>
+                  )}
+
+                  {quickSightEnabled && quickSightEnterprise && (
                     <>
                       <FormField
                         label={t('pipeline:create.quickSightUser')}

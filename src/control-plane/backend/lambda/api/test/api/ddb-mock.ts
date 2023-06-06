@@ -20,6 +20,7 @@ import {
   VpcEndpointType,
 } from '@aws-sdk/client-ec2';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
+import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
@@ -262,6 +263,7 @@ function createPipelineMock(
   ec2Mock: any,
   sfnMock: any,
   secretsManagerMock: any,
+  quickSightMock: any,
   props?: {
     noApp?: boolean;
     update?: boolean;
@@ -276,6 +278,7 @@ function createPipelineMock(
     sgError?: boolean;
     vpcEndpointSubnetErr?: boolean;
     twoAZsInRegion?: boolean;
+    quickSightStandard?: boolean;
   }): any {
   // project
   ddbMock.on(GetCommand, {
@@ -714,7 +717,12 @@ function createPipelineMock(
     SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
   });
   sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-
+  quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
+    AccountInfo: {
+      AccountName: 'ck',
+      Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
+    },
+  });
 }
 
 export {

@@ -17,6 +17,7 @@ import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatch
 import { checkVpcEndpoint, containRule, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
+import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getSecretValue } from '../store/aws/secretsmanager';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
@@ -225,6 +226,15 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
         `Validate error, security groups error of ${redshiftType} Redshift. ` +
         'Please check and try again.',
       );
+    }
+
+    if (pipeline.reporting?.quickSight?.accountName) {
+      const accountInfo = await describeAccountSubscription();
+      if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
+        throw new ClickStreamBadRequestError(
+          'Validation error: QuickSight edition is not enterprise in your account.',
+        );
+      }
     }
   }
 
