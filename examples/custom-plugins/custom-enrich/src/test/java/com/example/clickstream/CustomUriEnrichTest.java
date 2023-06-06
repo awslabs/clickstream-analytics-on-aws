@@ -22,15 +22,32 @@ import scala.collection.mutable.ArraySeq;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class CustomUriEnrichTest extends BaseSparkTest {
     CustomUriEnrich uriTransformer = new CustomUriEnrich();
     @Test
     public void should_transform(){
-        String inputJsonFile = requireNonNull(getClass().getResource("/transformed_data.json")).getPath();
-        Dataset<Row> inputDataset = spark.read().json(inputJsonFile);
+        String inputFile = getClass().getResource("/test.snappy.parquet").getPath();
+        Dataset<Row> inputDataset = spark.read().parquet(inputFile);
+
+        inputDataset = inputDataset.withColumn("uri", lit("customAppName=testApp007&appId=007"));
+        inputDataset.printSchema();
+
+        String eventParamSchema = "{\"name\":\"event_params\",\"type\":{\"type\":\"array\",\"elementType\":{\"type\":\"struct\",\"fields\":[" +
+                "{\"name\":\"key\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}," +
+                "{\"name\":\"value\",\"type\":{\"type\":\"struct\",\"fields\":[" +
+                "{\"name\":\"double_value\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}}," +
+                "{\"name\":\"float_value\",\"type\":\"float\",\"nullable\":true,\"metadata\":{}}," +
+                "{\"name\":\"int_value\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}," +
+                "{\"name\":\"string_value\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]}," +
+                "\"nullable\":true,\"metadata\":{}}]},\"containsNull\":true},\"nullable\":true,\"metadata\":{}}";
+
+        assertTrue(inputDataset.schema().json().indexOf(eventParamSchema) > 0);
+
         Dataset<Row> transformedDataset = uriTransformer.transform(inputDataset);
         transformedDataset.write().mode(SaveMode.Overwrite).json("/tmp/uriTransformer/");
         List<Row> rows = transformedDataset.takeAsList(2);
@@ -39,8 +56,8 @@ public class CustomUriEnrichTest extends BaseSparkTest {
         String lastKey = eventParams.last().getAs("key").toString();
         String lastValue = ((Row)eventParams.last().getAs("value")).getAs("string_value");
         assertEquals("customAppName", lastKey);
-        assertEquals("name1", lastValue);
-        assertEquals(20, eventParams.size());
+        assertEquals("testApp007", lastValue);
+        assertEquals(12, eventParams.size());
 
     }
 }

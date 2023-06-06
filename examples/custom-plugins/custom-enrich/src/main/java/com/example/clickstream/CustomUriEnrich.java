@@ -24,7 +24,7 @@ import static org.apache.spark.sql.functions.*;
 public final class CustomUriEnrich {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
-        // `event_params` array<struct<key:string,value:struct<double_value:string,float_value:string,int_value:string,string_value:string>>>,
+        // `event_params` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:long,string_value:string>>>,
         return dataset
                 .withColumn("customAppNameStr",
                         regexp_extract(col("uri"), "customAppName=(\\w+)", 1))
@@ -33,10 +33,10 @@ public final class CustomUriEnrich {
                 .withColumn("customAppNameArr", array(struct(
                         lit("customAppName").alias("key"),
                         struct(
-                                lit(null).cast(DataTypes.StringType).alias("double_value"),
-                                lit(null).cast(DataTypes.StringType).alias("float_value"),
-                                lit(null).cast(DataTypes.StringType).alias("int_value"),
-                                col("customAppName").alias("string_value")
+                                lit(null).cast(DataTypes.DoubleType).alias("double_value"),
+                                lit(null).cast(DataTypes.FloatType).alias("float_value"),
+                                lit(null).cast(DataTypes.LongType).alias("int_value"),
+                                col("customAppName").cast(DataTypes.StringType).alias("string_value")
                         ).alias("value"))))
                 .withColumn("event_params", array_union(col("event_params"), col("customAppNameArr")))
                 .drop("customAppName", "customAppNameArr", "customAppNameStr");
