@@ -35,6 +35,10 @@ const BASE_INGESTION_PARAMETERS: Parameter[] = [
     ParameterValue: 'Yes',
   },
   {
+    ParameterKey: 'ClickStreamSDK',
+    ParameterValue: 'Yes',
+  },
+  {
     ParameterKey: 'ProjectId',
     ParameterValue: 'project_8888_8888',
   },

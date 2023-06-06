@@ -361,3 +361,8 @@ export enum SubnetType {
   ISOLATED = 'isolated',
 }
 
+export enum DataCollectionSDK {
+  CLICKSTREAM = 'clickstream',
+  THIRDPARTY = 'thirdparty',
+}
+

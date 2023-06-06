@@ -39,6 +39,7 @@ import { validatePattern, validateSinkBatch } from '../common/stack-params-valid
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
+  DataCollectionSDK,
   KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
@@ -86,6 +87,9 @@ export class CIngestionServerStack extends JSONObject {
 
   @JSONObject.required
     DevMode?: string;
+
+  @JSONObject.required
+    ClickStreamSDK?: string;
 
   @JSONObject.required
     ProjectId?: string;
@@ -318,6 +322,7 @@ export class CIngestionServerStack extends JSONObject {
       DevMode: resources.project?.environment == ProjectEnvironment.DEV ? 'Yes' : 'No',
       ProjectId: pipeline.projectId,
       AppIds: resources.appIds?.join(','),
+      ClickStreamSDK: pipeline.dataCollectionSDK == DataCollectionSDK.CLICKSTREAM ? 'Yes' : 'No',
       // VPC Information
       VpcId: pipeline.network.vpcId,
       PublicSubnetIds: pipeline.network.publicSubnetIds.join(','),
