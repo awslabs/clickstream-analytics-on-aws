@@ -65,8 +65,7 @@ export class JWTAuthorizer {
         // Return a policy document that allows access to the API
         logger.debug('Token verified');
         const email = (verifiedToken as any).email as string;
-        const preferred_username = (verifiedToken as any).preferred_username as string;
-        return [true, verifiedToken.sub, email || preferred_username];
+        return [true, verifiedToken.sub, email];
       }
     } catch (error) {
       logger.error('Token verification failed due to : ' + (error as Error).message);
