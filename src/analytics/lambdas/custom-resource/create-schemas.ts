@@ -27,7 +27,7 @@ import {
   UpdateSecretCommand,
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
-import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -187,13 +187,16 @@ async function deleteBIUserCredentialSecret(secretName: string, biUsername: stri
   await secretManagerClient.send(new DeleteSecretCommand(params));
 }
 
-async function onUpdate(event: CdkCustomResourceEvent, biUsername: string) {
+async function onUpdate(event: CloudFormationCustomResourceUpdateEvent, biUsername: string) {
   logger.info('onUpdate()');
 
+  const oldProps = event.OldResourceProperties as ResourcePropertiesType;
   const props = event.ResourceProperties as ResourcePropertiesType;
-  await createSchemas(props, biUsername);
 
-  await createViewForReporting(props);
+  await updateSchemas(props, biUsername, oldProps);
+
+  await updateViewForReporting(props, oldProps);
+
 }
 
 async function onDelete(event: CdkCustomResourceEvent, biUsername: string) {
@@ -229,16 +232,70 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
       user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
+
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
-    sqlStatements.push(getSqlContent('ods-events.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('sp-clickstream-log.sql', mustacheParam));
+    for (const sqlDef of props.schemaDefs) {
+      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true' ) {
+        logger.info('multipleLine SQL: ', sqlDef.sqlFile);
+        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+      } else {
+        sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+      }
+    }
+  };
 
-    sqlStatements.push(...getSqlContents('grant-permissions-to-bi-user.sql', mustacheParam));
+  if (sqlStatements.length == 0) {
+    logger.info('Ignore creating schema in Redshift due to there is no application.');
+  } else {
+    const redShiftClient = getRedshiftClient(props.dataAPIRole);
+    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+  }
+}
 
-    sqlStatements.push(getSqlContent('dim-users.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('sp-upsert-users.sql', mustacheParam));
+async function updateSchemas(props: ResourcePropertiesType, biUsername: string, oldProps: ResourcePropertiesType) {
+  const odsTableName = props.odsTableName;
+  const appUpdateProps = getAppUpdateProps(props, oldProps);
 
-    sqlStatements.push(getSqlContent('sp-clear-expired-events.sql', mustacheParam));
+  const sqlStatements : string[] = [];
+  for (const app of appUpdateProps.createAppIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      user_bi: biUsername,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
+    sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
+    for (const sqlDef of props.schemaDefs) {
+      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true' ) {
+        logger.info('multipleLine SQL: ', sqlDef.sqlFile);
+        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+      } else {
+        sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+      }
+    }
+  };
+
+  for (const app of appUpdateProps.updateAppIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      user_bi: biUsername,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
+    for (const schemaDef of props.schemaDefs) {
+
+      logger.info(`viewDef.updatable: ${schemaDef.updatable}`);
+
+      if (!appUpdateProps.oldSchemaSqlArray.includes(schemaDef.sqlFile)) {
+        logger.info(`new sql: ${schemaDef.sqlFile}`);
+        sqlStatements.push(getSqlContent(schemaDef.sqlFile, mustacheParam));
+      } else if (schemaDef.updatable === 'true') {
+        logger.info(`update sql: ${schemaDef.sqlFile}`);
+        sqlStatements.push(getSqlContent(schemaDef.sqlFile, mustacheParam));
+      } else {
+        logger.info(`skip update ${schemaDef.sqlFile} due to it is not updatable.`);
+      }
+    }
   };
 
   if (sqlStatements.length == 0) {
@@ -259,17 +316,10 @@ async function createViewForReporting(props: ResourcePropertiesType) {
       table_ods_events: odsTableName,
       ...SQL_TEMPLATE_PARAMETER,
     };
-    // keep view order due to dependency between them.
-    sqlStatements.push(getSqlContent('clickstream-ods-events-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-ods-events-parameter-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-lifecycle-daily-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-lifecycle-weekly-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-user-dim-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-session-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-device-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-path-view.sql', mustacheParam));
-    sqlStatements.push(getSqlContent('clickstream-retention-view.sql', mustacheParam));
 
+    for (const viewDef of props.reportingViewsDef) {
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+    }
   };
 
   if (sqlStatements.length == 0) {
@@ -278,6 +328,54 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
     await createSchemasInRedshift(redShiftClient, sqlStatements, props);
   }
+}
+
+async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType) {
+  const odsTableName = props.odsTableName;
+
+  const appUpdateProps = getAppUpdateProps(props, oldProps);
+  const sqlStatements : string[] = [];
+
+  for (const app of appUpdateProps.createAppIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
+    for (const viewDef of props.reportingViewsDef) {
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+    }
+  };
+
+  for (const app of appUpdateProps.updateAppIds) {
+    const mustacheParam: MustacheParamType = {
+      schema: app,
+      table_ods_events: odsTableName,
+      ...SQL_TEMPLATE_PARAMETER,
+    };
+    for (const viewDef of props.reportingViewsDef) {
+
+      logger.info(`viewDef.updatable: ${viewDef.updatable}`);
+
+      if (!appUpdateProps.oldViewSqls.includes(viewDef.sqlFile)) {
+        logger.info(`new view: ${viewDef.sqlFile}`);
+        sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      } else if (viewDef.updatable === 'true') {
+        logger.info(`update view: ${viewDef.sqlFile}`);
+        sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      } else {
+        logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
+      }
+    }
+  };
+
+  if (sqlStatements.length == 0) {
+    logger.info('Ignore creating reporting views in Redshift due to there is no application.');
+  } else {
+    const redShiftClient = getRedshiftClient(props.dataAPIRole);
+    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+  }
+
 }
 
 const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string,
@@ -342,3 +440,54 @@ function generateRedshiftUserPassword(length: number): string {
   }
   return generateRedshiftUserPassword(length);
 }
+
+export type AppUpdateProps = {
+  createAppIds: string[];
+  updateAppIds: string[];
+  oldViewSqls: string[];
+  oldSchemaSqlArray: string[];
+}
+
+function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourcePropertiesType): AppUpdateProps {
+
+  const oldAppIdArray: string[] = [];
+  const oldViewSqlArray: string[] = [];
+  const oldSchemaSqlArray: string[] = [];
+  if ( oldProps.appIds.trim().length > 0 ) {
+    oldAppIdArray.push(...oldProps.appIds.trim().split(','));
+  };
+  for (const view of oldProps.reportingViewsDef) {
+    oldViewSqlArray.push(view.sqlFile);
+  }
+  logger.info(`old sql array: ${oldViewSqlArray}`);
+
+  for (const schema of oldProps.schemaDefs) {
+    oldSchemaSqlArray.push(schema.sqlFile);
+  }
+  logger.info(`old schema sql array: ${oldSchemaSqlArray}`);
+
+  const appIdArray: string[] = [];
+  if ( props.appIds.trim().length > 0 ) {
+    appIdArray.push(...props.appIds.trim().split(','));
+  };
+
+  logger.info(`props.appIds: ${props.appIds}`);
+  logger.info(`oldProps.appIds: ${oldProps.appIds}`);
+  logger.info(`appIdArray: ${appIdArray}`);
+  logger.info(`oldAppIdArray: ${oldAppIdArray}`);
+
+  const needCreateAppIds = appIdArray.filter(item => !oldAppIdArray.includes(item));
+  logger.info(`apps need to be create: ${needCreateAppIds}`);
+
+  const needUpdateAppIds = appIdArray.filter(item => oldAppIdArray.includes(item));
+  logger.info(`apps need to be update: ${needUpdateAppIds}`);
+
+  return {
+    createAppIds: needCreateAppIds,
+    updateAppIds: needUpdateAppIds,
+    oldViewSqls: oldViewSqlArray,
+    oldSchemaSqlArray: oldSchemaSqlArray,
+  };
+}
+
+

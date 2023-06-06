@@ -20,7 +20,8 @@ import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
 import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
-import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
+import { ProvisionedRedshiftProps, SQLDef } from '../../../../../src/analytics/private/model';
+import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
 import { TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
@@ -48,6 +49,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
       dataAPIRole: `arn:aws:iam::1234567890:role/${roleName}`,
       redshiftBIUserParameter: '/clickstream/report/user/1111',
       redshiftBIUsernamePrefix: biUserNamePrefix,
+      reportingViewsDef,
+      schemaDefs,
     },
   };
 
@@ -69,7 +72,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   const updateServerlessEvent: CdkCustomResourceEvent = {
     ...createServerlessEvent,
-    OldResourceProperties: createServerlessEvent.ResourceProperties,
+    OldResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: '',
+    },
     ResourceProperties: {
       ...createServerlessEvent.ResourceProperties,
       appIds: 'app2',
@@ -77,6 +83,100 @@ describe('Custom resource - Create schemas for applications in Redshift database
     PhysicalResourceId: `${physicalIdPrefix}abcde`,
     RequestType: 'Update',
   };
+
+  const updateServerlessEvent2: CdkCustomResourceEvent = {
+    ...createServerlessEvent,
+    OldResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: 'app1',
+    },
+    ResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: 'app2',
+    },
+    PhysicalResourceId: `${physicalIdPrefix}abcde`,
+    RequestType: 'Update',
+  };
+
+
+  const testReportingViewsDef: SQLDef[] = [
+    {
+      updatable: 'true',
+      sqlFile: 'clickstream-ods-events-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-ods-events-parameter-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-lifecycle-daily-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-lifecycle-weekly-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-user-dim-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-session-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-path-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-device-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-retention-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'clickstream-user-attr-view.sql',
+    },
+
+  ];
+
+  const testReportingViewsDef2: SQLDef[] = testReportingViewsDef.slice();
+  testReportingViewsDef2.push({
+    updatable: 'false',
+    sqlFile: 'clickstream-ods-events-parameter-test-view.sql',
+  });
+
+  const testSchemaDefs: SQLDef[] = [
+    {
+      updatable: 'false',
+      sqlFile: 'ods-events.sql',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'sp-clickstream-log.sql',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'grant-permissions-to-bi-user.sql',
+      multipleLine: 'true',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'dim-users.sql',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'sp-upsert-users.sql',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'sp-clear-expired-events.sql',
+    },
+
+  ];
 
   const clusterId = 'redshift-cluster-1';
   const dbUser = 'aDBUser';
@@ -105,6 +205,24 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
+  const updateAdditionalProvisionedEvent2: CdkCustomResourceEvent = {
+    ...createProvisionedEvent,
+    OldResourceProperties: {
+      ...createProvisionedEvent.ResourceProperties,
+      reportingViewsDef: testReportingViewsDef,
+      schemaDefs: testSchemaDefs,
+      appIds: 'app1',
+    },
+    ResourceProperties: {
+      ...createProvisionedEvent.ResourceProperties,
+      appIds: 'app1,app2',
+      reportingViewsDef: testReportingViewsDef2,
+      schemaDefs: testSchemaDefs,
+    },
+    PhysicalResourceId: 'physical-resource-id',
+    RequestType: 'Update',
+  };
+
   beforeEach(async () => {
     redshiftDataMock.reset();
     smMock.reset();
@@ -119,6 +237,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/clickstream-retention-view.sql': testSqlContent(rootPath + 'clickstream-retention-view.sql'),
       '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
       '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
+      '/opt/clickstream-user-attr-view.sql': testSqlContent(rootPath + 'clickstream-user-attr-view.sql'),
+      '/opt/clickstream-ods-events-parameter-test-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-view.sql'),
       '/opt/dim-users.sql': testSqlContent(rootPath + 'dim-users.sql'),
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
       '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
@@ -350,6 +470,41 @@ describe('Custom resource - Create schemas for applications in Redshift database
       throw new Error('Sqls are not expected');
     }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+    const resp = await handler(updateServerlessEvent2, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
+    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      Sqls: expect.arrayContaining([
+        `GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`,
+        `GRANT SELECT ON ALL TABLES IN SCHEMA app2 TO ${biUserNamePrefix}abcde`,
+      ]),
+    });
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      WorkgroupName: workgroupName,
+      Database: projectDBName,
+      ClusterIdentifier: undefined,
+      DbUser: undefined,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
+  });
+
+  test('Updated schemas and views only in Redshift serverless in update stack from empty appIds', async () => {
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+    redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      if (input as BatchExecuteStatementCommandInput) {
+        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+        && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
+          return { Id: 'Id-1' };
+        }
+      }
+      throw new Error('Sqls are not expected');
+    }).resolves({ Id: 'Id-2' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
@@ -369,6 +524,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
   });
+
 
   test('Do nothing when deleting the stack', async () => {
     const deleteEvent: CdkCustomResourceEvent = {
@@ -433,11 +589,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Updated schemas and views in Redshift provisioned cluster', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
-        console.log(`Sql is ${input.Sqls}`);
+        console.log(`Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
-          && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)
-          && input.Sqls[9].includes('CREATE SCHEMA IF NOT EXISTS app2')) {
+          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+          && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
+          && input.Sqls[9].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)) {
             return { Id: 'Id-1' };
           }
         }
@@ -445,6 +601,48 @@ describe('Custom resource - Create schemas for applications in Redshift database
       }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      WorkgroupName: undefined,
+      Database: projectDBName,
+      ClusterIdentifier: clusterId,
+      DbUser: dbUser,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
+  });
+
+  test('Updated schemas and views in Redshift provisioned cluster with updatable/new added view/schema table', async () => {
+    redshiftDataMock
+      .callsFakeOnce(input => {
+        console.log(`####Sql is ${JSON.stringify(input.Sqls)}`);
+        if (input as BatchExecuteStatementCommandInput) {
+          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+            && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
+            && !input.Sqls[9].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)
+            && input.Sqls[9].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+          ) {
+            return { Id: 'Id-1' };
+          }
+        }
+        throw new Error('Sqls are not expected');
+      })
+      .callsFakeOnce(input => {
+        console.log(`####Sql is ${JSON.stringify(input.Sqls)}`);
+        if (input as BatchExecuteStatementCommandInput) {
+          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_view')
+            && input.Sqls[11].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+            && input.Sqls[12].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_parameter_view')
+          ) {
+            return { Id: 'Id-2' };
+          }
+        }
+        throw new Error('Sqls are not expected');
+      }).callsFake(_input => {
+        return { Id: 'Id-3' };
+      });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+    const resp = await handler(updateAdditionalProvisionedEvent2, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
