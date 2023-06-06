@@ -193,7 +193,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the Data ingestion subnets AZ must cross two AZ. Please check and try again.');
+    expect(res.body.message).toEqual('Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
@@ -257,7 +257,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the Data ingestion subnets AZ can not meeting conditions. Please check and try again.');
+    expect(res.body.message).toEqual('Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);

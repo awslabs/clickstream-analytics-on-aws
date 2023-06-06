@@ -61,14 +61,12 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     // public subnets only
     // pipeline.network.privateSubnetIds = pipeline.network.publicSubnetIds;
     throw new ClickStreamBadRequestError(
-      'Validate error, The current version does not support deployment with public subnet only. ' +
-      'Please check and try again.',
+      'Validation error: you must select at least two private subnets for the ingestion endpoint.',
     );
   }
   if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the Data ingestion network for pipeline at least two subnets. ' +
-      'Please check and try again.',
+      'Validate error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
     );
   }
 
@@ -79,16 +77,14 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
   const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
   if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the Data ingestion subnets AZ must cross two AZ. ' +
-      'Please check and try again.',
+      'Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
     );
   }
   const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
-  const azInPrivate = privateSubnetsAZ.filter(az => publicSubnetsAZ.includes(az));
-  if (azInPublic.length !== privateSubnetsAZ.length && azInPrivate.length !== privateSubnetsAZ.length) {
+  if (azInPublic.length !== privateSubnetsAZ.length) {
     throw new ClickStreamBadRequestError(
-      'Validate error, the Data ingestion subnets AZ can not meeting conditions. ' +
-      'Please check and try again.',
+      'Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
+      'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
     );
   }
 
