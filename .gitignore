@@ -80,5 +80,6 @@ junit.xml
 !/.gitlab/ci-templates/data-pipeline-spark-etl.yml
 !/.gitlab/ci-templates/etl-plugin-samples.yml
 !/.gitlab/ci-templates/mutations-check.yml
+!/.gitlab/ci-templates/postbuild-scan.yml
 !/.gitlab/ci-templates/cfn-nag.yml
 !/.gitlab/ci-templates/cfn-lint.yml

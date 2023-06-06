@@ -295,6 +295,7 @@ gitlabMain.createNestedTemplates({
           'unzip output/build_result.zip -d build/',
           'unzip output/test_result.zip -d build/',
           'unzip output/coverage_result.zip -d build/',
+          'unzip output/deployment_assets.zip -d build/',
           'zcat output/logs.gz',
         ],
         artifacts: {
@@ -307,6 +308,7 @@ gitlabMain.createNestedTemplates({
           },
           paths: [
             'build/cdk.out/',
+            'build/deployment/',
           ],
         },
         coverage: '/All files[^|]*\\|[^|]*\\s+([\\d\\.]+)/',
@@ -622,7 +624,43 @@ gitlabMain.createNestedTemplates({
       },
     },
   },
-
+  'postbuild-scan': {
+    stages: [
+      'qa',
+    ],
+    needs: [
+      'build',
+    ],
+    jobs: {
+      'postbuild-viperlight': {
+        stage: 'qa',
+        image: {
+          name: 'public.ecr.aws/docker/library/python:3.11',
+        },
+        rules: [
+          {
+            if: '$CI_MERGE_REQUEST_IID',
+          },
+          {
+            if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
+          },
+        ],
+        before_script: [
+          'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
+          'apt -y install nodejs',
+          'npm install -g yarn',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
+          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
+          'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
+          'mv build/deployment/global-s3-assets ./deployment/',
+        ],
+        script: [
+          './codescan-prebuild-custom.sh',
+        ],
+      },
+    },
+  },
   'cfn-nag': {
     stages: [
       'qa',

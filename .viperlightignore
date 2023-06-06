@@ -3,10 +3,12 @@ CONTRIBUTING.md
 CODE_OF_CONDUCT.md
 
 .github/
-cdk.out/
+cdk.out/*
 node_modules/
 coverage/
 .*/package-lock.json
+
+deployment/global-s3-assets/*
 
 # account id for ALB access log
 src/common/constant.ts:20

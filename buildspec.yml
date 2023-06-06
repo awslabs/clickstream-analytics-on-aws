@@ -44,9 +44,9 @@ phases:
         export ECR_REPOS=$(join_by , `cat "${__dir}/ecr-repos"`)
 artifacts:
   files:
-    - .git/**/*
     - deployment/**/*
     - docs/**/*
-    - buildspec.yml
+    - .viperlightignore
+    - codescan-prebuild-custom.sh
     - CHANGELOG.md
     - .cfnnag_*
