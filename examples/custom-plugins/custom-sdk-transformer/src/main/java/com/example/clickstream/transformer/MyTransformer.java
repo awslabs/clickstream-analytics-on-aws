@@ -46,12 +46,15 @@ public final class MyTransformer {
         Dataset<Row> dataset8 = convertDateProperties(dataset7);
         Dataset<Row> dataset9 = convertUserProperties(dataset8);
 
-        log.info(new ETLMetric(dataset9, "transform return").toString());
+        Dataset<Row> dataset10 = dataset9.withColumn("event_bundle_sequence_id",
+                lit(null).cast(DataTypes.LongType));
+
+        log.info(new ETLMetric(dataset10, "transform return").toString());
         boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
         if (debugLocal) {
             dataset9.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/transformed/");
         }
-        return dataset9;
+        return dataset10;
     }
 
 

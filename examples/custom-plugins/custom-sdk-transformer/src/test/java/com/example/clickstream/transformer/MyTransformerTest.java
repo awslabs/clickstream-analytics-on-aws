@@ -55,6 +55,20 @@ class MyTransformerTest extends BaseSparkTest {
         assertEquals("Apache-HttpClient/4.5.12 (Java/11.0.15)", ua);
 
         assertEquals("test_project_id_01", row.getString(row.fieldIndex("project_id")));
+
+        Dataset<Row> retDataset  = transformedDataset.select(
+                "app_info", "device", "ecommerce", "event_bundle_sequence_id",
+                "event_date", "event_dimensions", "event_id", "event_name",
+                "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
+                "event_value_in_usd", "geo", "ingest_timestamp", "items",
+                "platform", "privacy_info", "project_id", "traffic_source",
+                "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
+                "user_pseudo_id"
+        );
+        retDataset.printSchema();
+        Long bseqId = retDataset.first().getAs("event_bundle_sequence_id");
+        assertEquals(null, bseqId);
+
     }
 
 }
