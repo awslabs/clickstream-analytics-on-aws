@@ -262,6 +262,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       targetToCNRegions: props?.targetToCNRegions,
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
+      healthCheckPath: '/',
     });
 
     if (!clickStreamApi.lambdaRestApi) {

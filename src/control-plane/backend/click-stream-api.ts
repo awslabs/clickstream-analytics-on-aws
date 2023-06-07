@@ -83,6 +83,7 @@ export interface ClickStreamApiProps {
   readonly pluginPrefix: string;
   readonly s3MainRegion?: string;
   readonly authProps?: AuthProps;
+  readonly healthCheckPath: string;
 }
 
 export class ClickStreamApiConstruct extends Construct {
@@ -293,6 +294,7 @@ export class ClickStreamApiConstruct extends Construct {
         JWKS_URI: props.authProps?.jwksUri ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
+        HEALTH_CHECK_PATH: props.healthCheckPath,
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

@@ -205,6 +205,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       throw new Error('Application Load Balancer VPC create error.');
     }
 
+    const healthCheckPath = '/';
+
     const pluginPrefix = 'plugins/';
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'alb',
@@ -219,6 +221,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
+      healthCheckPath: healthCheckPath,
     });
 
     controlPlane.addRoute('api-targets', {
@@ -227,6 +230,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       target: [new LambdaTarget(clickStreamApi.clickStreamApiFunction)],
       healthCheck: {
         enabled: true,
+        path: healthCheckPath,
         interval: Duration.seconds(60),
       },
       methods: ['POST', 'GET', 'PUT', 'DELETE'],

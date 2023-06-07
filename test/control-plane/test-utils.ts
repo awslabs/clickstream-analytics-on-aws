@@ -270,6 +270,7 @@ export class TestEnv {
       targetToCNRegions: cn,
       stackWorkflowS3Bucket: s3Bucket,
       pluginPrefix,
+      healthCheckPath: '/',
     });
 
     const template = Template.fromStack(stack);
@@ -307,6 +308,7 @@ export class TestEnv {
       targetToCNRegions: cn,
       stackWorkflowS3Bucket: s3Bucket,
       pluginPrefix,
+      healthCheckPath: '/',
     });
 
     const template = Template.fromStack(stack);

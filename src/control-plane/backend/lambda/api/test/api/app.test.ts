@@ -17,6 +17,8 @@ import { app, server } from '../../index';
 
 describe('App test', () => {
 
+  process.env.WITH_AUTH_MIDDLEWARE = 'true';
+  process.env.HEALTH_CHECK_PATH='/';
   it('healthcheck', async () => {
     const res = await request(app)
       .get('/');
@@ -35,6 +37,13 @@ describe('App test', () => {
     expect(getEmailFromRequestContext(context)).toEqual('abc@example.com');
     expect(getEmailFromRequestContext(context_unknown)).toEqual('unknown');
   });
+
+  it('status 401 when no auth token provided.', async () => {
+    const res = await request(app)
+      .get('/projects');
+    expect(res.statusCode).toBe(401);
+  });
+
   afterAll((done) => {
     server.close();
     done();

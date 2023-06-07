@@ -45,8 +45,6 @@ import { ProjectServ } from './service/project';
 
 const app = express();
 const port = process.env.PORT || 8080;
-const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
-
 const dictionaryServ: DictionaryServ = new DictionaryServ();
 const projectServ: ProjectServ = new ProjectServ();
 const appServ: ApplicationServ = new ApplicationServ();
@@ -69,7 +67,7 @@ app.use(express.json());
 
 // Implement logger middleware function
 app.use(function (req: express.Request, _res: express.Response, next: express.NextFunction) {
-  if (req.url !== '/') {
+  if (req.url !== process.env.HEALTH_CHECK_PATH) {
     logger.info('Request',
       {
         url: req.url,
@@ -85,7 +83,8 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
 // Implement authorization middleware function
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   let email = 'unknown';
-  if (WITH_AUTH_MIDDLEWARE === 'true') {
+  const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
+  if (WITH_AUTH_MIDDLEWARE === 'true' && req.url !== process.env.HEALTH_CHECK_PATH) {
     // ALB control plane get IdToken from header
     const authorization = req.get('authorization');
     if (authorization === undefined) {
@@ -136,7 +135,7 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
 });
 
 // healthcheck
-app.get('/', async (_req: express.Request, res: express.Response) => {
+app.get(process.env.HEALTH_CHECK_PATH ?? '/', async (_req: express.Request, res: express.Response) => {
   res.send('OK!');
 });
 
