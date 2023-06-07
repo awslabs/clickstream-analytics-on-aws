@@ -20,6 +20,7 @@ import {
 
 import { JWTAuthorizer } from './authorizer';
 import { logger } from '../../common/powertools';
+import { isEmpty } from '../../common/utils';
 
 const issuerInput = process.env.ISSUER;
 
@@ -48,10 +49,19 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
   }
 
   logger.info('authtication success.');
+  let email = '';
+  if (!isEmpty(authResult[2])) {
+    email = authResult[2]!.toString();
+  }
+  let username = '';
+  if (!isEmpty(authResult[3])) {
+    username = authResult[3]!.toString();
+  }
   return {
     principalId: authResult[1]!.toString(),
     context: {
-      email: authResult[2]!.toString(),
+      email: email,
+      username: username,
     },
     policyDocument: {
       Version: '2012-10-17',
