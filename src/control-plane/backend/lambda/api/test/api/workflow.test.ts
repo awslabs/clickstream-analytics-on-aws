@@ -54,6 +54,7 @@ import {
   S3_DATA_PROCESSING_PIPELINE,
   S3_INGESTION_PIPELINE, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+  S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
 } from './pipeline-mock';
 import {
   BASE_ATHENA_PARAMETERS,
@@ -63,12 +64,14 @@ import {
   DATA_PROCESSING_PLUGIN2_PARAMETERS,
   DATA_PROCESSING_PLUGIN3_PARAMETERS,
   DATA_PROCESSING_PLUGIN4_PARAMETERS,
+  DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS,
   INGESTION_KAFKA_PARAMETERS,
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
   INGESTION_KINESIS_PROVISIONED_PARAMETERS,
   INGESTION_MSK_PARAMETERS,
   INGESTION_MSK_WITHOUT_APP_PARAMETERS,
   INGESTION_S3_PARAMETERS,
+  INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
   MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
   MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
   REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
@@ -605,6 +608,94 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: DATA_PROCESSING_PLUGIN1_PARAMETERS,
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-s3 with specify prefix + DataProcessing', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
+        publicAZContainPrivateAZ: true,
+      });
+    const pipeline: CPipeline = new CPipeline(S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE);
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
+                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS,
                     StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',

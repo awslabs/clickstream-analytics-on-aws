@@ -597,7 +597,13 @@ export class CDataProcessingStack extends JSONObject {
 
   @JSONObject.required
   @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? `${value}${stack._kafkaTopic}/` : value;
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3
+      && !isEmpty(stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix)) {
+      return stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
+      return `${value}${stack._kafkaTopic}/`;
+    }
+    return value;
   })
     SourceS3Prefix?: string;
 

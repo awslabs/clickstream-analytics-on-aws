@@ -243,6 +243,50 @@ export const S3_DATA_PROCESSING_PIPELINE: IPipeline = {
   },
 };
 
+export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
+  ...S3_INGESTION_PIPELINE,
+  ingestionServer: {
+    ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+    size: {
+      serverMax: 1,
+      warmPoolSize: 0,
+      serverMin: 1,
+      scaleOnCpuUtilizationPercent: 50,
+    },
+    sinkType: PipelineSinkType.S3,
+    sinkS3: {
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: 'EXAMPLE_PREFIX/',
+      },
+      s3BatchMaxBytes: 1000000,
+      s3BatchTimeout: 60,
+    },
+    loadBalancer: {
+      ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+      authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+    },
+  },
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'hour',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: `${MOCK_PLUGIN_ID}_1`,
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+};
+
 export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
   ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   dataProcessing: {

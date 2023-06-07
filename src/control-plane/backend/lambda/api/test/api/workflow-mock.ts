@@ -166,6 +166,16 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
   ],
 );
 
+export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
+  INGESTION_S3_PARAMETERS,
+  [
+    {
+      ParameterKey: 'S3DataPrefix',
+      ParameterValue: 'EXAMPLE_PREFIX/',
+    },
+  ],
+);
+
 export const INGESTION_KAFKA_PARAMETERS = mergeParameters(
   BASE_INGESTION_PARAMETERS,
   [
@@ -484,6 +494,16 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'S3PathPluginFiles',
       ParameterValue: 's3://example-bucket/pipeline/files/data1.mmdb,s3://example-bucket/pipeline/files/data2.mmdb,s3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+    },
+  ],
+);
+
+export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParameters(
+  DATA_PROCESSING_PLUGIN1_PARAMETERS,
+  [
+    {
+      ParameterKey: 'SourceS3Prefix',
+      ParameterValue: 'EXAMPLE_PREFIX/',
     },
   ],
 );
