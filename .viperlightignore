@@ -83,9 +83,13 @@ frontend/src/ts/constant-ln.ts:80
 frontend/src/ts/constant-ln.ts:83
 frontend/src/ts/constant-ln.ts:86
 frontend/src/ts/constant-ln.ts:89
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:21
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:22
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:23
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:24
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:25
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:26
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:27
-src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:69
-src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:97
-src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:111
-src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:125
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:28
+src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:29
 src/control-plane/backend/config/dictionary.json:14

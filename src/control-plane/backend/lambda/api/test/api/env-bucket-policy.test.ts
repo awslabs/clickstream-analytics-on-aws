@@ -18,13 +18,24 @@ import { app, server } from '../../index';
 
 const s3Client = mockClient(S3Client);
 
+const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+const AllowLogDeliveryPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+const AllowIAMUserPutObejectPolicyInCN = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+const AllowIAMUserPutObejectPolicyWithErrorUserId = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::555555555555:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+const AllowIAMUserPutObejectPolicyWithErrorPartition = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+const AllowIAMUserPutObejectPolicyWithErrorBucket = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET1/clickstream/*"}]}';
+const AllowIAMUserPutObejectPolicyWithErrorBucketPrefix = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/*"}]}';
+export const AllowIAMUserPutObejectPolicyWithErrorService = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"errorservice.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::114774131450:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+
+
 describe('Account Env test', () => {
   beforeEach(() => {
     s3Client.reset();
   });
   it('Check bucket policy', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicy,
     });
     let res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -38,7 +49,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowLogDeliveryPutObejectPolicy,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=MOCK_NO_REGION&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -52,7 +63,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowLogDeliveryPutObejectPolicy,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -66,7 +77,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicyInCN,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -80,7 +91,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::555555555555:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicyWithErrorUserId,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -94,7 +105,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET1/clickstream/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicyWithErrorBucket,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -108,7 +119,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicyWithErrorPartition,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -122,7 +133,7 @@ describe('Account Env test', () => {
     });
 
     s3Client.on(GetBucketPolicyCommand).resolves({
-      Policy: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/*"}]}',
+      Policy: AllowIAMUserPutObejectPolicyWithErrorBucketPrefix,
     });
     res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

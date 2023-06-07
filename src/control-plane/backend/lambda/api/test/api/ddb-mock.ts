@@ -23,9 +23,11 @@ import { ListNodesCommand } from '@aws-sdk/client-kafka';
 import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
+import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { AllowIAMUserPutObejectPolicyInApSouthEast1, AllowIAMUserPutObejectPolicyWithErrorService } from './env-bucket-policy.test';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
@@ -264,6 +266,7 @@ function createPipelineMock(
   sfnMock: any,
   secretsManagerMock: any,
   quickSightMock: any,
+  s3Mock: any,
   props?: {
     noApp?: boolean;
     update?: boolean;
@@ -279,6 +282,7 @@ function createPipelineMock(
     vpcEndpointSubnetErr?: boolean;
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
+    albPolicyDisable?: boolean;
   }): any {
   // project
   ddbMock.on(GetCommand, {
@@ -722,6 +726,10 @@ function createPipelineMock(
       AccountName: 'ck',
       Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
     },
+  });
+  s3Mock.on(GetBucketPolicyCommand).resolves({
+    Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
+      :AllowIAMUserPutObejectPolicyInApSouthEast1,
   });
 }
 

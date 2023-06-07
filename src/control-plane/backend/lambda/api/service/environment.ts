@@ -13,9 +13,9 @@
 
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
-import { ALBLogServiceAccountMapping } from '../common/constants-ln';
-import { ApiFail, ApiSuccess, Policy, PolicyStatement } from '../common/types';
-import { getRegionAccount, paginateData } from '../common/utils';
+import { validateEnableAccessLogsForALB } from '../common/stack-params-valid';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { paginateData } from '../common/utils';
 import { ListCertificates } from '../store/aws/acm';
 import { agaPing } from '../store/aws/aga';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
@@ -32,7 +32,7 @@ import {
 } from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups, redshiftServerlessPing } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
-import { getS3BucketPolicy, listBuckets } from '../store/aws/s3';
+import { listBuckets } from '../store/aws/s3';
 import { listSecrets } from '../store/aws/secretsmanager';
 import { AssumeUploadRole } from '../store/aws/sts';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -114,31 +114,8 @@ export class EnvironmentServ {
         region,
         bucket,
       } = req.query;
-      const policyStr = await getS3BucketPolicy(bucket);
-      const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
-      if (policyStr) {
-        const accountId = getRegionAccount(ALBLogServiceAccountMapping.mapping, region);
-        if (accountId) {
-          const check = this.checkPolicy(
-            policyStr,
-            {
-              key: 'AWS',
-              value: `arn:${partition}:iam::${accountId}:root`,
-            },
-            `arn:${partition}:s3:::${bucket}/clickstream/*`);
-          return res.json(new ApiSuccess({ check: check }));
-        } else {
-          const check = this.checkPolicy(
-            policyStr,
-            {
-              key: 'Service',
-              value: 'logdelivery.elasticloadbalancing.amazonaws.com',
-            },
-            `arn:${partition}:s3:::${bucket}/clickstream/*`);
-          return res.json(new ApiSuccess({ check: check }));
-        }
-      }
-      return res.json(new ApiSuccess({ check: false }));
+      const check = await validateEnableAccessLogsForALB(region, bucket);
+      return res.json(new ApiSuccess({ check }));
     } catch (error) {
       next(error);
     }
@@ -415,37 +392,6 @@ export class EnvironmentServ {
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
-    }
-  }
-
-
-  checkPolicy(policyStr: string, principal: { key: string; value: string }, resource: string): boolean {
-    try {
-      const policy = JSON.parse(policyStr) as Policy;
-      let match: boolean = false;
-      for (let statement of policy.Statement as PolicyStatement[]) {
-        if (statement.Effect === 'Allow' && statement.Principal && statement.Resource) {
-          if (
-            (typeof statement.Principal[principal.key] === 'string' &&
-              statement.Principal[principal.key] === principal.value) ||
-            (Array.prototype.isPrototypeOf(statement.Principal[principal.key]) &&
-              (statement.Principal[principal.key] as string[]).indexOf(principal.value) > -1)
-          ) {
-            if (
-              (typeof statement.Resource === 'string' &&
-                statement.Resource === resource) ||
-              (Array.prototype.isPrototypeOf(statement.Resource) &&
-                (statement.Resource as string[]).indexOf(resource) > -1)
-            ) {
-              // find resource
-              match = true;
-            }
-          }
-        }
-      }
-      return match;
-    } catch (error) {
-      return false;
     }
   }
 

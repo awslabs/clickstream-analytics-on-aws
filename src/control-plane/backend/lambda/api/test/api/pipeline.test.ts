@@ -31,6 +31,10 @@ import {
 import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
+import {
+  GetBucketPolicyCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
@@ -69,6 +73,7 @@ const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
 const secretsManagerMock = mockClient(SecretsManagerClient);
 const ec2Mock = mockClient(EC2Client);
 const quickSightMock = mockClient(QuickSightClient);
+const s3Mock = mockClient(S3Client);
 
 
 describe('Pipeline test', () => {
@@ -82,13 +87,14 @@ describe('Pipeline test', () => {
     secretsManagerMock.reset();
     ec2Mock.reset();
     quickSightMock.reset();
+    s3Mock.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -111,12 +117,35 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
+  it('Create pipeline with ALB policy disable ', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        albPolicyDisable: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: your S3 bucket must have a bucket policy that grants Elastic Load Balancing permission to write the access logs to the bucket.');
+    expect(s3Mock).toHaveReceivedCommandTimes(GetBucketPolicyCommand, 1);
+  });
   it('Create pipeline with standard QuickSigth', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -139,7 +168,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: false,
       });
 
@@ -203,7 +232,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: false,
       });
 
@@ -267,7 +296,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: false,
         subnetsIsolated: true,
@@ -293,7 +322,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         twoAZsInRegion: true,
       });
@@ -361,7 +390,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         twoAZsInRegion: true,
       });
@@ -421,7 +450,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsIsolated: true,
         subnetsCross3AZ: true,
@@ -448,7 +477,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsIsolated: true,
         subnetsCross3AZ: true,
@@ -475,7 +504,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         sgError: true,
@@ -501,7 +530,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -528,7 +557,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -554,7 +583,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -580,7 +609,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -605,7 +634,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
@@ -642,7 +671,7 @@ describe('Pipeline test', () => {
       Item: undefined,
     });
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const res = await request(app)
@@ -662,7 +691,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     // Mock DynamoDB error
@@ -2274,7 +2303,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -2342,7 +2371,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -2488,7 +2517,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,

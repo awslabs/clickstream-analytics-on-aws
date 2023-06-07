@@ -13,11 +13,12 @@
 
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { REDSHIFT_MODE } from './model-ln';
-import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, SubnetType } from './types';
-import { checkVpcEndpoint, containRule, getSubnetsAZ, isEmpty } from './utils';
+import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, Policy, SubnetType } from './types';
+import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { describeAccountSubscription } from '../store/aws/quicksight';
+import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
@@ -139,7 +140,6 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     }
   }
 
-
   if (pipeline.dataModeling?.redshift) {
     let redshiftType = '';
     let vpcSubnets = allSubnets;
@@ -234,6 +234,15 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     }
   }
 
+  if (pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog) {
+    const enableAccessLogs = await validateEnableAccessLogsForALB(pipeline.region, pipeline.bucket.name);
+    if (!enableAccessLogs) {
+      throw new ClickStreamBadRequestError(
+        'Validation error: your S3 bucket must have a bucket policy that grants Elastic Load Balancing permission to write the access logs to the bucket.',
+      );
+    }
+  }
+
   return true;
 };
 
@@ -287,4 +296,31 @@ const validateVpcEndpoint = (region: string, subnet: ClickStreamSubnet, vpcEndpo
   }
 };
 
+export const validateEnableAccessLogsForALB = async (region: string, bucket: string) => {
+  const policyStr = await getS3BucketPolicy(region, bucket);
+  if (!policyStr) {
+    return false;
+  }
+  const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
+  const policy = JSON.parse(policyStr) as Policy;
+  const accountId = getALBLogServiceAccount(region);
+  if (accountId) {
+    return checkPolicy(
+      policy,
+      {
+        key: 'AWS',
+        value: `arn:${partition}:iam::${accountId}:root`,
+      },
+      `arn:${partition}:s3:::${bucket}/clickstream/*`);
+  } else {
+    return checkPolicy(
+      policy,
+      {
+        key: 'Service',
+        value: 'logdelivery.elasticloadbalancing.amazonaws.com',
+      },
+      `arn:${partition}:s3:::${bucket}/clickstream/*`);
+  }
+  return false;
+};
 

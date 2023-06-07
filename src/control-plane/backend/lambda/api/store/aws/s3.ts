@@ -89,13 +89,18 @@ export async function getS3Object(region: string, bucket: string, key: string): 
   }
 }
 
-export const getS3BucketPolicy = async (bucket: string) => {
-  const s3Client = new S3Client({
-    ...aws_sdk_client_common_config,
-  });
-  const params: GetBucketPolicyCommand = new GetBucketPolicyCommand({
-    Bucket: bucket,
-  });
-  const result = await s3Client.send(params);
-  return result.Policy;
+export const getS3BucketPolicy = async (region: string, bucket: string) => {
+  try {
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: GetBucketPolicyCommand = new GetBucketPolicyCommand({
+      Bucket: bucket,
+    });
+    const result = await s3Client.send(params);
+    return result.Policy;
+  } catch (error) {
+    return undefined;
+  }
 };

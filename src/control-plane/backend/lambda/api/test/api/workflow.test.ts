@@ -22,6 +22,9 @@ import {
 import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
+import {
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import {
   StartExecutionCommand,
@@ -88,6 +91,7 @@ const sfnMock = mockClient(SFNClient);
 const secretsManagerMock = mockClient(SecretsManagerClient);
 const ec2Mock = mockClient(EC2Client);
 const quickSightMock = mockClient(QuickSightClient);
+const s3Mock = mockClient(S3Client);
 
 const Tags = [
   {
@@ -122,12 +126,13 @@ describe('Workflow test', () => {
     secretsManagerMock.reset();
     ec2Mock.reset();
     quickSightMock.reset();
+    s3Mock.reset();
   });
 
   it('Generate Workflow ingestion-server-s3', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
@@ -192,7 +197,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka no connector', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KAFKA_INGESTION_PIPELINE);
@@ -257,7 +262,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka with connector', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
@@ -341,7 +346,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kafka msk with connector', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
@@ -425,7 +430,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
@@ -490,7 +495,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis PROVISIONED', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KINESIS_PROVISIONED_INGESTION_PIPELINE);
@@ -555,7 +560,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-s3 + DataProcessing', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(S3_DATA_PROCESSING_PIPELINE);
@@ -643,7 +648,7 @@ describe('Workflow test', () => {
   it('Generate Workflow kafka msk + DataProcessing + redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsIsolated: true,
         subnetsCross3AZ: true,
@@ -787,7 +792,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + new redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
@@ -894,7 +899,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + provisioned redshift', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE);
@@ -1018,7 +1023,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + provisioned redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
       });
     const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
@@ -1160,7 +1165,7 @@ describe('Workflow test', () => {
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + new redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
@@ -1285,7 +1290,7 @@ describe('Workflow test', () => {
   it('Generate Workflow allow app id is empty', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
@@ -1991,7 +1996,7 @@ describe('Workflow test', () => {
   it('Pipeline template url with version', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
@@ -2034,7 +2039,7 @@ describe('Workflow test', () => {
       ],
     });
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });

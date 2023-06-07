@@ -13,8 +13,9 @@
 
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
+import { ALBLogServiceAccountMapping } from './constants-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
@@ -46,10 +47,11 @@ function getValueFromTags(tag: string, tags: Tag[]): string {
   return '';
 }
 
-function getRegionAccount(map: ALBRegionMappingObject, region: string) {
-  for (let key in map) {
+function getALBLogServiceAccount(region: string) {
+  const ALBRegionMapping = ALBLogServiceAccountMapping.mapping as ALBRegionMappingObject;
+  for (let key in ALBRegionMapping) {
     if (key === region) {
-      return map[key].account;
+      return ALBRegionMapping[key].account;
     }
   }
   return undefined;
@@ -332,11 +334,41 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
+
+function checkPolicy(policy: Policy, principal: { key: string; value: string }, resource: string): boolean {
+  try {
+    let match: boolean = false;
+    for (let statement of policy.Statement as PolicyStatement[]) {
+      if (statement.Effect === 'Allow' && statement.Principal && statement.Resource) {
+        if (
+          (typeof statement.Principal[principal.key] === 'string' &&
+            statement.Principal[principal.key] === principal.value) ||
+          (Array.prototype.isPrototypeOf(statement.Principal[principal.key]) &&
+            (statement.Principal[principal.key] as string[]).indexOf(principal.value) > -1)
+        ) {
+          if (
+            (typeof statement.Resource === 'string' &&
+              statement.Resource === resource) ||
+            (Array.prototype.isPrototypeOf(statement.Resource) &&
+              (statement.Resource as string[]).indexOf(resource) > -1)
+          ) {
+            // find resource
+            match = true;
+          }
+        }
+      }
+    }
+    return match;
+  } catch (error) {
+    return false;
+  }
+}
+
 export {
   isEmpty,
   tryToJson,
   getValueFromTags,
-  getRegionAccount,
+  getALBLogServiceAccount,
   generateRandomStr,
   getEmailFromRequestContext,
   getBucketPrefix,
@@ -351,4 +383,5 @@ export {
   paginateData,
   replaceTemplateVersion,
   getValueFromStackOutputSuffix,
+  checkPolicy,
 };
