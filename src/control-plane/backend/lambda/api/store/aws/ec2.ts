@@ -32,7 +32,7 @@ import { SecurityGroupRule } from '@aws-sdk/client-ec2/dist-types/models/models_
 import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup, SubnetType } from '../../common/types';
-import { getSubnetRouteTable, getSubnetType, getValueFromTags } from '../../common/utils';
+import { getSubnetRouteTable, getSubnetType, getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string, vpcId?: string) => {
   const ec2Client = new EC2Client({
@@ -243,6 +243,10 @@ export const describeVpcEndpoints = async (region: string, vpcId: string) => {
 };
 
 export const describeSecurityGroupsWithRules = async (region: string, groupIds: string[]) => {
+  const filterGroupIds = groupIds.filter(id => id !== '');
+  if (isEmpty(filterGroupIds)) {
+    return [];
+  }
   const ec2Client = new EC2Client({
     ...aws_sdk_client_common_config,
     region,
@@ -250,7 +254,7 @@ export const describeSecurityGroupsWithRules = async (region: string, groupIds: 
   const records: SecurityGroupRule[] = [];
   const filters: Filter[] = [{
     Name: 'group-id',
-    Values: groupIds,
+    Values: filterGroupIds,
   }];
   for await (const page of paginateDescribeSecurityGroupRules(
     { client: ec2Client },

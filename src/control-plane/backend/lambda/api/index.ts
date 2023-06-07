@@ -699,10 +699,9 @@ app.delete(
   });
 
 // Implement the “catch-all” errorHandler function
-app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unexpected error occurred at server.', {
     error: err,
-    request: req,
   });
   if (err.name === 'TransactionCanceledException') {
     return res.status(400).json(new ApiFail('Update error, check version and retry.'));

@@ -11,19 +11,27 @@
  *  and limitations under the License.
  */
 
+import {
+  EC2Client,
+  DescribeSecurityGroupRulesCommand,
+} from '@aws-sdk/client-ec2';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { paginateData } from '../../common/utils';
+import { describeSecurityGroupsWithRules } from '../../store/aws/ec2';
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
+import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
+const ec2Mock = mockClient(EC2Client);
 const store: ClickStreamStore = new DynamoDbStore();
 
 describe('App test', () => {
 
   beforeEach(() => {
     ddbMock.reset();
+    ec2Mock.reset();
   });
 
   it('DDB GetCommand no item', async () => {
@@ -87,6 +95,32 @@ describe('App test', () => {
     const listPipeline = await store.listPipeline('666', '', 'asc');
     expect(paginateData(listPipeline, true, 2, 1)).toEqual([{ id: 1 }, { id: 2 }]);
 
+  });
+
+  it('Describe security group rules With empty string', async () => {
+    ec2Mock.on(DescribeSecurityGroupRulesCommand, { Filters: [{ Name: 'group-id', Values: ['id1'] }], MaxResults: undefined, NextToken: undefined }).resolves({
+      SecurityGroupRules: [
+        {
+          SecurityGroupRuleId: 'id1',
+        },
+      ],
+    });
+    const securityGroupRules = await describeSecurityGroupsWithRules('us-east-1', ['id1', '', '']);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(securityGroupRules).toEqual([{ SecurityGroupRuleId: 'id1' }]);
+  });
+
+  it('Describe security group rules With empty id list', async () => {
+    ec2Mock.on(DescribeSecurityGroupRulesCommand, { Filters: [{ Name: 'group-id', Values: ['id1'] }], MaxResults: undefined, NextToken: undefined }).resolves({
+      SecurityGroupRules: [
+        {
+          SecurityGroupRuleId: 'id1',
+        },
+      ],
+    });
+    const securityGroupRules = await describeSecurityGroupsWithRules('us-east-1', []);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 0);
+    expect(securityGroupRules).toEqual([]);
   });
 
 });
