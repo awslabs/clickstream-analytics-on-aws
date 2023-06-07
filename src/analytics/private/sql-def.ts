@@ -17,47 +17,46 @@ export const reportingViewsDef: SQLDef[] = [
   {
     updatable: 'false',
     sqlFile: 'clickstream-ods-events-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-ods-events-parameter-view.sql',
-
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'clickstream-ods-events-rt-view.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'clickstream-ods-events-parameter-rt-view.sql',
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-lifecycle-daily-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-lifecycle-weekly-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-user-dim-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-session-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-path-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-device-view.sql',
-
   },
   {
     updatable: 'false',
     sqlFile: 'clickstream-retention-view.sql',
-
   },
   {
     updatable: 'false',

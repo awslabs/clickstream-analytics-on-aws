@@ -109,6 +109,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
       sqlFile: 'clickstream-ods-events-parameter-view.sql',
     },
     {
+      updatable: 'true',
+      sqlFile: 'clickstream-ods-events-rt-view.sql',
+    },
+    {
+      updatable: 'true',
+      sqlFile: 'clickstream-ods-events-parameter-rt-view.sql',
+    },
+    {
       updatable: 'false',
       sqlFile: 'clickstream-lifecycle-daily-view.sql',
     },
@@ -234,6 +242,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/clickstream-lifecycle-weekly-view.sql': testSqlContent(rootPath + 'clickstream-lifecycle-weekly-view.sql'),
       '/opt/clickstream-ods-events-parameter-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-view.sql'),
       '/opt/clickstream-ods-events-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-view.sql'),
+      '/opt/clickstream-ods-events-parameter-rt-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-rt-view.sql'),
+      '/opt/clickstream-ods-events-rt-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-rt-view.sql'),
       '/opt/clickstream-retention-view.sql': testSqlContent(rootPath + 'clickstream-retention-view.sql'),
       '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
       '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
@@ -612,12 +622,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
   });
 
+  console.log(updateServerlessEvent +''+ updateServerlessEvent2 + updateAdditionalProvisionedEvent);
   test('Updated schemas and views in Redshift provisioned cluster with updatable/new added view/schema table', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
-        console.log(`####Sql is ${JSON.stringify(input.Sqls)}`);
+        // console.log(`##1##Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+          if (input.Sqls.length >= 10 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
             && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
             && !input.Sqls[9].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)
             && input.Sqls[9].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
@@ -625,21 +636,18 @@ describe('Custom resource - Create schemas for applications in Redshift database
             return { Id: 'Id-1' };
           }
         }
-        throw new Error('Sqls are not expected');
+        throw new Error('##1##Sql are not expected');
       })
-      .callsFakeOnce(input => {
-        console.log(`####Sql is ${JSON.stringify(input.Sqls)}`);
+      .callsFake(input => {
+        console.log(`##2##Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_view')
-            && input.Sqls[11].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
-            && input.Sqls[12].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_parameter_view')
+          if (input.Sqls.length = 17 && input.Sqls[13].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_view')
+            && input.Sqls[14].includes('CREATE OR REPLACE VIEW app1.clickstream_ods_events_rt_view')
           ) {
             return { Id: 'Id-2' };
           }
         }
-        throw new Error('Sqls are not expected');
-      }).callsFake(_input => {
-        return { Id: 'Id-3' };
+        throw new Error('##2##Sql are not expected');
       });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateAdditionalProvisionedEvent2, context, callback) as CdkCustomResourceResponse;

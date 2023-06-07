@@ -51,7 +51,5 @@ event_date
 , traffic_source.source::varchar as traffic_source_source
 , user_first_touch_timestamp as user_first_touch_timestamp
 , user_id as user_id
--- e.user_ltv as user_ltv,
 , user_pseudo_id
--- make sure you replace following schema name to your schema name
 from {{schema}}.ods_events;
