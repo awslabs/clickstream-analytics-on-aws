@@ -17,13 +17,13 @@ phases:
     commands:
       - |-
         set -euxo pipefail
-        FEATURE_NAME="${FEATURE_NAME:-''}"
+        FEATURE_NAME="${FEATURE_NAME:-""}"
         export BSS_IMAGE_ASSET_REPOSITORY_NAME=$(echo "$SOLUTION_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         BUILD_VERSION=$(git describe --tags --always --abbrev=0 $(git rev-parse --short HEAD))
         if [ "${BUILD_VERSION:0:1}" != v ]; then
           BUILD_VERSION=latest
         fi
-        if [ "$FEATURE_NAME" != '' ]; then
+        if [ -n "$FEATURE_NAME" ]; then
           BUILD_VERSION=$BUILD_VERSION-$FEATURE_NAME
         fi
 
