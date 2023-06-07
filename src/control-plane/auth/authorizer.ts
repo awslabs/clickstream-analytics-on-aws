@@ -16,12 +16,16 @@ import {
 } from '@aws-lambda-powertools/logger';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import NodeCache from 'node-cache';
+import fetch from 'node-fetch';
 
 const logger = new Logger();
+const nodeCache = new NodeCache();
 
+export const ERR_OPENID_CONFIGURATION = 'Get openid configuration error.';
 export class JWTAuthorizer {
 
-  public static async auth(client: jwksClient.JwksClient, issuer: string, authorizationToken: string) {
+  public static async auth(authorizationToken: string, issuerInput?: string) {
     try {
       if (authorizationToken === undefined
         || authorizationToken.indexOf('Bearer ') != 0 ) {
@@ -39,6 +43,18 @@ export class JWTAuthorizer {
         return [false, null, null];
       }
 
+      const openidConfiguration = await getOpenidConfiguration(issuerInput);
+      if (!openidConfiguration) {
+        throw Error(ERR_OPENID_CONFIGURATION);
+      }
+
+      const client = jwksClient({
+        jwksUri: openidConfiguration.jwks_uri,
+        cache: true,
+        cacheMaxAge: 300000, //5mins
+        rateLimit: true,
+        jwksRequestsPerMinute: 10,
+      });
       // Get the kid from the header
       const kid = decodedToken.header.kid;
       // Retrieve the public key from the JWKS endpoint using the kid
@@ -56,7 +72,7 @@ export class JWTAuthorizer {
       // Verify the token using the public key
       const verifiedToken = jwt.verify(token, key, {
         algorithms: ['RS256'],
-        issuer: issuer,
+        issuer: openidConfiguration.issuer,
       });
       if (verifiedToken.sub === undefined) {
         logger.info('VerifiedToken is invalid');
@@ -74,4 +90,33 @@ export class JWTAuthorizer {
   }
 }
 
+const getOpenidConfiguration = async (issuer: string | undefined) => {
+  if (!issuer) {
+    throw Error('Input issuer miss.');
+  }
+  try {
+    const cacheConfiguration = nodeCache.get('openid-configuration');
+    if (cacheConfiguration) {
+      return cacheConfiguration as OpenidConfiguration;
+    } else {
+      let jwksUriSuffix = '.well-known/openid-configuration';
+      if (!issuer.endsWith('/')) {
+        jwksUriSuffix = `/${jwksUriSuffix}`;
+      }
+      const response = await fetch(`${issuer}${jwksUriSuffix}`, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      nodeCache.set('openid-configuration', data);
+      return data as OpenidConfiguration;
+    }
+  } catch (error) {
+    logger.error('fetch openid-configuration error', { error });
+    return undefined;
+  }
+};
 
+export interface OpenidConfiguration {
+  readonly issuer: string;
+  readonly jwks_uri: string;
+}

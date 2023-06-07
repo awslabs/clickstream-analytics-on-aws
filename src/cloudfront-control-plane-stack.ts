@@ -207,7 +207,6 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     let issuer: string;
     let clientId: string;
-    let jwksUriSuffix: string;
     //Create Cognito user pool and client for backend api
     if (createCognitoUserPool) {
       const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
@@ -221,13 +220,11 @@ export class CloudFrontControlPlaneStack extends Stack {
 
       issuer = cognito.oidcProps.issuer;
       clientId = cognito.oidcProps.appClientId;
-      jwksUriSuffix = '/.well-known/jwks.json';
 
     } else {
       const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
       issuer = oidcParameters.oidcProvider.valueAsString;
       clientId = oidcParameters.oidcClientId.valueAsString;
-      jwksUriSuffix = oidcParameters.jwksUriSuffix.valueAsString;
     }
 
     const authFunction = new NodejsFunction(this, 'AuthorizerFunction', {
@@ -235,7 +232,6 @@ export class CloudFrontControlPlaneStack extends Stack {
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
-        JWKS_URI: Fn.join('', [issuer, jwksUriSuffix]),
         ISSUER: issuer,
         ... POWERTOOLS_ENVS,
       },

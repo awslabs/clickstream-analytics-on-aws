@@ -13,7 +13,6 @@
 
 import express from 'express';
 import { body, header, param, query } from 'express-validator';
-import jwksClient from 'jwks-rsa';
 import { amznRequestContextHeader } from './common/constants';
 import { logger } from './common/powertools';
 import {
@@ -35,7 +34,7 @@ import {
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { getEmailFromRequestContext, isEmpty } from './common/utils';
-import { JWTAuthorizer } from './middle-ware/authorizer';
+import { ERR_OPENID_CONFIGURATION, JWTAuthorizer } from './middle-ware/authorizer';
 import { ApplicationServ } from './service/application';
 import { DictionaryServ } from './service/dictionary';
 import { EnvironmentServ } from './service/environment';
@@ -52,16 +51,7 @@ const pipelineServ: PipelineServ = new PipelineServ();
 const environmentServ: EnvironmentServ = new EnvironmentServ();
 const pluginServ: PluginServ = new PluginServ();
 
-const issuer = process.env.ISSUER ?? '';
-const jwksUri = process.env.JWKS_URI ?? '';
-
-const client = jwksClient({
-  jwksUri: jwksUri,
-  cache: true,
-  cacheMaxAge: 300000, //5mins
-  rateLimit: true,
-  jwksRequestsPerMinute: 10,
-});
+const issuerEnv = process.env.ISSUER;
 
 app.use(express.json());
 
@@ -94,17 +84,31 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
         message: 'No token provided.',
       });
     } else {
-      const isAuthorized = await JWTAuthorizer.auth(client, issuer, authorization);
-      if (!isAuthorized[0]) {
-        const requestId = req.get('X-Click-Stream-Request-Id');
-        logger.warn(`Authentication failed. Request ID: ${requestId}`);
-        return res.status(403).send({
+      try {
+        const isAuthorized = await JWTAuthorizer.auth(authorization, issuerEnv);
+        if (!isAuthorized[0]) {
+          const requestId = req.get('X-Click-Stream-Request-Id');
+          logger.warn(`Authentication failed. Request ID: ${requestId}`);
+          return res.status(403).send({
+            auth: false,
+            message: 'Invalid token provided.',
+          });
+        }
+        if (!isEmpty(isAuthorized[2])) {
+          email = isAuthorized[2]!.toString();
+        }
+      } catch (err: any) {
+        if (err instanceof Error && err.message == ERR_OPENID_CONFIGURATION) {
+          return res.status(401).send({
+            auth: false,
+            message: 'Get openid configuration error.',
+          });
+        }
+        logger.error(err);
+        return res.status(500).send({
           auth: false,
-          message: 'Invalid token provided.',
+          message: 'internal error.',
         });
-      }
-      if (!isEmpty(isAuthorized[2])) {
-        email = isAuthorized[2]!.toString();
       }
     }
   } else {

@@ -20,6 +20,11 @@
       "type": "build"
     },
     {
+      "name": "@types/node-fetch",
+      "version": "^2.6.4",
+      "type": "build"
+    },
+    {
       "name": "@types/node",
       "version": "^16",
       "type": "build"
@@ -317,6 +322,7 @@
     },
     {
       "name": "json-difference",
+      "version": "^1.9.1",
       "type": "runtime"
     },
     {
@@ -340,8 +346,13 @@
       "type": "runtime"
     },
     {
+      "name": "node-cache",
+      "version": "^5.1.2",
+      "type": "runtime"
+    },
+    {
       "name": "node-fetch",
-      "version": "^2.6.3",
+      "version": "^2.6.4",
       "type": "runtime"
     },
     {

@@ -27,6 +27,8 @@ const commonDeps = [
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
   'mustache@^4.2.0',
+  'node-fetch@^2.6.4',
+  'node-cache@^5.1.2',
 ];
 
 const commonDevDeps = [
@@ -36,6 +38,7 @@ const commonDevDeps = [
   '@types/mustache@^4.2.2',
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
+  '@types/node-fetch@^2.6.4',
 ];
 
 const awsSDKVersion = '3.338.0';
@@ -91,10 +94,9 @@ const depsForApiProject = [
   'p-limit@3.1.0',
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
-  'node-fetch@^2.6.3',
   'ts-json-object@^0.4.0',
   'cidr-block@^1.3.2',
-  'json-difference',
+  'json-difference@^1.9.1',
   ...awsSDKDepsForApiProject,
 ];
 
@@ -105,7 +107,6 @@ const devDepsForApiProject = [
   'ts-node@^10.9.1',
   '@types/express@^4.17.16',
   '@types/supertest@^2.0.12',
-  '@types/node-fetch',
 ];
 const project = new awscdk.AwsCdkTypeScriptApp({
   version,

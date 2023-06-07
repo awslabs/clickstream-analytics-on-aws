@@ -17,20 +17,11 @@ import {
   APIGatewayTokenAuthorizerHandler,
   Context,
 } from 'aws-lambda';
-import jwksClient from 'jwks-rsa';
+
 import { JWTAuthorizer } from './authorizer';
 import { logger } from '../../common/powertools';
 
-const issuer = process.env.ISSUER;
-const jwksUri = process.env.JWKS_URI;
-
-const client = jwksClient({
-  jwksUri: jwksUri!,
-  cache: true,
-  cacheMaxAge: 300000, //5mins
-  rateLimit: true,
-  jwksRequestsPerMinute: 10,
-});
+const issuerInput = process.env.ISSUER;
 
 const denyResult: APIGatewayAuthorizerResult = {
   principalId: 'anonymous',
@@ -50,8 +41,7 @@ const denyResult: APIGatewayAuthorizerResult = {
 };
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent, context: Context)=> {
-
-  const authResult = await JWTAuthorizer.auth(client, issuer!, event.authorizationToken);
+  const authResult = await JWTAuthorizer.auth(event.authorizationToken, issuerInput);
   if (!authResult[0]) {
     logger.warn(`authtication failed. Request ID: ${context.awsRequestId}`);
     return denyResult;
@@ -75,3 +65,4 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
     },
   };
 };
+

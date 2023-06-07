@@ -287,7 +287,6 @@ export class TestEnv {
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
-        JWKS_URI: 'https://idp.example.com/.well-known/jwks.json',
         ISSUER: 'https://idp.example.com/GF13ivtJ2',
       },
       reservedConcurrentExecutions: 3,

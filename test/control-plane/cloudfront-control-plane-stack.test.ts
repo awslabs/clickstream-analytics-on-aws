@@ -253,22 +253,6 @@ describe('CloudFrontS3PotalStack', () => {
       ],
       Environment: {
         Variables: {
-          JWKS_URI: {
-            'Fn::Join': [
-              '',
-              [
-                'https://cognito-idp.',
-                {
-                  Ref: 'AWS::Region',
-                },
-                '.amazonaws.com/',
-                {
-                  Ref: Match.stringLikeRegexp('userPool[a-zA-Z0-9]+'),
-                },
-                '/.well-known/jwks.json',
-              ],
-            ],
-          },
           ISSUER: {
             'Fn::Join': [
               '',
@@ -522,22 +506,6 @@ describe('CloudFrontS3PotalStack', () => {
       ],
       Environment: {
         Variables: {
-          JWKS_URI: {
-            'Fn::Join': [
-              '',
-              [
-                'https://cognito-idp.',
-                {
-                  Ref: 'AWS::Region',
-                },
-                '.amazonaws.com/',
-                {
-                  Ref: Match.stringLikeRegexp('userPool[a-zA-Z0-9]+'),
-                },
-                '/.well-known/jwks.json',
-              ],
-            ],
-          },
           ISSUER: {
             'Fn::Join': [
               '',
