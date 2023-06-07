@@ -918,7 +918,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   // Monitor Region Changed and validate Service Available
   useEffect(() => {
-    if (pipelineInfo.region) {
+    if (pipelineInfo.region && !update) {
       validServiceAvailable(pipelineInfo.region);
     }
   }, [pipelineInfo.region]);
@@ -2396,7 +2396,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     pipelineInfo.enableAthena = pipelineInfo.dataModeling.athena !== null;
 
     pipelineInfo.redshiftType =
-      pipelineInfo.dataModeling.redshift.newServerless !== null
+      !isEmpty(pipelineInfo.dataModeling.redshift.newServerless)
         ? 'serverless'
         : 'provisioned';
     if (pipelineInfo.redshiftType === 'serverless') {
@@ -2597,25 +2597,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         athena: data.dataModeling.athena ?? false,
         redshift: {
           dataRange: data.dataModeling.redshift.dataRange ?? 0,
-          provisioned: {
-            clusterIdentifier:
-              data.dataModeling.redshift.provisioned?.clusterIdentifier ?? '',
-            dbUser: data.dataModeling.redshift.provisioned?.dbUser ?? '',
-          },
-          newServerless: {
-            network: {
-              vpcId:
-                data.dataModeling.redshift.newServerless.network.vpcId ?? '',
-              subnetIds:
-                data.dataModeling.redshift.newServerless.network.subnetIds ??
-                [],
-              securityGroups:
-                data.dataModeling.redshift.newServerless.network
-                  .securityGroups ?? [],
-            },
-            baseCapacity:
-              data.dataModeling.redshift.newServerless.baseCapacity ?? 16,
-          },
+          provisioned: data.dataModeling.redshift.provisioned ?? null,
+          newServerless: data.dataModeling.redshift.newServerless ?? null,
         },
         loadWorkflow: {
           loadJobScheduleIntervalExpression:
