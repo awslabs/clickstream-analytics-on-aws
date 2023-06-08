@@ -18,6 +18,7 @@ import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
+import { CFN_FN } from '../constants';
 
 describe('CloudFrontS3PotalStack', () => {
 
@@ -934,6 +935,44 @@ describe('CloudFrontS3PotalStack', () => {
       },
     }
     , 1);
+  });
+
+  test('Should has Rules CognitoUnsupportRegionRule', () => {
+    const rule = commonTemplate.toJSON().Rules.CognitoUnsupportRegionRule;
+    expect(rule.Assertions[0].Assert['Fn::Or'].length).toEqual(2);
+
+    const paramList = [
+      'us-east-1',
+      'us-east-2',
+      'us-west-1',
+      'us-west-2',
+      'ca-central-1',
+      'sa-east-1',
+      'eu-west-1',
+      'eu-west-2',
+      'eu-west-3',
+      'eu-central-1',
+      'ap-northeast-1',
+      'ap-northeast-2',
+      'ap-southeast-1',
+      'ap-southeast-2',
+      'ap-south-1',
+      'eu-north-1',
+      'me-south-1',
+    ];
+
+    let paramCount = 0;
+    for (const element of rule.Assertions[0].Assert['Fn::Or']) {
+      paramList.forEach(p => {
+        for (const e of element['Fn::Or'] ) {
+          if (p === e[CFN_FN.EQUALS][1]) {
+            paramCount++;
+          }
+        }
+      });
+
+    }
+    expect(paramCount).toEqual(paramList.length);
   });
 
 });

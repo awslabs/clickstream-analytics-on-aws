@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Fn, RemovalPolicy, Stack } from 'aws-cdk-lib';
+import { Aws, CfnRule, Fn, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import {
   UserPool,
   CfnUserPoolUser,
@@ -42,6 +42,37 @@ export class SolutionCognito extends Construct {
   constructor(scope: Construct, id: string, props: SolutionCognitoProps) {
     super(scope, id);
     const stackId = getShortIdOfStack(Stack.of(scope));
+
+    new CfnRule(scope, 'CognitoUnsupportRegionRule', {
+      assertions: [
+        {
+          assert:
+            Fn.conditionOr(
+              Fn.conditionEquals(Aws.REGION, 'us-east-1'),
+              Fn.conditionEquals(Aws.REGION, 'us-east-2'),
+              Fn.conditionEquals(Aws.REGION, 'us-west-1'),
+              Fn.conditionEquals(Aws.REGION, 'us-west-2'),
+              Fn.conditionEquals(Aws.REGION, 'ca-central-1'),
+              Fn.conditionEquals(Aws.REGION, 'sa-east-1'),
+              Fn.conditionEquals(Aws.REGION, 'eu-west-1'),
+              Fn.conditionEquals(Aws.REGION, 'eu-west-2'),
+              Fn.conditionEquals(Aws.REGION, 'eu-west-3'),
+              Fn.conditionEquals(Aws.REGION, 'eu-central-1'),
+              Fn.conditionEquals(Aws.REGION, 'ap-northeast-1'),
+              Fn.conditionEquals(Aws.REGION, 'ap-northeast-2'),
+              Fn.conditionEquals(Aws.REGION, 'ap-southeast-1'),
+              Fn.conditionEquals(Aws.REGION, 'ap-southeast-2'),
+              Fn.conditionEquals(Aws.REGION, 'ap-south-1'),
+              Fn.conditionEquals(Aws.REGION, 'eu-north-1'),
+              Fn.conditionEquals(Aws.REGION, 'me-south-1'),
+            ),
+
+          assertDescription:
+            'Cognito is not supported in current region. Please use correct CloudFormation template and try again.',
+        },
+      ],
+    });
+
     const userPool = new UserPool(scope, 'userPool', {
       selfSignUpEnabled: false,
       signInCaseSensitive: false,
