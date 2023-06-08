@@ -14,11 +14,12 @@
 import {
   EC2Client,
   DescribeSecurityGroupRulesCommand,
+  DescribeAvailabilityZonesCommand,
 } from '@aws-sdk/client-ec2';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { paginateData } from '../../common/utils';
-import { describeSecurityGroupsWithRules } from '../../store/aws/ec2';
+import { describeSecurityGroupsWithRules, listAvailabilityZones } from '../../store/aws/ec2';
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
 import 'aws-sdk-client-mock-jest';
@@ -101,6 +102,65 @@ describe('App test', () => {
     const securityGroupRules = await describeSecurityGroupsWithRules('us-east-1', []);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 0);
     expect(securityGroupRules).toEqual([]);
+  });
+
+  it('Describe Availability Zones specify region', async () => {
+    ec2Mock.on(DescribeAvailabilityZonesCommand).resolves({
+      AvailabilityZones: [
+        {
+          Messages: [],
+          RegionName: 'us-east-1',
+          State: 'available',
+          ZoneName: 'us-east-1b',
+        },
+        {
+          Messages: [],
+          RegionName: 'us-east-1',
+          State: 'available',
+          ZoneName: 'us-east-1c',
+        },
+        {
+          Messages: [],
+          RegionName: 'us-east-1',
+          State: 'available',
+          ZoneName: 'us-east-1d',
+        },
+        {
+          Messages: [],
+          RegionName: 'us-east-1',
+          State: 'available',
+          ZoneName: 'us-east-1e',
+        },
+      ],
+    });
+    const availabilityZones = await listAvailabilityZones('us-east-1');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeAvailabilityZonesCommand, 1);
+    expect(availabilityZones).toEqual([
+      {
+        Messages: [],
+        RegionName: 'us-east-1',
+        State: 'available',
+        ZoneName: 'us-east-1b',
+      },
+      {
+        Messages: [],
+        RegionName: 'us-east-1',
+        State: 'available',
+        ZoneName: 'us-east-1c',
+      },
+      {
+        Messages: [],
+        RegionName: 'us-east-1',
+        State: 'available',
+        ZoneName: 'us-east-1d',
+      },
+      {
+        Messages: [],
+        RegionName: 'us-east-1',
+        State: 'available',
+        ZoneName: 'us-east-1e',
+      },
+    ]);
   });
 
 });

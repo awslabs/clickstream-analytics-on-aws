@@ -181,14 +181,9 @@ export const listRegions = async () => {
 export const listAvailabilityZones = async (region: string) => {
   const ec2Client = new EC2Client({
     ...aws_sdk_client_common_config,
+    region,
   });
-  const filters: Filter[] = [{
-    Name: 'region-name',
-    Values: [region],
-  }];
-  const params: DescribeAvailabilityZonesCommand = new DescribeAvailabilityZonesCommand({
-    Filters: filters,
-  });
+  const params: DescribeAvailabilityZonesCommand = new DescribeAvailabilityZonesCommand({});
   const queryResponse = await ec2Client.send(params);
   return queryResponse.AvailabilityZones ?? [];
 };
