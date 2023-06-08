@@ -132,6 +132,34 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
   operator: 'u3@example.com',
 };
 
+export const S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE: IPipeline = {
+  ...BASE_PIPELINE_ATTRIBUTES,
+  ingestionServer: {
+    ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+    size: {
+      serverMax: 1,
+      warmPoolSize: 0,
+      serverMin: 1,
+      scaleOnCpuUtilizationPercent: 50,
+    },
+    sinkType: PipelineSinkType.S3,
+    sinkS3: {
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      s3BatchMaxBytes: 1000000,
+      s3BatchTimeout: 60,
+    },
+    loadBalancer: {
+      ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+      protocol: PipelineServerProtocol.HTTP,
+      authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+    },
+  },
+  operator: 'u3@example.com',
+};
+
 export const KAFKA_INGESTION_PIPELINE: IPipeline = {
   ...BASE_PIPELINE_ATTRIBUTES,
   ingestionServer: {

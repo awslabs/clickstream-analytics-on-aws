@@ -479,6 +479,11 @@ export class CPipeline {
     }
 
     if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
+      if (this.pipeline.ingestionServer.loadBalancer.protocol === PipelineServerProtocol.HTTP) {
+        throw new ClickStreamBadRequestError(
+          'Validation error: you must select protocol as HTTPS if open the authentication for ingestion server.',
+        );
+      }
       await validateSecretModel(this.pipeline.region, 'AuthenticationSecretArn',
         this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn, SECRETS_MANAGER_ARN_PATTERN);
     }
