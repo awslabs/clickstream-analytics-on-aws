@@ -84,12 +84,15 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
           label: element.name,
           value: element.arn,
-          description: `Authentication: ${element.authentication.join(',')}`,
+          description: `Authentication: ${element.authentication.join(
+            ','
+          )} Client Broker Communication: ${element.clientBroker}`,
           labelTag: element.type,
           iconAlt: element.arn,
           disabled:
             element.type === 'SERVERLESS' ||
-            element.authentication.indexOf('Unauthenticated') === -1,
+            element.authentication.indexOf('Unauthenticated') === -1 ||
+            element.clientBroker.indexOf('PLAINTEXT') === -1,
         }));
         setMSKClusterList(data);
         setMSKOptionList(mskOptions);

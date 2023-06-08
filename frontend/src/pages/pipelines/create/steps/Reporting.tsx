@@ -90,11 +90,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         setQuickSightEnabled(true);
         changeQuickSightAccountName(data.accountName);
       }
-      if (
-        success &&
-        data &&
-        data.edition.includes('ENTERPRISE')
-      ) {
+      if (success && data && data.edition.includes('ENTERPRISE')) {
         setQuickSightEnterprise(true);
       }
     } catch (error) {

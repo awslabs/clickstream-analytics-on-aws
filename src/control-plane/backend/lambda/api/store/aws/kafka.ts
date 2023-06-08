@@ -55,6 +55,7 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
             state: cluster.State ?? '',
             authentication: authentication,
             securityGroupId: securityGroups[0],
+            clientBroker: cluster.Provisioned?.EncryptionInfo?.EncryptionInTransit?.ClientBroker ?? '',
           });
         }
       }
@@ -76,6 +77,7 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
               state: cluster.State ?? '',
               authentication: authentication,
               securityGroupId: securityGroupIds[0],
+              clientBroker: '',
             });
           }
         }

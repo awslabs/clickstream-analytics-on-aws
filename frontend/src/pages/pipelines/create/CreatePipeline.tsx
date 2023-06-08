@@ -750,13 +750,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           ? parseInt(pipelineInfo.eventFreshValue) * 24
           : parseInt(pipelineInfo.eventFreshValue) || 72;
 
-      createPipelineObj.dataProcessing.scheduleExpression = generateCronDateRange(
-        pipelineInfo.selectedExcutionType?.value,
-        parseInt(pipelineInfo.excutionFixedValue),
-        pipelineInfo.exeCronExp,
-        pipelineInfo.selectedExcutionUnit,
-        'processing'
-      );
+      createPipelineObj.dataProcessing.scheduleExpression =
+        generateCronDateRange(
+          pipelineInfo.selectedExcutionType?.value,
+          parseInt(pipelineInfo.excutionFixedValue),
+          pipelineInfo.exeCronExp,
+          pipelineInfo.selectedExcutionUnit,
+          'processing'
+        );
 
       // set plugin value
       createPipelineObj.dataProcessing.transformPlugin =
@@ -1848,8 +1849,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         newServerless: {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataModeling.redshift.newServerless
-                              .network,
+                            ...prev.dataModeling.redshift.newServerless.network,
                             vpcId: vpc.value || '',
                             securityGroups: [], // set security group value to empty
                             subnetIds: [], // set subnets value to empty
@@ -1873,8 +1873,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         newServerless: {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataModeling.redshift.newServerless
-                              .network,
+                            ...prev.dataModeling.redshift.newServerless.network,
                             securityGroups: sg.map(
                               (element) => element.value || ''
                             ),
@@ -1899,8 +1898,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         newServerless: {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
-                            ...prev.dataModeling.redshift.newServerless
-                              .network,
+                            ...prev.dataModeling.redshift.newServerless.network,
                             subnetIds: subnets.map(
                               (element) => element.value || ''
                             ),
@@ -2292,8 +2290,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       const { success, data }: ApiResponse<SecurityGroupResponse[]> =
         await getSecurityGroups({
           region: pipelineInfo.region,
-          vpcId:
-            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
+          vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
         });
       if (success) {
         const selectSGs = data.filter((element) =>
@@ -2316,8 +2313,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       const { success, data }: ApiResponse<SubnetResponse[]> =
         await getSubnetList({
           region: pipelineInfo.region,
-          vpcId:
-            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
+          vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
         });
       if (success) {
         const selectSubnets = data.filter((element) =>
@@ -2395,10 +2391,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     pipelineInfo.enableRedshift = pipelineInfo.dataModeling.redshift !== null;
     pipelineInfo.enableAthena = pipelineInfo.dataModeling.athena !== null;
 
-    pipelineInfo.redshiftType =
-      !isEmpty(pipelineInfo.dataModeling.redshift.newServerless)
-        ? 'serverless'
-        : 'provisioned';
+    pipelineInfo.redshiftType = !isEmpty(
+      pipelineInfo.dataModeling.redshift.newServerless
+    )
+      ? 'serverless'
+      : 'provisioned';
     if (pipelineInfo.redshiftType === 'serverless') {
       pipelineInfo.redshiftBaseCapacity = REDSHIFT_CAPACITY_LIST.filter(
         (type) =>
@@ -2461,7 +2458,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         await getQuickSightUsers();
       if (success) {
         const selectUser = data.filter(
-          (element) => element.userName === pipelineInfo.reporting.quickSight.user
+          (element) =>
+            element.userName === pipelineInfo.reporting.quickSight.user
         )[0];
         pipelineInfo.selectedQuickSightUser = {
           label: selectUser.userName,

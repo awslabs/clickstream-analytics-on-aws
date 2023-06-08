@@ -173,6 +173,7 @@ export interface MSKCluster {
   readonly authentication: string[];
   readonly state: string;
   readonly securityGroupId: string;
+  readonly clientBroker: string;
 }
 
 export interface QuickSightUser {

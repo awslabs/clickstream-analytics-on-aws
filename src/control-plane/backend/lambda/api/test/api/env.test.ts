@@ -28,7 +28,7 @@ import {
 } from '@aws-sdk/client-ec2';
 import { EMRServerlessClient, ListApplicationsCommand } from '@aws-sdk/client-emr-serverless';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
-import { KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
+import { ClientBroker, KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
 import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
 import {
   QuickSightClient,
@@ -787,6 +787,11 @@ describe('Account Env test', () => {
               Sasl: { Iam: { Enabled: true } },
             },
             NumberOfBrokerNodes: 1,
+            EncryptionInfo: {
+              EncryptionInTransit: {
+                ClientBroker: ClientBroker.TLS_PLAINTEXT,
+              },
+            },
           },
           State: 'ACTIVE',
         },
@@ -823,6 +828,7 @@ describe('Account Env test', () => {
           type: 'PROVISIONED',
           state: 'ACTIVE',
           securityGroupId: 'sg-111',
+          clientBroker: 'TLS_PLAINTEXT',
         },
       ],
     });
@@ -877,6 +883,7 @@ describe('Account Env test', () => {
           type: 'SERVERLESS',
           state: 'ACTIVE',
           securityGroupId: 'sg-111',
+          clientBroker: '',
         },
       ],
     });

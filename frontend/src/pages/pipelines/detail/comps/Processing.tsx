@@ -101,11 +101,14 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         }
       } else if (pipelineInfo.dataProcessing.scheduleExpression) {
         if (pipelineInfo.dataProcessing.scheduleExpression) {
-          if (pipelineInfo.dataProcessing.scheduleExpression.startsWith('cron')) {
+          if (
+            pipelineInfo.dataProcessing.scheduleExpression.startsWith('cron')
+          ) {
             return pipelineInfo.dataProcessing.scheduleExpression;
           } else {
             const pattern = /rate\((\d+\s\w+)\)/;
-            const match = pipelineInfo.dataProcessing.scheduleExpression.match(pattern);
+            const match =
+              pipelineInfo.dataProcessing.scheduleExpression.match(pattern);
 
             if (match) {
               const rateValue = match[1];
@@ -217,8 +220,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
           return `${pipelineInfo.dataLoadCronExp}`;
         }
       } else if (
-        pipelineInfo.dataModeling.loadWorkflow
-          .loadJobScheduleIntervalExpression
+        pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression
       ) {
         if (
           pipelineInfo.dataModeling.loadWorkflow

@@ -62,6 +62,7 @@ declare global {
     state: string;
     type: string;
     authentication: string[];
+    clientBroker: string;
   }
 
   interface RedshiftResponse {
