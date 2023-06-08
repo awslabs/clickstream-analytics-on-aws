@@ -28,18 +28,28 @@ interface TabContentProps {
 const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { t } = useTranslation();
   const { pipelineInfo } = props;
+
+  const getReportingEnableStatus = () => {
+    if (pipelineInfo?.pipelineId) {
+      // pipeline detail page
+      if (pipelineInfo.reporting && pipelineInfo.reporting.quickSight) {
+        return true;
+      }
+    } else {
+      // create pipeline page
+      if (pipelineInfo?.enableReporting) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.status')}</Box>
-          {!pipelineInfo?.pipelineId ? (
-            pipelineInfo?.enableReporting ? (
-              <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
-            ) : (
-              <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
-            )
-          ) : pipelineInfo.reporting ? (
+          {getReportingEnableStatus() ? (
             <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
           ) : (
             <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
@@ -47,41 +57,51 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
         </div>
       </SpaceBetween>
 
-      <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.dashboards')}</Box>
-          {pipelineInfo?.dashboards?.map((element) => {
-            return (
-              <div key={element.appId}>
-                <Link
-                  external
-                  href={buildQuickSightDashboardLink(
-                    pipelineInfo.region || '',
-                    element.dashboardId
-                  )}
-                >
-                  {element.appId}
-                </Link>
-              </div>
-            );
-          }) || '-'}
-        </div>
-      </SpaceBetween>
+      {getReportingEnableStatus() && (
+        <>
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.dashboards')}
+              </Box>
+              {pipelineInfo?.dashboards && pipelineInfo?.dashboards.length > 0
+                ? pipelineInfo?.dashboards.map((element) => {
+                    return (
+                      <div key={element.appId}>
+                        <Link
+                          external
+                          href={buildQuickSightDashboardLink(
+                            pipelineInfo.region || '',
+                            element.dashboardId
+                          )}
+                        >
+                          {element.appId}
+                        </Link>
+                      </div>
+                    );
+                  })
+                : '-'}
+            </div>
+          </SpaceBetween>
 
-      <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:create.qsAccountName')}
-          </Box>
-          <div>{pipelineInfo?.reporting.quickSight.accountName || '-'}</div>
-        </div>
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:create.quickSightUser')}
-          </Box>
-          <div>{pipelineInfo?.reporting.quickSight.user || '-'}</div>
-        </div>
-      </SpaceBetween>
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:create.qsAccountName')}
+              </Box>
+              <div>
+                {pipelineInfo?.reporting?.quickSight?.accountName || '-'}
+              </div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:create.quickSightUser')}
+              </Box>
+              <div>{pipelineInfo?.reporting?.quickSight?.user || '-'}</div>
+            </div>
+          </SpaceBetween>
+        </>
+      )}
     </ColumnLayout>
   );
 };
