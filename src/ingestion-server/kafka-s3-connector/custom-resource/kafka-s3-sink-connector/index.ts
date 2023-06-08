@@ -171,26 +171,50 @@ async function createCustomPlugin(
   logger.info('createCustomPlugin()');
   const { pluginName, awsPartition } = getResourceName(event);
   const pluginBucketArn = `arn:${awsPartition}:s3:::${pluginBucket}`;
-  let res = await kafkaConnectClient.send(
-    new CreateCustomPluginCommand({
-      contentType: 'ZIP',
-      description: `s3://${pluginBucket}/${pluginKey}`,
-      location: {
-        s3Location: {
-          bucketArn: pluginBucketArn,
-          fileKey: pluginKey,
+  let customPluginArn;
+  try {
+    let res = await kafkaConnectClient.send(
+      new CreateCustomPluginCommand({
+        contentType: 'ZIP',
+        description: `s3://${pluginBucket}/${pluginKey}`,
+        location: {
+          s3Location: {
+            bucketArn: pluginBucketArn,
+            fileKey: pluginKey,
+          },
         },
-      },
-      name: pluginName,
-    }),
-  );
+        name: pluginName,
+      }),
+    );
+    customPluginArn = res.customPluginArn;
+  } catch (e: any) {
+    if (e.name === 'ConflictException') {
+      logger.info(e.message);
+      logger.info('pluginName: ' + pluginName);
+      const listRes = await kafkaConnectClient.send(
+        new ListCustomPluginsCommand({
+          maxResults: 100,
+        }),
+      );
+      const plugins = listRes.customPlugins?.filter((p) => p.name == pluginName);
+      if (plugins?.length == 1) {
+        logger.info(`the connector plugin: ${pluginName} already exists`);
+        customPluginArn = plugins[0].customPluginArn;
+      } else {
+        logger.error(e);
+        throw e;
+      }
+    } else {
+      logger.error(e);
+      throw e;
+    }
+  }
 
-  const customPluginArn = res.customPluginArn;
   let n = 0;
   while (n < MAX_N) {
     n++;
     await sleep(5);
-    res = await kafkaConnectClient.send(
+    let res = await kafkaConnectClient.send(
       new DescribeCustomPluginCommand({
         customPluginArn,
       }),

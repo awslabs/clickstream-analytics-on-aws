@@ -212,6 +212,37 @@ test('Create connector, there is exsiting connector', async () => {
   expect(error).toBeFalsy();
 });
 
+test('Create connector plugin, there is exsiting plugin', async () => {
+  KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
+    if (command.command == 'CreateCustomPluginCommand') {
+      const error = new Error('Invalid parameter connectorName: A resource with this name already exists.');
+      error.name = 'ConflictException';
+      throw error;
+    }
+    return {
+      customPlugins: [
+        {
+          customPluginArn: 'arn:aws:test-plugin',
+          customPluginState: 'ACTIVE',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
+        },
+      ],
+      connectorState: 'RUNNING',
+      customPluginArn: 'arn:aws:test-plugin',
+      customPluginState: 'ACTIVE',
+      name: '54bce910-Plugin-create-test-custom-resource54bce910',
+    };
+  });
+  event.RequestType = 'Create';
+  let error = false;
+  try {
+    await msk_sink_handler(event as CloudFormationCustomResourceEvent, c);
+  } catch (e: any) {
+    error = true;
+  }
+  expect(error).toBeFalsy();
+});
+
 test('Create s3 sink - success', async () => {
   event.RequestType = 'Create';
   const response = await msk_sink_handler(
