@@ -270,7 +270,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         header={
           <Header
             counter={
-              selectedItems.length ? '(' + selectedItems.length + '/10)' : ''
+              selectedItems.length
+                ? '(' + selectedItems.length + '/' + totalCount + ')'
+                : ''
             }
             description={t('project:pipeline.yourAppDesc')}
             actions={
