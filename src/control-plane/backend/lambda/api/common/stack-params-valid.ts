@@ -89,7 +89,7 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     );
   }
 
-  const isolatedSubnets = allSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
+  const isolatedSubnets = privateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
   if (isolatedSubnets.length > 0) {
     const vpcEndpoints = await describeVpcEndpoints(pipeline.region, network.vpcId);
     const vpcEndpointSecurityGroups: string[] = [];

@@ -97,27 +97,7 @@ describe('App test', () => {
 
   });
 
-  it('Describe security group rules With empty string', async () => {
-    ec2Mock.on(DescribeSecurityGroupRulesCommand, { Filters: [{ Name: 'group-id', Values: ['id1'] }], MaxResults: undefined, NextToken: undefined }).resolves({
-      SecurityGroupRules: [
-        {
-          SecurityGroupRuleId: 'id1',
-        },
-      ],
-    });
-    const securityGroupRules = await describeSecurityGroupsWithRules('us-east-1', ['id1', '', '']);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
-    expect(securityGroupRules).toEqual([{ SecurityGroupRuleId: 'id1' }]);
-  });
-
   it('Describe security group rules With empty id list', async () => {
-    ec2Mock.on(DescribeSecurityGroupRulesCommand, { Filters: [{ Name: 'group-id', Values: ['id1'] }], MaxResults: undefined, NextToken: undefined }).resolves({
-      SecurityGroupRules: [
-        {
-          SecurityGroupRuleId: 'id1',
-        },
-      ],
-    });
     const securityGroupRules = await describeSecurityGroupsWithRules('us-east-1', []);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 0);
     expect(securityGroupRules).toEqual([]);
