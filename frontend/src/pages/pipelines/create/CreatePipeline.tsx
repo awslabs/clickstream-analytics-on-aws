@@ -2554,12 +2554,12 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           securityGroupId:
             data.ingestionServer.sinkKafka?.securityGroupId ?? '',
           mskCluster: {
-            name: data.ingestionServer.sinkKafka?.mskCluster.name ?? '',
-            arn: data.ingestionServer.sinkKafka?.mskCluster.arn ?? '',
+            name: data.ingestionServer.sinkKafka?.mskCluster?.name ?? '',
+            arn: data.ingestionServer.sinkKafka?.mskCluster?.arn ?? '',
           },
           kafkaConnector: {
             enable:
-              data.ingestionServer.sinkKafka?.kafkaConnector.enable ?? true,
+              data.ingestionServer.sinkKafka?.kafkaConnector?.enable ?? true,
           },
         },
         sinkKinesis: {
