@@ -12,7 +12,7 @@
  */
 
 import { Duration } from 'aws-cdk-lib';
-import { Alarm, ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
@@ -50,6 +50,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.loadEventsWorkflow.metricFailed({ period: Duration.hours(1) }),
     alarmDescription: 'Load events workflow failed',
     alarmName: getAlarmName(scope, props.projectId, 'Load events workflow'),
@@ -59,6 +60,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }),
     alarmDescription: 'Upsert users workflow failed',
     alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
@@ -68,6 +70,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1800, // half hour
     evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: new Metric({
       metricName: AnalyticsCustomMetricsName.FILE_MAX_AGE,
       namespace: MetricsNamespace.REDSHIFT_ANALYTICS,

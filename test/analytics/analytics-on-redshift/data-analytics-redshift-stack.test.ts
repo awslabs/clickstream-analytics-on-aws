@@ -16,6 +16,7 @@ import {
 } from '@aws-lambda-powertools/logger';
 import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
@@ -4116,10 +4117,17 @@ describe('Should set metrics widgets', () => {
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Load events workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Upsert users workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Max file age more than 1800 seconds',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
   });
@@ -4139,10 +4147,17 @@ describe('Should set metrics widgets', () => {
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Load events workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Upsert users workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
+    existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: 'Max file age more than 1800 seconds',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
   });
@@ -4162,14 +4177,17 @@ describe('Should set metrics widgets', () => {
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Load events workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Upsert users workflow failed',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: 'Max file age more than 1800 seconds',
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
   });
