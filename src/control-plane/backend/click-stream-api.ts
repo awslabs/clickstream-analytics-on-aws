@@ -80,7 +80,6 @@ export interface ClickStreamApiProps {
   readonly targetToCNRegions?: boolean;
   readonly stackWorkflowS3Bucket: IBucket;
   readonly pluginPrefix: string;
-  readonly s3MainRegion?: string;
   readonly authProps?: AuthProps;
   readonly healthCheckPath: string;
 }
@@ -288,7 +287,6 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
-        S3_MAIN_REGION: props.targetToCNRegions? 'cn-north-1': 'us-east-1',
         ISSUER: props.authProps?.issuer ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         API_ROLE_NAME: clickStreamApiFunctionRole.roleName,

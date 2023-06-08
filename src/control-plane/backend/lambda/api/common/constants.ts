@@ -22,7 +22,6 @@ const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
-const s3MainRegion = process.env.S3_MAIN_REGION;
 const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
 const APIRoleName = process.env.API_ROLE_NAME;
 const amznRequestContextHeader = 'x-amzn-request-context';
@@ -39,7 +38,6 @@ export {
   awsRegion,
   awsAccountId,
   awsUrlSuffix,
-  s3MainRegion,
   STSUploadRole,
   APIRoleName,
   amznRequestContextHeader,

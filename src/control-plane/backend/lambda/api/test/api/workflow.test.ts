@@ -2098,6 +2098,38 @@ describe('Workflow test', () => {
     templateURL = await pipeline.getTemplateUrl('Ingestion_no');
     expect(templateURL).toEqual(undefined);
   });
+  it('Pipeline template url in china region', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+      });
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'Solution',
+      },
+    }).resolves({
+      Item: {
+        name: 'Solution',
+        data: {
+          name: 'clickstream-branch-main',
+          dist_output_bucket: 'EXAMPLE-BUCKET',
+          target: 'feature-rel/main',
+          prefix: 'cn/',
+          version: 'v1.0.0',
+        },
+      },
+    });
+    process.env.AWS_REGION='cn-northwest-1';
+    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    await pipeline.generateWorkflow();
+    let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
+    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/cn/ingestion-server-s3-stack.template.json');
+    templateURL = await pipeline.getTemplateUrl('Ingestion_no');
+    expect(templateURL).toEqual(undefined);
+  });
   it('Pipeline template url with latest', async () => {
     dictionaryMock(ddbMock);
     ddbMock.on(GetCommand, {
@@ -2134,6 +2166,7 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
+    process.env.AWS_REGION='us-east-1';
     const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
     await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');

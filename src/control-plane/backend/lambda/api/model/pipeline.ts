@@ -18,7 +18,7 @@ import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
 import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack } from './stacks';
-import { awsUrlSuffix, s3MainRegion, stackWorkflowS3Bucket } from '../common/constants';
+import { awsUrlSuffix, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
   PROJECT_ID_PATTERN,
@@ -491,9 +491,10 @@ export class CPipeline {
       }
       const solutionName = this.resources?.solution.data.name;
       const templateName = this.resources?.templates.data[name] as string;
-      const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3MainRegion}.${awsUrlSuffix}`;
       // default/ or cn/
       const prefix = this.resources?.solution.data.prefix;
+      const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
+      const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
       let version = this.resources?.solution.data.version === 'latest' ?
         this.resources?.solution.data.target : this.resources?.solution.data.version;
