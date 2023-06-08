@@ -59,6 +59,7 @@ import {
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGHT_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
 import { app, server } from '../../index';
@@ -339,7 +340,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the network for deploying New_Serverless Redshift at least three subnets that cross three AZs. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: the network for deploying New_Serverless Redshift at least three subnets that cross three AZs. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -471,7 +472,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, the network for deploying New_Serverless Redshift at least three subnets that cross two AZs. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: the network for deploying New_Serverless Redshift at least three subnets that cross two AZs. Please check and try again.');
   });
   it('Create pipeline with vpc endpoint SG error', async () => {
     tokenMock(ddbMock, false);
@@ -494,7 +495,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -521,8 +522,34 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The VpcEndpoint not contain specify subnets\"}]. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The VpcEndpoint not contain specify subnets\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline skip Redshift SG validation when reporting is disabled', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        sgError: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
@@ -543,11 +570,11 @@ describe('Pipeline test', () => {
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+        ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, security groups error of New_Serverless Redshift. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: Provisioned Redshift security groups missing rule for QuickSight access.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -600,7 +627,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"The route of vpc endpoint need attached in the route table\"}]. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"The route of vpc endpoint need attached in the route table\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -626,7 +653,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -652,7 +679,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error, vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"Miss vpc endpoint\"}]. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.s3\",\"reason\":\"Miss vpc endpoint\"}]. Please check and try again.');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);

@@ -119,7 +119,7 @@ export const isValidAppId: CustomValidator = value => {
   const regexp = new RegExp(APP_ID_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validate error, app name: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: app name: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
   }
   return true;
 };
@@ -131,7 +131,7 @@ export const isProjectExisted: CustomValidator = value => {
   const regexp = new RegExp(PROJECT_ID_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validate error, projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
   }
   return store.isProjectExisted(value).then(existed => {
     if (!existed) {
@@ -148,7 +148,7 @@ export const isProjectNotExisted: CustomValidator = value => {
   const regexp = new RegExp(PROJECT_ID_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validate error, projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
   }
   return store.isProjectExisted(value).then(existed => {
     if (existed) {
@@ -219,7 +219,7 @@ export const isEmails: CustomValidator = value => {
   const regexp = new RegExp(MUTIL_EMAIL_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validate error, projectId: ${value} not match ${MUTIL_EMAIL_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: projectId: ${value} not match ${MUTIL_EMAIL_PATTERN}. Please check and try again.`);
   }
   return true;
 };

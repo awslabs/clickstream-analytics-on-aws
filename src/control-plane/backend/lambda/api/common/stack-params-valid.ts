@@ -23,12 +23,12 @@ import { getSecretValue } from '../store/aws/secretsmanager';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
-    throw new ClickStreamBadRequestError(`Validate error, ${parameter}: undefined not match ${pattern}. Please check and try again.`);
+    throw new ClickStreamBadRequestError(`Validation error: ${parameter}: undefined not match ${pattern}. Please check and try again.`);
   }
   const regexp = new RegExp(pattern);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    throw new ClickStreamBadRequestError(`Validate error, ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
+    throw new ClickStreamBadRequestError(`Validation error: ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
   }
   return true;
 };
@@ -38,7 +38,7 @@ export const validateSecretModel = async (region: string, key: string, secretArn
     validatePattern(key, pattern, secretArn);
     const secretContent = await getSecretValue(region, secretArn);
     if (!secretContent) {
-      throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret is undefined. Please check and try again.');
+      throw new ClickStreamBadRequestError('Validation error: AuthenticationSecret is undefined. Please check and try again.');
     }
     const secret = JSON.parse(secretContent);
     const keys = secret.issuer &&
@@ -48,10 +48,10 @@ export const validateSecretModel = async (region: string, key: string, secretArn
       secret.appClientId &&
       secret.appClientSecret;
     if (!keys) {
-      throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret format mismatch. Please check and try again.');
+      throw new ClickStreamBadRequestError('Validation error: AuthenticationSecret format mismatch. Please check and try again.');
     }
   } catch (err) {
-    throw new ClickStreamBadRequestError('Validate error, AuthenticationSecret format mismatch. Please check and try again.');
+    throw new ClickStreamBadRequestError('Validation error: AuthenticationSecret format mismatch. Please check and try again.');
   }
   return true;
 };
@@ -185,50 +185,48 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
       const azInRegion = await listAvailabilityZones(pipeline.region);
       if (azInRegion.length < 2) {
         throw new ClickStreamBadRequestError(
-          `Validate error, error in obtaining ${pipeline.region} availability zones information. ` +
+          `Validation error: error in obtaining ${pipeline.region} availability zones information. ` +
           'Please check and try again.',
         );
       } else if (azInRegion.length === 2) {
         if (azSet.size < 2 || redshiftSubnets.length < 3) {
           throw new ClickStreamBadRequestError(
-            `Validate error, the network for deploying ${redshiftType} Redshift at least three subnets that cross two AZs. ` +
+            `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross two AZs. ` +
             'Please check and try again.',
           );
         }
       } else if (azSet.size < 3) {
         throw new ClickStreamBadRequestError(
-          `Validate error, the network for deploying ${redshiftType} Redshift at least three subnets that cross three AZs. ` +
+          `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross three AZs. ` +
           'Please check and try again.',
         );
       }
     }
 
-    const validSubnets = [];
-    for (let quickSightSubnet of quickSightSubnets) {
-      const redshiftCidrRule: SecurityGroupRule = {
-        IsEgress: false,
-        IpProtocol: 'tcp',
-        FromPort: portOfRedshift,
-        ToPort: portOfRedshift,
-        CidrIpv4: quickSightSubnet.cidr,
-      };
-      if (containRule(redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftCidrRule)) {
-        validSubnets.push(quickSightSubnet.id);
-        break;
-      }
-    }
-    if (isEmpty(validSubnets)) {
-      throw new ClickStreamBadRequestError(
-        `Validate error, security groups error of ${redshiftType} Redshift. ` +
-        'Please check and try again.',
-      );
-    }
-
-    if (pipeline.reporting?.quickSight?.accountName) {
+    if (pipeline.reporting) {
       const accountInfo = await describeAccountSubscription();
       if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
         throw new ClickStreamBadRequestError(
           'Validation error: QuickSight edition is not enterprise in your account.',
+        );
+      }
+      const validSubnets = [];
+      for (let quickSightSubnet of quickSightSubnets) {
+        const redshiftCidrRule: SecurityGroupRule = {
+          IsEgress: false,
+          IpProtocol: 'tcp',
+          FromPort: portOfRedshift,
+          ToPort: portOfRedshift,
+          CidrIpv4: quickSightSubnet.cidr,
+        };
+        if (containRule(redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftCidrRule)) {
+          validSubnets.push(quickSightSubnet.id);
+          break;
+        }
+      }
+      if (isEmpty(validSubnets)) {
+        throw new ClickStreamBadRequestError(
+          `Validation error: ${redshiftType} Redshift security groups missing rule for QuickSight access.`,
         );
       }
     }
@@ -250,13 +248,13 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
   if (sinkType === PipelineSinkType.KAFKA) {
     if (sinkBatch.intervalSeconds < 0 || sinkBatch.intervalSeconds > 3000) {
       throw new ClickStreamBadRequestError(
-        'Validate error, the sink batch interval must 0 <= interval <= 3000 for Kafka sink. ' +
+        'Validation error: the sink batch interval must 0 <= interval <= 3000 for Kafka sink. ' +
         'Please check and try again.',
       );
     }
     if (sinkBatch.size < 1 || sinkBatch.size > 50000) {
       throw new ClickStreamBadRequestError(
-        'Validate error, the sink batch size must 1 <= size <=50000 for Kafka sink. ' +
+        'Validation error: the sink batch size must 1 <= size <=50000 for Kafka sink. ' +
         'Please check and try again.',
       );
     }
@@ -264,13 +262,13 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
   if (sinkType === PipelineSinkType.KINESIS) {
     if (sinkBatch.intervalSeconds < 0 || sinkBatch.intervalSeconds > 300) {
       throw new ClickStreamBadRequestError(
-        'Validate error, the sink batch interval must 0 <= interval <= 300 for Kinesis sink. ' +
+        'Validation error: the sink batch interval must 0 <= interval <= 300 for Kinesis sink. ' +
         'Please check and try again.',
       );
     }
     if (sinkBatch.size < 1 || sinkBatch.size > 10000) {
       throw new ClickStreamBadRequestError(
-        'Validate error, the sink batch size must 1 <= size <= 10000 for Kinesis sink. ' +
+        'Validation error: the sink batch size must 1 <= size <= 10000 for Kinesis sink. ' +
         'Please check and try again.',
       );
     }
@@ -290,7 +288,7 @@ const validateVpcEndpoint = (region: string, subnet: ClickStreamSubnet, vpcEndpo
     securityGroupsRules, subnet, services);
   if (!isEmpty(invalidServices)) {
     throw new ClickStreamBadRequestError(
-      `Validate error, vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}. ` +
+      `Validation error: vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}. ` +
       'Please check and try again.',
     );
   }
