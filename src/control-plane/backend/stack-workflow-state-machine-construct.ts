@@ -80,6 +80,7 @@ export class StackWorkflowStateMachine extends Construct {
       tracing: aws_lambda.Tracing.ACTIVE,
       role: workflowFunctionRole,
       architecture: Architecture.X86_64,
+      timeout: Duration.seconds(15),
       environment: {
         ...POWERTOOLS_ENVS,
       },

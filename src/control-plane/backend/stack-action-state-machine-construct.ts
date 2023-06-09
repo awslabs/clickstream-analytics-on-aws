@@ -67,7 +67,7 @@ export class StackActionStateMachine extends Construct {
       tracing: aws_lambda.Tracing.ACTIVE,
       role: actionFunctionRole,
       architecture: Architecture.X86_64,
-      timeout: Duration.seconds(10),
+      timeout: Duration.seconds(15),
       environment: {
         ...POWERTOOLS_ENVS,
       },

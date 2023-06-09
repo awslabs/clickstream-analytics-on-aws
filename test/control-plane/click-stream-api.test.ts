@@ -185,7 +185,42 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
+      Environment: {
+        Variables: {
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        },
+      },
+      Handler: 'index.handler',
       Runtime: 'nodejs18.x',
+      Timeout: 15,
+      TracingConfig: {
+        Mode: 'Active',
+      },
+    });
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Architectures: [
+        'x86_64',
+      ],
+      Description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
+      Environment: {
+        Variables: {
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        },
+      },
+      Handler: 'index.handler',
+      Runtime: 'nodejs18.x',
+      Timeout: 15,
+      TracingConfig: {
+        Mode: 'Active',
+      },
     });
     template.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
