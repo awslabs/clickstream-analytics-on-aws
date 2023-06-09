@@ -441,6 +441,16 @@ describe('CloudFrontS3PotalStack', () => {
       Handler: 'index.certificateRequestHandler',
       Timeout: 900,
     });
+
+    // TLS version check for custom domain
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        ViewerCertificate: {
+          MinimumProtocolVersion: 'TLSv1.2_2019',
+        },
+      },
+    });
+
   });
 
   test('China regions', () => {
@@ -484,6 +494,15 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
     template.hasOutput('CloudFrontDomainName', {});
+
+    // TLS version check for custom domain
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        ViewerCertificate: {
+          MinimumProtocolVersion: 'TLSv1.2_2019',
+        },
+      },
+    });
   });
 
   test('OIDC authorizer', () => {

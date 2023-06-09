@@ -220,6 +220,7 @@ export class CloudFrontS3Portal extends Construct {
           IamCertificateId: props.cnCloudFrontS3PortalProps.iamCertificateId,
           SslSupportMethod: 'sni-only',
           CloudFrontDefaultCertificate: undefined,
+          MinimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2019,
         },
       );
 
