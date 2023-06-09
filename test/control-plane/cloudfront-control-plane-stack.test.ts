@@ -272,6 +272,7 @@ describe('CloudFrontS3PotalStack', () => {
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         },
       },
+      Timeout: 15,
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
     },
