@@ -1728,10 +1728,10 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           },
         },
         Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
+        MemorySize: 1024,
         ReservedConcurrentExecutions: 1,
         Runtime: Match.anyValue(),
-        Timeout: 180,
+        Timeout: 300,
         VpcConfig: {
           SecurityGroupIds: [
             {
@@ -1785,10 +1785,10 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           },
         },
         Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
+        MemorySize: 1024,
         ReservedConcurrentExecutions: 1,
         Runtime: Match.anyValue(),
-        Timeout: 180,
+        Timeout: 300,
         VpcConfig: {
           SecurityGroupIds: [
             {
