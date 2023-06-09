@@ -117,7 +117,7 @@ CREATE EXTERNAL TABLE `ods_events`(
   `ingest_timestamp` bigint, 
   `items` struct<item_id:string,item_name:string,item_brand:string,item_variant:string,item_category:string,item_category2:string,item_category3:string,item_category4:string,item_category5:string,price_in_usd:double,price:double,quantity:bigint,item_revenue_in_usd:double,item_revenue:double,item_refund_in_usd:double,item_refund:double,coupon:string,affiliation:string,location_id:string,item_list_id:string,item_list_name:string,item_list_index:string,promotion_id:string,promotion_name:string,creative_name:string,creative_slot:string>, 
   `platform` string, 
-  `privacy_info` struct<ads_storage:string,analytics_storage:string,uses_transient_token:string>, 
+  `privacy_info` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string>>>, 
   `project_id` string, 
   `traffic_source` struct<medium:string,name:string,source:string>, 
   `user_first_touch_timestamp` bigint, 

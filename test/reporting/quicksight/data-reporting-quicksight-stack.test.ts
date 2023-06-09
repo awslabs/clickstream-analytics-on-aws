@@ -1243,18 +1243,6 @@ describe('DataReportingQuickSightStack resource test', () => {
               Type: 'STRING',
             },
             {
-              Name: 'privacy_info_ad_storage',
-              Type: 'STRING',
-            },
-            {
-              Name: 'privacy_info_analytics_storage',
-              Type: 'STRING',
-            },
-            {
-              Name: 'privacy_info_uses_transient_token',
-              Type: 'STRING',
-            },
-            {
               Name: 'platform',
               Type: 'STRING',
             },
@@ -1345,9 +1333,6 @@ describe('DataReportingQuickSightStack resource test', () => {
             'geo_region',
             'geo_sub_continent',
             'geo_locale',
-            'privacy_info_ad_storage',
-            'privacy_info_analytics_storage',
-            'privacy_info_uses_transient_token',
             'platform',
             'project_id',
             'traffic_source_name',

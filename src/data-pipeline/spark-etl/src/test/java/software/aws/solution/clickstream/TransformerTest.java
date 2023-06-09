@@ -65,6 +65,29 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(111, row.getLong(row.fieldIndex("event_bundle_sequence_id")));
         assertEquals("test_project_id_01", row.getString(row.fieldIndex("project_id")));
 
+        List<Row> privateInfo = row.getList(row.fieldIndex("privacy_info"));
+
+        assertEquals(3, privateInfo.size());
+
+        String ads_storage = privateInfo.get(0).getAs("key");
+        Row value0 = privateInfo.get(0).getAs("value");
+        String ads_storage_value = value0.getAs("string_value");
+
+        String analytics_storage = privateInfo.get(1).getAs("key");
+        Row value1 = privateInfo.get(1).getAs("value");
+        String analytics_storage_value = value1.getAs("string_value");
+
+        String uses_transient_token = privateInfo.get(2).getAs("key");
+        Row value2 = privateInfo.get(2).getAs("value");
+        String uses_transient_token_value = value2.getAs("string_value");
+
+        assertEquals(ads_storage, "ads_storage");
+        assertEquals(analytics_storage, "analytics_storage");
+        assertEquals(uses_transient_token, "uses_transient_token");
+        
+        assertEquals("PIAS", ads_storage_value);
+        assertEquals("PIAAS", analytics_storage_value);
+        assertEquals("PIUTT", uses_transient_token_value);
     }
 
 

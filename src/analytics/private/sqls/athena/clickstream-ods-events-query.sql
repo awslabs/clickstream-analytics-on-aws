@@ -36,9 +36,6 @@ select
   ,geo.region as geo_region
   ,geo.sub_continent as geo_sub_continent
   ,geo.locale as geo_locale
-  ,privacy_info.ads_storage as privacy_info_ad_storage
-  ,privacy_info.analytics_storage as privacy_info_analytics_storage
-  ,privacy_info.uses_transient_token as privacy_info_uses_transient_token
   ,platform as platform
   ,project_id as project_id
   ,traffic_source.name as traffic_source_name

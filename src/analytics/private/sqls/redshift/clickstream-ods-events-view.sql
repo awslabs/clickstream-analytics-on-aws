@@ -41,9 +41,6 @@ event_date
 , geo.region::varchar as geo_region
 , geo.sub_continent::varchar as geo_sub_continent
 , geo.locale::varchar as geo_locale
-, privacy_info.ads_storage::varchar as privacy_info_ad_storage
-, privacy_info.analytics_storage::varchar as privacy_info_analytics_storage
-, privacy_info.uses_transient_token::varchar as privacy_info_uses_transient_token
 , platform as platform
 , project_id as project_id
 , traffic_source.name::varchar as traffic_source_name

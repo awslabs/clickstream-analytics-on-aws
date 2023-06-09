@@ -182,18 +182,6 @@ export const clickstream_ods_events_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'privacy_info_ad_storage',
-    Type: 'STRING',
-  },
-  {
-    Name: 'privacy_info_analytics_storage',
-    Type: 'STRING',
-  },
-  {
-    Name: 'privacy_info_uses_transient_token',
-    Type: 'STRING',
-  },
-  {
     Name: 'platform',
     Type: 'STRING',
   },

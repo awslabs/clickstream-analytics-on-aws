@@ -103,12 +103,32 @@ public final class MyTransformer {
 
     private Dataset<Row> convertPrivacyInfo(final Dataset<Row> dataset) {
         Column attributesCol = col("data").getField("attributes");
-
         return dataset.withColumn("privacy_info",
-                struct(
-                        get_json_object(attributesCol, "$._privacy_info_ads_storage").alias("ads_storage"),
-                        get_json_object(attributesCol, "$._privacy_info_analytics_storage").alias("analytics_storage"),
-                        get_json_object(attributesCol, "$._privacy_info_uses_transient_token").alias("uses_transient_token")
+                array(
+                        struct(
+                                lit("ads_storage").alias("key"),
+                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
+                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
+                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
+                                        get_json_object(attributesCol, "$._privacy_info_ads_storage").cast(DataTypes.StringType).alias("string_value")
+                                ).alias("value")),
+
+                        struct(
+                                lit("analytics_storage").alias("key"),
+                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
+                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
+                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
+                                        get_json_object(attributesCol, "$._privacy_info_analytics_storage").cast(DataTypes.StringType).alias("string_value")
+                                ).alias("value")),
+
+                        struct(
+                                lit("uses_transient_token").alias("key"),
+                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
+                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
+                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
+                                        get_json_object(attributesCol, "$._privacy_info_uses_transient_token").cast(DataTypes.StringType).alias("string_value")
+                                ).alias("value"))
+
                 )
         );
     }
