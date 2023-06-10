@@ -1093,7 +1093,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
                   disabled={isDisabled(update, pipelineInfo)}
-                  checked={pipelineInfo.enableAthena}
+                  checked={pipelineInfo.dataModeling.athena}
                   onChange={(e) => {
                     changeEnableAthena(e.detail.checked);
                   }}

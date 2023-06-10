@@ -853,7 +853,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     delete createPipelineObj.excutionFixedValue;
     delete createPipelineObj.enableRedshift;
 
-    delete createPipelineObj.enableAthena;
     delete createPipelineObj.eventFreshValue;
 
     delete createPipelineObj.redshiftExecutionValue;
@@ -1709,7 +1708,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       enableReporting: prev.serviceStatus.QUICK_SIGHT
                         ? true
                         : false,
-                      enableAthena: true,
                       dataModeling: {
                         ...prev.dataModeling,
                         athena: true,
@@ -1723,7 +1721,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev,
                       enableRedshift: false,
                       enableReporting: false,
-                      enableAthena: false,
                       dataModeling: {
                         ...prev.dataModeling,
                         athena: false,
@@ -1782,7 +1779,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
-                    enableAthena: enable,
                     dataModeling: {
                       ...prev.dataModeling,
                       athena: enable,
@@ -2389,7 +2385,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     setUpdateListPlugins(pipelineInfo);
 
     pipelineInfo.enableRedshift = pipelineInfo.dataModeling.redshift !== null;
-    pipelineInfo.enableAthena = pipelineInfo.dataModeling.athena !== null;
 
     pipelineInfo.redshiftType = !isEmpty(
       pipelineInfo.dataModeling.redshift.newServerless

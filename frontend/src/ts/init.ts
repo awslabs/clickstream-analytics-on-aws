@@ -119,7 +119,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     enrichPlugin: [],
   },
   dataModeling: {
-    athena: false,
+    athena: true,
     redshift: {
       dataRange: 0,
       provisioned: {
@@ -169,7 +169,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   exeCronExp: '',
   excutionFixedValue: '1',
   enableRedshift: true,
-  enableAthena: false,
   eventFreshValue: '3',
   redshiftExecutionValue: '6',
 

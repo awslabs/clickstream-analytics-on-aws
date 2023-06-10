@@ -201,7 +201,6 @@ declare global {
     excutionFixedValue: string;
     enableRedshift: boolean;
 
-    enableAthena: boolean;
     eventFreshValue: string;
 
     redshiftExecutionValue: string;
