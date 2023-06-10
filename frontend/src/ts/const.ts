@@ -46,11 +46,11 @@ export const DEFAULT_KDS_SINK_INTERVAL = '300';
 
 export const MIN_MSK_BATCH_SIZE = 1;
 export const MAX_MSK_BATCH_SIZE = 50000;
-export const DEFAULT_MSK_BATCH_SIZE = '50000';
+export const DEFAULT_MSK_BATCH_SIZE = '5000';
 
 export const MIN_MSK_SINK_INTERVAL = 0;
 export const MAX_MSK_SINK_INTERVAL = 3000;
-export const DEFAULT_MSK_SINK_INTERVAL = '3000';
+export const DEFAULT_MSK_SINK_INTERVAL = '300';
 
 export const DEFAULT_TRANSFORM_SDK_IDS = ['clickstream', 'amplify'];
 
