@@ -246,7 +246,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
 
         <FormField
           label={t('pipeline:create.s3Assets')}
-          constraintText={t('pipeline:create.s3AssetsDesc')}
+          description={t('pipeline:create.s3AssetsDesc')}
           secondaryControl={
             !update || pipelineInfo.status?.status === 'Failed' ? (
               <Button
