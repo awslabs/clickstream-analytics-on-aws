@@ -620,10 +620,6 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: '50',
   },
   {
-    ParameterKey: 'LoadJobScheduleInterval',
-    ParameterValue: 'rate(5 minutes)',
-  },
-  {
     ParameterKey: 'UpsertUsersScheduleExpression',
     ParameterValue: 'rate(5 minutes)',
   },

@@ -758,16 +758,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           pipelineInfo.selectedRedshiftExecutionUnit?.value
         );
 
-      // set redshift dataload frequency
-      createPipelineObj.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression =
-        generateCronDateRange(
-          pipelineInfo.selectedDataLoadType?.value,
-          parseInt(pipelineInfo.redshiftDataLoadValue),
-          pipelineInfo.dataLoadCronExp,
-          pipelineInfo.redshiftDataLoadUnit,
-          'dataload'
-        );
-
       // set redshift upsert frequency express
       createPipelineObj.dataModeling.upsertUsers.scheduleExpression =
         generateCronDateRange(
@@ -1891,30 +1881,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeDataLoadType={(type) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedDataLoadType: type,
-                  };
-                });
-              }}
-              changeDataLoadValue={(value) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftDataLoadValue: value,
-                  };
-                });
-              }}
-              changeDataLoadUnit={(unit) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftDataLoadUnit: unit,
-                  };
-                });
-              }}
               changeDataLoadCronExp={(cron) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -2398,22 +2364,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       (type) => type.value === reverseRedshiftDataRange.unit
     )[0];
 
-    const reverseLoadJobScheduleExpression = reverseCronDateRange(
-      pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression
-    );
-    pipelineInfo.selectedDataLoadType = EXECUTION_TYPE_LIST.filter(
-      (type) => type.value === reverseLoadJobScheduleExpression.type
-    )[0];
-    if (reverseLoadJobScheduleExpression.type === ExecutionType.FIXED_RATE) {
-      pipelineInfo.redshiftDataLoadValue =
-        reverseLoadJobScheduleExpression.value;
-      pipelineInfo.redshiftDataLoadUnit = EXCUTION_UNIT_LIST.filter(
-        (type) => type.value === reverseLoadJobScheduleExpression.unit
-      )[0];
-    } else {
-      pipelineInfo.dataLoadCronExp = reverseLoadJobScheduleExpression.value;
-    }
-
     const reverseUpsertUsersScheduleExpression = reverseCronDateRange(
       pipelineInfo.dataModeling.upsertUsers.scheduleExpression
     );
@@ -2578,11 +2528,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           dataRange: data.dataModeling.redshift.dataRange ?? 0,
           provisioned: data.dataModeling.redshift.provisioned ?? null,
           newServerless: data.dataModeling.redshift.newServerless ?? null,
-        },
-        loadWorkflow: {
-          loadJobScheduleIntervalExpression:
-            data.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression ??
-            '',
         },
         upsertUsers: {
           scheduleExpression:

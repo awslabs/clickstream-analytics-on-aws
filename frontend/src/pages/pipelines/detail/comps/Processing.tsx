@@ -209,54 +209,6 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     return '-';
   };
 
-  const getRedshiftDataLoadFrequencyDisplay = () => {
-    if (pipelineInfo) {
-      if (pipelineInfo.selectedDataLoadType) {
-        if (
-          pipelineInfo.selectedDataLoadType.value === ExecutionType.FIXED_RATE
-        ) {
-          return `${pipelineInfo.redshiftDataLoadValue} ${pipelineInfo.redshiftDataLoadUnit?.label} `;
-        } else {
-          return `${pipelineInfo.dataLoadCronExp}`;
-        }
-      } else if (
-        pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression
-      ) {
-        if (
-          pipelineInfo.dataModeling.loadWorkflow
-            .loadJobScheduleIntervalExpression
-        ) {
-          if (
-            pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression.startsWith(
-              'cron'
-            )
-          ) {
-            return pipelineInfo.dataModeling.loadWorkflow
-              .loadJobScheduleIntervalExpression;
-          } else {
-            const pattern = /rate\((\d+\s\w+)\)/;
-            const match =
-              pipelineInfo.dataModeling.loadWorkflow.loadJobScheduleIntervalExpression.match(
-                pattern
-              );
-
-            if (match) {
-              const rateValue = match[1];
-              const formattedRateValue = rateValue.replace(
-                /\b\s+(\w)/,
-                (match) => match.toUpperCase()
-              );
-              return formattedRateValue;
-            }
-          }
-        } else {
-          return '-';
-        }
-      }
-    }
-    return '-';
-  };
-
   const getEnrichPluginDisplay = () => {
     if (pipelineInfo?.selectedEnrichPlugins) {
       // Create Pipeline
@@ -374,12 +326,6 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.redshiftDataLoadFrequency')}
-          </Box>
-          <div>{getRedshiftDataLoadFrequencyDisplay()}</div>
-        </div>
         <div>
           <Box variant="awsui-key-label">
             {t('pipeline:detail.redshiftUserTableUpsertFrequency')}

@@ -135,9 +135,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
         baseCapacity: 16,
       },
     },
-    loadWorkflow: {
-      loadJobScheduleIntervalExpression: '',
-    },
     upsertUsers: {
       scheduleExpression: '',
     },

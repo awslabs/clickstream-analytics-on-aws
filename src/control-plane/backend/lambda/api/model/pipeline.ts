@@ -164,9 +164,8 @@ export interface DataModeling {
     };
   };
   readonly athena: boolean;
-  readonly loadWorkflow: {
+  readonly loadWorkflow?: {
     readonly bucket?: S3Bucket;
-    readonly loadJobScheduleIntervalExpression: string;
     readonly maxFilesLimit?: number;
     readonly processingFilesLimit?: number;
   };

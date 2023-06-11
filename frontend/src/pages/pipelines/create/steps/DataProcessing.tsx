@@ -81,14 +81,11 @@ interface DataProcessingProps {
   changeSecurityGroup: (sg: OptionDefinition[]) => void;
   changeReshiftSubnets: (subnets: OptionDefinition[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
-  changeDataLoadValue: (value: string) => void;
-  changeDataLoadUnit: (unit: SelectProps.Option) => void;
   changeUpsertUserValue: (value: string) => void;
   changeUpsertUserUnit: (unit: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
   changeSelectedUpsertType: (type: SelectProps.Option) => void;
   changeUpsertCronExp: (cron: string) => void;
-  changeDataLoadType: (type: SelectProps.Option) => void;
   changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalInvalidError: boolean;
   redshiftServerlessVpcEmptyError: boolean;
@@ -126,15 +123,11 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeSecurityGroup,
     changeReshiftSubnets,
     changeBaseCapacity,
-    changeDataLoadValue,
-    changeDataLoadUnit,
     changeUpsertUserValue,
     changeUpsertUserUnit,
     changeDBUser,
     changeSelectedUpsertType,
     changeUpsertCronExp,
-    changeDataLoadType,
-    changeDataLoadCronExp,
     dataProcessorIntervalInvalidError,
     redshiftServerlessVpcEmptyError,
     redshiftServerlessSGEmptyError,
@@ -159,10 +152,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
 
   const [selectedUpsertType, setSelectedUpsertType] = useState(
     pipelineInfo.selectedUpsertType || EXECUTION_TYPE_LIST[0]
-  );
-
-  const [selectDataLoadType, setSelectDataLoadType] = useState(
-    pipelineInfo.selectedDataLoadType || EXECUTION_TYPE_LIST[0]
   );
 
   const [loadingRedshift, setLoadingRedshift] = useState(false);
@@ -193,9 +182,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   );
   const [vpcThreeAZSubnetsOptionList, setVpcThreeAZSubnetsOptionList] =
     useState<SelectProps.Options>([]);
-  const [dataLoadUnit, setDataLoadUnit] = useState(
-    pipelineInfo.redshiftDataLoadUnit || REDSHIFT_FREQUENCY_UNIT[0]
-  );
+
   const [upsertUserUnit, setUpsertUserUnit] = useState(
     pipelineInfo.redshiftUpsertFreqUnit || REDSHIFT_FREQUENCY_UNIT[2]
   );
@@ -371,10 +358,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [redshiftCapacity]);
 
   useEffect(() => {
-    changeDataLoadUnit(dataLoadUnit);
-  }, [dataLoadUnit]);
-
-  useEffect(() => {
     changeUpsertUserUnit(upsertUserUnit);
   }, [upsertUserUnit]);
 
@@ -385,10 +368,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   useEffect(() => {
     changeSelectedUpsertType(selectedUpsertType);
   }, [selectedUpsertType]);
-
-  useEffect(() => {
-    changeDataLoadType(selectDataLoadType);
-  }, [selectDataLoadType]);
 
   useEffect(() => {
     getVPCListByRegion();
@@ -968,63 +947,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                     headerText={t('pipeline:create.redshiftAdditionalSettings')}
                   >
                     <SpaceBetween direction="vertical" size="s">
-                      <FormField
-                        label={t('pipeline:create.redshiftDataLoadFrequency')}
-                        description={t(
-                          'pipeline:create.redshiftDataLoadFrequencyDesc'
-                        )}
-                      >
-                        <div className="flex">
-                          <div style={{ width: 200 }}>
-                            <Select
-                              selectedOption={selectDataLoadType}
-                              onChange={({ detail }) => {
-                                setSelectDataLoadType(detail.selectedOption);
-                              }}
-                              options={EXECUTION_TYPE_LIST}
-                            />
-                          </div>
-                          {selectDataLoadType.value ===
-                            ExecutionType.CRON_EXPRESS && (
-                            <div className="flex-1 ml-10">
-                              <SpaceBetween direction="horizontal" size="xs">
-                                <Input
-                                  placeholder="0 5 * * ? *"
-                                  value={pipelineInfo.dataLoadCronExp}
-                                  onChange={(e) => {
-                                    changeDataLoadCronExp(e.detail.value);
-                                  }}
-                                />
-                              </SpaceBetween>
-                            </div>
-                          )}
-
-                          {selectDataLoadType.value ===
-                            ExecutionType.FIXED_RATE && (
-                            <div className="flex  ml-10">
-                              <div style={{ width: 250 }}>
-                                <Input
-                                  type="number"
-                                  placeholder="5"
-                                  value={pipelineInfo.redshiftDataLoadValue}
-                                  onChange={(e) => {
-                                    changeDataLoadValue(e.detail.value);
-                                  }}
-                                />
-                              </div>
-                              <div className="ml-10">
-                                <Select
-                                  selectedOption={dataLoadUnit}
-                                  onChange={({ detail }) => {
-                                    setDataLoadUnit(detail.selectedOption);
-                                  }}
-                                  options={REDSHIFT_FREQUENCY_UNIT}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </FormField>
                       <FormField
                         label={t(
                           'pipeline:create.redshiftUserTableUpsertFrequency'

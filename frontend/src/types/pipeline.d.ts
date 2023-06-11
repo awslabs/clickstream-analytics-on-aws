@@ -142,9 +142,6 @@ declare global {
           baseCapacity: number;
         };
       };
-      loadWorkflow: {
-        loadJobScheduleIntervalExpression: string;
-      };
       upsertUsers: {
         scheduleExpression: string;
       };

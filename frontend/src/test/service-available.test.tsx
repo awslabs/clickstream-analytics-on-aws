@@ -555,12 +555,6 @@ describe('Test EMR Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeDataLoadValue={() => {
-          return;
-        }}
-        changeDataLoadUnit={() => {
-          return;
-        }}
         changeUpsertUserValue={() => {
           return;
         }}
@@ -574,9 +568,6 @@ describe('Test EMR Serverless service available', () => {
           return;
         }}
         changeUpsertCronExp={() => {
-          return;
-        }}
-        changeDataLoadType={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -687,12 +678,6 @@ describe('Test EMR Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeDataLoadValue={() => {
-          return;
-        }}
-        changeDataLoadUnit={() => {
-          return;
-        }}
         changeUpsertUserValue={() => {
           return;
         }}
@@ -706,9 +691,6 @@ describe('Test EMR Serverless service available', () => {
           return;
         }}
         changeUpsertCronExp={() => {
-          return;
-        }}
-        changeDataLoadType={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -821,12 +803,6 @@ describe('Test Redsfhift Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeDataLoadValue={() => {
-          return;
-        }}
-        changeDataLoadUnit={() => {
-          return;
-        }}
         changeUpsertUserValue={() => {
           return;
         }}
@@ -840,9 +816,6 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeUpsertCronExp={() => {
-          return;
-        }}
-        changeDataLoadType={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -958,12 +931,6 @@ describe('Test Redsfhift Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeDataLoadValue={() => {
-          return;
-        }}
-        changeDataLoadUnit={() => {
-          return;
-        }}
         changeUpsertUserValue={() => {
           return;
         }}
@@ -977,9 +944,6 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeUpsertCronExp={() => {
-          return;
-        }}
-        changeDataLoadType={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
