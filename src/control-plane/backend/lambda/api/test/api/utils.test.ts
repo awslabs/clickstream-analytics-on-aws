@@ -25,6 +25,7 @@ import {
   MUTIL_EMAIL_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
+  SECRETS_MANAGER_ARN_PATTERN,
 } from '../../common/constants-ln';
 import { validatePattern, validateSinkBatch } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
@@ -248,6 +249,22 @@ describe('Utils test', () => {
       '',
     ];
     invalidValues.map(v => expect(() => validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Secret arn valid', async () => {
+    const validValues = [
+      'arn:aws:secretsmanager:us-east-1:555555555555:secret:path',
+      'arn:aws-cn:secretsmanager:us-east-1:555555555555:secret:path',
+      'arn:aws-cn:secretsmanager:us-east-1:555555555555:secret:/path/aaaa/bbbb',
+    ];
+    validValues.map(v => expect(validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'arn:aws:secretsmanager:us-east-1:5555555555556:secret:path',
+      'arn:awscc:secretsmanager:us-east-1:555555555555:secret:path',
+      'arn:awscc:secretsmanager:us-east-1:555555555555:secrets:path',
+      '',
+    ];
+    invalidValues.map(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Sink batch valid', async () => {
