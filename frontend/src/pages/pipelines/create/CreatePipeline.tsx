@@ -631,21 +631,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           }
 
           // Set AGA disabled
-          if (agaAvailable) {
-            // Set AGA Default Enable when AGA Avaiable
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                ingestionServer: {
-                  ...prev.ingestionServer,
-                  loadBalancer: {
-                    ...prev.ingestionServer.loadBalancer,
-                    enableGlobalAccelerator: true,
-                  },
-                },
-              };
-            });
-          } else {
+          if (!agaAvailable) {
             // Set AGA Disabled when AGA Not Avaiable
             setPipelineInfo((prev) => {
               return {
