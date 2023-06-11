@@ -202,23 +202,34 @@ const ApplicationDetail: React.FC = () => {
                         {t('application:detail.serverDomain')}
                       </Box>
                       <DomainNameWithStatus
+                        type="domain"
                         pipelineId={applicationInfo?.pipeline?.id}
-                        dns={applicationInfo?.pipeline?.dns}
+                        customDomain={applicationInfo?.pipeline?.customDomain}
+                        fetch
                       />
                     </div>
+
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('pipeline:detail.dns')}
+                      </Box>
+                      <DomainNameWithStatus
+                        type="dns"
+                        pipelineId={applicationInfo?.pipeline?.id}
+                        dns={applicationInfo?.pipeline?.dns}
+                        fetch={false}
+                      />
+                    </div>
+
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:detail.serverEdp')}
                       </Box>
                       <DomainNameWithStatus
+                        type="endpoint"
                         pipelineId={applicationInfo?.pipeline?.id}
                         endpoint={applicationInfo?.pipeline?.endpoint}
-                        customDomain={applicationInfo?.pipeline?.customDomain}
-                        fetch={
-                          applicationInfo?.pipeline?.customDomain !==
-                            undefined &&
-                          applicationInfo?.pipeline?.customDomain !== ''
-                        }
+                        fetch
                       />
                     </div>
                   </SpaceBetween>

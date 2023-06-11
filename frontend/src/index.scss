@@ -139,6 +139,11 @@ code {
   width: 45%;
 }
 
+.wrap-line {
+  word-break: break-all !important;
+  white-space: break-spaces;
+}
+
 .divider {
   background-color: #ccc;
 }

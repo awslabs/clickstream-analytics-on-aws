@@ -55,7 +55,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       }
     } else {
       // in detail page
-      if (pipelineInfo?.dataModeling.redshift.newServerless) {
+      if (pipelineInfo?.dataModeling?.redshift?.newServerless) {
         return (
           <Link
             external
@@ -99,7 +99,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         } else {
           return `${pipelineInfo.exeCronExp}`;
         }
-      } else if (pipelineInfo.dataProcessing.scheduleExpression) {
+      } else if (pipelineInfo?.dataProcessing?.scheduleExpression) {
         if (pipelineInfo.dataProcessing.scheduleExpression) {
           if (
             pipelineInfo.dataProcessing.scheduleExpression.startsWith('cron')
@@ -153,7 +153,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       if (pipelineInfo.selectedRedshiftExecutionUnit?.value) {
         return `${pipelineInfo.redshiftExecutionValue} ${pipelineInfo.selectedRedshiftExecutionUnit.label}`;
       } else {
-        const minutes = pipelineInfo.dataModeling.redshift.dataRange;
+        const minutes = pipelineInfo?.dataModeling?.redshift?.dataRange;
         if (minutes >= 60 * 24 * 30 && minutes % (60 * 24 * 30) === 0) {
           const months = minutes / (60 * 24 * 30);
           return `${months} Months`;
@@ -177,7 +177,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         } else {
           return `${pipelineInfo.upsertCronExp}`;
         }
-      } else if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
+      } else if (pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression) {
         if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
           if (
             pipelineInfo.dataModeling.upsertUsers.scheduleExpression.startsWith(

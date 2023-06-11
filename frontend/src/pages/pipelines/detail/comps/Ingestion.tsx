@@ -196,21 +196,30 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
           <DomainNameWithStatus
+            type="domain"
+            pipelineId={pipelineInfo?.pipelineId}
+            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+            fetch={pipelineInfo?.pipelineId ? true : false}
+          />
+        </div>
+
+        <div>
+          <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
+          <DomainNameWithStatus
+            type="dns"
             pipelineId={pipelineInfo?.pipelineId}
             dns={pipelineInfo?.dns}
+            fetch={false}
           />
         </div>
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.endpoint')}</Box>
           <DomainNameWithStatus
+            type="endpoint"
             pipelineId={pipelineInfo?.pipelineId}
             endpoint={pipelineInfo?.endpoint}
-            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-            fetch={
-              pipelineInfo?.ingestionServer.domain.domainName !== undefined &&
-              pipelineInfo?.ingestionServer.domain.domainName !== ''
-            }
+            fetch={pipelineInfo?.pipelineId ? true : false}
           />
         </div>
 

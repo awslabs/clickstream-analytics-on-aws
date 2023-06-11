@@ -22,6 +22,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DomainNameWithStatusProps {
+  type: 'domain' | 'endpoint' | 'dns';
   pipelineId?: string;
   dns?: string;
   customDomain?: string;
@@ -33,26 +34,24 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
   props: DomainNameWithStatusProps
 ) => {
   const { t } = useTranslation();
-  const { pipelineId, dns, customDomain, endpoint, fetch } = props;
+  const { type, pipelineId, dns, customDomain, endpoint, fetch } = props;
   const [domainResolved, setDomainResolved] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-  const [showText, setShowText] = useState('-');
+  const [showText, setShowText] = useState('');
 
   useEffect(() => {
     let requestUrl = '';
-    if (dns) {
-      requestUrl = `http://${dns}`;
-      setShowText(dns);
-    }
-    if (endpoint) {
-      requestUrl = endpoint;
-      setShowText(endpoint);
-    }
-    if (customDomain) {
+    if (type === 'domain') {
       requestUrl = `https://${customDomain}`;
-      setShowText(customDomain);
+      setShowText(customDomain || dns || '');
+    } else if (type === 'dns') {
+      requestUrl = `http://${dns}`;
+      setShowText(dns || '');
+    } else {
+      requestUrl = endpoint || '';
+      setShowText(endpoint || '');
     }
-    if (fetch) {
+    if (requestUrl) {
       setLoadingData(true);
       fetchOutsideLink({ method: 'get', url: `${requestUrl}` })
         .then((response: ApiResponse<FetchOutsideResponse>) => {
@@ -68,44 +67,50 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
           setDomainResolved(false);
         });
     }
-  }, [dns]);
+  }, [pipelineId, dns, customDomain, endpoint, fetch]);
 
   return (
     <div>
-      <CopyText text={showText === '-' ? '' : showText} />
-      {showText}
-      {fetch ? (
+      {showText ? (
         <>
-          {loadingData ? (
-            <span className="ml-5">
-              <Spinner />
-            </span>
-          ) : (
-            pipelineId &&
-            (domainResolved ? (
-              <span className="ml-5">
-                <StatusIndicator type="success" />
-              </span>
-            ) : (
-              <Popover
-                dismissButton={false}
-                position="top"
-                size="small"
-                triggerType="custom"
-                content={
-                  <StatusIndicator type="error">
-                    {t('common:status.dnsError')}
-                  </StatusIndicator>
-                }
-              >
+          <CopyText text={showText === '-' ? '' : showText} />
+          <span className="wrap-line">{showText}</span>
+          {fetch ? (
+            <>
+              {loadingData ? (
                 <span className="ml-5">
-                  <StatusIndicator type="error" />
+                  <Spinner />
                 </span>
-              </Popover>
-            ))
-          )}
+              ) : (
+                pipelineId &&
+                (domainResolved ? (
+                  <span className="ml-5">
+                    <StatusIndicator type="success" />
+                  </span>
+                ) : (
+                  <Popover
+                    dismissButton={false}
+                    position="top"
+                    size="small"
+                    triggerType="custom"
+                    content={
+                      <StatusIndicator type="error">
+                        {t('common:status.dnsError')}
+                      </StatusIndicator>
+                    }
+                  >
+                    <span className="ml-5">
+                      <StatusIndicator type="error" />
+                    </span>
+                  </Popover>
+                ))
+              )}
+            </>
+          ) : null}
         </>
-      ) : null}
+      ) : (
+        '-'
+      )}
     </div>
   );
 };

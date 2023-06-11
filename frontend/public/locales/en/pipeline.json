@@ -323,6 +323,7 @@
     "ingestionCapacity": "Ingestion capacity",
     "enableHTTPS": "Enable HTTPS",
     "domainName": "Domain name",
+    "dns": "DNS",
     "endpoint": "Endpoint",
     "acm": "ACM",
     "enableAGA": "Enable Global Accelerator",
