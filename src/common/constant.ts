@@ -91,6 +91,105 @@ export const ALBLogServiceAccountMapping = {
   },
 };
 
+export const ServerlessRedshiftRPUByRegionMapping = {
+  'me-south-1': {
+    min: 0,
+    max: 0,
+  },
+  'eu-south-1': {
+    min: 0,
+    max: 0,
+  },
+  'ap-northeast-1': {
+    min: 8,
+    max: 512,
+  },
+  'ap-northeast-2': {
+    min: 32,
+    max: 512,
+  },
+  'ap-northeast-3': {
+    min: 0,
+    max: 0,
+  },
+  'ap-south-1': {
+    min: 32,
+    max: 512,
+  },
+  'ap-southeast-1': {
+    min: 8,
+    max: 512,
+  },
+  'ap-southeast-2': {
+    min: 8,
+    max: 512,
+  },
+  'ca-central-1': {
+    min: 32,
+    max: 512,
+  },
+  'eu-central-1': {
+    min: 8,
+    max: 512,
+  },
+  'eu-north-1': {
+    min: 32,
+    max: 512,
+  },
+  'eu-west-1': {
+    min: 8,
+    max: 512,
+  },
+  'eu-west-2': {
+    min: 32,
+    max: 512,
+  },
+  'eu-west-3': {
+    min: 32,
+    max: 512,
+  },
+  'sa-east-1': {
+    min: 0,
+    max: 0,
+  },
+  'us-east-1': {
+    min: 8,
+    max: 512,
+  },
+  'us-east-2': {
+    min: 8,
+    max: 512,
+  },
+  'us-west-1': {
+    min: 32,
+    max: 512,
+  },
+  'us-west-2': {
+    min: 8,
+    max: 512,
+  },
+  'ap-east-1': {
+    min: 0,
+    max: 0,
+  },
+  'af-south-1': {
+    min: 0,
+    max: 0,
+  },
+  'ap-southeast-3': {
+    min: 0,
+    max: 0,
+  },
+  'cn-north-1': {
+    min: 0,
+    max: 0,
+  },
+  'cn-northwest-1': {
+    min: 0,
+    max: 0,
+  },
+};
+
 // regex patterns
 export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
 export const SECURITY_GROUP_PATTERN = 'sg-[a-f0-9]+';

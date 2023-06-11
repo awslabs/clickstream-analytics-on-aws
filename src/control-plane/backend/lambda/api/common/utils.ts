@@ -13,9 +13,9 @@
 
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
-import { ALBLogServiceAccountMapping } from './constants-ln';
+import { ALBLogServiceAccountMapping, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, RPURange, RPURegionMappingObject, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
@@ -55,6 +55,16 @@ function getALBLogServiceAccount(region: string) {
     }
   }
   return undefined;
+}
+
+function getServerlessRedshiftRPU(region: string): RPURange {
+  const RPUMapping = ServerlessRedshiftRPUByRegionMapping as RPURegionMappingObject;
+  for (let key in RPUMapping) {
+    if (key === region) {
+      return RPUMapping[key] as RPURange;
+    }
+  }
+  return { min: 0, max: 0 } as RPURange;
 }
 
 function generateRandomStr(length: number) {
@@ -369,6 +379,7 @@ export {
   tryToJson,
   getValueFromTags,
   getALBLogServiceAccount,
+  getServerlessRedshiftRPU,
   generateRandomStr,
   getEmailFromRequestContext,
   getBucketPrefix,

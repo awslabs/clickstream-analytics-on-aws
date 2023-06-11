@@ -76,6 +76,15 @@ export interface ALBRegionMappingObject {
   };
 }
 
+export interface RPURange {
+  min: number;
+  max: number;
+}
+
+export interface RPURegionMappingObject {
+  [key: string]: RPURange;
+}
+
 export interface StackData {
   Input: SfnStackInput;
   Callback: SfnStackCallback;

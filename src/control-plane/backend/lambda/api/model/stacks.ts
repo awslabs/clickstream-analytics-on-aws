@@ -35,7 +35,7 @@ import {
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
-import { validatePattern, validateSinkBatch } from '../common/stack-params-valid';
+import { validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
@@ -860,7 +860,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.lte(512)
   @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
     if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
-      return stack._pipeline?.dataModeling?.redshift?.newServerless.baseCapacity;
+      const rpu = stack._pipeline?.dataModeling?.redshift?.newServerless.baseCapacity;
+      validateServerlessRedshiftRPU(stack._pipeline?.region, rpu);
+      return rpu;
     }
     return value;
   })

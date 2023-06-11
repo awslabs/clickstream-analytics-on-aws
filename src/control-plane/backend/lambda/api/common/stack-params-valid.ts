@@ -14,7 +14,7 @@
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, Policy, SubnetType } from './types';
-import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getSubnetsAZ, isEmpty } from './utils';
+import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { describeAccountSubscription } from '../store/aws/quicksight';
@@ -52,6 +52,17 @@ export const validateSecretModel = async (region: string, key: string, secretArn
     }
   } catch (err) {
     throw new ClickStreamBadRequestError('Validation error: AuthenticationSecret format mismatch. Please check and try again.');
+  }
+  return true;
+};
+
+export const validateServerlessRedshiftRPU = (region: string, rpu: number) => {
+  const rpuRange = getServerlessRedshiftRPU(region);
+  if (rpuRange.min === 0 || rpuRange.max === 0) {
+    throw new ClickStreamBadRequestError('Validation error: the current region does not support ServerlessRedshift.');
+  }
+  if (rpu % 8 !== 0 || rpu > rpuRange.max || rpu < rpuRange.min) {
+    throw new ClickStreamBadRequestError(`Validation error: RPU range must be ${rpuRange.min}-${rpuRange.max} in increments of 8.`);
   }
   return true;
 };
