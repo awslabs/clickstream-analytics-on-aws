@@ -81,6 +81,8 @@ import {
   reverseCronDateRange,
   reverseFreshnessInHour,
   reverseRedshiftInterval,
+  validatePublicSubnetInSameAZWithPrivateSubnets,
+  validateSubnetCrossInAZs,
 } from 'ts/utils';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
@@ -109,6 +111,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
+  const [
+    privateSubnetDiffWithPublicError,
+    setPrivateSubnetDiffWithPublicError,
+  ] = useState(false);
 
   const [minCapacityError, setMinCapacityError] = useState(false);
   const [maxCapacityError, setMaxCapacityError] = useState(false);
@@ -228,15 +234,34 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const validateIngestionServer = () => {
     // Validate public subnets
-    if (pipelineInfo.selectedPublicSubnet.length <= 0) {
+    if (
+      pipelineInfo.selectedPublicSubnet.length < 2 ||
+      !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2)
+    ) {
       setPublicSubnetError(true);
       return false;
     }
+
     // Validate private subnets
-    if (pipelineInfo.selectedPrivateSubnet.length <= 0) {
+    if (
+      pipelineInfo.selectedPrivateSubnet.length < 2 ||
+      !validateSubnetCrossInAZs(pipelineInfo.selectedPrivateSubnet, 2)
+    ) {
       setPrivateSubnetError(true);
       return false;
     }
+
+    // Validate private subnet in the same AZ with public subnets
+    if (
+      !validatePublicSubnetInSameAZWithPrivateSubnets(
+        pipelineInfo.selectedPublicSubnet,
+        pipelineInfo.selectedPrivateSubnet
+      )
+    ) {
+      setPrivateSubnetDiffWithPublicError(true);
+      return false;
+    }
+
     // Validate ingestion server min capacity
     if (!isPositiveInteger(pipelineInfo.ingestionServer.size.serverMin)) {
       setMinCapacityError(true);
@@ -486,11 +511,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             return false;
           }
           // Check subnets valid
-          const subnetAZs = pipelineInfo.redshiftServerlessSubnets.map(
-            (element) => element.description.split(':')[0]
-          );
-          const subnetSets = new Set(subnetAZs);
-          if (subnetSets.size < 3) {
+          if (
+            !validateSubnetCrossInAZs(pipelineInfo.redshiftServerlessSubnets, 3)
+          ) {
             setRedshiftServerlessSubnetInvalidError(true);
             return false;
           }
@@ -531,6 +554,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setVPCEmptyError(false);
       setPublicSubnetError(false);
       setPrivateSubnetError(false);
+      setPrivateSubnetDiffWithPublicError(false);
       setUnSupportedServices('');
       try {
         setLoadingServiceAvailable(true);
@@ -1068,6 +1092,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               pipelineInfo={pipelineInfo}
               publicSubnetError={publicSubnetError}
               privateSubnetError={privateSubnetError}
+              privateSubnetDiffWithPublicError={
+                privateSubnetDiffWithPublicError
+              }
               domainNameEmptyError={domainNameEmptyError}
               domainNameFormatError={domainNameFormatError}
               certificateEmptyError={certificateEmptyError}
@@ -1107,6 +1134,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               }}
               changePrivateSubnets={(subnets) => {
                 setPrivateSubnetError(false);
+                setPrivateSubnetDiffWithPublicError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1599,12 +1627,28 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 redshiftProvisionedDBUserEmptyError
               }
               changeEnableDataProcessing={(enable) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    enableDataProcessing: enable,
-                  };
-                });
+                if (enable) {
+                  // if enable data processing, default to enable quicksight
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableDataProcessing: true,
+                      // Enable QuickSight When QuickSight Available
+                      enableReporting: prev.serviceStatus.QUICK_SIGHT
+                        ? true
+                        : false,
+                    };
+                  });
+                } else {
+                  // if data processing not enable, disable quicksight
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableDataProcessing: false,
+                      enableReporting: false,
+                    };
+                  });
+                }
               }}
               changeExecutionType={(type) => {
                 setDataProcessorIntervalInvalidError(false);

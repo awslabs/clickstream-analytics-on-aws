@@ -14,7 +14,7 @@
 import { TopNavigation } from '@cloudscape-design/components';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PROJECT_CONFIG_JSON } from 'ts/const';
+import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from 'ts/const';
 
 interface IHeaderProps {
   user: any;
@@ -23,7 +23,6 @@ interface IHeaderProps {
 
 const ZH_TEXT = '简体中文';
 const EN_TEXT = 'English(US)';
-const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN'];
 const LANGUAGE_ITEMS = [
   { id: 'en', text: EN_TEXT },
   { id: 'zh', text: ZH_TEXT },

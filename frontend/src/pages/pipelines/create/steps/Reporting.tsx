@@ -195,7 +195,8 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 controlId="test-quicksight-id"
                 disabled={
                   isDisabled(update, pipelineInfo) ||
-                  !pipelineInfo.serviceStatus?.QUICK_SIGHT
+                  !pipelineInfo.serviceStatus?.QUICK_SIGHT ||
+                  !pipelineInfo.enableRedshift
                 }
                 onChange={({ detail }) => changeEnableReporting(detail.checked)}
                 checked={pipelineInfo.enableReporting}

@@ -27,6 +27,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceCreateMehod } from 'ts/const';
 import { isDisabled } from 'ts/utils';
+import MSKRequirements from './MSKRequirements';
 
 interface BufferMSKProps {
   update?: boolean;
@@ -157,6 +158,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
               content: (
                 <div className="plr-20">
                   <SpaceBetween direction="vertical" size="l">
+                    <MSKRequirements />
                     {pipelineInfo.mskCreateMethod ===
                       ResourceCreateMehod.EXSITING && (
                       <FormField
@@ -239,6 +241,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                 <SpaceBetween direction="vertical" size="l">
                   <div className="plr-20">
                     <SpaceBetween direction="vertical" size="l">
+                      <MSKRequirements />
                       <FormField
                         label={t('pipeline:create.msk.brokerLink')}
                         description={t('pipeline:create.msk.brokerLinkDesc')}
@@ -289,6 +292,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         }
                       >
                         <Select
+                          filteringType="auto"
                           selectedOption={pipelineInfo.selectedSelfHostedMSKSG}
                           options={vpcSGOptionList}
                           placeholder={

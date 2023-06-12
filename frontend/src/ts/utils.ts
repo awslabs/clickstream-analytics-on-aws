@@ -12,6 +12,8 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { isEqual } from 'lodash';
 import { EPipelineStatus, ExecutionType } from './const';
 
 export const generateStr = (length: number) => {
@@ -220,4 +222,39 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return update && pipelineInfo?.status?.status !== EPipelineStatus.Failed;
+};
+
+// Validate subnets cross N AZs
+export const validateSubnetCrossInAZs = (
+  subnets: OptionDefinition[],
+  nAZ: number
+) => {
+  const subnetsAZs = subnets.map(
+    (element) => element?.description?.split(':')[0]
+  );
+  const subnetSets = new Set(subnetsAZs);
+  if (subnetSets.size < nAZ) {
+    return false;
+  }
+  return true;
+};
+
+// Validate Private Subnet in same AZ with Public Subnets
+export const validatePublicSubnetInSameAZWithPrivateSubnets = (
+  publicSubnets: OptionDefinition[],
+  privateSubnets: OptionDefinition[]
+) => {
+  const publicSubnetsAZs = publicSubnets.map(
+    (element) => element?.description?.split(':')[0]
+  );
+  const privateSubnetsAZs = privateSubnets.map(
+    (element) => element?.description?.split(':')[0]
+  );
+  console.info('new Set(publicSubnetsAZs):', new Set(publicSubnetsAZs));
+  console.info('new Set(privateSubnetsAZs):', new Set(privateSubnetsAZs));
+  console.info(
+    'isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs)):',
+    isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs))
+  );
+  return isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs));
 };

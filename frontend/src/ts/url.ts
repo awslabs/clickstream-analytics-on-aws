@@ -11,8 +11,21 @@
  *  and limitations under the License.
  */
 
+import { ZH_LANGUAGE_LIST } from './const';
+
 const CONSOLE_CHINA_DOMAIN = 'console.amazonaws.cn';
 const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
+
+// TODO Need To Change after publish
+export const SOLUTION_DOCUMENTS_DOMAIN =
+  'https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/';
+
+export const buildDocumentLink = (lang: string, url?: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return SOLUTION_DOCUMENTS_DOMAIN + 'zh' + (url ?? '');
+  }
+  return SOLUTION_DOCUMENTS_DOMAIN + 'en' + (url ?? '');
+};
 
 export const buildVPCLink = (region: string, vpcId: string): string => {
   if (region.startsWith('cn')) {

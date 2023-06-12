@@ -99,6 +99,7 @@ interface ConfigIngestionProps {
 
   publicSubnetError: boolean;
   privateSubnetError: boolean;
+  privateSubnetDiffWithPublicError: boolean;
   domainNameEmptyError: boolean;
   domainNameFormatError: boolean;
   certificateEmptyError: boolean;
@@ -164,6 +165,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeEnableALBAuthentication,
     publicSubnetError,
     privateSubnetError,
+    privateSubnetDiffWithPublicError,
     domainNameEmptyError,
     domainNameFormatError,
     certificateEmptyError,
@@ -311,6 +313,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             }
           >
             <Multiselect
+              filteringType="auto"
               disabled={isDisabled(update, pipelineInfo)}
               selectedOptions={pipelineInfo.selectedPublicSubnet}
               tokenLimit={3}
@@ -330,10 +333,15 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             description={t('pipeline:create.privateSubnetDesc')}
             stretch
             errorText={
-              privateSubnetError ? t('pipeline:valid.privateSubnetEmpty') : ''
+              privateSubnetError
+                ? t('pipeline:valid.privateSubnetEmpty')
+                : privateSubnetDiffWithPublicError
+                ? t('pipeline:valid.privateSubnetDiffWithPublicError')
+                : ''
             }
           >
             <Multiselect
+              filteringType="auto"
               disabled={isDisabled(update, pipelineInfo)}
               selectedOptions={pipelineInfo.selectedPrivateSubnet}
               tokenLimit={3}
@@ -599,6 +607,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                       <div className="flex">
                         <div className="flex-1">
                           <Select
+                            filteringType="auto"
                             disabled={isDisabled(update, pipelineInfo)}
                             statusType={loadingSecret ? 'loading' : 'finished'}
                             placeholder={
@@ -662,6 +671,12 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               columns={1}
               items={[
                 {
+                  label: t('pipeline:create.bufferKDS'),
+                  description: t('pipeline:create.bufferKDSDesc'),
+                  value: SinkType.KDS,
+                  disabled: isDisabled(update, pipelineInfo),
+                },
+                {
                   label: t('pipeline:create.bufferMSK'),
                   description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
@@ -671,12 +686,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: t('pipeline:create.bufferS3'),
                   description: t('pipeline:create.bufferS3Desc'),
                   value: SinkType.S3,
-                  disabled: isDisabled(update, pipelineInfo),
-                },
-                {
-                  label: t('pipeline:create.bufferKDS'),
-                  description: t('pipeline:create.bufferKDSDesc'),
-                  value: SinkType.KDS,
                   disabled: isDisabled(update, pipelineInfo),
                 },
               ]}

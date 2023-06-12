@@ -66,10 +66,10 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       },
       notificationsTopicArn: '',
     },
-    sinkType: SinkType.MSK,
+    sinkType: SinkType.KDS,
     sinkBatch: {
-      size: 50000,
-      intervalSeconds: 3000,
+      size: 10000,
+      intervalSeconds: 300,
     },
     sinkS3: {
       sinkBucket: {

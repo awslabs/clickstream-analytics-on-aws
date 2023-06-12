@@ -215,6 +215,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           errorText={vpcEmptyError ? t('pipeline:valid.vpcEmpty') : ''}
         >
           <Select
+            filteringType="auto"
             disabled={isDisabled(update, pipelineInfo)}
             placeholder={t('pipeline:create.vpcPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedVPC}

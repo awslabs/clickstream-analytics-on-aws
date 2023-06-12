@@ -26,7 +26,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: any) => key }),
+  useTranslation: () => ({
+    t: (key: any) => key,
+    i18n: {
+      language: 'en',
+    },
+  }),
   Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
 }));
 
@@ -181,6 +186,7 @@ describe('Test AGA service available', () => {
         }}
         publicSubnetError={false}
         privateSubnetError={false}
+        privateSubnetDiffWithPublicError={false}
         domainNameEmptyError={false}
         domainNameFormatError={false}
         certificateEmptyError={false}
@@ -337,6 +343,7 @@ describe('Test AGA service available', () => {
         }}
         publicSubnetError={false}
         privateSubnetError={false}
+        privateSubnetDiffWithPublicError={false}
         domainNameEmptyError={false}
         domainNameFormatError={false}
         certificateEmptyError={false}

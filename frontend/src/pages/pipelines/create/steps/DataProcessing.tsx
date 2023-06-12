@@ -724,6 +724,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             }
                           >
                             <Select
+                              filteringType="auto"
                               disabled={
                                 isDisabled(update, pipelineInfo) ||
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
@@ -761,6 +762,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             }
                           >
                             <Multiselect
+                              filteringType="auto"
                               disabled={
                                 isDisabled(update, pipelineInfo) ||
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
@@ -804,6 +806,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             }
                           >
                             <Multiselect
+                              filteringType="auto"
                               disabled={
                                 isDisabled(update, pipelineInfo) ||
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
@@ -1014,7 +1017,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <Divider height={2} />
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
-                  disabled={isDisabled(update, pipelineInfo)}
+                  disabled={
+                    isDisabled(update, pipelineInfo) ||
+                    !pipelineInfo.enableRedshift
+                  }
                   checked={pipelineInfo.dataModeling.athena}
                   onChange={(e) => {
                     changeEnableAthena(e.detail.checked);
