@@ -105,7 +105,7 @@ ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 export const IOS_CONFIG_JSON_TEMPLATE = `{
   "analytics": {
     "plugins": {
-      "awsClickstreamPlugin ": {
+      "awsClickstreamPlugin": {
         "appId": "${TEMPLATE_APP_ID}",
         "endpoint": "${TEMPLATE_SERVER_ENDPOINT}",
         "isCompressEvents": false,
