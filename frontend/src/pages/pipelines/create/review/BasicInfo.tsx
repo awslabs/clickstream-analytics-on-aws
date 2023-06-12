@@ -40,7 +40,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
         </Header>
       }
     >
-      <ColumnLayout columns={3} variant="text-grid">
+      <ColumnLayout columns={2} variant="text-grid">
         <SpaceBetween direction="vertical" size="l">
           <div>
             <Box variant="awsui-key-label">
@@ -48,8 +48,6 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             </Box>
             <div>{pipelineInfo?.region}</div>
           </div>
-        </SpaceBetween>
-        <SpaceBetween direction="vertical" size="l">
           <div>
             <Box variant="awsui-key-label">{t('pipeline:detail.vpc')}</Box>
             <Link
@@ -80,6 +78,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             <div>{pipelineInfo?.dataCollectionSDK}</div>
           </div>
         </SpaceBetween>
+
         <div>
           <FormField label={t('tag.name')} description={t('pipeline:tagDesc')}>
             <Table

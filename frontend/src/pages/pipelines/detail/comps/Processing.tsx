@@ -210,59 +210,83 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   };
 
   const getEnrichPluginDisplay = () => {
+    let renderEnrichPlugins: any = [];
     if (pipelineInfo?.selectedEnrichPlugins) {
       // Create Pipeline
-      return (
-        pipelineInfo?.selectedEnrichPlugins
-          ?.map((element) => element.name)
-          .join(', ') || '-'
-      );
+      renderEnrichPlugins = pipelineInfo?.selectedEnrichPlugins;
     } else {
       // Pipeline detail
-      if (
-        pipelineInfo?.dataProcessing.enrichPlugin &&
-        pipelineInfo?.dataProcessing.enrichPlugin.length > 0
-      ) {
-        const enrichPluginData: IPlugin[] = pipelineInfo.dataProcessing
-          .enrichPlugin as any;
-        console.info('enrichPluginData:', enrichPluginData);
-        const returnElement = enrichPluginData.map((element) => {
-          return (
-            <div key={element.id}>
-              {element.name} <Box variant="small">{element.description}</Box>
-            </div>
-          );
-        });
-        return returnElement;
-      } else {
-        return '-';
-      }
+      renderEnrichPlugins = pipelineInfo?.dataProcessing?.enrichPlugin || [];
+    }
+    if (renderEnrichPlugins.length > 0) {
+      const returnElement = renderEnrichPlugins.map((element: IPlugin) => {
+        return (
+          <div key={element.name}>
+            {element.name} <Box variant="small">{element.description}</Box>
+          </div>
+        );
+      });
+      return returnElement;
+    } else {
+      return '-';
     }
   };
 
   const getTransformPluginDisplay = () => {
+    let renderTransformPlugins: any = [];
     if (pipelineInfo?.selectedTransformPlugins) {
-      // Create pipeline
-      return (
-        pipelineInfo?.selectedTransformPlugins
-          ?.map((element) => element.name)
-          .join(', ') || '-'
-      );
+      // Create Pipeline
+      renderTransformPlugins = pipelineInfo?.selectedTransformPlugins;
     } else {
-      // pipeline detail
-      if (pipelineInfo?.dataProcessing.transformPlugin) {
-        const transformPluginData: IPlugin = pipelineInfo?.dataProcessing
-          .transformPlugin as any;
+      // Pipeline detail
+      renderTransformPlugins =
+        pipelineInfo?.dataProcessing?.transformPlugin || [];
+    }
+    if (renderTransformPlugins.length > 0) {
+      const returnElement = renderTransformPlugins.map((element: IPlugin) => {
         return (
-          <div>
-            <div>{transformPluginData.name}</div>
-            <Box variant="small">{transformPluginData.description}</Box>
+          <div key={element.name}>
+            {element.name} <Box variant="small">{element.description}</Box>
           </div>
         );
-      } else {
-        return '-';
+      });
+      return returnElement;
+    } else {
+      return '-';
+    }
+  };
+
+  const isDataProcessingEnable = () => {
+    // Pipeline Detail
+    if (pipelineInfo?.pipelineId) {
+      if (
+        pipelineInfo.dataProcessing?.dataFreshnessInHour &&
+        pipelineInfo.dataProcessing?.scheduleExpression
+      ) {
+        return true;
+      }
+    } else {
+      // Create Pipeline
+      if (pipelineInfo?.enableDataProcessing) {
+        return true;
       }
     }
+    return false;
+  };
+
+  const isRedshiftEnable = () => {
+    // Pipeline Detail
+    if (pipelineInfo?.pipelineId) {
+      if (pipelineInfo.dataModeling && pipelineInfo.dataModeling.redshift) {
+        return true;
+      }
+    } else {
+      // Create pipeline
+      if (pipelineInfo?.enableRedshift) {
+        return true;
+      }
+    }
+    return false;
   };
 
   return (
@@ -271,7 +295,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.status')}</Box>
           <div>
-            {pipelineInfo?.dataProcessing ? (
+            {isDataProcessingEnable() ? (
               <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
             ) : (
               <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
@@ -279,70 +303,113 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
           </div>
         </div>
 
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.dataProcesingInt')}
-          </Box>
-          <div>{getDataProcessingIntervalDisplay()}</div>
-        </div>
+        {isDataProcessingEnable() && (
+          <>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.dataProcesingInt')}
+              </Box>
+              <div>{getDataProcessingIntervalDisplay()}</div>
+            </div>
 
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.eventFreshness')}
-          </Box>
-          <div>{getRefreshDataDisplay()}</div>
-        </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.eventFreshness')}
+              </Box>
+              <div>{getRefreshDataDisplay()}</div>
+            </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.transform')}</Box>
-          {getTransformPluginDisplay()}
-        </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.transform')}
+              </Box>
+              {getTransformPluginDisplay()}
+            </div>
+
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.enrichment')}
+              </Box>
+              <div>{getEnrichPluginDisplay()}</div>
+            </div>
+          </>
+        )}
       </SpaceBetween>
 
-      <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.enrichment')}</Box>
-          <div>{getEnrichPluginDisplay()}</div>
-        </div>
+      {isDataProcessingEnable() && (
+        <>
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.redshift')}
+              </Box>
+              <div>
+                {isRedshiftEnable() ? (
+                  <StatusIndicator type="success">
+                    {t('enabled')}
+                  </StatusIndicator>
+                ) : (
+                  <StatusIndicator type="stopped">
+                    {t('disabled')}
+                  </StatusIndicator>
+                )}
+              </div>
+            </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.anlyEngine')}</Box>
-          <div>{buildRedshiftDisplay(pipelineInfo)}</div>
-        </div>
+            {isRedshiftEnable() && (
+              <>
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.anlyEngine')}
+                  </Box>
+                  <div>{buildRedshiftDisplay(pipelineInfo)}</div>
+                </div>
 
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.redshiftPermission')}
-          </Box>
-          <div>
-            {pipelineInfo?.dataModeling?.redshift?.provisioned?.dbUser || '-'}
-          </div>
-        </div>
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.redshiftPermission')}
+                  </Box>
+                  <div>
+                    {pipelineInfo?.dataModeling?.redshift?.provisioned
+                      ?.dbUser || '-'}
+                  </div>
+                </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.dataRange')}</Box>
-          <div>{getRedshiftDataRangeDisplay()}</div>
-        </div>
-      </SpaceBetween>
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.dataRange')}
+                  </Box>
+                  <div>{getRedshiftDataRangeDisplay()}</div>
+                </div>
 
-      <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">
-            {t('pipeline:detail.redshiftUserTableUpsertFrequency')}
-          </Box>
-          <div>{getRedshiftUpsertFrequncyDisplay()}</div>
-        </div>
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.athena')}</Box>
-          <div>
-            {pipelineInfo?.dataModeling.athena ? (
-              <StatusIndicator type="success">{t('enabled')}</StatusIndicator>
-            ) : (
-              <StatusIndicator type="stopped">{t('disabled')}</StatusIndicator>
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.redshiftUserTableUpsertFrequency')}
+                  </Box>
+                  <div>{getRedshiftUpsertFrequncyDisplay()}</div>
+                </div>
+              </>
             )}
-          </div>
-        </div>
-      </SpaceBetween>
+          </SpaceBetween>
+
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:detail.athena')}</Box>
+              <div>
+                {pipelineInfo?.dataModeling.athena ? (
+                  <StatusIndicator type="success">
+                    {t('enabled')}
+                  </StatusIndicator>
+                ) : (
+                  <StatusIndicator type="stopped">
+                    {t('disabled')}
+                  </StatusIndicator>
+                )}
+              </div>
+            </div>
+          </SpaceBetween>
+        </>
+      )}
     </ColumnLayout>
   );
 };

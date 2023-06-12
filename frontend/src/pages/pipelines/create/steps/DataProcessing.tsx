@@ -413,7 +413,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             isDisabled(update, pipelineInfo) ||
             !pipelineInfo.serviceStatus.EMR_SERVERLESS ||
             (!pipelineInfo.serviceStatus.MSK &&
-              pipelineInfo.ingestionServer.sinkType === SinkType.MSK)
+              pipelineInfo.ingestionServer.sinkType === SinkType.MSK) ||
+            (pipelineInfo.ingestionServer.sinkType === SinkType.MSK &&
+              !pipelineInfo.ingestionServer.sinkKafka.kafkaConnector.enable)
           }
           onChange={({ detail }) => changeEnableDataProcessing(detail.checked)}
           checked={pipelineInfo.enableDataProcessing}
@@ -574,6 +576,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             <SpaceBetween direction="vertical" size="s">
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
+                  controlId="test-redshift-id"
                   disabled={isDisabled(update, pipelineInfo)}
                   checked={pipelineInfo.enableRedshift}
                   onChange={(e) => {
@@ -1017,6 +1020,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <Divider height={2} />
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
+                  controlId="test-athena-id"
                   disabled={
                     isDisabled(update, pipelineInfo) ||
                     !pipelineInfo.enableRedshift

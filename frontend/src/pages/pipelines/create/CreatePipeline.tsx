@@ -1341,11 +1341,31 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   sinkInterval = DEFAULT_MSK_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_MSK_BATCH_SIZE;
                 }
+                let tmpEnableProcessing = pipelineInfo.serviceStatus
+                  .EMR_SERVERLESS
+                  ? true
+                  : false;
+                let tmpEnableQuickSight = pipelineInfo.serviceStatus.QUICK_SIGHT
+                  ? true
+                  : false;
                 setSinkIntervalError(false);
                 setSinkBatchSizeError(false);
+
+                if (type === SinkType.MSK) {
+                  if (
+                    !pipelineInfo.ingestionServer.sinkKafka.kafkaConnector
+                      .enable
+                  ) {
+                    tmpEnableProcessing = false;
+                    tmpEnableQuickSight = false;
+                  }
+                }
+
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
+                    enableDataProcessing: tmpEnableProcessing,
+                    enableReporting: tmpEnableQuickSight,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkType: type,
@@ -1513,20 +1533,46 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeEnableKafkaConnector={(enable) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        kafkaConnector: {
-                          enable: enable,
+                // if enable, set data processing enable
+                if (enable) {
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableDataProcessing: prev.serviceStatus.EMR_SERVERLESS
+                        ? true
+                        : false,
+                      enableReporting: prev.serviceStatus.QUICK_SIGHT
+                        ? true
+                        : false,
+                      ingestionServer: {
+                        ...prev.ingestionServer,
+                        sinkKafka: {
+                          ...prev.ingestionServer.sinkKafka,
+                          kafkaConnector: {
+                            enable: true,
+                          },
                         },
                       },
-                    },
-                  };
-                });
+                    };
+                  });
+                } else {
+                  setPipelineInfo((prev) => {
+                    return {
+                      ...prev,
+                      enableDataProcessing: false,
+                      enableReporting: false,
+                      ingestionServer: {
+                        ...prev.ingestionServer,
+                        sinkKafka: {
+                          ...prev.ingestionServer.sinkKafka,
+                          kafkaConnector: {
+                            enable: false,
+                          },
+                        },
+                      },
+                    };
+                  });
+                }
               }}
               changeSelfHosted={(selfHost) => {
                 setPipelineInfo((prev) => {
@@ -1728,10 +1774,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       enableReporting: prev.serviceStatus.QUICK_SIGHT
                         ? true
                         : false,
-                      dataModeling: {
-                        ...prev.dataModeling,
-                        athena: true,
-                      },
                     };
                   });
                 } else {
@@ -1741,10 +1783,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev,
                       enableRedshift: false,
                       enableReporting: false,
-                      dataModeling: {
-                        ...prev.dataModeling,
-                        athena: false,
-                      },
                     };
                   });
                 }

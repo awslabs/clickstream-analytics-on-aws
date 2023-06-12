@@ -352,6 +352,7 @@
     "redshiftPermission": "Redshift Permissions",
     "redshiftUserTableUpsertFrequency": "User table upsert frequency",
     "dataRange": "Data range",
+    "redshift": "Redshift",
     "athena": "Athena",
     "hours": "Hours",
     "minutes": "Minutes",

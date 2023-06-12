@@ -203,25 +203,31 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           />
         </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
-          <DomainNameWithStatus
-            type="dns"
-            pipelineId={pipelineInfo?.pipelineId}
-            dns={pipelineInfo?.dns}
-            fetch={false}
-          />
-        </div>
+        {pipelineInfo?.pipelineId && (
+          <>
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
+              <DomainNameWithStatus
+                type="dns"
+                pipelineId={pipelineInfo?.pipelineId}
+                dns={pipelineInfo?.dns}
+                fetch={false}
+              />
+            </div>
 
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.endpoint')}</Box>
-          <DomainNameWithStatus
-            type="endpoint"
-            pipelineId={pipelineInfo?.pipelineId}
-            endpoint={pipelineInfo?.endpoint}
-            fetch={pipelineInfo?.pipelineId ? true : false}
-          />
-        </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('pipeline:detail.endpoint')}
+              </Box>
+              <DomainNameWithStatus
+                type="endpoint"
+                pipelineId={pipelineInfo?.pipelineId}
+                endpoint={pipelineInfo?.endpoint}
+                fetch={pipelineInfo?.pipelineId ? true : false}
+              />
+            </div>
+          </>
+        )}
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enableAGA')}</Box>

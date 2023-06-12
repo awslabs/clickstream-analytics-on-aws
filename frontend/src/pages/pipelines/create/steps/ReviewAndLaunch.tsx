@@ -33,28 +33,21 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
       <BasicInfo pipelineInfo={pipelineInfo} />
       <Container
         header={
-          <Header
-            variant="h2"
-            description={t('pipeline:create.ingestSettingsDesc')}
-          >
-            {t('pipeline:create.ingestSettings')}
-          </Header>
+          <Header variant="h2">{t('pipeline:create.ingestSettings')}</Header>
         }
       >
         <Ingestion pipelineInfo={pipelineInfo} />
       </Container>
 
-      {pipelineInfo.enableDataProcessing && (
-        <Container
-          header={
-            <Header variant="h2" description="">
-              {t('pipeline:create.dataProcessing')}
-            </Header>
-          }
-        >
-          <Processing pipelineInfo={pipelineInfo} />
-        </Container>
-      )}
+      <Container
+        header={
+          <Header variant="h2" description="">
+            {t('pipeline:create.dataProcessing')}
+          </Header>
+        }
+      >
+        <Processing pipelineInfo={pipelineInfo} />
+      </Container>
 
       <Container
         header={<Header variant="h2">{t('pipeline:create.reporting')}</Header>}
