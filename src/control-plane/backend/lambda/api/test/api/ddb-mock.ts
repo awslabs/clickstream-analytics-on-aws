@@ -629,6 +629,13 @@ function createPipelineMock(
       SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
+      VpcEndpointId: 'vpce-states',
+      ServiceName: 'com.amazonaws.ap-southeast-1.states',
+      VpcEndpointType: VpcEndpointType.Interface,
+      Groups: vpcEndpointsGroups,
+      SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+    },
+    {
       VpcEndpointId: 'vpce-logs',
       ServiceName: 'com.amazonaws.ap-southeast-1.logs',
       VpcEndpointType: VpcEndpointType.Interface,

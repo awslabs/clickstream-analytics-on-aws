@@ -102,12 +102,25 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
 
   const isolatedSubnets = privateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
   if (isolatedSubnets.length > 0) {
+    const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
     const vpcEndpoints = await describeVpcEndpoints(pipeline.region, network.vpcId);
     const vpcEndpointSecurityGroups: string[] = [];
+    const invalidVpce = [];
     for (let vpce of vpcEndpoints) {
+      const vpceSubnets = allSubnets.filter(subnet => vpce.SubnetIds?.includes(subnet.id));
+      const vpceSubnetsAZ = getSubnetsAZ(vpceSubnets);
+      const azInVpceSubnetsAZ = vpceSubnetsAZ.filter(az => isolatedSubnetsAZ.includes(az));
+      if (azInVpceSubnetsAZ.length < isolatedSubnetsAZ.length) {
+        invalidVpce.push(vpce.ServiceName);
+      }
       for (let group of vpce.Groups!) {
         vpcEndpointSecurityGroups.push(group.GroupId!);
       }
+    }
+    if (invalidVpce.length > 0) {
+      throw new ClickStreamBadRequestError(
+        `Validate error: The Availability Zones (AZ) of VPC Endpoint (${invalidVpce.join(',')}) subnets must contain Availability Zones (AZ) of isolated subnets.`,
+      );
     }
 
     const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
@@ -143,6 +156,7 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
           validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
             [
               'redshift-data',
+              'states',
               'sts',
               'dynamodb',
             ]);

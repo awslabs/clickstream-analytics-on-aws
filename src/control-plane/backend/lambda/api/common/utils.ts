@@ -240,12 +240,6 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
           });
         }
       } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface && vpcEndpoint.Groups) {
-        if (!vpcEndpoint.SubnetIds?.includes(subnet.id)) {
-          invalidServices.push({
-            service: service,
-            reason: 'The VpcEndpoint not contain specify subnets',
-          });
-        }
         const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
         const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId!));
         const vpcEndpointRule: SecurityGroupRule = {
