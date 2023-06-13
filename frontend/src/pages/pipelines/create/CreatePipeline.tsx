@@ -58,7 +58,6 @@ import {
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
   ProtocalType,
-  REDSHIFT_CAPACITY_LIST,
   REDSHIFT_UNIT_LIST,
   ResourceCreateMehod,
   SDK_LIST,
@@ -76,6 +75,7 @@ import {
   extractAccountIdFromArn,
   generateCronDateRange,
   generateRedshiftInterval,
+  generateRedshiftRPUOptionListByRegion,
   isEmpty,
   isPositiveInteger,
   reverseCronDateRange,
@@ -103,6 +103,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const appConfig = useContext(AppContext);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingQuickSight, setloadingQuickSight] = useState(false);
 
   const [regionEmptyError, setRegionEmptyError] = useState(false);
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
@@ -577,172 +578,193 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           const quickSightAvailable =
             data.find((element) => element.service === 'quicksight')
               ?.available || false;
-          setPipelineInfo((prev) => {
-            return {
-              ...prev,
-              serviceStatus: {
-                AGA: agaAvailable,
-                EMR_SERVERLESS: emrAvailable,
-                REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
-                MSK: mskAvailable,
-                QUICK_SIGHT: quickSightAvailable,
-              },
-              // Below to set resources to empty by regions
-              selectedVPC: null,
-              selectedPublicSubnet: [],
-              selectedPrivateSubnet: [],
-              selectedSecret: null, // clear secret
-              selectedCertificate: null, // clear certificates
-              showServiceStatus: false,
-              ingestionServer: {
-                ...prev.ingestionServer,
-                sinkS3: {
-                  // set sink s3 to null
-                  ...prev.ingestionServer.sinkS3,
-                  sinkBucket: {
-                    name: '',
-                    prefix: '',
-                  },
-                },
-                domain: {
-                  ...prev.ingestionServer.domain,
-                  certificateArn: '', // set certificate arn to empty
-                },
-                loadBalancer: {
-                  ...prev.ingestionServer.loadBalancer,
-                  authenticationSecretArn: '', // set secret value to null
-                  logS3Bucket: {
-                    ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                    name: '',
-                  },
-                },
-              },
-            };
-          });
-
-          // Set show alert information when has unsupported services
-          const unSupportedServiceList = data.filter(
-            (service) => !service.available
-          );
-          if (unSupportedServiceList.length >= 0) {
-            setUnSupportedServices(
-              unSupportedServiceList.map((service) => service.service).join(',')
-            );
+          if (update) {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
-                showServiceStatus: true,
-              };
-            });
-          }
-
-          // Set QuickSight disabled
-          if (quickSightAvailable) {
-            // Set QuickSight Default Enable when QuickSight Available
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                enableReporting: true,
+                serviceStatus: {
+                  AGA: agaAvailable,
+                  EMR_SERVERLESS: emrAvailable,
+                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
+                  MSK: mskAvailable,
+                  QUICK_SIGHT: quickSightAvailable,
+                },
               };
             });
           } else {
             setPipelineInfo((prev) => {
               return {
                 ...prev,
-                enableReporting: false,
-              };
-            });
-          }
-
-          // Set AGA disabled
-          if (!agaAvailable) {
-            // Set AGA Disabled when AGA Not Avaiable
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
+                serviceStatus: {
+                  AGA: agaAvailable,
+                  EMR_SERVERLESS: emrAvailable,
+                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
+                  MSK: mskAvailable,
+                  QUICK_SIGHT: quickSightAvailable,
+                },
+                // Below to set resources to empty by regions
+                selectedVPC: null,
+                selectedPublicSubnet: [],
+                selectedPrivateSubnet: [],
+                selectedSecret: null, // clear secret
+                selectedCertificate: null, // clear certificates
+                showServiceStatus: false,
+                redshiftBaseCapacity: null,
+                redshiftServerlessSG: [],
+                redshiftServerlessVPC: null,
+                redshiftServerlessSubnets: [],
                 ingestionServer: {
                   ...prev.ingestionServer,
+                  sinkS3: {
+                    // set sink s3 to null
+                    ...prev.ingestionServer.sinkS3,
+                    sinkBucket: {
+                      name: '',
+                      prefix: '',
+                    },
+                  },
+                  domain: {
+                    ...prev.ingestionServer.domain,
+                    certificateArn: '', // set certificate arn to empty
+                  },
                   loadBalancer: {
                     ...prev.ingestionServer.loadBalancer,
-                    enableGlobalAccelerator: false,
-                  },
-                },
-              };
-            });
-          }
-
-          // Set MSK Disable and Apache Kafka connector Disabled
-          if (mskAvailable) {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                kafkaSelfHost: false, // Change to MSK as default
-                enableDataProcessing: true, // enable data processing
-                ingestionServer: {
-                  ...prev.ingestionServer,
-                  sinkKafka: {
-                    ...prev.ingestionServer.sinkKafka,
-                    kafkaConnector: {
-                      enable: true,
+                    authenticationSecretArn: '', // set secret value to null
+                    logS3Bucket: {
+                      ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                      name: '',
                     },
                   },
                 },
               };
             });
-          } else {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                kafkaSelfHost: true, // Change to self hosted as default
-                enableDataProcessing:
-                  pipelineInfo.ingestionServer.sinkType === SinkType.MSK
-                    ? false
-                    : true, // disabled all data processing when sink type is MSK and MSK not available
-                ingestionServer: {
-                  ...prev.ingestionServer,
-                  sinkKafka: {
-                    ...prev.ingestionServer.sinkKafka,
-                    kafkaConnector: {
-                      enable: false,
+
+            // Set show alert information when has unsupported services
+            const unSupportedServiceList = data.filter(
+              (service) => !service.available
+            );
+            if (unSupportedServiceList.length >= 0) {
+              setUnSupportedServices(
+                unSupportedServiceList
+                  .map((service) => service.service)
+                  .join(',')
+              );
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  showServiceStatus: true,
+                };
+              });
+            }
+
+            // Set QuickSight disabled
+            if (quickSightAvailable) {
+              // Set QuickSight Default Enable when QuickSight Available
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  enableReporting: true,
+                };
+              });
+            } else {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  enableReporting: false,
+                };
+              });
+            }
+
+            // Set AGA disabled
+            if (!agaAvailable) {
+              // Set AGA Disabled when AGA Not Avaiable
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  ingestionServer: {
+                    ...prev.ingestionServer,
+                    loadBalancer: {
+                      ...prev.ingestionServer.loadBalancer,
+                      enableGlobalAccelerator: false,
                     },
                   },
-                },
-              };
-            });
-          }
+                };
+              });
+            }
 
-          // Set redshift serverless Disabled
-          if (redshiftServerlessAvailable) {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                redshiftType: 'serverless', // change to serverless as default
-              };
-            });
-          } else {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                redshiftType: 'provisioned', // change to provisioned as default
-              };
-            });
-          }
+            // Set MSK Disable and Apache Kafka connector Disabled
+            if (mskAvailable) {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  kafkaSelfHost: false, // Change to MSK as default
+                  enableDataProcessing: true, // enable data processing
+                  ingestionServer: {
+                    ...prev.ingestionServer,
+                    sinkKafka: {
+                      ...prev.ingestionServer.sinkKafka,
+                      kafkaConnector: {
+                        enable: true,
+                      },
+                    },
+                  },
+                };
+              });
+            } else {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  kafkaSelfHost: true, // Change to self hosted as default
+                  enableDataProcessing:
+                    pipelineInfo.ingestionServer.sinkType === SinkType.MSK
+                      ? false
+                      : true, // disabled all data processing when sink type is MSK and MSK not available
+                  ingestionServer: {
+                    ...prev.ingestionServer,
+                    sinkKafka: {
+                      ...prev.ingestionServer.sinkKafka,
+                      kafkaConnector: {
+                        enable: false,
+                      },
+                    },
+                  },
+                };
+              });
+            }
 
-          // Set data processing Disabled when emr-serverless not available
-          if (emrAvailable) {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                enableDataProcessing: true, // Default to enable data processing
-              };
-            });
-          } else {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                enableDataProcessing: false, // disabled all data processing
-              };
-            });
+            // Set redshift serverless Disabled
+            if (redshiftServerlessAvailable) {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  redshiftType: 'serverless', // change to serverless as default
+                };
+              });
+            } else {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  redshiftType: 'provisioned', // change to provisioned as default
+                };
+              });
+            }
+
+            // Set data processing Disabled when emr-serverless not available
+            if (emrAvailable) {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  enableDataProcessing: true, // Default to enable data processing
+                };
+              });
+            } else {
+              setPipelineInfo((prev) => {
+                return {
+                  ...prev,
+                  enableDataProcessing: false, // disabled all data processing
+                };
+              });
+            }
           }
         }
         setLoadingServiceAvailable(false);
@@ -918,7 +940,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   // Monitor Region Changed and validate Service Available
   useEffect(() => {
-    if (pipelineInfo.region && !update) {
+    if (pipelineInfo.region) {
       validServiceAvailable(pipelineInfo.region);
     }
   }, [pipelineInfo.region]);
@@ -965,7 +987,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         }
         confirmCreatePipeline();
       }}
-      isLoadingNextStep={loadingCreate || loadingServiceAvailable}
+      isLoadingNextStep={
+        loadingCreate || loadingServiceAvailable || loadingQuickSight
+      }
       activeStepIndex={activeStepIndex}
       steps={[
         {
@@ -2014,6 +2038,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               update={update}
               pipelineInfo={pipelineInfo}
               quickSightUserEmptyError={quickSightUserEmptyError}
+              changeLoadingQuickSight={(loading) => {
+                setloadingQuickSight(loading);
+              }}
               changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -2075,7 +2102,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const { update } = props;
   const { id, pid } = useParams();
 
-  const [loadingData, setLoadingData] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
 
   const breadcrumbItems = [
@@ -2203,10 +2230,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateMSKCluster = async (pipelineInfo: IExtPipeline) => {
     try {
-      if (
-        pipelineInfo.ingestionServer.sinkType !== 'kafka' ||
-        pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn === null
-      ) {
+      if (pipelineInfo.ingestionServer.sinkType !== 'kafka') {
         return;
       }
       pipelineInfo.mskCreateMethod = ResourceCreateMehod.EXSITING;
@@ -2218,7 +2242,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         const selectMsk = data.filter(
           (element) =>
             element.arn ===
-            pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
+            pipelineInfo.ingestionServer?.sinkKafka?.mskCluster?.arn
         )[0];
         pipelineInfo.selectedMSK = {
           label: selectMsk.name,
@@ -2234,10 +2258,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateKafkaSelfHosted = async (pipelineInfo: IExtPipeline) => {
     try {
-      if (
-        pipelineInfo.ingestionServer.sinkType !== 'kafka' ||
-        pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn !== null
-      ) {
+      if (pipelineInfo.ingestionServer.sinkType !== 'kafka') {
         return;
       }
       pipelineInfo.mskCreateMethod = ResourceCreateMehod.CREATE;
@@ -2426,7 +2447,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       ? 'serverless'
       : 'provisioned';
     if (pipelineInfo.redshiftType === 'serverless') {
-      pipelineInfo.redshiftBaseCapacity = REDSHIFT_CAPACITY_LIST.filter(
+      pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
+        pipelineInfo.region
+      ).filter(
         (type) =>
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
@@ -2635,6 +2658,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     if (res.enableReporting) {
       res.reporting = data.reporting;
     }
+    res.kafkaSelfHost = isEmpty(
+      res.ingestionServer?.sinkKafka?.mskCluster?.name
+    );
     return res;
   };
   const getProjectPipelineDetail = async () => {
@@ -2649,20 +2675,28 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);
-          setUpdateRegion(extPipeline);
-          setUpdateVpc(extPipeline);
-          setUpdateSDK(extPipeline);
-          setUpdateSubnetList(extPipeline);
-          setUpdateCetificate(extPipeline);
-          setUpdateSSMSecret(extPipeline);
-          setUpdateMSKCluster(extPipeline);
-          setUpdateKafkaSelfHosted(extPipeline);
-          setUpdateKDSType(extPipeline);
-          setUpdateETL(extPipeline);
-          setUpdateReport(extPipeline);
           setUpdatePipeline(extPipeline);
-
-          setLoadingData(false);
+          Promise.all([
+            setUpdateRegion(extPipeline),
+            setUpdateVpc(extPipeline),
+            setUpdateSDK(extPipeline),
+            setUpdateSubnetList(extPipeline),
+            setUpdateCetificate(extPipeline),
+            setUpdateSSMSecret(extPipeline),
+            extPipeline.kafkaSelfHost
+              ? setUpdateKafkaSelfHosted(extPipeline)
+              : setUpdateMSKCluster(extPipeline),
+            setUpdateKDSType(extPipeline),
+            setUpdateETL(extPipeline),
+            setUpdateReport(extPipeline),
+          ])
+            .then(() => {
+              setLoadingData(false);
+            })
+            .catch((error) => {
+              console.error(error);
+              setLoadingData(false);
+            });
         }
       } catch (error) {
         setLoadingData(false);
@@ -2671,7 +2705,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
 
   useEffect(() => {
-    getProjectPipelineDetail();
+    if (update) {
+      getProjectPipelineDetail();
+    } else {
+      setLoadingData(false);
+    }
   }, []);
 
   return (

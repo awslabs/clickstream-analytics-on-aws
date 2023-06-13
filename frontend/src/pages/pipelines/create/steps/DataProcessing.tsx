@@ -48,13 +48,12 @@ import {
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
-  REDSHIFT_CAPACITY_LIST,
   REDSHIFT_FREQUENCY_UNIT,
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
-import { isDisabled } from 'ts/utils';
+import { generateRedshiftRPUOptionListByRegion, isDisabled } from 'ts/utils';
 
 interface DataProcessingProps {
   update?: boolean;
@@ -173,7 +172,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const [loadingRoles, setLoadingRoles] = useState(false);
 
   const [redshiftCapacity, setRedshiftCapacity] = useState(
-    pipelineInfo.redshiftBaseCapacity || REDSHIFT_CAPACITY_LIST[0]
+    pipelineInfo.redshiftBaseCapacity ||
+      generateRedshiftRPUOptionListByRegion(pipelineInfo.region)[0]
   );
   const [threeAZVPCOptionList, setThreeAZVPCOptionList] =
     useState<SelectProps.Options>([]);
@@ -331,7 +331,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   };
 
   useEffect(() => {
-    if (pipelineInfo.redshiftServerlessVPC?.value) {
+    if (!update && pipelineInfo.redshiftServerlessVPC?.value) {
       getSecurityGroupByVPC(pipelineInfo.redshiftServerlessVPC.value);
       getSubnetsByRedshiftVPC(pipelineInfo.redshiftServerlessVPC.value);
     }
@@ -374,7 +374,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     if (SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS) {
       getServerlessRedshiftClusterList();
     }
-    getVPCListByRegion();
   }, []);
 
   useEffect(() => {
@@ -704,6 +703,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             )}
                           >
                             <Select
+                              filteringType="auto"
                               disabled={
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
                               }
@@ -711,7 +711,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                               onChange={({ detail }) =>
                                 setRedshiftCapacity(detail.selectedOption)
                               }
-                              options={REDSHIFT_CAPACITY_LIST}
+                              options={generateRedshiftRPUOptionListByRegion(
+                                pipelineInfo.region
+                              )}
                               selectedAriaLabel="Selected"
                             />
                           </FormField>

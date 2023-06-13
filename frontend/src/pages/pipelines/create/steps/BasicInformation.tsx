@@ -146,7 +146,11 @@ const BasicInformation: React.FC<BasicInformationProps> = (
 
   // Monitor region change
   useEffect(() => {
-    if (pipelineInfo.selectedRegion && pipelineInfo.selectedRegion.value) {
+    if (
+      !update &&
+      pipelineInfo.selectedRegion &&
+      pipelineInfo.selectedRegion.value
+    ) {
       getVPCListByRegion(pipelineInfo.selectedRegion.value);
       getAllS3BucketList(pipelineInfo.selectedRegion.value);
     }

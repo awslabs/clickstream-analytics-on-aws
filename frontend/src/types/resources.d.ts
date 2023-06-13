@@ -149,4 +149,11 @@ declare global {
     service: string;
     available: boolean;
   }
+
+  interface RPURegionListType {
+    [region: string]: {
+      min: number;
+      max: number;
+    };
+  }
 }

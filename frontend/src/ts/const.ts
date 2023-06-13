@@ -205,14 +205,6 @@ export const REDSHIFT_FREQUENCY_UNIT = [
   { label: 'Days', value: 'day' },
 ];
 
-export const REDSHIFT_CAPACITY_LIST = [
-  { label: '8', value: '8' },
-  { label: '16', value: '16' },
-  { label: '32', value: '32' },
-  { label: '40', value: '40' },
-  { label: '48', value: '48' },
-];
-
 export const SDK_LIST: SelectProps.Option[] = [
   {
     label: 'ClickStream SDK',

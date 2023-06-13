@@ -32,7 +32,11 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
   const getReportingEnableStatus = () => {
     if (pipelineInfo?.pipelineId) {
       // pipeline detail page
-      if (pipelineInfo.reporting && pipelineInfo.reporting.quickSight) {
+      if (
+        pipelineInfo.reporting &&
+        pipelineInfo.reporting.quickSight &&
+        pipelineInfo.reporting.quickSight.accountName
+      ) {
         return true;
       }
     } else {

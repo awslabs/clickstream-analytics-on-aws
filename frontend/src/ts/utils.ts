@@ -15,6 +15,7 @@ import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
 import { EPipelineStatus, ExecutionType } from './const';
+import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
 export const generateStr = (length: number) => {
   let randomString = '';
@@ -24,6 +25,21 @@ export const generateStr = (length: number) => {
     randomString += letters[randomIndex];
   }
   return randomString;
+};
+
+export const generateRedshiftRPUOptionListByRegion = (region: string) => {
+  const STEP = 8;
+  const minMaxObject = (
+    ServerlessRedshiftRPUByRegionMapping as RPURegionListType
+  )[region];
+  if (region && minMaxObject && minMaxObject.min > 0) {
+    const options = [];
+    for (let i = minMaxObject.min; i <= minMaxObject.max; i += STEP) {
+      options.push({ label: i.toString(), value: i.toString() });
+    }
+    return options;
+  }
+  return [];
 };
 
 export const alertMsg = (alertTxt: string, alertType: AlertType) => {
@@ -237,7 +253,11 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 };
 
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
-  return update && pipelineInfo?.status?.status !== EPipelineStatus.Failed;
+  return (
+    update &&
+    (pipelineInfo?.status?.status === EPipelineStatus.Failed ||
+      pipelineInfo?.status?.status === EPipelineStatus.Active)
+  );
 };
 
 // Validate subnets cross N AZs
@@ -265,12 +285,6 @@ export const validatePublicSubnetInSameAZWithPrivateSubnets = (
   );
   const privateSubnetsAZs = privateSubnets.map(
     (element) => element?.description?.split(':')[0]
-  );
-  console.info('new Set(publicSubnetsAZs):', new Set(publicSubnetsAZs));
-  console.info('new Set(privateSubnetsAZs):', new Set(privateSubnetsAZs));
-  console.info(
-    'isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs)):',
-    isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs))
   );
   return isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs));
 };

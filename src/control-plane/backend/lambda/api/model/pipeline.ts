@@ -308,7 +308,7 @@ export class CPipeline {
         notAllowEdit.push(paramName);
       }
     }
-    if (!isEmpty(notAllowEdit) && this.pipeline.status.status === PipelineStatusType.ACTIVE) {
+    if (!isEmpty(notAllowEdit)) {
       throw new ClickStreamBadRequestError(`Property modification not allowed: ${notAllowEdit.join(',')}.`);
     }
     // update workflow

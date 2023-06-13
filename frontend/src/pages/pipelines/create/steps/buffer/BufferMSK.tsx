@@ -152,7 +152,10 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
           activeTabId={pipelineInfo.kafkaSelfHost ? 'manual' : 'select'}
           tabs={[
             {
-              disabled: !pipelineInfo.serviceStatus.MSK,
+              disabled:
+                (isDisabled(update, pipelineInfo) &&
+                  pipelineInfo.kafkaSelfHost) ||
+                !pipelineInfo.serviceStatus.MSK,
               label: t('pipeline:create.msk.select'),
               id: 'select',
               content: (
@@ -236,6 +239,8 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
             },
             {
               label: t('pipeline:create.msk.manual'),
+              disabled:
+                isDisabled(update, pipelineInfo) && !pipelineInfo.kafkaSelfHost,
               id: 'manual',
               content: (
                 <SpaceBetween direction="vertical" size="l">

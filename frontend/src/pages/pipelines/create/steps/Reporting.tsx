@@ -50,6 +50,7 @@ interface ReportingProps {
   changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
   changeQuickSightAccountName: (accountName: string) => void;
   quickSightUserEmptyError: boolean;
+  changeLoadingQuickSight?: (loading: boolean) => void;
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
@@ -61,6 +62,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     changeQuickSightSelectedUser,
     changeQuickSightAccountName,
     quickSightUserEmptyError,
+    changeLoadingQuickSight,
   } = props;
   const [quickSightRoleOptions, setQuickSightRoleOptions] =
     useState<SelectProps.Options>([]);
@@ -169,6 +171,10 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       getQuickSightUserList();
     }
   }, [quickSightEnabled]);
+
+  useEffect(() => {
+    changeLoadingQuickSight && changeLoadingQuickSight(loadingQuickSight);
+  }, [loadingQuickSight]);
 
   useEffect(() => {
     if (pipelineInfo.enableDataProcessing && pipelineInfo.enableReporting) {
