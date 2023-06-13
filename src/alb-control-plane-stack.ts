@@ -236,7 +236,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       issuer: issuer,
       clientId: clientId,
       redirectUrl: controlPlane.controlPlaneUrl,
-      solutionVersion: process.env.BUILD_VERSION || 'v1',
+      solutionVersion: SolutionInfo.SOLUTION_VERSION,
       cotrolPlaneMode: 'ALB',
       solutionBucket: solutionBucket.bucket.bucketName,
       solutionPluginPrefix: pluginPrefix,

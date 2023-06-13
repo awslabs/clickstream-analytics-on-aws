@@ -19,6 +19,7 @@ import { Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
 import { OUTPUT_CONTROL_PLANE_URL } from '../../src/common/constant';
+import { SolutionInfo } from '../../src/common/solution-info';
 import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-config';
 import { validateSubnetsRule } from '../rules';
 
@@ -869,7 +870,7 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                       ],
                     ],
                   },
-                  ':443/signin","solution_version":"v1","cotrol_plane_mode":"ALB","solution_data_bucket":"',
+                  `:443/signin","solution_version":"${SolutionInfo.SOLUTION_VERSION}","cotrol_plane_mode":"ALB","solution_data_bucket":"`,
                   {
                     Ref: 'ClickstreamSolutionDataBucket200465FE',
                   },

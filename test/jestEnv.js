@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+// solution
+SOLUTION_VERSION='v1.0.0_dev'
+
 // controlpalne backend API
 process.env.AWS_REGION = 'us-east-1'
 process.env.AWS_URL_SUFFIX = 'amazonaws.com'

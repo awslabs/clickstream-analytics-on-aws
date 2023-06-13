@@ -41,6 +41,7 @@ const MOCK_PLUGIN_ID = '5555-5555';
 const MOCK_EXECUTION_ID = 'main-3333-3333';
 const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
 const MOCK_NEW_TEMPLATE_VERSION = '1.0.0-main-sdjes12';
+const MOCK_SOLUTION_VERSION = 'v1.0.0';
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -237,7 +238,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
           prefix: 'default/',
-          version: 'v1.0.0',
+          version: MOCK_SOLUTION_VERSION,
         },
       },
     });
@@ -758,6 +759,7 @@ export {
   MOCK_EXECUTION_ID,
   MOCK_BUILT_IN_PLUGIN_ID,
   MOCK_NEW_TEMPLATE_VERSION,
+  MOCK_SOLUTION_VERSION,
   tokenMock,
   projectExistedMock,
   appExistedMock,

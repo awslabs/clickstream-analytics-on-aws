@@ -39,6 +39,7 @@ import {
   MOCK_EXECUTION_ID,
   MOCK_NEW_TEMPLATE_VERSION,
   MOCK_PROJECT_ID,
+  MOCK_SOLUTION_VERSION,
 } from './ddb-mock';
 import {
   KAFKA_INGESTION_PIPELINE,
@@ -111,7 +112,7 @@ const Tags = [
   },
   {
     Key: 'aws-solution/version',
-    Value: SolutionInfo.SOLUTION_VERSION,
+    Value: MOCK_SOLUTION_VERSION,
   },
   {
     Key: 'aws-solution/clickstream/project',
