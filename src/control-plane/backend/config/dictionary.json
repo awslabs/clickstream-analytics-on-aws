@@ -10,10 +10,6 @@
     }
   },
   {
-    "name": "QuickSightTemplateArn",
-    "data": "arn:aws:quicksight:us-east-1:992879540294:template/clickstream-quicksight-template-protype-v1-0-2"
-  },
-  {
     "name": "Templates",
     "data": {
       "Ingestion_s3": "ingestion-server-s3-stack.template.json",

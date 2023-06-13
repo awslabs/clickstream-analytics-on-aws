@@ -243,7 +243,6 @@ export interface CPipelineResources {
   redshift?: RedshiftInfo;
   solution?: IDictionary;
   templates?: IDictionary;
-  quickSightTemplateArn?: IDictionary;
   quickSightSubnetIds?: string[];
 }
 
@@ -434,15 +433,13 @@ export class CPipeline {
       };
     }
 
-    if (!this.resources || !this.resources.solution || !this.resources.templates || !this.resources.quickSightTemplateArn) {
+    if (!this.resources || !this.resources.solution || !this.resources.templates) {
       const solution = await store.getDictionary('Solution');
       const templates = await store.getDictionary('Templates');
-      const quickSightTemplateArn = await store.getDictionary('QuickSightTemplateArn');
       this.resources = {
         ...this.resources,
         solution,
         templates,
-        quickSightTemplateArn,
       };
     }
 

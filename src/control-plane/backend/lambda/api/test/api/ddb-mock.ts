@@ -243,19 +243,6 @@ function dictionaryMock(ddbMock: any, name?: string): any {
       },
     });
   }
-  if (!name || name === 'QuickSightTemplateArn') {
-    ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
-      Key: {
-        name: 'QuickSightTemplateArn',
-      },
-    }).resolves({
-      Item: {
-        name: 'QuickSightTemplateArn',
-        data: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
-      },
-    });
-  }
 }
 
 function createPipelineMock(

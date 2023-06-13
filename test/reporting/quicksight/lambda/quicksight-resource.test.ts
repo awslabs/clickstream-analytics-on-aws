@@ -36,7 +36,7 @@ import {
   CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
   CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
 } from '../../../../src/reporting/private/dashboard';
-import { clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/template-def';
+import { clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';
 import { getMockContext } from '../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 import {
@@ -46,7 +46,6 @@ import {
 } from '../../../common/lambda-events';
 
 describe('QuickSight Lambda function', () => {
-
   const context = getMockContext();
   const quickSightClientMock = mockClient(QuickSightClient);
 

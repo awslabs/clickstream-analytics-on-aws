@@ -11,8 +11,11 @@
  *  and limitations under the License.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   Aws,
+  CfnCondition,
   CfnOutput,
   CfnResource,
   Fn,
@@ -31,6 +34,7 @@ import {
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
+import { renderTemplate } from './reporting/private/dashboard';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
@@ -82,8 +86,18 @@ export class DataReportingQuickSightStack extends Stack {
     const quickSightUser = stackParames.quickSightUserParam.valueAsString;
     const principalArn = `${principalPrefix}:user/${quickSightNamespace}/${quickSightUser}`;
 
+    const useTemplateArnCondition = new CfnCondition(
+      this,
+      'useTemplateArnCondition',
+      {
+        expression:
+          Fn.conditionNot(Fn.conditionEquals(stackParames.quickSightTemplateArnParam.valueAsString, '')),
+      },
+    );
+
+    // const temptalteDefObj = renderTemplate(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')));
     const templateId = `clickstream_template_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
-    const template = new CfnTemplate(this, 'Clickstream-Template', {
+    const template = new CfnTemplate(this, 'Clickstream-Template-Def', {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
       permissions: [{
@@ -97,12 +111,16 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      sourceEntity: {
-        sourceTemplate: {
-          arn: stackParames.quickSightTemplateArnParam.valueAsString,
+      sourceEntity: Fn.conditionIf(useTemplateArnCondition.logicalId, {
+        SourceTemplate: {
+          Arn: stackParames.quickSightTemplateArnParam.valueAsString,
         },
-      },
+      }, Aws.NO_VALUE),
 
+      definition: Fn.conditionIf(useTemplateArnCondition.logicalId,
+        Aws.NO_VALUE,
+        renderTemplate(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8'))),
+      ),
     });
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstrem-Redshift-Secret', `${stackParames.redshiftParameterKeyParam.valueAsString}`);
@@ -176,7 +194,6 @@ export class DataReportingQuickSightStack extends Stack {
 
     addCfnNag(this);
   }
-
 }
 
 function addCfnNag(stack: Stack) {

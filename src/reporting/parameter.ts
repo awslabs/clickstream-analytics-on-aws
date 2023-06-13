@@ -81,6 +81,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const quickSightTemplateArnParam = new CfnParameter(scope, 'QuickSightTemplateArnParam', {
     description: 'Arn of the QuickSight template.',
     type: 'String',
+    default: '',
   });
   labels[quickSightTemplateArnParam.logicalId] = {
     default: 'QuickSight Template Arn',

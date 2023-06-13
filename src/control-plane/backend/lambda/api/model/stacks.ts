@@ -991,7 +991,6 @@ export class CReportingStack extends JSONObject {
       'QuickSightUserParam',
       'RedshiftDBParam',
       'RedShiftDBSchemaParam',
-      'QuickSightTemplateArnParam',
       'QuickSightVpcConnectionSubnetParam',
       'RedshiftParameterKeyParam',
     ];
@@ -1024,7 +1023,7 @@ export class CReportingStack extends JSONObject {
   @JSONObject.required
     RedShiftDBSchemaParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
     QuickSightTemplateArnParam?: string;
 
   @JSONObject.optional('')
@@ -1079,9 +1078,6 @@ export class CReportingStack extends JSONObject {
     RedshiftParameterKeyParam?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
-    if (!resources.quickSightTemplateArn) {
-      throw new ClickStreamBadRequestError('QuickSightTemplateArn can not found in dictionary.');
-    }
     if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
     }
@@ -1094,7 +1090,6 @@ export class CReportingStack extends JSONObject {
       QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
       RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
-      QuickSightTemplateArnParam: resources.quickSightTemplateArn?.data,
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
       RedshiftParameterKeyParam: getValueFromStackOutputSuffix(
         pipeline,

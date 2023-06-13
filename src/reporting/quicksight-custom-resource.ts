@@ -32,7 +32,6 @@ import {
   QuickSightDashboardDefProps,
   QuicksightCustomResourceProps,
 } from './private/dashboard';
-import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import {
   clickstream_device_view_columns,
   clickstream_event_parameter_view_columns,
@@ -44,7 +43,8 @@ import {
   clickstream_session_view_columns,
   clickstream_user_attr_view_columns,
   clickstream_user_dim_view_columns,
-} from './private/template-def';
+} from './private/dataset-col-def';
+import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export function createQuicksightCustomResource(

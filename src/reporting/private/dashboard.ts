@@ -285,20 +285,13 @@ function _renderTemplate(jsonObj: any): any {
       const newObject: { [key: string]: any } = {};
       for (const key in jsonObj) {
         if (Object.prototype.hasOwnProperty.call(jsonObj, key)) {
-          let newKey = key[0].toLowerCase() + key.substring(1);
-          if (newKey === 'screenCanvasSizeOption') {
-            newKey = 'screenCanvasSizeOptions';
-          }
-          if (newKey === 'kPIVisual') {
-            newKey = 'kpiVisual';
-          }
-          if (newKey === 'kPIOptions') {
-            newKey = 'kpiOptions';
-          }
-          if (newKey === 'collapsedRowDimensionsVisibility') {
+          let newKey = key.substring(0);
+          if (key === 'CollapsedRowDimensionsVisibility') {
             continue;
           }
-
+          if (key === 'ForecastConfigurations') {
+            continue;
+          }
           newObject[newKey] = renderTemplate(jsonObj[key]);
         }
       }

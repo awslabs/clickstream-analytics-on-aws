@@ -773,7 +773,6 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock, 'BuiltInPlugins');
-    dictionaryMock(ddbMock, 'QuickSightTemplateArn');
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
       Key: {
@@ -2462,7 +2461,7 @@ describe('Pipeline test', () => {
     let res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 7);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -2530,7 +2529,7 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 7);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({

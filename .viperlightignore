@@ -92,4 +92,3 @@ src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:26
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:27
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:28
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:29
-src/control-plane/backend/config/dictionary.json:14

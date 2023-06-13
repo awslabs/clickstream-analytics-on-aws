@@ -781,7 +781,7 @@ const BASE_REPORTING_PARAMETERS = [
   },
   {
     ParameterKey: 'QuickSightTemplateArnParam',
-    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
+    ParameterValue: '',
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
@@ -829,7 +829,7 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'QuickSightTemplateArnParam',
-    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:template/clickstream-quicksight-template-v1',
+    ParameterValue: '',
   },
   {
     ParameterKey: 'RedshiftEndpointParam.#',
