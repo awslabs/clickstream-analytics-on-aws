@@ -79,6 +79,16 @@ export class EnvironmentServ {
         subnetType,
       } = req.query;
       const result = await describeSubnetsWithType(region, vpcId, subnetType);
+      result.sort((a, b) => {
+        const fa = a.name.toLowerCase(), fb = b.name.toLowerCase();
+        if (fa < fb) {
+          return -1;
+        }
+        if (fa > fb) {
+          return 1;
+        }
+        return 0;
+      });
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

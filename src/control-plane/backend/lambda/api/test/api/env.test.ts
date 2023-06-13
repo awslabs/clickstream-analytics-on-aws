@@ -215,18 +215,6 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeSubnetsCommand).resolves({
       Subnets: [
         {
-          SubnetId: 'subnet-0b9fa05e061084b37',
-          CidrBlock: '10.255.0.0/24',
-          AvailabilityZone: 'us-east-1a',
-          MapPublicIpOnLaunch: true,
-          Tags: [
-            {
-              Key: 'Name',
-              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-            },
-          ],
-        },
-        {
           SubnetId: 'subnet-09ae522e85bbee5c5',
           CidrBlock: '10.255.1.0/24',
           AvailabilityZone: 'us-east-1b',
@@ -235,6 +223,18 @@ describe('Account Env test', () => {
             {
               Key: 'Name',
               Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
+            },
+          ],
+        },
+        {
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          MapPublicIpOnLaunch: true,
+          Tags: [
+            {
+              Key: 'Name',
+              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
             },
           ],
         },
