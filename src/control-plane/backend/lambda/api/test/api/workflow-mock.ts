@@ -163,6 +163,10 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
       ParameterKey: 'S3BatchTimeout',
       ParameterValue: '60',
     },
+    {
+      ParameterKey: 'WorkerStopTimeout',
+      ParameterValue: '90',
+    },
   ],
 );
 

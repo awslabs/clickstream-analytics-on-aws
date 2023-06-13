@@ -208,6 +208,13 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     },
   );
 
+  const workerStopTimeoutParam = new CfnParameter(scope, 'WorkerStopTimeout', {
+    description: 'Worker container stop timeout seconds',
+    type: 'Number',
+    default: '330',
+    minValue: 60,
+  });
+
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
       {
@@ -705,6 +712,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       projectIdParam,
       appIdsParam,
       clickStreamSDKParam,
+      workerStopTimeoutParam,
       enableAuthenticationParam,
       authenticationSecretArnParam,
     },

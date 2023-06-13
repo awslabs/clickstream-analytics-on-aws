@@ -296,6 +296,7 @@ export class TestStack extends Stack {
       projectId: 'test_proj_001',
       appIds: 'appId',
       clickStreamSDK: 'Yes',
+      workerStopTimeout: 330,
     };
 
     const ingestionServer = new IngestionServer(

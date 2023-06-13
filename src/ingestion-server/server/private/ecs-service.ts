@@ -39,7 +39,7 @@ export interface ServiceProps extends ECSClusterProps {
   workerImage: ContainerImage;
 }
 
-export function crateECSService(
+export function createECSService(
   scope: Construct,
   props: ServiceProps,
 ): EcsServiceResult {
@@ -94,6 +94,7 @@ export function crateECSService(
 
   taskDefinition.addContainer('worker', {
     image: props.workerImage,
+    stopTimeout: Duration.seconds(props.workerStopTimeout),
     memoryReservationMiB:
       ecsAsgSetting.workerReservedMemory,
     cpu: ecsAsgSetting.workerCpu,

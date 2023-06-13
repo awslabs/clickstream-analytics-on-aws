@@ -32,7 +32,7 @@ import {
 import { Construct, IConstruct } from 'constructs';
 import { createProxyAndWorkerECRImages } from './ecr';
 
-import { crateECSService } from './ecs-service';
+import { createECSService } from './ecs-service';
 import { addPoliciesToAsgRole } from './iam';
 import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 
@@ -132,7 +132,7 @@ export function createECSClusterAndService(
     scope,
     ecsConfig.platform,
   );
-  const ecsServiceInfo = crateECSService(scope, {
+  const ecsServiceInfo = createECSService(scope, {
     ...props,
     ecsCluster,
     proxyImage,

@@ -65,6 +65,7 @@ export class CIngestionServerStack extends JSONObject {
       'S3DataPrefix',
       'S3BatchMaxBytes',
       'S3BatchTimeout',
+      'WorkerStopTimeout',
       'MskClusterName',
       'MskSecurityGroupId',
       'KafkaTopic',
@@ -219,6 +220,17 @@ export class CIngestionServerStack extends JSONObject {
     return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value : undefined;
   })
     S3BatchTimeout?: number;
+
+  @JSONObject.optional(330)
+  @JSONObject.gte(60)
+  @JSONObject.lte(1830)
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+      return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 330;
+    }
+    return undefined;
+  })
+    WorkerStopTimeout?: number;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
@@ -379,9 +391,7 @@ export class CIngestionServerStack extends JSONObject {
     });
     return parameters;
   }
-
 }
-
 
 export class CKafkaConnectorStack extends JSONObject {
 

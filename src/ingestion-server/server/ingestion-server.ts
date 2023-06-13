@@ -122,6 +122,7 @@ export interface IngestionServerProps {
   readonly projectId: string;
   readonly appIds: string;
   readonly clickStreamSDK: string;
+  readonly workerStopTimeout: number;
 }
 
 export class IngestionServer extends Construct {

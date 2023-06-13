@@ -687,6 +687,9 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   const containerDefinitions = taskDefinition.Properties.ContainerDefinitions;
   const vector = containerDefinitions.filter((c: any) => c.Name == 'worker')[0];
 
+  const stopTimeoutValue = vector.StopTimeout;
+  expect(stopTimeoutValue).toEqual(330);
+
   const mskBrokersValue = vector.Environment.filter((e: any) => e.Name == 'AWS_MSK_BROKERS')[0].Value;
   expect(mskBrokersValue).not.toEqual('__NOT_SET__');
 

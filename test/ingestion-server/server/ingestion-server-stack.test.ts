@@ -546,6 +546,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'ProjectId',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -586,6 +587,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
 
   console.log('');
@@ -630,6 +632,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'ProjectId',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -668,6 +671,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -714,6 +718,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'ProjectId',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -755,6 +760,7 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'WorkerStopTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(

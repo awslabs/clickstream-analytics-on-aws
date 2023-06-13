@@ -62,6 +62,7 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly serverMax: number;
   readonly warmPoolSize: number;
   readonly scaleOnCpuUtilizationPercent: number;
+  readonly workerStopTimeout: number;
 
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
@@ -246,6 +247,7 @@ export class IngestionServerNestedStack extends NestedStack {
       projectId: props.projectId,
       appIds: props.appIds,
       clickStreamSDK: props.clickStreamSDK,
+      workerStopTimeout: props.workerStopTimeout,
     };
 
     const ingestionServer = new IngestionServer(
@@ -330,6 +332,7 @@ export class IngestionServerStack extends Stack {
         projectIdParam,
         appIdsParam,
         clickStreamSDKParam,
+        workerStopTimeoutParam,
         enableAuthenticationParam,
         authenticationSecretArnParam,
       },
@@ -365,6 +368,7 @@ export class IngestionServerStack extends Stack {
       projectId: projectIdParam.valueAsString,
       clickStreamSDK: clickStreamSDKParam.valueAsString,
       appIds: appIdsParam.valueAsString,
+      workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
     };
 
     let nestStackProps = { ... nestStackCommonProps };
