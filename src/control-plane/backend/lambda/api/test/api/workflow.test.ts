@@ -1536,7 +1536,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
-    await stackManager.retryWorkflow();
+    stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1674,7 +1674,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS);
-    await stackManager.retryWorkflow();
+    stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1812,7 +1812,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    await stackManager.upgradeWorkflow(MOCK_NEW_TEMPLATE_VERSION);
+    stackManager.upgradeWorkflow(MOCK_NEW_TEMPLATE_VERSION);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1950,7 +1950,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
-    await stackManager.deleteWorkflow();
+    stackManager.deleteWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -2201,7 +2201,7 @@ describe('Workflow test', () => {
       },
     };
     const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
-    let res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    let res = stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Data: {
         Callback: {
@@ -2305,7 +2305,7 @@ describe('Workflow test', () => {
         }],
       },
     };
-    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    res = stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Branches: [
         {
@@ -2478,7 +2478,7 @@ describe('Workflow test', () => {
         ],
       },
     };
-    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    res = stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Branches: [
         {
@@ -2920,7 +2920,7 @@ describe('Workflow test', () => {
       },
     };
     const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
-    const res = await stackManager.getWorkflowCurrentAction(workflowTemplate.Workflow);
+    const res = stackManager.getWorkflowCurrentAction(workflowTemplate.Workflow);
     expect(res).toEqual('CREATE');
   });
 

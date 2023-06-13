@@ -82,6 +82,11 @@ Resources:
       DockerTag: v1
       DockerContext: .
       Dockerfile: Dockerfile
+  ExpressFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['/', ['/aws/lambda', !Ref ExpressFunction]]
+      RetentionInDays: 30
 Outputs:
   ExpressApi:
     Description: "API Gateway endpoint URL for Prod stage for Express function"

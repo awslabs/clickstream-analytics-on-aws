@@ -2708,9 +2708,7 @@ describe('Pipeline test', () => {
     let res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
-    // expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 7);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    // expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
       data: {
         id: MOCK_PIPELINE_ID,

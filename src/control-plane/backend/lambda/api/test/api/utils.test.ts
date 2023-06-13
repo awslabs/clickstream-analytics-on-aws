@@ -57,7 +57,7 @@ describe('Utils test', () => {
       'pro_ded4511',
       MOCK_PROJECT_ID,
     ];
-    validValues.map(v => expect(validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
       'abc.test',
@@ -67,7 +67,7 @@ describe('Utils test', () => {
       '',
       'ab$',
     ];
-    invalidValues.map(v => expect(() => validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('ProjectId', PROJECT_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('App Id valid', async () => {
@@ -79,7 +79,7 @@ describe('Utils test', () => {
       MOCK_APP_ID,
       `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
     ];
-    validValues.map(v => expect(validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
       'abc.test',
@@ -93,7 +93,7 @@ describe('Utils test', () => {
       'abc,',
       'ab$',
     ];
-    invalidValues.map(v => expect(() => validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('VPC Params valid', async () => {
@@ -102,13 +102,13 @@ describe('Utils test', () => {
       'vpc-0d2619f249ded4511',
       'vpc-012345678910abcde',
     ];
-    validValues.map(v => expect(validatePattern('VpcId', VPC_ID_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('VpcId', VPC_ID_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'vp-0d2619f249ded45111',
       'vpc0d2619f249ded45111',
       'vpc-0123456789abcdefg',
     ];
-    invalidValues.map(v => expect(() => validatePattern('VpcId', VPC_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('VpcId', VPC_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Subnets Params valid', async () => {
@@ -117,7 +117,7 @@ describe('Utils test', () => {
       'subnet-fffff1,subnet-fffff2,subnet-fffff3',
     ];
 
-    validValues.map(v => expect(validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'subnet-a1234',
@@ -125,7 +125,7 @@ describe('Utils test', () => {
       'subnet-g1234,subnet-g1234',
       'subnet-a1234, subnet-b1234',
     ];
-    invalidValues.map(v => expect(() => validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('SubnetIds', SUBNETS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Domain Name valid', async () => {
@@ -134,13 +134,13 @@ describe('Utils test', () => {
       'example.com',
     ];
 
-    validValues.map(v => expect(validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'test',
       'net.',
     ];
-    invalidValues.map(v => expect(() => validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('DomainName', DOMAIN_NAME_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Kafka brokers Params valid', async () => {
@@ -152,7 +152,7 @@ describe('Utils test', () => {
       'b-1.test.com:5001,b-2.test.com:5001',
       '192.169.1.1:9092,192.169.1.2:9092,192.169.1.3:9092',
     ];
-    validValues.map(v => expect(validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'a',
@@ -163,7 +163,7 @@ describe('Utils test', () => {
       '192.169.1.1',
       '192.169.1.1:9092,192.169.1.2',
     ];
-    invalidValues.map(v => expect(() => validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('KafkaBrokers', KAFKA_BROKERS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Kafka topic Params valid', async () => {
@@ -173,7 +173,7 @@ describe('Utils test', () => {
       'test_sfds124',
       'test.sfds124',
     ];
-    validValues.map(v => expect(validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toEqual(true));
 
     const invalidValues = [
       'sss*ddf',
@@ -181,7 +181,7 @@ describe('Utils test', () => {
       'a#',
       'a,b',
     ];
-    invalidValues.map(v => expect(() => validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('KafkaTopic', KAFKA_TOPIC_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Positive Integers valid', async () => {
@@ -192,7 +192,7 @@ describe('Utils test', () => {
       '22',
       '99999999',
     ];
-    validValues.map(v => expect(validatePattern('Number', POSITIVE_INTEGERS, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Number', POSITIVE_INTEGERS, v)).toEqual(true));
     const invalidValues = [
       'sfsdf',
       '0',
@@ -201,7 +201,7 @@ describe('Utils test', () => {
       '1 ',
       '128¥',
     ];
-    invalidValues.map(v => expect(() => validatePattern('Number', POSITIVE_INTEGERS, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Number', POSITIVE_INTEGERS, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('s3 path plugin jars valid', async () => {
@@ -209,14 +209,14 @@ describe('Utils test', () => {
       's3://some-bucket/spark-etl-0.1.0.jar',
       's3://some-bucket/spark-etl-0.1.0.jar,s3://some-bucket/spark-etl-0.1.0.jar',
     ];
-    validValues.map(v => expect(validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toEqual(true));
     const invalidValues = [
       's3://some-bucket(&%^/spark-etl-0.1.0.jar',
       'abc/abc.jar',
       's3://abc/abc.txt',
       ',',
     ];
-    invalidValues.map(v => expect(() => validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Plugin Jars', S3_PATH_PLUGIN_JARS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('s3 path plugin files valid', async () => {
@@ -225,7 +225,7 @@ describe('Utils test', () => {
       's3://abc/abc/test.txt',
       's3://abc/abc/test.txt,s3://abc/abc/test2.txt',
     ];
-    validValues.map(v => expect(validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'abc/abc.txt',
       's3://abc_abc/abc/test.txt',
@@ -233,7 +233,7 @@ describe('Utils test', () => {
       ',',
       '',
     ];
-    invalidValues.map(v => expect(() => validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Emails valid', async () => {
@@ -241,14 +241,14 @@ describe('Utils test', () => {
       'fake@example.com',
       'fake1@example.com,fake2@example.com',
     ];
-    validValues.map(v => expect(validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'a.com',
       '@example.com',
       'fake@example.com,',
       '',
     ];
-    invalidValues.map(v => expect(() => validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Secret arn valid', async () => {
@@ -257,14 +257,14 @@ describe('Utils test', () => {
       'arn:aws-cn:secretsmanager:us-east-1:555555555555:secret:path',
       'arn:aws-cn:secretsmanager:us-east-1:555555555555:secret:/path/aaaa/bbbb',
     ];
-    validValues.map(v => expect(validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'arn:aws:secretsmanager:us-east-1:5555555555556:secret:path',
       'arn:awscc:secretsmanager:us-east-1:555555555555:secret:path',
       'arn:awscc:secretsmanager:us-east-1:555555555555:secrets:path',
       '',
     ];
-    invalidValues.map(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Sink batch valid', async () => {
@@ -319,7 +319,7 @@ describe('Utils test', () => {
         },
       },
     ];
-    validValues.map(v => expect(validateSinkBatch(v.sinkType, v.sinkBatch)).toEqual(true));
+    validValues.forEach(v => expect(validateSinkBatch(v.sinkType, v.sinkBatch)).toEqual(true));
     const invalidValues = [
       {
         sinkType: PipelineSinkType.KAFKA,
@@ -378,7 +378,7 @@ describe('Utils test', () => {
         },
       },
     ];
-    invalidValues.map(v => expect(() => validateSinkBatch(v.sinkType, v.sinkBatch)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validateSinkBatch(v.sinkType, v.sinkBatch)).toThrow(ClickStreamBadRequestError));
   });
 
 });

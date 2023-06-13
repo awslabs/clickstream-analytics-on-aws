@@ -529,57 +529,65 @@ function createPipelineMock(
     },
   ];
 
+  let mockSubnets = defaultSubnets;
+  if (!props?.publicAZContainPrivateAZ) {
+    mockSubnets = [
+      defaultSubnets[0],
+      defaultSubnets[1],
+      defaultSubnets[2],
+      defaultSubnets[3],
+      {
+        SubnetId: 'subnet-00000000000000021',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.48.0/20',
+      },
+      defaultSubnets[5],
+      defaultSubnets[6],
+    ];
+  } else if (!props?.subnetsCross3AZ) {
+    mockSubnets = [
+      defaultSubnets[0],
+      defaultSubnets[1],
+      {
+        SubnetId: 'subnet-00000000000000012',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.48.0/20',
+      },
+      {
+        SubnetId: 'subnet-00000000000000013',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.64.0/20',
+      },
+      defaultSubnets[4],
+      {
+        SubnetId: 'subnet-00000000000000022',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.64.0/20',
+      },
+      {
+        SubnetId: 'subnet-00000000000000023',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.64.0/20',
+      },
+    ];
+  } else if (props.azHasTwoSubnets) {
+    mockSubnets = [
+      defaultSubnets[0],
+      defaultSubnets[1],
+      defaultSubnets[2],
+      {
+        SubnetId: 'subnet-00000000000000013',
+        AvailabilityZone: 'us-east-1a',
+        CidrBlock: '10.0.64.0/20',
+      },
+      defaultSubnets[4],
+      defaultSubnets[5],
+      defaultSubnets[6],
+    ];
+  }
   ec2Mock.on(DescribeSubnetsCommand)
     .resolves({
-      Subnets: !props?.publicAZContainPrivateAZ ? [
-        defaultSubnets[0],
-        defaultSubnets[1],
-        defaultSubnets[2],
-        defaultSubnets[3],
-        {
-          SubnetId: 'subnet-00000000000000021',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.48.0/20',
-        },
-        defaultSubnets[5],
-        defaultSubnets[6],
-      ] : !props?.subnetsCross3AZ ? [
-        defaultSubnets[0],
-        defaultSubnets[1],
-        {
-          SubnetId: 'subnet-00000000000000012',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.48.0/20',
-        },
-        {
-          SubnetId: 'subnet-00000000000000013',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.64.0/20',
-        },
-        defaultSubnets[4],
-        {
-          SubnetId: 'subnet-00000000000000022',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.64.0/20',
-        },
-        {
-          SubnetId: 'subnet-00000000000000023',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.64.0/20',
-        },
-      ] : props.azHasTwoSubnets ? [
-        defaultSubnets[0],
-        defaultSubnets[1],
-        defaultSubnets[2],
-        {
-          SubnetId: 'subnet-00000000000000013',
-          AvailabilityZone: 'us-east-1a',
-          CidrBlock: '10.0.64.0/20',
-        },
-        defaultSubnets[4],
-        defaultSubnets[5],
-        defaultSubnets[6],
-      ] : defaultSubnets,
+      Subnets: mockSubnets,
     });
   ec2Mock.on(DescribeRouteTablesCommand).resolves({
     RouteTables: [

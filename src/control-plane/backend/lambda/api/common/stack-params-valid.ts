@@ -346,4 +346,3 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
   }
   return false;
 };
-

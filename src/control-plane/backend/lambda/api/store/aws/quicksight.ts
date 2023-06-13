@@ -158,7 +158,6 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
     }
     throw err;
   }
-  return undefined;
 };
 
 export const Sleep = (ms: number) => {

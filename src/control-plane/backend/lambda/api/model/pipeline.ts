@@ -274,8 +274,8 @@ export class CPipeline {
       pluginIds.push(this.pipeline.dataProcessing?.transformPlugin);
     }
     const enrichIds = this.pipeline.dataProcessing?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
-    pluginIds.concat(enrichIds!);
-    await store.bindPlugins(pluginIds, 1);
+    const allPluginIds = pluginIds.concat(enrichIds!);
+    await store.bindPlugins(allPluginIds, 1);
   }
 
   public async update(oldPipeline: IPipeline): Promise<void> {
@@ -384,8 +384,8 @@ export class CPipeline {
       pluginIds.push(this.pipeline.dataProcessing?.transformPlugin);
     }
     const enrichIds = this.pipeline.dataProcessing?.enrichPlugin?.filter(e => !e.startsWith('BUILT-IN'));
-    pluginIds.concat(enrichIds!);
-    await store.bindPlugins(pluginIds, -1);
+    const allPluginIds = pluginIds.concat(enrichIds!);
+    await store.bindPlugins(allPluginIds, -1);
   }
 
   public async retry(): Promise<void> {

@@ -43,19 +43,7 @@ export const describeRedshiftClusters = async (region: string, vpcId?: string, c
 
   const clusters: RedshiftCluster[] = [];
   for (let cluster of records as Cluster[]) {
-    if (!vpcId) {
-      clusters.push({
-        name: cluster.ClusterIdentifier ?? '',
-        nodeType: cluster.NodeType ?? '',
-        endpoint: cluster.Endpoint,
-        status: cluster.ClusterStatus ?? '',
-        masterUsername: cluster.MasterUsername ?? '',
-        publiclyAccessible: cluster.PubliclyAccessible ?? false,
-        vpcSecurityGroups: cluster.VpcSecurityGroups ?? [],
-        clusterSubnetGroupName: cluster.ClusterSubnetGroupName ?? '',
-        vpcId: cluster.VpcId ?? '',
-      });
-    } else if (cluster.VpcId === vpcId) {
+    if (!vpcId || cluster.VpcId === vpcId) {
       clusters.push({
         name: cluster.ClusterIdentifier ?? '',
         nodeType: cluster.NodeType ?? '',
