@@ -29,7 +29,7 @@ import {
 import { BuiltInTagKeys } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SolutionInfo } from '../common/solution-info-ln';
-import { validatePattern, validateSecretModel, validatePipelineNetwork } from '../common/stack-params-valid';
+import { validatePattern, validateSecretModel, validatePipelineNetwork, validateIngestionServerNum } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
   KinesisStreamMode,
@@ -42,7 +42,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps, ReportingDashboardOutput, PipelineStatusType,
+  IngestionServerSinkBatchProps, ReportingDashboardOutput, PipelineStatusType, IngestionServerSizeProps,
 } from '../common/types';
 import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -54,13 +54,6 @@ import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
-
-interface IngestionServerSizeProps {
-  readonly serverMin: number;
-  readonly serverMax: number;
-  readonly warmPoolSize: number;
-  readonly scaleOnCpuUtilizationPercent?: number;
-}
 
 interface IngestionServerLoadBalancerProps {
   readonly serverEndpointPath: string;
@@ -330,6 +323,7 @@ export class CPipeline {
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    validateIngestionServerNum(this.pipeline.ingestionServer.size);
     // update workflow
     this.stackManager.upgradeWorkflow(this.pipeline.templateVersion!);
     // create new execution

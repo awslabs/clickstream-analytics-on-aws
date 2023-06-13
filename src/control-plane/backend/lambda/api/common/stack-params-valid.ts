@@ -13,7 +13,7 @@
 
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { REDSHIFT_MODE } from './model-ln';
-import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, PipelineSinkType, Policy, SubnetType } from './types';
+import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
@@ -297,6 +297,15 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
         'Please check and try again.',
       );
     }
+  }
+  return true;
+};
+
+export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps) => {
+  if (serverSize.serverMin === 1 && serverSize.serverMax === 1) {
+    throw new ClickStreamBadRequestError(
+      'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+    );
   }
   return true;
 };

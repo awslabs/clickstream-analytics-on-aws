@@ -349,6 +349,13 @@ export interface ReportingDashboardOutput {
   readonly dashboardId: string;
 }
 
+export interface IngestionServerSizeProps {
+  readonly serverMin: number;
+  readonly serverMax: number;
+  readonly warmPoolSize: number;
+  readonly scaleOnCpuUtilizationPercent?: number;
+}
+
 export enum BucketPrefix {
   LOGS_ALB = 'logs-alb',
   LOGS_KAFKA_CONNECTOR = 'logs-kafka-connector',

@@ -2716,6 +2716,44 @@ describe('Pipeline test', () => {
       message: 'Pipeline upgraded.',
     });
   });
+  it('Upgrade pipeline with error server size', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
+      Item: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+        ingestionServer: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE.ingestionServer,
+          size: {
+            serverMax: 1,
+            warmPoolSize: 1,
+            serverMin: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+        },
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+    });
+  });
   it('Upgrade pipeline with error status', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
