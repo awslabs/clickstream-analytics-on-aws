@@ -789,7 +789,6 @@ test('Conditions are created as expected', () => {
           cKey: ck,
         };
       });
-
     for (const c of allConditions) {
       const binStr = c.cItems
         .map((it) => {
@@ -997,6 +996,7 @@ test('Parameters of onDemand Kinesis nested stack ', () => {
   const paramObj = paramCapture.asObject();
   const params = getParameterNamesFromParameterObject(paramObj);
   expect(params).toEqual([
+    'ProjectId',
     'KinesisDataRetentionHours',
     'VpcId',
     'KinesisDataS3Bucket',
@@ -1004,7 +1004,6 @@ test('Parameters of onDemand Kinesis nested stack ', () => {
     'PrivateSubnetIds',
     'KinesisBatchSize',
     'KinesisMaxBatchingWindowSeconds',
-    'ProjectId',
   ]);
 });
 
@@ -1019,6 +1018,7 @@ test('Parameters of provisioned Kinesis nested stack ', () => {
   const paramObj = paramCapture.asObject();
   const params = getParameterNamesFromParameterObject(paramObj);
   expect(params).toEqual([
+    'ProjectId',
     'KinesisDataRetentionHours',
     'KinesisShardCount',
     'VpcId',
@@ -1027,7 +1027,6 @@ test('Parameters of provisioned Kinesis nested stack ', () => {
     'PrivateSubnetIds',
     'KinesisBatchSize',
     'KinesisMaxBatchingWindowSeconds',
-    'ProjectId',
   ]);
 });
 
@@ -1223,5 +1222,22 @@ test('Each of kinesis nested templates should set metrics widgets', () => {
         });
       });
   }
+});
+
+test('Check there are Kinesis Arn outputs in Kinesis', () => {
+  const template = kinesisTemplate.toJSON();
+
+  const kinesisArnOutput = template.Outputs && Object.keys(template.Outputs).find(key => key.indexOf('KinesisArn') !== -1);
+
+  expect(kinesisArnOutput).toBeDefined();
+
+});
+
+test('Check there is no Kinesis outputs in S3 tempalte', () => {
+  const template = s3Template.toJSON();
+
+  const kinesisArnOutput = template.Outputs && Object.keys(template.Outputs).find(key => key.indexOf('KinesisArn') !== -1);
+
+  expect(kinesisArnOutput).toBeUndefined();
 });
 

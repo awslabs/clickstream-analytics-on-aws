@@ -313,11 +313,13 @@ export function createKinesisConditions(props: {
       conditions: [props.onDemandStackCondition],
       binStr: '1',
       name: 'K1',
+      scName: 'K1',
     },
     {
       conditions: [props.provisionedStackCondition],
       binStr: '2',
       name: 'K2',
+      scName: 'K2',
     },
   ];
   return {
@@ -346,6 +348,7 @@ export function mergeConditionsAndServerPropsConfig(
         conditions: [... sc.conditions, ... cc.conditions],
         binStr: sc.binStr + cc.binStr,
         name: sc.name + cc.name,
+        scName: sc.name,
       });
     }
   }
@@ -425,6 +428,7 @@ interface GenAllConditionsRetValueItem {
   conditions: CfnCondition[];
   binStr: string;
   name: string;
+  scName: string;
 }
 
 interface CfnConditionBit {
@@ -444,6 +448,7 @@ function genAllConditions(
     conditions: CfnCondition[];
     binStr: string;
     name: string;
+    scName: string;
   }[] = [];
 
   type ObjectIntKey = keyof CfnConditionBit;
@@ -465,6 +470,7 @@ function genAllConditions(
         conditions: conditionsForBinStr,
         binStr,
         name: `${idPrefix}${binStr}`,
+        scName: idPrefix,
       });
     }
   }

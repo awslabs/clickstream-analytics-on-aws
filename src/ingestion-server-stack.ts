@@ -432,6 +432,7 @@ export class IngestionServerStack extends Stack {
       const nestedStack = createNestedStackWithCondition(
         this,
         nestedId,
+        c.scName,
         serverNestStackProps,
         conditionExpression,
       );
@@ -443,6 +444,7 @@ export class IngestionServerStack extends Stack {
 function createNestedStackWithCondition(
   scope: Construct,
   id: string,
+  scName: string,
   props: IngestionServerNestStackProps,
   conditionExpression: ICfnConditionExpression,
 ) {
@@ -470,5 +472,13 @@ function createNestedStackWithCondition(
     description: 'Server URL',
   });
   serverURLOutput.condition = condition;
+
+  if (scName == 'K1' || scName == 'K2') {
+    const kdsOutput = new CfnOutput(scope, id + 'KinesisArn', {
+      value: props.kinesisDataStreamArn || '',
+      description: 'Kinesis Arn',
+    });
+    kdsOutput.condition = condition;
+  }
   return ingestionServer;
 }

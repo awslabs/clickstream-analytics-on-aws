@@ -44,6 +44,7 @@ export class KinesisDataStreamToS3 extends Construct {
     this.kinesisDataSteam = createKinesisDataStream(scope, {
       streamMode: props.streamMode,
       dataRetentionHours: props.dataRetentionHours,
+      projectId: props.projectId,
       shardCount: props.shardCount,
     });
 
