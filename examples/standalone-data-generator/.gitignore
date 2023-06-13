@@ -1,0 +1,24 @@
+.DS_Store
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# env files
+.env
+.venv
+# PyCharm
+.idea/
+# PyBuilder
+target/
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+
+data/
+venv/
+*.mmdb
