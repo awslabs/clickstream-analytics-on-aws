@@ -40,7 +40,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PLUGIN_TYPE_LIST } from 'ts/const';
-import { alertMsg } from 'ts/utils';
+import {
+  alertMsg,
+  validatePluginMainFunction,
+  validatePluginName,
+} from 'ts/utils';
 
 function Content() {
   const navigate = useNavigate();
@@ -171,6 +175,16 @@ function Content() {
     }
   };
 
+  // auto refresh sts token
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      initS3ClientWithSTS();
+    }, 5 * 60 * 1000);
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
+
   const uploadJarFile = async () => {
     setShowUploadJarSuccess(false);
     const Key = buildFileKey(jarFiles[0]?.name);
@@ -198,7 +212,6 @@ function Content() {
         }
       });
       const data: any = await parallelUploads3.done();
-      console.info('data:', data);
       if (data) {
         setCurPlugin((prev) => {
           return {
@@ -355,18 +368,21 @@ function Content() {
                 label={t('plugin:create.name')}
                 description={t('plugin:create.nameDesc')}
                 errorText={nameEmptypError ? t('plugin:valid.nameEmpty') : ''}
+                constraintText={t('plugin:valid.nameFormat')}
               >
                 <Input
                   placeholder="my-plugin"
                   value={curPlugin.name}
-                  onChange={(e) => {
+                  onChange={({ detail }) => {
                     setNameEmptypError(false);
-                    setCurPlugin((prev) => {
-                      return {
-                        ...prev,
-                        name: e.detail.value,
-                      };
-                    });
+                    detail.value.length <= 128 &&
+                      validatePluginName(detail.value) &&
+                      setCurPlugin((prev) => {
+                        return {
+                          ...prev,
+                          name: detail.value,
+                        };
+                      });
                   }}
                 />
               </FormField>
@@ -417,6 +433,7 @@ function Content() {
               >
                 <div>
                   <FileUpload
+                    accept=".jar"
                     onChange={({ detail }) => {
                       setUploadJarEmptyError(false);
                       setJarFiles(detail.value);
@@ -437,7 +454,7 @@ function Content() {
                     }}
                     showFileLastModified
                     showFileSize
-                    showFileThumbnail
+                    showFileThumbnail={false}
                   />
                   {uploadJarProgress > 0 && !showUploadJarSuccess && (
                     <ProgressBar value={uploadJarProgress} />
@@ -476,7 +493,7 @@ function Content() {
                     multiple
                     showFileLastModified
                     showFileSize
-                    showFileThumbnail
+                    showFileThumbnail={false}
                   />
                   {uploadDependenciesProgress > 0 &&
                     !showUploadDependenciesSuccess && (
@@ -496,18 +513,21 @@ function Content() {
                 errorText={
                   mainFuncEmptyError ? t('plugin:valid.mainFuncEmpty') : ''
                 }
+                constraintText={t('plugin:valid.functionNameFormat')}
               >
                 <Input
                   placeholder="com.company.main"
                   value={curPlugin.mainFunction}
-                  onChange={(e) => {
+                  onChange={({ detail }) => {
                     setMainFuncEmptyError(false);
-                    setCurPlugin((prev) => {
-                      return {
-                        ...prev,
-                        mainFunction: e.detail.value,
-                      };
-                    });
+                    detail.value.length <= 128 &&
+                      validatePluginMainFunction(detail.value) &&
+                      setCurPlugin((prev) => {
+                        return {
+                          ...prev,
+                          mainFunction: detail.value,
+                        };
+                      });
                   }}
                 />
               </FormField>

@@ -72,6 +72,22 @@ export const validateAppId = (appId: string) => {
   return true;
 };
 
+export const validatePluginName = (name: string) => {
+  const re = /[^0-9a-zA-Z_\- |-]/g;
+  if (!re?.test(name)) {
+    return true;
+  }
+  return false;
+};
+
+export const validatePluginMainFunction = (functionName: string) => {
+  const re = /[^0-9a-zA-Z._\- |-]/g;
+  if (!re?.test(functionName)) {
+    return true;
+  }
+  return false;
+};
+
 export const generateFileDownloadLink = (fileContent: string): string => {
   // Create Blob url
   const blob = new Blob([fileContent], { type: 'text/plain' });

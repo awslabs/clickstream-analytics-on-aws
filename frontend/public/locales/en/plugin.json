@@ -19,7 +19,9 @@
     "nameEmpty": "Please input plugin name",
     "typeEmpty": "Please select plugin type",
     "mainFuncEmpty": "Plase input main function class",
-    "uploadJarEmpty": "Plase upload custom JAR file"
+    "uploadJarEmpty": "Plase upload custom JAR file",
+    "nameFormat": "The name can be up to 128 characters long. Valid characters are a-z, A-Z, 0-9, _ (underscore) and - (hyphen).",
+    "functionNameFormat": "The name can be up to 128 characters long. Valid characters are a-z, A-Z, 0-9, . (period), _ (underscore) and - (hyphen)."
   },
   "create": {
     "createPlugin": "Create Plugin",

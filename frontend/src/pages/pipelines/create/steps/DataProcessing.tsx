@@ -529,6 +529,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             pipelineInfo.dataCollectionSDK
           ) && (
             <PluginTable
+              hideDefaultTransformPlugin
               hideAction
               showRefresh
               pluginType="Transform"

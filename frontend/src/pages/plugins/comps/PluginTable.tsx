@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 
 interface PluginTableProps {
+  hideDefaultTransformPlugin?: boolean;
   pluginType?: string;
   hideAction?: boolean;
   showRefresh?: boolean;
@@ -41,6 +42,7 @@ interface PluginTableProps {
 
 const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const {
+    hideDefaultTransformPlugin,
     pluginType,
     hideAction,
     showRefresh,
@@ -81,13 +83,22 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           type: pluginType,
         });
       if (success) {
-        setPluginList(data.items);
-        setTotalCount(data.totalCount);
+        let resultDataItem = data.items;
+        if (pluginType === 'Transform' && hideDefaultTransformPlugin) {
+          resultDataItem = data.items.filter((item) => !item.builtIn);
+          setPluginList(resultDataItem);
+          setTotalCount(data.totalCount - 1);
+        } else {
+          setPluginList(resultDataItem);
+          setTotalCount(data.totalCount);
+        }
         if (selectBuitInPlugins) {
-          setSelectedItems(data.items.filter((item) => item.builtIn === true));
+          setSelectedItems(
+            resultDataItem.filter((item) => item.builtIn === true)
+          );
           changePluginSeletedItems &&
             changePluginSeletedItems(
-              data.items.filter((item) => item.builtIn === true)
+              resultDataItem.filter((item) => item.builtIn === true)
             );
         }
         setLoadingData(false);
