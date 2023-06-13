@@ -18,7 +18,6 @@ import {
   Cards,
   Link,
   Pagination,
-  TextFilter,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -149,13 +148,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeSelectedItems([]);
               listProjects();
             }}
-          />
-        }
-        filter={
-          <TextFilter
-            filteringAriaLabel={t('project:list.filter') || ''}
-            filteringPlaceholder={t('project:list.find') || ''}
-            filteringText=""
           />
         }
         pagination={
