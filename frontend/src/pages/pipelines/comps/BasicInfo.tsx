@@ -26,7 +26,7 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
+import { EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 
 interface BasicInfoProps {
@@ -178,6 +178,45 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
             </div>
             <div>
               <Box variant="awsui-key-label">
+                {t('pipeline:detail.version')}
+              </Box>
+              <div>{pipelineInfo?.versionTag || '-'}</div>
+            </div>
+          </SpaceBetween>
+
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:detail.region')}</Box>
+              <div>{pipelineInfo?.region}</div>
+            </div>
+
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:detail.sdk')}</Box>
+              <div>
+                {SDK_LIST.find(
+                  (element) => element.value === pipelineInfo?.dataCollectionSDK
+                )?.label ||
+                  pipelineInfo?.dataCollectionSDK ||
+                  '-'}
+              </div>
+            </div>
+          </SpaceBetween>
+
+          <SpaceBetween direction="vertical" size="l">
+            <div>
+              <Box variant="awsui-key-label">{t('pipeline:detail.vpc')}</Box>
+              <Link
+                external
+                href={buildVPCLink(
+                  pipelineInfo?.region || '',
+                  pipelineInfo?.network.vpcId || ''
+                )}
+              >
+                {pipelineInfo?.network.vpcId}
+              </Link>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
                 {t('pipeline:detail.s3Bucket')}
               </Box>
               <Link
@@ -204,38 +243,25 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 />
               </div>
             </div>
-            <div>
-              <Box variant="awsui-key-label">{t('pipeline:detail.sdk')}</Box>
-              <div>{pipelineInfo?.dataCollectionSDK}</div>
-            </div>
-          </SpaceBetween>
 
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">{t('pipeline:detail.region')}</Box>
-              <div>{pipelineInfo?.region}</div>
-            </div>
-          </SpaceBetween>
-
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">{t('pipeline:detail.vpc')}</Box>
-              <Link
-                external
-                href={buildVPCLink(
-                  pipelineInfo?.region || '',
-                  pipelineInfo?.network.vpcId || ''
-                )}
-              >
-                {pipelineInfo?.network.vpcId}
-              </Link>
-            </div>
             {pipelineInfo?.pipelineId && (
               <div>
                 <Box variant="awsui-key-label">
                   {t('pipeline:detail.creationTime')}
                 </Box>
                 <div>{moment(pipelineInfo?.createAt).format(TIME_FORMAT)}</div>
+              </div>
+            )}
+            {pipelineInfo?.pipelineId && pipelineInfo?.updateAt && (
+              <div>
+                <Box variant="awsui-key-label">
+                  {t('pipeline:detail.updateTime')}
+                </Box>
+                <div>
+                  {moment(parseInt(pipelineInfo.updateAt.toString())).format(
+                    TIME_FORMAT
+                  )}
+                </div>
               </div>
             )}
           </SpaceBetween>
