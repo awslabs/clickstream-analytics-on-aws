@@ -217,7 +217,11 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
   return !isEmpty(subnetRouteTable) ? subnetRouteTable : mainRouteTable;
 }
 
-function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
+function checkVpcEndpoint(
+  allSubnets: ClickStreamSubnet[],
+  isolatedSubnetsAZ: string[],
+  routeTable: RouteTable,
+  vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
   subnet: ClickStreamSubnet,
   services: string[]) {
@@ -240,6 +244,12 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
           });
         }
       } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface && vpcEndpoint.Groups) {
+        if (!checkInterfaceVPCEndpointSubnets(allSubnets, isolatedSubnetsAZ, vpcEndpoint)) {
+          invalidServices.push({
+            service: service,
+            reason: `The Availability Zones (AZ) of VPC Endpoint (${service}) subnets must contain Availability Zones (AZ) of isolated subnets.`,
+          });
+        }
         const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
         const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId!));
         const vpcEndpointRule: SecurityGroupRule = {
@@ -259,6 +269,16 @@ function checkVpcEndpoint(routeTable: RouteTable, vpcEndpoints: VpcEndpoint[],
     }
   }
   return invalidServices;
+}
+
+function checkInterfaceVPCEndpointSubnets(allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[], vpcEndpoint: VpcEndpoint) {
+  const vpceSubnets = allSubnets.filter(subnet => vpcEndpoint.SubnetIds?.includes(subnet.id));
+  const vpceSubnetsAZ = getSubnetsAZ(vpceSubnets);
+  const azInVpceSubnetsAZ = vpceSubnetsAZ.filter(az => isolatedSubnetsAZ.includes(az));
+  if (azInVpceSubnetsAZ.length < isolatedSubnetsAZ.length) {
+    return false;
+  }
+  return true;
 }
 
 function checkRoutesGatewayId(routes: Route[], gatewayId: String) {

@@ -618,6 +618,13 @@ function createPipelineMock(
   const vpcEndpointsGroups = [{ GroupId: 'sg-00000000000000030' }];
   const vpcEndpoints = [
     {
+      VpcEndpointId: 'vpce-error',
+      ServiceName: 'com.amazonaws.ap-southeast-1.error',
+      VpcEndpointType: VpcEndpointType.Interface,
+      Groups: vpcEndpointsGroups,
+      SubnetIds: [],
+    },
+    {
       VpcEndpointId: 'vpce-emr-serverless',
       ServiceName: 'com.amazonaws.ap-southeast-1.emr-serverless',
       VpcEndpointType: VpcEndpointType.Interface,

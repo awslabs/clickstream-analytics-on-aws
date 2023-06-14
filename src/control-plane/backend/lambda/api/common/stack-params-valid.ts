@@ -105,29 +105,23 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
     const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
     const vpcEndpoints = await describeVpcEndpoints(pipeline.region, network.vpcId);
     const vpcEndpointSecurityGroups: string[] = [];
-    const invalidVpce = [];
     for (let vpce of vpcEndpoints) {
-      const vpceSubnets = allSubnets.filter(subnet => vpce.SubnetIds?.includes(subnet.id));
-      const vpceSubnetsAZ = getSubnetsAZ(vpceSubnets);
-      const azInVpceSubnetsAZ = vpceSubnetsAZ.filter(az => isolatedSubnetsAZ.includes(az));
-      if (azInVpceSubnetsAZ.length < isolatedSubnetsAZ.length) {
-        invalidVpce.push(vpce.ServiceName);
-      }
       for (let group of vpce.Groups!) {
         vpcEndpointSecurityGroups.push(group.GroupId!);
       }
-    }
-    if (invalidVpce.length > 0) {
-      throw new ClickStreamBadRequestError(
-        `Validate error: The Availability Zones (AZ) of VPC Endpoint (${invalidVpce.join(',')}) subnets must contain Availability Zones (AZ) of isolated subnets.`,
-      );
     }
 
     const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
 
     for (let privateSubnet of privateSubnets) {
       if (privateSubnet.type === SubnetType.ISOLATED) {
-        validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
+        validateVpcEndpoint(
+          pipeline.region,
+          allSubnets,
+          isolatedSubnetsAZ,
+          privateSubnet,
+          vpcEndpoints,
+          vpcEndpointSecurityGroupRules,
           [
             's3',
             'logs',
@@ -143,17 +137,35 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
           if (pipeline.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
             services.push('kinesis-streams');
           }
-          validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules, services);
+          validateVpcEndpoint(
+            pipeline.region,
+            allSubnets,
+            isolatedSubnetsAZ,
+            privateSubnet,
+            vpcEndpoints,
+            vpcEndpointSecurityGroupRules,
+            services);
         }
         if (pipeline.dataProcessing) {
-          validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
+          validateVpcEndpoint(
+            pipeline.region,
+            allSubnets,
+            isolatedSubnetsAZ,
+            privateSubnet,
+            vpcEndpoints,
+            vpcEndpointSecurityGroupRules,
             [
               'emr-serverless',
               'glue',
             ]);
         }
         if (pipeline.dataModeling) {
-          validateVpcEndpoint(pipeline.region, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules,
+          validateVpcEndpoint(pipeline.region,
+            allSubnets,
+            isolatedSubnetsAZ,
+            privateSubnet,
+            vpcEndpoints,
+            vpcEndpointSecurityGroupRules,
             [
               'redshift-data',
               'states',
@@ -310,7 +322,11 @@ export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps)
   return true;
 };
 
-const validateVpcEndpoint = (region: string, subnet: ClickStreamSubnet, vpcEndpoints: VpcEndpoint[],
+const validateVpcEndpoint = (region: string,
+  allSubnets: ClickStreamSubnet[],
+  isolatedSubnetsAZ: string[],
+  subnet: ClickStreamSubnet,
+  vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
   services: string[]) => {
   let prefix = `com.amazonaws.${region}`;
@@ -318,12 +334,17 @@ const validateVpcEndpoint = (region: string, subnet: ClickStreamSubnet, vpcEndpo
     prefix = 'cn.com.amazonaws.cn-northwest-1';
   }
   services = services.map(s => `${prefix}.${s}`);
-  const invalidServices = checkVpcEndpoint(subnet.routeTable!, vpcEndpoints,
-    securityGroupsRules, subnet, services);
+  const invalidServices = checkVpcEndpoint(
+    allSubnets,
+    isolatedSubnetsAZ,
+    subnet.routeTable!,
+    vpcEndpoints,
+    securityGroupsRules,
+    subnet,
+    services);
   if (!isEmpty(invalidServices)) {
     throw new ClickStreamBadRequestError(
-      `Validation error: vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}. ` +
-      'Please check and try again.',
+      `Validation error: vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}.`,
     );
   }
 };
