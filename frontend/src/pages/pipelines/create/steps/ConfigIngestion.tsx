@@ -51,6 +51,7 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
+import { PIPELINE_ACCESS_LOG_PERMISSION_LINK, buildDocumentLink } from 'ts/url';
 import { isDisabled } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
@@ -127,7 +128,7 @@ interface ConfigIngestionProps {
 const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   props: ConfigIngestionProps
 ) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     update,
     pipelineInfo,
@@ -644,7 +645,20 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   pipelineInfo.ingestionServer.loadBalancer
                     .enableApplicationLoadBalancerAccessLog
                 }
-                description={t('pipeline:create.enableALBLogDesc')}
+                description={
+                  <div>
+                    {t('pipeline:create.enableALBLogDesc')}
+                    <Link
+                      external
+                      href={buildDocumentLink(
+                        i18n.language,
+                        PIPELINE_ACCESS_LOG_PERMISSION_LINK
+                      )}
+                    >
+                      {t('learnMore')}
+                    </Link>
+                  </div>
+                }
               >
                 <b>{t('pipeline:create.enableALBLog')}</b>
               </Checkbox>

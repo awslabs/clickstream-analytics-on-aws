@@ -286,7 +286,7 @@
     "auth": "Authentication",
     "authDesc": "You can use OpenID Connector (OIDC) provider to authenticate the request sent to your ingestion server. If you plan to enable it, please create an OIDC client in the OIDC provider then create a secret in AWS Secret Manager with information “issuer”, “token endpoint”, User endpoint”, “Authorization endpoint”, “App client ID”, and “App Client Secret”.",
     "enableALBLog": "Access logs",
-    "enableALBLogDesc": "Application Load Balancer support delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.",
+    "enableALBLogDesc": "Application Load Balancer support delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step. Note that you need add permission to the S3 bucket for ALB to deliver logs. ",
     "connector": "Connector",
     "connectorDesc": "Create a Apache Kafka connector to stream data to S3.",
     "connectorCheck": "The solution will download the Confluent <connector_anchor>Amazon S3 sink connector</connector_anchor> follow by this <guide_anchor>guide</guide_anchor>",

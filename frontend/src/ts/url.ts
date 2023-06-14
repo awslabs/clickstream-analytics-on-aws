@@ -20,6 +20,12 @@ const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
 export const SOLUTION_DOCUMENTS_DOMAIN =
   'https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/';
 
+// TODO Need To Change after publish
+export const PIPELINE_ACCESS_LOG_PERMISSION_LINK =
+  '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';
+export const KAFKA_REQUIREMENT_LINK =
+  '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/';
+
 export const buildDocumentLink = (lang: string, url?: string) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {
     return SOLUTION_DOCUMENTS_DOMAIN + 'zh' + (url ?? '');

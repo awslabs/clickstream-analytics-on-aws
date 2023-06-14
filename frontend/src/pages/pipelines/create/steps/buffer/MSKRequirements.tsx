@@ -14,7 +14,7 @@
 import { Alert, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { buildDocumentLink } from 'ts/url';
+import { KAFKA_REQUIREMENT_LINK, buildDocumentLink } from 'ts/url';
 
 const MSKRequirements: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -23,10 +23,7 @@ const MSKRequirements: React.FC = () => {
       {t('pipeline:create.kafkaRequirements')}{' '}
       <Link
         external
-        href={buildDocumentLink(
-          i18n.language,
-          '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/'
-        )}
+        href={buildDocumentLink(i18n.language, KAFKA_REQUIREMENT_LINK)}
       >
         {t('learnMore')}
       </Link>
