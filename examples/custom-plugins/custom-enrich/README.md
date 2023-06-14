@@ -8,7 +8,7 @@ E.g. Input data:
 {
 
     "uri": "/collect?customAppName=name1&appId=uba-app&compression=gzip&event_bundle_sequence_id=12",
-    
+
     "event_params": [
         {
             "key": "test",
@@ -25,7 +25,7 @@ E.g. Input data:
                 "string_value": "TSM"
             }
         }
-       
+    
     ]
 }
 
@@ -37,7 +37,7 @@ After transform, the data:
 {
 
     "uri": "/collect?customAppName=name1&appId=uba-app&compression=gzip&event_bundle_sequence_id=12",
-    
+
     "event_params": [
         {
             "key": "test",
@@ -61,7 +61,7 @@ After transform, the data:
                 "string_value": "name1"
             }
         }
-       
+    
     ]
 }
 ```
@@ -71,7 +71,7 @@ After transform, the data:
 ```sh
 cd custom-enrich/
 
-./gradlew clean build  
+./gradlew clean build
 
 
 ```
@@ -93,7 +93,7 @@ com.example.clickstream.CustomUriEnrich
 
 ## Use Plugin in solution
 
-Please refer the [deployment guide](link-to-be-update)
+Please refer the [deployment guide](../../../docs/en/pipeline-mgmt/data-processing/configure-plugin.md).
 
 ## Use Plugin in solution (update cloudformation directly)
 
@@ -105,7 +105,6 @@ Please refer the [deployment guide](link-to-be-update)
 | ------ | ------ |
 |**Class name list for plugins** |`software.aws.solution.clickstream.Transformer,com.example.clickstream.CustomUriEnrich,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment`|
 |**Plugin jars**|`s3://<bucket>/pipeline/jars/custom-enrich-1.0.0.jar`|
-
 
 ## Run Test
 

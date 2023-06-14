@@ -1,21 +1,25 @@
-To uninstall the XXX solution, you must delete the AWS CloudFormation stack. 
+# Uninstall the Clickstream Analytics on AWS
 
-You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to delete the CloudFormation stack.
+!!! Warning "Warning"
+    You will encounter an IAM role missing error if you delete {{ solution_name }} main stack before you delete the stacks created for Clickstream projects. {{ solution_name }} console launches additional CloudFormation stacks for the Clickstream pipelines.
+    We recommend you delete projects before uninstalling the solution.
 
-## Uninstall the stack using the AWS Management Console
+## Step 1. Delete projects
 
-1. Sign in to the [AWS CloudFormation][cloudformation-console] console.
-1. Select this solution’s installation parent stack.
-1. Choose **Delete**.
+1. Go to the {{ solution_name }} console. 
+2. In the left sidebar, choose **Projects**.
+3. Select the project to be deleted.
+4. Choose the **Delete** button in the upper right corner.
+5. Repeat steps 3 and 4 to delete all your projects.
 
-## Uninstall the stack using AWS Command Line Interface
+## Step 2. Delete {{ solution_name }} stack
 
-Determine whether the AWS Command Line Interface (AWS CLI) is available in your environment. For installation instructions, refer to [What Is the AWS Command Line Interface][aws-cli] in the *AWS CLI User Guide*. After confirming that the AWS CLI is available, run the following command.
+1. Go to the [CloudFormation console][cloudformation].
+2. Find the CloudFormation stack of the solution.
+3. Delete the CloudFormation Stack of the solution.
+4. (Optional) Delete the S3 bucket created by the solution.
+    1. Choose the CloudFormation stack of the solution, and select the **Resources** tab.
+    2. In the search bar, enter `DataBucket`. It shows all resources with the name `DataBucket` created by the solution. You can find the resource type **AWS::S3::Bucket**, and the **Physical ID** field is the S3 bucket name.
+    3. Go to the S3 console, and find the S3 bucket with the bucket name. **Empty** and **Delete** the S3 bucket.
 
-```bash
-aws cloudformation delete-stack --stack-name <installation-stack-name> --region <aws-region>
-```
-
-
-[cloudformation-console]: https://console.aws.amazon.com/cloudformation/home
-[aws-cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html
+[cloudformation]: https://console.aws.amazon.com/cloudfromation/

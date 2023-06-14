@@ -1,14 +1,15 @@
 ## Plugin description
 
-The plugin `custom-sdk-transformer` is an example transformer plugin, which transforms input raw json data without compression to clickstream schema. 
+The plugin `custom-sdk-transformer` is an example transformer plugin, which transforms input raw json data without compression to clickstream schema.
 
-The plugin does not:
+The plugin does not support:
 
 1. decompress data
 2. filter appId
 3. check data refresh hours
 
 Example input data:
+
 ```json
 [
   {
@@ -87,13 +88,11 @@ Example input data:
     }
   }
 ]
-
 ```
 
 Input data, schema of item in data array:
 
 [schema.json](./src/main/resources/schema.json)
-
 
 Output data schema:
 
@@ -128,14 +127,12 @@ CREATE EXTERNAL TABLE `ods_events`(
 
 ```
 
-
-
 ## Build custom plugin jar
 
 ```sh
 cd custom-sdk-transformer/
 
-./gradlew clean build  
+./gradlew clean build
 
 
 ```
@@ -152,10 +149,9 @@ ls -l ./build/libs/custom-sdk-transformer-1.0.0.jar
 
 - Transformer: `com.example.clickstream.transformer`
 
-
 ## Use Plugin in solution
 
-Please refer the [deployment guide](link-to-be-update)
+Please refer the [deployment guide](../../../docs/en/pipeline-mgmt/data-processing/configure-plugin.md).
 
 ## Use Plugin in solution (update cloudformation directly)
 

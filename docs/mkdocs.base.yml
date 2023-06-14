@@ -9,11 +9,49 @@ theme:
     - search.suggest
     - search.highlight
 
+extra_css:
+  - ./stylesheets/extra.css
+
 extra:
   generator: false
   copyright: Copyright &copy; 2023 Amazon Web Services
+  alternate:
+    - name: English
+      link: /en/
+      lang: en
+    - name: 简体中文
+      link: /zh/
+      lang: zh
+  aws_bucket: aws-gcr-solutions
+  aws_cn_bucket: aws-gcr-solutions
+  aws_version: feature-rel/main
+  aws_cn_version: feature-rel/main
+  aws_prefix: clickstream-branch-main
+  aws_cn_prefix: clickstream-branch-main
+  solution: clickstream-analytics-on-aws
+  solution_name: Clickstream Analytics on AWS
+  git_repo: git@ssh.gitlab.aws.dev:aws-gcr-solutions/incubator/web-analytics-on-aws/clickstream-analytics-on-aws.git
+  source_repo: https://github.com/awslabs/clickstream-analytics-on-aws
 
 plugins:
   - search
   - include-markdown
   - macros
+  - glightbox
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true 
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
