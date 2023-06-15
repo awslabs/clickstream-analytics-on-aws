@@ -280,7 +280,7 @@ describe('Test redsfhit settings', () => {
     const athenaCheckbox =
       configIngestionDom.container.querySelector('#test-athena-id');
     expect(athenaCheckbox).toBeInTheDocument();
-    expect(athenaCheckbox).toBeDisabled();
+    expect(athenaCheckbox).toBeEnabled();
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );

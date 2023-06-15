@@ -42,33 +42,40 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   const [updatedStatus, setUpdatedStatus] = useState(status);
   const [pipelineRegion, setPipelineRegion] = useState('');
   const [stackStatusList, setStackStatusList] = useState<IStackStatus[]>([]);
-  let indicatorType: StatusIndicatorProps.Type = 'loading';
-  let displayStatus = '';
-  if (
-    updatedStatus === EPipelineStatus.Creating ||
-    updatedStatus === EPipelineStatus.Updating ||
-    updatedStatus === EPipelineStatus.Deleting
-  ) {
-    indicatorType = 'loading';
-    if (updatedStatus === EPipelineStatus.Creating) {
-      displayStatus = 'status.creating';
+  const [displayStatus, setDisplayStatus] = useState('');
+  const [indicatorType, setIndicatorType] =
+    useState<StatusIndicatorProps.Type>('loading');
+  useEffect(() => {
+    let tmpDisplayStatus = '';
+    let tmpIndicatorType: StatusIndicatorProps.Type = 'loading';
+    if (
+      updatedStatus === EPipelineStatus.Creating ||
+      updatedStatus === EPipelineStatus.Updating ||
+      updatedStatus === EPipelineStatus.Deleting
+    ) {
+      tmpIndicatorType = 'loading';
+      if (updatedStatus === EPipelineStatus.Creating) {
+        tmpDisplayStatus = 'status.creating';
+      }
+      if (updatedStatus === EPipelineStatus.Updating) {
+        tmpDisplayStatus = 'status.updating';
+      }
+      if (updatedStatus === EPipelineStatus.Deleting) {
+        tmpDisplayStatus = 'status.deleting';
+      }
+    } else if (updatedStatus === EPipelineStatus.Failed) {
+      tmpIndicatorType = 'error';
+      tmpDisplayStatus = 'status.failed';
+    } else if (updatedStatus === EPipelineStatus.Active) {
+      tmpIndicatorType = 'success';
+      tmpDisplayStatus = 'status.active';
+    } else {
+      tmpIndicatorType = 'pending';
+      tmpDisplayStatus = 'status.pending';
     }
-    if (updatedStatus === EPipelineStatus.Updating) {
-      displayStatus = 'status.updating';
-    }
-    if (updatedStatus === EPipelineStatus.Deleting) {
-      displayStatus = 'status.deleting';
-    }
-  } else if (updatedStatus === EPipelineStatus.Failed) {
-    indicatorType = 'error';
-    displayStatus = 'status.failed';
-  } else if (updatedStatus === EPipelineStatus.Active) {
-    indicatorType = 'success';
-    displayStatus = 'status.active';
-  } else {
-    indicatorType = 'pending';
-    displayStatus = 'status.pending';
-  }
+    setDisplayStatus(tmpDisplayStatus);
+    setIndicatorType(tmpIndicatorType);
+  }, [updatedStatus]);
 
   const checkStatus = async (isRefresh?: boolean) => {
     if (!isRefresh) {

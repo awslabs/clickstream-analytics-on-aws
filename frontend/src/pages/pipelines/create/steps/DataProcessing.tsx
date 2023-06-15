@@ -908,8 +908,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             ) || ''
                           }
                           value={
-                            pipelineInfo.dataModeling.redshift.provisioned
-                              .dbUser
+                            pipelineInfo.dataModeling?.redshift?.provisioned
+                              ?.dbUser
                           }
                           onChange={(e) => {
                             changeDBUser(e.detail.value);
@@ -1024,10 +1024,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <SpaceBetween direction="horizontal" size="xs">
                 <Checkbox
                   controlId="test-athena-id"
-                  disabled={
-                    isDisabled(update, pipelineInfo) ||
-                    !pipelineInfo.enableRedshift
-                  }
+                  disabled={isDisabled(update, pipelineInfo)}
                   checked={pipelineInfo.dataModeling.athena}
                   onChange={(e) => {
                     changeEnableAthena(e.detail.checked);

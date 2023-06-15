@@ -526,7 +526,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             return false;
           }
           // Check DB user
-          if (!pipelineInfo.dataModeling.redshift.provisioned.dbUser.trim()) {
+          if (
+            !pipelineInfo.dataModeling?.redshift?.provisioned?.dbUser.trim()
+          ) {
             setRedshiftProvisionedDBUserEmptyError(true);
             return false;
           }
@@ -2360,6 +2362,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
   };
   const setUpdateNewServerlessSubnets = async (pipelineInfo: IExtPipeline) => {
+    if (!pipelineInfo.dataModeling?.redshift?.newServerless) {
+      return;
+    }
     try {
       const { success, data }: ApiResponse<SubnetResponse[]> =
         await getSubnetList({
@@ -2387,6 +2392,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateProvisionedRedshiftCluster = async (
     pipelineInfo: IExtPipeline
   ) => {
+    if (!pipelineInfo.dataModeling?.redshift?.provisioned) {
+      return;
+    }
     try {
       const { success, data }: ApiResponse<RedshiftResponse[]> =
         await getRedshiftCluster({
@@ -2439,7 +2447,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     };
     setUpdateListPlugins(pipelineInfo);
 
-    pipelineInfo.enableRedshift = pipelineInfo.dataModeling.redshift !== null;
+    pipelineInfo.enableRedshift = !(
+      isEmpty(pipelineInfo.dataModeling?.redshift?.newServerless) &&
+      isEmpty(pipelineInfo.dataModeling?.redshift?.provisioned)
+    );
 
     pipelineInfo.redshiftType = !isEmpty(
       pipelineInfo.dataModeling.redshift.newServerless
@@ -2577,8 +2588,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
         sinkS3: {
           sinkBucket: {
-            name: data.ingestionServer.sinkS3?.sinkBucket.name ?? '',
-            prefix: data.ingestionServer.sinkS3?.sinkBucket.prefix ?? '',
+            name: data.ingestionServer.sinkS3?.sinkBucket?.name ?? '',
+            prefix: data.ingestionServer.sinkS3?.sinkBucket?.prefix ?? '',
           },
           s3BufferSize: data.ingestionServer.sinkS3?.s3BufferSize ?? 10,
           s3BufferInterval:
@@ -2610,33 +2621,33 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
       },
       dataProcessing: {
-        dataFreshnessInHour: data.dataProcessing.dataFreshnessInHour ?? 72,
-        scheduleExpression: data.dataProcessing.scheduleExpression ?? '',
+        dataFreshnessInHour: data.dataProcessing?.dataFreshnessInHour ?? 72,
+        scheduleExpression: data.dataProcessing?.scheduleExpression ?? '',
         sourceS3Bucket: {
-          name: data.dataProcessing.sourceS3Bucket.name ?? '',
-          prefix: data.dataProcessing.sourceS3Bucket.prefix ?? '',
+          name: data.dataProcessing?.sourceS3Bucket?.name ?? '',
+          prefix: data.dataProcessing?.sourceS3Bucket?.prefix ?? '',
         },
         sinkS3Bucket: {
-          name: data.dataProcessing.sinkS3Bucket.name ?? '',
-          prefix: data.dataProcessing.sinkS3Bucket.prefix ?? '',
+          name: data.dataProcessing?.sinkS3Bucket?.name ?? '',
+          prefix: data.dataProcessing?.sinkS3Bucket?.prefix ?? '',
         },
         pipelineBucket: {
-          name: data.dataProcessing.pipelineBucket.name ?? '',
-          prefix: data.dataProcessing.pipelineBucket.prefix ?? '',
+          name: data.dataProcessing?.pipelineBucket?.name ?? '',
+          prefix: data.dataProcessing?.pipelineBucket?.prefix ?? '',
         },
-        transformPlugin: data.dataProcessing.transformPlugin ?? '',
-        enrichPlugin: data.dataProcessing.enrichPlugin ?? [],
+        transformPlugin: data.dataProcessing?.transformPlugin ?? '',
+        enrichPlugin: data.dataProcessing?.enrichPlugin ?? [],
       },
       dataModeling: {
-        athena: data.dataModeling.athena ?? false,
+        athena: data.dataModeling?.athena ?? false,
         redshift: {
-          dataRange: data.dataModeling.redshift.dataRange ?? 0,
-          provisioned: data.dataModeling.redshift.provisioned ?? null,
-          newServerless: data.dataModeling.redshift.newServerless ?? null,
+          dataRange: data.dataModeling?.redshift?.dataRange ?? 0,
+          provisioned: data.dataModeling?.redshift?.provisioned ?? null,
+          newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
         upsertUsers: {
           scheduleExpression:
-            data.dataModeling.upsertUsers.scheduleExpression ?? '',
+            data.dataModeling?.upsertUsers?.scheduleExpression ?? '',
         },
       },
       status: {
