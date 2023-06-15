@@ -32,10 +32,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
-  const [logoutEndpoint, setLogoutEndpoint] = useState('');
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
+
   useEffect(() => {
     if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
       changeLanguage('zh');
@@ -43,10 +43,22 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
       ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
       : {};
-    setLogoutEndpoint(configJSONObj.oidc_logout_endpoint);
-    setFullLogoutUrl(
-      `${configJSONObj.oidc_logout_endpoint}?id_token_hint=${user.id_token}&post_logout_redirect_uri=${configJSONObj.oidc_redirect_url}`
-    );
+    if (configJSONObj.oidc_logout_url) {
+      const redirectUrl = configJSONObj.oidc_redirect_url.replace(
+        '/signin',
+        ''
+      );
+      const queryParams = new URLSearchParams({
+        client_id: configJSONObj.oidc_client_id,
+        id_token_hint: user.id_token,
+        logout_uri: redirectUrl,
+        redirect_uri: redirectUrl,
+        post_logout_redirect_uri: redirectUrl,
+      });
+      const logoutUrl = new URL(configJSONObj.oidc_logout_url);
+      logoutUrl.search = queryParams.toString();
+      setFullLogoutUrl(decodeURIComponent(logoutUrl.toString()));
+    }
   }, []);
 
   return (
@@ -83,7 +95,8 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
-                if (logoutEndpoint) {
+                if (fullLogoutUrl) {
+                  signOut && signOut();
                   window.location.href = fullLogoutUrl;
                 } else {
                   signOut && signOut();

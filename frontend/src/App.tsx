@@ -168,16 +168,18 @@ const App: React.FC = () => {
     // Get config
     const res = await Axios.get(`${CONFIG_URL}?timestamp=${timeStamp}`);
     const configData: ConfigType = res.data;
+    if (!configData.oidc_logout_url) {
+      // Get oidc logout url from openid configuration
+      await Axios.get(
+        `${configData.oidc_provider}/.well-known/openid-configuration`
+      ).then((oidcRes) => {
+        configData.oidc_logout_url = oidcRes.data.end_session_endpoint;
+      });
+    }
+    setLoadingConfig(false);
+    localStorage.setItem(PROJECT_CONFIG_JSON, JSON.stringify(configData));
+    initAuthentication(configData);
     setContextData(configData);
-    // Get oidc logout url from openid configuration
-    await Axios.get(
-      `${configData.oidc_provider}/.well-known/openid-configuration`
-    ).then((oidcRes) => {
-      configData.oidc_logout_endpoint = oidcRes.data.end_session_endpoint;
-      localStorage.setItem(PROJECT_CONFIG_JSON, JSON.stringify(configData));
-      initAuthentication(configData);
-      setLoadingConfig(false);
-    });
   };
 
   const setLocalStorageAfterLoad = async () => {

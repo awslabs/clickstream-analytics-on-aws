@@ -28,11 +28,13 @@ export interface OIDCProps {
   userEndpoint: string;
   authorizationEndpoint: string;
   appClientId: string;
+  oidcLogoutUrl: string;
 }
 
 export interface SolutionCognitoProps {
   email: string;
   callbackUrls?: string[];
+  logoutUrls?: string[];
 }
 
 export class SolutionCognito extends Construct {
@@ -106,12 +108,13 @@ export class SolutionCognito extends Construct {
         },
         scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
         callbackUrls: props.callbackUrls,
+        logoutUrls: props.logoutUrls,
       },
     });
 
     const userPoolId = userPool.userPoolId;
     const domainPrefix = Fn.join('', ['clickstream', stackId]);
-    userPool.addDomain('cognito-domain', {
+    const domain = userPool.addDomain('cognito-domain', {
       cognitoDomain: {
         domainPrefix,
       },
@@ -131,10 +134,11 @@ export class SolutionCognito extends Construct {
     const region = Stack.of(scope).region;
     this.oidcProps = {
       issuer: `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`,
-      tokenEndpoint: `https://${domainPrefix}.auth.${region}.amazoncognito.com/oauth2/token`,
-      userEndpoint: `https://${domainPrefix}.auth.${region}.amazoncognito.com/oauth2/userInfo`,
-      authorizationEndpoint: `https://${domainPrefix}.auth.${region}.amazoncognito.com/oauth2/authorize`,
+      tokenEndpoint: `https://${domain.domainName}.auth.${region}.amazoncognito.com/oauth2/token`,
+      userEndpoint: `https://${domain.domainName}.auth.${region}.amazoncognito.com/oauth2/userInfo`,
+      authorizationEndpoint: `https://${domain.domainName}.auth.${region}.amazoncognito.com/oauth2/authorize`,
       appClientId: userPoolClient.userPoolClientId,
+      oidcLogoutUrl: `https://${domain.domainName}.auth.${region}.amazoncognito.com/logout`,
     };
   };
 

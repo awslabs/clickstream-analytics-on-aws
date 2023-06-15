@@ -41,7 +41,7 @@ declare global {
     oidc_provider: string;
     oidc_client_id: string;
     oidc_redirect_url: string;
-    oidc_logout_endpoint: string;
+    oidc_logout_url: string;
     solution_version: string;
     solution_cognito_idp: string;
     solution_region: string;

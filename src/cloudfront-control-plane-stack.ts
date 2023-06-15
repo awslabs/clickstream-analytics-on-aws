@@ -205,8 +205,10 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
     });
 
+
     let issuer: string;
     let clientId: string;
+    let oidcLogoutUrl: string = '';
     //Create Cognito user pool and client for backend api
     if (createCognitoUserPool) {
       const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
@@ -216,10 +218,12 @@ export class CloudFrontControlPlaneStack extends Stack {
       const cognito = new SolutionCognito(this, 'solution-cognito', {
         email: emailParamerter.valueAsString,
         callbackUrls: [`${controlPlane.controlPlaneUrl}/signin`],
+        logoutUrls: [`${controlPlane.controlPlaneUrl}`],
       });
 
       issuer = cognito.oidcProps.issuer;
       clientId = cognito.oidcProps.appClientId;
+      oidcLogoutUrl = cognito.oidcProps.oidcLogoutUrl;
 
     } else {
       const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
@@ -302,6 +306,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       solutionBucket: solutionBucket.bucket.bucketName,
       solutionPluginPrefix: pluginPrefix,
       solutionRegion: Aws.REGION,
+      oidcLogoutUrl: oidcLogoutUrl,
     });
 
     controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));

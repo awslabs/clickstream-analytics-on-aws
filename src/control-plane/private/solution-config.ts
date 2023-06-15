@@ -23,6 +23,7 @@ export interface SolutionConfigProps {
   readonly solutionBucket: string;
   readonly solutionPluginPrefix: string;
   readonly solutionRegion: string;
+  readonly oidcLogoutUrl: string;
 }
 
 export function generateSolutionConfig(props: SolutionConfigProps ) {
@@ -35,5 +36,6 @@ export function generateSolutionConfig(props: SolutionConfigProps ) {
     solution_data_bucket: props.solutionBucket,
     solution_plugin_prefix: props.solutionPluginPrefix,
     solution_region: props.solutionRegion,
+    oidc_logout_url: props.oidcLogoutUrl,
   };
 }

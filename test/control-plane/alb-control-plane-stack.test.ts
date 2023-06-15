@@ -764,6 +764,54 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
       SupportedIdentityProviders: [
         'COGNITO',
       ],
+      CallbackURLs: [
+        {
+          'Fn::Join': [
+            '',
+            [
+              'https://',
+              {
+                'Fn::Join': [
+                  '.',
+                  [
+                    {
+                      Ref: 'RecordName',
+                    },
+                    {
+                      Ref: 'HostedZoneName',
+                    },
+                  ],
+                ],
+              },
+              ':443/signin',
+            ],
+          ],
+        },
+      ],
+      LogoutURLs: [
+        {
+          'Fn::Join': [
+            '',
+            [
+              'https://',
+              {
+                'Fn::Join': [
+                  '.',
+                  [
+                    {
+                      Ref: 'RecordName',
+                    },
+                    {
+                      Ref: 'HostedZoneName',
+                    },
+                  ],
+                ],
+              },
+              ':443',
+            ],
+          ],
+        },
+      ],
     });
 
     template.hasResourceProperties('AWS::Cognito::UserPool', {
@@ -878,7 +926,15 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                   {
                     Ref: 'AWS::Region',
                   },
-                  '"}',
+                  '","oidc_logout_url":"https://',
+                  {
+                    Ref: 'userPoolcognitodomain5F5914A6',
+                  },
+                  '.auth.',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  '.amazoncognito.com/logout"}',
                 ],
               ],
             },

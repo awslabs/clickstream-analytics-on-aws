@@ -306,6 +306,39 @@ describe('CloudFrontS3PotalStack', () => {
       SupportedIdentityProviders: [
         'COGNITO',
       ],
+      CallbackURLs: [
+        {
+          'Fn::Join': [
+            '',
+            [
+              'https://',
+              {
+                'Fn::GetAtt': [
+                  'cloudfrontcontrolplanePortalDistributionCAE911E8',
+                  'DomainName',
+                ],
+              },
+              '/signin',
+            ],
+          ],
+        },
+      ],
+      LogoutURLs: [
+        {
+          'Fn::Join': [
+            '',
+            [
+              'https://',
+              {
+                'Fn::GetAtt': [
+                  'cloudfrontcontrolplanePortalDistributionCAE911E8',
+                  'DomainName',
+                ],
+              },
+            ],
+          ],
+        },
+      ],
     });
 
     commonTemplate.hasResourceProperties('AWS::Cognito::UserPool', {

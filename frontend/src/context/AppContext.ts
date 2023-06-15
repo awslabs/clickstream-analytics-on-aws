@@ -16,7 +16,7 @@ export const AppContext = createContext<ConfigType | undefined>({
   oidc_provider: '',
   oidc_client_id: '',
   oidc_redirect_url: '',
-  oidc_logout_endpoint: '',
+  oidc_logout_url: '',
   solution_version: '',
   solution_cognito_idp: '',
   solution_region: '',
