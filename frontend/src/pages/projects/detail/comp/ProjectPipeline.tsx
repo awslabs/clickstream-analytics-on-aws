@@ -302,6 +302,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   {t('button.delete')}
                 </Button>
                 <Button
+                  disabled={
+                    pipelineInfo?.status?.status !== EPipelineStatus.Active
+                  }
                   variant="primary"
                   iconName="add-plus"
                   onClick={() => {
