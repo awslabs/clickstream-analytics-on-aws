@@ -594,6 +594,8 @@ describe('Network test', () => {
       'cron(0 0/2 * * * ?)',
       'cron(0 0-10 * * * ?)',
       'cron(0 0,5,15 * * * ?)',
+      'cron(0 20,25,35 * * * ?)',
+      'cron(0 40,45,55 * * * ?)',
       'rate(1 minute)',
       'rate(5 minutes)',
     ];

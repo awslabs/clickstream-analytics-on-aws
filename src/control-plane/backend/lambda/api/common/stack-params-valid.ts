@@ -384,20 +384,21 @@ export const validateDataProcessingInterval = (scheduleExpression: string) => {
           'Validation error: schedule expression is not a reasonable interval.',
         );
       } else {
-        const firstTime = runTimes[0];
+        let firstTime = runTimes[0];
         for (let i = 1; i < runTimes.length; i++) {
           if (runTimes[i] - firstTime < 360000) {
             throw new ClickStreamBadRequestError(
               'Validation error: the minimum interval of data processing is 6 minutes.',
             );
           }
+          firstTime = runTimes[i];
         }
       }
       return true;
     } catch (err) {
       logger.warn('schedule expression parse error: ', { err });
       throw new ClickStreamBadRequestError(
-        'Validation error: schedule expression parse error.',
+        `Validation error: schedule expression(${scheduleExpression}) parse error.`,
       );
     }
   }
