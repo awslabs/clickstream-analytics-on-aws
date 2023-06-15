@@ -243,7 +243,6 @@ export interface PipelineStatus {
   readonly executionDetail: {
     readonly name?: string;
     readonly status?: ExecutionStatus | string;
-    readonly output?: string;
   };
 }
 

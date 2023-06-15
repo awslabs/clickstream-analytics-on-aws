@@ -211,7 +211,6 @@ export class StackManager {
         executionDetail: {
           name: executionDetail?.name,
           status: executionDetail?.status,
-          output: executionDetail?.output,
         },
       } as PipelineStatus;
     }

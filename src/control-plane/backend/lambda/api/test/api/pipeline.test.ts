@@ -1627,7 +1627,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -1715,7 +1714,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -1803,7 +1801,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -1897,7 +1894,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -1980,7 +1976,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'RUNNING',
       },
       stackDetails: [
@@ -2067,7 +2062,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -2147,7 +2141,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'SUCCEEDED',
         status: 'SUCCEEDED',
       },
       stackDetails: [
@@ -2227,7 +2220,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'error',
         status: 'FAILED',
       },
       stackDetails: [
@@ -2308,7 +2300,6 @@ describe('Pipeline test', () => {
     expect(res.body.data.items[0].status).toEqual({
       executionDetail: {
         name: 'exec1',
-        output: 'error',
         status: 'FAILED',
       },
       stackDetails: [
@@ -2441,7 +2432,6 @@ describe('Pipeline test', () => {
       executionDetail: {
         name: 'exec1',
         status: 'SUCCEEDED',
-        output: 'SUCCEEDED',
       },
     });
   });
