@@ -12,7 +12,9 @@
  */
 
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
+import { CronDate, parseExpression } from 'cron-parser';
 import { REDSHIFT_MODE } from './model-ln';
+import { logger } from './powertools';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
@@ -347,6 +349,61 @@ const validateVpcEndpoint = (region: string,
       `Validation error: vpc endpoint error in subnet: ${subnet.id}, detail: ${JSON.stringify(invalidServices)}.`,
     );
   }
+};
+export const validateDataProcessingInterval = (scheduleExpression: string) => {
+  if (scheduleExpression.startsWith('rate')) {
+    const indexSpace = scheduleExpression.indexOf(' ');
+    const fixedValue = parseInt(scheduleExpression.substring(5, indexSpace));
+    const fixedUnitStr = scheduleExpression.substring(indexSpace + 1, scheduleExpression.length - 1);
+    if (fixedUnitStr.startsWith('minute') && fixedValue < 6) {
+      throw new ClickStreamBadRequestError(
+        'Validation error: the minimum interval of data processing is 6 minutes.',
+      );
+    }
+    return true;
+  } else if (scheduleExpression.startsWith('cron')) {
+    const cronValue = scheduleExpression.substring(5, scheduleExpression.length - 1);
+    const nowDate = new Date();
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    var options = {
+      currentDate: nowDate,
+      iterator: true,
+    };
+    try {
+      const interval = parseExpression(cronValue, options);
+      const runTimes = [];
+      let num = 0;
+      while (num < 10) {
+        const obj = interval.next() as IteratorResult<CronDate>;
+        runTimes.push(obj.value.getTime());
+        num += 1;
+      }
+      if (runTimes.length === 0) {
+        throw new ClickStreamBadRequestError(
+          'Validation error: schedule expression is not a reasonable interval.',
+        );
+      } else {
+        const firstTime = runTimes[0];
+        for (let i = 1; i < runTimes.length; i++) {
+          if (runTimes[i] - firstTime < 360000) {
+            throw new ClickStreamBadRequestError(
+              'Validation error: the minimum interval of data processing is 6 minutes.',
+            );
+          }
+        }
+      }
+      return true;
+    } catch (err) {
+      logger.warn('schedule expression parse error: ', { err });
+      throw new ClickStreamBadRequestError(
+        'Validation error: schedule expression parse error.',
+      );
+    }
+  }
+  throw new ClickStreamBadRequestError(
+    'Validation error: schedule expression format error.',
+  );
 };
 
 export const validateEnableAccessLogsForALB = async (region: string, bucket: string) => {

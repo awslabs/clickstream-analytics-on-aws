@@ -97,6 +97,7 @@ const depsForApiProject = [
   'ts-json-object@^0.4.0',
   'cidr-block@^1.3.2',
   'json-difference@^1.9.1',
+  'cron-parser@^4.8.1',
   ...awsSDKDepsForApiProject,
 ];
 

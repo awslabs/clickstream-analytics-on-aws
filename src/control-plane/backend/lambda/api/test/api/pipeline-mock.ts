@@ -253,7 +253,7 @@ export const S3_DATA_PROCESSING_PIPELINE: IPipeline = {
   ...S3_INGESTION_PIPELINE,
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
@@ -297,7 +297,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
   },
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
@@ -319,7 +319,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
   ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
@@ -381,7 +381,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE: IPipeline = {
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
@@ -443,7 +443,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE: IPipe
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
@@ -505,7 +505,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   dataProcessing: {
     dataFreshnessInHour: 7,
-    scheduleExpression: 'hour',
+    scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
       name: 'EXAMPLE_BUCKET',
       prefix: '',

@@ -27,7 +27,7 @@ import {
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../../common/constants-ln';
-import { validatePattern, validateSinkBatch } from '../../common/stack-params-valid';
+import { validateDataProcessingInterval, validatePattern, validateSinkBatch } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
 import { containRule, isEmpty } from '../../common/utils';
 
@@ -575,6 +575,29 @@ describe('Network test', () => {
       ...REFERENCED_GROUP_RULE,
       ReferencedGroupInfo: { GroupId: 'sg-00000000000000003' },
     }], PORT_RANGE_RUlE)).toEqual(false);
+  });
+
+  it('Validate Interval', async () => {
+    const validValues = [
+      'cron(0 0/6 * * * ?)',
+      'cron(0 0/30 * * * ?)',
+      'cron(0 0,6,12 * * * ?)',
+      'cron(0 15 * * * ?)',
+      'rate(6 minutes)',
+      'rate(1 hour)',
+      'rate(1 day)',
+    ];
+    validValues.forEach(v => expect(validateDataProcessingInterval(v)).toEqual(true));
+    const invalidValues = [
+      '',
+      'cron(0 * * * * ?)',
+      'cron(0 0/2 * * * ?)',
+      'cron(0 0-10 * * * ?)',
+      'cron(0 0,5,15 * * * ?)',
+      'rate(1 minute)',
+      'rate(5 minutes)',
+    ];
+    invalidValues.forEach(v => expect(() => validateDataProcessingInterval(v)).toThrow(ClickStreamBadRequestError));
   });
 
 });

@@ -35,7 +35,7 @@ import {
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
-import { validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
+import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
@@ -635,6 +635,10 @@ export class CDataProcessingStack extends JSONObject {
     DataFreshnessInHour?: number;
 
   @JSONObject.required
+  @JSONObject.custom( (_:any, _key:string, value:string) => {
+    validateDataProcessingInterval(value);
+    return value;
+  })
     ScheduleExpression?: string;
 
   @JSONObject.optional('')

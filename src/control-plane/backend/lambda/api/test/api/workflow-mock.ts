@@ -464,7 +464,7 @@ const BASE_DATA_PROCESSING_PARAMETERS = [
   },
   {
     ParameterKey: 'ScheduleExpression',
-    ParameterValue: 'hour',
+    ParameterValue: 'rate(6 minutes)',
   },
   {
     ParameterKey: 'TransformerAndEnrichClassNames',

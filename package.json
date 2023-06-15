@@ -90,6 +90,7 @@
     "cdk-nag": "^2.20.6",
     "cidr-block": "^1.3.2",
     "constructs": "^10.0.5",
+    "cron-parser": "^4.8.1",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
     "json-difference": "^1.9.1",
