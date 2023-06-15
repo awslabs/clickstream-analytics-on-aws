@@ -1,0 +1,8 @@
+SOLUTION_ID='SO0219'
+SOLUTION_NAME='clickstream-analytics-on-aws'
+SOLUTION_TRADEMARKEDNAME='clickstream-analytics-on-aws'
+
+SOLUTION_ECR_ACCOUNT=366590864501
+SOLUTION_ECR_REPO_NAME='clickstream-analytics-on-aws'
+#SOLUTION_ECR_BUILD_VERSION=$(curl -s https://s3.amazonaws.com/aws-gcr-solutions/clickstream-analytics-on-aws/latest/version)
+SOLUTION_ECR_BUILD_VERSION=v0.10.0-ci-global-release-test-202306150324-37931727

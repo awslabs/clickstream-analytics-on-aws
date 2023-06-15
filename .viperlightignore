@@ -8,8 +8,8 @@ node_modules/
 coverage/
 .*/package-lock.json
 
-deployment/global-s3-assets/* # assets build output
 public/*  # doc build output
+deployment/*
 
 # git repo of source
 docs/mkdocs.base.yml:33

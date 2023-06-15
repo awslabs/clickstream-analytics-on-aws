@@ -17,7 +17,7 @@ update_dict() {
     local target=$1
     local prefix=$2
 
-    git restore src/control-plane/backend/config/dictionary.json
+    git restore src/control-plane/backend/config/dictionary.json || true
     sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/config/dictionary.json
     sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$BUCKET_NAME'/g' src/control-plane/backend/config/dictionary.json
     sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/config/dictionary.json
@@ -57,6 +57,8 @@ run cd ${SRC_PATH}
 run yarn install --check-files --frozen-lockfile
 run npx projen
 
+echo "IS_IN_GCR_PIPELINE: $IS_IN_GCR_PIPELINE"
+
 export USE_BSS=true
 # see https://github.com/aws-samples/cdk-bootstrapless-synthesizer/blob/main/API.md for how to config
 export BSS_TEMPLATE_BUCKET_NAME="${BUCKET_NAME}"
@@ -75,14 +77,14 @@ export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${CN_ASSETS}"
 update_dict $TARGET ${CN_ASSETS}
 run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${CN_ASSETS}
 
+if [ ! -z "$AWS_ASSET_PUBLISH_ROLE" ]; then
+    run export BSS_FILE_ASSET_PUBLISHING_ROLE_ARN="$AWS_ASSET_PUBLISH_ROLE"
+    run export BSS_IMAGE_ASSET_PUBLISHING_ROLE_ARN="$AWS_ASSET_PUBLISH_ROLE"
+fi
+
 export BSS_IMAGE_ASSET_ACCOUNT_ID=${AWS_ASSET_ACCOUNT_ID}
 export BSS_FILE_ASSET_REGION_SET="$REGIONS"
 export BSS_IMAGE_ASSET_REGION_SET=${BSS_FILE_ASSET_REGION_SET}
-
-if [ ! -z "$AWS_ASSET_PUBLISH_ROLE" ]; then
-run export BSS_FILE_ASSET_PUBLISHING_ROLE_ARN="$AWS_ASSET_PUBLISH_ROLE"
-run export BSS_IMAGE_ASSET_PUBLISHING_ROLE_ARN="$AWS_ASSET_PUBLISH_ROLE"
-fi
 
 IFS=',' read -r -a prefixes <<< "$GLOBAL_ASSETS"
 mkdir -p ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
@@ -90,4 +92,8 @@ mkdir -p ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
 export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${prefixes[0]}"
 
 update_dict $TARGET ${prefixes[0]}
+
 run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
+
+node ./deployment/post-build-1/index.js
+

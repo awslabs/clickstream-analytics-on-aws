@@ -19,21 +19,44 @@ phases:
         set -euxo pipefail
         FEATURE_NAME="${FEATURE_NAME:-""}"
         export BSS_IMAGE_ASSET_REPOSITORY_NAME=$(echo "$SOLUTION_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-        BUILD_VERSION=$(git describe --tags --always --abbrev=0 $(git rev-parse --short HEAD))
-        if [ "${BUILD_VERSION:0:1}" != v ]; then
-          BUILD_VERSION=latest
-        fi
-        if [ -n "$FEATURE_NAME" ]; then
-          BUILD_VERSION=$BUILD_VERSION-$FEATURE_NAME
-        fi
-
-        export BUILD_VERSION=${BUILD_VERSION}-$(/bin/date +"%Y%m%d%H%M")-$(git rev-parse --short HEAD)
+        if [ $DIST_OUTPUT_BUCKET != 'aws-gcr-solutions' ]; then
+            export BUILD_VERSION=$VERSION
+            export IS_IN_GCR_PIPELINE=0
+        else 
+            BUILD_VERSION=$(git describe --tags --always --abbrev=0 $(git rev-parse --short HEAD))
+            if [ "${BUILD_VERSION:0:1}" != v ]; then
+                BUILD_VERSION=latest
+            fi
+            if [ -n "$FEATURE_NAME" ]; then
+               BUILD_VERSION=$BUILD_VERSION-$FEATURE_NAME
+            fi
+            export BUILD_VERSION=${BUILD_VERSION}-$(/bin/date +"%Y%m%d%H%M")-$(git rev-parse --short HEAD)
+            export IS_IN_GCR_PIPELINE=1
+        fi 
+        
+        echo BUILD_VERSION=$BUILD_VERSION
         export GLOBAL_ASSETS='default/'
         export CN_ASSETS='cn/'
   build:
     commands:
-      - ${CODEBUILD_SRC_DIR}/deployment/build-dist.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${BUILD_VERSION}
-      - mkdir -p deployment/open-source/ && touch deployment/open-source/.empty
+      - |- 
+         set -euxo pipefail
+         if [ $IS_IN_GCR_PIPELINE -eq 1 ]; then  
+            ${CODEBUILD_SRC_DIR}/deployment/build-s3-dist-1.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${BUILD_VERSION}
+            mkdir -p deployment/open-source/ && touch deployment/open-source/.empty
+         fi
+
+         if [ $IS_IN_GCR_PIPELINE -eq 0 ]; then  
+            echo "Starting build `date` in `pwd`"
+            cd ${CODEBUILD_SRC_DIR}/deployment
+            chmod +x ./run-all-test.sh && ./run-all-test.sh
+            chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${BUILD_VERSION}
+            echo "Build completed `date`"
+            echo "Starting open-source-dist `date` in `pwd`"
+            chmod +x ./build-open-source-dist.sh && ./build-open-source-dist.sh $SOLUTION_NAME
+            echo "Open Source Dist completed `date`"
+         fi 
+
   post_build:
     commands:
       - aws s3 cp s3://solutions-build-assets/changelog-spec.yml buildspec.yml || true
@@ -48,5 +71,9 @@ artifacts:
     - docs/**/*
     - .viperlightignore
     - codescan-prebuild-custom.sh
+    - sonar-project.properties
+    - src/**/*
+    - test/**/*
+    - coverage/**/*
     - CHANGELOG.md
     - .cfnnag_*
