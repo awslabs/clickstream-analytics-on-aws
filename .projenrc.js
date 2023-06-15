@@ -234,6 +234,16 @@ apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./
 apiProject.setScript('start', 'node dist/index.js');
 
 
+const provisionViperlightScripts = [
+  'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
+  'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg >/dev/null',
+  'echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list',
+  'apt-get update && apt-get install -y nodejs npm yarn',
+  'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
+  'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
+  'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
+  'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
+];
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
     workflow: {
@@ -508,15 +518,7 @@ gitlabMain.createNestedTemplates({
             if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
           },
         ],
-        before_script: [
-          'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
-          'apt -y install nodejs',
-          'npm install -g yarn',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
-          'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
-        ],
+        before_script: provisionViperlightScripts,
         script: [
           './codescan-prebuild-custom.sh',
         ],
@@ -646,17 +648,9 @@ gitlabMain.createNestedTemplates({
             if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH',
           },
         ],
-        before_script: [
-          'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
-          'apt -y install nodejs',
-          'npm install -g yarn',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh',
-          'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
-          'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
-          'mv build/deployment/global-s3-assets ./deployment/',
-        ],
+        before_script: provisionViperlightScripts,
         script: [
+          'mv build/deployment/global-s3-assets ./deployment/',
           './codescan-prebuild-custom.sh',
         ],
       },
