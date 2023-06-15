@@ -31,10 +31,22 @@ const LANGUAGE_ITEMS = [
 const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
+  const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
+
+  useEffect(() => {
+    setDisplayName(
+      user?.profile?.email ||
+        user?.profile?.name ||
+        user?.profile?.preferred_username ||
+        user?.profile?.nickname ||
+        user?.profile?.sub ||
+        ''
+    );
+  }, [user]);
 
   useEffect(() => {
     if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
@@ -90,8 +102,8 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           },
           {
             type: 'menu-dropdown',
-            text: user?.profile?.email || '',
-            description: user?.profile?.email,
+            text: displayName,
+            description: displayName,
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
