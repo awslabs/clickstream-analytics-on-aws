@@ -238,6 +238,8 @@ declare global {
       QUICK_SIGHT: boolean;
     };
     showServiceStatus: boolean;
+    enrichPluginChanged: boolean;
+    transformPluginChanged: boolean;
   }
 
   interface IAlarm {

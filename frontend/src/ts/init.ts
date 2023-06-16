@@ -203,4 +203,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     QUICK_SIGHT: false,
   },
   showServiceStatus: false,
+  enrichPluginChanged: false,
+  transformPluginChanged: false,
 };

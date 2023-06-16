@@ -919,6 +919,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
     delete createPipelineObj.selectedDataLoadType;
     delete createPipelineObj.dataLoadCronExp;
+    delete createPipelineObj.serviceStatus;
+    delete createPipelineObj.showServiceStatus;
+    delete createPipelineObj.enrichPluginChanged;
+    delete createPipelineObj.transformPluginChanged;
 
     setLoadingCreate(true);
     try {
@@ -1781,6 +1785,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedEnrichPlugins: plugins,
+                    enrichPluginChanged: true,
                   };
                 });
               }}
@@ -1789,6 +1794,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedTransformPlugins: plugins,
+                    transformPluginChanged: true,
                   };
                 });
               }}

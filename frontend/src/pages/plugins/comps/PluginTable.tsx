@@ -28,8 +28,9 @@ import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 
 interface PluginTableProps {
+  pipelineInfo?: IExtPipeline;
   hideDefaultTransformPlugin?: boolean;
-  pluginType?: string;
+  pluginType?: 'Transform' | 'Enrich';
   hideAction?: boolean;
   showRefresh?: boolean;
   selectionType?: 'multi' | 'single';
@@ -42,6 +43,7 @@ interface PluginTableProps {
 
 const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const {
+    pipelineInfo,
     hideDefaultTransformPlugin,
     pluginType,
     hideAction,
@@ -83,7 +85,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           type: pluginType,
         });
       if (success) {
-        let resultDataItem = data.items;
+        let resultDataItem: IPlugin[] = data.items;
         if (pluginType === 'Transform' && hideDefaultTransformPlugin) {
           resultDataItem = data.items.filter((item) => !item.builtIn);
           setPluginList(resultDataItem);
@@ -92,14 +94,39 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           setPluginList(resultDataItem);
           setTotalCount(data.totalCount);
         }
-        if (selectBuitInPlugins) {
-          setSelectedItems(
-            resultDataItem.filter((item) => item.builtIn === true)
-          );
-          changePluginSeletedItems &&
-            changePluginSeletedItems(
-              resultDataItem.filter((item) => item.builtIn === true)
-            );
+
+        // In Pipeline Page
+        if (pipelineInfo) {
+          if (pluginType === 'Transform') {
+            if (pipelineInfo.transformPluginChanged) {
+              setSelectedItems(pipelineInfo.selectedTransformPlugins);
+            } else {
+              if (selectBuitInPlugins) {
+                setSelectedItems(
+                  resultDataItem.filter((item) => item.builtIn === true)
+                );
+                changePluginSeletedItems &&
+                  changePluginSeletedItems(
+                    resultDataItem.filter((item) => item.builtIn === true)
+                  );
+              }
+            }
+          }
+          if (pluginType === 'Enrich') {
+            if (pipelineInfo.enrichPluginChanged) {
+              setSelectedItems(pipelineInfo.selectedEnrichPlugins);
+            } else {
+              if (selectBuitInPlugins) {
+                setSelectedItems(
+                  resultDataItem.filter((item) => item.builtIn === true)
+                );
+                changePluginSeletedItems &&
+                  changePluginSeletedItems(
+                    resultDataItem.filter((item) => item.builtIn === true)
+                  );
+              }
+            }
+          }
         }
         setLoadingData(false);
       }

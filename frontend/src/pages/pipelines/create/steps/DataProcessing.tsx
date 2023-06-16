@@ -528,6 +528,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             pipelineInfo.dataCollectionSDK
           ) && (
             <PluginTable
+              pipelineInfo={pipelineInfo}
               hideDefaultTransformPlugin
               hideAction
               showRefresh
@@ -550,6 +551,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
           )}
 
           <PluginTable
+            pipelineInfo={pipelineInfo}
             hideAction
             showRefresh
             pluginType="Enrich"

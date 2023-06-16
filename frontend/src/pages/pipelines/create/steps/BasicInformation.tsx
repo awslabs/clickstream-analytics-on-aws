@@ -173,7 +173,9 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           errorText={regionEmptyError ? t('pipeline:valid.regionEmpty') : ''}
         >
           <Select
-            disabled={isDisabled(update, pipelineInfo)}
+            disabled={
+              loadingServiceAvailable || isDisabled(update, pipelineInfo)
+            }
             filteringType="auto"
             placeholder={t('pipeline:create.awsRegionPlaceholder') || ''}
             selectedOption={pipelineInfo.selectedRegion}
