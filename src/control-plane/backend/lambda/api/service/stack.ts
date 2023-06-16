@@ -32,7 +32,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { isEmpty, replaceTemplateVersion } from '../common/utils';
+import { isEmpty } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { describeStack } from '../store/aws/cloudformation';
 
@@ -97,12 +97,12 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
   }
 
-  public upgradeWorkflow(version: string): void {
+  public upgradeWorkflow(stackTemplateMap: Map<string, string> ): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
-    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, version, false);
-    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, version, true);
+    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, stackTemplateMap, false);
+    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, stackTemplateMap, true);
   }
 
   public retryWorkflow(): void {
@@ -273,15 +273,15 @@ export class StackManager {
     return state;
   }
 
-  private getUpgradeWorkflow(state: WorkflowState, version: string, origin: boolean): WorkflowState {
+  private getUpgradeWorkflow(state: WorkflowState, stackTemplateMap: Map<string, string>, origin: boolean): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], version, origin);
+          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], stackTemplateMap, origin);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input) {
-      state.Data.Input.TemplateURL = replaceTemplateVersion(state.Data.Input.TemplateURL, version);
+      state.Data.Input.TemplateURL = stackTemplateMap.get(state.Data?.Input.StackName) ?? '';
       if (!origin) {
         state.Data.Input.Action = 'Upgrade';
       }
@@ -342,7 +342,7 @@ export class StackManager {
     return undefined;
   }
 
-  private getWorkflowStacks(state: WorkflowState): string[] {
+  public getWorkflowStacks(state: WorkflowState): string[] {
     let res: string[] = [];
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {

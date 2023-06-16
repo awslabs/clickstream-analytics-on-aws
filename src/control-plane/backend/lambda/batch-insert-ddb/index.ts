@@ -19,9 +19,10 @@ import {
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
-  ScanCommand,
+  ScanCommandInput,
+  paginateScan,
 } from '@aws-sdk/lib-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { NativeAttributeValue, marshall } from '@aws-sdk/util-dynamodb';
 import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
@@ -85,7 +86,7 @@ async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
   const itemsAsDynamoPutRequest: any[] = [];
   items.forEach(item => {
     const marshallItem = marshall(item, {
-      convertEmptyValues: true,
+      convertEmptyValues: false,
       removeUndefinedValues: true,
       convertClassInstanceToMap: true,
     });
@@ -105,17 +106,10 @@ async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
 
 async function cleanData(event: CdkCustomResourceEvent): Promise<any> {
   const tableName: string = event.ResourceProperties.tableName;
-  const records = await getPaginatedResults(async (ExclusiveStartKey: any) => {
-    const scan_params: ScanCommand = new ScanCommand({
-      TableName: tableName,
-      ExclusiveStartKey,
-    });
-    const queryResponse = await docClient.send(scan_params);
-    return {
-      marker: queryResponse.LastEvaluatedKey,
-      results: queryResponse.Items,
-    };
-  });
+  const input: ScanCommandInput = {
+    TableName: tableName,
+  };
+  const records = await scan(input);
   const items = records as DicItem[];
   for (let index in items) {
     const params: DeleteCommand = new DeleteCommand({
@@ -128,32 +122,10 @@ async function cleanData(event: CdkCustomResourceEvent): Promise<any> {
   }
 }
 
-const getPaginatedResults = async (fn: any) => {
-  const EMPTY = Symbol('empty');
-  const res = [];
-  for await (const lf of (async function* () {
-    let NextMarker = EMPTY;
-    let count = 0;
-    while (NextMarker || NextMarker === EMPTY) {
-      const {
-        marker,
-        results,
-        count: ct,
-      } = await fn(NextMarker !== EMPTY ? NextMarker : undefined, count);
-
-      yield* results;
-
-      if (!marker) {
-        break;
-      }
-
-      NextMarker = marker;
-      count = ct;
-    }
-  })()) {
-    // @ts-ignore
-    res.push(lf);
+const scan = async (input: ScanCommandInput) => {
+  const records: Record<string, NativeAttributeValue>[] = [];
+  for await (const page of paginateScan({ client: docClient }, input)) {
+    records.push(...page.Items as Record<string, NativeAttributeValue>[]);
   }
-
-  return res;
+  return records;
 };

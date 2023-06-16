@@ -114,6 +114,68 @@ describe('Dictionary Data', () => {
     });
   });
 
+  test('Initialize Dictionary Solution', async () => {
+    const event = {
+      ...createDictionaryEvent,
+      ResourceProperties: {
+        ...createDictionaryEvent.ResourceProperties,
+        items: [
+          {
+            name: 'Solution',
+            data: {
+              name: 'clickstream-analytics-on-aws',
+              dist_output_bucket: 'solutions-features-reference',
+              target: 'clickstream-analytics-on-aws/v1.0.0_dev',
+              prefix: '',
+              version: 'v1.0.0_dev',
+            },
+          },
+        ],
+      },
+    };
+    docMock.on(ScanCommand).resolvesOnce({ Items: [] });
+    docMock.on(DeleteCommand).resolves({});
+    ddbMock.on(BatchWriteItemCommand).resolvesOnce({});
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(docMock).toHaveReceivedCommandTimes(DeleteCommand, 0);
+    expect(ddbMock).toHaveReceivedNthSpecificCommandWith(1, BatchWriteItemCommand, {
+      RequestItems: {
+        Dictionary: [
+          {
+            PutRequest: {
+              Item: {
+                data: {
+                  M: {
+                    name: {
+                      S: 'clickstream-analytics-on-aws',
+                    },
+                    dist_output_bucket: {
+                      S: 'solutions-features-reference',
+                    },
+                    target: {
+                      S: 'clickstream-analytics-on-aws/v1.0.0_dev',
+                    },
+                    prefix: {
+                      S: '',
+                    },
+                    version: {
+                      S: 'v1.0.0_dev',
+                    },
+                  },
+                },
+                name: {
+                  S: 'Solution',
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
   test('Initialize Dictionary with plugins', async () => {
     const event = {
       ...createDictionaryEvent,
@@ -184,7 +246,7 @@ describe('Dictionary Data', () => {
                           S: 'BUILDIN-1',
                         },
                         jarFile: {
-                          NULL: true,
+                          S: '',
                         },
                         mainFunction: {
                           S: 'software.aws.solution.clickstream.Transformer',
@@ -193,7 +255,7 @@ describe('Dictionary Data', () => {
                           S: 'Transformer',
                         },
                         operator: {
-                          NULL: true,
+                          S: '',
                         },
                         pluginType: {
                           S: 'Transform',

@@ -326,8 +326,9 @@ export class CPipeline {
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
+    const stackTemplateMap = await this.getStackTemplateMap();
     // update workflow
-    this.stackManager.upgradeWorkflow(this.pipeline.templateVersion!);
+    this.stackManager.upgradeWorkflow(stackTemplateMap);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionName = `main-${uuidv4()}`;
@@ -483,15 +484,39 @@ export class CPipeline {
     }
   }
 
+  public async getStackTemplateMap() {
+    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
+    const stackTemplateMap = new Map();
+    for (let stackName of stackNames) {
+      const stackType = stackName.split('-')[1] as PipelineStackType;
+      let templateName: string = stackType;
+      if (stackType === PipelineStackType.INGESTION) {
+        templateName = `${stackType}_${this.pipeline.ingestionServer.sinkType}`;
+      }
+      const templateURL = await this.getTemplateUrl(templateName);
+      stackTemplateMap.set(stackName, templateURL);
+    }
+    return stackTemplateMap;
+  };
+
   public async getTemplateUrl(name: string) {
+    if (!this.resources || !this.resources.solution || !this.resources.templates) {
+      const solution = await store.getDictionary('Solution');
+      const templates = await store.getDictionary('Templates');
+      this.resources = {
+        ...this.resources,
+        solution,
+        templates,
+      };
+    }
     if (this.resources?.solution && this.resources?.templates) {
       if (isEmpty(this.resources?.templates.data[name])) {
         return undefined;
       }
       const solutionName = this.resources?.solution.data.name;
       const templateName = this.resources?.templates.data[name] as string;
-      // default/ or cn/
-      const prefix = this.resources?.solution.data.prefix;
+      // default/ or cn/ or 'null',''
+      const prefix = isEmpty(this.resources?.solution.data.prefix) ? '' : this.resources?.solution.data.prefix;
       const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
       const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
