@@ -126,7 +126,7 @@ export function createMetricsWidgetForS3Connector(scope: Construct, props: {
     projectId: props.projectId,
     name: 'kafkaS3SinkConnector',
     description: {
-      markdown: '## Kafka S3 Sink Connector',
+      markdown: '## Data Ingestion - Sink - Kafka S3 Connector',
     },
     widgets,
   });

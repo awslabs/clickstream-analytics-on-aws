@@ -48,11 +48,11 @@ export enum MetricsService {
 }
 
 export enum DataPipelineCustomMetricsName {
-  SOURCE='ETL source count',
-  FLATTED_SOURCE ='ETL flatted source count',
-  SINK='ETL sink count',
-  CORRUPTED='ETL corrupted count',
-  RUN_TIME='ETL job run time seconds',
+  SOURCE='Data Processing source count',
+  FLATTED_SOURCE ='Data Processing flatted source count',
+  SINK='Data Processing sink count',
+  CORRUPTED='Data Processing corrupted count',
+  RUN_TIME='Data Processing job run time seconds',
 };
 
 export enum AnalyticsCustomMetricsName {

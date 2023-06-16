@@ -268,7 +268,7 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
     projectId: props.projectId,
     name: 'redshiftProvisionedCluster',
     description: {
-      markdown: '## Analytics Redshift Provisioned Cluster',
+      markdown: '## Data Modeling - Redshift Cluster',
     },
     widgets,
   });

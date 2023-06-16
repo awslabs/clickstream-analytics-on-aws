@@ -52,7 +52,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.loadEventsWorkflow.metricFailed({ period: Duration.hours(1) }),
-    alarmDescription: 'Load events workflow failed',
+    alarmDescription: `Load events workflow failed, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Load events workflow'),
   });
 
@@ -62,7 +62,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }),
-    alarmDescription: 'Upsert users workflow failed',
+    alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
   });
 
@@ -81,7 +81,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         service: MetricsService.WORKFLOW,
       },
     }),
-    alarmDescription: 'Max file age more than 1800 seconds',
+    alarmDescription: `Max file age more than 1800 seconds, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Max file age'),
   });
 
@@ -97,7 +97,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
           upsertUsersWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
         ],
-        title: 'Analytics Alarms',
+        title: 'Data Modeling Alarms',
       },
     },
   ];

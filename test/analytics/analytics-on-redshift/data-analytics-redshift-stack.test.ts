@@ -4116,17 +4116,45 @@ describe('Should set metrics widgets', () => {
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Load events workflow failed',
+
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Load events workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Upsert users workflow failed',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Upsert users workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Max file age more than 1800 seconds',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Max file age more than 1800 seconds, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
@@ -4146,17 +4174,42 @@ describe('Should set metrics widgets', () => {
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Load events workflow failed',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Load events workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Upsert users workflow failed',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Upsert users workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Max file age more than 1800 seconds',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Max file age more than 1800 seconds, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
@@ -4176,17 +4229,42 @@ describe('Should set metrics widgets', () => {
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Load events workflow failed',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Load events workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Upsert users workflow failed',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Upsert users workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: 'Max file age more than 1800 seconds',
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Max file age more than 1800 seconds, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
     });
 

@@ -222,7 +222,7 @@ export function createMetricsWidgetForKinesis(scope: Construct, props: {
     projectId: props.projectId,
     name: 'kinesisDataStream',
     description: {
-      markdown: '## Kinesis Data Stream',
+      markdown: '## Data Ingestion - Sink - Kinesis Data Stream',
     },
     widgets,
   });

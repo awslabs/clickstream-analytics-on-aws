@@ -93,7 +93,7 @@ export function createMetricsWidgetForKafka(scope: Construct, props: {
     projectId: props.projectId,
     name: 'kafkaCluster',
     description: {
-      markdown: '## Kafka Cluster',
+      markdown: '## Data Ingestion - Sink - Kafka Cluster',
     },
     widgets,
   });

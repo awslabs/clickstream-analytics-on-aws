@@ -80,7 +80,7 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
     projectId: props.projectId,
     name: 'redshiftServerless',
     description: {
-      markdown: '## Analytics Redshift Serverless',
+      markdown: '## Data Modeling - Redshift Serverless',
     },
     widgets,
   });

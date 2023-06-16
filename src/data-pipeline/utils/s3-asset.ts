@@ -16,14 +16,13 @@ import { AssetHashType, BundlingOptions, DockerImage, Fn } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import { SolutionInfo } from '../../common/solution-info';
 
 export function uploadBuiltInSparkJarsAndFiles(
   scope: Construct,
   bucket: IBucket,
   prefix: string,
 ) {
-  const jarFile = `spark-etl-${SolutionInfo.ETL_VERSION}.jar`;
+  const jarFile = 'spark-etl-1.0.0.jar';
   let shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',

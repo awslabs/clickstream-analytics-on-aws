@@ -549,7 +549,6 @@ gitlabMain.createNestedTemplates({
         ],
         before_script: [
           'cd ./src/data-pipeline/spark-etl',
-          `sed -i "s/projectVersion=.*/projectVersion=${version}/" gradle.properties`,
         ],
 
         script: [

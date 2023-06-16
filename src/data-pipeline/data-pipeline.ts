@@ -32,7 +32,7 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { createMetricsWidget } from './utils/utils-metircs';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
-import { ETL_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
 const EMR_VERSION = 'emr-6.9.0';
 
@@ -95,7 +95,7 @@ export class DataPipelineConstruct extends Construct {
     const s3PathPluginFiles = [builtInFiles];
 
     if (props.s3PathPluginJars) {
-      // Custom resource - copies ETL jars and files to pipelineS3Bucket
+      // Custom resource - copies Data Processing jars and files to pipelineS3Bucket
       const copiedAsset = createCopyAssetsCustomResource(scope, {
         pipelineS3Bucket: props.pipelineS3Bucket,
         pipelineS3Prefix: props.pipelineS3Prefix,
@@ -247,8 +247,8 @@ export class DataPipelineConstruct extends Construct {
     });
     addCfnNagToSecurityGroup(emrSg, ['W40', 'W5']);
 
-    const serverlessApp = new CfnApplication(this, 'ClickStream-ETL-APP', {
-      name: `${ETL_APPLICATION_NAME_PREFIX}-Spark-ETL-APP-${this.props.projectId}`,
+    const serverlessApp = new CfnApplication(this, 'clickstream-app', {
+      name: `${DATA_PROCESSING_APPLICATION_NAME_PREFIX}-Spark-APP-${this.props.projectId}`,
       releaseLabel: EMR_VERSION,
       type: 'SPARK',
       networkConfiguration: {

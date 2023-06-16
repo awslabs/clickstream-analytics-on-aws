@@ -66,7 +66,7 @@ export function createStackParameters(scope: Construct) {
   });
 
   const scheduleExpressionParam = new CfnParameter(scope, 'ScheduleExpression', {
-    description: 'The schedule expression to run ETL job, e.g: rate(24 hours) or cron(0 1 * * ? *)',
+    description: 'The schedule expression to run Data Processing job, e.g: rate(24 hours) or cron(0 1 * * ? *)',
     default: 'cron(0 1 * * ? *)',
     allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
     type: 'String',

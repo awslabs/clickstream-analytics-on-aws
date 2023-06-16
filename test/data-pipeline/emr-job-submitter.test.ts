@@ -86,12 +86,12 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
   });
 
-  test('start ETL job', async () => {
+  test('start data processing job', async () => {
     await EMRServerlessUtil.start({}, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
   });
 
-  test('start ETL job with timestamp - string', async () => {
+  test('start data processing job with timestamp - string', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
     await EMRServerlessUtil.start({
       startTimestamp: '2023-03-12T09:33:26.572Z',
@@ -148,7 +148,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     expect(actParam).toEqual(expectedStartParam);
   });
 
-  test('start ETL job with timestamp - number', async () => {
+  test('start data processing job with timestamp - number', async () => {
     await EMRServerlessUtil.start({
       startTimestamp: '1678700304279',
     }, context);
@@ -158,7 +158,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     expect(actParam.tags).toEqual({});
   });
 
-  test('start ETL job with timestamp - error', async () => {
+  test('start data processing job with timestamp - error', async () => {
     let errMsg = '';
     try {
       await EMRServerlessUtil.start({

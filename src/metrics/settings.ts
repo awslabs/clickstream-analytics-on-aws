@@ -23,7 +23,7 @@ export const WIDGETS_ORDER = {
   kafkaS3Connector: 250,
   kinesisDataStream: 260,
 
-  dataPipelineETL: 300,
+  dataProcessing: 300,
 
   redshiftServerless: 400,
   redshiftProvisionedCluster: 450,

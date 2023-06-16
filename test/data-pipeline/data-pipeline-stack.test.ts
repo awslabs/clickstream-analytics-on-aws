@@ -777,7 +777,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 });
 
-describe('ETL job submitter', () => {
+describe('Data Processing job submitter', () => {
   const template = nestedTemplates[0];
 
   test('Has lambda and emr-serverless IAM role', () => {
@@ -904,7 +904,7 @@ describe('ETL job submitter', () => {
         Variables: {
           EMR_SERVERLESS_APPLICATION_ID: {
             'Fn::GetAtt': [
-              'NestedStackClickStreamETLAPPA7796B30',
+              Match.anyValue(),
               'ApplicationId',
             ],
           },
@@ -1274,7 +1274,7 @@ test('Should set metrics widgets', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     metricsWidgetsProps: {
-      order: WIDGETS_ORDER.dataPipelineETL,
+      order: WIDGETS_ORDER.dataProcessing,
       projectId: Match.anyValue(),
       name: Match.anyValue(),
       description: {

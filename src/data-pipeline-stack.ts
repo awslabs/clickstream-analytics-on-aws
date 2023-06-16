@@ -27,13 +27,13 @@ import { SolutionInfo } from './common/solution-info';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
 
-export interface ETLStackProps extends StackProps {
+export interface DataProcessingStackProps extends StackProps {
 }
 
 export class DataPipelineStack extends Stack {
   public nestedStacks: NestedStack[] = [];
 
-  constructor(scope: Construct, id: string, props: ETLStackProps = {}) {
+  constructor(scope: Construct, id: string, props: DataProcessingStackProps = {}) {
     super(scope, id, props);
 
     const featureName = 'DataPipeline';

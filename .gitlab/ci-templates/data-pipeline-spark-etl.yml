@@ -12,7 +12,6 @@ etl-unit-test:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   before_script:
     - cd ./src/data-pipeline/spark-etl
-    - sed -i "s/projectVersion=.*/projectVersion=1.0.0/" gradle.properties
   script:
     - gradle clean build
     - gradle jacocoAggregatedReport

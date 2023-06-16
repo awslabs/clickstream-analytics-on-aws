@@ -18,5 +18,4 @@ export class SolutionInfo {
   static SOLUTION_SHORT_NAME = 'Clickstream';
   static SOLUTION_VERSION = process.env.SOLUTION_VERSION || 'v1.0.0';
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} (Version ${SolutionInfo.SOLUTION_VERSION})`;
-  static ETL_VERSION = process.env.ETL_VERSION || '1.0.0';
 }

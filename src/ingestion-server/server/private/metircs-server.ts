@@ -69,7 +69,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
         ServiceName: props.ecsServiceName,
       },
     }),
-    alarmDescription: 'ECS has PendingTaskCount >= 1',
+    alarmDescription: `ECS has PendingTaskCount >= 1, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'ECS Pending Task Count'),
   });
 
@@ -86,7 +86,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
         ClusterName: props.ecsClusterName,
       },
     }),
-    alarmDescription: 'ECS Cluster CPUUtilization more than 85%',
+    alarmDescription: `ECS Cluster CPUUtilization more than 85%, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'ECS Cluster CPUUtilization'),
   });
 
@@ -101,7 +101,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
           ecsPendingTaskCountAlarm.alarmArn,
           ecsCpuUtilizedAlarm.alarmArn,
         ],
-        title: 'Ingestion Server Alarms',
+        title: 'Server Alarms',
 
       },
     },
@@ -302,7 +302,7 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     projectId: props.projectId,
     name: 'ingestionServer',
     description: {
-      markdown: '## Ingestion Server',
+      markdown: '## Data Ingestion - Server',
     },
     widgets,
   });

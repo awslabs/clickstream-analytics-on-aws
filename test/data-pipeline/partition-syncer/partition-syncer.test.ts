@@ -23,7 +23,7 @@ const schedulerEvent = {
   'account': '12345678901',
   'time': '2023-02-23T11:28:00Z',
   'region': 'ap-southeast-1',
-  'resources': ['arn:aws:scheduler:ap-southeast-1:12345678901:schedule/default/Spark-ETL-Stack-DataETLpartitionSyncerScheduler3E5-1W6PLORURCXWY'],
+  'resources': ['arn:aws:scheduler:ap-southeast-1:12345678901:schedule/default/test'],
   'source': 'aws.scheduler',
   'detail-type': 'Scheduled Event',
   'detail': {},

@@ -51,8 +51,8 @@ export function createMetricsWidget(scope: Construct, props: {
         ApplicationId: props.emrApplicationId,
       },
     }),
-    alarmDescription: 'Has failed jobs in last hour',
-    alarmName: getAlarmName(scope, props.projectId, 'ETL Job Failed'),
+    alarmDescription: `Has failed jobs in last hour, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Data Processing Job Failed'),
   });
 
 
@@ -71,7 +71,7 @@ export function createMetricsWidget(scope: Construct, props: {
         service: MetricsService.EMR_SERVERLESS,
       },
     }),
-    alarmDescription: 'No data loaded in past 24 hours',
+    alarmDescription: `No data loaded in past 24 hours, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'No Data Loaded'),
   });
 
@@ -86,7 +86,7 @@ export function createMetricsWidget(scope: Construct, props: {
           failedJobAlarm.alarmArn,
           noDataAlarm.alarmArn,
         ],
-        title: 'Data Pipeline ETL Alarms',
+        title: 'Data Processing Alarms',
 
       },
     },
@@ -95,7 +95,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Sum',
-        title: 'Data Pipeline ETL Jobs',
+        title: 'Data Processing Jobs',
         metrics: [
           [emrServerlessNamespace, 'SubmittedJobs', ...appIdDimension],
           ['.', 'FailedJobs', '.', '.', { id: 'errors', stat: 'Sum', color: '#d13212' }],
@@ -108,7 +108,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Sum',
-        title: 'Data Pipeline ETL Job success rate (%)',
+        title: 'Data Processing Job success rate (%)',
         metrics: [
           [emrServerlessNamespace, 'SuccessJobs', ...appIdDimension, { id: 'succ', stat: 'Sum', visible: false }],
           ['.', 'FailedJobs', '.', '.', { id: 'fail', stat: 'Sum', visible: false }],
@@ -134,7 +134,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Data Pipeline ETL CPUAllocated',
+        title: 'Data Processing CPUAllocated',
         metrics: [
           [
             emrServerlessNamespace,
@@ -149,7 +149,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Data Pipeline ETL MemoryAllocated',
+        title: 'Data Processing MemoryAllocated',
         metrics: [
           [
             emrServerlessNamespace,
@@ -163,7 +163,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Data Pipeline ETL StorageAllocated',
+        title: 'Data Processing StorageAllocated',
         metrics: [
           [
             emrServerlessNamespace,
@@ -178,7 +178,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Data Pipeline ETL RunningWorkerCount',
+        title: 'Data Processing RunningWorkerCount',
         metrics: [
           [
             emrServerlessNamespace,
@@ -194,7 +194,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Sum',
-        title: 'Data Pipeline ETL Row counts',
+        title: 'Data Processing Row counts',
         metrics: [
           [
             dataPipelineNamespace,
@@ -223,7 +223,7 @@ export function createMetricsWidget(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Data Pipeline ETL job run time',
+        title: 'Data Processing job run time',
         metrics: [
           [
             dataPipelineNamespace,
@@ -235,12 +235,12 @@ export function createMetricsWidget(scope: Construct, props: {
     },
   ];
 
-  return new MetricsWidgets(scope, 'dataPipelineETL', {
-    order: WIDGETS_ORDER.dataPipelineETL,
+  return new MetricsWidgets(scope, 'dataProcessing', {
+    order: WIDGETS_ORDER.dataProcessing,
     projectId: props.projectId,
-    name: 'dataPipelineETL',
+    name: 'dataProcessing',
     description: {
-      markdown: '## Data Pipeline ETL',
+      markdown: '## Data Processing',
     },
     widgets,
   });
