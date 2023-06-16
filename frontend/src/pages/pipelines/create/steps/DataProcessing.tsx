@@ -30,12 +30,12 @@ import {
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import {
-  get3AZVPCList,
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
   getSecurityGroups,
   getServiceRolesByAccount,
   getSubnetList,
+  getVPCList,
 } from 'apis/resource';
 
 import Divider from 'components/common/Divider';
@@ -259,15 +259,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     }
   };
 
-  // get 3 AZ vpc list
+  // get all vpc list by Region
   const getVPCListByRegion = async () => {
     setLoading3AZVpc(true);
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await get3AZVPCList(
-        {
-          region: pipelineInfo.region,
-        }
-      );
+      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+        region: pipelineInfo.region,
+      });
       if (success) {
         const vpcOptions: SelectProps.Options = data.map((element) => ({
           label: `${element.name}(${element.id})`,
@@ -370,11 +368,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [selectedUpsertType]);
 
   useEffect(() => {
-    getVPCListByRegion();
-    if (SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS) {
-      getServerlessRedshiftClusterList();
+    if (pipelineInfo.region) {
+      getVPCListByRegion();
+      if (SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS) {
+        getServerlessRedshiftClusterList();
+      }
     }
-  }, []);
+  }, [pipelineInfo.region]);
 
   useEffect(() => {
     if (pipelineInfo.redshiftType === 'provisioned') {

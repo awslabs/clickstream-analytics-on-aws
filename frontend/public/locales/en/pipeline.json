@@ -42,7 +42,7 @@
     "redshiftServerlessVpcEmptyError": "Please select a vpc",
     "redshiftServerlessSGEmptyError": "Please select security groups",
     "redshiftServerlessSubnetEmptyError": "Please select subnets",
-    "redshiftServerlessSubnetInvalidError": "Please select at least 3 subnets locates in 3 different AZ",
+    "redshiftServerlessSubnetInvalidError": "Please select at least 3 subnets locates in at least 2 different AZ",
     "redshiftProvisionedCulsterEmptyError": "Please select a culster",
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
     "quickSightUserEmptyError": "Please select a QuickSight user.",

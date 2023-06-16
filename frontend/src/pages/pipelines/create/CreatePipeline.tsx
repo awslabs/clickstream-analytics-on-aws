@@ -20,7 +20,6 @@ import {
 import { getPluginList } from 'apis/plugin';
 import {
   checkServicesAvailable,
-  get3AZVPCList,
   getCertificates,
   getMSKList,
   getQuickSightUsers,
@@ -511,9 +510,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             setRedshiftServerlessSubnetEmptyError(true);
             return false;
           }
-          // Check subnets valid
+          // Check subnets valid 3 subnets locates in at least 2 different AZ
           if (
-            !validateSubnetCrossInAZs(pipelineInfo.redshiftServerlessSubnets, 3)
+            !validateSubnetCrossInAZs(
+              pipelineInfo.redshiftServerlessSubnets,
+              2
+            ) ||
+            pipelineInfo.redshiftServerlessSubnets.length < 3
           ) {
             setRedshiftServerlessSubnetInvalidError(true);
             return false;
@@ -2317,11 +2320,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateNewServerlessVpc = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await get3AZVPCList(
-        {
-          region: pipelineInfo.region,
-        }
-      );
+      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+        region: pipelineInfo.region,
+      });
       if (success) {
         const selectVpc = data.filter(
           (element) =>
