@@ -44,6 +44,25 @@ describe('App test', () => {
     expect(res.statusCode).toBe(401);
   });
 
+  it('content length check', async () => {
+    const res1 = await request(app)
+      .post('/api/plugin')
+      .send({ name: Array(1024 * 300).join('a') });
+    expect(res1.status).toBe(401);
+    expect(res1.body).toEqual({
+      auth: false,
+      message: 'No token provided.',
+    });
+    const res2 = await request(app)
+      .post('/api/plugin')
+      .send({ name: Array(1024 * 400).join('a') });
+    expect(res2.status).toBe(413);
+    expect(res2.body).toEqual({
+      success: false,
+      message: 'The request entity is larger than limits defined by server.',
+    });
+  });
+
   afterAll((done) => {
     server.close();
     done();

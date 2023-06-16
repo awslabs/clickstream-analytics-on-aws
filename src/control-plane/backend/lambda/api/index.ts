@@ -53,7 +53,7 @@ const pluginServ: PluginServ = new PluginServ();
 
 const issuerEnv = process.env.ISSUER;
 
-app.use(express.json());
+app.use(express.json({ limit: '384kb' }));
 
 // Implement logger middleware function
 app.use(function (req: express.Request, _res: express.Response, next: express.NextFunction) {
@@ -715,6 +715,9 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   }
   if (err.name === 'TypeError') {
     return res.status(400).json(new ApiFail(`Validation error: ${err.message}. Please check and try again.`));
+  }
+  if (err.name === 'PayloadTooLargeError') {
+    return res.status(413).json(new ApiFail('The request entity is larger than limits defined by server.'));
   }
   return res.status(500).send(new ApiFail('Unexpected error occurred at server.', err.name));
 });
