@@ -203,6 +203,7 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <DomainNameWithStatus
                         type="domain"
+                        projectId={applicationInfo?.projectId}
                         pipelineId={applicationInfo?.pipeline?.id}
                         customDomain={applicationInfo?.pipeline?.customDomain}
                         fetch
@@ -215,6 +216,7 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <DomainNameWithStatus
                         type="dns"
+                        projectId={applicationInfo?.projectId}
                         pipelineId={applicationInfo?.pipeline?.id}
                         dns={applicationInfo?.pipeline?.dns}
                         fetch={false}
@@ -227,6 +229,7 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <DomainNameWithStatus
                         type="endpoint"
+                        projectId={applicationInfo?.projectId}
                         pipelineId={applicationInfo?.pipeline?.id}
                         endpoint={applicationInfo?.pipeline?.endpoint}
                         fetch

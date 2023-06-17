@@ -13,10 +13,10 @@
 
 import { apiRequest } from 'ts/request';
 
-const fetchOutsideLink = async (params: {
-  method: string;
-  url: string;
-  headers?: any;
+const fetchStatusWithType = async (params: {
+  type: StatusWithType;
+  projectId?: string;
+  pipelineId?: string;
 }) => {
   const result: any = await apiRequest('post', `/env/fetch`, params);
   return result;
@@ -190,7 +190,7 @@ const checkServicesAvailable = async (params: { region: string }) => {
 };
 
 export {
-  fetchOutsideLink,
+  fetchStatusWithType,
   createQuickSightUser,
   get3AZVPCList,
   getCertificates,

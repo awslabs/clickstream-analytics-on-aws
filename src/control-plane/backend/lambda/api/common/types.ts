@@ -382,3 +382,10 @@ export enum DataCollectionSDK {
   THIRDPARTY = 'thirdparty',
 }
 
+export enum FetchType {
+  ANDROIDSDK = 'AndroidSDK',
+  PIPELINE_ENDPOINT = 'PipelineEndpoint',
+  PIPELINE_DOMAIN= 'PipelineDomain',
+  PIPELINE_DNS= 'PipelineDNS',
+}
+

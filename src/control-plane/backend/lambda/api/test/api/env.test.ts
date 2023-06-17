@@ -13,6 +13,7 @@
 
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import {
   CloudWatchClient,
   DescribeAlarmsCommand,
@@ -40,14 +41,17 @@ import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshif
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
 import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
+import fetch, { Response } from 'node-fetch';
 import request from 'supertest';
 import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 
 
+jest.mock('node-fetch');
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const ec2ClientMock = mockClient(EC2Client);
 const s3Client = mockClient(S3Client);
@@ -62,6 +66,7 @@ const acmClient = mockClient(ACMClient);
 const cloudWatchClient = mockClient(CloudWatchClient);
 const emrServerlessClient = mockClient(EMRServerlessClient);
 const kafkaConnectClient = mockClient(KafkaConnectClient);
+const cloudFormationMock = mockClient(CloudFormationClient);
 
 describe('Account Env test', () => {
   beforeEach(() => {
@@ -1702,6 +1707,196 @@ describe('Account Env test', () => {
   afterAll((done) => {
     server.close();
     done();
+  });
+
+});
+
+describe('Fetch test', () => {
+  const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    mockFetch.mockClear();
+  });
+
+  it('Fetch Android SDK', async () => {
+    const SDKInfo = {
+      responseHeader: {
+        status: 0,
+        QTime: 2,
+        params: {
+          'q': 'g:"software.aws.solution" AND a:"clickstream"',
+          'core': '',
+          'indent': 'off',
+          'spellcheck': 'true',
+          'fl': 'id,g,a,latestVersion,p,ec,repositoryId,text,timestamp,versionCount',
+          'start': '',
+          'spellcheck.count': '5',
+          'sort': 'score desc,timestamp desc,g asc,a asc',
+          'rows': '20',
+          'wt': 'json',
+          'version': '2.2',
+        },
+      },
+      response: {
+        numFound: 1,
+        start: 0,
+        docs: [
+          {
+            id: 'software.aws.solution:clickstream',
+            g: 'software.aws.solution',
+            a: 'clickstream',
+            latestVersion: '0.1.0',
+            repositoryId: 'central',
+            p: 'aar',
+            timestamp: 1688888888000,
+            versionCount: 7,
+            text: [
+              'software.aws.solution',
+              'clickstream',
+              '.pom.sha512',
+              '.aar',
+              '.aar.sha256',
+              '.aar.sha512',
+              '.pom',
+              '.aar.asc.sha256',
+              '.aar.asc.sha512',
+              '.pom.asc.sha256',
+              '.pom.asc.sha512',
+              '.pom.sha256',
+            ],
+            ec: [
+              '.pom.sha512',
+              '.aar',
+              '.aar.sha256',
+              '.aar.sha512',
+              '.pom',
+              '.aar.asc.sha256',
+              '.aar.asc.sha512',
+              '.pom.asc.sha256',
+              '.pom.asc.sha512',
+              '.pom.sha256',
+            ],
+          },
+        ],
+      },
+      spellcheck: {
+        suggestions: [],
+      },
+    };
+    const fn = jest.fn() as jest.MockedFunction<any>;
+    fn.mockResolvedValue(JSON.stringify(SDKInfo));
+    mockFetch.mockResolvedValue({ ok: true, status: 200, text: fn } as Response);
+    const res = await request(app)
+      .post('/api/env/fetch')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        type: 'AndroidSDK',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ok: true,
+        status: 200,
+        data: '{"responseHeader":{"status":0,"QTime":2,"params":{"q":"g:\\"software.aws.solution\\" AND a:\\"clickstream\\"","core":"","indent":"off","spellcheck":"true","fl":"id,g,a,latestVersion,p,ec,repositoryId,text,timestamp,versionCount","start":"","spellcheck.count":"5","sort":"score desc,timestamp desc,g asc,a asc","rows":"20","wt":"json","version":"2.2"}},"response":{"numFound":1,"start":0,"docs":[{"id":"software.aws.solution:clickstream","g":"software.aws.solution","a":"clickstream","latestVersion":"0.1.0","repositoryId":"central","p":"aar","timestamp":1688888888000,"versionCount":7,"text":["software.aws.solution","clickstream",".pom.sha512",".aar",".aar.sha256",".aar.sha512",".pom",".aar.asc.sha256",".aar.asc.sha512",".pom.asc.sha256",".pom.asc.sha512",".pom.sha256"],"ec":[".pom.sha512",".aar",".aar.sha256",".aar.sha512",".pom",".aar.asc.sha256",".aar.asc.sha512",".pom.asc.sha256",".pom.asc.sha512",".pom.sha256"]}]},"spellcheck":{"suggestions":[]}}',
+      },
+    });
+  });
+
+  it('Fetch Pipeline', async () => {
+    ddbMock.on(GetCommand).resolves({
+      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    });
+
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyyyyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    const fn = jest.fn() as jest.MockedFunction<any>;
+    fn.mockResolvedValue('OK');
+    mockFetch.mockResolvedValue({ ok: true, status: 200, text: fn } as Response);
+    const resPipelineEndpoint = await request(app)
+      .post('/api/env/fetch')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        type: 'PipelineEndpoint',
+      });
+    expect(mockFetch.mock.calls.length).toBe(1);
+    expect(mockFetch.mock.calls[0]).toEqual(['http://xxx/xxx', { method: 'GET' }]);
+    expect(resPipelineEndpoint.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(resPipelineEndpoint.statusCode).toBe(200);
+    expect(resPipelineEndpoint.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ok: true,
+        status: 200,
+        data: 'OK',
+      },
+    });
+    const resPipelineDNS = await request(app)
+      .post('/api/env/fetch')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        type: 'PipelineDNS',
+      });
+    expect(mockFetch.mock.calls.length).toBe(2);
+    expect(mockFetch.mock.calls[1]).toEqual(['http://yyyyyy', { method: 'GET' }]);
+    expect(resPipelineDNS.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(resPipelineDNS.statusCode).toBe(200);
+    expect(resPipelineDNS.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ok: true,
+        status: 200,
+        data: 'OK',
+      },
+    });
+    const resPipelineDomain = await request(app)
+      .post('/api/env/fetch')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        type: 'PipelineDomain',
+      });
+    expect(mockFetch.mock.calls.length).toBe(3);
+    expect(mockFetch.mock.calls[2]).toEqual(['https://fake.example.com', { method: 'GET' }]);
+    expect(resPipelineDomain.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(resPipelineDomain.statusCode).toBe(200);
+    expect(resPipelineDomain.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ok: true,
+        status: 200,
+        data: 'OK',
+      },
+    });
   });
 
 });

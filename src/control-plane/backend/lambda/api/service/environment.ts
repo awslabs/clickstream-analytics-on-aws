@@ -13,9 +13,12 @@
 
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
+import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { validateEnableAccessLogsForALB } from '../common/stack-params-valid';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, FetchType, PipelineStackType } from '../common/types';
 import { paginateData } from '../common/utils';
+import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
 import { agaPing } from '../store/aws/aga';
 import { athenaPing, listWorkGroups } from '../store/aws/athena';
@@ -408,15 +411,44 @@ export class EnvironmentServ {
   public async fetch(req: any, res: any, _next: any) {
     try {
       const {
-        url,
-        method,
-        body,
-        headers,
+        type,
+        projectId,
+        pipelineId,
       } = req.body;
+      let url = '';
+      if (type === FetchType.ANDROIDSDK) {
+        url = SDK_MAVEN_VERSION_API_LINK;
+      } else {
+        const latestPipeline = await store.getPipeline(projectId, pipelineId);
+        if (!latestPipeline) {
+          return res.status(404).send(new ApiFail('Pipeline not found'));
+        }
+        const pipeline = new CPipeline(latestPipeline);
+        if (type === FetchType.PIPELINE_ENDPOINT) {
+          const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
+            PipelineStackType.INGESTION,
+            [
+              OUTPUT_INGESTION_SERVER_URL_SUFFIX,
+            ],
+          );
+          url = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX) ?? '';
+        } else if (type === FetchType.PIPELINE_DNS) {
+          const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
+            PipelineStackType.INGESTION,
+            [
+              OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
+            ],
+          );
+          const dns = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
+          url = dns ? `http://${dns}` : '';
+        } else {
+          const domainName = latestPipeline.ingestionServer.domain?.domainName;
+          url = domainName ? `https://${domainName}` : '';
+        }
+      }
+      console.log(url);
       const response = await fetch(url, {
-        method: method,
-        body: body,
-        headers: headers,
+        method: 'GET',
       });
       const data = await response.text();
       return res.json(new ApiSuccess({

@@ -16,13 +16,14 @@ import {
   Spinner,
   Popover,
 } from '@cloudscape-design/components';
-import { fetchOutsideLink } from 'apis/resource';
+import { fetchStatusWithType } from 'apis/resource';
 import CopyText from 'components/common/CopyIcon';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DomainNameWithStatusProps {
   type: 'domain' | 'endpoint' | 'dns';
+  projectId?: string;
   pipelineId?: string;
   dns?: string;
   customDomain?: string;
@@ -34,27 +35,32 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
   props: DomainNameWithStatusProps
 ) => {
   const { t } = useTranslation();
-  const { type, pipelineId, dns, customDomain, endpoint, fetch } = props;
+  const { type, pipelineId, projectId, dns, customDomain, endpoint, fetch } =
+    props;
   const [domainResolved, setDomainResolved] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [showText, setShowText] = useState('');
 
   useEffect(() => {
-    let requestUrl = '';
+    let requestType: StatusWithType = '';
     if (type === 'domain') {
-      requestUrl = `https://${customDomain}`;
+      requestType = 'PipelineDomain';
       setShowText(customDomain || dns || '');
     } else if (type === 'dns') {
-      requestUrl = `http://${dns}`;
+      requestType = 'PipelineDNS';
       setShowText(dns || '');
     } else {
-      requestUrl = endpoint || '';
+      requestType = 'PipelineEndpoint';
       setShowText(endpoint || '');
     }
-    if (requestUrl) {
+    if (requestType) {
       setLoadingData(true);
-      fetchOutsideLink({ method: 'get', url: `${requestUrl}` })
-        .then((response: ApiResponse<FetchOutsideResponse>) => {
+      fetchStatusWithType({
+        type: requestType,
+        projectId: projectId,
+        pipelineId: pipelineId,
+      })
+        .then((response: ApiResponse<StatusWithTypeResponse>) => {
           setLoadingData(false);
           if (response.data.ok) {
             setDomainResolved(true);

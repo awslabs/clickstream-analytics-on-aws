@@ -14,7 +14,13 @@
 export {};
 
 declare global {
-  interface FetchOutsideResponse {
+  type StatusWithType =
+    | 'AndroidSDK'
+    | 'PipelineEndpoint'
+    | 'PipelineDomain'
+    | 'PipelineDNS'
+    | '';
+  interface StatusWithTypeResponse {
     data: any;
     ok: boolean;
     status: number;

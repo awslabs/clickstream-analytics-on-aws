@@ -21,12 +21,11 @@ import {
   SpaceBetween,
   Spinner,
 } from '@cloudscape-design/components';
-import { fetchOutsideLink } from 'apis/resource';
+import { fetchStatusWithType } from 'apis/resource';
 import AndroidConfig from 'assets/images/android.webp';
 import CopyCode from 'components/common/CopyCode';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SDK_MAVEN_VERSION_API_LINK } from 'ts/const';
 import {
   ANDROID_ADD_DEPENDENCY_TEXT,
   ANDROID_ADD_USER_ATTR,
@@ -72,10 +71,9 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const getAndroidMavenVersion = async () => {
     try {
       setLoadingSdkVersion(true);
-      const { data }: ApiResponse<FetchOutsideResponse> =
-        await fetchOutsideLink({
-          method: 'get',
-          url: SDK_MAVEN_VERSION_API_LINK,
+      const { data }: ApiResponse<StatusWithTypeResponse> =
+        await fetchStatusWithType({
+          type: 'AndroidSDK',
         });
       setLoadingSdkVersion(false);
       if (data.ok) {

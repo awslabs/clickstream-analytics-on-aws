@@ -197,6 +197,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
           <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
           <DomainNameWithStatus
             type="domain"
+            projectId={pipelineInfo?.projectId}
             pipelineId={pipelineInfo?.pipelineId}
             customDomain={pipelineInfo?.ingestionServer.domain.domainName}
             fetch={pipelineInfo?.pipelineId ? true : false}
@@ -209,6 +210,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
               <DomainNameWithStatus
                 type="dns"
+                projectId={pipelineInfo?.projectId}
                 pipelineId={pipelineInfo?.pipelineId}
                 dns={pipelineInfo?.dns}
                 fetch={false}
@@ -221,6 +223,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               </Box>
               <DomainNameWithStatus
                 type="endpoint"
+                projectId={pipelineInfo?.projectId}
                 pipelineId={pipelineInfo?.pipelineId}
                 endpoint={pipelineInfo?.endpoint}
                 fetch={pipelineInfo?.pipelineId ? true : false}
