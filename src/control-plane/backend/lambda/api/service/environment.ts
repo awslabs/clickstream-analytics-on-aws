@@ -446,7 +446,6 @@ export class EnvironmentServ {
           url = domainName ? `https://${domainName}` : '';
         }
       }
-      console.log(url);
       const response = await fetch(url, {
         method: 'GET',
       });
