@@ -13,7 +13,7 @@
 
 import {
   CloudFormationClient,
-  DescribeStacksCommand, StackStatus,
+  DescribeStacksCommand, StackStatus, UpdateTerminationProtectionCommand,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CdkCustomResourceResponse } from 'aws-lambda';
@@ -130,6 +130,41 @@ describe('SFN Action Lambda Function', () => {
       },
     });
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, DescribeStacksCommand, {
+      StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+  });
+
+  test('Delete stack with protection', async () => {
+    const event: SfnStackEvent = {
+      ...baseStackActionEvent,
+      Action: StackAction.DELETE,
+      Result: {
+        ...stackResult,
+        StackStatus: StackStatus.CREATE_COMPLETE,
+      },
+    };
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+          StackStatus: StackStatus.CREATE_COMPLETE,
+        },
+      ],
+    });
+    cloudFormationMock.on(UpdateTerminationProtectionCommand).resolves({
+      StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Action).toEqual(StackAction.DESCRIBE);
+    expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
+    expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
+    expect(resp.Result.StackStatus).toEqual(StackStatus.DELETE_IN_PROGRESS);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, DescribeStacksCommand, {
+      StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateTerminationProtectionCommand, {
+      EnableTerminationProtection: false,
       StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
     });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);

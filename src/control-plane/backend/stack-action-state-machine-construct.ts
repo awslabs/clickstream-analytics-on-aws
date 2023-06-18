@@ -93,6 +93,7 @@ export class StackActionStateMachine extends Construct {
             'cloudformation:UpdateStack',
             'cloudformation:DeleteStack',
             'cloudformation:DescribeStacks',
+            'cloudformation:UpdateTerminationProtection',
           ],
         }),
         new iam.PolicyStatement({

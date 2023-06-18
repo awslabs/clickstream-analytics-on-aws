@@ -594,6 +594,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'cloudformation:UpdateStack',
               'cloudformation:DeleteStack',
               'cloudformation:DescribeStacks',
+              'cloudformation:UpdateTerminationProtection',
             ],
             Effect: 'Allow',
             Resource: {

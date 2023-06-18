@@ -21,6 +21,7 @@ import {
   Tag,
   Stack,
   StackStatus,
+  UpdateTerminationProtectionCommand,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { logger } from '../../../../common/powertools';
@@ -85,6 +86,7 @@ export const createStack = async (event: SfnStackEvent) => {
       TemplateURL: event.Input.TemplateURL,
       Parameters: event.Input.Parameters,
       DisableRollback: true,
+      EnableTerminationProtection: true,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
       Tags: event.Input.Tags,
     });
@@ -187,6 +189,11 @@ export const deleteStack = async (event: SfnStackEvent) => {
       ...aws_sdk_client_common_config,
       region: event.Input.Region,
     });
+    const disProtectionParams: UpdateTerminationProtectionCommand = new UpdateTerminationProtectionCommand({
+      EnableTerminationProtection: false,
+      StackName: stack.StackId,
+    });
+    await cloudFormationClient.send(disProtectionParams);
     const params: DeleteStackCommand = new DeleteStackCommand({
       StackName: stack.StackId,
     });
