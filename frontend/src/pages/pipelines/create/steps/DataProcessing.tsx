@@ -352,7 +352,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [selectedEventFreshUnit]);
 
   useEffect(() => {
-    changeBaseCapacity(redshiftCapacity);
+    if (redshiftCapacity) {
+      changeBaseCapacity(redshiftCapacity);
+    }
   }, [redshiftCapacity]);
 
   useEffect(() => {

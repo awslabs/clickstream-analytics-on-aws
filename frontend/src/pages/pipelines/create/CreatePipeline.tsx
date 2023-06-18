@@ -1916,7 +1916,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.dataModeling.redshift,
                         newServerless: {
                           ...prev.dataModeling.redshift.newServerless,
-                          baseCapacity: parseInt(capacity.value || '16'),
+                          baseCapacity: parseInt(capacity?.value || '0'),
                         },
                       },
                     },
