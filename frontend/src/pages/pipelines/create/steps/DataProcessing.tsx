@@ -906,6 +906,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         }
                       >
                         <Input
+                          disabled={isDisabled(update, pipelineInfo)}
                           placeholder={
                             t(
                               'pipeline:create.redshiftDatabaseUserPlaceholder'

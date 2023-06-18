@@ -721,7 +721,6 @@ export class CDataModelingStack extends JSONObject {
       'UpsertUsersScheduleExpression',
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
-      'RedshiftDbUser',
       'RedshiftServerlessRPU',
     ];
     return allowedList;
