@@ -1431,7 +1431,10 @@ describe('Account Env test', () => {
     kafkaConnectClient.on(ListConnectorsCommand).rejects(mockError);
     redshiftServerlessClient.on(ListWorkgroupsCommand).rejects(mockError);
     athenaClient.on(ListWorkGroupsCommand).rejects(mockError);
-    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
+
+    const mockUnrecognizedClientException = new Error('Mock UnrecognizedClientException error');
+    mockUnrecognizedClientException.name = 'UnrecognizedClientException';
+    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockUnrecognizedClientException);
     let res = await request(app).get(
       '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
