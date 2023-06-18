@@ -6,7 +6,7 @@
   "breadCrumb": {
     "name": "Clickstream Analytics",
     "pipelines": "Pipelines",
-    "createPipeline": "Create Pipeline",
+    "configPipeline": "Configure Pipeline",
     "updatePipeline": "Update Pipeline",
     "home": "Home",
     "projects": "Projects",

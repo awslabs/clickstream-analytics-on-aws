@@ -53,7 +53,7 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
       requestType = 'PipelineEndpoint';
       setShowText(endpoint || '');
     }
-    if (requestType) {
+    if (requestType && pipelineId) {
       setLoadingData(true);
       fetchStatusWithType({
         type: requestType,

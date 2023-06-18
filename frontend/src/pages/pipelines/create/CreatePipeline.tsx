@@ -2124,7 +2124,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     {
       text: update
         ? t('breadCrumb.updatePipeline')
-        : t('breadCrumb.createPipeline'),
+        : t('breadCrumb.configPipeline'),
       href: '/',
     },
   ];
