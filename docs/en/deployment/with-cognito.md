@@ -80,8 +80,8 @@ Meanwhile, an auto-generated temporary password will be sent to your email addre
 Once you have logged into the {{ solution_name }} console, you can start to [create a project][create-project] for your applications.
 
 [launch-stack]: ../images/launch-stack.webp
-[cloudfront-cognito-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/default/cloudfront-s3-control-plane-stack-global.template.json
-[cloudfront-cognito-custom-domain-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/default/cloudfront-s3-control-plane-stack-global-customdomain.template.json
+[cloudfront-cognito-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global.template.json
+[cloudfront-cognito-custom-domain-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain.template.json
 [iam-limits]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md

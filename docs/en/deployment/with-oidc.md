@@ -256,9 +256,9 @@ Once you have logged into the {{ solution_name }} console, you can start to [cre
 [keycloak-deployment-guide]: https://aws-samples.github.io/keycloak-on-aws/en/implementation-guide/deployment/
 [ad-fs-deployment-guide]: https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/deployment/ad-fs-deployment-guide
 [launch-stack]: ../images/launch-stack.webp
-[standard-oidc-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/default/cloudfront-s3-control-plane-stack-global-oidc.template.json
-[standard-oidc-with-custom-domain-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/default/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
-[cn-oidc-template-url]: https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cn/cloudfront-s3-control-plane-stack-cn.template.json
+[standard-oidc-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-oidc.template.json
+[standard-oidc-with-custom-domain-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
+[cn-oidc-template-url]: https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cloudfront-s3-control-plane-stack-cn.template.json
 [iam-limits]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md

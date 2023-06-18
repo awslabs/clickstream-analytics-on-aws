@@ -88,8 +88,8 @@ Once you have logged into the {{ solution_name }} console, you can start to [cre
 [subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html#subnet-types
 [oidc-clients]: ./with-oidc.md#step-1-create-oidc-client
 [launch-stack]: ../images/launch-stack.webp
-[standard-intranet-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/default/private-exist-vpc-control-plane-stack.template.json
-[cn-intranet-template-url]: https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cn/private-exist-vpc-control-plane-stack.template.json
+[standard-intranet-template-url]: https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
+[cn-intranet-template-url]: https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [iam-limits]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md
