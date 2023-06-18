@@ -78,7 +78,7 @@ with session_f_sv_view as (
     where ep.key in ('_screen_name','_page_title')) t on session_f_sv_view.last_sv_event_id=t.event_id
 )
 select 
-    session.session_id
+     NVL(session.session_id, '#') as session_id
     ,user_pseudo_id
     ,platform
     ,session_duration

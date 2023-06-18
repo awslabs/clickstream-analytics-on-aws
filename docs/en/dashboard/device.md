@@ -33,7 +33,7 @@ Below is the SQL command that generates the view.
         , device.ua_browser::varchar
         , device.ua_browser_version::varchar
         , device.ua_os::varchar
-        , device.us_os_version::varchar
+        , device.ua_os_version::varchar
         , device.ua_device::varchar
         , device.ua_device_category::varchar
         , device.system_language::varchar
@@ -59,7 +59,7 @@ Below is the SQL command that generates the view.
         , device.ua_browser
         , device.ua_browser_version
         , device.ua_os 
-        , device.us_os_version
+        , device.ua_os_version
         , device.ua_device
         , device.ua_device_category
         , device.system_language

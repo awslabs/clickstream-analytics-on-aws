@@ -162,6 +162,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
     });
     dataSource.node.addDependency(vPCConnectionResource);
+    dataSource.node.addDependency(template);
 
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,

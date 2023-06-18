@@ -389,6 +389,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     }
 
     logger.info('start to create dataset');
+    logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -667,11 +668,12 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     }
 
     logger.info('start to update dataset');
+    logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
     let dataset: CreateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name} - ${identifer.tableNameIdentifer} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
+      Name: `${identifer.tableNameIdentifer}-${identifer.schemaIdentifer}-${identifer.databaseIdentifer}`,
 
       ImportMode: props.importMode,
       PhysicalTableMap: {
@@ -778,7 +780,7 @@ const buildAnalysisId = function (databaseName: string, schema: string): Identif
 };
 
 const buildDataSetId = function (databaseName: string, schema: string, tableName: string): Identifer {
-  const tableNameIdentifer = truncateString(tableName, 30);
+  const tableNameIdentifer = truncateString(tableName.replace(/clickstream_/g, ''), 40);
   const schemaIdentifer = truncateString(schema, 15);
   const databaseIdentifer = truncateString(databaseName, 15);
   const suffix = crypto.createHash('md5').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);

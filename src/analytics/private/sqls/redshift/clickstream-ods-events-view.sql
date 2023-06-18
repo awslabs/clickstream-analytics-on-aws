@@ -17,6 +17,7 @@ event_date
 , app_info.id::varchar as app_info_package_id
 , app_info.install_source::varchar as app_info_install_source
 , app_info.version::varchar as app_info_version
+, device.vendor_id::varchar as device_id
 , device.mobile_brand_name::varchar as device_mobile_brand_name
 , device.mobile_model_name::varchar as device_mobile_model_name
 , device.manufacturer::varchar as device_manufacturer

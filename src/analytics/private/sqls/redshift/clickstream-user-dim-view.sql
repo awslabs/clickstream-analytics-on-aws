@@ -4,8 +4,7 @@ SORTKEY(first_visit_date)
 AUTO REFRESH YES
 AS
 SELECT
-user_pseudo_id
-, user_id
+  user_pseudo_id
 , event_date as first_visit_date
 , app_info.install_source::varchar as first_visit_install_source
 , device.system_language::varchar as first_visit_device_language

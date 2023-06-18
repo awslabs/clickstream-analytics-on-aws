@@ -381,7 +381,7 @@ export const clickstream_device_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'us_os_version',
+    Name: 'ua_os_version',
     Type: 'STRING',
   },
   {

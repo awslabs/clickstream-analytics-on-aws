@@ -1110,7 +1110,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: 'clickstream',
             tableName: 'clickstream_ods_events_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_rt_view',
             columns: [
               {
                 Name: 'event_date',
@@ -1424,7 +1424,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'us_os_version',
+                Name: 'ua_os_version',
                 Type: 'STRING',
               },
               {
@@ -1475,7 +1475,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'ua_browser',
               'ua_browser_version',
               'ua_os',
-              'us_os_version',
+              'ua_os_version',
               'ua_device',
               'ua_device_category',
               'system_language',
@@ -1490,7 +1490,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: 'clickstream',
             tableName: 'clickstream_ods_events_parameter_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_parameter_view ',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_parameter_rt_view ',
             columns: [
               {
                 Name: 'event_id',

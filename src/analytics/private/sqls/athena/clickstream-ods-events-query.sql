@@ -12,6 +12,7 @@ select
   ,app_info.id as app_info_package_id
   ,app_info.install_source as app_info_install_source
   ,app_info.version as app_info_version
+  ,device.vendor_id as device_id
   ,device.mobile_brand_name as device_mobile_brand_name
   ,device.mobile_model_name as device_mobile_model_name
   ,device.manufacturer as device_manufacturer

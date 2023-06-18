@@ -20,9 +20,11 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import {
   CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
+  CLICKSTREAM_EVENT_PARAMETER_RT_VIEW_PLACEHOLDER,
   CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
   CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ODS_EVENT_RT_VIEW_PLACEHOLDER,
   CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_PATH_VIEW_PLACEHOLDER,
   CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
@@ -187,7 +189,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}  where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_RT_VIEW_PLACEHOLDER}`,
         columns: clickstream_ods_events_view_columns,
         tagColumnOperations: [
           {
@@ -286,7 +288,7 @@ export function createQuicksightCustomResource(
           'ua_browser',
           'ua_browser_version',
           'ua_os',
-          'us_os_version',
+          'ua_os_version',
           'ua_device',
           'ua_device_category',
           'system_language',
@@ -315,7 +317,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_RT_VIEW_PLACEHOLDER} `,
         columns: clickstream_event_parameter_view_columns,
         projectedColumns: [
           'event_id',
@@ -458,8 +460,7 @@ function createQuicksightLambda(
 }
 
 function getDate(index: number) {
-  const date = new Date();
   const newDate = new Date();
-  newDate.setDate(date.getDate() + index);
+  newDate.setDate(new Date().getDate() + index);
   return newDate;
 }
