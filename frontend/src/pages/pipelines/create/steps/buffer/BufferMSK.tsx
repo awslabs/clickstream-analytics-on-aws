@@ -223,7 +223,10 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       }
                     >
                       <Input
-                        disabled={!pipelineInfo.serviceStatus.MSK}
+                        disabled={
+                          isDisabled(update, pipelineInfo) ||
+                          !pipelineInfo.serviceStatus.MSK
+                        }
                         placeholder={
                           t('pipeline:create.msk.enterTopicName') || ''
                         }
@@ -259,6 +262,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         }
                       >
                         <Input
+                          disabled={
+                            isDisabled(update, pipelineInfo)
+                          }
                           placeholder={
                             t('pipeline:create.msk.brokerLindPlaceHolder') || ''
                           }
@@ -278,6 +284,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         }
                       >
                         <Input
+                          disabled={
+                            isDisabled(update, pipelineInfo)
+                          }
                           placeholder={
                             t('pipeline:create.msk.enterTopicName') || ''
                           }
