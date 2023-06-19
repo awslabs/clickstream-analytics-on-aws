@@ -106,10 +106,7 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixs.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
     return prefixs.get(key) ?? '';
   }
-  if (!value?.endsWith('/')) {
-    return `${value}/`;
-  }
-  return value;
+  return value!;
 }
 
 function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {

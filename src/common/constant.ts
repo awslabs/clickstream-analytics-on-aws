@@ -203,6 +203,7 @@ export const RECORD_NAME_PATTERN = '^[a-zA-Z0-9\\-_]{1,63}$';
 export const VPC_ID_PATTERN = '^vpc-[a-f0-9]+$';
 export const IAM_CERTIFICATE_ID_PATTERN = '^[A-Z0-9]+$';
 export const S3_BUCKET_NAME_PATTERN = '[a-z0-9\\.\\-]{3,63}';
+export const S3_PREFIX_PATTERN = '^(|[^/].*/)$';
 export const PROJECT_ID_PATTERN = '[a-z][a-z0-9_]{0,126}';
 export const APP_ID_PATTERN = '[a-zA-Z][a-zA-Z0-9_]{0,126}';
 export const KAFKA_BROKERS_PATTERN = `(((${DOMAIN_NAME_PATTERN}|${IP_PATTERN})(:[0-9]+){1},?)){1,}`;

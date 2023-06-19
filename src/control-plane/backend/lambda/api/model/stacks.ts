@@ -33,6 +33,7 @@ import {
   OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
+  S3_PREFIX_PATTERN,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
@@ -191,6 +192,10 @@ export class CIngestionServerStack extends JSONObject {
     LogS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack: any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     LogS3Prefix?: string;
 
   @JSONObject.required
@@ -200,8 +205,12 @@ export class CIngestionServerStack extends JSONObject {
     S3DataBucket?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+      validatePattern(key, S3_PREFIX_PATTERN, value);
+      return value;
+    }
+    return undefined;
   })
     S3DataPrefix?: string;
 
@@ -312,8 +321,12 @@ export class CIngestionServerStack extends JSONObject {
     KinesisDataS3Bucket?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
+      validatePattern(key, S3_PREFIX_PATTERN, value);
+      return value;
+    }
+    return undefined;
   })
     KinesisDataS3Prefix?: string;
 
@@ -426,18 +439,30 @@ export class CKafkaConnectorStack extends JSONObject {
     DataS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     DataS3Prefix?: string;
 
   @JSONObject.required
     LogS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     LogS3Prefix?: string;
 
   @JSONObject.required
     PluginS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     PluginS3Prefix?: string;
 
   @JSONObject.required
@@ -603,13 +628,14 @@ export class CDataProcessingStack extends JSONObject {
     SourceS3Bucket?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
+  @JSONObject.custom( (stack:CDataProcessingStack, key:string, value:string) => {
     if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3
       && !isEmpty(stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix)) {
-      return stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix;
+      value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix ?? '';
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      return `${value}${stack._kafkaTopic}/`;
+      value = `${value}${stack._kafkaTopic}/`;
     }
+    validatePattern(key, S3_PREFIX_PATTERN, value);
     return value;
   })
     SourceS3Prefix?: string;
@@ -618,12 +644,20 @@ export class CDataProcessingStack extends JSONObject {
     SinkS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     SinkS3Prefix?: string;
 
   @JSONObject.required
     PipelineS3Bucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     PipelineS3Prefix?: string;
 
   @JSONObject.required
@@ -756,6 +790,10 @@ export class CDataModelingStack extends JSONObject {
     ODSEventBucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     ODSEventPrefix?: string;
 
   @JSONObject.optional('.snappy.parquet')
@@ -765,6 +803,10 @@ export class CDataModelingStack extends JSONObject {
     LoadWorkflowBucket?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
     LoadWorkflowBucketPrefix?: string;
 
   @JSONObject.optional(50)

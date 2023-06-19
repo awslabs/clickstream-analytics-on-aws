@@ -42,6 +42,7 @@ import {
   PROJECT_ID_PATTERN,
   APP_ID_PATTERN,
   EMAIL_PATTERN,
+  S3_PREFIX_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -196,7 +197,7 @@ export class Parameters {
 
   public static createS3PrefixParameter(scope: Construct, id: string,
     props: {description: string; default: string; allowedPattern?: string}) : CfnParameter {
-    const pattern = props.allowedPattern ?? '^(|[^/].*/)$';
+    const pattern = props.allowedPattern ?? S3_PREFIX_PATTERN;
     return new CfnParameter(scope, id, {
       type: 'String',
       allowedPattern: pattern,
