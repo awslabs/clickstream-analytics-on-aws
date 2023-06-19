@@ -16,7 +16,7 @@ const path = require('path');
 
 const outTagImageShellFile = process.env.OUT_TAG_IMAGE_SHELL_FILE || 'tag-images.sh';
 const solutionEcrAccount = process.env.SOLUTION_ECR_ACCOUNT || '366590864501';
-const solutionEcrRepoName = process.env.SOLUTION_ECR_REPO_NAME || 'clickstream-analytics-on-aws';
+const solutionEcrRepoName = process.env.SOLUTION_ECR_REPO_NAME || 'test-clickstream-analytics-on-aws';
 const solutionEcrBuildVersion = process.env.BUILD_VERSION;
 
 const imagesSet = new Set();
