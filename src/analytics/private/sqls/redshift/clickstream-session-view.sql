@@ -78,15 +78,21 @@ with session_f_sv_view as (
     where ep.key in ('_screen_name','_page_title')) t on session_f_sv_view.last_sv_event_id=t.event_id
 )
 select 
-     NVL(session.session_id, '#') as session_id
+    CASE
+      WHEN session.session_id IS NULL THEN CAST('#' AS VARCHAR)
+      WHEN session.session_id = '' THEN CAST('#' AS VARCHAR)
+      ELSE session.session_id END AS session_id
     ,user_pseudo_id
     ,platform
-    ,session_duration
-    ,session_views
-    ,engaged_session
+    ,session_duration::BIGINT
+    ,session_views::BIGINT
+    ,engaged_session::BIGINT
     ,bounced_session
     ,session_start_timestamp
-    ,session_engagement_time
+    ,CASE
+       WHEN session.session_engagement_time IS NULL THEN CAST(0 AS BIGINT)
+       ELSE session.session_engagement_time 
+    END::BIGINT AS session_engagement_time
     ,DATE_TRUNC('day', TIMESTAMP 'epoch' + session_start_timestamp/1000 * INTERVAL '1 second') as session_date
     ,DATE_TRUNC('hour', TIMESTAMP 'epoch' + session_start_timestamp/1000 * INTERVAL '1 second') as session_date_hour
     ,first_sv_view::varchar as entry_view

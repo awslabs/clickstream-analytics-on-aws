@@ -701,7 +701,10 @@
                                                 "ColumnName": "first_visit_date"
                                             },
                                             "DateGranularity": "WEEK",
-                                            "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644"
+                                            "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -1040,7 +1043,10 @@
                                                 "DataSetIdentifier": "clickstream_user_dim_view",
                                                 "ColumnName": "first_visit_date"
                                             },
-                                            "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644"
+                                            "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -1128,7 +1134,10 @@
                                                     "DataSetIdentifier": "clickstream_user_dim_view",
                                                     "ColumnName": "first_visit_date"
                                                 },
-                                                "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.0.1684915077154"
+                                                "HierarchyId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.0.1684915077154",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -1596,6 +1605,9 @@
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_user_dim_view",
                                                     "ColumnName": "first_visit_date"
+                                                },
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
                                                 }
                                             }
                                         },
@@ -2262,7 +2274,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2349,7 +2364,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2436,7 +2454,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2521,7 +2542,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2605,7 +2629,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990298606"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990298606",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2683,7 +2710,10 @@
                                                     "DataSetIdentifier": "clickstream_session_view",
                                                     "ColumnName": "session_date"
                                                 },
-                                                "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684990356947"
+                                                "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684990356947",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -2853,7 +2883,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990937158"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990937158",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2913,7 +2946,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991420965"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991420965",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -2973,7 +3009,10 @@
                                                 "DataSetIdentifier": "clickstream_session_view",
                                                 "ColumnName": "session_date"
                                             },
-                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991772067"
+                                            "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991772067",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -3046,7 +3085,10 @@
                                                     "DataSetIdentifier": "clickstream_session_view",
                                                     "ColumnName": "session_date"
                                                 },
-                                                "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684991902710"
+                                                "HierarchyId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684991902710",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -3191,6 +3233,9 @@
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_session_view",
                                                     "ColumnName": "session_date"
+                                                },
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
                                                 }
                                             }
                                         }
@@ -3933,7 +3978,10 @@
                                                 "DataSetIdentifier": "clickstream_ods_events_view",
                                                 "ColumnName": "event_date"
                                             },
-                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101"
+                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -4013,7 +4061,10 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684995486248"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684995486248",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -4142,7 +4193,10 @@
                                                 "DataSetIdentifier": "clickstream_ods_events_view",
                                                 "ColumnName": "event_date"
                                             },
-                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101"
+                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -4452,7 +4506,10 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684996894651"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684996894651",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -4695,7 +4752,11 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684997093562"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684997093562",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
+                                                
                                             }
                                         }
                                     ],
@@ -5288,7 +5349,10 @@
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "MONTH",
-                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998"
+                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -5374,7 +5438,10 @@
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "WEEK",
-                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998"
+                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -5459,7 +5526,10 @@
                                                 "DataSetIdentifier": "clickstream_ods_events_view",
                                                 "ColumnName": "event_date"
                                             },
-                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998"
+                                            "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
+                                            "FormatConfiguration": {
+                                                "DateTimeFormat": "MM-DD-YYYY"
+                                            }
                                         }
                                     }
                                 ]
@@ -5532,7 +5602,10 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685001800930"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685001800930",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -5648,7 +5721,10 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685002366843"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685002366843",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -5830,7 +5906,10 @@
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685002465496"
+                                                "HierarchyId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685002465496",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],
@@ -5975,6 +6054,9 @@
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_ods_events_view",
                                                     "ColumnName": "event_date"
+                                                },
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
                                                 }
                                             }
                                         }
@@ -6212,7 +6294,10 @@
                                                     "DataSetIdentifier": "clickstream_retention_view",
                                                     "ColumnName": "first_date"
                                                 },
-                                                "HierarchyId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.first_date.0.1685003974524"
+                                                "HierarchyId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.first_date.0.1685003974524",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY"
+                                                }
                                             }
                                         }
                                     ],

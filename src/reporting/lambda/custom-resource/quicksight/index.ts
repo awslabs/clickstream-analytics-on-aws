@@ -393,7 +393,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name} - ${identifer.tableNameIdentifer} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
+      Name: `${props.name}${identifer.tableNameIdentifer}-${identifer.schemaIdentifer}-${identifer.databaseIdentifer}`,
       Permissions: [{
         Principal: principalArn,
         Actions: dataSetActions,

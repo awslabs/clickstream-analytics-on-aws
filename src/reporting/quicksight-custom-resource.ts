@@ -72,7 +72,7 @@ export function createQuicksightCustomResource(
     databaseName: databaseName,
     dataSets: [
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         columns: clickstream_user_dim_view_columns,
@@ -123,7 +123,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}`,
@@ -136,7 +136,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER} where session_date > <<$SessionDate>>`,
@@ -172,7 +172,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER}`,
@@ -185,7 +185,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}  where event_date > <<$EventDate>>`,
@@ -267,7 +267,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
@@ -313,7 +313,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
@@ -341,7 +341,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER} where time_period > <<$EventDate>>`,
@@ -367,7 +367,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER}`,
@@ -379,7 +379,7 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: 'clickstream',
+        name: '',
         tableName: CLICKSTREAM_PATH_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_PATH_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,

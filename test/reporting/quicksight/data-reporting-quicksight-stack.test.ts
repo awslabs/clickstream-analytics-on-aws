@@ -879,7 +879,7 @@ describe('DataReportingQuickSightStack resource test', () => {
         },
         dataSets: [
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_user_dim_view',
             importMode: 'DIRECT_QUERY',
             columns: [
@@ -972,7 +972,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_retention_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view',
@@ -1002,7 +1002,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_session_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_session_view',
@@ -1077,7 +1077,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_user_attr_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_user_attr_view',
@@ -1107,7 +1107,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_ods_events_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_rt_view',
@@ -1362,7 +1362,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_device_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_device_view',
@@ -1487,7 +1487,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_ods_events_parameter_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_parameter_rt_view ',
@@ -1522,7 +1522,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_lifecycle_daily_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view',
@@ -1547,7 +1547,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_lifecycle_weekly_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view',
@@ -1572,7 +1572,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
-            name: 'clickstream',
+            name: '',
             tableName: 'clickstream_path_view',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_path_view',
