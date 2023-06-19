@@ -75,15 +75,23 @@ session_f_l_sv_view as (
     where ep.key in ('_screen_name','_page_title')) t on session_f_sv_view.last_sv_event_id=t.event_id
 )
 select 
-     nvl(session.session_id, '#') as session_id
+    CASE
+      WHEN session.session_id IS NULL THEN CAST('#' AS VARCHAR)
+      WHEN session.session_id = '' THEN CAST('#' AS VARCHAR)
+      ELSE session.session_id 
+    END AS session_id
     ,user_pseudo_id
     ,platform
-    ,session_duration
-    ,session_views
+    ,cast(session_duration as bigint) as session_duration
+    ,cast(session_views as bigint) as session_duration
     ,engaged_session
     ,bounced_session
     ,session_start_timestamp
     ,session_engagement_time
+    ,CASE
+       WHEN session.session_engagement_time IS NULL THEN CAST(0 AS BIGINT)
+       ELSE session.session_engagement_time 
+     END AS session_engagement_time
     ,DATE_TRUNC('day', from_unixtime(session_start_timestamp/1000)) as session_date
     ,DATE_TRUNC('hour', from_unixtime(session_start_timestamp/1000)) as session_date_hour
     ,first_sv_view as entry_view
