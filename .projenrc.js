@@ -58,6 +58,7 @@ const awsSDKDeps = [
   '@aws-sdk/node-http-handler',
   '@aws-sdk/client-sns',
   '@aws-sdk/client-elastic-load-balancing-v2',
+  '@aws-sdk/client-ecs',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sfn',
 ].map(dep => `${dep}@^${awsSDKVersion}`);

@@ -35,6 +35,7 @@ import { createMetricsWidgetForKafka } from './private/metircs-kafka';
 import { createMetricsWidgetForServer } from './private/metircs-server';
 import { createALBSecurityGroup, createECSSecurityGroup } from './private/sg';
 import { LogProps } from '../../common/alb';
+import { deleteECSClusterCustomResource } from '../custom-resource/delete-ecs-cluster';
 import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
@@ -141,7 +142,7 @@ export class IngestionServer extends Construct {
     }
 
     // ECS Cluster
-    const { ecsService, httpContainerName, autoScalingGroup } =
+    const { ecsService, httpContainerName, autoScalingGroup, ecsCluster } =
       createECSClusterAndService(this, {
         ...props,
         ecsSecurityGroup,
@@ -218,6 +219,8 @@ export class IngestionServer extends Construct {
       props.domainName,
       props.authenticationSecretArn);
 
+    deleteECSCluster(this, ecsCluster.clusterArn, ecsCluster.clusterName, ecsService.serviceName);
+
     const acceleratorEnableCondition = new CfnCondition(
       scope,
       'acceleratorEnableCondition',
@@ -263,5 +266,13 @@ function updateAlbRules(
     endpointPath,
     domainName,
     protocol,
+  });
+}
+
+function deleteECSCluster(scope: Construct, ecsClusterArn: string, ecsClusterName: string, ecsServiceName: string) {
+  deleteECSClusterCustomResource(scope, {
+    ecsClusterArn,
+    ecsClusterName,
+    ecsServiceName,
   });
 }

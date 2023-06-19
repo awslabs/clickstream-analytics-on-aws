@@ -68,5 +68,6 @@ export function addCfnNagToIngestionServer(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'S3SinkConnector', 'S3SinkConnectorCustomResource', '');
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'updateAlbRulesCustomResourceProvider', 'updateAlbRulesCustomResourceProvider', '');
+  addCfnNagForCustomResourceProvider(stack, 'deleteECSClusterCustomResourceProvider', 'deleteECSClusterCustomResourceProvider', '');
   addCfnNagToStack(stack, cfnNagList);
 }
