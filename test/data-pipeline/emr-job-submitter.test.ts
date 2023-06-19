@@ -10,6 +10,15 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+
+//@ts-nocheck
+class TimeoutError extends Error {
+  constructor() {
+    super();
+    this.name = 'TimeoutError';
+  }
+}
+
 const emrMock = {
   EMRServerlessClient: jest.fn(() => {
     return {
@@ -45,7 +54,7 @@ import { EMRServerlessUtil } from '../../src/data-pipeline/lambda/emr-job-submit
 import { getMockContext } from '../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
-process.env.EMR_SERVERLESS_APPLICATION_ID='testApplicationId',
+process.env.EMR_SERVERLESS_APPLICATION_ID = 'testApplicationId';
 process.env.PROJECT_ID = 'test_proj_001';
 process.env.APP_IDS = 'app1,app2';
 process.env.ROLE_ARN = 'arn:aws::role:role1';
@@ -66,8 +75,8 @@ process.env.S3_PATH_PLUGIN_JARS = 's3://test/test1.jar,s3://test/test2.jar';
 process.env.S3_PATH_PLUGIN_FILES = 's3://test/test1.txt,s3://test/test2.txt';
 process.env.S3_PATH_ENTRY_POINT_JAR = 's3://test/main.jar';
 process.env.OUTPUT_FORMAT = 'json';
-process.env.OUTPUT_PARTITIONS ='128';
-process.env.RE_PARTITIONS ='96';
+process.env.OUTPUT_PARTITIONS = '128';
+process.env.RE_PARTITIONS = '96';
 process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
 
@@ -83,10 +92,11 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   beforeEach(() => {
     lambdaMock.reset();
-    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+
   });
 
   test('start data processing job', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
     await EMRServerlessUtil.start({}, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
   });
@@ -134,12 +144,12 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
       tags: functionTags,
       configurationOverrides: {
         monitoringConfiguration:
-              {
-                s3MonitoringConfiguration:
-                  {
-                    logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
-                  },
-              },
+        {
+          s3MonitoringConfiguration:
+          {
+            logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
+          },
+        },
       },
     };
     //@ts-ignore
@@ -149,6 +159,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   });
 
   test('start data processing job with timestamp - number', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
     await EMRServerlessUtil.start({
       startTimestamp: '1678700304279',
     }, context);
@@ -159,6 +170,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   });
 
   test('start data processing job with timestamp - error', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({});
     let errMsg = '';
     try {
       await EMRServerlessUtil.start({
@@ -169,6 +181,31 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
       errMsg = e.message;
     }
     expect(errMsg).toEqual('endTimestamp less than startTimestamp');
+  });
+
+
+  test('start ETL job get function tags timeout', async () => {
+    lambdaMock.on(ListTagsCommand).rejects(new TimeoutError());
+
+    await EMRServerlessUtil.start({
+    }, context);
+
+    //@ts-ignore
+    const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
+    expect(actParam.tags).toEqual(undefined);
+  });
+
+  test('start ETL job get function tags error', async () => {
+    lambdaMock.on(ListTagsCommand).rejects(new Error('ListTagsCommand error'));
+    let errMsg = '';
+    try {
+      await EMRServerlessUtil.start({
+      }, context);
+    } catch (e: any) {
+      errMsg = e.message;
+    }
+    expect(errMsg).toEqual('ListTagsCommand error');
+
   });
 
 });

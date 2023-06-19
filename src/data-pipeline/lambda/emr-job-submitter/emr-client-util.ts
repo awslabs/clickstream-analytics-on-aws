@@ -69,7 +69,21 @@ export class EMRServerlessUtil {
     context: Context,
   ) {
 
-    const funcTags = await getFunctionTags(context);
+    let funcTags: Record<string, string> | undefined = undefined;
+
+    try {
+      funcTags = await getFunctionTags(context);
+    } catch (e) {
+      //@ts-ignore
+      if (e.name === 'TimeoutError') {
+        logger.warn('getFunctionTags TimeoutError');
+      } else {
+        logger.error('error:' + e);
+        throw e;
+      }
+    }
+
+    logger.info('funcTags', { funcTags });
 
     const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
       event,
@@ -173,7 +187,7 @@ export class EMRServerlessUtil {
       startRunTime: new Date().toISOString(),
     });
 
-    logger.info('jobInfo', { jobInfo } );
+    logger.info('jobInfo', { jobInfo });
 
     return jobInfo.jobRunId!;
   }
@@ -194,7 +208,7 @@ export class EMRServerlessUtil {
 
   private static getConfig() {
     return {
-      saveInfoToWarehouse: process.env.SAVE_INFO_TO_WAREHOUSE == '1' || process.env.SAVE_INFO_TO_WAREHOUSE?.toLocaleLowerCase() == 'true' ? 'true': 'false',
+      saveInfoToWarehouse: process.env.SAVE_INFO_TO_WAREHOUSE == '1' || process.env.SAVE_INFO_TO_WAREHOUSE?.toLocaleLowerCase() == 'true' ? 'true' : 'false',
       emrServerlessApplicationId: process.env.EMR_SERVERLESS_APPLICATION_ID!,
       stackId: process.env.STACK_ID!,
       projectId: process.env.PROJECT_ID!,
@@ -275,7 +289,7 @@ export class EMRServerlessUtil {
   }
 }
 
-function getTimestampFromEvent(inputTimestamp: string|number): number {
+function getTimestampFromEvent(inputTimestamp: string | number): number {
   if (typeof inputTimestamp == 'number') {
     return inputTimestamp;
   }
