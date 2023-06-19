@@ -59,3 +59,91 @@ This project is licensed under the Apache-2.0 License.
 
 [configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
 [aws-cdk]: https://aws.amazon.com/cdk/
+
+
+## File Structure
+
+Upon successfully cloning the repository into your local development environment but prior to running the initialization script, you will see the following file structure in your editor:
+
+```
+├── CHANGELOG.md                       [Change log file]
+├── CODE_OF_CONDUCT.md                 [Code of conduct file]
+├── CONTRIBUTING.md                    [Contribution guide]
+├── LICENSE                            [LICENSE for this solution]
+├── NOTICE.txt                         [Notice for 3rd-party libraries]
+├── README.md                          [Read me file]
+├── buildspec.yml          
+├── cdk.json
+├── codescan-prebuild-custom.sh
+├── deployment                         [shell scripts for packaging distribution assets]
+│   ├── build-open-source-dist.sh
+│   ├── build-s3-dist-1.sh
+│   ├── build-s3-dist.sh
+│   ├── cdk-solution-helper
+│   ├── post-build-1
+│   ├── run-all-test.sh
+│   ├── solution_config
+│   ├── test
+│   ├── test-build-dist.sh
+│   └── test-deploy-tag-images.sh
+├── docs                               [document]
+│   ├── en
+│   ├── index.html
+│   ├── mkdocs.base.yml
+│   ├── mkdocs.en.yml
+│   ├── mkdocs.zh.yml
+│   ├── site
+│   ├── test-deploy-mkdocs.sh
+│   └── zh
+├── examples                           [example code]
+│   ├── custom-plugins
+│   └── standalone-data-generator
+├── frontend                           [frontend source code]
+│   ├── README.md
+│   ├── build
+│   ├── config
+│   ├── esbuild.ts
+│   ├── node_modules
+│   ├── package.json
+│   ├── public
+│   ├── scripts
+│   ├── src
+│   ├── tsconfig.json
+│   └── yarn.lock
+├── package.json
+├── sonar-project.properties
+├── src                                [all backend source code]
+│   ├── alb-control-plane-stack.ts
+│   ├── analytics
+│   ├── cloudfront-control-plane-stack.ts
+│   ├── common
+│   ├── control-plane
+│   ├── data-analytics-redshift-stack.ts
+│   ├── data-modeling-athena-stack.ts
+│   ├── data-pipeline
+│   ├── data-pipeline-stack.ts
+│   ├── data-reporting-quicksight-stack.ts
+│   ├── ingestion-server
+│   ├── ingestion-server-stack.ts
+│   ├── kafka-s3-connector-stack.ts
+│   ├── main.ts
+│   ├── metrics
+│   ├── metrics-stack.ts
+│   └── reporting
+├── test                               [test code]
+│   ├── analytics
+│   ├── common
+│   ├── constants.ts
+│   ├── control-plane
+│   ├── data-pipeline
+│   ├── ingestion-server
+│   ├── jestEnv.js
+│   ├── metrics
+│   ├── reporting
+│   ├── rules.ts
+│   └── utils.ts
+├── tsconfig.dev.json
+├── tsconfig.json
+└── yarn.lock
+
+```
