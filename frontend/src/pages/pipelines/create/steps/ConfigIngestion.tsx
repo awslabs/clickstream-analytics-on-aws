@@ -691,10 +691,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   disabled: isDisabled(update, pipelineInfo),
                 },
                 {
+                  controlId: 'test-select-msk-buffer',
                   label: t('pipeline:create.bufferMSK'),
                   description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
-                  disabled: isDisabled(update, pipelineInfo),
+                  disabled:
+                    isDisabled(update, pipelineInfo) ||
+                    !pipelineInfo.serviceStatus.MSK,
                 },
                 {
                   label: t('pipeline:create.bufferS3'),

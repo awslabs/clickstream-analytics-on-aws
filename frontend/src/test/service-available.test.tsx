@@ -997,8 +997,8 @@ describe('Test MSK service available', () => {
       mskAvailable,
       quickSightAvailable,
     } = getServiceStatus(data);
-    const bufferMSKDom = render(
-      <BufferMSK
+    const configIntestionDom = render(
+      <ConfigIngestion
         pipelineInfo={{
           ...INIT_EXT_PIPELINE_DATA,
           serviceStatus: {
@@ -1009,6 +1009,66 @@ describe('Test MSK service available', () => {
             QUICK_SIGHT: quickSightAvailable,
           },
         }}
+        changePublicSubnets={() => {
+          return;
+        }}
+        changePrivateSubnets={() => {
+          return;
+        }}
+        changeServerMin={() => {
+          return;
+        }}
+        changeServerMax={() => {
+          return;
+        }}
+        changeWarmSize={() => {
+          return;
+        }}
+        changeDomainName={() => {
+          return;
+        }}
+        changeEnableALBAccessLog={() => {
+          return;
+        }}
+        changeEnableAGA={() => {
+          return;
+        }}
+        changeProtocal={() => {
+          return;
+        }}
+        changeServerEdp={() => {
+          return;
+        }}
+        changeServerCors={() => {
+          return;
+        }}
+        changeCertificate={() => {
+          return;
+        }}
+        changeSSMSecret={() => {
+          return;
+        }}
+        changeBufferType={() => {
+          return;
+        }}
+        changeBufferS3Bucket={() => {
+          return;
+        }}
+        changeBufferS3Prefix={() => {
+          return;
+        }}
+        changeS3BufferSize={() => {
+          return;
+        }}
+        changeBufferInterval={() => {
+          return;
+        }}
+        changeSinkMaxInterval={() => {
+          return;
+        }}
+        changeSinkBatchSize={() => {
+          return;
+        }}
         changeSelfHosted={() => {
           return;
         }}
@@ -1016,6 +1076,9 @@ describe('Test MSK service available', () => {
           return;
         }}
         changeSelectedMSK={() => {
+          return;
+        }}
+        changeSecurityGroup={() => {
           return;
         }}
         changeMSKTopic={() => {
@@ -1027,23 +1090,54 @@ describe('Test MSK service available', () => {
         changeKafkaTopic={() => {
           return;
         }}
-        changeSecurityGroup={() => {
+        changeEnableKafkaConnector={() => {
           return;
         }}
+        changeKDSProvisionType={() => {
+          return;
+        }}
+        changeKDSShardNumber={() => {
+          return;
+        }}
+        changeEnableALBAuthentication={() => {
+          return;
+        }}
+        changeAckownledge={() => {
+          return;
+        }}
+        publicSubnetError={false}
+        privateSubnetError={false}
+        privateSubnetDiffWithPublicError={false}
+        domainNameEmptyError={false}
+        domainNameFormatError={false}
+        certificateEmptyError={false}
+        bufferS3BucketEmptyError={false}
+        acknowledgedHTTPSecurity={false}
+        sinkBatchSizeError={false}
+        sinkIntervalError={false}
+        minCapacityError={false}
+        maxCapacityError={false}
+        warmPoolError={false}
+        corsFormatError={false}
+        secretEmptyError={false}
         mskEmptyError={false}
         topicFormatError={false}
         brokerLinkEmptyError={false}
         brokerLinkFormatError={false}
         kafkaSGEmptyError={false}
+        bufferS3PrefixFormatError={false}
+        bufferS3SizeFormatError={false}
+        bufferS3IntervalFormatError={false}
+        bufferKDSModeEmptyError={false}
+        bufferKDSShardNumFormatError={false}
       />
     );
-    expect(bufferMSKDom).toBeDefined();
-    const selectedMSK = bufferMSKDom.getByTestId('select');
-    const manualKafka = bufferMSKDom.getByTestId('manual');
-    expect(selectedMSK).toBeInTheDocument();
-    expect(manualKafka).toBeInTheDocument();
-    expect(selectedMSK).toBeDisabled();
-    expect(manualKafka).toBeEnabled();
+    expect(configIntestionDom).toBeDefined();
+    const selectedMSKBuffer = configIntestionDom.container.querySelector(
+      '#test-select-msk-buffer'
+    );
+    expect(selectedMSKBuffer).toBeInTheDocument();
+    expect(selectedMSKBuffer).toBeDisabled();
   });
 
   test('Buffer MSK Rendered and MSK is available', async () => {
@@ -1102,11 +1196,10 @@ describe('Test MSK service available', () => {
       />
     );
     expect(bufferMSKDom).toBeDefined();
-    const selectedMSK = bufferMSKDom.getByTestId('select');
-    const manualKafka = bufferMSKDom.getByTestId('manual');
+    const selectedMSK = bufferMSKDom.container.querySelector(
+      '#test-select-msk-id'
+    );
     expect(selectedMSK).toBeInTheDocument();
-    expect(manualKafka).toBeInTheDocument();
     expect(selectedMSK).toBeEnabled();
-    expect(manualKafka).toBeEnabled();
   });
 });

@@ -91,7 +91,7 @@
     },
     "msk": {
       "mskCluster": "Connect to an Apache Kafka Cluster",
-      "mskClusterDesc": "You can choose to use Amazon Managed Streaming for Apache Kafka (Amazon MSK) or a self-hosted Kafka cluster.",
+      "mskClusterDesc": "You can choose to use Amazon Managed Streaming for Apache Kafka (Amazon MSK).",
       "select": "Amazon MSK",
       "topic": "Topic",
       "topicDesc": "By default, the solution will create a topic with “project id”, you can customize it.",
