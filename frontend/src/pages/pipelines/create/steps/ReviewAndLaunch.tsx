@@ -41,9 +41,7 @@ const ReviewAndLaunch: React.FC<ReviewAndLaunchProps> = (
 
       <Container
         header={
-          <Header variant="h2" description="">
-            {t('pipeline:create.dataProcessing')}
-          </Header>
+          <Header variant="h2">{t('pipeline:create.dataProcessing')}</Header>
         }
       >
         <Processing pipelineInfo={pipelineInfo} />

@@ -33,13 +33,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
   const { pipelineInfo } = props;
   return (
-    <Container
-      header={
-        <Header variant="h2" description="">
-          {t('pipeline:basic')}
-        </Header>
-      }
-    >
+    <Container header={<Header variant="h2">{t('pipeline:basic')}</Header>}>
       <ColumnLayout columns={2} variant="text-grid">
         <SpaceBetween direction="vertical" size="l">
           <div>

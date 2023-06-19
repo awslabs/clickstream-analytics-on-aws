@@ -226,7 +226,6 @@
     "quickSightUserDesc": "Select a QuickSight user for the solution to create datasets and analyses. Click “Create new” button to create a new user.",
     "quickSIghtPlaceholder": "Select a quicksight user",
     "ingestSettings": "Ingestion setting",
-    "ingestSettingsDesc": "",
     "clusterSize": "Cluster Size",
     "topic": "Topic",
     "modelSettings": "Data modeling setting",
