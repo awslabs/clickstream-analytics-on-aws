@@ -30,6 +30,7 @@ import {
 
 import { SecurityGroupRule } from '@aws-sdk/client-ec2/dist-types/models/models_0';
 import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
+import { PIPELINE_SUPPORTED_REGIONS } from '../../common/constants';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup, SubnetType } from '../../common/types';
 import { getSubnetRouteTable, getSubnetType, getValueFromTags, isEmpty } from '../../common/utils';
@@ -171,9 +172,11 @@ export const listRegions = async () => {
   const queryResponse = await ec2Client.send(params);
   const regions: ClickStreamRegion[] = [];
   for (let region of queryResponse.Regions as Region[]) {
-    regions.push({
-      id: region.RegionName ?? '',
-    });
+    if (region.RegionName && PIPELINE_SUPPORTED_REGIONS.includes(region.RegionName)) {
+      regions.push({
+        id: region.RegionName,
+      });
+    }
   }
   return regions;
 };

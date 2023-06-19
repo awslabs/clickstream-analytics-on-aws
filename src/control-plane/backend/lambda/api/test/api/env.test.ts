@@ -88,6 +88,7 @@ describe('Account Env test', () => {
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
+        { RegionName: 'ap-northeast-4' },
       ],
     });
     let res = await request(app).get('/api/env/regions');
