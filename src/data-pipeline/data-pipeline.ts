@@ -164,6 +164,7 @@ export class DataPipelineConstruct extends Construct {
     createMetricsWidget(this, {
       projectId: props.projectId,
       emrApplicationId,
+      dataProcessingCronOrRateExpression: this.props.scheduleExpression,
     });
   }
 

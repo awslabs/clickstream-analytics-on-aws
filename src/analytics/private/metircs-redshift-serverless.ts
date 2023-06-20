@@ -21,6 +21,8 @@ import { WIDGETS_ORDER } from '../../metrics/settings';
 
 export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: string, props: {
   projectId: string;
+  dataProcessingCronOrRateExpression: string;
+  upsertUsersCronOrRateExpression: string;
   redshiftServerlessNamespace?: string;
   redshiftServerlessWorkgroupName: string;
   loadEventsWorkflow: IStateMachine;

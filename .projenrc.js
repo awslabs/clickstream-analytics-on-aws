@@ -29,6 +29,7 @@ const commonDeps = [
   'mustache@^4.2.0',
   'node-fetch@^2.6.4',
   'node-cache@^5.1.2',
+  'cron-parser@^4.8.1',
 ];
 
 const commonDevDeps = [
@@ -98,7 +99,6 @@ const depsForApiProject = [
   'ts-json-object@^0.4.0',
   'cidr-block@^1.3.2',
   'json-difference@^1.9.1',
-  'cron-parser@^4.8.1',
   ...awsSDKDepsForApiProject,
 ];
 

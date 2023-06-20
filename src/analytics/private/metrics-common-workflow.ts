@@ -11,21 +11,33 @@
  *  and limitations under the License.
  */
 
-import { Duration } from 'aws-cdk-lib';
+import { CfnResource, Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
+import { GetInterval } from '../../metrics/get-interval-custom-resource';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
 import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 
 
 export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, props: {
   projectId: string;
+  dataProcessingCronOrRateExpression: string;
+  upsertUsersCronOrRateExpression: string;
   loadEventsWorkflow: IStateMachine;
   upsertUsersWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
+
+
+  const processingJobInterval = new GetInterval(scope, 'dataProcess', {
+    expression: props.dataProcessingCronOrRateExpression,
+  });
+
+  const upsertUsersInterval = new GetInterval(scope, 'upsertUsers', {
+    expression: props.upsertUsersCronOrRateExpression,
+  });
 
   const statesNamespace = 'AWS/States';
   const loadEventsWorkflowDimension = [
@@ -56,6 +68,9 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmName: getAlarmName(scope, props.projectId, 'Load events workflow'),
   });
 
+  (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
+
+
   const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'upsertUsersWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
@@ -65,8 +80,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
   });
+  (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
-  const newFilesCountAlarm = new Alarm(scope, id + 'maxFileAageAlarm', {
+
+  const newFilesCountAlarm = new Alarm(scope, id + 'maxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1800, // half hour
     evaluationPeriods: 1,
@@ -81,9 +98,11 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         service: MetricsService.WORKFLOW,
       },
     }),
-    alarmDescription: `Max file age more than 1800 seconds, projectId: ${props.projectId}`,
+    alarmDescription: `Max file age more than ${processingJobInterval.getIntervalSeconds()} seconds, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Max file age'),
   });
+  (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
+  (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
 
   setCfnNagForAlarms([loadEventsWorkflowAlarm, upsertUsersWorkflowAlarm, newFilesCountAlarm]);

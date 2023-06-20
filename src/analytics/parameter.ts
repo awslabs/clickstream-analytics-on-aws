@@ -29,6 +29,7 @@ export interface RedshiftAnalyticsStackProps {
   };
   projectId: string;
   appIds: string;
+  dataProcessingCronOrRateExpression: string;
   odsEvents: {
     bucket: IBucket;
     prefix: string;
@@ -535,6 +536,14 @@ export function createStackParameters(scope: Construct): {
     default: 365,
   });
 
+  const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {
+    description: 'The schedule expression of data processing.',
+    type: 'String',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
+    constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year) or rate(N seconds|minutes|hours|days|months|years)',
+    default: 'rate(1 hour)',
+  });
+
   clearExpiredEventsWorkflowParamsGroup.push({
     Label: { default: 'Clear expired events job' },
     Parameters: [
@@ -639,6 +648,10 @@ export function createStackParameters(scope: Construct): {
         ...loadJobParamsLabels,
         ...upsertUsersWorkflowParamsLabels,
         ...clearExpiredEventsWorkflowParamsLabels,
+
+        [dataProcessingCronOrRateExpressionParam.logicalId]: {
+          default: 'The schedule expression of data processing',
+        },
       },
     },
   };
@@ -658,6 +671,7 @@ export function createStackParameters(scope: Construct): {
       },
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
+      dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
       odsEvents: {
         bucket: Bucket.fromBucketName(
           scope,

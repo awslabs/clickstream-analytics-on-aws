@@ -628,6 +628,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: 'rate(5 minutes)',
   },
   {
+    ParameterKey: 'DataProcessingCronOrRateExpression',
+    ParameterValue: 'rate(6 minutes)',
+  },
+  {
     ParameterKey: 'ClearExpiredEventsScheduleExpression',
     ParameterValue: 'cron(0 17 * * ? *)',
   },

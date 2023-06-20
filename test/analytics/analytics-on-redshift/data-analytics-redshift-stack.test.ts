@@ -158,6 +158,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     });
   });
 
+  test('Should has parameter DataProcessingCronOrRateExpression', () => {
+    template.hasParameter('DataProcessingCronOrRateExpression', {
+      Type: 'String',
+    });
+  });
+
   test('Should has parameter LoadWorkflowBucket', () => {
     template.hasParameter('LoadWorkflowBucket', {
       Type: 'String',
@@ -317,7 +323,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(27);
+    expect(paramCount).toEqual(28);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -431,6 +437,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'EMRServerlessApplicationId',
+      'DataProcessingCronOrRateExpression',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -600,6 +607,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         retentionRangeDays: 365,
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
+      dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
     };
     var error = false;
     try {
@@ -661,6 +669,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         retentionRangeDays: 365,
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
+      dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
     };
     var error = false;
     try {
@@ -709,6 +718,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         retentionRangeDays: 365,
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
+      dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
     };
 
     const nestedStack = new RedshiftAnalyticsStack(stack, testId+'redshiftAnalytics'+count++, nestStackProps);
@@ -3775,9 +3785,9 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
   const testId = 'test-4';
   const stack = new DataAnalyticsRedshiftStack(app, testId+'-data-analytics-redshift-stack-serverless', {});
 
-  test('redshiftServerlessStack has two CustomResource', ()=>{
+  test('redshiftServerlessStack has 5 CustomResource', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
-      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 3);
+      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 5);
     }
   });
 
@@ -4128,6 +4138,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4142,6 +4158,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4149,13 +4171,28 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Max file age more than 1800 seconds, projectId: ',
-            Match.anyValue(),
+            'Max file age more than ',
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'intervalSeconds',
+              ],
+            },
+            ' seconds, projectId: ',
+            {
+              Ref: Match.anyValue(),
+            },
           ],
         ],
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
   });
@@ -4185,6 +4222,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4198,6 +4241,12 @@ describe('Should set metrics widgets', () => {
         ],
       },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4205,12 +4254,27 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Max file age more than 1800 seconds, projectId: ',
-            Match.anyValue(),
+            'Max file age more than ',
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'intervalSeconds',
+              ],
+            },
+            ' seconds, projectId: ',
+            {
+              Ref: Match.anyValue(),
+            },
           ],
         ],
       },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
   });
@@ -4240,6 +4304,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4253,6 +4323,12 @@ describe('Should set metrics widgets', () => {
         ],
       },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4260,12 +4336,27 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Max file age more than 1800 seconds, projectId: ',
-            Match.anyValue(),
+            'Max file age more than ',
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'intervalSeconds',
+              ],
+            },
+            ' seconds, projectId: ',
+            {
+              Ref: Match.anyValue(),
+            },
           ],
         ],
       },
       TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
   });

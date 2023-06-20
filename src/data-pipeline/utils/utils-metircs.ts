@@ -12,10 +12,11 @@
  */
 
 
-import { Duration } from 'aws-cdk-lib';
+import { CfnResource, Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
 import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
+import { GetInterval } from '../../metrics/get-interval-custom-resource';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 import { setCfnNagForAlarms, getAlarmName } from '../../metrics/util';
@@ -23,7 +24,15 @@ import { setCfnNagForAlarms, getAlarmName } from '../../metrics/util';
 export function createMetricsWidget(scope: Construct, props: {
   projectId: string;
   emrApplicationId: string;
+  dataProcessingCronOrRateExpression: string;
 }) {
+
+  const processingJobInterval = new GetInterval(scope, 'dataProcess', {
+    expression: props.dataProcessingCronOrRateExpression,
+  });
+
+  const processingJobIntervalSeconds = processingJobInterval.getIntervalSeconds();
+
   const dataPipelineNamespace = MetricsNamespace.DATAPIPELINE;
   const emrServerlessNamespace = 'AWS/EMRServerless';
   const appIdDimension = [
@@ -51,9 +60,10 @@ export function createMetricsWidget(scope: Construct, props: {
         ApplicationId: props.emrApplicationId,
       },
     }),
-    alarmDescription: `Has failed jobs in last hour, projectId: ${props.projectId}`,
+    alarmDescription: `Has failed jobs, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Data Processing Job Failed'),
   });
+  (failedJobAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobIntervalSeconds);
 
 
   const noDataAlarm = new Alarm(scope, 'noDataAlarm', {

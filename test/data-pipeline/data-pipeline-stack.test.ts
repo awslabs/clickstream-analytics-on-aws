@@ -1285,6 +1285,77 @@ test('Should set metrics widgets', () => {
   });
 });
 
+test ('Should has alaram: data Processing Job Failed', ()=> {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+    ComparisonOperator: 'GreaterThanThreshold',
+    EvaluationPeriods: 1,
+    AlarmDescription: {
+      'Fn::Join': Match.anyValue(),
+    },
+    AlarmName: {
+      'Fn::Join': Match.anyValue(),
+    },
+    Dimensions: [
+      {
+        Name: 'ApplicationId',
+        Value: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'ApplicationId',
+          ],
+        },
+      },
+    ],
+    MetricName: 'FailedJobs',
+    Namespace: 'AWS/EMRServerless',
+    Period: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        'intervalSeconds',
+      ],
+    },
+    Statistic: 'Sum',
+    Threshold: 1,
+  });
+});
+
+
+test ('Should has alaram: No data loaded in past 24 hours', ()=> {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+    ComparisonOperator: 'LessThanOrEqualToThreshold',
+    EvaluationPeriods: 1,
+    AlarmDescription: {
+      'Fn::Join': Match.anyValue(),
+    },
+    AlarmName: {
+      'Fn::Join': Match.anyValue(),
+    },
+    Dimensions: [
+      {
+        Name: 'ApplicationId',
+        Value: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'ApplicationId',
+          ],
+        },
+      },
+      {
+        Name: 'service',
+        Value: 'EMR-Serverless',
+      },
+    ],
+    MetricName: 'Data Processing sink count',
+    Namespace: 'Clickstream/DataPipeline',
+    Period: 86400,
+    Statistic: 'Sum',
+    Threshold: 0,
+    TreatMissingData: 'notBreaching',
+  });
+});
+
 
 test('Root template has Cfn Outputs for Glue database and table', () => {
 

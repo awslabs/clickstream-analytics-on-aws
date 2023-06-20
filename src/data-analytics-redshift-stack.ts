@@ -24,7 +24,7 @@ import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
 import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
-import { addCfnNagForCfnResource, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
+import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
@@ -58,6 +58,14 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     addCfnNagForCfnResource(this, 'CDK built-in custom resource for S3 bucket notification', 'BucketNotificationsHandler[0-9a-fA-F]+',
       undefined, [ruleRolePolicyWithWildcardResources('BucketNotificationsHandler[0-9a-fA-F]+/Role/DefaultPolicy/Resource', 'CDK built-in BucketNotification', 's3')]);
+
+    addCfnNagForCustomResourceProvider(this.nestedStacks.newRedshiftServerlessStack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
+    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftProvisionedStack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
+    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftServerlessStack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
+
+    addCfnNagForCustomResourceProvider(this.nestedStacks.newRedshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
+    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftProvisionedStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
+    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
   }
 }
 
@@ -70,6 +78,7 @@ export function createRedshiftAnalyticsStack(
     subnetSelection: props.network.subnetSelection,
     projectId: props.projectId,
     appIds: props.appIds,
+    dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     odsSource: {
       s3Bucket: props.odsEvents.bucket,
       prefix: props.odsEvents.prefix,
@@ -132,6 +141,7 @@ export function createRedshiftAnalyticsStack(
         databaseName: props.redshift.defaultDatabaseName,
       },
       emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );
   (newRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isNewRedshiftServerless;
@@ -148,6 +158,7 @@ export function createRedshiftAnalyticsStack(
         dataAPIRoleArn: props.redshift.existingServerless!.iamRole,
       },
       emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );
   (redshiftExistingServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
@@ -162,6 +173,7 @@ export function createRedshiftAnalyticsStack(
         ...props.redshift.provisioned!,
       },
       emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;

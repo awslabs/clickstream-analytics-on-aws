@@ -824,6 +824,14 @@ export class CDataModelingStack extends JSONObject {
   })
     UpsertUsersScheduleExpression?: string;
 
+  @JSONObject.optional('cron(0 1 * * ? *)')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, value:any) => {
+    value = stack._pipeline?.dataProcessing?.scheduleExpression;
+    validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);
+    return value;
+  })
+    DataProcessingCronOrRateExpression?: string;
+
   @JSONObject.optional('cron(0 17 * * ? *)')
   @JSONObject.custom( (_:any, key:string, value:any) => {
     validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);

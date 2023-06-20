@@ -52,6 +52,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
+  readonly dataProcessingCronOrRateExpression: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -251,6 +252,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
     if (this.redshiftServerlessWorkgroup) {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
+        dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
@@ -263,6 +266,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
     if (props.existingRedshiftServerlessProps) {
       createMetricsWidgetForRedshiftServerless(this, 'existingServerless', {
         projectId: props.projectId,
+        dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
@@ -274,8 +279,9 @@ export class RedshiftAnalyticsStack extends NestedStack {
     if (props.provisionedRedshiftProps) {
       createMetricsWidgetForRedshiftCluster(this, {
         projectId: props.projectId,
+        dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
-
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
         upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
