@@ -254,6 +254,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(15),
+      memorySize: 512,
       architecture: props?.targetToCNRegions ? undefined : Architecture.ARM_64,
       logRetention: RetentionDays.TEN_YEARS,
     });
