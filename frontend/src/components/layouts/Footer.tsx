@@ -22,12 +22,6 @@ const Footer: React.FC = () => {
     <footer id="f" className="flex">
       <ul>
         <li>
-          <a href="/about/about-cloudscape/">{t('footer.about')}</a>
-        </li>
-        <li>
-          <a href="/about/connect/">{t('footer.connect')}</a>
-        </li>
-        <li>
           © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>

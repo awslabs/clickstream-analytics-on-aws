@@ -25,7 +25,7 @@ interface INavigationProps {
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
   const { t } = useTranslation();
-  const navHeader = { text: t('name'), href: '#/' };
+  const navHeader = { text: t('name'), href: '/' };
   const navItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
     { type: 'link', text: t('nav.projects'), href: '/projects' },

@@ -1,0 +1,43 @@
+{
+  "plugins": "插件",
+  "description": "该解决方案支持用户引入自定义的数据处理插件来客制化数据处理工作流程。",
+  "BUILT-IN-2": "从 HTTP 请求标头的用户代理（User Agent)字符串中获取操作系统、设备和浏览器信息",
+  "BUILT-IN-3": "根据请求源 IP 获取位置信息（例如，城市、国家、地区）",
+  "list": {
+    "id": "插件 ID",
+    "name": "插件名称",
+    "desc": "描述",
+    "type": "类型",
+    "pluginList": "插件清单",
+    "loading": "正在加载资源",
+    "noPlugin": "没有插件",
+    "noPluginDisplay": "没有插件可显示。",
+    "findPlugin": "找到你的插件",
+    "pipelineDesc": "您账户中的所有点击流分析插件。"
+  },
+  "valid": {
+    "nameEmpty": "请输入插件名称",
+    "typeEmpty": "请选择插件类型",
+    "mainFuncEmpty": "请输入主函数类",
+    "uploadJarEmpty": "请上传自定义 JAR 文件",
+    "nameFormat": "名称长度最多可为 128 个字符。有效字符为 a-z、A-Z、0-9、_（下划线）和-（连字符）。",
+    "functionNameFormat": "名称长度最多可为 128 个字符。有效字符为 a-z、A-Z、0-9、。（句点）、_（下划线）和-（连字符）。"
+  },
+  "create": {
+    "createPlugin": "创建插件",
+    "pluginInfo": "插件信息",
+    "name": "姓名",
+    "nameDesc": "为插件提供一个名称",
+    "desc": "描述",
+    "descDesc": "为您的插件提供描述",
+    "pluginDesc": "插件描述",
+    "type": "插件类型",
+    "typeDesc": "请选择插件类型",
+    "uploadJar": "上传自定义 JAR 文件",
+    "uploadJarDesc": "请上传包含插件主要功能的 JAR 文件",
+    "uploadFile": "上传依赖关系文件",
+    "uploadFileDesc": "请上传包含插件主要功能的文件",
+    "mainFunc": "主函数类",
+    "mainFuncDesc": "将主函数类指定为启动插件的入口点"
+  }
+}

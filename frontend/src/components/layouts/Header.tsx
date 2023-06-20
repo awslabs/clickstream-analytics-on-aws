@@ -77,14 +77,14 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     <header id="h">
       <TopNavigation
         identity={{
-          href: '#',
+          href: '/',
           title: t('header.solution') || '',
         }}
         utilities={[
           {
             type: 'button',
             text: t('header.solutionLibrary') || '',
-            href: 'https://example.com/',
+            href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
           {

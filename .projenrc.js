@@ -121,7 +121,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk.context.json',
     '.DS_Store',
     'docs/site/',
-    'public/',
     'frontend/amplify',
     'test-deploy*',
     'deployment/global-s3-assets/',

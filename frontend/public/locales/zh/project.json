@@ -1,0 +1,72 @@
+{
+  "projects": "项目",
+  "description": "此页面列出了所有项目。",
+  "valid": {
+    "nameEmpty": "请输入项目名称。",
+    "emailEmpty": "请输入通知电子邮件。",
+    "emailInvalid": "通知电子邮件无效。",
+    "projectIdInvalid": "项目 ID 必须以小写字母开头，只能支持小写字母、数字和 _，最多 127 个字符",
+    "saveFirst": "请点击保存按钮先保存项目 ID。",
+    "projectIdExisting": "项目 ID 已经存在。"
+  },
+  "split": {
+    "id": "项目编号",
+    "name": "项目名称",
+    "platform": "应用程序平台",
+    "created": "创作时间",
+    "notifyEmail": "通知电子邮件",
+    "envType": "环境类型",
+    "description": "描述"
+  },
+  "create": {
+    "createProject": "创建项目（第 1 步，共 3 步）",
+    "addEmail": "添加通知电子邮件（第 2 步，共 3 步）",
+    "specifyEnv": "指定环境类型（第 3 步，共 3 步）",
+    "inputName": "请为您的项目输入一个名称",
+    "inputNamePlaceholder": "例如，My project",
+    "projectNameAlert": "您的项目的全局唯一标识符，在数据库中用作数据库名称。创建项目后，您无法更改您的项目 ID。",
+    "inputEmail": "请输入电子邮件地址以接收来自此项目的通知 ",
+    "inputEmailPlaceholder": "例如 example@example.com、example-2@example.com",
+    "inputEmailAlert": "如果要添加多个电子邮件地址，请使用逗号分隔电子邮件",
+    "inputEnv": "请为您的项目指定环境类型",
+    "inputEnvAlert": "此设置可标识应用程序的不同生命周期阶段。将您的项目标记环境类型不会影响您的项目的工作方式或其功能。但是，标记可以帮助您和您的团队更容易管理处于不同生命周期中的各种项目。",
+    "unspecified": "未指定",
+    "projectDesc": "项目描述-可选"
+  },
+  "pipeline": {
+    "pipeline": "管道",
+    "dataPipeline": "数据管道",
+    "dataPipelineDesc": "数据管道是一组集成的亚马逊云科技资源，用于收集、处理和分析您的点击流数据。",
+    "health": "数据管道运行状况",
+    "healthDesc": "该项目数据管道的健康状况。",
+    "status": "状态",
+    "region": "区域",
+    "appName": "应用程序名称",
+    "appDesc": "应用程序描述",
+    "platform": "平台",
+    "appId": "应用程序 ID",
+    "time": "注册时间",
+    "loading": "正在加载应用程序",
+    "noApp": "此项目中没有应用程序",
+    "noAppDisplay": "没有可显示的应用程序。",
+    "findApp": "查找应用程序",
+    "yourApp": "你的应用程序",
+    "yourAppDesc": "此表列出了在此项目中注册的所有应用程序"
+  },
+  "list": {
+    "name": "项目名称",
+    "id": "项目编号",
+    "platform": "项目平台",
+    "status": "状态",
+    "loading": "正在加载项目",
+    "filter": "筛选项目",
+    "find": "查找项目",
+    "noProject": "您还没有任何点击流分析项目",
+    "createAt": "创建日期"
+  },
+  "delete": {
+    "title": "删除项目",
+    "tip1": "您确定要删除该项目吗 ",
+    "tip2": " 删除项目将删除 Redshift 中的所有数据。"
+  }
+}
