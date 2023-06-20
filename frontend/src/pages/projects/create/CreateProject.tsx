@@ -28,7 +28,8 @@ import { createProject, verificationProjectId } from 'apis/project';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PROJECT_STAGE_LIST } from 'ts/const';
+import { MAX_USER_INPUT_LENGTH, PROJECT_STAGE_LIST } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { INIT_PROJECT_DATA } from 'ts/init';
 import {
   alertMsg,
@@ -276,10 +277,16 @@ const CreateProject: React.FC<CreateProjectProps> = (
             <div className="mt-10">
               <FormField>
                 <Textarea
-                  placeholder="Project description - optional"
+                  placeholder={t('project:create.projectDesc') || ''}
                   rows={3}
                   value={curProject.description}
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     setCurProject((prev) => {
                       return { ...prev, description: e.detail.value };
                     });

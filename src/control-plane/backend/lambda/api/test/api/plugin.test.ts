@@ -50,6 +50,42 @@ describe('Plugin test', () => {
     expect(res.body.success).toEqual(true);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
+  it('Create plugin with XSS', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(PutCommand).resolvesOnce({});
+    const res = await request(app)
+      .post('/api/plugin')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
+        description: 'Description of Plugin-01',
+        jarFile: 'jarFile',
+        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        mainFunction: 'com.cn.sre.main',
+        pluginType: 'Transform',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
+        {
+          location: 'body',
+          msg: 'This request contains Cross-site scripting (XSS) cheat sheet. Please check and try again.',
+          param: '',
+          value: {
+            name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
+            description: 'Description of Plugin-01',
+            jarFile: 'jarFile',
+            dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+            mainFunction: 'com.cn.sre.main',
+            pluginType: 'Transform',
+          },
+        },
+      ],
+    });
+  });
   it('Create plugin with mock error', async () => {
     tokenMock(ddbMock, false);
     // Mock DynamoDB error
@@ -87,12 +123,6 @@ describe('Plugin test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
           param: 'jarFile',
         },
         {
@@ -104,6 +134,12 @@ describe('Plugin test', () => {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: '',
+          value: {},
         },
       ],
     });

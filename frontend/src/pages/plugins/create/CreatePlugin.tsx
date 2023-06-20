@@ -39,7 +39,8 @@ import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PLUGIN_TYPE_LIST } from 'ts/const';
+import { MAX_USER_INPUT_LENGTH, PLUGIN_TYPE_LIST } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   alertMsg,
   validatePluginMainFunction,
@@ -395,6 +396,12 @@ function Content() {
                   placeholder={t('plugin:create.pluginDesc') || ''}
                   value={curPlugin.description}
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     setCurPlugin((prev) => {
                       return {
                         ...prev,

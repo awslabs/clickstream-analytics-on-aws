@@ -31,7 +31,7 @@ import {
   defaultAssumeRoleTypeValid,
   isProjectExisted,
   isProjectNotExisted,
-  isValidAppId, isEmails,
+  isValidAppId, isEmails, isXSSRequest,
 } from './common/request-valid';
 import { ApiFail } from './common/types';
 import { getEmailFromRequestContext, isEmpty } from './common/utils';
@@ -446,7 +446,7 @@ app.get(
 app.post(
   '/api/project',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('emails').custom(isEmails),
     body('id').custom(isProjectNotExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
@@ -506,7 +506,7 @@ app.get(
 app.post(
   '/api/app',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId')
       .custom(isProjectExisted),
     body('appId')
@@ -565,7 +565,7 @@ app.delete(
 app.post(
   '/api/pipeline',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
@@ -673,7 +673,7 @@ app.get(
 app.post(
   '/api/plugin',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('jarFile').custom(isValidEmpty),
     body('mainFunction').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),

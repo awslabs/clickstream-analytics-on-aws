@@ -15,6 +15,7 @@ import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { awsRegion } from './constants';
 import { APP_ID_PATTERN, MUTIL_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
+import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -224,4 +225,11 @@ export const isEmails: CustomValidator = value => {
   return true;
 };
 
+export const isXSSRequest = (data: any) => {
+  const str = JSON.stringify(data);
+  if (validateXSS(str)) {
+    return Promise.reject('This request contains Cross-site scripting (XSS) cheat sheet. Please check and try again.');
+  }
+  return true;
+};
 

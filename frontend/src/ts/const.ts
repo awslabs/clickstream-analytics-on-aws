@@ -34,6 +34,7 @@ export const COMMON_ALERT_TYPE = {
   Info: 'info',
 };
 
+export const MAX_USER_INPUT_LENGTH = 1024;
 export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN', 'zh-CN'];
 
 export const XMIND_LINK = 'https://www.maxmind.com';

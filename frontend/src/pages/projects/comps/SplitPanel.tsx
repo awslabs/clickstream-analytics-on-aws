@@ -28,7 +28,12 @@ import { updateProject } from 'apis/project';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PROJECT_STAGE_LIST, TIME_FORMAT } from 'ts/const';
+import {
+  MAX_USER_INPUT_LENGTH,
+  PROJECT_STAGE_LIST,
+  TIME_FORMAT,
+} from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { validateEmails } from 'ts/utils';
 
 interface SplitPanelContentProps {
@@ -167,6 +172,12 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                     rows={3}
                     value={newProject.description}
                     onChange={(e) => {
+                      if (
+                        new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                        e.detail.value.length > MAX_USER_INPUT_LENGTH
+                      ) {
+                        return false;
+                      }
                       setNewProject((prev) => {
                         return {
                           ...prev,

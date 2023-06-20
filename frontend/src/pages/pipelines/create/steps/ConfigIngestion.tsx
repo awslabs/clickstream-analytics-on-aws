@@ -42,6 +42,7 @@ import {
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
   MAX_MSK_SINK_INTERVAL,
+  MAX_USER_INPUT_LENGTH,
   MIN_KDS_BATCH_SIZE,
   MIN_KDS_SINK_INTERVAL,
   MIN_MSK_BATCH_SIZE,
@@ -51,6 +52,7 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { PIPELINE_ACCESS_LOG_PERMISSION_LINK, buildDocumentLink } from 'ts/url';
 import { isDisabled } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
@@ -480,6 +482,12 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     placeholder="example.domain.com"
                     value={pipelineInfo.ingestionServer.domain.domainName}
                     onChange={(e) => {
+                      if (
+                        new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                        e.detail.value.length > MAX_USER_INPUT_LENGTH
+                      ) {
+                        return false;
+                      }
                       changeDomainName(e.detail.value);
                     }}
                   />
@@ -543,6 +551,12 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath
                   }
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     changeServerEdp(e.detail.value);
                   }}
                 />
@@ -561,6 +575,12 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin
                   }
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     changeServerCors(e.detail.value);
                   }}
                 />

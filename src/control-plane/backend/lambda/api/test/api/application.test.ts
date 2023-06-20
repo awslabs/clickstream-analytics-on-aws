@@ -253,12 +253,6 @@ describe('Application test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
           param: 'projectId',
         },
         {
@@ -270,6 +264,12 @@ describe('Application test', () => {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: '',
+          value: {},
         },
       ],
     });

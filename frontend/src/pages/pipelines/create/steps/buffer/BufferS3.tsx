@@ -21,6 +21,8 @@ import {
 import { getS3BucketList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MAX_USER_INPUT_LENGTH } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { isDisabled } from 'ts/utils';
 
 interface BufferS3Props {
@@ -115,6 +117,12 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
           placeholder={t('pipeline:create.s3.enterAdditional') || ''}
           value={pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
           onChange={(e) => {
+            if (
+              new RegExp(XSS_PATTERN).test(e.detail.value) ||
+              e.detail.value.length > MAX_USER_INPUT_LENGTH
+            ) {
+              return false;
+            }
             changeS3Prefix(e.detail.value);
           }}
         />

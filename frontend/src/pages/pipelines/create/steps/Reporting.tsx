@@ -36,10 +36,11 @@ import {
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
+  MAX_USER_INPUT_LENGTH,
   PIPELINE_QUICKSIGHT_GUIDE_LINK,
   PIPELINE_QUICKSIGHT_LEARNMORE_LINK,
 } from 'ts/const';
-import { EMAIL_PATTERN } from 'ts/constant-ln';
+import { EMAIL_PATTERN, XSS_PATTERN } from 'ts/constant-ln';
 import { buildQuickSightSubscriptionLink } from 'ts/url';
 import { checkStringValidRegex, isDisabled } from 'ts/utils';
 
@@ -349,6 +350,12 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                     value={newUserEmail}
                     onChange={(e) => {
                       setEmailInvalid(false);
+                      if (
+                        new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                        e.detail.value.length > MAX_USER_INPUT_LENGTH
+                      ) {
+                        return false;
+                      }
                       setNewUserEmail(e.detail.value);
                     }}
                   />

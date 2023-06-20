@@ -48,11 +48,13 @@ import {
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
+  MAX_USER_INPUT_LENGTH,
   REDSHIFT_FREQUENCY_UNIT,
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { generateRedshiftRPUOptionListByRegion, isDisabled } from 'ts/utils';
 
 interface DataProcessingProps {
@@ -464,6 +466,12 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           placeholder="0 15 10 * * ? *"
                           value={pipelineInfo.exeCronExp}
                           onChange={(e) => {
+                            if (
+                              new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                              e.detail.value.length > MAX_USER_INPUT_LENGTH
+                            ) {
+                              return false;
+                            }
                             changeExecutionCronExp(e.detail.value);
                           }}
                         />
@@ -917,6 +925,12 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                               ?.dbUser
                           }
                           onChange={(e) => {
+                            if (
+                              new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                              e.detail.value.length > MAX_USER_INPUT_LENGTH
+                            ) {
+                              return false;
+                            }
                             changeDBUser(e.detail.value);
                           }}
                         />
@@ -987,6 +1001,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                   placeholder="0 1 * * ? *"
                                   value={pipelineInfo.upsertCronExp}
                                   onChange={(e) => {
+                                    if (
+                                      new RegExp(XSS_PATTERN).test(
+                                        e.detail.value
+                                      ) ||
+                                      e.detail.value.length >
+                                        MAX_USER_INPUT_LENGTH
+                                    ) {
+                                      return false;
+                                    }
                                     changeUpsertCronExp(e.detail.value);
                                   }}
                                 />

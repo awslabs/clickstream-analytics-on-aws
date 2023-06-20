@@ -29,6 +29,8 @@ import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { MAX_USER_INPUT_LENGTH } from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
@@ -134,6 +136,12 @@ const RegisterApp: React.FC = () => {
                   onChange={(e) => {
                     setNameEmptyError(false);
                     setAppIdInvalidError(false);
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     setApplication((prev) => {
                       return {
                         ...prev,
@@ -158,6 +166,12 @@ const RegisterApp: React.FC = () => {
                   onChange={(e) => {
                     setNameEmptyError(false);
                     setAppIdInvalidError(false);
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     setApplication((prev) => {
                       return {
                         ...prev,
@@ -174,6 +188,12 @@ const RegisterApp: React.FC = () => {
                   placeholder={t('application:appDesc') || ''}
                   value={application.description}
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     setApplication((prev) => {
                       return {
                         ...prev,
@@ -195,6 +215,12 @@ const RegisterApp: React.FC = () => {
                       placeholder="com.example.appname"
                       value={application.androidPackage}
                       onChange={(e) => {
+                        if (
+                          new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                          e.detail.value.length > MAX_USER_INPUT_LENGTH
+                        ) {
+                          return false;
+                        }
                         setApplication((prev) => {
                           return {
                             ...prev,
@@ -213,6 +239,12 @@ const RegisterApp: React.FC = () => {
                       placeholder="com.example.App"
                       value={application.iosBundleId}
                       onChange={(e) => {
+                        if (
+                          new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                          e.detail.value.length > MAX_USER_INPUT_LENGTH
+                        ) {
+                          return false;
+                        }
                         setApplication((prev) => {
                           return {
                             ...prev,

@@ -890,12 +890,6 @@ describe('Pipeline test', () => {
       message: 'Parameter verification failed.',
       error: [
         {
-          value: {},
-          msg: 'Value is empty.',
-          param: '',
-          location: 'body',
-        },
-        {
           msg: 'Value is empty.',
           param: 'projectId',
           location: 'body',
@@ -904,6 +898,12 @@ describe('Pipeline test', () => {
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
           location: 'headers',
+        },
+        {
+          value: {},
+          msg: 'Value is empty.',
+          param: '',
+          location: 'body',
         },
       ],
     });

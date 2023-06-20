@@ -231,6 +231,7 @@ export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
 export const CORS_PATTERN = `^$|\\*$|^(${DOMAIN_NAME_PATTERN}(,\\s*${DOMAIN_NAME_PATTERN})*)$`;
+export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
 
 // cloudformation parameters
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';

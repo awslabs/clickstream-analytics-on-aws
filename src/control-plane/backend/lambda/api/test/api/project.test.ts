@@ -117,12 +117,6 @@ describe('Project test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
           param: 'emails',
         },
         {
@@ -134,6 +128,12 @@ describe('Project test', () => {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: '',
+          value: {},
         },
       ],
     });

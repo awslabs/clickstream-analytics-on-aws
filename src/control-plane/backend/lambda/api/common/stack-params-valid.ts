@@ -13,6 +13,7 @@
 
 import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
+import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { logger } from './powertools';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
@@ -33,6 +34,12 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
     throw new ClickStreamBadRequestError(`Validation error: ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
   }
   return true;
+};
+
+export const validateXSS = (data: string) => {
+  const regexp = new RegExp(XSS_PATTERN);
+  const match = data.match(regexp);
+  return !isEmpty(match);
 };
 
 export const validateSecretModel = async (region: string, key: string, secretArn: string, pattern: string) => {

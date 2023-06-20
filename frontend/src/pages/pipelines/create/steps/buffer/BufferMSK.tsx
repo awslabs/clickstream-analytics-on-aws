@@ -25,7 +25,12 @@ import {
 import { getMSKList, getSecurityGroups } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResourceCreateMehod, SUPPORT_SELF_HOSTED_KAFKA } from 'ts/const';
+import {
+  MAX_USER_INPUT_LENGTH,
+  ResourceCreateMehod,
+  SUPPORT_SELF_HOSTED_KAFKA,
+} from 'ts/const';
+import { XSS_PATTERN } from 'ts/constant-ln';
 import { isDisabled } from 'ts/utils';
 import MSKRequirements from './MSKRequirements';
 
@@ -237,6 +242,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           }
                           value={pipelineInfo.ingestionServer.sinkKafka.topic}
                           onChange={(e) => {
+                            if (
+                              new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                              e.detail.value.length > MAX_USER_INPUT_LENGTH
+                            ) {
+                              return false;
+                            }
                             changeMSKTopic(e.detail.value);
                           }}
                         />
@@ -275,6 +286,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                             }
                             value={pipelineInfo.kafkaBrokers}
                             onChange={(e) => {
+                              if (
+                                new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                                e.detail.value.length > MAX_USER_INPUT_LENGTH
+                              ) {
+                                return false;
+                              }
                               changeKafkaBrokers(e.detail.value);
                             }}
                           />
@@ -295,6 +312,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                             }
                             value={pipelineInfo.ingestionServer.sinkKafka.topic}
                             onChange={(e) => {
+                              if (
+                                new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                                e.detail.value.length > MAX_USER_INPUT_LENGTH
+                              ) {
+                                return false;
+                              }
                               changeKafkaTopic(e.detail.value);
                             }}
                           />
@@ -398,6 +421,12 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                   placeholder={t('pipeline:create.msk.enterTopicName') || ''}
                   value={pipelineInfo.ingestionServer.sinkKafka.topic}
                   onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
                     changeMSKTopic(e.detail.value);
                   }}
                 />
