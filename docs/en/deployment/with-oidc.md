@@ -194,7 +194,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
     | Parameter  | Default          | Description                                                  |
     | ---------- | ---------------- | ------------------------------------------------------------ |
-    | Domain | `<Requires input>` | Custom domain for Centralized Logging with OpenSearch console. Do NOT add `http(s)` prefix. |
+    | Domain | `<Requires input>` | Custom domain for {{ solution_name }} console. Do NOT add `http(s)` prefix. |
     | IamCertificateID | `<Requires input>` | The ID of the SSL certificate in IAM. The ID is composed of 21 characters of capital letters and digits. Use the [`list-server-certificates`][iam-list-cert]{target='_blank'} command to retrieve the ID. |
 
 6. Choose **Next**.

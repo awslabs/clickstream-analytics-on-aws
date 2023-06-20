@@ -1,5 +1,5 @@
 # Device report
-You can use the Device report to get insights into the devices that users useed when using your apps or websites. The report provides more information for your user profile.
+You can use the Device report to get insights into the devices that users used when using your apps or websites. The report provides more information for your user profile.
 
 Note: This article describes the default report. You can customize the report by applying filters or comparisons or by changing the dimensions, metrics, or charts in QuickSight. [Learn more](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
 
@@ -137,15 +137,15 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`mobile_brand_name`| Dimension | The brand name for the device  | Query from analytics engine|
 |`mobile_model_name`| Dimension | The model name for the device | Query from analytics engine|
 |`manufacturer`| Dimension | The manufacturer for the device | Query from analytics engine|
-|`network_type`| Dimension | The newtork type when user logged the events  | Query from analytics engine|
+|`network_type`| Dimension | The network type when user logged the events  | Query from analytics engine|
 |`operating_system`| Dimension | The operating system of the device  | Query from analytics engine|
 |`operating_system_version`| Dimension | The operating system version of the device  | Query from analytics engine|
 |`screen_height`| Dimension | The screen height of the device  | Query from analytics engine|
 |`screen_width`| Dimension | The screen width of the device  | Query from analytics engine|
 |`Screen Resolution`| Dimension | The screen resolution (i.e., screen height x screen width) of the device  | Calculated field in QuickSight|
 |`system_language`| Dimension | The system language of the solution  | Query from analytics engine|
-|`us_broswer`| Dimension | The browser derived from user agent  | Query from analytics engine|
-|`us_broswer_version`| Dimension | The browser version derived from user agent  | Query from analytics engine|
+|`us_browser`| Dimension | The browser derived from user agent  | Query from analytics engine|
+|`us_browser_version`| Dimension | The browser version derived from user agent  | Query from analytics engine|
 |`us_os`| Dimension | The operating system derived from user agent  | Query from analytics engine|
 |`us_device`| Dimension | The device derived from user agent  | Query from analytics engine|
 |`us_device_category`| Dimension | The device category derived from user agent  | Query from analytics engine|

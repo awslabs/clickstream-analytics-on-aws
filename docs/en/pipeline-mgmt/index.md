@@ -33,12 +33,12 @@ Before you start to configure the pipeline in a specific region, make sure you h
 
 - At least one Amazon VPC.
 - At least two public subnets across two AZs in the VPC.
-- At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets acroos two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create [VPC endpoints][vpc-endpoints] for below AWS services,
+- At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create [VPC endpoints][vpc-endpoints] for below AWS services,
     - `s3`, `logs`, `ecr.api`, `ecr.dkr`, `ecs`, `ecs-agent`, `ecs-telemetry`.
     - `kinesis-streams` if you use KDS as sink buffer in ingestion module.
     - `emr-serverless`, `glue` if you enable data processing module.
     - `redshift-data`, `sts`, `dynamodb`, `states` and `lambda` if you enable Redshift as analytics engine in data modeling module.
-- a S3 bucket locates in the same region.
+- an Amazon S3 bucket located in the same Region.
 - If you need to enable Redshift Serverless as analytics engine in data modeling module, you need have subnets across at least three AZs.
 - QuickSight Enterprise edition subscription is required if the reporting is enable.
 

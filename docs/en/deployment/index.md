@@ -4,7 +4,7 @@ Before you launch the solution, review the architecture, supported regions, and 
 
 ## Prerequisites
 
-Review all the [considerations](../plan-deployment/cost.md) and make sure you have the following in the target region you want to deploy the solution:
+Review all the [considerations](../plan-deployment/cost.md) and make sure you have the following in the target Region you want to deploy the solution:
 
 - At least two vacant S3 buckets.
 

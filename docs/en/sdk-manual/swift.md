@@ -18,7 +18,7 @@ Clickstream requires Xcode 13.4 or higher to build.
 
 ### 1.Add Package
 
-We use **Swift Package Manager** to distribute Clickstream Swift SDK, open your project in Xcode and select **File > Add Pckages**.
+We use **Swift Package Manager** to distribute Clickstream Swift SDK, open your project in Xcode and select **File > Add Packages**.
 
 ![](../images/sdk-manual/swift_add_package.png)
 
@@ -28,7 +28,7 @@ Enter the Clickstream Library for Swift GitHub repo URL (`https://github.com/aws
 
 ### 2.Parameter configuration
 
-Downlod your `amplifyconfiguration.json` file from your Clickstream solution control plane, and paste it to your project root folder:
+Download your `amplifyconfiguration.json` file from your Clickstream solution control plane, and paste it to your project root folder:
 
 ![](../images/sdk-manual/swift_add_amplify_config_json_file.png)
 
@@ -99,7 +99,7 @@ do {
 
 > Note: this configuation will override the default configuation in `amplifyconfiguration.json` file
 
-### 5.Recored event
+### 5.Record event
 
 Add the following code where you need to report an event.
 
@@ -153,7 +153,7 @@ In order to improve the efficiency of querying and analysis, we need to limit ev
 | Length of event name            | under 25 character  | 50 character        | throw error                   |
 | Length of event attribute name  | under 25 character  | 50 character        | discard, log and record error |
 | Length of event attribute value | under 100 character | 1024 character      | discard, log and record error |
-| Event attribute per event       | under 50 attribute  | 500 evnet attribute | discard, log and record error |
+| Event attribute per event       | under 50 attribute  | 500 event attribute | discard, log and record error |
 | User attribute number           | under 25 attribute  | 100 user attribute  | discard, log and record error |
 | Length of User attribute name   | under 25 character  | 50 character        | discard, log and record error |
 | Length of User attribute value  | under 50 character  | 256 character       | discard, log and record error |
@@ -162,7 +162,7 @@ In order to improve the efficiency of querying and analysis, we need to limit ev
 
 - The character limits are the same for single-width character languages (e.g., English) and double-width character languages (e.g., Chinese).
 - The limit of event attribute per event include common attributes and preset attributes.
-- If add the same name of attribute or user attribute more than twice, the value will be covered by the laste value.
+- If you add the same name of attribute or user attribute more than twice, the last value applies.
 
 ## Preset events and attributes
 
@@ -258,7 +258,7 @@ In Clickstream Swift SDK, we define the `user_engagement` as the app is in the f
 }
 ```
 
-All user attributes will be occour in `user` object, and all custom and global attribute are store in `attributes` object.
+All user attributes will be included in `user` object, and all custom and global attribute are stored in `attributes` object.
 
 #### Reserved attributes
 
@@ -276,7 +276,7 @@ All user attributes will be occour in `user` object, and all custom and global a
 | attribute name                     | description                                                                                                 |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | _traffic_source_medium             | Reserved for traffic medium, use this attribute to store the medium that acquired user when events were logged.                                                                                |
-| _traffic_source_name               | Reserved for traffic name, use this attribute to store the marketing campagin that acquired user when events were logged.  |
+| _traffic_source_name               | Reserved for traffic name, use this attribute to store the marketing campaign that acquired user when events were logged.  |
 | _traffic_source_source             | Reserved for traffic source,  Name of the network source that acquired the user when the event were reported.  |
 | _channel                           | the channel for app was downloaded                                                                             |
 | _device_vendor_id                  |                                                                                                          |

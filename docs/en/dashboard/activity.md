@@ -14,7 +14,7 @@ Activity report are created based on the following QuickSight datasets:
 - `Clickstream_Events` that connects to the `clickstream-ods-events` view in analytics engines (i.e., Redshift or Athena)
 - `Clickstream_Event_Attributes` that connects to the `clickstream-event-parameter` view in analytics engines  
 
-Below is the SQL command that generates the related veiws.
+Below is the SQL command that generates the related views.
 ??? SQL Commands
     === "Redshift"
         ```sql
@@ -160,7 +160,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 
 |Field | Type| What is it | How it's populated|
 |----------|---|---------|--------------------|
-|`event_id`| Dimension | A SDK-generated unique id for the event user triggered when useing your websites and apps | Query from analytics engine|
+|`event_id`| Dimension | A SDK-generated unique id for the event user triggered when using your websites and apps | Query from analytics engine|
 |`event_name`| Dimension |The name of the event  | Query from analytics engine|
 |`platform`| Dimension | The platform user used during the session  | Query from analytics engine|
 |`Event User Type`| Dimension | The type of user performed the event, i.e., new user or existing user  | Calculated field in QuickSight|

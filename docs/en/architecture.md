@@ -58,7 +58,7 @@ Suppose you create a data pipeline in the solution and enable ETL. This solution
 
 1. Amazon EventBridge is used to trigger the ETL jobs periodically.
 2. The configurable time-based scheduler invokes an AWS Lambda function.
-3. The Lambda function will kick off an EMR Serverless application based on Spark to process a batch of clickstream events.
+3. The Lambda function kicks off an EMR Serverless application based on Spark to process a batch of clickstream events.
 4. The EMR Serverless application uses the configurable transformer and enrichment plug-ins to process the clickstream events from the source S3 bucket.
 5. After processing the clickstream events, the EMR Serverless application sinks the processed events to the sink S3 bucket.
 
@@ -73,14 +73,14 @@ Suppose you create a data pipeline in the solution and enable ETL. This solution
 Suppose you create a data pipeline in the solution and enable data modeling in Amazon Redshift. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.
 
 1. After the processed clickstream events data is written in the Amazon S3 bucket, the `Object Created Event` is emitted.
-2. A rule in Amazon EventBridge is created for the event emitted in step 1, and an AWS Lambda function is invoked when the event happens.
-3. The Lambda function persists the source event in an Amazon DynamoDB table as an item to be loaded.
+2. An Amazon EventBridge rule is created for the event emitted in step 1, and an AWS Lambda function is invoked when the event happens.
+3. The Lambda function persists the source event to be loaded in an Amazon DynamoDB table.
 4. When data processing job is done, an event is emitted to Amazon EventBridge.
 5. The pre-defined event rule of Amazon EventBridge processes the `EMR job success event`.
-6. The rule invokes its target that is an AWS Step Functions workflow.
-7. The workflow starts with a Lambda function that queries the DynamoDB table to find out the data to be loaded, then creates a manifest file for a batch of event data to optimize the load performance.
-8. After waiting seconds, another Lambda function starts to check the status of loading job.
-9. If the load is still in progress, it waits another seconds.
+6. The rule invokes the AWS Step Functions workflow.
+7. The workflow invokes the `list objects` Lambda function that queries the DynamoDB table to find out the data to be loaded, then creates a manifest file for a batch of event data to optimize the load performance.
+8. After a few seconds, the `check status` Lambda function starts to check the status of loading job.
+9. If the load is still in progress, the `check status` Lambda function waits a few more seconds.
 10. After all objects are loaded, the workflow ends.
 
 <figure markdown>
@@ -90,7 +90,7 @@ Suppose you create a data pipeline in the solution and enable data modeling in A
 
 Suppose you create a data pipeline in the solution and enable data modeling in Amazon Athena. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.
 
-1. Amazon EventBridge triggers the data load into [Amazon Athena](https://aws.amazon.com/athena/) periodically.
+1. Amazon EventBridge initiates the data load into [Amazon Athena](https://aws.amazon.com/athena/) periodically.
 2. The configurable time-based scheduler invokes an AWS Lambda function.
 3. The AWS Lambda function creates the partitions of the [AWS Glue](https://aws.amazon.com/glue/) table for the processed clickstream data.
 4. Amazon Athena is used for interactive querying of clickstream events.

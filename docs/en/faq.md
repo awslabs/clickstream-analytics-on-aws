@@ -7,7 +7,7 @@ An AWS Solution that enables customers to build clickstream analytic system on A
 ## SDK
 
 **Q: Can I use other SDK to send data to the pipeline created by this solution**<br>
-Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data procesing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map thrid-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
+Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
 
 ## Setup and configuration
 **Q: How can I create more users for this solution?**</br>

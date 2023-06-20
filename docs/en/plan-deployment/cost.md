@@ -8,7 +8,7 @@ weight: 1
 
     The following cost estimations are examples and may vary depending on your environment. 
 
-You are responsible for the cost of Amazon cloud technology services used when running this solution. The majority of the cost for this solution is incurred by the data pipeline. As of June 2023, the main factors affecting the solution cost include:
+You are responsible for the cost of Amazon cloud technology services used when running this solution. The majority of the cost for this solution is incurred by the data pipeline. As of this revision, the main factors affecting the solution cost include:
 
 - **Ingestion module**, the cost depends on the size of the ingestion server and the type of the data sink you choose.
 
@@ -18,13 +18,13 @@ You are responsible for the cost of Amazon cloud technology services used when r
 
 - **Volume of clickstream data** 
 
-- **Additonal features**
+- **Additional features**
 
 The following are cost estimations for daily data volumes of 10/100/1000/10000 RPS (request per second) with different data pipeline configurations. Cost estimation are provided by modules. To get a total cost for your use case, sum the cost by modules based on your actual configuration.
 
 !!! Important "Important"
 
-    As of June 2023, the following cost is calculated with `On-Demand` prices in `us-east-1` region measured in USD.
+    As of this revision, the following cost is calculated with `On-Demand` prices in `us-east-1` region measured in USD.
 
 ## Ingestion module
 

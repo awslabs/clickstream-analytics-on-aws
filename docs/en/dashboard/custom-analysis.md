@@ -1,6 +1,6 @@
 # Custom report
-One of the key benefits of this solution is that you have 100% control over the clickstream data collected from your apps and websites. You have complete flexbility to analyze the data for your specific business needs. 
-This article illustrates the steps of creating a custom report with an example of creating funnel analysis by using Redshfit Serverless as analytics engine and QuickSight as reporting tools.
+One of the key benefits of this solution is that you have 100% control over the clickstream data collected from your apps and websites. You have complete flexibility to analyze the data for your specific business needs. 
+This article illustrates the steps of creating a custom report with an example of creating funnel analysis by using Redshift Serverless as analytics engine and QuickSight as reporting tools.
 
 ## Steps 
 

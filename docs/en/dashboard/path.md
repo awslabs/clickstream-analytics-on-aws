@@ -102,7 +102,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`event_date`| Dimension | The event data of when the device information was logged | Query from analytics engine|
 |`event_timestamp`| Dimension | The timestamp when event happened  | Query from analytics engine|
 |`platform`| Dimension | The platform user used when event is logged  | Query from analytics engine|
-|`session_id`| Dimension | A SDK-generated unique id for the session user triggered when useing your websites and apps | Query from analytics engine|
+|`session_id`| Dimension | A SDK-generated unique id for the session user triggered when using your websites and apps | Query from analytics engine|
 |`current_screen`| Dimension | The screen user is on for the event, 'null' for those events are not viewing screen or webpage | Query from analytics engine|
 |`event_rank`| Dimension | The sequence of the event in a session | Query from analytics engine|
 |`previous_event`| Dimension | The  event name of  previous event | Query from analytics engine|

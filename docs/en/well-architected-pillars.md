@@ -28,7 +28,7 @@ This section describes how the principles and best practices of the [reliability
 This section describes how the principles and best practices of the [performance efficiency pillar][performance-efficiency-pillar] were applied when designing this solution.
 
 - The ability to launch this solution in any Region that supports AWS services in this solution such as: Amazon S3, Amazon ECS, Elastic load balancer.
-- Use Serverless architectures remove the need for you to run and maintain physical servers for traditional compute activities.
+- Using serverless architecture removes the need for you to run and maintain physical servers for traditional compute activities.
 - Automatically testing and deploying this solution daily. Reviewing this solution by solution architects and subject matter experts for areas to experiment and improve.
 
 ## Cost optimization

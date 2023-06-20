@@ -196,13 +196,13 @@ The report includes the following dimensions and metrics. You can add more dimen
 
 |Field | Type| What is it | How it's populated|
 |----------|---|---------|--------------------|
-|`session_id`| Dimension | A SDK-generated unique id for the session user triggered when useing your websites and apps | Query from analytics engine|
+|`session_id`| Dimension | A SDK-generated unique id for the session user triggered when using your websites and apps | Query from analytics engine|
 |`user_pseudo_id`| Dimension | A SDK-generated unique id for the user  | Query from analytics engine|
 |`platform`| Dimension | The platform user used during the session  | Query from analytics engine|
 |`session_duration`| Dimension | The length of the session in millisecond  | Query from analytics engine|
 |`session_views`| Metric | Number of screen view or page view within the session  | Query from analytics engine|
 |`engaged_session`| Dimension | Whether the session is engaged or not. </br>`Engaged session is defined as if the session last more than 10 seconds or have two or more screen views page views` | Query from analytics engine|
-|`session_start_timestamp`| Dimension | The start timestame of the session  | Query from analytics engine|
+|`session_start_timestamp`| Dimension | The start timestamp of the session  | Query from analytics engine|
 |`session_engagement_time`| Dimension | The total engagement time of the session in millisecond  | Query from analytics engine|
 |`entry_view`| Dimension | The screen name or page title of the first screen or page user viewed in the session  | Query from analytics engine|
 |`exit_view`| Dimension | The screen name or page title of the last screen or page user viewed in the session  | Query from analytics engine|

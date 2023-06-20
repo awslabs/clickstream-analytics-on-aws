@@ -25,7 +25,7 @@ You can add custom plugins to transform raw event data or enrich the data for yo
     To add custom plugins, you must develop your own plugins firstly, see [Develop Custom Plugins](#develop-custom-plugins)
 
 
-You can add your plugins by click **Add Plugin** buttion, which will open a new window, in which you can upload your plugins.
+You can add your plugins by click **Add Plugin** button, which will open a new window, in which you can upload your plugins.
 
 1. Give the plugin **Name** and **Description**.
 2. Chose **Plugin Type**,
@@ -64,4 +64,4 @@ cd examples/custom-plugins
 
 5. Run gradle to package code to jar `./gradlew clean build`.
 
-6. Get the jar file in build ouput directory `./build/libs/`.
+6. Get the jar file in build output directory `./build/libs/`.
