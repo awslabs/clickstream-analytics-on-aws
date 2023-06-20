@@ -18,11 +18,13 @@ import {
   Context,
 } from 'aws-lambda';
 
+import { JwtPayload } from 'jsonwebtoken';
 import { JWTAuthorizer } from './authorizer';
 import { logger } from '../../common/powertools';
 import { isEmpty } from '../../common/utils';
 
-const issuerInput = process.env.ISSUER;
+const issuerInput = process.env.ISSUER ?? '';
+const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
 
 const denyResult: APIGatewayAuthorizerResult = {
   principalId: 'anonymous',
@@ -42,23 +44,23 @@ const denyResult: APIGatewayAuthorizerResult = {
 };
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent, context: Context)=> {
-  const authResult = await JWTAuthorizer.auth(event.authorizationToken, issuerInput);
-  if (!authResult[0]) {
+  const authorizer = new JWTAuthorizer({
+    issuer: issuerInput,
+    dynamodbTableName: authorizerTable,
+  });
+  const authResult = await authorizer.auth(event.authorizationToken);
+  if (!authResult.success) {
     logger.warn(`authtication failed. Request ID: ${context.awsRequestId}`);
     return denyResult;
   }
 
   logger.info('authtication success.');
-  let email = '';
-  if (!isEmpty(authResult[2])) {
-    email = authResult[2]!.toString();
-  }
-  let username = '';
-  if (!isEmpty(authResult[3])) {
-    username = authResult[3]!.toString();
-  }
+  const principalId = !isEmpty((authResult.jwtPayload as JwtPayload).sub) ? (authResult.jwtPayload as JwtPayload).sub : '';
+  const email = !isEmpty((authResult.jwtPayload as JwtPayload).email) ? (authResult.jwtPayload as JwtPayload).email.toString() : '';
+  const username = !isEmpty((authResult.jwtPayload as JwtPayload).username) ? (authResult.jwtPayload as JwtPayload).username.toString() : '';
+
   return {
-    principalId: authResult[1]!.toString(),
+    principalId: principalId,
     context: {
       email: email,
       username: username,

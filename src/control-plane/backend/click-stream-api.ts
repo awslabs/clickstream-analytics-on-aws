@@ -13,7 +13,6 @@
 
 import path from 'path';
 import {
-  aws_dynamodb,
   aws_iam as iam,
   CfnResource,
   Duration,
@@ -31,7 +30,7 @@ import {
   AuthorizationType,
   IAuthorizer,
 } from 'aws-cdk-lib/aws-apigateway';
-import { AttributeType, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
+import { AttributeType, BillingMode, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import {
   Connections,
   ISecurityGroup,
@@ -66,6 +65,7 @@ export interface ApplicationLoadBalancerProps {
 
 export interface AuthProps {
   readonly issuer: string;
+  readonly authorizerTable: Table;
 }
 
 export interface ApiGatewayProps {
@@ -91,27 +91,27 @@ export class ClickStreamApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
 
-    const dictionaryTable = new aws_dynamodb.Table(this, 'ClickstreamDictionary', {
+    const dictionaryTable = new Table(this, 'ClickstreamDictionary', {
       partitionKey: {
         name: 'name',
-        type: aws_dynamodb.AttributeType.STRING,
+        type: AttributeType.STRING,
       },
-      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
       encryption: TableEncryption.AWS_MANAGED,
     });
 
-    const clickStreamTable = new aws_dynamodb.Table(this, 'ClickstreamMetadata', {
+    const clickStreamTable = new Table(this, 'ClickstreamMetadata', {
       partitionKey: {
         name: 'id',
-        type: aws_dynamodb.AttributeType.STRING,
+        type: AttributeType.STRING,
       },
       sortKey: {
         name: 'type',
-        type: aws_dynamodb.AttributeType.STRING,
+        type: AttributeType.STRING,
       },
-      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
       encryption: TableEncryption.AWS_MANAGED,
@@ -288,6 +288,7 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
         ISSUER: props.authProps?.issuer ?? '',
+        AUTHORIZER_TABLE_NAME: props.authProps?.authorizerTable.tableName ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
         HEALTH_CHECK_PATH: props.healthCheckPath,
@@ -302,6 +303,9 @@ export class ClickStreamApiConstruct extends Construct {
 
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
+    if (props.authProps?.authorizerTable) {
+      props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
+    }
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
 

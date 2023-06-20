@@ -17,9 +17,10 @@ import {
   Stack,
   StackProps,
   Fn,
-  CfnOutput, Aws,
+  CfnOutput, Aws, RemovalPolicy,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { AttributeType, BillingMode, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Vpc, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -205,6 +206,18 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       throw new Error('Application Load Balancer VPC create error.');
     }
 
+    const authorizerTable = new Table(this, 'AuthorizerCache', {
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+      encryption: TableEncryption.AWS_MANAGED,
+      timeToLiveAttribute: 'ttl',
+    });
+
     const healthCheckPath = '/';
 
     const pluginPrefix = 'plugins/';
@@ -217,6 +230,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       },
       authProps: {
         issuer: issuer,
+        authorizerTable: authorizerTable,
       },
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,

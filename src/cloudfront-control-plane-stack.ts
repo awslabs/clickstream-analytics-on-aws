@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, RemovalPolicy, Stack, StackProps, aws_dynamodb } from 'aws-cdk-lib';
 import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -30,6 +30,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
+import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -231,18 +232,32 @@ export class CloudFrontControlPlaneStack extends Stack {
       clientId = oidcParameters.oidcClientId.valueAsString;
     }
 
+    const authorizerTable = new aws_dynamodb.Table(this, 'AuthorizerCache', {
+      partitionKey: {
+        name: 'id',
+        type: aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+      encryption: TableEncryption.AWS_MANAGED,
+      timeToLiveAttribute: 'ttl',
+    });
+
     const authFunction = new NodejsFunction(this, 'AuthorizerFunction', {
       runtime: props?.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
         ISSUER: issuer,
+        AUTHORIZER_TABLE: authorizerTable.tableName,
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(15),
       architecture: props?.targetToCNRegions ? undefined : Architecture.ARM_64,
       logRetention: RetentionDays.TEN_YEARS,
     });
+    authorizerTable.grantReadWriteData(authFunction);
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
       ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
     ]);

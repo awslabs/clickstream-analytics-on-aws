@@ -13,6 +13,7 @@
 
 import express from 'express';
 import { body, header, param, query } from 'express-validator';
+import { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './common/constants';
 import { logger } from './common/powertools';
 import {
@@ -51,7 +52,8 @@ const pipelineServ: PipelineServ = new PipelineServ();
 const environmentServ: EnvironmentServ = new EnvironmentServ();
 const pluginServ: PluginServ = new PluginServ();
 
-const issuerEnv = process.env.ISSUER;
+const issuerInput = process.env.ISSUER ?? '';
+const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
 
 app.use(express.json({ limit: '384kb' }));
 
@@ -72,7 +74,7 @@ app.use(function (req: express.Request, _res: express.Response, next: express.Ne
 
 // Implement authorization middleware function
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  let email = 'unknown';
+  let operator = '';
   const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
   if (WITH_AUTH_MIDDLEWARE === 'true' && req.url !== process.env.HEALTH_CHECK_PATH) {
     // ALB control plane get IdToken from header
@@ -85,8 +87,13 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
       });
     } else {
       try {
-        const isAuthorized = await JWTAuthorizer.auth(authorization, issuerEnv);
-        if (!isAuthorized[0]) {
+        const authorizer = new JWTAuthorizer({
+          issuer: issuerInput,
+          dynamodbTableName: authorizerTable,
+        });
+
+        const authResult = await authorizer.auth(authorization);
+        if (!authResult.success) {
           const requestId = req.get('X-Click-Stream-Request-Id');
           logger.warn(`Authentication failed. Request ID: ${requestId}`);
           return res.status(403).send({
@@ -94,8 +101,11 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
             message: 'Invalid token provided.',
           });
         }
-        if (!isEmpty(isAuthorized[2])) {
-          email = isAuthorized[2]!.toString();
+
+        if (!isEmpty((authResult.jwtPayload as JwtPayload).email)) {
+          operator = (authResult.jwtPayload as JwtPayload).email.toString();
+        } else if (!isEmpty((authResult.jwtPayload as JwtPayload).username)) {
+          operator = (authResult.jwtPayload as JwtPayload).username.toString();
         }
       } catch (err: any) {
         if (err instanceof Error && err.message == ERR_OPENID_CONFIGURATION) {
@@ -113,9 +123,9 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
     }
   } else {
     // Cloudfront control plane
-    email = getEmailFromRequestContext(req.get(amznRequestContextHeader));
+    operator = getEmailFromRequestContext(req.get(amznRequestContextHeader));
   }
-  res.set('X-Click-Stream-Operator', email);
+  res.set('X-Click-Stream-Operator', operator);
   return next();
 });
 

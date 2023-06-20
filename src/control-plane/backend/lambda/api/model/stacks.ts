@@ -47,7 +47,7 @@ import {
   PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
-import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix } from '../common/utils';
+import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail } from '../common/utils';
 
 export class CIngestionServerStack extends JSONObject {
 
@@ -1248,7 +1248,7 @@ export class CMetricsStack extends JSONObject {
     const projectEmails = resources.project?.emails?.split(',');
     const operators = pipeline.operator.split(',');
     const emailList = projectEmails?.concat(operators);
-    const emails = emailList?.filter(op => op !== 'unknown' && !isEmpty(op));
+    const emails = emailList?.filter(op => isEmail(op));
     const uniqueEmails = [...new Set(emails)];
 
     super({

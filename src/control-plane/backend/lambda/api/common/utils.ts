@@ -13,7 +13,7 @@
 
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
-import { ALBLogServiceAccountMapping, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
+import { ALBLogServiceAccountMapping, EMAIL_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, RPURange, RPURegionMappingObject, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
@@ -26,6 +26,18 @@ function isEmpty(a: any): boolean {
   if (Array.prototype.isPrototypeOf(a) && a.length === 0) return true; //Verify empty array
   if (Object.prototype.isPrototypeOf(a) && Object.keys(a).length === 0) return true; //Verify empty objects
   return false;
+}
+
+function isEmail(str: string): boolean {
+  if (isEmpty(str)) {
+    return false;
+  }
+  const regexp = new RegExp(EMAIL_PATTERN);
+  const match = str.match(regexp);
+  if (!match || str !== match[0]) {
+    return false;
+  }
+  return true;
 }
 
 function tryToJson(s: string): any {
@@ -78,12 +90,12 @@ function generateRandomStr(length: number) {
 }
 
 function getEmailFromRequestContext(requestContext: string | undefined) {
-  let email = 'unknown';
+  let email = '';
   try {
     if (requestContext) {
       // Api Gateway pass the request context to the backend
       const context = JSON.parse(requestContext);
-      email = context.authorizer.email ?? 'unknown';
+      email = context.authorizer.email ?? '';
     }
   } catch (err) {
     logger.warn('unknown user', {
@@ -387,6 +399,7 @@ function checkPolicy(policy: Policy, principal: { key: string; value: string }, 
 
 export {
   isEmpty,
+  isEmail,
   tryToJson,
   getValueFromTags,
   getALBLogServiceAccount,
