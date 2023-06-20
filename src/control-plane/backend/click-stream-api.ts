@@ -234,6 +234,7 @@ export class ClickStreamApiConstruct extends Construct {
             'ds:DeleteDirectory',
             'ds:CreateIdentityPoolDirectory',
             's3:GetBucketLocation',
+            's3:GetBucketPolicy',
             'route53:ListHostedZones',
             'athena:ListWorkGroups',
             'iam:ListRoles',

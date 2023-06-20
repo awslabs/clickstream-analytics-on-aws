@@ -561,6 +561,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'ds:DeleteDirectory',
               'ds:CreateIdentityPoolDirectory',
               's3:GetBucketLocation',
+              's3:GetBucketPolicy',
               'route53:ListHostedZones',
               'athena:ListWorkGroups',
               'iam:ListRoles',

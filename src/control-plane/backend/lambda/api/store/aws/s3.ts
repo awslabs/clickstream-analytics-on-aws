@@ -21,6 +21,7 @@ import {
   GetBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
+import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
 
@@ -85,6 +86,7 @@ export async function getS3Object(region: string, bucket: string, key: string): 
     const bodyContents = await streamToString(Body);
     return bodyContents;
   } catch (error) {
+    logger.error('get S3 bucket object error ', { error });
     return undefined;
   }
 }
@@ -101,6 +103,7 @@ export const getS3BucketPolicy = async (region: string, bucket: string) => {
     const result = await s3Client.send(params);
     return result.Policy;
   } catch (error) {
+    logger.error('get S3 bucket policy error ', { error });
     return undefined;
   }
 };
