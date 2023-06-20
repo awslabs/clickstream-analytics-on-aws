@@ -24,22 +24,22 @@ FROM
         ,event_id
         ,platform
         ,(select 
-            ep.value.string_value as value 
+            max(ep.value.string_value) as value
         from base e cross join unnest(event_params) as t(ep) 
         where 
             ep.key = '_session_id' and e.event_id = ods.event_id) session_id
         ,cast((select 
-            ep.value.int_value as value 
+            max(ep.value.int_value) as value
         from base e cross join unnest(event_params) as t(ep) 
         where 
             ep.key = '_session_duration' and e.event_id = ods.event_id) as integer) session_duration
         ,cast((select 
-            ep.value.int_value as value 
+            max(ep.value.int_value) as value
         from base e cross join unnest(event_params) as t(ep) 
         where 
             ep.key = '_session_start_timestamp' and e.event_id = ods.event_id) as bigint) session_st
         ,cast((select 
-            ep.value.int_value as value 
+            max(ep.value.int_value) as value
         from base e cross join unnest(event_params) as t(ep) 
         where 
             ep.key = '_engagement_time_msec' and event_name = '_user_engagement' and e.event_id = ods.event_id) as integer)  as engagement_time

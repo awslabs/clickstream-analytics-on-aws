@@ -23,22 +23,30 @@ FROM
             ep.value.string_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
-            ep.key = '_session_id' and e.event_id = ods.event_id) session_id
+            ep.key = '_session_id' and e.event_id = ods.event_id
+        limit 1
+        ) session_id
         ,(select 
             ep.value.int_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
-            ep.key = '_session_duration' and e.event_id = ods.event_id) session_duration
+            ep.key = '_session_duration' and e.event_id = ods.event_id
+        limit 1
+        ) session_duration
         ,(select 
             ep.value.int_value::bigint as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
-            ep.key = '_session_start_timestamp' and e.event_id = ods.event_id) session_st
+            ep.key = '_session_start_timestamp' and e.event_id = ods.event_id
+        limit 1
+        ) session_st
         ,(select 
             ep.value.int_value as value 
         from {{schema}}.ods_events e, e.event_params ep 
         where 
-            ep.key = '_engagement_time_msec' and event_name = '_user_engagement' and e.event_id = ods.event_id) as engagement_time
+            ep.key = '_engagement_time_msec' and event_name = '_user_engagement' and e.event_id = ods.event_id
+        limit 1
+        ) as engagement_time
         ,(case when event_name in ('_screen_view', '_page_view') then 1 else 0 end) as view
     FROM {{schema}}.ods_events ods
 ) AS es
