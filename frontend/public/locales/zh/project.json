@@ -13,7 +13,7 @@
     "id": "项目编号",
     "name": "项目名称",
     "platform": "应用程序平台",
-    "created": "创作时间",
+    "created": "创建时间",
     "notifyEmail": "通知电子邮件",
     "envType": "环境类型",
     "description": "描述"
