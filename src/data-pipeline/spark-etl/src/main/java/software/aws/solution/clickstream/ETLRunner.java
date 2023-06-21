@@ -135,7 +135,7 @@ public class ETLRunner {
                     .schema(inputDataSchema)
                     .json(sourcePathsArray[i]);
             log.info("read source " + i + ", path:" + sourcePathsArray[i]);
-            dataset.unionAll(datasetTemp);
+            dataset = dataset.unionAll(datasetTemp);
         }
 
         if (config.isSaveInfoToWarehouse()) {
@@ -238,7 +238,7 @@ public class ETLRunner {
         long milliSec = milliSecStart;
 
         while (milliSec <= milliSecEnd) {
-            String[] tempDayParts = getUTCYearMonthDay(milliSecEnd);
+            String[] tempDayParts = getUTCYearMonthDay(milliSec);
             if (!isDayEqual(endDayParts, tempDayParts)) {
                 partitions.add(tempDayParts);
             }

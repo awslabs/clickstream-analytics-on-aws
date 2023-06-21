@@ -33,6 +33,37 @@ import static org.junit.jupiter.api.Assertions.*;
 class ETLRunnerTest extends BaseSparkTest {
 
     @Test
+    public void should_read_dataset_cross_multi_days() {
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
+        String jobDataDir = "/tmp/job-data";
+        String transformerClassNames = String.join(",");
+        String outputPath = "/tmp/test-output";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
+        String endTimestamp = "1668136766000"; // 2022-11-11T03:19:26.000Z
+        String dataFreshnessInHour = "72";
+        String outputPartitions = "-1";
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                "true",
+                database,
+                sourceTable,
+                sourcePath,
+                jobDataDir,
+                newArrayList(transformerClassNames.split(",")),
+                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
+                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        Dataset<Row> dataset = runner.readInputDataset(false);
+        assertEquals(9, dataset.count());
+    }
+
+    @Test
     public void should_readDataset() {
         String database = "default";
         String sourceTable = "fakeSourceTable";
