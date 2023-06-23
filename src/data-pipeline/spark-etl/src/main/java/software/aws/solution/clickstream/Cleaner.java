@@ -29,6 +29,7 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.*;
+import org.apache.spark.storage.StorageLevel;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -111,7 +112,7 @@ public class Cleaner {
     public Dataset<Row> clean(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "clean enter").toString());
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
-        decodedDataset.cache();
+        decodedDataset.persist(StorageLevel.MEMORY_AND_DISK());
         log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
         Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
         log.info(new ETLMetric(flattedDataset, "flatted source").toString());
@@ -124,6 +125,7 @@ public class Cleaner {
             flattedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-1-flattedDataset/");
             structuredDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/clean-2-structuredDataset/");
         }
+        decodedDataset.unpersist();
         return filteredDataSet;
     }
 

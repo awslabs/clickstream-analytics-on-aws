@@ -84,13 +84,33 @@ export class EMRServerlessUtil {
     }
 
     logger.info('funcTags', { funcTags });
+    let sparkConfigEvent: string[] = event.sparkConfig || [];
+    let sparkConfigS3: string[] = [];
+    let s3OutputPartitions = undefined;
+    let s3InputRePartitions = undefined;
+
+    let sparkConfigS3Obj = await readS3ObjectAsJson(config.pipelineS3BucketName,
+      `${config.pipelineS3Prefix}${config.projectId}/config/spark-config.json`,
+    );
+
+    if (sparkConfigS3Obj && sparkConfigS3Obj.sparkConfig) {
+      sparkConfigS3 = sparkConfigS3Obj.sparkConfig;
+    }
+
+    if (sparkConfigS3Obj) {
+      s3OutputPartitions = sparkConfigS3Obj.outputPartitions;
+      s3InputRePartitions = sparkConfigS3Obj.inputRePartitions;
+    }
 
     const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
       event,
       config,
     );
 
-    const jobName = process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
+    const outputPartitions = (event.outputPartitions || s3OutputPartitions || config.outputPartitions) + '';
+    const rePartitions = (event.inputRePartitions || s3InputRePartitions || config.rePartitions) + '';
+
+    const jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
 
     const sinkPrefix = getSinkTableLocationPrefix(config.sinkS3Prefix, config.projectId, config.sinkTableName);
 
@@ -110,8 +130,8 @@ export class EMRServerlessUtil {
       config.appIds, // [10] app_ids
       `${config.dataFreshnessInHour}`, // [11] dataFreshnessInHour,
       config.outputFormat, // [12] outputFormat,
-      config.outputPartitions, // [13] outputPartitions
-      config.rePartitions, // [14] rePartitions.
+      outputPartitions, // [13] outputPartitions
+      rePartitions, // [14] rePartitions.
     ];
 
     const jars = Array.from(
@@ -135,11 +155,27 @@ export class EMRServerlessUtil {
 
     // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/metastore-config.html
     // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
-    sparkSubmitParameters.push('--conf', 'spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory');
-    sparkSubmitParameters.push('--conf', 'spark.driver.cores=4');
-    sparkSubmitParameters.push('--conf', 'spark.driver.memory=14g');
-    sparkSubmitParameters.push('--conf', 'spark.executor.cores=4');
-    sparkSubmitParameters.push('--conf', 'spark.executor.memory=14g');
+    const defaultConfig = [
+      'spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory',
+      'spark.driver.cores=4',
+      'spark.driver.memory=14g',
+      'spark.executor.cores=4',
+      'spark.executor.memory=14g',
+    ];
+
+    const configMap = new Map<string, string>();
+    for (let it of [...defaultConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
+      const m = it.match(/(.*)=(.*)/);
+      if (m) {
+        const key = m[1];
+        const value = m[2];
+        configMap.set(key, value);
+      }
+    }
+
+    for (let [confKey, confVal] of configMap.entries()) {
+      sparkSubmitParameters.push('--conf', `${confKey}=${confVal}`);
+    }
 
     const startJobRunCommandInput: StartJobRunCommandInput = {
       applicationId: config.emrServerlessApplicationId,

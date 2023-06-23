@@ -158,6 +158,71 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     expect(actParam).toEqual(expectedStartParam);
   });
 
+  test('start data processing job with event input jobName, sparkConfig and partitions', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
+    await EMRServerlessUtil.start({
+      jobName: 'test-sparkConfig-job',
+      startTimestamp: '2023-03-12T09:33:26.572Z',
+      endTimestamp: '2023-03-13T09:33:26.572Z',
+      sparkConfig: [
+        'spark.executor.memory=50g',
+        'spark.executor.cores=8',
+        'spark.executor.test=test001',
+      ],
+      inputRePartitions: 90,
+      outputPartitions: 120,
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+
+    const expectedStartParam = {
+      applicationId: 'testApplicationId',
+      executionRoleArn: 'arn:aws::role:role1',
+      name: 'test-sparkConfig-job',
+      jobDriver: {
+        sparkSubmit: {
+          entryPoint: 's3://test/main.jar',
+          entryPointArguments: [
+            'true',
+            'test_db',
+            'source_table',
+            '1678613606572',
+            '1678700006572',
+            's3://test-bucket-src/src-prefix/',
+            's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-sparkConfig-job', // pipeline data path
+            'com.test.ClassMain,com.test.ClassMainTest',
+            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            'test_proj_001',
+            'app1,app2',
+            '24',
+            'json',
+            '120',
+            '90',
+          ],
+          sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
+--jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
+--files s3://test/test1.txt,s3://test/test2.txt \
+--conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
+--conf spark.driver.cores=4 --conf spark.driver.memory=14g \
+--conf spark.executor.cores=8 --conf spark.executor.memory=50g \
+--conf spark.executor.test=test001',
+        },
+      },
+      tags: functionTags,
+      configurationOverrides: {
+        monitoringConfiguration:
+        {
+          s3MonitoringConfiguration:
+          {
+            logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
+          },
+        },
+      },
+    };
+    //@ts-ignore
+    const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
+    expect(actParam).toEqual(expectedStartParam);
+  });
+
   test('start data processing job with timestamp - number', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
     await EMRServerlessUtil.start({

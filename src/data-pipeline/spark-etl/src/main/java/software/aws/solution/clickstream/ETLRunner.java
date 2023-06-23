@@ -24,6 +24,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.storage.StorageLevel;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 
 import javax.validation.constraints.NotEmpty;
@@ -55,12 +56,13 @@ public class ETLRunner {
 
         Dataset<Row> dataset = readInputDataset(true);
         int inputDataPartitions = dataset.rdd().getNumPartitions();
-        if (config.getRePartitions() < inputDataPartitions) {
+        if (config.getRePartitions() > 0 && config.getRePartitions() < inputDataPartitions) {
             log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.getRePartitions());
             dataset = dataset.repartition(config.getRePartitions());
         }
         log.info("NumPartitions: " + dataset.rdd().getNumPartitions());
-        dataset.cache();
+        dataset.persist(StorageLevel.MEMORY_AND_DISK());
+
         log.info(new ETLMetric(dataset, "source").toString());
 
         Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
@@ -111,7 +113,8 @@ public class ETLRunner {
                         DataTypes.createStructField("appId", DataTypes.StringType, true),
                         DataTypes.createStructField("compression", DataTypes.StringType, true),
                         DataTypes.createStructField("ingest_time", DataTypes.LongType, true),
-                        DataTypes.createStructField("server_ingest_time", DataTypes.LongType, true)
+                        DataTypes.createStructField("server_ingest_time", DataTypes.LongType, true),
+                        DataTypes.createStructField("hour", DataTypes.IntegerType   , true)
                 }
         );
 
@@ -142,7 +145,7 @@ public class ETLRunner {
             Dataset<Row> readFileDataset = spark.read().format("binaryFile").options(options).load(sourcePathsArray[0]);
             for (int i = 1; i < sourcePathsArray.length; i++) {
                 Dataset<Row> fileDatasetTemp = spark.read().format("binaryFile").options(options).load(sourcePathsArray[i]);
-                readFileDataset.unionAll(fileDatasetTemp);
+                readFileDataset = readFileDataset.unionAll(fileDatasetTemp);
             }
 
             readFileDataset = readFileDataset.select(col("path"), col("modificationTime"), col("length"));

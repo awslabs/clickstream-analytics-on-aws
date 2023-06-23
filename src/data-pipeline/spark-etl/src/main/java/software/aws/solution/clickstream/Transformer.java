@@ -19,6 +19,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.storage.StorageLevel;
 
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
@@ -33,6 +34,7 @@ public final class Transformer {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "transform enter").toString());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
+        cleanedDataset.persist(StorageLevel.MEMORY_AND_DISK());
         log.info(new ETLMetric(cleanedDataset, "after clean").toString());
 
         Dataset<Row> dataset1 = retrieveEventParams(cleanedDataset);
@@ -51,6 +53,8 @@ public final class Transformer {
         if (ContextUtil.isDebugLocal()) {
             dataset10.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/transformed/");
         }
+        cleanedDataset.unpersist();
+        dataset10.persist(StorageLevel.MEMORY_AND_DISK());
         return dataset10;
     }
 
