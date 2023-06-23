@@ -51,7 +51,6 @@ nav:
       - Overview: sdk-manual/index.md
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
-      - Web SDK: sdk-manual/javascript.md
     - Dashboards:
       - Overview: dashboard/index.md
       - Acquisition report: dashboard/acquisition.md
@@ -69,5 +68,4 @@ nav:
     - Developer guide:
         - Source code: source.md
     - Revisions: revisions.md
-    - Contributors: contributor.md
     - Notices: notices.md

@@ -23,28 +23,27 @@ You can choose to use Redshift or Athena, or both.
 You can set below configurations for Redshift.  
 
   * **Redshift Mode**: Select Redshift serverless or provisioned mode.
+
     * **Serverless mode**
 
-        * **Base RPU**: RPU stands for Redshift Processing Unit. Amazon Redshift Serverless measures data warehouse capacity in RPUs, which are resources used to handle workloads. The base capacity specifies the base data warehouse capacity Amazon Redshift uses to serve queries and is specified in RPUs. Setting higher base capacity improves query performance, especially for data processing jobs that consume a lot of resources.  
+        * **Base RPU**: RPU stands for Redshift Processing Unit. Amazon Redshift Serverless measures data warehouse capacity in RPUs, which are resources used to handle workloads. The base capacity specifies the base data warehouse capacity Amazon Redshift uses to serve queries and is specified in RPUs. Setting higher base capacity improves query performance, especially for data processing jobs that consume a lot of resources.
 
-        * **VPC**: A virtual private cloud (VPC) based on the Amazon VPC service is your private, logically isolated network in the AWS Cloud. 
-          
-            > **Note** The VPC must have VPC endpoints for S3, Dynamodb, STS and Redshift and Redshift-data service.
+        * **VPC**: A virtual private cloud (VPC) based on the Amazon VPC service is your private, logically isolated network in the AWS Cloud.
 
-        * **Security Group**: This VPC security group defines which subnets and IP ranges can be used in the VPC.
+            > **Note**: If you place the cluster within the isolated subnets, the VPC must have VPC endpoints for S3, Logs, Dynamodb, STS, States, Redshift and Redshift-data service.
 
-        * **Subnets**: Select at least three existing VPC subnets. 
-        
-            > **Note** We recommend using private subnets to deploy for security issues.  
+        * **Security Group**: This VPC security group defines which subnets and IP ranges can access the endpoint of Redshift cluster.
 
-    * **Provisioned mode**:
-        
-    * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.  
+        * **Subnets**: Select at least three existing VPC subnets.
+
+            > **Note**: We recommend using private subnets to deploy for following security best practices.
+
+    * **Provisioned mode**
+
+    * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.
 
 * **Additional Settings**
 
     * **User table upsert frequency**: Since all versions of user properties are saved in Redshift. We create a user-scoped custom dimension table `dim_users` in DWD layer so the BI dashboard can report on the latest user property. The workflow run on schedule to upsert (update and insert) users.
 
-
 * **Athena**: Choose Athena to query all data on S3 using the table created in the Glue Data Catalog.
-

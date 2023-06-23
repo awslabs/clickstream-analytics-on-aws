@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Clickstream Android SDK can help you easily collect and report in-app events from Android devices to AWS. As part of the solution {{ solution_name }}, this SDK provisions data pipeline to ingest and process event data into AWS services such as Amazon S3, and Amazon Redshift.
+Clickstream Android SDK can help you easily collect and report in-app events from Android devices to AWS. As part of the solution {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as Amazon S3, and Amazon Redshift.
 
 The SDK is based on the Amplify for Android SDK Core Library and developed according to the Amplify Android SDK plug-in specification. In addition, the SDK is equipped with features that automatically collect common user events and attributes (for example, screen view, and first open) to simplify data collection for users.
 
@@ -18,7 +18,7 @@ Add the following dependency to your `app` module's `build.gradle` file.
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.4.1'
+    implementation 'software.aws.solution:clickstream:0.5.1'
 }
 ```
 
@@ -54,7 +54,7 @@ In the file, your `appId` and `endpoint` are already configured. The explanation
 - **endpoint**: the endpoint url you will upload the event to AWS server.
 - **isCompressEvents**: whether to compress event content when uploading events, and the default value is `true`
 - **autoFlushEventsInterval**: event sending interval, and the default value is `10s`
-- **isTrackAppExceptionEvents**: whether auto track exception event in app, and the default value is `true`
+- **isTrackAppExceptionEvents**: whether auto track exception event in app, and the default value is `false`
 
 ### 3. Initialize the SDK
 

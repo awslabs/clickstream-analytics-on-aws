@@ -4,19 +4,72 @@ site_description: Clickstream Analytics on AWS 解决方案实施指南
 docs_dir: zh
 site_dir: ./site/zh
 edit_uri: edit/main/docs/zh/
+extra:
+  solution_name: 亚马逊云科技点击流分析
 theme:
   language: zh
 nav:
   - 实施指南:
-    - 概述: index.md
-    - 成本预估: cost.md
-    - 架构概览: architecture.md
-    - 安全信息: security.md
-    - 区域支持: regions.md
-    - 模板信息: template.md
-    - 部署解决方案: deployment.md
-    - 更多资源: additional resources.md
+    - 解决方案概述:
+        - 概述: solution-overview/index.md
+        - 特性和优势: solution-overview/features-and-benefits.md
+        - 使用案例: solution-overview/use-cases.md
+    - 架构概述:
+        - 架构图: architecture.md
+        - AWS符合架构要求的支柱: well-architected-pillars.md
+    - 架构详细信息:
+        - 解决方案中的AWS服务: aws-services.md
+        - 解决方案的工作原理: architecture-details.md
+    - 计划部署:
+        - 成本: plan-deployment/cost.md
+        - 安全: plan-deployment/security.md
+        - 支持的AWS区域: plan-deployment/regions.md
+    - 部署:
+      - 概述: ./deployment/index.md
+      - Cognito: ./deployment/with-cognito.md
+      - OIDC: ./deployment/with-oidc.md
+      - Vpc内部署: ./deployment/within-vpc.md
+    - 入门指南:
+      - 概述: getting-started/index.md
+      - 步骤1. 创建项目: getting-started/1.create-project.md
+      - 步骤2. 配置数据管道: getting-started/2.config-pipeline.md
+      - 步骤3. 集成SDK: getting-started/3.integrate-sdk.md
+      - 步骤4. 查看仪表盘: getting-started/4.view-dashboard.md
+    - 管道管理:
+      - 概述: pipeline-mgmt/index.md
+      - 数据摄取:
+        - 概述: pipeline-mgmt/ingestion/index.md
+        - 摄取端点: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
+        - 数据宿 - Kafka: pipeline-mgmt/ingestion/create-data-sink-w-kafka.md
+        - 数据宿 - Kinesis: pipeline-mgmt/ingestion/create-data-sink-w-kinesis.md
+        - 数据宿 - S3: pipeline-mgmt/ingestion/create-data-sink-w-s3.md
+      - 数据处理:
+        - 概述: pipeline-mgmt/data-processing/index.md
+        - 数据模式: pipeline-mgmt/data-processing/data-schema.md
+        - 执行参数: pipeline-mgmt/data-processing/configure-execution-para.md
+        - 处理插件: pipeline-mgmt/data-processing/configure-plugin.md
+      - 数据建模: pipeline-mgmt/data-modeling/configure-data-modeling.md
+      - 报告: pipeline-mgmt/quicksight/configure-quicksight.md
+      - 管道管理: pipeline-mgmt/pipe-mgmt.md
+    - SDK手册:
+      - 概述: sdk-manual/index.md
+      - Android SDK: sdk-manual/android.md
+      - Swift SDK: sdk-manual/swift.md
+    - 仪表盘:
+      - 概述: dashboard/index.md
+      - 获取报表: dashboard/acquisition.md
+      - 参与度报表: dashboard/engagement.md
+      - 活动报表: dashboard/activity.md
+      - 留存报表: dashboard/retention.md
+      - 设备报表: dashboard/device.md
+      - 路径探索器: dashboard/path.md
+      - 自定义报表: dashboard/custom-analysis.md
+    - 附加资源:
+      - 上传证书: resources/upload-ssl-certificate.md
+    - 常见问题: faq.md
+    - 故障排除: troubleshooting.md
     - 卸载解决方案: uninstall.md
-    - 源代码: source.md
-    - 文档发布说明: revisions.md
-
+    - 开发者指南:
+      - 源代码: source.md
+    - 修订记录: revisions.md
+    - 注意事项: notices.md

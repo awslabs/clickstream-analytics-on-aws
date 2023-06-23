@@ -11,189 +11,25 @@ Note: This article describes the default report. You can customize the report by
 ## Where the data comes from
 Retention report are created based on the following QuickSight dataset:
 
-- `Clickstream_Lifecycle_Weekly`, which connects to the `clickstream-lifecycle-weekly` view in analytics engines (i.e., Redshift or Athena). 
-- `Clickstream_Lifecycle_Daily`, which connects to the `clickstream-lifecycle-daily` view in analytics engines (i.e., Redshift or Athena). 
-- `Clickstream_Events` that connects to the `clickstream-ods-events` view in analytics engines
+- `lifecycle_weekly_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_weekly_view` view in analytics engines (i.e., Redshift or Athena). 
+- `lifecycle_daily_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_daily_view` view in analytics engines (i.e., Redshift or Athena). 
+- `retention_view-<app id>-<project id>` that connects to the `clickstream_retention_view` view in analytics engines
 
 Below is the SQL command that generates the view.
 ??? SQL Commands
     === "Redshift"
-        ```sql
-        -- clickstream-lifecycle-weekly view
-        with weekly_usage as (
-        select 
-            user_pseudo_id, 
-            -- datediff(week, '1970-01-01', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-            DATE_TRUNC('week', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-        from {{app_id}}.ods_events
-        where event_name = '_session_start' group by 1,2 order by 1,2),
-        -- detect if lag and lead exists
-        lag_lead as (
-        select user_pseudo_id, time_period,
-            lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
-            lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
-        from weekly_usage),
-        -- caculate lag and lead size
-        lag_lead_with_diffs as (
-        select user_pseudo_id, time_period, lag, lead, 
-            datediff(week,lag,time_period) lag_size,
-            datediff(week,time_period,lead) lead_size
-            -- time_period-lag lag_size, 
-            -- lead-time_period lead_size 
-        from lag_lead),
-        -- case to lifecycle stage
-        calculated as (select time_period,
-        case when lag is null then '1-NEW'
-            when lag_size = 1 then '2-ACTIVE'
-            when lag_size > 1 then '3-RETURN'
-        end as this_week_value,
-        case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
-            else NULL
-        end as next_week_churn,
-        count(distinct user_pseudo_id)
-        from lag_lead_with_diffs
-        group by 1,2,3)
-        select time_period, this_week_value, sum(count) 
-        from calculated group by 1,2
-        union
-        select time_period+7, '0-CHURN', -1*sum(count) 
-        from calculated where next_week_churn is not null group by 1,2
-        order by 1;
-
-        -- clickstream-lifecycle-daily view
-        with daily_usage as (
-        select 
-            user_pseudo_id, 
-            -- datediff(week, '1970-01-01', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-            DATE_TRUNC('day', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-        from {{schema}}.ods_events
-        where event_name = '_session_start' group by 1,2 order by 1,2),
-        -- detect if lag and lead exists
-        lag_lead as (
-        select user_pseudo_id, time_period,
-            lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
-            lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
-        from daily_usage),
-        -- caculate lag and lead size
-        lag_lead_with_diffs as (
-        select user_pseudo_id, time_period, lag, lead, 
-            datediff(day,lag,time_period) lag_size,
-            datediff(day,time_period,lead) lead_size
-            -- time_period-lag lag_size, 
-            -- lead-time_period lead_size 
-        from lag_lead),
-        -- case to lifecycle stage
-        calculated as (select time_period,
-        case when lag is null then '1-NEW'
-            when lag_size = 1 then '2-ACTIVE'
-            when lag_size > 1 then '3-RETURN'
-        end as this_day_value,
-        case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
-            else NULL
-        end as next_day_churn,
-        count(distinct user_pseudo_id)
-        from lag_lead_with_diffs
-        group by 1,2,3)
-        select time_period, this_day_value, sum(count) 
-        from calculated group by 1,2
-        union
-        select time_period+1, '0-CHURN', -1*sum(count) 
-        from calculated where next_day_churn is not null group by 1,2
-        order by 1;
-
+        ```sql title="clickstream-lifecycle-weekly-view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/clickstream-lifecycle-weekly-view.sql:6"
+        ```
+        ```sql title="clickstream-lifecycle-dialy-view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/clickstream-lifecycle-daily-view.sql:6"
         ```
     === "Athena"
-        ```sql
-        -- clickstream-lifecycle-weekly-query
-        with weekly_usage as (
-        select 
-            user_pseudo_id, 
-            DATE_TRUNC('week', event_date) as time_period
-        from {{database}}.{{eventTable}}
-        where partition_app = ? 
-            and partition_year >= ?
-            and partition_month >= ?
-            and partition_day >= ?
-            and event_name = '_session_start' group by 1,2 order by 1,2
-        ),
-        lag_lead as (
-        select user_pseudo_id, time_period,
-            lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lag,
-            lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lead
-        from weekly_usage
-        ),
-        lag_lead_with_diffs as (
-        select user_pseudo_id, time_period, lag, lead, 
-            date_diff('week',lag,time_period) lag_size,
-            date_diff('week',time_period,lead) lead_size
-        from lag_lead
-        ),
-        calculated as (
-        select time_period,
-            case when lag is null then '1-NEW'
-            when lag_size = 1 then '2-ACTIVE'
-            when lag_size > 1 then '3-RETURN'
-            end as this_week_value,
-            case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
-            else NULL
-            end as next_week_churn,
-            count(distinct user_pseudo_id) as cnt
-        from lag_lead_with_diffs
-        group by 1,2,3
-        )
-        select time_period, this_week_value, sum(cnt) as cnt from calculated group by 1,2
-        union
-        select date_add('day', 7, time_period), '0-CHURN', -1*sum(cnt) as cnt
-        from calculated 
-        where next_week_churn is not null 
-        group by 1,2
-
-        -- clickstream-lifecycle-daily-query
-        with daily_usage as (
-        select 
-            user_pseudo_id, 
-            DATE_TRUNC('day', event_date) as time_period
-        from {{database}}.{{eventTable}} 
-        where partition_app = ? 
-            and partition_year >= ?
-            and partition_month >= ?
-            and partition_day >= ?
-            and event_name = '_session_start' group by 1,2 order by 1,2
-        ),
-        lag_lead as (
-        select user_pseudo_id, time_period,
-            lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lag,
-            lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lead
-        from daily_usage
-        ),
-        lag_lead_with_diffs as (
-        select user_pseudo_id, time_period, lag, lead, 
-            date_diff('day',lag,time_period) lag_size,
-            date_diff('day',time_period,lead) lead_size
-        from lag_lead
-        ),
-        calculated as (
-        select time_period,
-            case when lag is null then '1-NEW'
-            when lag_size = 1 then '2-ACTIVE'
-            when lag_size > 1 then '3-RETURN'
-            end as this_day_value,
-        
-            case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
-            else NULL
-            end as next_day_churn,
-            count(distinct user_pseudo_id) as cnt
-        from lag_lead_with_diffs
-        group by 1,2,3
-        )
-        select time_period, this_day_value, sum(cnt) as cnt
-        from calculated group by 1,2
-        union
-        select date_add('day', 1, time_period) as time_period, '0-CHURN', -1*sum(cnt) as cnt 
-        from calculated 
-        where next_day_churn is not null 
-        group by 1,2;
-
+        ```sql title="clickstream-lifecycle-weekly-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-weekly-query.sql"
+        ```
+        ```sql title="clickstream-lifecycle-daily-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-daily-query.sql"
         ```
 
 ## Dimensions and metrics

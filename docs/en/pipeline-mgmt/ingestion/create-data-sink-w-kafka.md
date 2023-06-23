@@ -1,13 +1,13 @@
 # Apache Kafka
 This data sink will stream the clickstream data collected by the ingestion endpoint into an topic in a Kafka cluster.
-Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK) or a self-hosted Kafka cluster.
+Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK).
 
 ## Amazon MSK
 * **Select an existing Amazon MSK cluster.** Select an MSK cluster from the drop-down list, the MSK cluster needs to meet the following requirements:
     * MSK cluster and this solution need to be in the same VPC
     * Enable **Unauthenticated access** in Access control methods
     * Enable **Plaintext** in Encryption
-    * Set **auto.create.topics.enable** as `true` in MSK cluster configuration. This configuration sets whether MSK cluster can create topic automatically. 
+    * Set **auto.create.topics.enable** as `true` in MSK cluster configuration. This configuration sets whether MSK cluster can create topic automatically. Or You need to create the specific topic in your Kafka cluster before creating the data pipeline.
     * The value of **default.replication.factor** cannot be larger than the number of MKS cluster brokers
     
     **Note**: If there is no MSK cluster, the user needs to create an MSK Cluster follow above requirements.

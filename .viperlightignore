@@ -12,7 +12,7 @@ public/*  # doc build output
 deployment/*
 
 # git repo of source
-docs/mkdocs.base.yml:33
+docs/mkdocs.base.yml:35
 # account id for ALB access log
 src/common/constant.ts:20
 src/common/constant.ts:23
