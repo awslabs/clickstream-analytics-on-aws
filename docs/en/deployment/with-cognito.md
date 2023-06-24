@@ -29,22 +29,24 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
 5. Under **Parameters**, review the parameters for the template and modify them as necessary.
 
-     - This solution uses the following parameters:
+    - This solution uses the following parameters:
 
-    | Parameter  | Default          | Description                                                  |
-    | ---------- | ---------------- | ------------------------------------------------------------ |
-    | Admin User Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
+        | Parameter  | Default          | Description                                                  |
+        | ---------- | ---------------- | ------------------------------------------------------------ |
+        | Admin User Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
 
-    !!! Note "Note"
-        By default, this deployment uses TLSv1.0 in CloudFront. However, you can manually configure CloudFront to use the more secure TLSv1.2 after applying for a certificate and custom domain.
+        !!! note "Note"
+            {%
+             include-markdown "tls-note.md"
+            %}
 
     - If you are launching the solution with custom domain in AWS regions, this solution uses the additional following parameters:
 
-    | Parameter  | Default          | Description                                                  |
-    | ---------- | ---------------- | ------------------------------------------------------------ |
-    | Hosted Zone ID | `<Requires input>` | Choose the public hosted zone ID of Amazon Route 53. |
-    | Hosted Zone Name | `<Requires input>` | The domain name of the public hosted zone, for example, `example.com`. |
-    | Record Name | `<Requires input>` | The sub name (as known as record name in R53) of the domain name of console. For example, enter `clickstream`, if you want to use custom domain `clickstream.example.com` for the console. |
+        | Parameter  | Default          | Description                                                  |
+        | ---------- | ---------------- | ------------------------------------------------------------ |
+        | Hosted Zone ID | `<Requires input>` | Choose the public hosted zone ID of Amazon Route 53. |
+        | Hosted Zone Name | `<Requires input>` | The domain name of the public hosted zone, for example, `example.com`. |
+        | Record Name | `<Requires input>` | The sub name (as known as record name in R53) of the domain name of console. For example, enter `clickstream`, if you want to use custom domain `clickstream.example.com` for the console. |
 
 6. Choose **Next**.
 

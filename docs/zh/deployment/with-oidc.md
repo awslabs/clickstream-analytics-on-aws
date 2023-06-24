@@ -179,28 +179,31 @@
 
     * 此解决方案使用以下参数：
 
-    | 参数  | 默认值          | 描述                                                  |
-    | ---------- | ---------------- | ------------------------------------------------------------ |
-    | OIDCClientId | `<输入>` | OpenID Connect 客户端 ID。 |
-    | OIDCProvider  | `<输入>` | OpenID Connect 提供程序发行方。发行方必须以 `https://` 开头 |
+        | 参数  | 默认值          | 描述                                                  |
+        | ---------- | ---------------- | ------------------------------------------------------------ |
+        | OIDCClientId | `<输入>` | OpenID Connect 客户端 ID。 |
+        | OIDCProvider  | `<输入>` | OpenID Connect 提供程序发行方。发行方必须以 `https://` 开头 |
 
-    !!! 注意 "注意"
-        默认情况下，此部署在 CloudFront 中使用 TLSv1.0。但是，您可以在申请证书和自定义域名后手动配置 CloudFront 使用更安全的 TLSv1.2。
+        !!! note "注意"
+            {%
+            include-markdown "tls-note.md"
+            %}
+
 
     * 如果您在 AWS 区域中使用自定义域名启动解决方案，则还有以下附加参数：
 
-    | 参数  | 默认值          | 描述                                                  |
-    | ---------- | ---------------- | ------------------------------------------------------------ |
-    | Hosted Zone ID | `<输入>` | 选择 Amazon Route 53 的公共托管区域的 ID。 |
-    | Hosted Zone Name | `<输入>` | 公共托管区域的域名，例如 `example.com`。 |
-    | Record Name | `<输入>` | 控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 `clickstream.example.com`，则输入 `clickstream`。 |
+        | 参数  | 默认值          | 描述                                                  |
+        | ---------- | ---------------- | ------------------------------------------------------------ |
+        | Hosted Zone ID | `<输入>` | 选择 Amazon Route 53 的公共托管区域的 ID。 |
+        | Hosted Zone Name | `<输入>` | 公共托管区域的域名，例如 `example.com`。 |
+        | Record Name | `<输入>` | 控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 `clickstream.example.com`，则输入 `clickstream`。 |
 
     * 如果您在 AWS 中国区域中启动解决方案，则还有以下附加参数：
 
-    | 参数  | 默认值          | 描述                                                  |
-    | ---------- | ---------------- | ------------------------------------------------------------ |
-    | Domain | `<输入>` | Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 `http(s)` 前缀。 |
-    | IamCertificateID | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
+        | 参数  | 默认值          | 描述                                                  |
+        | ---------- | ---------------- | ------------------------------------------------------------ |
+        | Domain | `<输入>` | Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 `http(s)` 前缀。 |
+        | IamCertificateID | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
 
 6. 选择**下一步**。
 7. 在**配置堆栈选项**页面上，选择**下一步**。
