@@ -10,20 +10,29 @@ powering the use cases such as user behavior analytics, marketing analytics, and
 
 ## Architecutre of solution
 
-![architecture diagram](./docs/en/images/architecture/01-architecture-end-to-end.png)
+![architecture diagram](./docs/images/architecture/01-architecture-end-to-end.png)
 
 1. Amazon CloudFront distributes the frontend web UI assets hosted in the Amazon S3 bucket, and the backend APIs hosted with Amazon API Gateway and AWS Lambda.
 2. The Amazon Cognito user pool or OpenID Connect (OIDC) is used for authentication.
 3. The web UI console uses Amazon DynamoDB to store persistent data.
-4. AWS Step Functions, AWS CloudFormation, AWS Lambda, and[Amazon EventBridge are used for orchestrating the lifecycle management of data pipelines.
+4. AWS Step Functions, AWS CloudFormation, AWS Lambda, and Amazon EventBridge are used for orchestrating the lifecycle management of data pipelines.
 5. The data pipeline is provisioned in the region specified by the system operator. It consists of Application Load Balancer (ALB),
 Amazon ECS, Amazon Managed Streaming for Kafka (Amazon MSK), Amazon Kinesis Data Streams, Amazon S3, Amazon EMR Serverless, Amazon Redshift, and Amazon QuickSight.
 
-See [the doc](./docs/en/architecture.md) for more detail.
+See [the doc][doc-arch] for more detail.
+
+## SDKs
+
+Clickstream Analytics on AWS provides different client-side SDKs, which can make it easier for you to report events to the data pipeline created in the solution. Currently, the solution supports the following platforms:
+
+- [Android][android-sdk]
+- [Swift][swift-sdk]
 
 ## How to deploy the solution
 
-Follow the [implementation guide](./docs/en/deployment/index.md) to deploy the solution with few clicks.
+### Deploy from one-click CloudFormation templates
+
+Follow the [implementation guide][doc-deployment] to deploy the solution with few clicks.
 
 ### Deploy from source
 
@@ -57,10 +66,6 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 
 This project is licensed under the Apache-2.0 License.
 
-[configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
-[aws-cdk]: https://aws.amazon.com/cdk/
-
-
 ## File Structure
 
 Upon successfully cloning the repository into your local development environment but prior to running the initialization script, you will see the following file structure in your editor:
@@ -72,7 +77,7 @@ Upon successfully cloning the repository into your local development environment
 ├── LICENSE                            [LICENSE for this solution]
 ├── NOTICE.txt                         [Notice for 3rd-party libraries]
 ├── README.md                          [Read me file]
-├── buildspec.yml          
+├── buildspec.yml
 ├── cdk.json
 ├── codescan-prebuild-custom.sh
 ├── deployment                         [shell scripts for packaging distribution assets]
@@ -145,5 +150,11 @@ Upon successfully cloning the repository into your local development environment
 ├── tsconfig.dev.json
 ├── tsconfig.json
 └── yarn.lock
-
 ```
+
+[android-sdk]: https://github.com/awslabs/clickstream-android
+[swift-sdk]: https://github.com/awslabs/clickstream-swift
+[configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
+[aws-cdk]: https://aws.amazon.com/cdk/
+[doc-arch]: ./docs/en/architecture.md
+[doc-deployment]: ./docs/en/deployment/index.md
