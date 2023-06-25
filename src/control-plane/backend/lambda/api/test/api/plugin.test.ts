@@ -72,7 +72,7 @@ describe('Plugin test', () => {
       error: [
         {
           location: 'body',
-          msg: 'This request contains Cross-site scripting (XSS) cheat sheet. Please check and try again.',
+          msg: 'Bad request. Please check and try again.',
           param: '',
           value: {
             name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',

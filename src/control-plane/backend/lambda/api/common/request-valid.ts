@@ -228,7 +228,7 @@ export const isEmails: CustomValidator = value => {
 export const isXSSRequest = (data: any) => {
   const str = JSON.stringify(data);
   if (validateXSS(str)) {
-    return Promise.reject('This request contains Cross-site scripting (XSS) cheat sheet. Please check and try again.');
+    return Promise.reject('Bad request. Please check and try again.');
   }
   return true;
 };
