@@ -51,6 +51,7 @@ export function createMetricsWidget(scope: Construct, props: {
     comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: new Metric({
       metricName: 'FailedJobs',
       namespace: emrServerlessNamespace,

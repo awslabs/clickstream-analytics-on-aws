@@ -25,6 +25,7 @@ import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export interface GetIntervalProps {
   readonly expression: string;
+  readonly evaluationPeriods?: number;
 }
 
 export class GetInterval extends Construct {
@@ -57,6 +58,7 @@ function createGetIntervalCustomResource(
     serviceToken: provider.serviceToken,
     properties: {
       expression: props.expression,
+      evaluationPeriods: props.evaluationPeriods || '1',
       version: new Date().getTime(),
     },
   });

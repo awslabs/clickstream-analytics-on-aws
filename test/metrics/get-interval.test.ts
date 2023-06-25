@@ -88,7 +88,69 @@ test('should get interval seconds for rate expression - seconds', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 1 } });
+  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
+});
+
+
+test('should get interval seconds for rate expression - evaluationPeriods', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'rate ( 12 hours )',
+      evaluationPeriods: 3,
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({ Data: { intervalSeconds: 28800 } });
+});
+
+
+test('should get interval seconds for rate expression - evaluationPeriods 2', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'rate ( 28801 seconds )',
+      evaluationPeriods: 3,
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({ Data: { intervalSeconds: 28800 } });
+});
+
+
+test('should get interval seconds for rate expression - intervalSeconds must N * 60 - 65', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'rate ( 65 seconds )',
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
+});
+
+
+test('should get interval seconds for rate expression - intervalSeconds must N * 60 - 119', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'rate ( 119 seconds )',
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
 });
 
 
@@ -103,7 +165,7 @@ test('should get interval seconds for rate expression - weeks', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 * 7 * 2 } });
+  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
 });
 
 
@@ -118,7 +180,7 @@ test('should get interval seconds for rate expression - month', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 * 30 } });
+  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
 });
 
 
@@ -179,6 +241,21 @@ test('should get interval seconds for cron expression 4', async () => {
   //@ts-ignore
   const data = await handler(event, c);
   expect(data).toEqual({ Data: { intervalSeconds: 3600 } });
+});
+
+
+test('should get interval seconds for cron expression 5', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'cron (0 1 1 * ? * )',
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
 });
 
 

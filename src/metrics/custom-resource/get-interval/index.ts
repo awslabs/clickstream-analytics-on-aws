@@ -33,6 +33,7 @@ async function _handler(event: CdkCustomResourceEvent) {
   }
 
   const expression = event.ResourceProperties.expression!;
+  const evaluationPeriods = parseInt(event.ResourceProperties.evaluationPeriods || '1');
 
   let intervalSeconds = 300;
   if ((expression as string).startsWith('rate')) {
@@ -42,6 +43,15 @@ async function _handler(event: CdkCustomResourceEvent) {
   } else {
     throw new Error('Unknown expression:' + expression);
   }
+
+  // Metrics cannot be checked across more than a day (EvaluationPeriods * Period must be <= 86400)
+  if (intervalSeconds * evaluationPeriods > 86400) {
+    intervalSeconds = 86400 / evaluationPeriods;
+  }
+  // Must: Any multiple of 60, with 60 as the minimum
+  intervalSeconds = Math.max(60, intervalSeconds);
+  intervalSeconds = Math.floor(intervalSeconds / 60) * 60;
+
   return {
     Data: {
       intervalSeconds,
