@@ -40,6 +40,10 @@ You can set below configurations for Redshift.
 
     * **Provisioned mode**
 
+        * **Redshift Cluster**: With a provisioned Amazon Redshift cluster, you build a cluster with node types that meet your cost and performance specifications. You have to set up, tune, and manage Amazon Redshift provisioned clusters.
+
+        * **Database user**: The solution needs permissions to access and create database in Redshift cluster. By default, it grants Redshift Data API with the permissions of the admin user to execute the commands to create DB, tables, and views, as well as loading data.
+
     * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.
 
 * **Additional Settings**
