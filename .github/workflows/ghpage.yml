@@ -1,0 +1,39 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Set a branch name to trigger deployment
+  pull_request:
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install mkdocs and material theme
+        run: |
+          python3 -m pip install 'mkdocs<1.5' 'mkdocs-material<10' 'mkdocs-material-extensions<1.2' 'mkdocs-include-markdown-plugin<5' 'mkdocs-macros-plugin<1' 'mkdocs-glightbox<1'            # install mkdocs
+
+      - name: Build mkdocs
+        run: |
+          mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
+          mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
+          cp -av ./docs/index.html ./docs/site
+
+      - name: Deploy pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/site
