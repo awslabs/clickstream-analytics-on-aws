@@ -252,6 +252,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
               {t('project:pipeline.noAppDisplay')}
             </Box>
             <Button
+              disabled={pipelineInfo?.status?.status !== EPipelineStatus.Active}
               iconName="add-plus"
               onClick={() => {
                 goToCreateApplication();
