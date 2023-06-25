@@ -35,13 +35,15 @@ import {
 } from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import {
-  MAX_USER_INPUT_LENGTH,
-  PIPELINE_QUICKSIGHT_GUIDE_LINK,
-  PIPELINE_QUICKSIGHT_LEARNMORE_LINK,
-} from 'ts/const';
+import { MAX_USER_INPUT_LENGTH } from 'ts/const';
 import { EMAIL_PATTERN, XSS_PATTERN } from 'ts/constant-ln';
-import { buildQuickSightSubscriptionLink } from 'ts/url';
+import {
+  buildDocumentLink,
+  buildQuickSightSubscriptionLink,
+  PIPELINE_QUICKSIGHT_GUIDE_LINK,
+  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
+  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN,
+} from 'ts/url';
 import { checkStringValidRegex, isDisabled } from 'ts/utils';
 
 interface ReportingProps {
@@ -55,7 +57,7 @@ interface ReportingProps {
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     update,
     pipelineInfo,
@@ -215,7 +217,11 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                         learnmore_anchor: (
                           <Link
                             external
-                            href={PIPELINE_QUICKSIGHT_LEARNMORE_LINK}
+                            href={buildDocumentLink(
+                              i18n.language,
+                              PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
+                              PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
+                            )}
                           />
                         ),
                         guide_anchor: (

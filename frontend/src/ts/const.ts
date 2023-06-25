@@ -14,16 +14,6 @@ import { SelectProps } from '@cloudscape-design/components';
  */
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const SUPPORT_SELF_HOSTED_KAFKA = false;
-// TODO change after publish
-export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK =
-  'https://<placeholder-to-click-stream-report-doc-link>';
-export const PIPELINE_QUICKSIGHT_GUIDE_LINK =
-  'https://docs.aws.amazon.com/quicksight/latest/user/signing-up.html';
-
-export const PIPELINE_SINK_CONNECTOR_LINK =
-  'https://www.confluent.io/hub/confluentinc/kafka-connect-s3';
-export const PIPELINE_SINK_CONNECTOR_GUIDE =
-  'https://docs.aws.amazon.com/msk/latest/developerguide/mkc-S3sink-connector-example.html';
 
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const CONFIG_URL = '/aws-exports.json';

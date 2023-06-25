@@ -13,8 +13,10 @@
 
 export const CLICKSTREAM_IOS_REPO_LINK =
   'https://github.com/awslabs/clickstream-swift';
-export const GUIDE_LINK_ANDROID_SDK = '/'; // TODO
-export const GUIDE_LINK_IOS_SDK = '/'; // TODO
+export const GUIDE_LINK_ANDROID_SDK =
+  'https://github.com/awslabs/clickstream-android#integrate-sdk';
+export const GUIDE_LINK_IOS_SDK =
+  'https://github.com/awslabs/clickstream-swift#integrate-sdk';
 export const DOWNLOAD_FILENAME = 'amplifyconfiguration.json';
 export const TEMPLATE_APP_ID = '{{APP_ID}}';
 export const TEMPLATE_SERVER_ENDPOINT = '{{SERVER_ENDPOINT}}';

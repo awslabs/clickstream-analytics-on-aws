@@ -47,13 +47,17 @@ import {
   MIN_KDS_SINK_INTERVAL,
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
-  PIPELINE_SINK_CONNECTOR_GUIDE,
-  PIPELINE_SINK_CONNECTOR_LINK,
   ProtocalType,
   SinkType,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import { PIPELINE_ACCESS_LOG_PERMISSION_LINK, buildDocumentLink } from 'ts/url';
+import {
+  PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
+  PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN,
+  PIPELINE_SINK_CONNECTOR_GUIDE,
+  PIPELINE_SINK_CONNECTOR_LINK,
+  buildDocumentLink,
+} from 'ts/url';
 import { isDisabled } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
@@ -672,7 +676,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                       external
                       href={buildDocumentLink(
                         i18n.language,
-                        PIPELINE_ACCESS_LOG_PERMISSION_LINK
+                        PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
+                        PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN
                       )}
                     >
                       {t('learnMore')}

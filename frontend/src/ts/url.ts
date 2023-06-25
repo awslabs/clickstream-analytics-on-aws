@@ -16,21 +16,41 @@ import { ZH_LANGUAGE_LIST } from './const';
 const CONSOLE_CHINA_DOMAIN = 'console.amazonaws.cn';
 const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
 
-// TODO Need To Change after publish
-export const SOLUTION_DOCUMENTS_DOMAIN =
-  'https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/';
+export const PIPELINE_QUICKSIGHT_GUIDE_LINK =
+  'https://docs.aws.amazon.com/quicksight/latest/user/signing-up.html';
 
-// TODO Need To Change after publish
-export const PIPELINE_ACCESS_LOG_PERMISSION_LINK =
+export const PIPELINE_SINK_CONNECTOR_LINK =
+  'https://www.confluent.io/hub/confluentinc/kafka-connect-s3';
+export const PIPELINE_SINK_CONNECTOR_GUIDE =
+  'https://docs.aws.amazon.com/msk/latest/developerguide/mkc-S3sink-connector-example.html';
+
+export const SOLUTION_DOCUMENTS_DOMAIN_EN =
+  'https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws';
+export const SOLUTION_DOCUMENTS_DOMAIN_CN =
+  'https://awslabs.github.io/clickstream-analytics-on-aws/zh';
+
+export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN =
   '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';
-export const KAFKA_REQUIREMENT_LINK =
-  '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/';
+export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN =
+  '/ingestion-endpoint.html';
 
-export const buildDocumentLink = (lang: string, url?: string) => {
+export const KAFKA_REQUIREMENT_LINK_CN =
+  '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/';
+export const KAFKA_REQUIREMENT_LINK_EN = '/data-sink-kafka.html';
+
+export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN =
+  '/pipeline-mgmt/quicksight/configure-quicksight';
+export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN = '/reporting.html';
+
+export const buildDocumentLink = (
+  lang: string,
+  enUrl?: string,
+  cnUrl?: string
+) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return SOLUTION_DOCUMENTS_DOMAIN + 'zh' + (url ?? '');
+    return SOLUTION_DOCUMENTS_DOMAIN_CN + (cnUrl ?? '');
   }
-  return SOLUTION_DOCUMENTS_DOMAIN + 'en' + (url ?? '');
+  return SOLUTION_DOCUMENTS_DOMAIN_EN + (enUrl ?? '');
 };
 
 export const buildVPCLink = (region: string, vpcId: string): string => {
