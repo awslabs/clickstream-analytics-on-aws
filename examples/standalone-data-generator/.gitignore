@@ -22,3 +22,5 @@ coverage.xml
 data/
 venv/
 *.mmdb
+
+amplifyconfiguration.json

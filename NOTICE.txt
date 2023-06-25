@@ -21,6 +21,7 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/client-cloudwatch under the Apache-2.0
 @aws-sdk/client-dynamodb under the Apache-2.0
 @aws-sdk/client-ec2 under the Apache-2.0
+@aws-sdk/client-ecs under the Apache-2.0
 @aws-sdk/client-elastic-load-balancing-v2 under the Apache-2.0
 @aws-sdk/client-emr-serverless under the Apache-2.0
 @aws-sdk/client-glue under the Apache-2.0

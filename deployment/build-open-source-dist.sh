@@ -80,16 +80,17 @@ cp $source_template_dir/../CONTRIBUTING.md $dist_dir
 echo "cp $source_template_dir/../CHANGELOG.md $dist_dir"
 cp $source_template_dir/../CHANGELOG.md $dist_dir
 
-echo "cp $source_template_dir/../.gitignore $dist_dir"
-cp $source_template_dir/../.gitignore $dist_dir
+cp $source_template_dir/*.sh $dist_dir/deployment
+
+cp -r $source_template_dir/../src $dist_dir
 
 echo "------------------------------------------------------------------------------"
 echo "[Packing] Clean up the open-source distributable"
 echo "------------------------------------------------------------------------------"
 echo $dist_dir
 
-echo "remove $dist_dir/deployment"
-rm -rf  $dist_dir/deployment
+rm -rf  $dist_dir/deployment/global-s3-assets
+rm -rf  $dist_dir/deployment/regional-s3-assets
 rm -rf  $dist_dir/.gitlab
 rm -rf  $dist_dir/cdk.out
 rm -rf  $dist_dir/buid*.yml

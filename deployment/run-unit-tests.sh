@@ -19,7 +19,6 @@ echo "yarn install"
 yarn install --check-files --frozen-lockfile
 
 npx projen 
-yarn
 
 echo "npx yarn test"
 npx yarn test

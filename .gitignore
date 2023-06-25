@@ -38,6 +38,8 @@ docs/site/
 frontend/amplify
 test-deploy*
 deployment/global-s3-assets/
+deployment/regional-s3-assets/
+deployment/open-source/
 codescan-funcs.sh
 *.iml
 *.ipr
@@ -54,7 +56,6 @@ junit.xml
 !/.github/workflows/build.yml
 !/.mergify.yml
 !/.github/workflows/upgrade.yml
-!/.github/pull_request_template.md
 !/.npmrc
 !/test/
 !/tsconfig.json
