@@ -19,6 +19,7 @@ phases:
         set -euxo pipefail
         if [ "${IS_IN_GCR_PIPELINE-1}" == '0' ] || [ $DIST_OUTPUT_BUCKET != 'aws-gcr-solutions' ]; then
             export BUILD_VERSION=$VERSION-$(/bin/date +"%Y%m%d%H%M")
+            export SOLUTION_VERSION=$BUILD_VERSION
             export IS_IN_GCR_PIPELINE=0
         else
             FEATURE_NAME="${FEATURE_NAME:-""}"
@@ -51,7 +52,11 @@ phases:
             echo "Starting build `date` in `pwd`"
             cd ${CODEBUILD_SRC_DIR}/deployment
             chmod +x ./run-unit-tests.sh && ./run-unit-tests.sh
-            chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${BUILD_VERSION}
+            if [ -n "$VERSION" ]; then
+              chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${VERSION}
+            else
+              chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${BUILD_VERSION}
+            fi
             echo "Build completed `date`"
             echo "Starting open-source-dist `date` in `pwd`"
             chmod +x ./build-open-source-dist.sh && ./build-open-source-dist.sh $SOLUTION_NAME
