@@ -2452,7 +2452,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       label: reverseFreshness.unit === 'hour' ? 'Hours' : 'Days',
       value: reverseFreshness.unit,
     };
-    setUpdateListPlugins(pipelineInfo);
+    await setUpdateListPlugins(pipelineInfo);
 
     pipelineInfo.enableRedshift = !(
       isEmpty(pipelineInfo.dataModeling?.redshift?.newServerless) &&
@@ -2472,11 +2472,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];
-      setUpdateNewServerlessVpc(pipelineInfo);
-      setUpdateNewServerlessSG(pipelineInfo);
-      setUpdateNewServerlessSubnets(pipelineInfo);
+      await setUpdateNewServerlessVpc(pipelineInfo);
+      await setUpdateNewServerlessSG(pipelineInfo);
+      await setUpdateNewServerlessSubnets(pipelineInfo);
     } else if (pipelineInfo.redshiftType === 'provisioned') {
-      setUpdateProvisionedRedshiftCluster(pipelineInfo);
+      await setUpdateProvisionedRedshiftCluster(pipelineInfo);
     }
 
     const reverseRedshiftDataRange = reverseRedshiftInterval(
@@ -2531,7 +2531,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     if (pipelineInfo.reporting.quickSight.user) {
-      setUpdateQuickSightUserList(pipelineInfo);
+      await setUpdateQuickSightUserList(pipelineInfo);
     }
   };
   const getDefaultExtPipeline = (data: IExtPipeline): IExtPipeline => {
@@ -2693,7 +2693,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);
-          setUpdatePipeline(extPipeline);
           Promise.all([
             setUpdateRegion(extPipeline),
             setUpdateVpc(extPipeline),
@@ -2709,6 +2708,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
             setUpdateReport(extPipeline),
           ])
             .then(() => {
+              setUpdatePipeline(extPipeline);
               setLoadingData(false);
             })
             .catch((error) => {
