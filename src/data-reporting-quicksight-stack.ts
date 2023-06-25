@@ -34,7 +34,6 @@ import {
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
-import { renderTemplate } from './reporting/private/dashboard';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
@@ -119,7 +118,7 @@ export class DataReportingQuickSightStack extends Stack {
 
       definition: Fn.conditionIf(useTemplateArnCondition.logicalId,
         Aws.NO_VALUE,
-        renderTemplate(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8'))),
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')),
       ),
     });
 

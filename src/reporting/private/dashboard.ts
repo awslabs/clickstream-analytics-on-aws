@@ -12,7 +12,6 @@
  */
 
 import { DatasetParameter, InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
-import { CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -278,32 +277,3 @@ export function truncateString(source: string, length: number): string {
   }
   return source;
 };
-
-function _renderTemplate(jsonObj: any): any {
-  if (typeof jsonObj === 'object' && jsonObj !== null) {
-    if (Array.isArray(jsonObj)) {
-      return jsonObj.map(item => renderTemplate(item));
-    } else {
-      const newObject: { [key: string]: any } = {};
-      for (const key in jsonObj) {
-        if (Object.prototype.hasOwnProperty.call(jsonObj, key)) {
-          let newKey = key.substring(0);
-          if (key === 'CollapsedRowDimensionsVisibility') {
-            continue;
-          }
-          if (key === 'ForecastConfigurations') {
-            continue;
-          }
-          newObject[newKey] = renderTemplate(jsonObj[key]);
-        }
-      }
-      return newObject;
-    }
-  }
-  return jsonObj;
-}
-
-export function renderTemplate(exportedTemplateDef: any): CfnTemplate.TemplateVersionDefinitionProperty {
-
-  return _renderTemplate(exportedTemplateDef) as CfnTemplate.TemplateVersionDefinitionProperty;
-}
