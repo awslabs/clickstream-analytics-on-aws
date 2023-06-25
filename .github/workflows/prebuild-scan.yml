@@ -1,0 +1,26 @@
+name: pre-build scan
+on:
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  viperlight:
+    name: pre-build scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Pre-build scan
+        run: |-
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip
+          unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip
+          ./codescan-prebuild-custom.sh

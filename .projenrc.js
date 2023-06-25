@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-const { awscdk, gitlab, typescript } = require('projen');
+const { awscdk, github, gitlab, typescript } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.81.0';
 
@@ -110,10 +110,11 @@ const devDepsForApiProject = [
   '@types/express@^4.17.16',
   '@types/supertest@^2.0.12',
 ];
+const defaultBranch = 'main';
 const project = new awscdk.AwsCdkTypeScriptApp({
   version,
   cdkVersion,
-  defaultReleaseBranch: 'main',
+  defaultReleaseBranch: defaultBranch,
   name: 'clickstream-analytics-on-aws',
   description: 'Clickstream Analytics on AWS',
   majorVersion: 1,
@@ -176,6 +177,20 @@ const project = new awscdk.AwsCdkTypeScriptApp({
       emitDecoratorMetadata: true,
     },
   },
+  githubOptions: {
+    pullRequestLintOptions: {
+      semanticTitleOptions: {
+        types: [
+          'feat',
+          'fix',
+          'chore',
+          'docs',
+          'ci',
+          'tests',
+        ],
+      },
+    },
+  },
 });
 
 project.eslint?.addRules({
@@ -219,7 +234,7 @@ const apiProject = new typescript.TypeScriptProject({
   outdir: 'src/control-plane/backend/lambda/api/',
   libdir: 'dist/',
   readme: undefined,
-  defaultReleaseBranch: 'main',
+  defaultReleaseBranch: defaultBranch,
   entrypoint: 'index.js',
   parent: project,
   sampleCode: false,
@@ -242,6 +257,10 @@ apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./
 apiProject.setScript('start', 'node dist/index.js');
 apiProject.addFields({ version });
 
+project.buildWorkflow.buildTask._env = {
+  NODE_OPTIONS: '--max_old_space_size=6144',
+};
+
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
   'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg >/dev/null',
@@ -252,6 +271,7 @@ const provisionViperlightScripts = [
   'curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip',
   'unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip',
 ];
+
 const gitlabMain = new gitlab.GitlabConfiguration(project,
   {
     workflow: {
