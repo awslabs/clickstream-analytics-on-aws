@@ -484,4 +484,163 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     }
   });
 
+
+  test('QueryCommand LastEvaluatedKey is set correctly', async () => {
+    dynamoDBClientMock.on(QueryCommand).resolvesOnce({
+      LastEvaluatedKey: {
+        key1: 'NextKey1',
+      },
+      Count: 2,
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date().getTime(),
+      },
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00001.parquet.snappy`,
+        s3_object_size: 232322,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date().getTime(),
+      }],
+    }).resolvesOnce({
+      LastEvaluatedKey: {
+        key1: 'NextKey2',
+      },
+      Count: 1,
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1233232,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date().getTime(),
+      }],
+    }).resolvesOnce({
+      Count: 1,
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1233232,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date().getTime(),
+      }],
+      LastEvaluatedKey: {
+        key1: 'NextKey3',
+      },
+    }).resolvesOnce({
+      Count: 0,
+      Items: [],
+    })
+      .resolvesOnce({
+        Count: 1,
+        Items: [{
+          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          s3_object_size: 1233232,
+          job_status: JobStatus.JOB_PROCESSING,
+          timestamp: new Date().getTime(),
+        }],
+      })
+      .resolvesOnce({
+        Count: 1,
+        Items: [{
+          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          s3_object_size: 1233232,
+          job_status: JobStatus.JOB_ENQUEUE,
+          timestamp: new Date().getTime(),
+        }],
+      });
+
+    dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
+    s3ClientMock.on(PutObjectCommand).resolvesOnce({});
+
+    await handler(scheduleEvent, context);
+
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 6);
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(1, QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'NEW',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
+      ExclusiveStartKey: {
+        key1: 'NextKey1',
+      },
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'NEW',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(3, QueryCommand, {
+      ExclusiveStartKey: {
+        key1: 'NextKey2',
+      },
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'NEW',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(4, QueryCommand, {
+      ExclusiveStartKey: {
+        key1: 'NextKey3',
+      },
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'NEW',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(5, QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'PROCESSING',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+  });
+
 });

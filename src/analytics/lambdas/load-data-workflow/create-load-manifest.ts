@@ -121,13 +121,12 @@ export const handler = async (_event: any, context: Context) => {
   logger.info(`checked JOB_NEW, oldestFileTimestamp: ${newMinFileTimestamp}`);
 
   while (newRecordResp.Count! > 0) {
-    candidateItems = candidateItems.concat(newRecordResp.Items!);
-
-    if (candidateItems.length < queryResultLimit && newRecordResp.LastEvaluatedKey) {
+    if (candidateItems.length < queryResultLimit) {
+      candidateItems = candidateItems.concat(newRecordResp.Items!);
+    }
+    if (newRecordResp.LastEvaluatedKey) {
       newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, newRecordResp.LastEvaluatedKey);
       allJobNewCount += newRecordResp.Count;
-    } else if (newRecordResp.LastEvaluatedKey) {
-      allJobNewCount += (await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, newRecordResp.LastEvaluatedKey)).Count;
     } else {
       break;
     }
@@ -136,7 +135,7 @@ export const handler = async (_event: any, context: Context) => {
   logger.info(`allJobNewCount: ${allJobNewCount}`);
 
   const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
-  const enQueueInfo= await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
+  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
 
   const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
 
@@ -151,7 +150,7 @@ export const handler = async (_event: any, context: Context) => {
   metrics.publishStoredMetrics();
 
   const processJobNum = processInfo.jobNum;
-  if ( processJobNum >= processingLimit) {
+  if (processJobNum >= processingLimit) {
     const msg = `Abort this loading data due to jobs with JobStatus=JOB_PROCESSING [${processJobNum}] exceeded the allowed quota [${processingLimit}]`;
     logger.warn(msg);
     return {
