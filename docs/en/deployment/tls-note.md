@@ -6,3 +6,5 @@ By default, this deployment uses TLSv1.0 and TLSv1.1 in CloudFront. However, we 
   - **Authentication**: ECDSA
   - **Encryption Cipher**: AES256
   - **Message Authentication**: SHA(256/384/any hash function except for SHA1)
+
+Such as TLSv1.2_2021 can meet the above recommendations.
