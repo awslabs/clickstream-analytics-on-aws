@@ -22,7 +22,7 @@ Clickstream 需要 Xcode 13.4 或更高版本才能构建。
 
 ![](../images/sdk-manual/swift_add_package.png)
 
-将 Clickstream Library for Swift GitHub 仓库 URL（`https://github.com/awslabs/clickstream-swift`）输入搜索栏中，您将看到 Clickstream Library for Swift 仓库规则，以确定要安装的 Swift Package Manager 版本。选择 **Up to Next Major Version**，然后单击 **Add Package**，将 Clickstream 产品选中为默认值，然后再次单击 **Add Package**。
+将 Swift SDK 的 GitHub 仓库 URL（`https://github.com/awslabs/clickstream-swift`）输入搜索栏中，您将看到 Swift Package Manager 安装版本的规则。选择 **Up to Next Major Version**，然后单击 **Add Package**，将 Clickstream 选中为默认值，然后再次单击 **Add Package**。
 
 ![](../images/sdk-manual/swift_add_package_url.png)
 
@@ -57,11 +57,6 @@ Clickstream 需要 Xcode 13.4 或更高版本才能构建。
 - **isCompressEvents**：上传事件时是否压缩事件内容，默认为 `true`。
 - **autoFlushEventsInterval**：事件发送间隔， 默认为 `10s`。
 - **isTrackAppExceptionEvents**：是否自动跟踪应用程序异常事件，默认为 `false`。
-
-
-
-
-
 
 ### 3.初始化 SDK
 
@@ -132,13 +127,13 @@ ClickstreamAnalytics.recordEvent(eventName: "button_click")
 
 Clickstream Swift SDK 支持以下数据类型：
 
-| 数据类型 | 范围                                                 | 示例        |
-| --------- | ----------------------------------------------------- | ------------- |
-| Int       | -2147483648～2147483647                                | 12            |
-| Int64     | -9,223,372,036,854,775,808～ 9,223,372,036,854,775,807 | 26854775808   |
-| Double    | -2.22E-308~1.79E+308                                  | 3.14          |
-| Boolean   | true、false                                            | true          |
-| String    | 最大支持 1024 个字符                                 | "clickstream" |
+| 数据类型    | 范围                                                    | 示例            |
+| ------- |-------------------------------------------------------| ------------- |
+| Int     | -2147483648～2147483647                                | 12            |
+| Int64   | -9,223,372,036,854,775,808～ 9,223,372,036,854,775,807 | 26854775808   |
+| Double  | -2.22E-308~1.79E+308                                  | 3.14          |
+| Boolean | true 或 false                                          | true          |
+| String  | 最大支持 1024 个字符                                         | "clickstream" |
 
 ### 命名规则
 
@@ -152,15 +147,15 @@ Clickstream Swift SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称                            | 建议          | 硬限制          | 超过限制的处理策略    |
-| ------------------------------- | ------------- | --------------- | ----------------------------- |
-| 事件名称长度            | 小于等于 25 个字符 | 50 个字符        | 抛出错误                   |
-| 事件属性名称长度  | 小于等于 25 个字符 | 50 个字符        | 丢弃、记录和报告错误 |
-| 事件属性值长度 | 小于等于 100 个字符 | 1024 个字符      | 丢弃、记录和报告错误 |
-| 每个事件的属性数       | 小于等于 50 个属性 | 500 个事件属性 | 丢弃、记录和报告错误 |
-| 用户属性数量           | 小于等于 25 个属性 | 100 个用户属性  | 丢弃、记录和报告错误 |
-| 用户属性名称长度   | 小于等于 25 个字符 | 50 个字符        | 丢弃、记录和报告错误 |
-| 用户属性值长度   | 小于等于 50 个字符 | 256 个字符       | 丢弃、记录和报告错误 |
+| 名称       | 建议           | 硬限制       | 超过限制的处理策略  |
+| -------- | ------------ | --------- | ---------- |
+| 事件名称长度   | 小于等于 25 个字符  | 50 个字符    | 抛出错误       |
+| 事件属性名称长度 | 小于等于 25 个字符  | 50 个字符    | 丢弃、记录和报告错误 |
+| 事件属性值长度  | 小于等于 100 个字符 | 1024 个字符  | 丢弃、记录和报告错误 |
+| 每个事件的属性数 | 小于等于 50 个属性  | 500 个事件属性 | 丢弃、记录和报告错误 |
+| 用户属性数量   | 小于等于 25 个属性  | 100 个用户属性 | 丢弃、记录和报告错误 |
+| 用户属性名称长度 | 小于等于 25 个字符  | 50 个字符    | 丢弃、记录和报告错误 |
+| 用户属性值长度  | 小于等于 50 个字符  | 256 个字符   | 丢弃、记录和报告错误 |
 
 **限制说明**
 
@@ -174,16 +169,16 @@ Clickstream Swift SDK 支持以下数据类型：
 
 自动收集的事件：
 
-| 事件名称       | 触发时机                                             | 事件属性                                                                                                  |
-| ---------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| _session_start   | 用户首次启动应用程序进入前台时且没有正在进行的会话                         | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
-| _screen_view     | 当 Activity 的 `onResume()` 方法被调用时              | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
-| _app_exception   | 应用程序崩溃时                                      | _exception_message<br>_exception_stack                                                                            |
-| _app_update      | 应用程序升级到新版本并再次启动时 | _previous_app_version                                                                                             |
-| _first_open      | 用户首次安装应用程序后启动时        |                                                                                                                   |
-| _os_update       | 设备操作系统升级到新版本时         | _previous_os_version                                                                                              |
-| _user_engagement | 当应用程序在前台至少停留一秒钟时       | _engagement_time_msec<br>                                                                                         |
-| _profile_set     | 调用 `addUserAttributes()` 或 `setUserId()` API 时触发 |                                                                                                                       |
+| 事件名称             | 触发时机                                             | 事件属性                                                                                                              |
+| ---------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| _session_start   | 用户首次启动应用程序进入前台时且没有正在进行的会话                        | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
+| _screen_view     | 当 Activity 的 `onResume()` 方法被调用时                 | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
+| _app_exception   | 应用程序崩溃时                                          | _exception_message<br>_exception_stack                                                                            |
+| _app_update      | 应用程序升级到新版本并再次启动时                                 | _previous_app_version                                                                                             |
+| _first_open      | 用户首次安装应用程序后启动时                                   |                                                                                                                   |
+| _os_update       | 设备操作系统升级到新版本时                                    | _previous_os_version                                                                                              |
+| _user_engagement | 当应用程序在前台至少停留一秒钟时                                 | _engagement_time_msec<br>                                                                                         |
+| _profile_set     | 调用 `addUserAttributes()` 或 `setUserId()` API 时触发 |                                                                                                                   |
 
 #### 会话定义
 
@@ -213,8 +208,8 @@ Clickstream Swift SDK 支持以下数据类型：
 
 ```json
 {
-    "app_id": "购物应用",
-    "app_package_name": "com.compny.app",
+    "app_id": "shopping",
+    "app_package_name": "com.company.app",
     "app_title": "ModerneShopping",
     "app_version": "1.0",
     "brand": "apple",
@@ -242,7 +237,7 @@ Clickstream Swift SDK 支持以下数据类型：
     "user": {
         "_user_city": {
             "set_timestamp": 1685006678437,
-            "value": "上海"
+            "value": "Shanghai"
         },
         "_user_first_touch_timestamp": {
             "set_timestamp": 1685006678434,
@@ -255,43 +250,71 @@ Clickstream Swift SDK 支持以下数据类型：
     },
     "attributes": {
         "_session_duration": 15349,
-        "_session_id": "0E6614B
-
-7-20230526-062238846",
+        "_session_id": "0E6614B7-20230526-062238846",
         "_session_number": 3,
         "_session_start_timestamp": 1685082158847,
-        "product_category": "男装",
-        "product_id": 1,
+        "product_category": "men's clothing",
+        "product_id": 1
     }
 }
 ```
 
 所有用户属性将出现在 `user` 对象中，所有自定义和全局属性将存储在 `attributes` 对象中。
 
+#### 公共属性
+
+| 属性               | 描述                       | 如何生成                                                                                                              | 用途和目的                  |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| hashCode         | 事件json的哈希码               | 通过`String(format："%08X", hasher.combine(eventjson))`生成                                                            | 区分不同的事件                |
+| app_id           | Clickstream App id       | 从解决方案控制平面创建点击流应用程序时生成                                                                                             | 区分不同app的事件             |
+| unique_id        | 用户的唯一id                  | sdk第一次初始化时生成`UUID().uuidString`形式<br>当用户重新登录到另一个用户后，它会改变，并且当用户在同一设备上重新登录到之前的用户时，`unique_id`将重置为之前的用户的 `unique_id` | 标识不同用户的唯一性并关联登录和未登录的行为 |
+| device_id        | 设备的唯一id                  | 通过`UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString`生成 <br>应用程序重新安装后将更改<br>                  | 区分不同设备                 |
+| device_unique_id | 设备广告id                   | 通过`ASIdentifierManager.shared().advertisingIdentifier.uuidString ?? ""`生成                                         | 区分不同设备                 |
+| event_type       | 事件名称                     | 由用户或sdk设置                                                                                                         | 区分不同的事件类型              |
+| event_id         | 事件的唯一id                  | 事件创建时通过`UUID().uuidString`生成                                                                                      | 区分每个事件                 |
+| timestamp        | 事件创建时间戳                  | 事件创建时通过`Date().timeIntervalSince1970 * 1000`生成                                                                    | 数据分析需要                 |
+| platform         | 平台名称                     | iOS 设备始终为"iOS"                                                                                                    | 数据分析需要                 |
+| os_version       | iOS 操作系统版本               | 通过`UIDevice.current.systemVersion`生成                                                                              | 数据分析需要                 |
+| make             | 设备制造商                    | iOS 设备始终是"apple"                                                                                                  | 数据分析需要                 |
+| brand            | 设备品牌                     | iOS 设备始终是"apple"                                                                                                  | 数据分析需要                 |
+| model            | 设备型号                     | 通过设备标识符映射设备版本生成                                                                                                   | 数据分析需要                 |
+| carrier          | 设备网络运营商名称                | 通过`CTTelephonyNetworkInfo().serviceSubscriberCellularProviders?.first?.value`生成<br>默认值为："UNKNOWN"                 | 数据分析需要                 |
+| network_type     | 当前设备网络类型                 | "Mobile", "WIFI" or "UNKNOWN"<br>由`NWPathMonitor` 生成                                                              | 数据分析需要                 |
+| screen_height    | 屏幕高度（以像素为单位）             | 通过`UIScreen.main.bounds.size.height * UIScreen.main.scale`生成                                                      | 数据分析需要                 |
+| screen_width     | 屏幕宽度（以像素为单位）             | 通过`UIScreen.main.bounds.size.width * UIScreen.main.scale`生成                                                       | 数据分析需要                 |
+| zone_offset      | 设备与 GMT 的原始时区偏移量（以毫秒为单位） | 通过`TimeZone.current.secondsFromGMT()*1000`生成                                                                      | 数据分析需要                 |
+| locale           | 此设备的默认区域设置（语言、国家/地区和变体）  | 通过`Locale.current`生成                                                                                              | 数据分析需要                 |
+| system_language  | 设备语言代码                   | 通过`Locale.current.languageCode`生成 <br>默认为："UNKNOWN"                                                               | 数据分析需要                 |
+| country_code     | 该设备的国家/地区代码              | 通过`Locale.current.regionCode`生成<br>默认值为："UNKNOWN"                                                                 | 数据分析需要                 |
+| sdk_version      | 点击流sdk版本                 | 通过`PackageInfo.version`生成                                                                                         | 数据分析需要                 |
+| sdk_name         | Clickstream SDK 名称       | 始终为"aws-solution-clickstream-sdk"                                                                                 | 数据分析需要                 |
+| app_version      | 应用程序版本名称                 | 通过`Bundle.main.infoDictionary["CFBundleShortVersionString"] ?? ""`生成                                              | 数据分析需要                 |
+| app_package_name | 应用程序包名称                  | 通过`Bundle.main.infoDictionary["CFBundleIdentifier"] ?? ""`生成                                                      | 数据分析需要                 |
+| app_title        | 应用程序的显示名称                | 通过`Bundle.main.infoDictionary["CFBundleName"] ?? ""`生成                                                            | 数据分析需要                 |
+
 #### 保留属性
 
 **用户属性**
 
-| 属性名称              | 描述                                |
-| --------------------------- | --------------------------------------- |
-| _user_id                    | 保留给由应用程序分配的用户 ID                       |
-| _user_ltv_revenue           | 保留给用户生命周期价值              |
-| _user_ltv_currency          | 保留给用户生命周期价值货币         |
+| 属性名称                        | 描述                                              |
+| --------------------------- | ----------------------------------------------- |
+| _user_id                    | 保留给由应用程序分配的用户 ID                                |
+| _user_ltv_revenue           | 保留给用户生命周期价值                                     |
+| _user_ltv_currency          | 保留给用户生命周期价值货币                                   |
 | _user_first_touch_timestamp | 用户首次打开应用程序或访问网站的时间（以微秒为单位），它包含在 `user` 对象的每个事件中 |
 
 **保留属性**
 
-| 属性名称                     | 描述                                                                                                 |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| _traffic_source_medium             | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介。                                                                                |
-| _traffic_source_name               | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动。  |
-| _traffic_source_source             | 保留给流量来源，事件报告时获取的网络来源的名称。  |
-| _channel                           | 下载应用的渠道                                                                             |
-| _device_vendor_id                  |                                                                                                          |
-| _device_advertising_id             |                                                                                                          |
-| _entrances                         | 添加在 `_screen_view` 事件中，会话中第一个 `_screen_view` 事件的值为 1，其他为 0。 |
-| _session_id                        | 添加在所有事件中。                                                                                      |
-| _session_start_timestamp           | 添加在所有事件中。                                                                                      |
-| _session_duration                  | 添加在所有事件中。                                                                                      |
-| _session_number                    | 添加在所有事件中，初始值为 1，由用户设备自动增加。                                         |
-
+| 属性名称                     | 描述                                                |
+| ------------------------ |---------------------------------------------------|
+| _traffic_source_medium   | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介                       |
+| _traffic_source_name     | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动                     |
+| _traffic_source_source   | 保留给流量来源，事件报告时获取的网络来源的名称                           |
+| _channel                 | 下载应用的渠道                                           |
+| _device_vendor_id        | 设备供应商ID                                           |
+| _device_advertising_id   | 设备广告ID                                            |
+| _entrances               | 添加在 `_screen_view` 事件中，会话中第一个 `_screen_view` 事件的值为 1，其他为 0 |
+| _session_id              | 添加在所有事件中                                          |
+| _session_start_timestamp | 添加在所有事件中                                          |
+| _session_duration        | 添加在所有事件中                                          |
+| _session_number          | 添加在所有事件中，初始值为 1，由用户设备自动增加                         |

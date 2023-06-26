@@ -128,11 +128,11 @@ For **Objective-c** project refer to [ClickstreamObjc Api Reference](https://aws
 Clickstream Swift SDK supports the following data types:
 
 | Data type | Range                                                 | Sample        |
-| --------- | ----------------------------------------------------- | ------------- |
+| --------- |-------------------------------------------------------| ------------- |
 | Int       | -2147483648～2147483647                                | 12            |
 | Int64     | -9,223,372,036,854,775,808～ 9,223,372,036,854,775,807 | 26854775808   |
 | Double    | -2.22E-308~1.79E+308                                  | 3.14          |
-| Boolean   | true、false                                            | true          |
+| Boolean   | true, false                                           | true          |
 | String    | max support 1024 characters                           | "clickstream" |
 
 ### Naming rules
@@ -169,16 +169,16 @@ In order to improve the efficiency of querying and analysis, we need to limit ev
 
 Automatically collected events:
 
-| Event name       | When to trigger                                             | Event Attributes                                                                                                  |
-| ---------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| _session_start   | when users app come to foreground for the first time and their is no on-going session                         | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
-| _screen_view     | when the activity callback `onResume()` method              | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
-| _app_exception   | when the app is crash.                                      | _exception_message<br>_exception_stack                                                                            |
-| _app_update      | when the app is updated to a new version and launched again | _previous_app_version                                                                                             |
-| _first_open      | the first time user launches an app after installing        |                                                                                                                   |
-| _os_update       | device operating system is updated to a new version         | _previous_os_version                                                                                              |
-| _user_engagement | when the app is in the foreground at least one second       | _engagement_time_msec<br>                                                                                         |
-| _profile_set     | when the `addUserAttributes()` or `setUserId()` api called. |                                                                                                                       |
+| Event name       | When to trigger                                                                       | Event Attributes                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| _session_start   | when users app come to foreground for the first time and their is no on-going session | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
+| _screen_view     | when the activity callback `onResume()` method                                        | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
+| _app_exception   | when the app is crash.                                                                | _exception_message<br>_exception_stack                                                                            |
+| _app_update      | when the app is updated to a new version and launched again                           | _previous_app_version                                                                                             |
+| _first_open      | the first time user launches an app after installing                                  |                                                                                                                   |
+| _os_update       | device operating system is updated to a new version                                   | _previous_os_version                                                                                              |
+| _user_engagement | when the app is in the foreground at least one second                                 | _engagement_time_msec<br>                                                                                         |
+| _profile_set     | when the `addUserAttributes()` or `setUserId()` api called.                           |                                                                                                                   |
 
 #### Session definition
 
@@ -252,36 +252,67 @@ In Clickstream Swift SDK, we define the `user_engagement` as the app is in the f
         "_session_number": 3,
         "_session_start_timestamp": 1685082158847,
         "product_category": "men's clothing",
-        "product_id": 1,
+        "product_id": 1
     }
 }
 ```
 
 All user attributes will be included in `user` object, and all custom and global attribute are stored in `attributes` object.
 
+#### Common attribute explanation
+
+| attribute        | describe                                                          | how to generate                                                                                                                                                                                                                                     | use and purpose                                                                                      |
+| ---------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| hashCode         | the AnalyticsEvent Object's hashCode                              | generate from`String(format: "%08X", hasher.combine(eventjson))`                                                                                                                                                                                    | distinguish different event                                                                          |
+| app_id           | clickstram app id                                                 | generated when clickstream app create from solution control plane.                                                                                                                                                                                  | identify the events for your apps                                                                    |
+| unique_id        | the unique id for user                                            | generate from `UUID().uuidString` when the sdk first initialization<br>it will be changed after user relogin to another user, and when user relogin to the before user in same device, the `unique_id` will reset to the before user's `unique_id`. | the unique for identity different user and associating the behavior of logging in and not logging in |
+| device_id        | the unique id for device                                          | generate from`UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString`<br>it will be changed after app reinstall<br>                                                                                                                  | distinguish different device                                                                         |
+| device_unique_id | the device advertising Id                                         | generate from`ASIdentifierManager.shared().advertisingIdentifier.uuidString ?? ""`                                                                                                                                                                  | distinguish different device                                                                         |
+| event_type       | event name                                                        | set by user or sdk.                                                                                                                                                                                                                                 | distinguish different event type                                                                     |
+| event_id         | the unique id for event                                           | generate from `UUID().uuidString` when the event create.                                                                                                                                                                                            | distinguish each event                                                                               |
+| timestamp        | event create timestamp                                            | generate from `Date().timeIntervalSince1970 * 1000` when event create                                                                                                                                                                               | data analysis needs                                                                                  |
+| platform         | the platform name                                                 | for iOS device is always "iOS"                                                                                                                                                                                                                      | data analysis needs                                                                                  |
+| os_version       | the iOS os version                                                | generate from`UIDevice.current.systemVersion`                                                                                                                                                                                                       | data analysis needs                                                                                  |
+| make             | manufacturer of the device                                        | for iOS device is always "apple"                                                                                                                                                                                                                    | data analysis needs                                                                                  |
+| brand            | brand of the device                                               | for iOS device is always "apple"                                                                                                                                                                                                                    | data analysis needs                                                                                  |
+| model            | model of the device                                               | generate from mapping of device identifier                                                                                                                                                                                                          | data analysis needs                                                                                  |
+| carrier          | the device network operator name                                  | generate from`CTTelephonyNetworkInfo().serviceSubscriberCellularProviders?.first?.value`<br>default is: "UNKNOWN"                                                                                                                                   | data analysis needs                                                                                  |
+| network_type     | the current device network type                                   | "Mobile", "WIFI" or "UNKNOWN"<br>generate by  `NWPathMonitor`                                                                                                                                                                                       | data analysis needs                                                                                  |
+| screen_height    | The absolute height of the available display size in pixels       | generate from`UIScreen.main.bounds.size.height * UIScreen.main.scale`                                                                                                                                                                               | data analysis needs                                                                                  |
+| screen_width     | The absolute width of the available display size in pixels.       | generate from`UIScreen.main.bounds.size.width * UIScreen.main.scale`                                                                                                                                                                                | data analysis needs                                                                                  |
+| zone_offset      | the divece raw offset from GMT in milliseconds.                   | generate from`TimeZone.current.secondsFromGMT()*1000`                                                                                                                                                                                               | data analysis needs                                                                                  |
+| locale           | the default locale(language, country and variant) for this device | generate from `Locale.current`                                                                                                                                                                                                                      | data analysis needs                                                                                  |
+| system_language  | the devie language code                                           | generate from `Locale.current.languageCode`<br>default is: "UNKNOWN"                                                                                                                                                                                | data analysis needs                                                                                  |
+| country_code     | country/region code for this device                               | generate from `Locale.current.regionCode`<br>default is: "UNKNOWN"                                                                                                                                                                                  | data analysis needs                                                                                  |
+| sdk_version      | clickstream sdk version                                           | generate from`PackageInfo.version`                                                                                                                                                                                                                  | data analysis needs                                                                                  |
+| sdk_name         | clickstream sdk name                                              | this will always be `aws-solution-clickstream-sdk`                                                                                                                                                                                                  | data analysis needs                                                                                  |
+| app_version      | the app version name                                              | generate from `Bundle.main.infoDictionary["CFBundleShortVersionString"] ?? ""`                                                                                                                                                                      | data analysis needs                                                                                  |
+| app_package_name | the app package name                                              | generate from`Bundle.main.infoDictionary["CFBundleIdentifier"] ?? ""`                                                                                                                                                                               | data analysis needs                                                                                  |
+| app_title        | the app's display name                                            | generate from `Bundle.main.infoDictionary["CFBundleName"] ?? ""`                                                                                                                                                                                    | data analysis needs                                                                                  |
+
 #### Reserved attributes
 
 **User attributes**
 
-| attribute name              | description                                |
-| --------------------------- | --------------------------------------- |
-| _user_id                    | Reserved for user id that is assigned by app                       |
-| _user_ltv_revenue           | Reserved for user lifetime value   |
-| _user_ltv_currency          | Reserved for user lifetime value currency        |
+| attribute name              | description                                                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| _user_id                    | Reserved for user id that is assigned by app                                                                                          |
+| _user_ltv_revenue           | Reserved for user lifetime value                                                                                                      |
+| _user_ltv_currency          | Reserved for user lifetime value currency                                                                                             |
 | _user_first_touch_timestamp | The time (in microseconds) at which the user first opened the app or visited the site, it is included in every event in `user` object |
 
 **Reserved attributes**
 
-| attribute name                     | description                                                                                                 |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| _traffic_source_medium             | Reserved for traffic medium, use this attribute to store the medium that acquired user when events were logged.                                                                                |
-| _traffic_source_name               | Reserved for traffic name, use this attribute to store the marketing campaign that acquired user when events were logged.  |
-| _traffic_source_source             | Reserved for traffic source,  Name of the network source that acquired the user when the event were reported.  |
-| _channel                           | the channel for app was downloaded                                                                             |
-| _device_vendor_id                  |                                                                                                          |
-| _device_advertising_id             |                                                                                                          |
-| _entrances                         | added in `_screen_view` event , the first `_screen_view` event in a session the value is 1, others is 0. |
-| _session_id                        | added in all event.                                                                                      |
-| _session_start_timestamp           | added in all event.                                                                                      |
-| _session_duration                  | added in all event.                                                                                      |
-| _session_number                    | added in all event, the initial value is 1, automatically increment by user device.                                         |
+| attribute name           | description                                                                                                               |
+| ------------------------ |---------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_medium   | Reserved for traffic medium, use this attribute to store the medium that acquired user when events were logged.           |
+| _traffic_source_name     | Reserved for traffic name, use this attribute to store the marketing campaign that acquired user when events were logged. |
+| _traffic_source_source   | Reserved for traffic source,  Name of the network source that acquired the user when the event were reported.             |
+| _channel                 | the channel for app was downloaded                                                                                        |
+| _device_vendor_id        | Vendor id of the device                                                                                                   |
+| _device_advertising_id   | Advertising id of the device                                                                                              |
+| _entrances               | added in `_screen_view` event , the first `_screen_view` event in a session the value is 1, others is 0.                  |
+| _session_id              | added in all event.                                                                                                       |
+| _session_start_timestamp | added in all event.                                                                                                       |
+| _session_duration        | added in all event.                                                                                                       |
+| _session_number          | added in all event, the initial value is 1, automatically increment by user device.                                       |
