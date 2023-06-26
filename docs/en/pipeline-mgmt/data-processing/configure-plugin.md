@@ -20,7 +20,7 @@ The IpEnrichment plugin uses [GeoLite2-City data](https://cdn.jsdelivr.net/npm/g
 
 You can add custom plugins to transform raw event data or enrich the data for your need.
 
-!!! note "Note"
+!!! info "Note"
 
     To add custom plugins, you must develop your own plugins firstly, see [Develop Custom Plugins](#develop-custom-plugins)
 
@@ -36,7 +36,7 @@ You can add your plugins by click **Add Plugin** button, which will open a new w
 
 4. (Optional) Upload the dependency files if any.
 
-5. **Main function class**: fill the full class name of your plugin class name, e.g. `com.company.sol.CustomTransformer`.
+5. **Main function class**: fill the full class name of your plugin class name, e.g. `com.example.sol.CustomTransformer`.
 
 
 ## Develop Custom Plugins

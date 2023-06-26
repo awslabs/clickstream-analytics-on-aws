@@ -1,7 +1,7 @@
 # Amazon S3
 In this option, clickstream data is buffered in the memory of ingestion Server, then sink into a S3 bucket. This option provides the best cost-performance in case real-time data consumption is not required. 
 
-!!! note "Note"
+!!! info "Note"
     Unlike Kafka and KDS data sink, this option buffers data in the ingestion server and responses 200 code to SDK client before sink into S3, so there is chance data could be lost while ingestion server fails and auto-scaled machine is in the process of creation. But it is worth to note that this probability is very low because of the High-availability design of the solution.
 
 * **S3 URI**: You can select an amazon s3 bucket. The data will be sank into this bucket.

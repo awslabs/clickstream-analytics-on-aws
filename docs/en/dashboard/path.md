@@ -16,7 +16,7 @@ Device report are created based on the following QuickSight dataset:
 - `path_view-<app id>-<project id>`, which connects to the `clickstream_path_view` view in analytics engines (i.e., Redshift or Athena).
 
 Below is the SQL command that generates the view.
-??? SQL Commands
+??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-path-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-path-view.sql:6"

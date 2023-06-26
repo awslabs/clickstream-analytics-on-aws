@@ -4,7 +4,7 @@
 
 ## 先决条件
 
-!!! important "重要"
+!!! info "重要提示"
     {{ solution_name }} 控制台是通过 CloudFront 分发提供的，它被视为一项互联网信息服务。
     如果您在 **AWS 中国区域** 部署解决方案，域名必须具有有效的 [ICP 备案][icp]。
 
@@ -48,7 +48,7 @@
    - 在选择 **应用类型** 时选择 **公共客户端**。确保不要更改 **客户端密钥** 的选择 **不生成客户端密钥**。
    - 在 **OpenID Connect 作用域** 中添加 **Profile**。
 3. 使用您的域名为 {{ solution_name }} 控制台设置 **回调 URL** 和 **登出 URL**。
-    !!! note "注意"
+    !!! info "注意"
         如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 `clickstream.example.com`，然后根据第 3 步中的指南进行更新。
 
 4. 如果您的托管 UI 设置完毕，您应该能够看到如下所示的内容。
@@ -113,7 +113,7 @@
 
 8. 更改客户端设置。在 **Valid Redirect URIs** 中输入 `http[s]://<{{ solution_name }} Console domain>/signin`，在 **Web Origins** 中输入 `<console domain>` 和 `+`。
 
-    !!! note "注意"
+    !!! tip "提示"
         如果您没有为控制台使用自定义域名，则控制台的域名尚不可用。您可以输入一个虚假的域名，例如 `clickstream.example.com`，然后在第 3 步中按照指南进行更新。
 
 9. 在高级设置中，将 **Access Token Lifespan** 设置为至少 5 分钟。
@@ -184,7 +184,7 @@
         | OIDCClientId | `<输入>` | OpenID Connect 客户端 ID。 |
         | OIDCProvider  | `<输入>` | OpenID Connect 提供程序发行方。发行方必须以 `https://` 开头 |
 
-        !!! note "注意"
+        !!! info "重要提示"
             {%
             include-markdown "tls-note.md"
             %}
@@ -214,7 +214,7 @@
 
 ## 第三步：更新 OIDC 客户端的回调 URL
 
-!!! important "重要提示"
+!!! info "重要提示"
     如果您没有使用自定义域名部署栈，请完成以下步骤。
 
 1. 登录到 [AWS CloudFormation 控制台][cloudformation]{target='_blank'}。
@@ -228,7 +228,7 @@
 
 ## 第四步：设置 DNS 解析器
 
-!!! important "重要提示"
+!!! info "重要提示"
     如果您在 AWS 区域中部署了栈，则可以跳过此步骤。
 
 该解决方案提供了一个 CloudFront 分发，用于访问 {{ solution_name }} 控制台。
@@ -241,7 +241,7 @@
 
 ## 第5步：启动Web控制台
 
-!!! important "重要"
+!!! info "重要提示"
 
     您的登录凭据由OIDC提供者管理。在登录{{ solution_name }}控制台之前，请确保在OIDC提供者的用户池中至少创建了一个用户。
 

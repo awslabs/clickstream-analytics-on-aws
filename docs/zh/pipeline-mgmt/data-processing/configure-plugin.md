@@ -19,10 +19,9 @@ IpEnrichment 插件使用由MaxMind创建的 [GeoLite2-City 数据](https://cdn.
 
 您可以添加自定义插件来转换原始事件数据或根据您的需求丰富数据。
 
-!!! note "注意"
+!!! info "提示"
 
     要添加自定义插件，您必须首先开发您自己的插件，请参阅 [开发自定义插件](#开发自定义插件)
-
 
 您可以通过点击 **添加插件** 按钮来添加您的插件，这将打开一个新窗口，在其中您可以上传您的插件。
 
@@ -35,8 +34,7 @@ IpEnrichment 插件使用由MaxMind创建的 [GeoLite2-City 数据](https://cdn.
 
 4. (可选)如果有的话，上传依赖文件。
 
-5. **主要功能类**：填写您的插件类名的完整类名，例如 `com.company.sol.CustomTransformer`。
-
+5. **主要功能类**：填写您的插件类名的完整类名，例如 `com.example.sol.CustomTransformer`。
 
 ## 开发自定义插件
 
@@ -64,4 +62,3 @@ cd examples/custom-plugins
 5. 运行gradle将代码打包成jar `./gradlew clean build`。
 
 6. 在构建输出目录 `./build/libs/` 中获取jar文件。
-

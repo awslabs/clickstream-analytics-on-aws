@@ -10,6 +10,6 @@
 - **Ease of use**. Clickstream SDKs provide multiple APIs and configuration options to simplify the event reporting and attribute setting process.
 - **Cross-platform analytics**. Clickstream SDKs are consistent in event data structure, attribute validation rules, and event sending mechanism, so that data can be normalized in the same structure for cross-platform analytics.
 
-!!! note "Note"
+!!! info "Note"
 
     All Clickstream SDKs are open source under Apache 2.0 License in [GitHub](https://github.com/awslabs/). You can customize the SDKs if needed. All contributions are welcome.

@@ -12,15 +12,15 @@
 3. 单击“查询数据”按钮，您将被定向到 Redshift 查询编辑器。
 4. 在 Redshift 查询编辑器的“编辑器”视图中，右键单击名称为“clickstream-<project-id>”的工作组，在提示的下拉菜单中，选择“编辑连接”，您将被要求提供连接参数，按照此[指南](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html){:target="_blank"} 使用适当的方法进行连接。
 
-    !!! note "重要事项"
-        
+    !!! info "重要提示"
+
         您需要数据库（名称为`<project-id>`)的读写权限才能创建自定义视图或表。 例如，您可以使用管理员用户连接到集群或工作组，如果您不知道管理员用户的密码，可以在 Redshift 控制台中重置管理员密码（[了解更多](https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-security .html){:target="_blank"})。 
 
 5. 如果您是第一次访问查询编辑器，系统会提示您配置帐户，请点击**配置帐户**按钮打开查询编辑器。
 6. 添加一个新的 SQL 编辑器，并确保您选择了正确的工作组和模式。
 7. 为漏斗分析创建一个新视图。 在这个例子中，我们使用了下面的 SQL。
   
-    ??? SQL command
+    ??? example "SQL 命令"
         ```sql
         CREATE OR REPLACE VIEW notepad.clickstream_funnel_view as
         SELECT
@@ -81,9 +81,9 @@
 11. 选择来自 Redshift 的视图作为数据源 - "**clickstream_funnel_view**", 然后
     - Schema（模式）: 选择 `notepad` 
     - Tables（表）: 选择 `clickstream_funnel_view`
-    
-    !!! note "提示"
-        
+
+    !!! tip "提示"
+
         系统会提示您选择“导入到SPICE”或“直接查询您的数据”，请选择“直接查询您的数据”。
 
     - 点击 **Edit/Preview data**（编辑/预览数据） 来预览你的数据, 确认数据后，单击右上角的 **PUBLISH & VISUALIZE**（发布并可视化）。

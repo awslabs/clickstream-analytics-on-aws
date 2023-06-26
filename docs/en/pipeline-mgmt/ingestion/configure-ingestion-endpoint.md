@@ -5,8 +5,8 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
 * **Private Subnets**: select at least two existing VPC private subnets, and the EC2 instances running in ECS will be deployed in these subnets.
 
-    !!! Note "Note"
-        
+    !!! tip "Tip"
+
         The availability zones where the public subnets are located must be consistent with those of the private subnets.
 
 * **Ingestion capacity**: This configuration sets the capacity of the ingestion server, and the ingestion server will automatically scale up or down based on the utilization of the processing CPU.
@@ -20,9 +20,9 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         * SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer [create public certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) to create it.
     * Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.
 
-        !!! Important "Important"
-            
-             Using HTTP protocol is not secure, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
+        !!! warning "Warning"
+
+            Using HTTP protocol is not secure, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
   
 * Additional Settings
     * Request path: User can input the path of ingestion endpoint to collect data, the default path is "/collect".
@@ -51,7 +51,7 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
     * Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.
 
-        !!! Important "Important"
+        !!! tip "Tip"
 
             The bucket must have [a bucket policy that grants Elastic Load Balancing permission][alb-permission] to write to the bucket.
 

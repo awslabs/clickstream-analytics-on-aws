@@ -15,7 +15,7 @@ Activity report are created based on the following QuickSight datasets:
 - `ods_events_parameter_view-<app id>-<project id>` that connects to the `clickstream_ods_events_parameter_rt_view` view in analytics engines  
 
 Below is the SQL command that generates the related views.
-??? SQL Commands
+??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-ods-events-rt-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-ods-events-rt-view.sql:3"

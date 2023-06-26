@@ -17,7 +17,7 @@
 - 连接到分析引擎中的`clickstream_ods_events_parameter_rt_view`数据集`ods_events_parameter_view-<app id>-<project id>`
 
 下面是生成相关视图的 SQL 命令。
-??? SQL Commands
+??? example "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-ods-events-rt-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-ods-events-rt-view.sql:3"

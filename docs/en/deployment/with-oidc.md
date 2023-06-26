@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-!!! important "Important"
+!!! info "Important"
     The {{ solution_name }} console is served via CloudFront distribution which is considered as an Internet information service.
     If you are deploying the solution in **AWS China Regions**, the domain must have a valid [ICP Recordal][icp].
 
@@ -46,7 +46,7 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
       - Choose **Public client** when selecting the **App type**. Make sure don't change the selection **Don't generate a client secret** for **Client secret**.
       - Add **Profile** in **OpenID Connect scopes**.
 3. Enter the **Callback URL** and **Sign out URL** using your domain name for {{ solution_name }} console. 
-    !!! note "Note"
+    !!! info "Note"
         If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, `clickstream.example.com`. Then update it following guidelines in Step 3.
 
 4. If your hosted UI is set up, you should be able to see something like below.
@@ -108,7 +108,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 7. Enter a Client ID, which must contain letters (case-insensitive) or numbers. Record the **Client ID** which will be used later.
 8. Change client settings. Enter `http[s]://<{{ solution_name }} Console domain>/signin` in **Valid Redirect URIs**，and enter `<console domain>` and `+` in **Web Origins**.
 
-    !!! note "Note"
+    !!! tip "Tip"
         If you're not using custom domain for the console, the domain name of console is not available yet. You can enter a fake one, for example, `clickstream.example.com`, and then update it following guidelines in Step 3.
 
 9. In the Advanced Settings, set the **Access Token Lifespan** to at least 5 minutes.
@@ -179,7 +179,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
         | OIDCClientId | `<Requires input>` | OpenID Connect client Id. |
         | OIDCProvider  | `<Requires input>` | OpenID Connect provider issuer. The issuer must begin with `https://` |
 
-        !!! Note "Note"
+        !!! info "Important"
             {%
             include-markdown "tls-note.md"
             %}
@@ -208,7 +208,7 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 ## Step 3. Update the callback URL of OIDC client
 
-!!! important "Important"
+!!! info "Important"
     If you don't deploy stack with custom domain, you must complete below steps.
 
 1. Sign in to the [AWS CloudFormation console][cloudformation]{target='_blank'}.
@@ -222,7 +222,7 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 ## Step 4. Setup DNS Resolver
 
-!!! important "Important"
+!!! info "Important"
     If you deploy stack in AWS Regions, you can skip this step.
 
 This solution provisions a CloudFront distribution that gives you access to the {{ solution_name }} console.
@@ -235,7 +235,7 @@ This solution provisions a CloudFront distribution that gives you access to the 
 
 ## Step 5. Launch the web console
 
-!!! important "Important"
+!!! info "Important"
 
     Your login credentials is managed by the OIDC provider. Before signing in to the {{ solution_name }} console, make sure you have created at least one user in the OIDC provider's user pool.
 

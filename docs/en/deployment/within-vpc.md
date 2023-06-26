@@ -25,7 +25,7 @@ Use the following steps to deploy this solution on AWS.
 
 You can use existing OpenID Connect (OIDC) provider or following [this guide][oidc-clients] to create an OIDC client.
 
-!!! note "Note"
+!!! tip "Tip"
     This solution deploys the console in VPC without requiring SSL certificate by default. You have to use an OIDC client to support callback url with `http` protocol.
 ## Step 2. Launch the stack
 
@@ -69,7 +69,7 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 ## Step 4. Launch the web console
 
-!!! important "Important"
+!!! info "Important"
 
     Your login credentials is managed by the OIDC provider. Before signing in to the {{ solution_name }} console, make sure you have created at least one user in the OIDC provider's user pool.
 

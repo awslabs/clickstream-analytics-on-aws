@@ -14,10 +14,9 @@ Replace the file names and YourCertificate with the names for your uploaded file
 You must specify the `file://` prefix in the certificate-body, certificate-chain and private-key parameters in the API request. 
 Otherwise, the request fails with a `MalformedCertificate: Unknown` error message.
 
-!!! note "Note"
+!!! info "Note"
 
-     You must specify a path using the --path option. The path must begin with /cloudfront and must include a 
-     trailing slash (for example, /cloudfront/test/).
+    You must specify a path using the --path option. The path must begin with /cloudfront and must include a trailing slash (for example, /cloudfront/test/).
 
 After the certificate is uploaded, the AWS command `upload-server-certificate` returns metadata for the uploaded certificate, including the certificate's Amazon Resource Name (ARN), friendly name, identifier (ID), and expiration date.
 

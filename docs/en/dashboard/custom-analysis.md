@@ -12,16 +12,16 @@ Creating a custom report mainly consists of two parts, the first part is to prep
 2. Click the workgroup starting with `clickstream-<project-id>` created by the solution.
 3. Click on the `Query data` button, you will be directed to the Redshift Query Editor.
 4. In the `Editor` view on the Redshift Query Editor, right click on the workgroup with name of `clickstream-<project-id>`. In the prompted drop-down, select `Edit connection`, you will be asked to provide connection parameters. Follow this [guide](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html){:target="_blank"} to use an appropriate method to connect.
-   
-    !!! note "Important"
-        
+
+    !!! info "Important"
+
         You will need read and write permissions for the database (with name as `<project-id>`) to create custom view or table. For example, you can use Admin user to connect to the cluster or workgroup. If you don't know the password for the Admin user, you can reset the admin password in the Redshift Console ([Learn more](https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-security.html){:target="_blank"}). 
 
 5. If it is the first time you access the query editor, you will be prompted to configure the account, please click **Config account** button to open query editor.
 6. Add a new SQL editor, and make sure you selected the correct workgroup and schema.
 7. Create a new view for funnel analysis. In this example, we used below SQL.
   
-    ??? SQL command
+    ??? example "SQL Commands"
         ```sql
         CREATE OR REPLACE VIEW notepad.clickstream_funnel_view as
         SELECT
@@ -82,9 +82,9 @@ Creating a custom report mainly consists of two parts, the first part is to prep
 11. Choose the view from Redshift as data source - "**clickstream_funnel_view**", then
     - Schema: select `notepad` 
     - Tables: `clickstream_funnel_view`
-    
-    !!! note "note"
-        
+
+    !!! tip "Tip"
+
         You will be prompt to select `Import to SPICE` or `Directly query your data`, please select `Directly query your data`.
 
     - Click **Edit/Preview data** to preview the data, once you're familiar with the data, click  **PUBLISH & VISUALIZE** at the top-right.

@@ -1,6 +1,6 @@
 # Uninstall the Clickstream Analytics on AWS
 
-!!! Warning "Warning"
+!!! warning "Warning"
     You will encounter an IAM role missing error if you delete {{ solution_name }} main stack before you delete the stacks created for Clickstream projects. {{ solution_name }} console launches additional CloudFormation stacks for the Clickstream pipelines.
     We recommend you delete projects before uninstalling the solution.
 

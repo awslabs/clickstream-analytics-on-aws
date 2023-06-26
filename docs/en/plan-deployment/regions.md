@@ -65,7 +65,7 @@ This solution provides [modular components](../architecture.md) for supporting d
 | China (Beijing) Region Operated by Sinnet* | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } |
 | China (Ningxia) Region Operated by NWCD*  | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } |
 
-!!! note "Note(*)"
+!!! info "Note(*)"
 
     AWS China Regions don't support using AWS Global Accelerator to accelerate the ingestion endpoint.
 

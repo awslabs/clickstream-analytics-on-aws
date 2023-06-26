@@ -25,7 +25,7 @@
 
 您可以使用现有的OpenID Connect（OIDC）提供者，或按照[此指南][oidc-clients]创建一个OIDC客户端。
 
-!!! notice "注意"
+!!! tip "提示"
     默认情况下，此解决方案在VPC中部署控制台时不需要SSL证书。您必须使用OIDC客户端来支持具有`http`协议的回调URL。
 
 ## 第二步：启动堆栈
@@ -70,7 +70,7 @@
 
 ## Step 4. 启动 Web 控制台
 
-!!! important "重要"
+!!! info "重要提示"
 
     您的登录凭据由 OIDC 提供者管理。在登录到 {{ solution_name }} 控制台之前，请确保您已在 OIDC 提供者的用户池中创建了至少一个用户。
 

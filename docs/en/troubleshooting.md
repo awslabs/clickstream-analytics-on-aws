@@ -56,8 +56,8 @@ It results from deleting the web console stack for this solution before the Clou
 
 Please create a new IAM role with the identical name mentioned in the above error message and trust the CloudFormation service with sufficient permission to delete those stacks.
 
-!!! Note "Note"
-    
+!!! tip "Tip"
+
     You can delete the IAM role after successfully removing those CloudFormation stacks.
 
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL

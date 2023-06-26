@@ -6,7 +6,7 @@
 
 * **私有子网**：选择至少两个现有的 VPC 私有子网，运行在 ECS 中的 EC2 实例将部署在这些子网中。
 
-    !!! Note "注意"
+    !!! tip "提示"
 
         公共子网所在的可用区必须与私有子网的可用区保持一致。
 
@@ -28,7 +28,7 @@
 
     * 禁用 HTTPS：如果用户选择禁用 HTTPS，则摄取服务器将提供 HTTP 端点。
 
-        !!! 重要 "重要"
+        !!! warning "重要提示"
 
             使用 HTTP 协议是不安全的，因为数据将在没有任何加密的情况下发送，数据在传输过程中存在泄漏或篡改的高风险。请确认风险后再进行操作。
 
@@ -69,44 +69,44 @@
 
     * 访问日志：ALB 支持提供其接收的所有请求的详细日志。如果您启用此选项，则解决方案将自动为您启用访问日志，并将日志存储在您之前选择的 S3 存储桶中。
 
-        !!! Important "重要"
+        !!! tip "提示"
 
             存储桶必须具有 [授权 Elastic Load Balancing 写入存储桶的存储桶策略][alb-permission]。
 
-下面是 **2022 年 8 月之前可用的区域** 存储桶的示例策略：
+            下面是 **2022 年 8 月之前可用的区域** 存储桶的示例策略：
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::<elb-account-id>:root"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::<BUCKET>/clickstream/*"
-    }
-  ]
-}
-```
+            ```json
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "arn:aws:iam::<elb-account-id>:root"
+                  },
+                  "Action": "s3:PutObject",
+                  "Resource": "arn:aws:s3:::<BUCKET>/clickstream/*"
+                }
+              ]
+            }
+            ```
 
-下面是 **2022 年 8 月或之后可用的区域** 存储桶的示例策略：
+            下面是 **2022 年 8 月或之后可用的区域** 存储桶的示例策略：
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "logdelivery.elasticloadbalancing.amazonaws.com"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::<BUCKET>/clickstream/*"
-    }
-  ]
-}
-```
+            ```json
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "logdelivery.elasticloadbalancing.amazonaws.com"
+                  },
+                  "Action": "s3:PutObject",
+                  "Resource": "arn:aws:s3:::<BUCKET>/clickstream/*"
+                }
+              ]
+            }
+            ```
 
 [alb-permission]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html

@@ -14,7 +14,7 @@ aws iam upload-server-certificate --path /cloudfront/ \
 在 API 请求中的 certificate-body、certificate-chain 和 private-key 参数中，必须使用 `file://` 前缀。
 否则，请求将失败，并显示 `MalformedCertificate: Unknown` 错误消息。
 
-!!! note "注意"
+!!! info "注意"
 
      您必须使用 --path 选项指定一个路径。该路径必须以 /cloudfront 开头，并且必须包含尾部斜杠（例如，/cloudfront/test/）。
 

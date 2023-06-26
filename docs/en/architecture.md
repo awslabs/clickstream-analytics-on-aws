@@ -34,7 +34,7 @@ The following introduces the architecture diagram for each module.
 
 Suppose you create a data pipeline in the solution. This solution deploys the Amazon CloudFormation template in your AWS account and completes the following settings.
 
-!!! Note "Note"
+!!! info "Note"
       The ingestion module supports three types of data sinks.
 
 1. (Optional) The ingestion module creates an AWS global accelerator endpoint to reduce the latency of sending events from your clients (web applications or mobile applications).

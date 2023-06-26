@@ -56,9 +56,9 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 请使用上述错误消息中提到的相同名称创建一个新的 IAM 角色，并信任具有足够权限的 CloudFormation 服务以删除这些堆栈。
 
-!!! Note "注意"
-    
-     成功移除这些 CloudFormation 堆栈后，您可以删除 IAM 角色。
+!!! tip "提示"
+
+    成功移除这些 CloudFormation 堆栈后，您可以删除 IAM 角色。
 
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 

@@ -18,7 +18,7 @@
 - 连接到分析引擎中的`clickstream_retention_view`视图的`retention_view-<app id>-<project id>`。
 
 下面是生成视图的 SQL 命令。
-??? SQL Commands
+??? example "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-lifecycle-weekly-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-lifecycle-weekly-view.sql:6"

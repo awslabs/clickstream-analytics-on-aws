@@ -10,7 +10,7 @@ Note: This article describes the default report. You can customize the report by
 
 ## Where the data comes from
 Acquisistion report are created based on the QuickSight dataset of `user_dim_view-<app>-<project>`, which connects to the `clickstream_user_dim_view` view in analytics engine (i.e., Redshift or Athena). Below is the SQL command that generates the view.
-??? SQL Commands
+??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-user-dim-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-user-dim-view.sql:6"

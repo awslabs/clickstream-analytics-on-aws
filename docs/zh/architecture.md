@@ -33,8 +33,8 @@
 
 假设您在解决方案中创建了一个数据管道。此解决方案在您的账户中部署 Amazon CloudFormation 模板并完成以下设置。
 
-!!! Note "Note"
-      摄取模块支持三种类型的数据宿。
+!!! info "注意"
+    摄取模块支持三种类型的数据宿。
 
 1. （可选）摄取模块创建全球加速器终端节点，以减少从客户端（Web 应用程序或移动应用程序）发送事件的延迟。
 2. [Elastic Load Balancing (ELB)](https://aws.amazon.com/elasticloadbalancing/) 使用ALB用于负载平衡摄取 Web 服务器。

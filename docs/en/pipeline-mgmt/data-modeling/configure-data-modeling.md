@@ -16,7 +16,7 @@ Once the data pipeline processes the event data, you can load the data into an a
 
 You can choose to use Redshift or Athena, or both. 
 
-!!! note "Note"
+!!! tip "Tip"
 
     We recommended you select both, that is, using Redshift for hot data modeling and using Athena for all-time data analysis.
 

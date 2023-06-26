@@ -12,7 +12,7 @@
 
 流量获取报表是基于QuickSight数据集`user_dim_view-<app>-<project>`创建的，该数据集连接到分析引擎（即Redshift或Athena）中的`clickstream_user_dim_view`视图。以下是生成该视图的SQL命令。
 
-??? SQL Commands
+??? example "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-user-dim-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-user-dim-view.sql:6"

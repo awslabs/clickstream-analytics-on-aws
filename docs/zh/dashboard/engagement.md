@@ -13,7 +13,7 @@
 
 参与报表是基于`session_view-<app id>-<project id>`的 QuickSight 数据集创建的，它连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_session_view` 视图，下面是生成视图的 SQL 命令。
 
-??? SQL Commands
+??? example "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-session-view.sql:7"

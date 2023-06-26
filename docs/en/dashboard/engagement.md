@@ -10,7 +10,7 @@ Note: This article describes the default report. You can customize the report by
 
 ## Where the data comes from
 Engagement report are created based on the QuickSight dataset of `session_view-<app id>-<project id>`, which connects to the `clickstream_session_view` view in analytics engines (i.e., Redshift or Athena). Below is the SQL command that generates the view.
-??? SQL Commands
+??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-session-view.sql:7"

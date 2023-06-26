@@ -65,7 +65,7 @@ AWS 上的 Clickstream Analytics 提供了两种身份验证方式，[Cognito �
 | 中国（北京）地区，由 Sinnet 运营*                   | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } |
 | 中国（宁夏）地区，由 NWCD 运营*                    | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } | :material-check-bold:{ .icon_check }  | :material-close-thick:{ .icon_cross } |
 
-!!! note "注意(*)"
+!!! info "注意(*)"
 
     AWS 中国区域不支持使用 AWS 全球加速器加速数据摄入端点。
 

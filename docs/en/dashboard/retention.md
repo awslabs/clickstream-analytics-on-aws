@@ -16,7 +16,7 @@ Retention report are created based on the following QuickSight dataset:
 - `retention_view-<app id>-<project id>` that connects to the `clickstream_retention_view` view in analytics engines
 
 Below is the SQL command that generates the view.
-??? SQL Commands
+??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-lifecycle-weekly-view.sql"
         --8<-- "src/analytics/private/sqls/redshift/clickstream-lifecycle-weekly-view.sql:6"

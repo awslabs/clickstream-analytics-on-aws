@@ -4,7 +4,7 @@ weight: 1
 
 ---
 
-!!! Important "Important"
+!!! info "Important"
 
     The following cost estimations are examples and may vary depending on your environment.
 
@@ -20,7 +20,7 @@ You are responsible for the cost of Amazon cloud technology services used when r
 
 The following are cost estimations for monthly data volumes of 10/100/1000 RPS (request per second) with different data pipeline configurations. Cost estimation are provided by modules. To get a total cost for your use case, sum the cost by modules based on your actual configuration.
 
-!!! Important "Important"
+!!! info "Important"
 
     As of this revision, the following cost is calculated with `On-Demand` prices in `us-east-1` region measured in USD.
 
@@ -99,7 +99,7 @@ Key assumptions include
 | --------------------- | ------- | ------- | ----- | ----- |
 | All size              | 48      | 18.80   |   0   | 66.80 |
 
-!!! note "Note"
+!!! info "Note"
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.
 
 ## Logs and Monitoring

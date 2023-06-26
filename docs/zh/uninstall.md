@@ -1,6 +1,6 @@
 # 卸载Clickstream Analytics on AWS
 
-!!! Warning "警告"
+!!! warning "警告"
     如果你在删除{{ solution_name }}主堆栈之前，删除项目相关的堆栈，你会遇到IAM角色丢失的错误。{{ solution_name }}控制台为Clickstream数据管道启动了额外的CloudFormation堆栈。
     我们建议你在卸载解决方案之前删除项目。
 

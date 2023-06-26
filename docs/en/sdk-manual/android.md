@@ -79,8 +79,8 @@ public void onCreate() {
 
 After initializing the SDK, you can use the following code to customize it.
 
-!!! Important "Important"
-    This configuration will override the default configuration in `amplifyconfiguration.json` file. 
+!!! info "Important"
+    This configuration will override the default configuration in `amplifyconfiguration.json` file.
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
@@ -155,7 +155,7 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 | Length of user attribute name   | less than 25 characters  | 50 characters       | discard, log and record error  |
 | Length of user attribute value  | less than 50 characters  | 256 characters      | discard, log and record error  |
 
-!!! Important "Important"
+!!! info "Important"
 
     - The character limits are the same for single-width character languages (e.g., English) and double-width character languages (e.g., Chinese).
     - The limit of event attribute per event include common attributes and preset attributes.
