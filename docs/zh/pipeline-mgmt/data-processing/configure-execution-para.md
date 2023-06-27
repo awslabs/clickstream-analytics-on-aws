@@ -17,3 +17,44 @@
   `cron(分钟 小时 月中的天 月 周中的天 年)`
  
  有关更多信息，请参阅 [基于 Cron 的计划](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html?icmpid=docs_console_unmapped#cron-based)。
+
+
+## 配置 Spark 作业参数
+
+默认情况下，EMR 无服务器作业配置了[默认设置][jobs-spark]，适用于大多数情况，例如以小时为单位处理。
+
+如果您的数据量非常庞大，例如总批次的行数超过 100,000,000，则默认设置可能不适用于此情况，这将导致 EMR 作业失败。您需要更改 EMR Spark 作业的配置。
+
+您可以通过将文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` 添加到 S3 存储桶中来配置 EMR Spark 作业使用的资源。
+
+请将 `{PipelineS3Bucket}`、`{PipelineS3Prefix}` 和 `{ProjectId}` 替换为您的数据管道的值。这些值可以在 `Clickstream-DataProcessing-<uuid>` 栈的 **参数** 中找到。
+
+另外，您可以通过运行以下命令获取这些值：
+
+```sh
+stackNames=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE --no-paginate  | jq -r '.StackSummaries[].StackName' | grep  Clickstream-DataProcessing  | grep -v Nested)
+
+echo -e "$stackNames" | while read stackName; do
+    aws cloudformation describe-stacks --stack-name $stackName  | jq '.Stacks[].Parameters' | jq 'map(select(.ParameterKey == "PipelineS3Bucket" or .ParameterKey == "PipelineS3Prefix" or .ParameterKey == "ProjectId"))'
+done
+```
+
+在解决方案基准测试中，数据处理作业花费约 75 分钟处理 100,000,000 行数据（数据大小：303G gzip）。
+
+```json
+{
+   "sparkConfig": [
+        "spark.emr-serverless.executor.disk=200g",
+        "spark.executor.instances=8",
+        "spark.dynamicAllocation.initialExecutors=8",
+        "spark.executor.memory=100g",
+        "spark.executor.cores=16"
+    ],
+    "inputRePartitions": 500
+}
+```
+
+有关更多配置，请参阅[Spark 作业属性][spark-defaults]。
+
+[jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
+[spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
