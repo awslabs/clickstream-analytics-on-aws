@@ -14,27 +14,32 @@
 import { Box, Container, Header, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  getWorkingWithQuickSightLink,
+  getWorkingWithRedshiftLink,
+  getWorkshopLink,
+} from 'ts/url';
 
 const GetStarted: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <Container
       header={<Header variant="h2">{t('home:getStarted.name')}</Header>}
     >
       <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">{t('home:getStarted.link1')}</Link>
+        <Link href={getWorkshopLink(i18n.language)} target="_blank">
+          {t('home:getStarted.link1')}
+        </Link>
       </Box>
       <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">{t('home:getStarted.link2')}</Link>
+        <Link href={getWorkingWithRedshiftLink(i18n.language)}>
+          {t('home:getStarted.link4')}
+        </Link>
       </Box>
       <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">{t('home:getStarted.link3')}</Link>
-      </Box>
-      <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">{t('home:getStarted.link4')}</Link>
-      </Box>
-      <Box padding={{ vertical: 'xs' }}>
-        <Link href="#">{t('home:getStarted.link5')}</Link>
+        <Link href={getWorkingWithQuickSightLink(i18n.language)}>
+          {t('home:getStarted.link5')}
+        </Link>
       </Box>
     </Container>
   );

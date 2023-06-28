@@ -40,9 +40,10 @@ import { EMAIL_PATTERN, XSS_PATTERN } from 'ts/constant-ln';
 import {
   buildDocumentLink,
   buildQuickSightSubscriptionLink,
-  PIPELINE_QUICKSIGHT_GUIDE_LINK,
   PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
   PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN,
+  PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
+  PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
 import { checkStringValidRegex, isDisabled } from 'ts/utils';
 
@@ -227,7 +228,11 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                         guide_anchor: (
                           <Link
                             external
-                            href={PIPELINE_QUICKSIGHT_GUIDE_LINK}
+                            href={buildDocumentLink(
+                              i18n.language,
+                              PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
+                              PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
+                            )}
                           />
                         ),
                       }}

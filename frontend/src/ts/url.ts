@@ -38,9 +38,26 @@ export const KAFKA_REQUIREMENT_LINK_CN =
   '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/';
 export const KAFKA_REQUIREMENT_LINK_EN = '/data-sink-kafka.html';
 
-export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN =
+export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN = '/dashboard/';
+export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN = '/dashboards-1.html';
+
+export const PIPELINE_QUICKSIGHT_GUIDE_LINK_CN =
   '/pipeline-mgmt/quicksight/configure-quicksight';
-export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN = '/reporting.html';
+export const PIPELINE_QUICKSIGHT_GUIDE_LINK_EN = '/reporting.html';
+
+export const DATA_PROCESSING_LINK_CN =
+  '/pipeline-mgmt/data-processing/data-schema/';
+export const DATA_PROCESSING_LINK_EN = '/pipeline-management.html';
+
+export const DATA_MODELING_LINK_CN =
+  '/pipeline-mgmt/data-processing/data-schema/#columns';
+export const DATA_MODELING_LINK_EN = '/data-modeling.html';
+
+export const FAQ_LINK_CN = '/faq/';
+export const FAQ_LINK_EN = '/frequently-asked-questions.html';
+
+export const SUBMMIT_ISSUE_LINK =
+  'https://github.com/aws-solutions/clickstream-analytics-on-aws/issues';
 
 export const buildDocumentLink = (
   lang: string,
@@ -155,4 +172,34 @@ export const buildMSKLink = (region: string, arn: string) => {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
   }
   return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
+};
+
+// Document link
+export const getDoucmentList = (lang: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}`;
+  }
+  return `${SOLUTION_DOCUMENTS_DOMAIN_EN}/solution-overview.html`;
+};
+
+// Getting started link
+export const getWorkshopLink = (lang: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return `https://catalog.workshops.aws/clickstream/zh-CN`;
+  }
+  return `https://catalog.workshops.aws/clickstream/en-US`;
+};
+
+export const getWorkingWithRedshiftLink = (lang: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return `https://docs.aws.amazon.com/zh_cn/redshift/latest/mgmt/working-with-serverless.html`;
+  }
+  return `https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-serverless.html`;
+};
+
+export const getWorkingWithQuickSightLink = (lang: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return `https://docs.aws.amazon.com/zh_cn/quicksight/latest/user/welcome.html`;
+  }
+  return `https://docs.aws.amazon.com/quicksight/latest/user/welcome.html`;
 };

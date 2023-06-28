@@ -17,6 +17,7 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getDoucmentList } from 'ts/url';
 
 interface INavigationProps {
   activeHref: string;
@@ -24,7 +25,7 @@ interface INavigationProps {
 
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navHeader = { text: t('name'), href: '/' };
   const navItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
@@ -45,7 +46,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     {
       type: 'link',
       text: t('nav.doc'),
-      href: 'https://example.com',
+      href: getDoucmentList(i18n.language),
       external: true,
     },
   ];

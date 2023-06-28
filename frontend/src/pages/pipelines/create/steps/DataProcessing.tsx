@@ -55,6 +55,13 @@ import {
   SinkType,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
+import {
+  DATA_MODELING_LINK_CN,
+  DATA_MODELING_LINK_EN,
+  DATA_PROCESSING_LINK_CN,
+  DATA_PROCESSING_LINK_EN,
+  buildDocumentLink,
+} from 'ts/url';
 import { generateRedshiftRPUOptionListByRegion, isDisabled } from 'ts/utils';
 
 interface DataProcessingProps {
@@ -100,7 +107,7 @@ interface DataProcessingProps {
 const DataProcessing: React.FC<DataProcessingProps> = (
   props: DataProcessingProps
 ) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     update,
     pipelineInfo,
@@ -401,8 +408,17 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             description={
               <span>
                 {t('pipeline:create.enableETLDesc1')} (
-                <Link external>{t('learnMore')}</Link>){' '}
-                {t('pipeline:create.enableETLDesc2')}
+                <Link
+                  href={buildDocumentLink(
+                    i18n.language,
+                    DATA_PROCESSING_LINK_EN,
+                    DATA_PROCESSING_LINK_CN
+                  )}
+                  external
+                >
+                  {t('learnMore')}
+                </Link>
+                ) {t('pipeline:create.enableETLDesc2')}
               </span>
             }
           >
@@ -553,8 +569,17 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               desc={
                 <div>
                   {t('pipeline:create.transformDesc1')}(
-                  <Link external>{t('learnMore')}</Link>){' '}
-                  {t('pipeline:create.transformDesc2')}
+                  <Link
+                    external
+                    href={buildDocumentLink(
+                      i18n.language,
+                      DATA_MODELING_LINK_EN,
+                      DATA_MODELING_LINK_CN
+                    )}
+                  >
+                    {t('learnMore')}
+                  </Link>
+                  ) {t('pipeline:create.transformDesc2')}
                 </div>
               }
             />
