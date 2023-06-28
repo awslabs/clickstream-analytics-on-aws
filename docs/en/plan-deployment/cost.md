@@ -6,7 +6,7 @@ weight: 1
 
 !!! Important "Important"
 
-    The following cost estimations are examples and may vary depending on your environment. 
+    The following cost estimations are examples and may vary depending on your environment.
 
 You are responsible for the cost of Amazon cloud technology services used when running this solution. The majority of the cost for this solution is incurred by the data pipeline. As of this revision, the main factors affecting the solution cost include:
 
@@ -18,7 +18,7 @@ You are responsible for the cost of Amazon cloud technology services used when r
 
 - **Additional features**
 
-The following are cost estimations for monthly data volumes of 10/100/1000/10000 RPS (request per second) with different data pipeline configurations. Cost estimation are provided by modules. To get a total cost for your use case, sum the cost by modules based on your actual configuration.
+The following are cost estimations for monthly data volumes of 10/100/1000 RPS (request per second) with different data pipeline configurations. Cost estimation are provided by modules. To get a total cost for your use case, sum the cost by modules based on your actual configuration.
 
 !!! Important "Important"
 
@@ -32,34 +32,28 @@ Ingestion module includes the following cost components:
 - EC2 for ECS
 - Data sink (Kinesis | Kafka | Direct to S3)
 - S3 storage
-- CloudWatch
 
 Key assumptions include:
 
 - Request payload: 1KB (compressed, 1:15 ratio)
 - MSK configurations (m5.large * 2)
 - KDS configuration (on-demand, provision - shard 2)
-- 10/100/1000/10000RPS
+- 10/100/1000RPS
 
-| Request Per Second | ALB | EC2 | Buffer type       | Buffer cost | S3   | CloudWatch | Total (USD/Month) |
-| ------------------ | --- | --- | ----------------- | ----------- | ---  | ---------- | --------- |
-| 10RPS             |   7  | 122    | Kinesis (On-Demand) |    36         |   3   |   14   |  182  |
-|                         |     |     | Kinesis (Provisioned)   |             |     |       |    |
-|                         |   7  |  122   | MSK (m5.large * 2)   |       417      |   3  |    14   | 563   |
-|                         | 7    |  122   | None              |             |  3    |    14   |  146   |
-|100RPS           |   43  |  122  |     Kinesis(On-demand)              |      86       |  3   |    14   | 268 |
-|                         |     |     | Kinesis (Provisioned)   |             |     |       |    |
-|           |   43  |  122  |     MSK (m5.large * 2)              |      417       |  3   |    14   | 599
-|           |   43  |  122  |     None              |             |  3    |    14   | 182
-|
-|1000RPS           |   396  |   122 |     Kinesis(On-demand)              |      576       |  14   |   14    | 1122 |
-|                         |     |     | Kinesis (Provisioned)   |             |     |       |    |
-|           |  396   | 122   |     MSK (m5.large * 2)              |      530       |  14  |   14    |  1076
-|           |  396   | 122   |     None              |            |  14   |   14    |  546
-|10000RPS           |   4996  |   244 |     Kinesis(On-demand)              |      6501       |  86   |   21    | 11848 |
-|                         |     |     | Kinesis (Provisioned)   |             |     |       |    |
-|           |  4996   |  187  |     MSK (m5.large * 3)              |      1850       |  101|   21    |  7155
-|           |  4996   | 187   |     None              |            |  28    |   21    |  5232
+| Request Per Second | ALB | EC2 | Buffer type       | Buffer cost | S3   |  Total (USD/Month) |
+| ------------------ | --- | --- | ----------------- | ----------- | ---  |  --------- |
+| 10RPS             |   7  | 122    | Kinesis (On-Demand) |    36         |   3   |     168  |
+|                         |   7  |  122   | Kinesis (Provisioned 2 shard)   |      22       |  3   |   154  |
+|                         |   7  |  122   | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     549   |
+|                         | 7    |  122   | None              |             |  3    |      132   |
+|100RPS           |   43  |  122  |     Kinesis(On-demand)              |      86       |  3   |     254 |
+|                         | 43    |   122  | Kinesis (Provisioned 2 shard)   |      26       | 3    |     194  |
+|           |   43  |  122  |     MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     585
+|           |   43  |  122  |     None              |             |  3    |     168
+|1000RPS           |   396  |   122 |     Kinesis(On-demand)              |      576       |  14   |    1108 |
+|                         |  396   |  122   | Kinesis (Provisioned 10 shard)   |    146         |   14  |     678  |
+|           |  396   | 122   |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1062
+|           |  396   | 122   |     None              |            |  14   |     532
 
 ## Data processing & data modeling modules
 
@@ -75,21 +69,17 @@ Key assumptions include:
 - Data processing interval: hourly/6-hourly/daily
 - EMR running three built-in plugins to process data
 
-| Request Per Second | EMR schedule interval | EMR Job run time | EMR Cost | Redshift type            | Redshift cost | Total (USD) |
-| ----------------------- | --------------------- | ---------------- | -------- | ------------------------ | ------------- | ----- |
-| 10RPS             | Hourly                |                  |     28     | Serverless (8 based RPU) |     36          |   64    |
-|                         | 6-hourly              |                  |     10.8     | Serverless               |       12        |   22.8    |
-|                         | Daily                 |                  |      9.6    | Serverless               |     3          |   12.6    |
-|                         | Hourly                |                  |      28    | Cluster                  |               |       |
-|                         | 6-hourly              |                  |      10.8    | Cluster                  |               |       |
-|                         | Daily                 |                  |      9.6    | Cluster                  |               |       |
-| 100RPS             | Hourly                |                  |      115   | Serverless (8 based RPU) |       72        |  187    |
-|                         | 6-hourly              |                  |          | Serverless               |               |       |
-|                         | Daily                 |                  |          | Serverless               |               |       |
-|                         | Hourly                |                  |          | Cluster                  |               |       |
-|                         | 6-hourly              |                  |          | Cluster                  |               |       |
-|                         | Daily                 |                  |          | Cluster                  |               |       |
-| 1000RPS             | Hourly                |        480 H          |      964.8   | Serverless (8 based RPU) |       300        |  1264.8    |
+| Request Per Second | EMR schedule interval |  EMR Cost | Redshift type            | Redshift cost | Total (USD) |
+| ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- |
+| 10RPS             | Hourly                |     28     | Serverless (8 based RPU) |     36          |   64    |
+|                         | 6-hourly              |     10.8     | Serverless(8 based RPU)               |       12        |   22.8    |
+|                         | Daily                 |      9.6    | Serverless(8 based RPU)               |     3          |   12.6    |
+| 100RPS             | Hourly                |      105   | Serverless (8 based RPU) |       72        |  177    |
+|                         | 6-hourly              |     90     | Serverless(8 based RPU)               |       60        |   155    |
+|                         | Daily                 |     130     | Serverless(8 based RPU)               |       17        |    147   |
+| 1000RPS             | Hourly                |      964   | Serverless (8 based RPU) |       194        |  1158    |
+|              | 6-Hourly                |      678   | Serverless (8 based RPU) |       176        |  854    |
+|              | Daily                |         | Serverless (8 based RPU) |               |      |
 
 ## Reporting module
 
@@ -111,6 +101,9 @@ Key assumptions include
 
 !!! note "Note"
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.
+
+## Logs and Monitoring
+The solution utilizes CloudWatch Logs， CloudWatch Metrics and CloudWatch Dashboard to implement logging, monitoring and visualizating features. The total cost ranges from $7 to $14 per month and may fluctuate based on the volume of logs and the number of metrics being monitored.
 
 ## Additional features
 
@@ -135,7 +128,6 @@ Key assumptions:
 | 10RPS           |        18           |          0.3          |       18.3     |
 | 100RPS         |          18         |           3         |      21      |
 | 1000RPS       |            18       |            30        |      38      |
-| 10000RPS       |            18       |           300       |       318     |
 
 ### Application Load Balancer Access log
 
@@ -146,4 +138,3 @@ You are charged storage costs for Amazon S3, but not charged for the bandwidth u
 | 10 RPS           |    16.5       |    0.38     |
 | 100 RPS         |     165     |      3.8   |
 | 1000 RPS       |     1650     |    38     |
-| 10000 RPS       |     16500     |    380     |
