@@ -34,7 +34,7 @@ import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
-const EMR_VERSION = 'emr-6.9.0';
+export const EMR_VERSION = 'emr-6.11.0';
 
 export interface DataPipelineProps {
   readonly vpc: IVpc;

@@ -40,22 +40,23 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-The data processing job took about 75 minutes to process 100,000,000 rows (data size: 303G gzip) in solution benchmark testing.
+The data processing job took about 15 minutes to process 100,000,000 rows in solution benchmark testing.
 
 ```json
 {
    "sparkConfig": [
         "spark.emr-serverless.executor.disk=200g",
-        "spark.executor.instances=8",
-        "spark.dynamicAllocation.initialExecutors=8",
+        "spark.executor.instances=16",
+        "spark.dynamicAllocation.initialExecutors=48",
         "spark.executor.memory=100g",
         "spark.executor.cores=16"
     ],
-    "inputRePartitions": 500
+    "inputRePartitions": 1000
 }
 ```
 
-For more configurations, please refer to [Spark job properties][spark-defaults].
+For more configurations, please refer to [Spark job properties][spark-defaults] and application [worker config][worker-configs].
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
+[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs

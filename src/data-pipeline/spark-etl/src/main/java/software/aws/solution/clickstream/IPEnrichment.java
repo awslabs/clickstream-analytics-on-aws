@@ -14,9 +14,7 @@
 
 package software.aws.solution.clickstream;
 
-import com.maxmind.db.MaxMindDbConstructor;
-import com.maxmind.db.MaxMindDbParameter;
-import com.maxmind.db.Reader;
+import com.maxmind.db.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkFiles;
@@ -69,7 +67,8 @@ public class IPEnrichment {
             GenericRow defaultRow = new GenericRow(
                     new Object[]{null, null, null, null, null, null, localeValue}
             );
-            try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")))) {
+            try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")),
+                    new CHMCache(1024 * 128))) {
                 InetAddress address = InetAddress.getByName(ipValue);
                 LookupResult result = reader.get(address, LookupResult.class);
                 return Optional.ofNullable(result)

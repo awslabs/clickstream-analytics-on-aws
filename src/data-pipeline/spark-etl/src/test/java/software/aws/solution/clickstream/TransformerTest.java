@@ -15,13 +15,15 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TransformerTest extends BaseSparkTest {
 
@@ -41,8 +43,9 @@ class TransformerTest extends BaseSparkTest {
         transformedDataset.printSchema();
 
         Row row = transformedDataset.first();
+        assertNotNull(row.getAs(ETLRunner.getDistFields().length + 1));
 
-        assertEquals(true, row.isNullAt(row.fieldIndex("event_value_in_usd")));
+        assertTrue(row.isNullAt(row.fieldIndex("event_value_in_usd")));
 
         Date eventDate = row.getDate(row.fieldIndex("event_date"));
         assertEquals(Date.valueOf("2023-04-24"), eventDate);
@@ -53,7 +56,7 @@ class TransformerTest extends BaseSparkTest {
 
         assertEquals(-44, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
 
-        assertEquals(null, device.getString(device.fieldIndex("ua_browser")));
+        assertNull(device.getString(device.fieldIndex("ua_browser")));
 
         Row geo_for_enrich = row.getStruct(row.fieldIndex("geo_for_enrich"));
         assertEquals("13.212.229.59", geo_for_enrich.getString(geo_for_enrich.fieldIndex("ip")));

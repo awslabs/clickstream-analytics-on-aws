@@ -19,10 +19,14 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.storage.StorageLevel;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.ETLRunner.getDistFields;
 
 @Slf4j
 public final class Transformer {
@@ -34,7 +38,7 @@ public final class Transformer {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "transform enter").toString());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
-        cleanedDataset.persist(StorageLevel.MEMORY_AND_DISK());
+        ContextUtil.cacheDataset(cleanedDataset);
         log.info(new ETLMetric(cleanedDataset, "after clean").toString());
 
         Dataset<Row> dataset1 = retrieveEventParams(cleanedDataset);
@@ -48,14 +52,19 @@ public final class Transformer {
         Dataset<Row> dataset9 = convertUserProperties(dataset8);
         Dataset<Row> dataset10 = convertUri(dataset9);
 
-        log.info(new ETLMetric(dataset10, "transform return").toString());
-
         if (ContextUtil.isDebugLocal()) {
             dataset10.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/transformed/");
         }
-        cleanedDataset.unpersist();
-        dataset10.persist(StorageLevel.MEMORY_AND_DISK());
-        return dataset10;
+        Column[] distCol = getDistFields();
+        List<Column> transformOutFields = Stream.of(distCol).collect(Collectors.toList());
+
+        transformOutFields.add(col("ua"));
+        transformOutFields.add(col("geo_for_enrich"));
+        Dataset<Row> dataset11= dataset10.select(
+                transformOutFields.toArray(new Column[]{})
+        );
+        log.info(new ETLMetric(dataset11, "transform return").toString());
+        return dataset11;
     }
 
     private Dataset<Row> convertUri(final Dataset<Row> dataset) {

@@ -17,14 +17,10 @@ package software.aws.solution.clickstream;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.apache.spark.storage.StorageLevel;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 
 import javax.validation.constraints.NotEmpty;
@@ -36,6 +32,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.spark.sql.functions.*;
 
@@ -48,6 +45,7 @@ public class ETLRunner {
     private final ETLRunnerConfig config;
 
 
+
     public void run() {
         ContextUtil.setContextProperties(this.config);
 
@@ -56,18 +54,20 @@ public class ETLRunner {
 
         Dataset<Row> dataset = readInputDataset(true);
         int inputDataPartitions = dataset.rdd().getNumPartitions();
-        if (config.getRePartitions() > 0 && config.getRePartitions() < inputDataPartitions) {
+        if (config.getRePartitions() > 0
+                && (inputDataPartitions > 200 || config.getRePartitions() < inputDataPartitions)
+        ) {
             log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.getRePartitions());
-            dataset = dataset.repartition(config.getRePartitions());
+            dataset = dataset.repartition(config.getRePartitions(),
+                    col("ingest_time"), col("rid"));
         }
         log.info("NumPartitions: " + dataset.rdd().getNumPartitions());
-        dataset.persist(StorageLevel.MEMORY_AND_DISK());
+        ContextUtil.cacheDataset(dataset);
 
         log.info(new ETLMetric(dataset, "source").toString());
-
         Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
-        writeResult(config.getOutputPath(), dataset2);
-        log.info(new ETLMetric(dataset2, "sink").toString());
+        long resultCount = writeResult(config.getOutputPath(), dataset2);
+        log.info(new ETLMetric(resultCount, "sink").toString());
 
     }
 
@@ -169,20 +169,13 @@ public class ETLRunner {
         Dataset<Row> result = dataset;
         for (String transformerClassName : transformerClassNames) {
             result = executeTransformer(result, transformerClassName);
+            ContextUtil.cacheDataset(result);
             log.info(new ETLMetric(result, "after " + transformerClassName).toString());
             if (result.count() == 0) {
                 break;
             }
         }
-        return result.select(
-                "app_info", "device", "ecommerce", "event_bundle_sequence_id",
-                "event_date", "event_dimensions", "event_id", "event_name",
-                "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
-                "event_value_in_usd", "geo", "ingest_timestamp", "items",
-                "platform", "privacy_info", "project_id", "traffic_source",
-                "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
-                "user_pseudo_id"
-        );
+        return result.select(getDistFields());
     }
 
     @SuppressWarnings("unchecked")
@@ -204,9 +197,10 @@ public class ETLRunner {
         }
     }
 
-    protected void writeResult(final String outputPath, final Dataset<Row> dataset) {
+    protected long writeResult(final String outputPath, final Dataset<Row> dataset) {
         Dataset<Row> partitionedDataset = prepareForPartition(dataset);
-        log.info(new ETLMetric(partitionedDataset, "writeResult").toString());
+        long resultCount = partitionedDataset.count();
+        log.info(new ETLMetric(resultCount, "writeResult").toString());
         log.info("outputPath: " + outputPath);
         String[] partitionBy = new String[]{"partition_app", "partition_year", "partition_month", "partition_day"};
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
@@ -223,6 +217,7 @@ public class ETLRunner {
                     .option("compression", "snappy")
                     .partitionBy(partitionBy).mode(SaveMode.Append).parquet(outputPath);
         }
+        return resultCount;
     }
 
     private Dataset<Row> prepareForPartition(final Dataset<Row> dataset) {
@@ -271,6 +266,19 @@ public class ETLRunner {
 
     private boolean isDayEqual(final String[] day1, final String[] day2) {
         return String.join("-", day1).equals(String.join("-", day2));
+    }
+
+    public static Column[] getDistFields() {
+       List<Column> cols = Stream.of(new String[]{
+                "app_info", "device", "ecommerce", "event_bundle_sequence_id",
+                "event_date", "event_dimensions", "event_id", "event_name",
+                "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
+                "event_value_in_usd", "geo", "ingest_timestamp", "items",
+                "platform", "privacy_info", "project_id", "traffic_source",
+                "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
+                "user_pseudo_id"
+        }).map(functions::col).collect(Collectors.toList());
+       return cols.toArray(new Column[] {});
     }
 
 }

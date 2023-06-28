@@ -11,12 +11,29 @@
  *  and limitations under the License.
  */
 
-
 package software.aws.solution.clickstream;
+
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.storage.StorageLevel;
 
 import java.util.Arrays;
 
 public class ContextUtil {
+    private static Dataset<Row> datasetCached;
+
+    public static void cacheDataset(final Dataset<Row> dataset) {
+        if (datasetCached == null) {
+            datasetCached = dataset.persist(StorageLevel.MEMORY_AND_DISK());
+        } else if (dataset != datasetCached) {
+            Dataset<Row> oldDatasetCached = datasetCached;
+            datasetCached = dataset.persist(StorageLevel.MEMORY_AND_DISK());
+            try {
+                oldDatasetCached.unpersist();
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     public static void setContextProperties(final ETLRunnerConfig config) {
         System.setProperty("database", config.getDatabase());
@@ -32,7 +49,7 @@ public class ContextUtil {
 
     public static void setJobAndWarehouseInfo(final String jobDataDir) {
         String[] dirParts = jobDataDir.split("/");
-        String jobName = dirParts[dirParts.length -1];
+        String jobName = dirParts[dirParts.length - 1];
         String warehouseDir = String.join("/", Arrays.copyOf(dirParts, dirParts.length - 1));
 
         System.setProperty("job.name", jobName);
@@ -40,7 +57,7 @@ public class ContextUtil {
     }
 
     public static boolean isDebugLocal() {
-       return Boolean.parseBoolean(System.getProperty("debug.local"));
+        return Boolean.parseBoolean(System.getProperty("debug.local"));
     }
 
     public static boolean isSaveToWarehouse() {
@@ -48,8 +65,9 @@ public class ContextUtil {
     }
 
     public static String getJobName() {
-       return System.getProperty("job.name");
+        return System.getProperty("job.name");
     }
+
     public static String getWarehouseDir() {
         return System.getProperty("warehouse.dir");
     }

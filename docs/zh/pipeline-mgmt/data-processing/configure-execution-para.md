@@ -39,22 +39,23 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-在解决方案基准测试中，数据处理作业花费约 75 分钟处理 100,000,000 行数据（数据大小：303G gzip）。
+在解决方案基准测试中，数据处理作业花费约 15 分钟处理 100,000,000 行数据。
 
 ```json
 {
    "sparkConfig": [
         "spark.emr-serverless.executor.disk=200g",
-        "spark.executor.instances=8",
-        "spark.dynamicAllocation.initialExecutors=8",
+        "spark.executor.instances=16",
+        "spark.dynamicAllocation.initialExecutors=48",
         "spark.executor.memory=100g",
         "spark.executor.cores=16"
     ],
-    "inputRePartitions": 500
+    "inputRePartitions": 1000
 }
 ```
 
-有关更多配置，请参阅[Spark 作业属性][spark-defaults]。
+有关更多配置，请参阅[Spark 作业属性][spark-defaults]和应用程序[工作节点设置][worker-configs]。
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
+[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs
