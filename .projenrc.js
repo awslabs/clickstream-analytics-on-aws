@@ -115,6 +115,9 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion,
   defaultReleaseBranch: 'main',
   name: 'clickstream-analytics-on-aws',
+  description: 'Clickstream Analytics on AWS',
+  majorVersion: 1,
+  minMajorVersion: 0,
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -195,6 +198,7 @@ project.eslint?.addRules({
     },
   ],
 });
+project.addFields({ version });
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
@@ -236,7 +240,7 @@ const apiProject = new typescript.TypeScriptProject({
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
-
+apiProject.addFields({ version });
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',

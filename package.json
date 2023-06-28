@@ -1,5 +1,6 @@
 {
   "name": "clickstream-analytics-on-aws",
+  "description": "Clickstream Analytics on AWS",
   "scripts": {
     "build": "npx projen build",
     "bundle": "npx projen bundle",
@@ -110,7 +111,7 @@
     "node": ">= 16.18.0"
   },
   "license": "Apache-2.0",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "jest": {
     "setupFiles": [
       "./test/jestEnv.js"
