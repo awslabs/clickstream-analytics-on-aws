@@ -24,15 +24,15 @@ extra:
     - name: 简体中文
       link: /incubator/web-analytics-on-aws/clickstream-analytics-on-aws/zh/
       lang: zh
-  aws_bucket: solutions-test-reference
+  aws_bucket: solutions-reference
   aws_cn_bucket: aws-gcr-solutions
-  aws_version: v1.0.0_mainline
+  aws_version: latest
   aws_cn_version: latest/cn
   aws_prefix: clickstream-analytics-on-aws
   aws_cn_prefix: clickstream-analytics-on-aws
   solution: clickstream-analytics-on-aws
   solution_name: Clickstream Analytics on AWS
-  git_repo: git@ssh.gitlab.aws.dev:aws-gcr-solutions/incubator/web-analytics-on-aws/clickstream-analytics-on-aws.git
+  git_repo: https://github.com/awslabs/clickstream-analytics-on-aws.git
   source_repo: https://github.com/awslabs/clickstream-analytics-on-aws
 
 plugins:
