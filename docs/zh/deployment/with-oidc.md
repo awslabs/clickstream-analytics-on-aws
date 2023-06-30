@@ -15,17 +15,17 @@
 
 按照以下步骤在 AWS 上部署此解决方案。
 
-[第 1 步：创建 OIDC 客户端](#第-1-步创建-oidc-客户端)
+[步骤 1. 创建 OIDC 客户端](/#1-oidc)
 
-[第 2 步：启动堆栈](#第-2-步启动堆栈)
+[步骤 2. 启动堆栈](#2)
 
-[第 3 步：更新 OIDC 客户端的回调 URL](#第-3-步更新-oidc-客户端的回调-url)
+[步骤 3. 更新 OIDC 客户端的回调 URL](#3-oidc-url)
 
-[第 4 步：设置 DNS 解析器](#第-4-步设置-dns-解析器)
+[步骤 4. 设置 DNS 解析器](#4-dns)
 
-[第 5 步：启动 Web 控制台](#第-5-步启动-web-控制台)
+[步骤 5. 启动 Web 控制台](#5-web)
 
-## 第 1 步：创建 OIDC 客户端
+## 步骤 1. 创建 OIDC 客户端
 
 您可以使用不同类型的 OpenID Connect 提供程序。本部分介绍了选项 1 到选项 4。
 
@@ -60,7 +60,7 @@
        ![cognito client id](../images/OIDC/cognito-new-console-clientID.png)
        ![cognito userpool id](../images/OIDC/cognito-new-console-userpoolID.png)
 
-在 [Step 2. Launch the stack](#step-2-launch-the-stack) 中，使用来自您的 Cognito 用户池的以下参数。
+在[步骤 2. 启动堆栈](#2)中，使用来自您的 Cognito 用户池的以下参数。
 
 - **OIDCClientId**: `应用客户端 ID`
 - **OIDCProvider**: `https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}`
@@ -87,7 +87,7 @@
 
 您已成功创建了 Authing 自建应用。
 
-在 [Step 2. Launch the stack](#step-2-launch-the-stack) 中，使用来自您的 Authing 用户池的以下参数。
+在[步骤 2. 启动堆栈](#2)中，使用来自您的 Authing 用户池的以下参数。
 
 - **OIDCClientId**: `client id`
 - **OIDCProvider**: `Issuer`
@@ -121,7 +121,7 @@
 11. 点击 **Add user** 并输入 **Username**。
 12. 创建用户后，选择 **Credentials**，然后输入 **Password**。
 
-在 [Step 2. Launch the stack](#step-2-launch-the-stack) 中，使用来自您的 Keycloak realm 的以下参数。
+在[步骤 2. 启动堆栈](#2)中，使用来自您的 Keycloak realm 的以下参数。
 
 - **OIDCClientId**: `client id`
 - **OIDCProvider**: `https://<KEYCLOAK_DOMAIN_NAME>/auth/realms/<REALM_NAME>`
@@ -157,7 +157,7 @@
 
     ![get adfs properties](../images/OIDC/adfs-9.png)
 
-在 [Step 2. Launch the stack](#step-2-launch-the-stack) 中，使用来自您的 ADFS 服务器的以下参数。
+在[步骤 2. 启动堆栈](#2)中，使用来自您的 ADFS 服务器的以下参数。
 
 - **OIDCClientId**: `client id`
 - **OIDCProvider**: 从上述第 11 步中获取发行方（issuer）的服务器
@@ -212,7 +212,7 @@
 
 您可以在 AWS CloudFormation 控制台中查看堆栈的状态列。大约 10 分钟后，您应该会收到**CREATE_COMPLETE**状态。
 
-## 第三步：更新 OIDC 客户端的回调 URL
+## 步骤 3. 更新 OIDC 客户端的回调 URL
 
 !!! info "重要提示"
     如果您没有使用自定义域名部署栈，请完成以下步骤。
@@ -226,7 +226,7 @@
     2. 对于 Keycloak，请在客户端的 **Valid Redirect URIs** 中添加或更新 URL，值为 `${ControlPlaneURL}/signin`。
     3. 对于 Authing.cn，请在 **Authentication Configuration** 的 **Login Callback URL** 中添加或更新 URL。
 
-## 第四步：设置 DNS 解析器
+## 步骤 4. 设置 DNS 解析器
 
 !!! info "重要提示"
     如果您在 AWS 区域中部署了栈，则可以跳过此步骤。
@@ -239,7 +239,7 @@
 4. 获取 **ControlPlaneURL** 和 **CloudFrontDomainName**。
 5. 在 DNS 解析器中为 **ControlPlaneURL** 创建一个 CNAME 记录，该记录指向前面获取到的 **CloudFrontDomainName** 域名。
 
-## 第5步：启动Web控制台
+## 步骤 5. 启动Web控制台
 
 !!! info "重要提示"
 

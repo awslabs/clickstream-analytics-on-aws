@@ -13,22 +13,22 @@
 
 按照以下步骤在AWS上部署此解决方案。
 
-[步骤1：创建OIDC客户端](#step-1-create-oidc-client)
+[步骤 1. 创建OIDC客户端](#1-oidc)
 
-[步骤2：启动堆栈](#step-2-launch-the-stack)
+[步骤 2. 启动堆栈](#2)
 
-[步骤3：更新OIDC客户端的回调URL](#step-3-update-the-callback-url-of-oidc-client)
+[步骤 3. 更新OIDC客户端的回调URL](#3-oidc-url)
 
-[步骤4：启动Web控制台](#step-4-launch-the-web-console)
+[步骤 4. 启动Web控制台](#4-web)
 
-## 步骤1：创建OIDC客户端
+## 步骤 1. 创建OIDC客户端
 
 您可以使用现有的OpenID Connect（OIDC）提供者，或按照[此指南][oidc-clients]创建一个OIDC客户端。
 
 !!! tip "提示"
     默认情况下，此解决方案在VPC中部署控制台时不需要SSL证书。您必须使用OIDC客户端来支持具有`http`协议的回调URL。
 
-## 第二步：启动堆栈
+## 步骤 2. 启动堆栈
 
 1. 登录AWS管理控制台，并使用下方按钮启动AWS CloudFormation模板。
 
@@ -58,7 +58,7 @@
 
 您可以在AWS CloudFormation控制台中的**状态**列中查看堆栈的状态。大约10分钟后，您应该会收到**CREATE_COMPLETE**状态。
 
-## Step 3. 更新 OIDC 客户端的回调 URL
+## 步骤 3. 更新 OIDC 客户端的回调 URL
 
 1. 登录 [AWS CloudFormation 控制台](cloudformation){target="_blank"}。
 2. 选择解决方案的堆栈。
@@ -68,7 +68,7 @@
     1. 对于 Keycloak，请在 **有效重定向 URL** 中添加或更新 URL。
     2. 对于 Authing.cn，请在 **身份验证配置** 的 **登录回调 URL** 中添加或更新 URL。
 
-## Step 4. 启动 Web 控制台
+## 步骤 4. 启动 Web 控制台
 
 !!! info "重要提示"
 
