@@ -305,7 +305,7 @@ gitlabMain.createNestedTemplates({
           'apt update',
           'apt install -y zip',
           'zip /tmp/source-$CI_JOB_ID.zip -r9 ./',
-          'yarn add typescript @aws-sdk/client-s3 @aws-sdk/client-codebuild @aws-sdk/client-sts',
+          `yarn add typescript @aws-sdk/client-s3@${awsSDKVersion} @aws-sdk/client-codebuild@${awsSDKVersion} @aws-sdk/client-sts@${awsSDKVersion}`,
           'mkdir -p output/',
         ],
         script: [

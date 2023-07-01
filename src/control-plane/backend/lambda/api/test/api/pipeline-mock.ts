@@ -13,7 +13,7 @@
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
 import {
   KinesisStreamMode,
@@ -709,7 +709,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -726,7 +726,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -748,7 +748,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -770,7 +770,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -787,7 +787,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -803,7 +803,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
               Data: {
                 Callback: {
                   BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                 },
                 Input: {
                   Action: 'Create',
@@ -847,7 +847,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -864,7 +864,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -886,7 +886,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -925,7 +925,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -941,7 +941,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Data: {
                 Callback: {
                   BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                 },
                 Input: {
                   Action: 'Create',

@@ -276,13 +276,15 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
+
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
       this.pipeline.status.status === PipelineStatusType.DELETING ||
       this.pipeline.status.status === PipelineStatusType.UPDATING) {
       throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
     }
-    this.pipeline.executionName = `main-${uuidv4()}`;
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
@@ -325,14 +327,14 @@ export class CPipeline {
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const stackTemplateMap = await this.getStackTemplateMap();
     // update workflow
     this.stackManager.upgradeWorkflow(stackTemplateMap);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
@@ -344,6 +346,8 @@ export class CPipeline {
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
     const dataProcessingStackName = getStackName(
@@ -356,20 +360,18 @@ export class CPipeline {
     this.stackManager.updateWorkflowForApp(appIds, ingestionStackName, dataProcessingStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
   public async delete(): Promise<void> {
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
     // update workflow
     this.stackManager.deleteWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
@@ -387,12 +389,12 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
+    const executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = executionName;
     // update workflow
     this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);

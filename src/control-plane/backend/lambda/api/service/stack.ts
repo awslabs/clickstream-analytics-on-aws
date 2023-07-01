@@ -97,7 +97,7 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
   }
 
-  public upgradeWorkflow(stackTemplateMap: Map<string, string> ): void {
+  public upgradeWorkflow(stackTemplateMap: Map<string, string>): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
@@ -268,7 +268,10 @@ export class StackManager {
       }
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';
-      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
+      state.Data!.Callback = {
+        BucketName: stackWorkflowS3Bucket ?? '',
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      };
     }
     return state;
   }
@@ -285,6 +288,10 @@ export class StackManager {
       if (!origin) {
         state.Data.Input.Action = 'Upgrade';
       }
+      state.Data!.Callback = {
+        BucketName: stackWorkflowS3Bucket ?? '',
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      };
     }
     return state;
   }
@@ -303,7 +310,10 @@ export class StackManager {
       } else if (status?.endsWith('_IN_PROGRESS') || status?.endsWith('_COMPLETE')) {
         state.Type = WorkflowStateType.PASS;
       }
-      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
+      state.Data!.Callback = {
+        BucketName: stackWorkflowS3Bucket ?? '',
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      };
     }
     return state;
   }
@@ -328,7 +338,10 @@ export class StackManager {
           state.Type = WorkflowStateType.PASS;
         }
       }
-      state.Data!.Callback.BucketName = stackWorkflowS3Bucket ?? '';
+      state.Data!.Callback = {
+        BucketName: stackWorkflowS3Bucket ?? '',
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      };
     }
     return state;
   }
