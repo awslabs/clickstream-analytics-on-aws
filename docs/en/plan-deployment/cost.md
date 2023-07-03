@@ -73,15 +73,31 @@ Key assumptions include:
 
 | Request Per Second | EMR schedule interval |  EMR Cost | Redshift type            | Redshift cost | Total (USD) |
 | ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- |
-| 10RPS             | Hourly                |     28     | Serverless (8 based RPU) |     36          |   64    |
-|                         | 6-hourly              |     10.8     | Serverless(8 based RPU)               |       12        |   22.8    |
+| 10RPS             | Hourly                |     28     | Serverless (8 based RPU) |     68          |   96    |
+|                         | 6-hourly              |     10.8     | Serverless(8 based RPU)               |       11        |   21.8    |
 |                         | Daily                 |      9.6    | Serverless(8 based RPU)               |     3          |   12.6    |
 | 100RPS             | Hourly                |      105   | Serverless (8 based RPU) |       72        |  177    |
-|                         | 6-hourly              |     90     | Serverless(8 based RPU)               |       60        |   155    |
-|                         | Daily                 |     130     | Serverless(8 based RPU)               |       17        |    147   |
-| 1000RPS             | Hourly                |      964   | Serverless (8 based RPU) |       194        |  1158    |
+|                         | 6-hourly              |     99     | Serverless(8 based RPU)               |       17.2        |   116.2    |
+|                         | Daily                 |     140     | Serverless(8 based RPU)               |       16.9        |    156.9   |
+| 1000RPS             | Hourly                |      1362   | Serverless (8 based RPU) |       172        |  1534    |
 |              | 6-Hourly                |      678   | Serverless (8 based RPU) |       176        |  854    |
-|              | Daily                |         | Serverless (8 based RPU) |               |      |
+|              | Daily                |     2589    | Serverless (8 based RPU) |        352       |   2941   |
+
+!!! info "Note"
+    For the cost of 1000 PRS Daily, we used below EMR configuration.
+
+    ```json
+    {
+    "sparkConfig": [
+            "spark.emr-serverless.executor.disk=200g",
+            "spark.executor.instances=16",
+            "spark.dynamicAllocation.initialExecutors=48",
+            "spark.executor.memory=100g",
+            "spark.executor.cores=16"
+        ],
+        "inputRePartitions": 1000
+    }
+    ```
 
 ## Reporting module
 
@@ -93,8 +109,8 @@ Key assumptions include
 
 - QuickSight Enterprise subscription
 - Exclude Q cost
-- Two authors with monthly subscription
-- Ten readers with 22 working days per month, 5% active readers, 50% frequent readers, 25%  occasional readers, 20% inactive readers
+- **Two authors** with monthly subscription
+- **Ten readers** with 22 working days per month, 5% active readers, 50% frequent readers, 25%  occasional readers, 20% inactive readers
 - 10GB SPICE capacity
 
 | Daily data volume/RPS | Authors | Readers | SPICE | Total |
@@ -105,7 +121,8 @@ Key assumptions include
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.
 
 ## Logs and Monitoring
-The solution utilizes CloudWatch Logs， CloudWatch Metrics and CloudWatch Dashboard to implement logging, monitoring and visualizating features. The total cost ranges from $7 to $14 per month and may fluctuate based on the volume of logs and the number of metrics being monitored.
+
+The solution utilizes CloudWatch Logs， CloudWatch Metrics and CloudWatch Dashboard to implement logging, monitoring and visualizating features. The total cost is around $14 per month and may fluctuate based on the volume of logs and the number of metrics being monitored.
 
 ## Additional features
 
@@ -123,7 +140,7 @@ It incurs a fixed hourly charge and a per-day volume data transfer cost.
 
 Key assumptions:
 
-- Ingestion deployment in us-east-1
+- Ingestion deployment in `us-east-1`
 
 | Request Per Second | Fixed hourly cost | Data transfer cost | Total cost(USD) |
 | --------------------- | ----------------- | ------------------ | ---------- |

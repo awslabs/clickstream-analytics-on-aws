@@ -12,4 +12,6 @@
 
 !!! info "Note"
 
-    All Clickstream SDKs are open source under Apache 2.0 License in [GitHub](https://github.com/awslabs/). You can customize the SDKs if needed. All contributions are welcome.
+    All Clickstream SDKs are open source under Apache 2.0 License in [GitHub][github]. You can customize the SDKs if needed. All contributions are welcome.
+
+[github]: https://github.com/awslabs/?q=clickstream&type=all&language=&sort=

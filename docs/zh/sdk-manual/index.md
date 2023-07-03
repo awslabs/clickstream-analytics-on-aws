@@ -11,4 +11,6 @@
 
 !!! info "注意"
 
-    所有Clickstream SDK均在[GitHub](https://github.com/awslabs/)上以Apache 2.0许可证开源。如果需要，您可以自定义SDK。
+    所有Clickstream SDK均在[GitHub][github]上以Apache 2.0许可证开源。如果需要，您可以自定义SDK。
+
+[github]: https://github.com/awslabs/?q=clickstream&type=all&language=&sort=
