@@ -8,13 +8,15 @@ weight: 1
 
     The following cost estimations are examples and may vary depending on your environment.
 
-You are responsible for the cost of Amazon cloud technology services used when running this solution. The majority of the cost for this solution is incurred by the data pipeline. As of this revision, the main factors affecting the solution cost include:
+You are responsible for the cost of AWS services used when running this solution. Deploying this solution will only create a solution web console in your AWS account, which is completely serverless and typically can be covered within free tier.
 
-- **Ingestion module**, the cost depends on the size of the ingestion server and the type of the data sink you choose.
+The majority of the cost for this solution is incurred by the data pipeline. As of this revision, the main factors affecting the solution cost include:
 
-- **Data processing and modeling module** (optional), the cost depends on whether you choose to enabled this module and its relevant configurations
+- **Ingestion module**: the cost depends on the size of the ingestion server and the type of the data sink you choose.
 
-- **Enabled Dashboards** (optional), the cost depends on whether you choose to enabled this module and its relevant configurations
+- **Data processing and modeling module** (optional): the cost depends on whether you choose to enabled this module and its relevant configurations
+
+- **Enabled Dashboards** (optional): the cost depends on whether you choose to enabled this module and its relevant configurations
 
 - **Additional features**
 
@@ -30,12 +32,12 @@ Ingestion module includes the following cost components:
 
 - Application load balancer
 - EC2 for ECS
-- Data sink (Kinesis | Kafka | Direct to S3)
+- Data sink (Kinesis Data Streams | Kafka | Direct to S3)
 - S3 storage
 
 Key assumptions include:
 
-- Request payload: 1KB (compressed, 1:15 ratio)
+- Request payload: 1KB (compressed, 1:10 ratio)
 - MSK configurations (m5.large * 2)
 - KDS configuration (on-demand, provision - shard 2)
 - 10/100/1000RPS
@@ -57,7 +59,7 @@ Key assumptions include:
 
 ## Data processing & data modeling modules
 
-Data processing & modeling module include the following cost components if you enable:
+Data processing & modeling module include the following cost components if you choose to enable:
 
 - EMR Serverless
 

@@ -52,3 +52,9 @@
 | `us_device`                | 维度  | 从用户代理派生的设备                                          | 来自分析引擎的查询         |
 | `us_device_category`       | 维度  | 从用户代理派生的设备类别                                        | 来自分析引擎的查询         |
 | `usage_num`                | 指标  | 为设备 ID 记录的事件数                                       | 来自分析引擎的查询         |
+
+
+## 示例仪表盘
+以下图片是一个示例仪表盘供您参考。
+
+![qs-device](../images/dashboard/device.jpg)

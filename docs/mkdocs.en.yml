@@ -33,13 +33,13 @@ nav:
       - Step 4. View dashboard: getting-started/4.view-dashboard.md
     - Pipeline management:
       - Overview: pipeline-mgmt/index.md
-      - Ingestion:
+      - Data ingestion:
         - Overview: pipeline-mgmt/ingestion/index.md
         - Ingeston endpoint: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
         - Data sink - Kafka: pipeline-mgmt/ingestion/create-data-sink-w-kafka.md
         - Data sink - Kinesis: pipeline-mgmt/ingestion/create-data-sink-w-kinesis.md
         - Data sink - S3: pipeline-mgmt/ingestion/create-data-sink-w-s3.md
-      - Data Processing:
+      - Data processing:
         - Overview: pipeline-mgmt/data-processing/index.md
         - Data schema: pipeline-mgmt/data-processing/data-schema.md
         - Execution parameters: pipeline-mgmt/data-processing/configure-execution-para.md

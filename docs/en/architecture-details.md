@@ -1,14 +1,14 @@
-The {{ solution_name }} solution has three components: a web console, SDKs, the data pipeline for ingesting, processing, analyzing and visualizing the Clickstream data.
+The {{ solution_name }} solution has three components: a web console, SDKs, and data pipeline.
 
 ### Web console
 
-This solution provides a simple web console which allows you to create and manage projects with their data pipeline to ingest, process, analyze and visualize the Clickstream data.
+This solution provides a web console which allows you to create clickstream projects, and configure, deploy, and manage  data pipeline for each clickstream project.
 
 ### SDKs
 
-This solution provides native SDKs for help you easily collect and report in-app events from your applications to your Clickstream pipelines.
+This solution provides native SDKs for help you easily collect and report in-app events from your applications to data pipelines.
 
-- [Android SDK][clickstream -andriod]
+- [Android SDK][clickstream-andriod]
 - [Swift SDK][clickstream-swift]
 
 ### Data pipeline
@@ -24,7 +24,7 @@ The ingestion module serves as web server for ingesting the Clickstream data. It
 - support authenticate with OIDC
 - support SSL
 - support enabling AWS Global Accelerator for ELB
-- support different sink buffer, S3, KDS and MSK
+- support different data sinks, including S3, KDS and MSK
 
 #### Data processing module
 
@@ -52,4 +52,5 @@ The data modeling module loads the processed data into data lakehouse. It suppor
 The reporting module queries the data in Redshift with out-of-the-box Clickstream reports.
 
 [clickstream-swift]: https://github.com/awslabs/clickstream-swift
-[clickstream -andriod]: https://github.com/awslabs/clickstream-android
+[clickstream-andriod]: https://github.com/awslabs/clickstream-android
+[clickstream-javascript]: https://github.com/awslabs/clickstream-javascript

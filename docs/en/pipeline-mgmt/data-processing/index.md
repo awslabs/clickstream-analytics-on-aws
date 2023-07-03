@@ -1,5 +1,5 @@
 # Data Processing
-{{solution_name}} provides an inbuilt data schema to parse and model the raw event data sent from your web and mobile apps, which makes it easy for you to analyze the data in analytics engines (such as RedShift and Athena). 
+{{solution_name}} provides an inbuilt data schema to parse and model the raw event data sent from your web and mobile apps, which makes it easy for you to analyze the data in analytics engines (such as Redshift and Athena). 
 
 Data Processing module includes two functionalities:
 

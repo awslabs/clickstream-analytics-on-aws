@@ -54,3 +54,9 @@
 |`time_period`| 维度| 用户生命周期的周或日 | 来自分析引擎的查询|
 |`this_week_value`| 维度| 用户生命周期阶段，即新来、活跃、返回和流失 | 来自分析引擎的查询|
 |`this_day_value`| 维度| 用户生命周期阶段，即新来、活跃、返回和流失 | 来自分析引擎的查询|
+
+
+## 示例仪表盘
+以下图片是一个示例仪表盘供您参考。
+
+![qs-retention](../images/dashboard/retention.jpg)

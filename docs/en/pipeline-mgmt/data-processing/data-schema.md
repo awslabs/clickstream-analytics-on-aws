@@ -1,12 +1,12 @@
 # Data schema
-This article explains the data schema and format in {{solution_name}}. This solution uses an **event-based** data model to store and analyze clickstream data, every activity (e.g., click, view) on the clients is modeled as an event with multiple dimensions. Dimensions are common for all events, but customers have the flexibility to use JSON object to store values into some dimensions (e.g., event parameters, use attributes), which will cater for the need of collecting information that are specific for their business. Those JSON will be stored in special data types which allow customers to unnest the values in the analytics engines.
+This article explains the data schema and format in {{solution_name}}. This solution uses an **event-based** data model to store and analyze clickstream data, every activity (e.g., click, view) on the clients is modeled as an event with multiple dimensions. Dimensions are common for all events, but customers have the flexibility to use JSON object to store values into some dimensions (e.g., event parameters, user attributes), which will cater for the need of collecting information that are specific for their business. Those JSON will be stored in special data types which allow customers to unnest the values in the analytics engines.
 
 ## Database and table
 For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. In Redshift, each App will have a schema with name of `app_id`, within which event data are stored in `ods_event` tables, user-related attributes are stored in `dim_user` table. In Athena, data from all apps in the project will be stored in `ods_event` table with partitions of app_id, year, month, and day.
 
 
 ## Columns
-Each column in the ods_event table represents an event-specific parameter. Note that some parameters are nested within a Super field in Redshift or Array in Athena, and some fields such as items and event_params are repeatable. Table columns are described below.
+Each column in the ods_event table represents an event-specific parameter. Note that some parameters are nested within a Super field in Redshift or Array in Athena, and those fields (e.g., items and event_params) contains parameters that are repeatable. Table columns are described below.
 
 ### Event fields
 |**Field Name**| **Data Type - Redshift** | **Data Type - Athena** | **Description** |

@@ -43,3 +43,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`User activity number in last 30 days`| Metrics | Number of events logged in last 30 days  | Calculated field in QuickSight|
 
 
+## Sample dashboard
+Below image is a sample dashboard for your reference.
+
+![qs-activity](../images/dashboard/activity.jpg)

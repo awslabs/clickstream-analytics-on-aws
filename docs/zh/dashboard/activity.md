@@ -44,3 +44,9 @@
 | `event_parameter_key`                  | 维度  | 事件参数的值                            | 来自分析引擎的查询         |
 | `User activity number in last 7 days`  | 指标  | 最近 7 天记录的事件数                      | QuickSight 中的计算字段 |
 | `User activity number in last 30 days` | 指标  | 最近 30 天记录的事件数                     | QuickSight 中的计算字段 |
+
+
+## 示例仪表盘
+以下图片是一个示例仪表盘供您参考。
+
+![qs-activity](../images/dashboard/activity.jpg)

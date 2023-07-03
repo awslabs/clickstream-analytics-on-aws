@@ -10,7 +10,7 @@ A project in this solution is the top-level entity, like a container, that group
 ### Data pipeline
 A data pipeline is deployed into one AWS region, which means all the underlining resources are created in one AWS region. A data pipeline in this solution contains four modules:
 
-- **Ingestion server**: a web service that provides an endpoint to collect data through HTTP requests, and sink the data in streaming services or S3.
+- **Data ingestion**: a web service that provides an endpoint to collect data through HTTP requests, and sink the data in streaming services or S3.
 - **Data processing**: a module that transforms raw data to the solution schema and enriches data with additional dimensions.
 - **Data modeling**: a module that aggregates data to calculate metrics for business analytics.
 - **Reporting**: a module that creates metrics and out-of-the-box visualizations in QuickSight.

@@ -54,4 +54,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`us_device_category`| Dimension | The device category derived from user agent  | Query from analytics engine|
 |`usage_num`| Metric | Number of event that logged for the device ID  | Query from analytics engine|
 
+## Sample dashboard
+Below image is a sample dashboard for your reference.
 
+![qs-device](../images/dashboard/device.jpg)

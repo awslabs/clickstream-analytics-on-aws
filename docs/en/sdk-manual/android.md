@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Clickstream Android SDK can help you easily collect and report in-app events from Android devices to AWS. As part of the solution {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as Amazon S3, and Amazon Redshift.
+Clickstream Android SDK can help you easily collect in-app click stream data from Android devices to your AWS environments through the data pipeline privisoned by this solution.
 
-The SDK is based on the Amplify for Android SDK Core Library and developed according to the Amplify Android SDK plug-in specification. In addition, the SDK is equipped with features that automatically collect common user events and attributes (for example, screen view, and first open) to simplify data collection for users.
+The SDK is based on the Amplify for Android SDK Core Library and developed according to the Amplify Android SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.
 
 ### Platform Support
 

@@ -40,3 +40,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`Average engagement time per user`| Metric | Average engagement time per user in the selected time period  | Calculated field in QuickSight|
 |`Average screen view per user`| Metric | Average number of screen views per user in the selected time period  | Calculated field in QuickSight|
 
+## Sample dashboard
+Below image is a sample dashboard for your reference.
+
+![qs-engagement](../images/dashboard/engagement.jpg)

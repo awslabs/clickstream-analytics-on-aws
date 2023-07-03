@@ -24,7 +24,7 @@ Syntax
 
 By default, the EMR Serverless job is configured with [default settings][jobs-spark], which is suitable for most cases, e.g., hourly processing.
 
-If your data volume is enormous, e.g., row counts of the total batch exceed 100,000,000, the default settings may not fit this situation, which will cause the EMR job to fail. It would help if you changed the configuration of your EMR Spark job.
+If your data volume is enormous, e.g., total row counts of a batch exceed 100,000,000, the default settings may not fit this situation, which will cause the EMR job to fail. It would help if you changed the configuration of your EMR Spark job.
 
 You can configure the resources used by the EMR spark job by adding the file `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` in the S3 bucket.
 
@@ -40,23 +40,31 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-The data processing job took about 15 minutes to process 100,000,000 rows in solution benchmark testing.
+The data processing job took about 25 minutes to process 600,000,000 rows (200,000,000 requests, 170G gzip data) in solution benchmark testing via below configuration:
 
 ```json
 {
    "sparkConfig": [
         "spark.emr-serverless.executor.disk=200g",
         "spark.executor.instances=16",
-        "spark.dynamicAllocation.initialExecutors=48",
+        "spark.dynamicAllocation.initialExecutors=16",
         "spark.executor.memory=100g",
-        "spark.executor.cores=16"
+        "spark.executor.cores=16",
+        "spark.network.timeout=10000000",
+        "spark.executor.heartbeatInterval=10000000",
+        "spark.shuffle.registration.timeout=120000",
+        "spark.shuffle.registration.maxAttempts=5",
+        "spark.shuffle.file.buffer=2m",
+        "spark.shuffle.unsafe.file.output.buffer=1m"
     ],
-    "inputRePartitions": 1000
+    "inputRePartitions": 2000
 }
 ```
 
+Please make sure your account has enough emr-serverless quotas, you can view the quotas via [emr-serverless-quotas][emr-serverless-quotas] in region us-east-1.
 For more configurations, please refer to [Spark job properties][spark-defaults] and application [worker config][worker-configs].
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
 [worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs
+[emr-serverless-quotas]: https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75

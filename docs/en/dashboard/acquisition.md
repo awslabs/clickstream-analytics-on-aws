@@ -37,6 +37,10 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`custom_attr_value`| Dimension | The value of the custom attribute key of the user.  | Query from analytics engine|
 |`is_registered`| Dimension | If user had registed or not  | Query from analytics engine|
   
+## Sample dashboard
+Below image is a sample dashboard for your reference.
+
+![qs-acquisition](../images/dashboard/acquisition.jpg)
 
 
 

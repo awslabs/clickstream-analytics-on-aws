@@ -42,3 +42,9 @@
 |`Average engagement time per session`| 指标  | 所选时间段内每个会话的平均参与时间 | QuickSight 中的计算字段|
 |`Average engagement time per user`| 指标  | 所选时间段内每个用户的平均参与时间 | QuickSight 中的计算字段|
 |`Average screen view per user`| 指标  | 所选时间段内每个用户的平均屏幕浏览量 | QuickSight 中的计算字段|
+
+
+## 示例仪表盘
+以下图片是一个示例仪表盘供您参考。
+
+![qs-engagement](../images/dashboard/engagement.jpg)

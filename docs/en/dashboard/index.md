@@ -18,7 +18,7 @@ The dashboards contains a set of reports covering the following topics.
 
 | Report name | What it is |
 |-------------|------------|
-|[Acquisition](./acquisition.md) | Summarizes key metrics about new users, provides detail view user profile|
+|[Acquisition](./acquisition.md) | Summarizes key metrics about new users, provides detail view of user profile|
 |[Engagement](./engagement.md) | Summarizes key metrics about user engagements and sessions|
 |[Activity](./activity.md) | Summarizes key metrics about events user generates in the app, provide detail view of event attributes|
 |[Retention](./retention.md) | Summarizes key metrics about active users and user retentions |

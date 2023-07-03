@@ -18,18 +18,17 @@
  
  有关更多信息，请参阅 [基于 Cron 的计划](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html?icmpid=docs_console_unmapped#cron-based)。
 
+ ## 配置Spark作业参数
 
-## 配置 Spark 作业参数
+默认情况下，EMR Serverless作业配置为[默认设置][jobs-spark]，适用于大多数情况，例如按小时处理。
 
-默认情况下，EMR 无服务器作业配置了[默认设置][jobs-spark]，适用于大多数情况，例如以小时为单位处理。
+如果您的数据量巨大，例如单批次处理的数据行数超过1亿，则默认设置可能不适用于此情况，会导致EMR作业失败。您需要更改EMR Spark作业的配置。
 
-如果您的数据量非常庞大，例如总批次的行数超过 100,000,000，则默认设置可能不适用于此情况，这将导致 EMR 作业失败。您需要更改 EMR Spark 作业的配置。
+您可以通过在S3存储桶中添加文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` 来配置EMR Spark作业使用的资源。
 
-您可以通过将文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` 添加到 S3 存储桶中来配置 EMR Spark 作业使用的资源。
+请使用数据流水线中的值替换 `{PipelineS3Bucket}`, `{PipelineS3Prefix}`, 和 `{ProjectId}` 。 这些值可以在`Clickstream-DataProcessing-<uuid>` 堆栈的 **参数**界面中找到。
 
-请将 `{PipelineS3Bucket}`、`{PipelineS3Prefix}` 和 `{ProjectId}` 替换为您的数据管道的值。这些值可以在 `Clickstream-DataProcessing-<uuid>` 栈的 **参数** 中找到。
-
-另外，您可以通过运行以下命令获取这些值：
+此外，您可以通过运行以下命令获取这些值：
 
 ```sh
 stackNames=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE --no-paginate  | jq -r '.StackSummaries[].StackName' | grep  Clickstream-DataProcessing  | grep -v Nested)
@@ -39,23 +38,31 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-在解决方案基准测试中，数据处理作业花费约 15 分钟处理 100,000,000 行数据。
+使用下面配置，在解决方案的基准测试中，数据处理作业处理600,000,000行数据（200,000,000请求， 数据大小：170G gzip）大约花费了25分钟的时间。
 
 ```json
 {
    "sparkConfig": [
         "spark.emr-serverless.executor.disk=200g",
         "spark.executor.instances=16",
-        "spark.dynamicAllocation.initialExecutors=48",
+        "spark.dynamicAllocation.initialExecutors=16",
         "spark.executor.memory=100g",
-        "spark.executor.cores=16"
+        "spark.executor.cores=16",
+        "spark.network.timeout=10000000",
+        "spark.executor.heartbeatInterval=10000000",
+        "spark.shuffle.registration.timeout=120000",
+        "spark.shuffle.registration.maxAttempts=5",
+        "spark.shuffle.file.buffer=2m",
+        "spark.shuffle.unsafe.file.output.buffer=1m"
     ],
-    "inputRePartitions": 1000
+    "inputRePartitions": 2000
 }
 ```
 
-有关更多配置，请参阅[Spark 作业属性][spark-defaults]和应用程序[工作节点设置][worker-configs]。
+请确保您有足够的 emr-serverless 配额，在 us-east-1 区域，您可以通过[emr-serverless-quotas][emr-serverless-quotas]查看配额。
+更多信息请参阅 [Spark作业参数][spark-defaults]和应用[工作节点设置][worker-configs]。
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
 [worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs
+[emr-serverless-quotas]: https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75

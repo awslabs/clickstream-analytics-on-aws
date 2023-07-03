@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Clickstream Swift SDK can help you easily collect and report in-app events from iOS devices to AWS. As part of the solution {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as Amazon S3, and Amazon Redshift.
+Clickstream Swift SDK can help you easily collect in-app click stream data from iOS devices to your AWS environments through the data pipeline provisioned by this solution.
 
-The SDK is based on the Amplify for Swift Core Library and developed according to the Amplify Swift SDK plug-in specification. In addition, the SDK is equipped with features that automatically collect common user events and attributes (for example, screen view, first open) to simplify data collection for users.
+The SDK is based on the Amplify for Swift SDK Core Library and developed according to the Amplify Swift SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.
 
 ### Platform Support
 

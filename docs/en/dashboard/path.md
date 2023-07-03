@@ -44,3 +44,9 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`next_event`| Dimension | The  event name of next event | Query from analytics engine|
 |`previous_screen`| Dimension | The screen name of  previous screen | Query from analytics engine|
 |`next_screen`| Dimension | The  screen name of  next screen | Query from analytics engine|
+
+
+## Sample dashboard
+Below image is a sample dashboard for your reference.
+
+![qs-path](../images/dashboard/path.png)

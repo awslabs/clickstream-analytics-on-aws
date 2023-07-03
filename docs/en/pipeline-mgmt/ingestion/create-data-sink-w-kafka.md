@@ -12,14 +12,14 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
     
     **Note**: If there is no MSK cluster, the user needs to create an MSK Cluster follow above requirements.
 
-* **Topic**: The user can specify a topic name. By default, the solution will create a topic with “project-id”.
+* **Topic**: The user can specify a topic name. By default, the solution will create a topic with "project-id".
 
-## Self-hosted:
+<!-- ## Self-hosted:
 Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:
 
 * **Broker link**: Enter the  brokers link of Kafka cluster that you wish to connect to.
 * **Topic**: User can specify the topic for storing the data
-* **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster.
+* **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster. -->
 
 ## Connector
 Enable solution to create Kafka connector and a custom plugin for this connector. This connector will sink the data from Kafka cluster to S3 bucket.

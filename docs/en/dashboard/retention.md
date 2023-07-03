@@ -52,3 +52,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`this_week_value`| Dimension | The user lifecycle stage, i.e., New, Active, Return, and Churn  | Query from analytics engine|
 |`this_day_value`| Dimension | The user lifecycle stage, i.e., New, Active, Return, and Churn   | Query from analytics engine|
 
+## Sample dashboard
+Below image is a sample dashboard for your reference.
+
+![qs-retention](../images/dashboard/retention.jpg)

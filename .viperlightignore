@@ -11,8 +11,10 @@ coverage/
 public/*  # doc build output
 deployment/*
 
-# git repo of source
+# git source and ALB service accounts in docs
 docs/mkdocs.base.yml:35
+docs/en/pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
+docs/zh/pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
 # account id for ALB access log
 src/common/constant.ts:20
 src/common/constant.ts:23
