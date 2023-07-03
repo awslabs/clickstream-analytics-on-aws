@@ -19,10 +19,10 @@ extra:
   copyright: Copyright &copy; 2023 Amazon Web Services
   alternate:
     - name: English
-      link: /incubator/web-analytics-on-aws/clickstream-analytics-on-aws/en/
+      link: !ENV [LINK_EN, '/en/']
       lang: en
     - name: 简体中文
-      link: /incubator/web-analytics-on-aws/clickstream-analytics-on-aws/zh/
+      link: !ENV [LINK_ZH, '/zh/']
       lang: zh
   aws_bucket: solutions-reference
   aws_cn_bucket: aws-gcr-solutions
