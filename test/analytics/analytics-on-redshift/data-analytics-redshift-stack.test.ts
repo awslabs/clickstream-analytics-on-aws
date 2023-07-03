@@ -920,6 +920,85 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
+
+  test('Check lambda HasMoreWorkFn', () => {
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+            PROJECT_ID: Match.anyValue(),
+            ODS_EVENT_BUCKET: Match.anyValue(),
+            ODS_EVENT_BUCKET_PREFIX: Match.anyValue(),
+            DYNAMODB_TABLE_NAME: Match.anyValue(),
+            DYNAMODB_TABLE_INDEX_NAME: Match.anyValue(),
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: 1024,
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+      });
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: {
+            'Fn::Sub': Match.anyValue(),
+          },
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+            LOG_LEVEL: 'WARN',
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+            PROJECT_ID: Match.anyValue(),
+            ODS_EVENT_BUCKET: Match.anyValue(),
+            ODS_EVENT_BUCKET_PREFIX: Match.anyValue(),
+            DYNAMODB_TABLE_NAME: Match.anyValue(),
+            DYNAMODB_TABLE_INDEX_NAME: Match.anyValue(),
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: 1024,
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 120,
+      });
+    }
+  });
+
+
   test('Check LoadODSEventToRedshiftWorkflowODSEventProcessorFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);

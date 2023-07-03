@@ -658,7 +658,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
         'has-more-job-new.ts',
       ),
       handler: 'handler',
-      memorySize: 128,
+      memorySize: 1024,
       timeout: Duration.minutes(2),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
