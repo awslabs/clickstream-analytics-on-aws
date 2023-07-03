@@ -314,9 +314,9 @@
     "notSupportedServices": "以下服务：{{unSupportedServices}} 在此区域不可用，某些功能可能不支持。"
   },
   "detail": {
-    "ingestion": "摄取",
-    "processing": "处理中",
-    "reporting": "报告",
+    "ingestion": "数据摄取",
+    "processing": "数据处理和建模",
+    "reporting": "报表",
     "monitoring": "监控",
     "alarms": "告警",
     "publicSubnet": "公共子网",
