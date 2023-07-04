@@ -11,7 +11,14 @@
  *  and limitations under the License.
  */
 
-import { Button, Container, Header } from '@cloudscape-design/components';
+import {
+  Box,
+  Button,
+  Container,
+  Header,
+  SpaceBetween,
+} from '@cloudscape-design/components';
+import PipelineArch from 'assets/images/pipelineArch.webp';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -37,15 +44,22 @@ const NonePipeline: React.FC<NonePipelineProps> = (
         </Header>
       }
     >
-      <Button
-        iconName="settings"
-        variant="primary"
-        onClick={() => {
-          navigate(`/project/${projectId}/pipelines/create`);
-        }}
-      >
-        {t('button.configPipeline')}
-      </Button>
+      <SpaceBetween direction="vertical" size="l">
+        <Button
+          iconName="settings"
+          variant="primary"
+          onClick={() => {
+            navigate(`/project/${projectId}/pipelines/create`);
+          }}
+        >
+          {t('button.configPipeline')}
+        </Button>
+        <Box>
+          <div className="pd-20">
+            <img src={PipelineArch} width="100%" alt="pipeline" />
+          </div>
+        </Box>
+      </SpaceBetween>
     </Container>
   );
 };
