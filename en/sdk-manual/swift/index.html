@@ -1,0 +1,2516 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../android/">
+      
+      
+        <link rel="next" href="../../dashboard/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+    
+    
+      
+        <title>Swift SDK - Clickstream Analytics on AWS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clickstream-swift-sdk" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Clickstream Analytics on AWS" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Clickstream Analytics on AWS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Swift SDK
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <div class="md-header__option">
+        <div class="md-select">
+          
+          <button class="md-header__button md-icon" aria-label="Select language">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+          </button>
+          <div class="md-select__inner">
+            <ul class="md-select__list">
+              
+                <li class="md-select__item">
+                  <a href="/clickstream-analytics-on-aws/en/" hreflang="en" class="md-select__link">
+                    English
+                  </a>
+                </li>
+              
+                <li class="md-select__item">
+                  <a href="/clickstream-analytics-on-aws/zh/" hreflang="zh" class="md-select__link">
+                    简体中文
+                  </a>
+                </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Aws-Gcr-Solutions
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../solution-overview/" class="md-tabs__link md-tabs__link--active">
+        Implementation Guide
+      </a>
+    </li>
+  
+
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Clickstream Analytics on AWS" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Clickstream Analytics on AWS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Aws-Gcr-Solutions
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+          Implementation Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Implementation Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_1" id="__nav_1_1_label" tabindex="0">
+          Solution Overview
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_1">
+          <span class="md-nav__icon md-icon"></span>
+          Solution Overview
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
+        Features and benefits
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
+        Use cases
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
+          Architecture overview
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture overview
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        Architecture diagram
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
+        AWS Well-Architected pillars
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+          Architecture details
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_3">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws-services/" class="md-nav__link">
+        AWS services in this solution
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-details/" class="md-nav__link">
+        How the solution works
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_4" id="__nav_1_4_label" tabindex="0">
+          Plan your deployment
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_4">
+          <span class="md-nav__icon md-icon"></span>
+          Plan your deployment
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
+        Cost
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
+        Supported AWS Regions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+          Deployment
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_5">
+          <span class="md-nav__icon md-icon"></span>
+          Deployment
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
+        Cognito
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
+        OIDC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
+        Intranet
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
+          Getting started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_6">
+          <span class="md-nav__icon md-icon"></span>
+          Getting started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
+        Step 1. Create a project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
+        Step 2. Configure data pipeline
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
+        Step 3. Integrate SDK
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
+        Step 4. View dashboard
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
+          Pipeline management
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_7">
+          <span class="md-nav__icon md-icon"></span>
+          Pipeline management
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
+          Data ingestion
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_7_2">
+          <span class="md-nav__icon md-icon"></span>
+          Data ingestion
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+        Ingeston endpoint
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+        Data sink - Kafka
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+        Data sink - Kinesis
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+        Data sink - S3
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+          Data processing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_7_3">
+          <span class="md-nav__icon md-icon"></span>
+          Data processing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+        Data schema
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+        Execution parameters
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+        Processing plugin
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+        Data modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+        Reporting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+        Pipeline management
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+          SDK manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_1_8">
+          <span class="md-nav__icon md-icon"></span>
+          SDK manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../android/" class="md-nav__link">
+        Android SDK
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Swift SDK
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Swift SDK
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-support" class="md-nav__link">
+    Platform Support
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrate-sdk" class="md-nav__link">
+    Integrate SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrate SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1add-package" class="md-nav__link">
+    1.Add Package
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2parameter-configuration" class="md-nav__link">
+    2.Parameter configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3initialize-the-sdk" class="md-nav__link">
+    3.Initialize the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4config-the-sdk" class="md-nav__link">
+    4.Config the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5record-event" class="md-nav__link">
+    5.Record event
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format-definition" class="md-nav__link">
+    Data format definition
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-type" class="md-nav__link">
+    Data type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-rules" class="md-nav__link">
+    Naming rules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-attribute-limitation" class="md-nav__link">
+    Event &amp; Attribute Limitation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preset-events-and-attributes" class="md-nav__link">
+    Preset events and attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Preset events and attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preset-events" class="md-nav__link">
+    Preset events
+  </a>
+  
+    <nav class="md-nav" aria-label="Preset events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#session-definition" class="md-nav__link">
+    Session definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-engagement-definition" class="md-nav__link">
+    User engagement definition
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-attributes-and-reserved-attributes" class="md-nav__link">
+    Common attributes and Reserved attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Common attributes and Reserved attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-structure-sample" class="md-nav__link">
+    Event structure sample
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-attribute-explanation" class="md-nav__link">
+    Common attribute explanation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reserved-attributes" class="md-nav__link">
+    Reserved attributes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+          Dashboards
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_9">
+          <span class="md-nav__icon md-icon"></span>
+          Dashboards
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/acquisition/" class="md-nav__link">
+        Acquisition report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/engagement/" class="md-nav__link">
+        Engagement report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/activity/" class="md-nav__link">
+        Activity report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/retention/" class="md-nav__link">
+        Retention report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/device/" class="md-nav__link">
+        Device report
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/path/" class="md-nav__link">
+        Path explorer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/custom-analysis/" class="md-nav__link">
+        Custom report
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_10" id="__nav_1_10_label" tabindex="0">
+          Additional resources
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_10">
+          <span class="md-nav__icon md-icon"></span>
+          Additional resources
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
+        Upload Certificate
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uninstall/" class="md-nav__link">
+        Uninstall the solution
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_14" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1_14" id="__nav_1_14_label" tabindex="0">
+          Developer guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_14_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_14">
+          <span class="md-nav__icon md-icon"></span>
+          Developer guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../source/" class="md-nav__link">
+        Source code
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../revisions/" class="md-nav__link">
+        Revisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notices/" class="md-nav__link">
+        Notices
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-support" class="md-nav__link">
+    Platform Support
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrate-sdk" class="md-nav__link">
+    Integrate SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrate SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1add-package" class="md-nav__link">
+    1.Add Package
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2parameter-configuration" class="md-nav__link">
+    2.Parameter configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3initialize-the-sdk" class="md-nav__link">
+    3.Initialize the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4config-the-sdk" class="md-nav__link">
+    4.Config the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5record-event" class="md-nav__link">
+    5.Record event
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format-definition" class="md-nav__link">
+    Data format definition
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-type" class="md-nav__link">
+    Data type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-rules" class="md-nav__link">
+    Naming rules
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-attribute-limitation" class="md-nav__link">
+    Event &amp; Attribute Limitation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preset-events-and-attributes" class="md-nav__link">
+    Preset events and attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Preset events and attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preset-events" class="md-nav__link">
+    Preset events
+  </a>
+  
+    <nav class="md-nav" aria-label="Preset events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#session-definition" class="md-nav__link">
+    Session definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-engagement-definition" class="md-nav__link">
+    User engagement definition
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-attributes-and-reserved-attributes" class="md-nav__link">
+    Common attributes and Reserved attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Common attributes and Reserved attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-structure-sample" class="md-nav__link">
+    Event structure sample
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-attribute-explanation" class="md-nav__link">
+    Common attribute explanation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reserved-attributes" class="md-nav__link">
+    Reserved attributes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="clickstream-swift-sdk">Clickstream Swift SDK</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Clickstream Swift SDK can help you easily collect in-app click stream data from iOS devices to your AWS environments through the data pipeline provisioned by this solution.</p>
+<p>The SDK is based on the Amplify for Swift SDK Core Library and developed according to the Amplify Swift SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.</p>
+<h3 id="platform-support">Platform Support</h3>
+<p>Clickstream Swift SDK supports iOS 13+.</p>
+<p><a href="https://awslabs.github.io/clickstream-swift/"><strong>API Documentation</strong></a></p>
+<h2 id="integrate-sdk">Integrate SDK</h2>
+<p>Clickstream requires Xcode 13.4 or higher to build.</p>
+<h3 id="1add-package">1.Add Package</h3>
+<p>We use <strong>Swift Package Manager</strong> to distribute Clickstream Swift SDK, open your project in Xcode and select <strong>File &gt; Add Packages</strong>.</p>
+<p><a class="glightbox" href="../../images/sdk-manual/swift_add_package.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_package.png" /></a></p>
+<p>Enter the Clickstream Library for Swift GitHub repo URL (<code>https://github.com/awslabs/clickstream-swift</code>) into the search bar, You'll see the Clickstream Library for Swift repository rules for which version of Clickstream you want Swift Package Manager to install. Choose <strong>Up to Next Major Version</strong>, then click <strong>Add Package</strong>, make the Clickstream product checked as default, and click <strong>Add Package</strong> again.</p>
+<p><a class="glightbox" href="../../images/sdk-manual/swift_add_package_url.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_package_url.png" /></a></p>
+<h3 id="2parameter-configuration">2.Parameter configuration</h3>
+<p>Download your <code>amplifyconfiguration.json</code> file from your Clickstream solution control plane, and paste it to your project root folder:</p>
+<p><a class="glightbox" href="../../images/sdk-manual/swift_add_amplify_config_json_file.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_amplify_config_json_file.png" /></a></p>
+<p>the json file will be as follows:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;analytics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&quot;awsClickstreamPlugin &quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="nt">&quot;appId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appId&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">&quot;isCompressEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="nt">&quot;autoFlushEventsInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="nt">&quot;isTrackAppExceptionEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Your <code>appId</code> and <code>endpoint</code> are already set up in it, here's an explanation of each property:</p>
+<ul>
+<li><strong>appId</strong>: the app id of your project in control plane.</li>
+<li><strong>endpoint</strong>: the endpoint url you will upload the event to AWS server.</li>
+<li><strong>isCompressEvents</strong>: whether to compress event content when uploading events, default is <code>true</code></li>
+<li><strong>autoFlushEventsInterval</strong>: event sending interval, the default is <code>10s</code></li>
+<li><strong>isTrackAppExceptionEvents</strong>: whether auto track exception event in app, default is <code>false</code></li>
+</ul>
+<h3 id="3initialize-the-sdk">3.Initialize the SDK</h3>
+<p>Once you have configured the parameters, you need to initialize it in AppDelegate's <code>didFinishLaunchingWithOptions</code> lifecycle method to use the SDK.</p>
+<div class="language-swift highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">...</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">func</span> <span class="nf">application</span><span class="p">(</span><span class="kc">_</span> <span class="n">application</span><span class="p">:</span> <span class="bp">UIApplication</span><span class="p">,</span> <span class="n">didFinishLaunchingWithOptions</span> <span class="n">launchOptions</span><span class="p">:</span> <span class="p">[</span><span class="bp">UIApplication</span><span class="p">.</span><span class="n">LaunchOptionsKey</span><span class="p">:</span> <span class="nb">Any</span><span class="p">]?)</span> <span class="p">-&gt;</span> <span class="nb">Bool</span> <span class="p">{</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="c1">// Override point for customization after application launch.</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">do</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="k">try</span> <span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">initSDK</span><span class="p">()</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="bp">assertionFailure</span><span class="p">(</span><span class="s">&quot;Fail to initialize ClickstreamAnalytics: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="kc">true</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="4config-the-sdk">4.Config the SDK</h3>
+<div class="language-swift highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">// config the sdk after initialize.</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">do</span> <span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kd">var</span> <span class="nv">configuration</span> <span class="p">=</span> <span class="k">try</span> <span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">getClickstreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">appId</span> <span class="p">=</span> <span class="s">&quot;appId&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">endpoint</span> <span class="p">=</span> <span class="s">&quot;https://example.com/collect&quot;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">authCookie</span> <span class="p">=</span> <span class="s">&quot;your authentication cookie&quot;</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">sessionTimeoutDuration</span> <span class="p">=</span> <span class="mi">1800000</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isLogEvents</span> <span class="p">=</span> <span class="kc">true</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isCompressEvents</span> <span class="p">=</span> <span class="kc">true</span>    
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isLogEvents</span> <span class="p">=</span> <span class="kc">true</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="bp">print</span><span class="p">(</span><span class="s">&quot;Failed to config ClickstreamAnalytics: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<blockquote>
+<p>Note: this configuation will override the default configuation in <code>amplifyconfiguration.json</code> file</p>
+</blockquote>
+<h3 id="5record-event">5.Record event</h3>
+<p>Add the following code where you need to report an event.</p>
+<div class="language-swift highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">let</span> <span class="nv">attributes</span><span class="p">:</span> <span class="n">ClickstreamAttribute</span> <span class="p">=</span> <span class="p">[</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="s">&quot;channel&quot;</span><span class="p">:</span> <span class="s">&quot;apple&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="s">&quot;uccessful&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="s">&quot;ProcessDuration&quot;</span><span class="p">:</span> <span class="mf">12.33</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="s">&quot;UserAge&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">]</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">recordEvent</span><span class="p">(</span><span class="n">eventName</span><span class="p">:</span> <span class="s">&quot;testEvent&quot;</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">attributes</span><span class="p">)</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1">// for record an event directly</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">recordEvent</span><span class="p">(</span><span class="n">eventName</span><span class="p">:</span> <span class="s">&quot;button_click&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>For more usage refer to <a href="https://github.com/awslabs/clickstream-swift#start-using">Github start using</a></p>
+<p>For <strong>Objective-c</strong> project refer to <a href="https://awslabs.github.io/clickstream-swift/Classes/ClickstreamObjc.html">ClickstreamObjc Api Reference</a></p>
+<h2 id="data-format-definition">Data format definition</h2>
+<h3 id="data-type">Data type</h3>
+<p>Clickstream Swift SDK supports the following data types:</p>
+<table>
+<thead>
+<tr>
+<th>Data type</th>
+<th>Range</th>
+<th>Sample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Int</td>
+<td>-2147483648～2147483647</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Int64</td>
+<td>-9,223,372,036,854,775,808～ 9,223,372,036,854,775,807</td>
+<td>26854775808</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>-2.22E-308~1.79E+308</td>
+<td>3.14</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>true, false</td>
+<td>true</td>
+</tr>
+<tr>
+<td>String</td>
+<td>max support 1024 characters</td>
+<td>"clickstream"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="naming-rules">Naming rules</h3>
+<ol>
+<li>
+<p>The event name and attribute name cannot start with a number, and only contains uppercase and lowercase letters, numbers, underscores, if the event name is invalid will throw <code>precondition failure</code>, if the attribute or user attribute name is invalid the attribute will discard and record error.</p>
+</li>
+<li>
+<p>Do not use <code>_</code> as prefix to naming event name and attribute name, <code>_</code> prefix is the reserved from Clickstream Analytics.</p>
+</li>
+<li>
+<p>The event name and attribute name are in case sensitive, So the event <code>Add_to_cart</code> and <code>add_to_cart</code> will be Recognized as two different event.</p>
+</li>
+</ol>
+<h3 id="event-attribute-limitation">Event &amp; Attribute Limitation</h3>
+<p>In order to improve the efficiency of querying and analysis, we need to limit events as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Suggestion</th>
+<th>Hard limit</th>
+<th>Handle strategy for exceed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Length of event name</td>
+<td>under 25 character</td>
+<td>50 character</td>
+<td>throw error</td>
+</tr>
+<tr>
+<td>Length of event attribute name</td>
+<td>under 25 character</td>
+<td>50 character</td>
+<td>discard, log and record error</td>
+</tr>
+<tr>
+<td>Length of event attribute value</td>
+<td>under 100 character</td>
+<td>1024 character</td>
+<td>discard, log and record error</td>
+</tr>
+<tr>
+<td>Event attribute per event</td>
+<td>under 50 attribute</td>
+<td>500 event attribute</td>
+<td>discard, log and record error</td>
+</tr>
+<tr>
+<td>User attribute number</td>
+<td>under 25 attribute</td>
+<td>100 user attribute</td>
+<td>discard, log and record error</td>
+</tr>
+<tr>
+<td>Length of User attribute name</td>
+<td>under 25 character</td>
+<td>50 character</td>
+<td>discard, log and record error</td>
+</tr>
+<tr>
+<td>Length of User attribute value</td>
+<td>under 50 character</td>
+<td>256 character</td>
+<td>discard, log and record error</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Explanation of limits</strong></p>
+<ul>
+<li>The character limits are the same for single-width character languages (e.g., English) and double-width character languages (e.g., Chinese).</li>
+<li>The limit of event attribute per event include common attributes and preset attributes.</li>
+<li>If you add the same name of attribute or user attribute more than twice, the last value applies.</li>
+</ul>
+<h2 id="preset-events-and-attributes">Preset events and attributes</h2>
+<h3 id="preset-events">Preset events</h3>
+<p>Automatically collected events:</p>
+<table>
+<thead>
+<tr>
+<th>Event name</th>
+<th>When to trigger</th>
+<th>Event Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_session_start</td>
+<td>when users app come to foreground for the first time and their is no on-going session</td>
+<td>_session_id <br>_session_start_timestamp<br>_session_duration</td>
+</tr>
+<tr>
+<td>_screen_view</td>
+<td>when the activity callback <code>onResume()</code> method</td>
+<td>_screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec</td>
+</tr>
+<tr>
+<td>_app_exception</td>
+<td>when the app is crash.</td>
+<td>_exception_message<br>_exception_stack</td>
+</tr>
+<tr>
+<td>_app_update</td>
+<td>when the app is updated to a new version and launched again</td>
+<td>_previous_app_version</td>
+</tr>
+<tr>
+<td>_first_open</td>
+<td>the first time user launches an app after installing</td>
+<td></td>
+</tr>
+<tr>
+<td>_os_update</td>
+<td>device operating system is updated to a new version</td>
+<td>_previous_os_version</td>
+</tr>
+<tr>
+<td>_user_engagement</td>
+<td>when the app is in the foreground at least one second</td>
+<td>_engagement_time_msec<br></td>
+</tr>
+<tr>
+<td>_profile_set</td>
+<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> api called.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="session-definition">Session definition</h4>
+<p>In Clickstream Swift SDK, we do not limit the total time of a session, as long as the time between the next entry of the app and the last exit time is within the allowable timeout period, we consider the current session to be continuous.</p>
+<ul>
+<li>
+<p><strong>_session_start</strong>: When the app starts for the first time, or the app was launched to the foreground and the time between the last exit exceeded <code>session_time_out</code> period.</p>
+</li>
+<li>
+<p><strong>_session_duration</strong>: We calculate the <code>_session_duration</code> by minus the current event create timestamp and the session's <code>_session_start_timestamp</code>, this attribute will be added in every event during the session.</p>
+</li>
+<li>
+<p><strong>session_time_out</strong>: By default is 30 minutes, which can be customized through the configuration api.</p>
+</li>
+<li>
+<p><strong>_session_number</strong>: The total number of session distinct by session id, and <code>_session_number</code> will be appear in every event's attribute object.</p>
+</li>
+</ul>
+<h4 id="user-engagement-definition">User engagement definition</h4>
+<p>In Clickstream Swift SDK, we define the <code>user_engagement</code> as the app is in the foreground at least one second.</p>
+<ul>
+<li>
+<p><strong>when to send</strong>: We send the event when the app navigate to background or navigate to another app.</p>
+</li>
+<li>
+<p><strong>engagement_time_msec</strong>: We count the time from when the app comes in the foreground to when the app goes to the background..</p>
+</li>
+</ul>
+<h3 id="common-attributes-and-reserved-attributes">Common attributes and Reserved attributes</h3>
+<h4 id="event-structure-sample">Event structure sample</h4>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shopping&quot;</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.compny.app&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ModerneShopping&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;apple&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UNKNOWN&quot;</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A536A563-65BD-49BE-A6EC-6F3CE7AC8FBE&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">&quot;device_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;91DA4BBE-933F-4DFA-A489-8AEFBC7A06D8&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nt">&quot;hashCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;63D7991D&quot;</span><span class="p">,</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en_US (current)&quot;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;apple&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iPhone 14 Pro&quot;</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WIFI&quot;</span><span class="p">,</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16.4&quot;</span><span class="p">,</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iOS&quot;</span><span class="p">,</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">    </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2556</span><span class="p">,</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1179</span><span class="p">,</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">    </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.4.1&quot;</span><span class="p">,</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">    </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685082174195</span><span class="p">,</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">    </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0E6614B7-2D2C-4774-AB2F-B0A9E6C3BFAC&quot;</span><span class="p">,</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">    </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">        </span><span class="nt">&quot;_user_city&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678437</span><span class="p">,</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shanghai&quot;</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">        </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678434</span><span class="p">,</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678432</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">        </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678437</span><span class="p">,</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="w">        </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15349</span><span class="p">,</span>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">        </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0E6614B7-20230526-062238846&quot;</span><span class="p">,</span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">        </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">        </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685082158847</span><span class="p">,</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">        </span><span class="nt">&quot;product_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;men&#39;s clothing&quot;</span><span class="p">,</span>
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">        </span><span class="nt">&quot;product_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>All user attributes will be included in <code>user</code> object, and all custom and global attribute are stored in <code>attributes</code> object.</p>
+<h4 id="common-attribute-explanation">Common attribute explanation</h4>
+<table>
+<thead>
+<tr>
+<th>attribute</th>
+<th>describe</th>
+<th>how to generate</th>
+<th>use and purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hashCode</td>
+<td>the AnalyticsEvent Object's hashCode</td>
+<td>generate from<code>String(format: "%08X", hasher.combine(eventjson))</code></td>
+<td>distinguish different event</td>
+</tr>
+<tr>
+<td>app_id</td>
+<td>clickstream app id</td>
+<td>generated when clickstream app create from solution control plane.</td>
+<td>identify the events for your apps</td>
+</tr>
+<tr>
+<td>unique_id</td>
+<td>the unique id for user</td>
+<td>generate from <code>UUID().uuidString</code> when the sdk first initialization<br>it will be changed after user relogin to another user, and when user relogin to the before user in same device, the <code>unique_id</code> will reset to the before user's <code>unique_id</code>.</td>
+<td>the unique for identity different user and associating the behavior of logging in and not logging in</td>
+</tr>
+<tr>
+<td>device_id</td>
+<td>the unique id for device</td>
+<td>generate from<code>UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString</code><br>it will be changed after app reinstall<br></td>
+<td>distinguish different device</td>
+</tr>
+<tr>
+<td>device_unique_id</td>
+<td>the device advertising Id</td>
+<td>generate from<code>ASIdentifierManager.shared().advertisingIdentifier.uuidString ?? ""</code></td>
+<td>distinguish different device</td>
+</tr>
+<tr>
+<td>event_type</td>
+<td>event name</td>
+<td>set by user or sdk.</td>
+<td>distinguish different event type</td>
+</tr>
+<tr>
+<td>event_id</td>
+<td>the unique id for event</td>
+<td>generate from <code>UUID().uuidString</code> when the event create.</td>
+<td>distinguish each event</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>event create timestamp</td>
+<td>generate from <code>Date().timeIntervalSince1970 * 1000</code> when event create</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>platform</td>
+<td>the platform name</td>
+<td>for iOS device is always "iOS"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>os_version</td>
+<td>the iOS os version</td>
+<td>generate from<code>UIDevice.current.systemVersion</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>make</td>
+<td>manufacturer of the device</td>
+<td>for iOS device is always "apple"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>brand</td>
+<td>brand of the device</td>
+<td>for iOS device is always "apple"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>model</td>
+<td>model of the device</td>
+<td>generate from mapping of device identifier</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>carrier</td>
+<td>the device network operator name</td>
+<td>generate from<code>CTTelephonyNetworkInfo().serviceSubscriberCellularProviders?.first?.value</code><br>default is: "UNKNOWN"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>network_type</td>
+<td>the current device network type</td>
+<td>"Mobile", "WIFI" or "UNKNOWN"<br>generate by  <code>NWPathMonitor</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>screen_height</td>
+<td>The absolute height of the available display size in pixels</td>
+<td>generate from<code>UIScreen.main.bounds.size.height * UIScreen.main.scale</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>screen_width</td>
+<td>The absolute width of the available display size in pixels.</td>
+<td>generate from<code>UIScreen.main.bounds.size.width * UIScreen.main.scale</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>zone_offset</td>
+<td>the divece raw offset from GMT in milliseconds.</td>
+<td>generate from<code>TimeZone.current.secondsFromGMT()*1000</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>locale</td>
+<td>the default locale(language, country and variant) for this device</td>
+<td>generate from <code>Locale.current</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>system_language</td>
+<td>the devie language code</td>
+<td>generate from <code>Locale.current.languageCode</code><br>default is: "UNKNOWN"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>country_code</td>
+<td>country/region code for this device</td>
+<td>generate from <code>Locale.current.regionCode</code><br>default is: "UNKNOWN"</td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>sdk_version</td>
+<td>clickstream sdk version</td>
+<td>generate from<code>PackageInfo.version</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>sdk_name</td>
+<td>clickstream sdk name</td>
+<td>this will always be <code>aws-solution-clickstream-sdk</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>app_version</td>
+<td>the app version name</td>
+<td>generate from <code>Bundle.main.infoDictionary["CFBundleShortVersionString"] ?? ""</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>app_package_name</td>
+<td>the app package name</td>
+<td>generate from<code>Bundle.main.infoDictionary["CFBundleIdentifier"] ?? ""</code></td>
+<td>data analysis needs</td>
+</tr>
+<tr>
+<td>app_title</td>
+<td>the app's display name</td>
+<td>generate from <code>Bundle.main.infoDictionary["CFBundleName"] ?? ""</code></td>
+<td>data analysis needs</td>
+</tr>
+</tbody>
+</table>
+<h4 id="reserved-attributes">Reserved attributes</h4>
+<p><strong>User attributes</strong></p>
+<table>
+<thead>
+<tr>
+<th>attribute name</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_user_id</td>
+<td>Reserved for user id that is assigned by app</td>
+</tr>
+<tr>
+<td>_user_ltv_revenue</td>
+<td>Reserved for user lifetime value</td>
+</tr>
+<tr>
+<td>_user_ltv_currency</td>
+<td>Reserved for user lifetime value currency</td>
+</tr>
+<tr>
+<td>_user_first_touch_timestamp</td>
+<td>The time (in microseconds) at which the user first opened the app or visited the site, it is included in every event in <code>user</code> object</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Event attributes</strong></p>
+<table>
+<thead>
+<tr>
+<th>attribute name</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_traffic_source_medium</td>
+<td>Reserved for traffic medium, use this attribute to store the medium that acquired user when events were logged.</td>
+</tr>
+<tr>
+<td>_traffic_source_name</td>
+<td>Reserved for traffic name, use this attribute to store the marketing campaign that acquired user when events were logged.</td>
+</tr>
+<tr>
+<td>_traffic_source_source</td>
+<td>Reserved for traffic source,  Name of the network source that acquired the user when the event were reported.</td>
+</tr>
+<tr>
+<td>_channel</td>
+<td>the channel for app was downloaded</td>
+</tr>
+<tr>
+<td>_device_vendor_id</td>
+<td>Vendor id of the device</td>
+</tr>
+<tr>
+<td>_device_advertising_id</td>
+<td>Advertising id of the device</td>
+</tr>
+<tr>
+<td>_entrances</td>
+<td>added in <code>_screen_view</code> event , the first <code>_screen_view</code> event in a session the value is 1, others is 0.</td>
+</tr>
+<tr>
+<td>_session_id</td>
+<td>added in all event.</td>
+</tr>
+<tr>
+<td>_session_start_timestamp</td>
+<td>added in all event.</td>
+</tr>
+<tr>
+<td>_session_duration</td>
+<td>added in all event.</td>
+</tr>
+<tr>
+<td>_session_number</td>
+<td>added in all event, the initial value is 1, automatically increment by user device.</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "search.suggest", "search.highlight", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>
