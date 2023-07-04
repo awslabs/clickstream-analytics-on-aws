@@ -169,11 +169,6 @@ public class ETLRunner {
         Dataset<Row> result = dataset;
         for (String transformerClassName : transformerClassNames) {
             result = executeTransformer(result, transformerClassName);
-            ContextUtil.cacheDataset(result);
-            log.info(new ETLMetric(result, "after " + transformerClassName).toString());
-            if (result.count() == 0) {
-                break;
-            }
         }
         return result.select(getDistFields());
     }
