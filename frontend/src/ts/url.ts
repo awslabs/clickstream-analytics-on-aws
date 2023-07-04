@@ -56,8 +56,11 @@ export const DATA_MODELING_LINK_EN = '/data-modeling.html';
 export const FAQ_LINK_CN = '/faq/';
 export const FAQ_LINK_EN = '/frequently-asked-questions.html';
 
+export const GETTING_STARTED_LINK_CN = '/getting-started/';
+export const GETTING_STARTED_LINK_EN = '/getting-started.html';
+
 export const SUBMMIT_ISSUE_LINK =
-  'https://github.com/aws-solutions/clickstream-analytics-on-aws/issues';
+  'https://github.com/awslabs/clickstream-analytics-on-aws/issues';
 
 export const buildDocumentLink = (
   lang: string,

@@ -15,6 +15,7 @@
   },
   "getStarted": {
     "name": "Getting started",
+    "link0": "Getting started",
     "link1": "Hands-on Workshop",
     "link2": "Out-of-the-box dashboards",
     "link3": "Working with a third-party SDK",

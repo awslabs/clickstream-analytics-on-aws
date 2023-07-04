@@ -15,6 +15,9 @@ import { Box, Container, Header, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  GETTING_STARTED_LINK_CN,
+  GETTING_STARTED_LINK_EN,
+  buildDocumentLink,
   getWorkingWithQuickSightLink,
   getWorkingWithRedshiftLink,
   getWorkshopLink,
@@ -26,6 +29,18 @@ const GetStarted: React.FC = () => {
     <Container
       header={<Header variant="h2">{t('home:getStarted.name')}</Header>}
     >
+      <Box padding={{ vertical: 'xs' }}>
+        <Link
+          href={buildDocumentLink(
+            i18n.language,
+            GETTING_STARTED_LINK_EN,
+            GETTING_STARTED_LINK_CN
+          )}
+          target="_blank"
+        >
+          {t('home:getStarted.link0')}
+        </Link>
+      </Box>
       <Box padding={{ vertical: 'xs' }}>
         <Link href={getWorkshopLink(i18n.language)} target="_blank">
           {t('home:getStarted.link1')}
