@@ -16,10 +16,11 @@ import { CronDate, parseExpression } from 'cron-parser';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { logger } from './powertools';
-import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
-import { checkPolicy, checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
+import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, PolicyStatement, SubnetType } from './types';
+import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
+import { simulateCustomPolicy } from '../store/aws/iam';
 import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
@@ -422,22 +423,44 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
   const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
   const policy = JSON.parse(policyStr) as Policy;
   const accountId = getALBLogServiceAccount(region);
+  let principal = {
+    key: 'Service',
+    value: 'logdelivery.elasticloadbalancing.amazonaws.com',
+  };
   if (accountId) {
-    return checkPolicy(
-      policy,
-      {
-        key: 'AWS',
-        value: `arn:${partition}:iam::${accountId}:root`,
-      },
-      `arn:${partition}:s3:::${bucket}/clickstream/*`);
-  } else {
-    return checkPolicy(
-      policy,
-      {
-        key: 'Service',
-        value: 'logdelivery.elasticloadbalancing.amazonaws.com',
-      },
-      `arn:${partition}:s3:::${bucket}/clickstream/*`);
+    principal = {
+      key: 'AWS',
+      value: `arn:${partition}:iam::${accountId}:root`,
+    };
   }
-  return false;
+  const policyWithoutPrincipal: Policy = {
+    Version: '2012-10-17',
+    Statement: [],
+  };
+  for (let statement of policy.Statement as PolicyStatement[]) {
+    if (statement.Principal &&
+      (typeof statement.Principal[principal.key] === 'string' &&
+          statement.Principal[principal.key] === principal.value) ||
+        (Array.prototype.isPrototypeOf(statement.Principal![principal.key]) &&
+          (statement.Principal![principal.key] as string[]).indexOf(principal.value) > -1)) {
+      {
+        policyWithoutPrincipal.Statement.push({
+          Effect: statement.Effect,
+          Action: statement.Action,
+          Resource: statement.Resource,
+          Condition: statement.Condition,
+        });
+      }
+    }
+  }
+  console.log(policyWithoutPrincipal, principal);
+  if (isEmpty(policyWithoutPrincipal.Statement)) {
+    return false;
+  }
+  const simulateResult = await simulateCustomPolicy(
+    [JSON.stringify(policyWithoutPrincipal)],
+    ['s3:PutObject'],
+    [`arn:${partition}:s3:::${bucket}/clickstream/*`],
+  );
+  return simulateResult;
 };

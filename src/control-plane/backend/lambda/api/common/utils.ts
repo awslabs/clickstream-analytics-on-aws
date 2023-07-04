@@ -15,7 +15,7 @@ import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGro
 import { ipv4 as ip } from 'cidr-block';
 import { ALBLogServiceAccountMapping, EMAIL_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, RPURange, RPURegionMappingObject, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, RPURange, RPURegionMappingObject, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
@@ -367,36 +367,6 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
-
-function checkPolicy(policy: Policy, principal: { key: string; value: string }, resource: string): boolean {
-  try {
-    let match: boolean = false;
-    for (let statement of policy.Statement as PolicyStatement[]) {
-      if (statement.Effect === 'Allow' && statement.Principal && statement.Resource) {
-        if (
-          (typeof statement.Principal[principal.key] === 'string' &&
-            statement.Principal[principal.key] === principal.value) ||
-          (Array.prototype.isPrototypeOf(statement.Principal[principal.key]) &&
-            (statement.Principal[principal.key] as string[]).indexOf(principal.value) > -1)
-        ) {
-          if (
-            (typeof statement.Resource === 'string' &&
-              statement.Resource === resource) ||
-            (Array.prototype.isPrototypeOf(statement.Resource) &&
-              (statement.Resource as string[]).indexOf(resource) > -1)
-          ) {
-            // find resource
-            match = true;
-          }
-        }
-      }
-    }
-    return match;
-  } catch (error) {
-    return false;
-  }
-}
-
 export {
   isEmpty,
   isEmail,
@@ -418,5 +388,4 @@ export {
   paginateData,
   replaceTemplateVersion,
   getValueFromStackOutputSuffix,
-  checkPolicy,
 };

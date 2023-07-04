@@ -19,6 +19,7 @@ import {
   DescribeVpcEndpointsCommand,
   VpcEndpointType,
 } from '@aws-sdk/client-ec2';
+import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
 import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
@@ -256,6 +257,7 @@ function createPipelineMock(
   secretsManagerMock: any,
   quickSightMock: any,
   s3Mock: any,
+  iamMock: any,
   props?: {
     noApp?: boolean;
     update?: boolean;
@@ -273,6 +275,14 @@ function createPipelineMock(
     quickSightStandard?: boolean;
     albPolicyDisable?: boolean;
   }): any {
+  iamMock.on(SimulateCustomPolicyCommand).resolves({
+    EvaluationResults: [
+      {
+        EvalActionName: '',
+        EvalDecision: PolicyEvaluationDecisionType.ALLOWED,
+      },
+    ],
+  });
   // project
   ddbMock.on(GetCommand, {
     TableName: clickStreamTableName,

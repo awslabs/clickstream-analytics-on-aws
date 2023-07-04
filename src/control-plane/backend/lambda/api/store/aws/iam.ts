@@ -14,7 +14,9 @@
 import {
   IAMClient,
   paginateListRoles,
+  PolicyEvaluationDecisionType,
   Role,
+  SimulateCustomPolicyCommand,
 } from '@aws-sdk/client-iam';
 import { awsRegion } from '../../common/constants';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
@@ -47,4 +49,25 @@ export const listRoles = async (type: AssumeRoleType, key?: string) => {
     }
   }
   return roles;
+};
+
+export const simulateCustomPolicy = async (policys: string[], actionNames: string[], resourceArns: string[]) => {
+  const iamClient = new IAMClient({
+    ...aws_sdk_client_common_config,
+  });
+  const command = new SimulateCustomPolicyCommand({
+    PolicyInputList: policys,
+    ActionNames: actionNames,
+    ResourceArns: resourceArns,
+  });
+  const response = await iamClient.send(command);
+  if (response.EvaluationResults && response.EvaluationResults?.length !== 0) {
+    for (let evaluationResult of response.EvaluationResults) {
+      if (evaluationResult.EvalDecision === PolicyEvaluationDecisionType.ALLOWED) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return false;
 };

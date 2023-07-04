@@ -239,6 +239,8 @@ export class ClickStreamApiConstruct extends Construct {
             'athena:ListWorkGroups',
             'iam:ListRoles',
             'iam:ListServerCertificates',
+            'iam:GetContextKeysForCustomPolicy',
+            'iam:SimulateCustomPolicy',
             'states:DescribeExecution',
             'acm:ListCertificates',
             'cloudformation:DescribeStacks',

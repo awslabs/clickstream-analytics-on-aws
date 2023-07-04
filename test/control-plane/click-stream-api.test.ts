@@ -566,6 +566,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'athena:ListWorkGroups',
               'iam:ListRoles',
               'iam:ListServerCertificates',
+              'iam:GetContextKeysForCustomPolicy',
+              'iam:SimulateCustomPolicy',
               'states:DescribeExecution',
               'acm:ListCertificates',
               'cloudformation:DescribeStacks',
