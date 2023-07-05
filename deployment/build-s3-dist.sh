@@ -223,6 +223,13 @@ else
     export SOLUTION_ECR_REPO_NAME
 fi
 
+if [[ -z ${SOLUTION_CN_TEMPLATES[@]} ]]; then
+    echo "SOLUTION_CN_TEMPLATES is missing from ../solution_config"
+    exit 1
+else 
+    export SOLUTION_CN_TEMPLATES
+fi
+
 #------------------------------------------------------------------------------
 # Validate command line parameters
 #------------------------------------------------------------------------------
@@ -340,6 +347,17 @@ do_replace "*.template.json" %%SOLUTION_ECR_ACCOUNT%% ${SOLUTION_ECR_ACCOUNT}
 do_replace "*.template.json" %%SOLUTION_ECR_REPO_NAME%% ${SOLUTION_ECR_REPO_NAME}
 do_replace "*.template.json" %%SOLUTION_ECR_BUILD_VERSION%% ${SOLUTION_ECR_BUILD_VERSION}
 
+
+for cn_template in ${SOLUTION_CN_TEMPLATES[@]}; do 
+   echo $cn_template
+   template_name=$(basename $cn_template)
+   if [[ $(echo $template_name | grep 'stack.template.json') ]]; then
+       template_name=$(echo $template_name | sed 's/stack.template.json/stack-cn.template.json/')
+   fi 
+   echo $template_name
+   do_cmd curl -s $cn_template -o ./$template_name
+done
+ 
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Packing] Source code artifacts${normal}"
 echo "------------------------------------------------------------------------------"
