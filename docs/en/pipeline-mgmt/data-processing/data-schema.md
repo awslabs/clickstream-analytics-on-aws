@@ -19,7 +19,6 @@ Each column in the ods_event table represents an event-specific parameter. Note 
 |event_value_in_usd| BIGINT | BIGINT | The currency-converted value (in USD) of the event's "value" parameter.|
 |event_bundle_sequence_id| BIGINT | BIGINT | The sequential ID of the bundle in which these events were uploaded.|
 |ingest_timestamp| BIGINT | BIGINT | Timestamp offset between collection time and upload time in micros.|
-|
 
 ### Event parameter fields
 |**Field Name**| **Data Type - Redshift** | **Data Type - Athena** | **Description** |

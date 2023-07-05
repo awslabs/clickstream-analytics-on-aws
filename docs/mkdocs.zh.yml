@@ -57,12 +57,12 @@ nav:
       - Swift SDK: sdk-manual/swift.md
     - 仪表盘:
       - 概述: dashboard/index.md
-      - 获取报表: dashboard/acquisition.md
+      - 流量获取报表: dashboard/acquisition.md
       - 参与度报表: dashboard/engagement.md
       - 活动报表: dashboard/activity.md
       - 留存报表: dashboard/retention.md
       - 设备报表: dashboard/device.md
-      - 路径探索器: dashboard/path.md
+      - 路径探索报表: dashboard/path.md
       - 自定义报表: dashboard/custom-analysis.md
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md

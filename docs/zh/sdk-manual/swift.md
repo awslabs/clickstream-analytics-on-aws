@@ -172,7 +172,7 @@ Clickstream Swift SDK 支持以下数据类型：
 | 事件名称             | 触发时机                                             | 事件属性                                                                                                              |
 | ---------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | _session_start   | 用户首次启动应用程序进入前台时且没有正在进行的会话                        | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
-| _screen_view     | 当 Activity 的 `onResume()` 方法被调用时                 | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
+| _screen_view     | 当 Activity 的 `viewDidAppear()` 方法被调用时                 | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
 | _app_exception   | 应用程序崩溃时                                          | _exception_message<br>_exception_stack                                                                            |
 | _app_update      | 应用程序升级到新版本并再次启动时                                 | _previous_app_version                                                                                             |
 | _first_open      | 用户首次安装应用程序后启动时                                   |                                                                                                                   |

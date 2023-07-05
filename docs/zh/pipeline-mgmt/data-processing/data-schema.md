@@ -85,29 +85,7 @@ ods_event表中的每一列都代表一个特定于事件的参数。注意，�
 | geo.latitude       |     DOUBLE PRECISION | FLOAT                | 基于 IP 地址报告事件的纬度。      |
 | geo.longitude      |     DOUBLE PRECISION | FLOAT                | 基于 IP 地址报告事件的经度。      |
 | geo.accuracy       |     BIGINT          | BIGINT               | 基于 IP 地址报告事件的精度。      |
-
-### 事件字段
-| 字段名称            | Redshift 数据类型 | Athena 数据类型 | 描述                                                                               |
-| --------------------- | ------------------ | -------------------- | ----------------------------------------------------------------------------------------- |
-| event_name            | VARCHAR            | STRING                | 发生的事件的名称。                                                                      |
-| event_timestamp       | TIMESTAMP          | TIMESTAMP             | 发生事件的时间戳（UTC）。                                                                |
-| event_previous_timestamp | TIMESTAMP          | TIMESTAMP             | 上一个事件的时间戳（UTC）。                                                              |
-| event_value           | DOUBLE PRECISION    | FLOAT                 | 与事件关联的值。                                                                         |
-| event_currency        | VARCHAR            | STRING                | 事件值的货币代码。                                                                      |
-| event_items           | SUPER              | ARRAY                | 与事件相关联的项目。                                                              |
-| event_items.item_name               | VARCHAR            | STRING                | 项目名称。                                                                           |
-| event_items.item_category           | VARCHAR            | STRING                | 项目类别。                                                                           |
-| event_items.item_id                 | VARCHAR            | STRING                | 项目 ID。                                                                            |
-| event_items.item_brand              | VARCHAR            | STRING                | 项目品牌。                                                                         |
-| event_items.item_variant            | VARCHAR            | STRING                | 项目变体。                                                                           |
-| event_params          | SUPER              | ARRAY                | 与事件关联的参数。                                                                 |
-| event_params.key      | VARCHAR            | STRING                | 参数名称。                                                                           |
-| event_params.value    | SUPER              | ARRAY                | 参数值的记录。                                                                   |
-| event_params.value.string_value  | VARCHAR            | STRING                | 参数的字符串值。                                                                  |
-| event_params.value.int_value     | BIGINT             | BIGINT               | 参数的整数值。                                                                   |
-| event_params.value.double_value  | DOUBLE PRECISION    | FLOAT                 | 参数的双精度值。                                                                  |
-| event_params.value.float_value   | DOUBLE PRECISION    | FLOAT                 | 此字段目前未使用。                                                                        |
-
+                                                                       |
 ### 流量字段
 | 字段名称               | 数据类型 - Redshift | 数据类型 - Athena | 描述                                                                           |
 | ------------------------ | -------------------- | --------- | ------------------------------------------------------------------------------------- |

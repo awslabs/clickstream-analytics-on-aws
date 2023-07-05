@@ -260,33 +260,33 @@ Clickstream Android SDK 支持以下数据类型：
 
 #### 公共属性
 
-| 属性               | 描述                            | 如何生成                                                                                                                                   | 用途和目的                   |
-| ---------------- |-------------------------------| -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| hashCode         | 事件对象的哈希码                      | 通过`Integer.toHexString(AnalyticsEvent.hashCode())`生成                                                                                   | 区分不同的事件                 |
-| app_id           | 点击流app id                     | 控制平面创建点击流应用程序时生成。                                                                                                                      | 区分不同app的事件              |
-| unique_id        | 用户唯一id                        | sdk 首次初始化时从 `UUID.randomUUID().toString()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，当用户重新登录到同一设备上的之前的用户时，unique_id 将重置为之前用户的唯一id。             | 标识不同用户的唯一性，并关联登录和未登录的行为 |
-| device_id        | 设备的唯一id                       | 通过`Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)` 生成，<br>如果 Android id 为 null 或""，我们将使用 UUID 代替。 | 区分不同设备                  |
-| event_type       | 事件名称                          | 由开发者或SDK设置                                                                                                                             | 区分不同的事件名称               |
-| event_id         | 事件的唯一id                       | 事件创建时通过`UUID.randomUUID().toString()`生成。                                                                                               | 区分每个事件                  |
-| timestamp        | 事件创建时间戳                       | 事件创建时由`System.currentTimeMillis()`生成                                                                                                   | 数据分析需要                  |
-| platform         | 平台名称                          | Android 设备始终为"Android"                                                                                                                 | 数据分析需要                  |
-| os_version       | 系统版本号                         | 通过`Build.VERSION.RELEASE`生成                                                                                                            | 数据分析需要                  |
-| make             | 设备制造商                         | 通过`Build.MANUFACTURER`生成                                                                                                               | 数据分析需要                  |
-| brand            | 设备品牌                          | 通过`Build.BRAND`生成                                                                                                                      | 数据分析需要                  |
-| model            | 设备型号                          | 通过`Build.MODEL`生成                                                                                                                      | 数据分析需要                  |
-| carrier          | 设备网络运营商名称                     | 通过`TelephonyManager.getNetworkOperatorName()`生成<br>默认为："UNKNOW"                                                                        | 数据分析需要                  |
-| network_type     | 当前设备网络类型                      | “移动”、“WIFI”或“未知”<br>通过`android.netConnectivityManager`生成                                                                               | 数据分析需要                  |
-| screen_height    | 屏幕高度（以像素为单位）                  | 通过`applicationContext.resources.displayMetrics.heightPixels`生成                                                                         | 数据分析需要                  |
-| screen_width     | 屏幕宽度（以像素为单位）                  | 通过`applicationContext.resources.displayMetrics.widthPixels`生成                                                                          | 数据分析需要                  |
-| zone_offset      | divce 与 GMT 的原始偏移量（以毫秒为单位）    | 通过`java.util.Calendar.get(Calendar.ZONE_OFFSET)`生成                                                                                     | 数据分析需要                  |
-| locale           | Java 虚拟机此设备的默认区域设置（语言、国家/地区和变体） | 通过“java.util.Local.getDefault()”生成                                                                                                     | 数据分析需要                  |
-| system_language  | 设备语言代码                        | 通过`java.util.Local.getLanguage()`生成<br>默认为："UNKNOW"                                                                                    | 数据分析需要                  |
-| country_code     | 该设备的国家/地区代码                   | 通过`java.util.Local.getCountry()`生成<br>默认为："UNKNOW"                                                                                     | 数据分析需要                  |
-| sdk_version      | 点击流sdk版本                      | 通过`BuildConfig.VERSION_NAME`生成                                                                                                         | 数据分析需要                  |
-| sdk_name         | Clickstream SDK 名称            | 这将始终是`aws-solution-clickstream-sdk`                                                                                                    | 数据分析需要                  |
-| app_version      | 用户应用程序的应用程序版本名称。              | 通过`android.content.pm.PackageInfo.versionName`生成<br>默认为："UNKNOW"                                                                       | 数据分析需要                  |
-| app_package_name | 用户应用的应用程序包名称。                 | 通过`android.content.pm.PackageInfo.packageName`生成<br>默认为："UNKNOW"                                                                       | 数据分析需要                  |
-| app_title        | 应用程序的显示名称                     | 通过`android.content.pm.getApplicationLabel(appInfo)`生成                                                                                  | 数据分析需要                  |
+| 属性               | 描述                              | 如何生成                                                                                                                                | 用途和目的                   |
+| ---------------- |---------------------------------| ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| hashCode         | 事件对象的哈希码                        | 通过`Integer.toHexString(AnalyticsEvent.hashCode())`生成                                                                                | 区分不同的事件                 |
+| app_id           | 点击流app id                       | 控制平面创建点击流应用程序时生成                                                                                                                    | 区分不同app的事件              |
+| unique_id        | 用户唯一id                          | sdk 首次初始化时从 `UUID.randomUUID().toString()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，当用户重新登录到同一设备上的之前的用户时，unique_id 将重置为之前用户的唯一id           | 标识不同用户的唯一性，并关联登录和未登录的行为 |
+| device_id        | 设备的唯一id                         | 通过`Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)` 生成，<br>如果 Android id 为 null 或""，我们将使用 UUID 代替 | 区分不同设备                  |
+| event_type       | 事件名称                            | 由开发者或SDK设置                                                                                                                          | 区分不同的事件名称               |
+| event_id         | 事件的唯一id                         | 事件创建时通过`UUID.randomUUID().toString()`生成                                                                                             | 区分每个事件                  |
+| timestamp        | 事件创建时间戳                         | 事件创建时由`System.currentTimeMillis()`生成                                                                                                | 数据分析需要                  |
+| platform         | 平台名称                            | Android 设备始终为"Android"                                                                                                              | 数据分析需要                  |
+| os_version       | 系统版本号                           | 通过`Build.VERSION.RELEASE`生成                                                                                                         | 数据分析需要                  |
+| make             | 设备制造商                           | 通过`Build.MANUFACTURER`生成                                                                                                            | 数据分析需要                  |
+| brand            | 设备品牌                            | 通过`Build.BRAND`生成                                                                                                                   | 数据分析需要                  |
+| model            | 设备型号                            | 通过`Build.MODEL`生成                                                                                                                   | 数据分析需要                  |
+| carrier          | 设备网络运营商名称                       | 通过`TelephonyManager.getNetworkOperatorName()`生成<br>默认为："UNKNOW"                                                                     | 数据分析需要                  |
+| network_type     | 当前设备网络类型                        | “移动”、“WIFI”或“未知”<br>通过`android.netConnectivityManager`生成                                                                            | 数据分析需要                  |
+| screen_height    | 屏幕高度（以像素为单位）                    | 通过`applicationContext.resources.displayMetrics.heightPixels`生成                                                                      | 数据分析需要                  |
+| screen_width     | 屏幕宽度（以像素为单位）                    | 通过`applicationContext.resources.displayMetrics.widthPixels`生成                                                                       | 数据分析需要                  |
+| zone_offset      | divce 与 GMT 的原始偏移量（以毫秒为单位）      | 通过`java.util.Calendar.get(Calendar.ZONE_OFFSET)`生成                                                                                  | 数据分析需要                  |
+| locale           | Java 虚拟机此设备的默认区域设置（语言、国家/地区和变体） | 通过“java.util.Local.getDefault()”生成                                                                                                  | 数据分析需要                  |
+| system_language  | 设备语言代码                          | 通过`java.util.Local.getLanguage()`生成<br>默认为："UNKNOW"                                                                                 | 数据分析需要                  |
+| country_code     | 该设备的国家/地区代码                     | 通过`java.util.Local.getCountry()`生成<br>默认为："UNKNOW"                                                                                  | 数据分析需要                  |
+| sdk_version      | 点击流SDK版本                        | 通过`BuildConfig.VERSION_NAME`生成                                                                                                      | 数据分析需要                  |
+| sdk_name         | Clickstream SDK 名称              | 这将始终是`aws-solution-clickstream-sdk`                                                                                                 | 数据分析需要                  |
+| app_version      | 用户应用程序的应用程序版本名称                 | 通过`android.content.pm.PackageInfo.versionName`生成<br>默认为："UNKNOW"                                                                    | 数据分析需要                  |
+| app_package_name | 用户应用的应用程序包名称                    | 通过`android.content.pm.PackageInfo.packageName`生成<br>默认为："UNKNOW"                                                                    | 数据分析需要                  |
+| app_title        | 应用程序的显示名称                       | 通过`android.content.pm.getApplicationLabel(appInfo)`生成                                                                               | 数据分析需要                  |
 
 #### 保留属性
 
@@ -301,16 +301,16 @@ Clickstream Android SDK 支持以下数据类型：
 
 **事件属性**
 
-| 属性名称                     | 描述                                                             |
-| ------------------------ | -------------------------------------------------------------- |
-| _traffic_source_medium   | 保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介。                                |
-| _traffic_source_name     | 保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity。                        |
-| _traffic_source_source   | 保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称。                              |
-| _channel                 | 下载应用程序的渠道                                                      |
-| _device_vendor_id        | 设备供应商ID                                                              |
-| _device_advertising_id   | 设备广告ID                                                              |
-| _entrances               | 在 `_screen_view` 事件中添加。会话中的第一个 `_screen_view` 事件具有值 1，其他事件为 0。 |
-| _session_id              | 在所有事件中添加。                                                      |
-| _session_start_timestamp | 在所有事件中添加。                                                      |
-| _session_duration        | 在所有事件中添加。                                                      |
-| _session_number          | 在所有事件中添加。初始值为 1，并且用户设备会自动递增该值。                                 |
+| 属性名称                     | 描述                                                     |
+| ------------------------ | ------------------------------------------------------ |
+| _traffic_source_medium   | 保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介                         |
+| _traffic_source_name     | 保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity                 |
+| _traffic_source_source   | 保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称                       |
+| _channel                 | 下载应用程序的渠道                                              |
+| _device_vendor_id        | 设备供应商ID                                                    |
+| _device_advertising_id   | 设备广告ID                                                    |
+| _entrances               | 在 `_screen_view` 事件中添加。会话中的第一个 `_screen_view` 事件具有值 1，其他事件为 0 |
+| _session_id              | 在所有事件中添加                                               |
+| _session_start_timestamp | 在所有事件中添加                                               |
+| _session_duration        | 在所有事件中添加                                               |
+| _session_number          | 在所有事件中添加。初始值为 1，并且用户设备会自动递增该值                          |
