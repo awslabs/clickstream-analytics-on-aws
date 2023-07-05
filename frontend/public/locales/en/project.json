@@ -36,7 +36,7 @@
   "pipeline": {
     "pipeline": "Pipeline",
     "dataPipeline": "Data pipeline",
-    "dataPipelineDesc": "A data pipeline is a set of AWS resource that collect, process and model your clickstream data.",
+    "dataPipelineDesc": "A data pipeline is a set of integrated AWS resources that collect, process, model, and visualize the clickstream data from your apps or websites. Below diagram illustrates the end-to-end architecture of a data pipeline. Click below button to start configure the data pipeline for this project. ",
     "health": "Pipeline health",
     "healthDesc": "Health status of the pipeline of this project.",
     "status": "Status",
