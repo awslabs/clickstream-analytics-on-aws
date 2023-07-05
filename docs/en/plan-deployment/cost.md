@@ -81,7 +81,7 @@ Key assumptions include:
 |                         | Daily                 |     140     | Serverless(8 based RPU)               |       16.9        |    156.9   |
 | 1000RPS             | Hourly                |      1362   | Serverless (8 based RPU) |       172        |  1534    |
 |              | 6-Hourly                |      678   | Serverless (8 based RPU) |       176        |  854    |
-|              | Daily                |     2589    | Serverless (8 based RPU) |        352       |   2941   |
+|              | Daily                |     873   | Serverless (8 based RPU) |        352       |   1225   |
 
 !!! info "Note"
     For the cost of 1000 PRS Daily, we used below EMR configuration.
@@ -89,13 +89,13 @@ Key assumptions include:
     ```json
     {
     "sparkConfig": [
-            "spark.emr-serverless.executor.disk=200g",
-            "spark.executor.instances=16",
-            "spark.dynamicAllocation.initialExecutors=48",
-            "spark.executor.memory=100g",
+            "spark.emr-serverless.executor.disk=80g",
+            "spark.executor.instances=8",
+            "spark.dynamicAllocation.initialExecutors=16",
+            "spark.executor.memory=80g",
             "spark.executor.cores=16"
         ],
-        "inputRePartitions": 1000
+        "inputRePartitions": 2000
     }
     ```
 
