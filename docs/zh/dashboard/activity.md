@@ -46,7 +46,7 @@
 | `User activity number in last 30 days` | 指标  | 最近 30 天记录的事件数                     | QuickSight 中的计算字段 |
 
 
-## 示例仪表盘
-以下图片是一个示例仪表盘供您参考。
+## 示例仪表板
+以下图片是一个示例仪表板供您参考。
 
 ![qs-activity](../images/dashboard/activity.jpg)

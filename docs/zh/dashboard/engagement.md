@@ -44,7 +44,7 @@
 |`Average screen view per user`| 指标  | 所选时间段内每个用户的平均屏幕浏览量 | QuickSight 中的计算字段|
 
 
-## 示例仪表盘
-以下图片是一个示例仪表盘供您参考。
+## 示例仪表板
+以下图片是一个示例仪表板供您参考。
 
 ![qs-engagement](../images/dashboard/engagement.jpg)

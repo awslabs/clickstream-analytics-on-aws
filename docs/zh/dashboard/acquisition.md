@@ -41,8 +41,8 @@
 | `is_registered`               | 维度| 用户是否注册                        | 来自分析引擎的查询 |
 
 
-## 示例仪表盘
-以下图片是一个示例仪表盘供您参考。
+## 示例仪表板
+以下图片是一个示例仪表板供您参考。
 
 ![qs-acquisition](../images/dashboard/acquisition.jpg)
 

@@ -172,7 +172,7 @@ Automatically collected events:
 | Event name       | When to trigger                                                                       | Event Attributes                                                                                                  |
 | ---------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | _session_start   | when users app come to foreground for the first time and their is no on-going session | _session_id <br>_session_start_timestamp<br>_session_duration                                                     |
-| _screen_view     | when the activity callback `onResume()` method                                        | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
+| _screen_view     | when the activity callback `viewDidAppear()` method                                        | _screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec |
 | _app_exception   | when the app is crash.                                                                | _exception_message<br>_exception_stack                                                                            |
 | _app_update      | when the app is updated to a new version and launched again                           | _previous_app_version                                                                                             |
 | _first_open      | the first time user launches an app after installing                                  |                                                                                                                   |
@@ -259,7 +259,7 @@ In Clickstream Swift SDK, we define the `user_engagement` as the app is in the f
 
 All user attributes will be included in `user` object, and all custom and global attribute are stored in `attributes` object.
 
-#### Common attribute explanation
+#### Common attribute
 
 | attribute        | describe                                                          | how to generate                                                                                                                                                                                                                                     | use and purpose                                                                                      |
 | ---------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
