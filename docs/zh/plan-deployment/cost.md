@@ -84,7 +84,7 @@ weight: 1
 |                         | 每日                 |     140     | 无服务器 (基于8个RPU)               |       16.9        |    156.9   |
 | 1000RPS             | 每小时                |      1362   | 无服务器 (基于8个RPU) |       172        |  1534    |
 |              | 每6小时                |      678   | 无服务器 (基于8个RPU) |       176        | 854
-|              | 每日                |      2589   | 无服务器 (基于8个RPU) |       352        | 2941 |
+|              | 每日                |      873   | 无服务器 (基于8个RPU) |       352        | 1225 |
 
 !!! info "提示"
 
@@ -93,13 +93,13 @@ weight: 1
     ```json
     {
     "sparkConfig": [
-            "spark.emr-serverless.executor.disk=200g",
-            "spark.executor.instances=16",
-            "spark.dynamicAllocation.initialExecutors=48",
-            "spark.executor.memory=100g",
+            "spark.emr-serverless.executor.disk=80g",
+            "spark.executor.instances=8",
+            "spark.dynamicAllocation.initialExecutors=16",
+            "spark.executor.memory=80g",
             "spark.executor.cores=16"
         ],
-        "inputRePartitions": 1000
+        "inputRePartitions": 2000
     }
     ```
 
