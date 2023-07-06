@@ -313,7 +313,7 @@ export class ClickStreamApiConstruct extends Construct {
     addCfnNagSuppressRules(this.clickStreamApiFunction.node.defaultChild as CfnResource, [
       {
         id: 'W92',
-        reason: 'TODO: will revisit it based on T-shirt size of workload',
+        reason: 'Lambda function is only used by ClickStreamApiFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
       },
     ]);
 
@@ -364,7 +364,7 @@ export class ClickStreamApiConstruct extends Construct {
           },
           {
             id: 'W92',
-            reason: 'TODO: will revisit it based on T-shirt size of workload',
+            reason: 'Lambda function is only used by ClickStreamApiFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
           },
         ],
       );
