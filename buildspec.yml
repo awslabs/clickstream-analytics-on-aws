@@ -73,19 +73,4 @@ phases:
         export ECR_REPOS=$(join_by , `cat "${__dir}/ecr-repos"`)
 artifacts:
   files:
-    - deployment/**/*
-    - docs/**/*
-    - .viperlightignore
-    - codescan-prebuild-custom.sh
-    - sonar-project.properties
-    - src/**/*
-    - test/**/*
-    - coverage/**/*
-    - CHANGELOG.md
-    - CODE_OF_CONDUCT.md
-    - CONTRIBUTING.md
-    - LICENSE
-    - NOTICE.txt
-    - README.md
-    - .cfnnag_*
-    - .github/**/*
+    - '**/*'
