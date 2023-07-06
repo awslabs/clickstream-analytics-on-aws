@@ -49,7 +49,7 @@ export class DataAnalyticsRedshiftStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'Analytics';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const p = createStackParameters(this);
     this.templateOptions.metadata = p.metadata;

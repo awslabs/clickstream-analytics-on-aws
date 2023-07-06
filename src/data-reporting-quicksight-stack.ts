@@ -45,7 +45,7 @@ export class DataReportingQuickSightStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'Reporting - QuickSight';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-rep) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const stackParames = createStackParametersQuickSight(this, this.paramGroups, this.paramLabels);
 

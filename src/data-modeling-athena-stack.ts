@@ -33,7 +33,7 @@ export class DataModelingAthenaStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'Data Modeling';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dma) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const parameters = createAthenaStackParameters(this);
     this.templateOptions.metadata = parameters.metadata;

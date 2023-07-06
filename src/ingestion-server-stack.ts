@@ -109,7 +109,7 @@ export class IngestionServerNestedStack extends NestedStack {
     super(scope, id, props);
     const featureName = 'IngestionServer ' + id;
 
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     // Vpc
     const vpc = Vpc.fromVpcAttributes(this, 'from-vpc', {
@@ -303,7 +303,7 @@ export class IngestionServerStack extends Stack {
 
     const featureName = 'IngestionServer';
 
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const {
       metadata,

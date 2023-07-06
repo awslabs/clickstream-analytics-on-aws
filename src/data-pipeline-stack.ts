@@ -37,7 +37,7 @@ export class DataPipelineStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'DataPipeline';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dpe) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const {
       metadata, params: {
@@ -205,7 +205,7 @@ class DataPipelineNestedStack extends NestedStack {
   constructor(scope: Construct, id: string, props: DataPipelineNestedStackProps) {
     super(scope, id, props);
     const featureName = 'DataPipeline ' + id;
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dpe) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const dataPipeline = new DataPipelineConstruct(this, 'NestedStack', {
       ... props,

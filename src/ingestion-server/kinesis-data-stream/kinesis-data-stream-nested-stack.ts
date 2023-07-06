@@ -173,7 +173,7 @@ export class KinesisDataStreamToS3NestedStack extends NestedStack {
 
     const featureName = 'KinesisDataStreamToS3-' + props.streamMode;
 
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-k2s) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const kdsToS3 = new KinesisDataStreamToS3(this, 'KinesisDataStreamToS3', {
       ...props,
