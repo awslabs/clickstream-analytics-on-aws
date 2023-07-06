@@ -126,4 +126,7 @@ rm -rf * .*
 echo "mv ../$1.zip ."
 mv ../$1.zip .
 
+echo "rm -rf $dist_dir"
+rm -rf $dist_dir
+
 echo "Completed building $1.zip dist"
