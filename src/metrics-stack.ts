@@ -29,7 +29,7 @@ export class MetricsStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'Metrics';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-met) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const projectIdParam = new CfnParameter(this, 'ProjectId', {
       description: 'Project Id',
