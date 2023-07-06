@@ -39,7 +39,7 @@ export class KafkaS3SinkConnectorStack extends Stack {
 
     const featureName = 'KafkaS3SinkConnector';
 
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} - ${featureName} (Version ${SolutionInfo.SOLUTION_VERSION})`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-kco) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const projectIdParam = Parameters.createProjectIdParameter(this);
 
