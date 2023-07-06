@@ -10,7 +10,7 @@ for the second scenarios we define the notepad app have total 10000 users and th
 
 ### install dependency
 
-> pip install -r requirements.txt
+> pip3 install requests
 
 ### requirement
 
@@ -21,12 +21,12 @@ Please download your `amplifyconfiguration.json` file from your web console of t
 
 ### how to generate last 30 days events
 
-> python create_event.py
+> python3 create_event.py
 
 
 ### how to generate events in real-time
 
-> python create_event_real_time.py
+> python3 create_event_real_time.py
 
 ### Other configuration
 
