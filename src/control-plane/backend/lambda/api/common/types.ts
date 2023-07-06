@@ -26,6 +26,25 @@ export class ClickStreamBadRequestError extends Error {
   }
 }
 
+export class ClickStreamAuthError extends Error {
+  readonly code: number;
+  readonly body: {
+    auth: boolean;
+    message: string;
+  };
+
+  constructor(code: number, message: string) {
+    super(message);
+    this.name = 'ClickStreamAuthError';
+    this.message = message;
+    this.code = code;
+    this.body = {
+      auth: false,
+      message: message,
+    };
+  }
+}
+
 export class ApiResponse {
   readonly success: boolean;
   readonly message: string;
