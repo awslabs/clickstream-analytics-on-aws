@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Tag } from '@aws-sdk/client-cloudformation';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
   IAMClient,
@@ -1819,7 +1820,8 @@ describe('Workflow test', () => {
     const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
     const stackTemplateMap = await pipeline.getStackTemplateMap();
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    stackManager.upgradeWorkflow(stackTemplateMap);
+    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
+    stackManager.upgradeWorkflow(stackTemplateMap, tags);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1838,6 +1840,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kinesis-stack.template.json`,
                   },
                 },
@@ -1855,6 +1858,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
                   },
                 },
@@ -1877,6 +1881,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
@@ -1897,6 +1902,7 @@ describe('Workflow test', () => {
                     Action: 'Upgrade',
                     Parameters: [],
                     StackName: 'Clickstream-Reporting-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -1916,6 +1922,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   },
                 },
@@ -1938,6 +1945,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: BASE_METRICS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
                   },
                 },
@@ -1976,7 +1984,8 @@ describe('Workflow test', () => {
     const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
     const stackTemplateMap = await pipeline.getStackTemplateMap();
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    stackManager.upgradeWorkflow(stackTemplateMap);
+    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
+    stackManager.upgradeWorkflow(stackTemplateMap, tags);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1995,6 +2004,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/ingestion-server-kinesis-stack.template.json',
                   },
                 },
@@ -2012,6 +2022,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/kafka-s3-sink-stack.template.json',
                   },
                 },
@@ -2034,6 +2045,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/data-pipeline-stack.template.json',
                   },
                 },
@@ -2054,6 +2066,7 @@ describe('Workflow test', () => {
                     Action: 'Upgrade',
                     Parameters: [],
                     StackName: 'Clickstream-Reporting-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -2073,6 +2086,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/data-analytics-redshift-stack.template.json',
                   },
                 },
@@ -2095,6 +2109,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: BASE_METRICS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/metrics-stack.template.json',
                   },
                 },

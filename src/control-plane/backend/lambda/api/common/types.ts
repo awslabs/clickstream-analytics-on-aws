@@ -115,7 +115,7 @@ export interface SfnStackInput {
   readonly StackName: string;
   TemplateURL: string;
   readonly Parameters: Parameter[];
-  readonly Tags?: Tag[];
+  Tags?: Tag[];
 }
 
 export interface SfnStackCallback {

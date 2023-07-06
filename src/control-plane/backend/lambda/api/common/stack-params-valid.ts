@@ -453,7 +453,6 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
       }
     }
   }
-  console.log(policyWithoutPrincipal, principal);
   if (isEmpty(policyWithoutPrincipal.Statement)) {
     return false;
   }

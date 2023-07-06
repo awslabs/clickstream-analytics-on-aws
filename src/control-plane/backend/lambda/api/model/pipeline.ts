@@ -323,6 +323,8 @@ export class CPipeline {
     this.pipeline.workflow = newWorkflow;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
 
+    const templateInfo = await this.getTemplateInfo();
+    this.pipeline.templateVersion = templateInfo.solutionVersion;
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -330,9 +332,14 @@ export class CPipeline {
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
+    // update pipeline tags
+    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
+      this.setTags();
+      this.stackTags = this.getStackTags();
+    }
     const stackTemplateMap = await this.getStackTemplateMap();
     // update workflow
-    this.stackManager.upgradeWorkflow(stackTemplateMap);
+    this.stackManager.upgradeWorkflow(stackTemplateMap, this.stackTags);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
