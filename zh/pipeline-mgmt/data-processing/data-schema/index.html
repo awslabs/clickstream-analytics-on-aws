@@ -1064,27 +1064,13 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    事件字段
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    流量字段
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
     应用信息字段
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     其他字段
   </a>
   
@@ -1312,7 +1298,7 @@
   
     <li class="md-nav__item">
       <a href="../../../dashboard/acquisition/" class="md-nav__link">
-        获取报表
+        流量获取报表
       </a>
     </li>
   
@@ -1382,7 +1368,7 @@
   
     <li class="md-nav__item">
       <a href="../../../dashboard/path/" class="md-nav__link">
-        路径探索器
+        路径探索报表
       </a>
     </li>
   
@@ -1667,27 +1653,13 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    事件字段
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    流量字段
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
     应用信息字段
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     其他字段
   </a>
   
@@ -2122,140 +2094,30 @@
 <td>BIGINT</td>
 <td>基于 IP 地址报告事件的精度。</td>
 </tr>
-</tbody>
-</table>
-<h3 id="_10">事件字段</h3>
-<table>
-<thead>
 <tr>
-<th>字段名称</th>
-<th>Redshift 数据类型</th>
-<th>Athena 数据类型</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>event_name</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>发生的事件的名称。</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td>event_timestamp</td>
-<td>TIMESTAMP</td>
-<td>TIMESTAMP</td>
-<td>发生事件的时间戳（UTC）。</td>
+<td>### 流量字段</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td>event_previous_timestamp</td>
-<td>TIMESTAMP</td>
-<td>TIMESTAMP</td>
-<td>上一个事件的时间戳（UTC）。</td>
+<td>字段名称</td>
+<td>数据类型 - Redshift</td>
+<td>数据类型 - Athena</td>
+<td>描述</td>
 </tr>
 <tr>
-<td>event_value</td>
-<td>DOUBLE PRECISION</td>
-<td>FLOAT</td>
-<td>与事件关联的值。</td>
+<td>------------------------</td>
+<td>--------------------</td>
+<td>---------</td>
+<td>-------------------------------------------------------------------------------------</td>
 </tr>
-<tr>
-<td>event_currency</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>事件值的货币代码。</td>
-</tr>
-<tr>
-<td>event_items</td>
-<td>SUPER</td>
-<td>ARRAY</td>
-<td>与事件相关联的项目。</td>
-</tr>
-<tr>
-<td>event_items.item_name</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>项目名称。</td>
-</tr>
-<tr>
-<td>event_items.item_category</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>项目类别。</td>
-</tr>
-<tr>
-<td>event_items.item_id</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>项目 ID。</td>
-</tr>
-<tr>
-<td>event_items.item_brand</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>项目品牌。</td>
-</tr>
-<tr>
-<td>event_items.item_variant</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>项目变体。</td>
-</tr>
-<tr>
-<td>event_params</td>
-<td>SUPER</td>
-<td>ARRAY</td>
-<td>与事件关联的参数。</td>
-</tr>
-<tr>
-<td>event_params.key</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>参数名称。</td>
-</tr>
-<tr>
-<td>event_params.value</td>
-<td>SUPER</td>
-<td>ARRAY</td>
-<td>参数值的记录。</td>
-</tr>
-<tr>
-<td>event_params.value.string_value</td>
-<td>VARCHAR</td>
-<td>STRING</td>
-<td>参数的字符串值。</td>
-</tr>
-<tr>
-<td>event_params.value.int_value</td>
-<td>BIGINT</td>
-<td>BIGINT</td>
-<td>参数的整数值。</td>
-</tr>
-<tr>
-<td>event_params.value.double_value</td>
-<td>DOUBLE PRECISION</td>
-<td>FLOAT</td>
-<td>参数的双精度值。</td>
-</tr>
-<tr>
-<td>event_params.value.float_value</td>
-<td>DOUBLE PRECISION</td>
-<td>FLOAT</td>
-<td>此字段目前未使用。</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_11">流量字段</h3>
-<table>
-<thead>
-<tr>
-<th>字段名称</th>
-<th>数据类型 - Redshift</th>
-<th>数据类型 - Athena</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
 <tr>
 <td>traffic_source.name</td>
 <td>VARCHAR</td>
@@ -2276,7 +2138,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_12">应用信息字段</h3>
+<h3 id="_10">应用信息字段</h3>
 <table>
 <thead>
 <tr>
@@ -2313,7 +2175,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_13">其他字段</h3>
+<h3 id="_11">其他字段</h3>
 <table>
 <thead>
 <tr>

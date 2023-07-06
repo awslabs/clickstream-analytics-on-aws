@@ -1396,7 +1396,7 @@
   
     <li class="md-nav__item">
       <a href="../../dashboard/acquisition/" class="md-nav__link">
-        获取报表
+        流量获取报表
       </a>
     </li>
   
@@ -1466,7 +1466,7 @@
   
     <li class="md-nav__item">
       <a href="../../dashboard/path/" class="md-nav__link">
-        路径探索器
+        路径探索报表
       </a>
     </li>
   
@@ -2248,19 +2248,19 @@
 <tr>
 <td>app_id</td>
 <td>点击流app id</td>
-<td>控制平面创建点击流应用程序时生成。</td>
+<td>控制平面创建点击流应用程序时生成</td>
 <td>区分不同app的事件</td>
 </tr>
 <tr>
 <td>unique_id</td>
 <td>用户唯一id</td>
-<td>sdk 首次初始化时从 <code>UUID.randomUUID().toString()</code> 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，当用户重新登录到同一设备上的之前的用户时，unique_id 将重置为之前用户的唯一id。</td>
+<td>sdk 首次初始化时从 <code>UUID.randomUUID().toString()</code> 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，当用户重新登录到同一设备上的之前的用户时，unique_id 将重置为之前用户的唯一id</td>
 <td>标识不同用户的唯一性，并关联登录和未登录的行为</td>
 </tr>
 <tr>
 <td>device_id</td>
 <td>设备的唯一id</td>
-<td>通过<code>Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)</code> 生成，<br>如果 Android id 为 null 或""，我们将使用 UUID 代替。</td>
+<td>通过<code>Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)</code> 生成，<br>如果 Android id 为 null 或""，我们将使用 UUID 代替</td>
 <td>区分不同设备</td>
 </tr>
 <tr>
@@ -2272,7 +2272,7 @@
 <tr>
 <td>event_id</td>
 <td>事件的唯一id</td>
-<td>事件创建时通过<code>UUID.randomUUID().toString()</code>生成。</td>
+<td>事件创建时通过<code>UUID.randomUUID().toString()</code>生成</td>
 <td>区分每个事件</td>
 </tr>
 <tr>
@@ -2361,7 +2361,7 @@
 </tr>
 <tr>
 <td>sdk_version</td>
-<td>点击流sdk版本</td>
+<td>点击流SDK版本</td>
 <td>通过<code>BuildConfig.VERSION_NAME</code>生成</td>
 <td>数据分析需要</td>
 </tr>
@@ -2373,13 +2373,13 @@
 </tr>
 <tr>
 <td>app_version</td>
-<td>用户应用程序的应用程序版本名称。</td>
+<td>用户应用程序的应用程序版本名称</td>
 <td>通过<code>android.content.pm.PackageInfo.versionName</code>生成<br>默认为："UNKNOW"</td>
 <td>数据分析需要</td>
 </tr>
 <tr>
 <td>app_package_name</td>
-<td>用户应用的应用程序包名称。</td>
+<td>用户应用的应用程序包名称</td>
 <td>通过<code>android.content.pm.PackageInfo.packageName</code>生成<br>默认为："UNKNOW"</td>
 <td>数据分析需要</td>
 </tr>
@@ -2430,15 +2430,15 @@
 <tbody>
 <tr>
 <td>_traffic_source_medium</td>
-<td>保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介。</td>
+<td>保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介</td>
 </tr>
 <tr>
 <td>_traffic_source_name</td>
-<td>保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity。</td>
+<td>保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity</td>
 </tr>
 <tr>
 <td>_traffic_source_source</td>
-<td>保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称。</td>
+<td>保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称</td>
 </tr>
 <tr>
 <td>_channel</td>
@@ -2454,23 +2454,23 @@
 </tr>
 <tr>
 <td>_entrances</td>
-<td>在 <code>_screen_view</code> 事件中添加。会话中的第一个 <code>_screen_view</code> 事件具有值 1，其他事件为 0。</td>
+<td>在 <code>_screen_view</code> 事件中添加。会话中的第一个 <code>_screen_view</code> 事件具有值 1，其他事件为 0</td>
 </tr>
 <tr>
 <td>_session_id</td>
-<td>在所有事件中添加。</td>
+<td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_session_start_timestamp</td>
-<td>在所有事件中添加。</td>
+<td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_session_duration</td>
-<td>在所有事件中添加。</td>
+<td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_session_number</td>
-<td>在所有事件中添加。初始值为 1，并且用户设备会自动递增该值。</td>
+<td>在所有事件中添加。初始值为 1，并且用户设备会自动递增该值</td>
 </tr>
 </tbody>
 </table>

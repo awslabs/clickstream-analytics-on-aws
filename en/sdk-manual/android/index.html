@@ -1293,8 +1293,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#common-attribute-explanation" class="md-nav__link">
-    Common attribute explanation
+  <a href="#common-attribute" class="md-nav__link">
+    Common attribute
   </a>
   
 </li>
@@ -1843,8 +1843,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#common-attribute-explanation" class="md-nav__link">
-    Common attribute explanation
+  <a href="#common-attribute" class="md-nav__link">
+    Common attribute
   </a>
   
 </li>
@@ -2226,7 +2226,7 @@
 </span><span id="__span-5-51"><a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>All user attributes will be stored in <code>user</code> object, and all custom and global attributes in <code>attributes</code> object.</p>
-<h4 id="common-attribute-explanation">Common attribute explanation</h4>
+<h4 id="common-attribute">Common attribute</h4>
 <table>
 <thead>
 <tr>
@@ -2240,7 +2240,7 @@
 <tr>
 <td>hashCode</td>
 <td>the event object's hash code</td>
-<td>generate from<code>Integer.toHexString(AnalyticsEvent.hashCode())</code></td>
+<td>generate from <code>Integer.toHexString(AnalyticsEvent.hashCode())</code></td>
 <td>distinguish different event</td>
 </tr>
 <tr>
@@ -2288,25 +2288,25 @@
 <tr>
 <td>os_version</td>
 <td>the platform version code</td>
-<td>generate from<code>Build.VERSION.RELEASE</code></td>
+<td>generate from <code>Build.VERSION.RELEASE</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>make</td>
 <td>manufacturer of the device</td>
-<td>generate from<code>Build.MANUFACTURER</code></td>
+<td>generate from <code>Build.MANUFACTURER</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>brand</td>
 <td>brand of the device</td>
-<td>generate from<code>Build.BRAND</code></td>
+<td>generate from <code>Build.BRAND</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>model</td>
 <td>model of the device</td>
-<td>generate from<code>Build.MODEL</code></td>
+<td>generate from <code>Build.MODEL</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2324,19 +2324,19 @@
 <tr>
 <td>screen_height</td>
 <td>The absolute height of the available display size in pixels</td>
-<td>generate from<code>applicationContext.resources.displayMetrics.heightPixels</code></td>
+<td>generate from <code>applicationContext.resources.displayMetrics.heightPixels</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>screen_width</td>
 <td>The absolute width of the available display size in pixels.</td>
-<td>generate from<code>applicationContext.resources.displayMetrics.widthPixels</code></td>
+<td>generate from <code>applicationContext.resources.displayMetrics.widthPixels</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>zone_offset</td>
 <td>the divece raw offset from GMT in milliseconds.</td>
-<td>generate from<code>java.util.Calendar.get(Calendar.ZONE_OFFSET)</code></td>
+<td>generate from <code>java.util.Calendar.get(Calendar.ZONE_OFFSET)</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2354,13 +2354,13 @@
 <tr>
 <td>country_code</td>
 <td>country/region code for this device</td>
-<td>generate from `java.util.Local.getCountry()``<br>default is: "UNKNOWN"</td>
+<td>generate from <code>java.util.Local.getCountry()</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>sdk_version</td>
 <td>clickstream sdk version</td>
-<td>generate from<code>BuildConfig.VERSION_NAME</code></td>
+<td>generate from <code>BuildConfig.VERSION_NAME</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2372,19 +2372,19 @@
 <tr>
 <td>app_version</td>
 <td>the app version name of user's app.</td>
-<td>generate from<code>android.content.pm.PackageInfo.versionName</code><br>default is: "UNKNOWN"</td>
+<td>generate from <code>android.content.pm.PackageInfo.versionName</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>app_package_name</td>
 <td>the app package name  of user's app.</td>
-<td>generate from<code>android.content.pm.PackageInfo.packageName</code><br>default is: "UNKNOWN"</td>
+<td>generate from <code>android.content.pm.PackageInfo.packageName</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>app_title</td>
 <td>the app's display name</td>
-<td>generate from<code>android.content.pm.getApplicationLabel(appInfo)</code></td>
+<td>generate from <code>android.content.pm.getApplicationLabel(appInfo)</code></td>
 <td>data analysis needs</td>
 </tr>
 </tbody>
