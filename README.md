@@ -1,14 +1,14 @@
 # Clickstream Analytics on AWS
 
-An AWS Solution builds clickstream analytic system on AWS with a click-through experience.
-This solution automates the data pipeline creation per configurations,
-and provides SDKs for web and mobiles apps to help users to collect and ingest client-side data into the data pipeline on AWS.
-The solution allows you to further enrich, model, and distribute the event data for business function teams (e.g., marketing, operation) to consume,
-and provides a dozen of built-in visualizations (e.g., acquisition, engagement, retention, user demographic)
-and explorative reporting templates (e.g., funnel, use path, user explorer),
-powering the use cases such as user behavior analytics, marketing analytics, and product analytics.
+An end-to-end solution to collect, ingest, analyze, and visualize clickstream data inside your web and mobile applications.
 
-## Architecutre of solution
+## Solution Overview
+
+This solution collects, ingests, analyzes, and visualizes clickstreams from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
+
+With this solution, you can quickly configure and deploy a data pipeline that fits your business and technical needs. It provides purpose-built software development kits (SDKs) that automatically collect common events and easy-to-use APIs to report custom events, enabling you to easily send your customers’ clickstream data to the data pipeline in your AWS account. The solution also offers pre-assembled dashboards that visualize key metrics about user lifecycle, including acquisition, engagement, activity, and retention, and adds visibility into user devices and geographies. You can combine user behavior data with business backend data to create a comprehensive data platform and generate insights that drive business growth.
+
+## Architecture Overview
 
 ![architecture diagram](./docs/images/architecture/01-architecture-end-to-end.png)
 
@@ -16,10 +16,10 @@ powering the use cases such as user behavior analytics, marketing analytics, and
 2. The Amazon Cognito user pool or OpenID Connect (OIDC) is used for authentication.
 3. The web UI console uses Amazon DynamoDB to store persistent data.
 4. AWS Step Functions, AWS CloudFormation, AWS Lambda, and Amazon EventBridge are used for orchestrating the lifecycle management of data pipelines.
-5. The data pipeline is provisioned in the region specified by the system operator. It consists of Application Load Balancer (ALB),
+5. The data pipeline is provisioned in the Region specified by the system operator. It consists of Application Load Balancer (ALB),
 Amazon ECS, Amazon Managed Streaming for Kafka (Amazon MSK), Amazon Kinesis Data Streams, Amazon S3, Amazon EMR Serverless, Amazon Redshift, and Amazon QuickSight.
 
-See [the doc][doc-arch] for more detail.
+For more information, refer to [the doc][doc-arch].
 
 ## SDKs
 
@@ -28,31 +28,31 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [Android][android-sdk]
 - [Swift][swift-sdk]
 
-## How to deploy the solution
+## Deployment
 
-### Deploy from one-click CloudFormation templates
+### Using AWS CloudFormation template
 
-Follow the [implementation guide][doc-deployment] to deploy the solution with few clicks.
+Follow the [implementation guide][doc-deployment] to deploy the solution using AWS CloudFormation template.
 
-### Deploy from source
+### Using AWS CDK
 
-#### Prerequisites
+#### Preparations
 
-- An AWS account
+- Make sure you have an AWS account
 - Configure [credential of aws cli][configure-aws-cli]
-- Install node.js LTS version 16.18.0 at least
+- Install node.js LTS version 16.18.0 or later
 - Install Docker Engine
-- Install the dependencies of solution via executing command `yarn install --check-files && npx projen`
-- Initialize the CDK toolkit stack into AWS environment(only for deploying via [AWS CDK][aws-cdk] first time), run `npx cdk bootstrap`
+- Install the dependencies of the solution by executing the command `yarn install --check-files && npx projen`
+- Initialize the CDK toolkit stack into AWS environment (only for deploying via [AWS CDK][aws-cdk] for the first time), and run `npx cdk bootstrap`
 
-#### Deploy web console
+#### Deploy the web console
 
 ```shell
 # deploy the web console of the solution
 npx cdk deploy cloudfront-s3-control-plane-stack-global --parameters Email=<your email> --require-approval never
 ```
 
-## How to test
+## Test
 
 ```shell
 yarn test
