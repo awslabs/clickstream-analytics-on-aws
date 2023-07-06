@@ -61,7 +61,7 @@ export function createKinesisToS3Lambda(
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
     {
       id: 'W92',
-      reason: 'TODO: will revisit it based on T-shirt size of workload',
+      reason: 'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
     },
   ]);
   return fn;
