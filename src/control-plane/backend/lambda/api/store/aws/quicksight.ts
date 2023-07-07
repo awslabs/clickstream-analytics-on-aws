@@ -122,7 +122,8 @@ export const quickSightPing = async (region: string): Promise<boolean> => {
   } catch (err) {
     if ((err as Error).name === 'TimeoutError' ||
     (err as Error).message.includes('getaddrinfo ENOTFOUND') ||
-    (err as Error).name === 'UnrecognizedClientException') {
+    (err as Error).name === 'UnrecognizedClientException' ||
+    (err as Error).name === 'InternalFailure') {
       return false;
     }
   }
