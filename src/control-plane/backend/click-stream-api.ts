@@ -295,6 +295,7 @@ export class ClickStreamApiConstruct extends Construct {
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
         HEALTH_CHECK_PATH: props.healthCheckPath,
+        QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         ... POWERTOOLS_ENVS,
       },
       architecture: Architecture.X86_64,

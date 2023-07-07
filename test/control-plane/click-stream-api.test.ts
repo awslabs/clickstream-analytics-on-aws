@@ -136,6 +136,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Ref: 'AWS::AccountId',
           },
           LOG_LEVEL: 'WARN',
+          QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
         },
       },
       MemorySize: 512,
@@ -1016,6 +1017,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           DICTIONARY_TABLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
           },
+          QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
         },
       },
       MemorySize: 512,
@@ -1075,6 +1077,11 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
+      Environment: {
+        Variables: {
+          QUICKSIGHT_CONTROL_PLANE_REGION: 'cn-north-1',
+        },
+      },
       Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
     });
 
