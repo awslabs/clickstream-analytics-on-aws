@@ -17,7 +17,6 @@ import util.util as utils
 import model.Event as Event
 from model.User import User
 import time
-import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 global_current_time = utils.current_timestamp()
