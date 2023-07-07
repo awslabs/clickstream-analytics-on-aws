@@ -50,6 +50,16 @@ phases:
 
          if [ $IS_IN_GCR_PIPELINE -eq 0 ]; then
             echo "Starting build `date` in `pwd`"
+
+            [ ! -z $SOLUTION_VERSION ] && {
+                if [ $(echo $SOLUTION_VERSION | grep 'v[0-9]\+\.[0-9]\+\.[0-9]\+') ]; then
+                    echo "SOLUTION_VERSION: $SOLUTION_VERSION"
+                else
+                    echo "SOLUTION_VERSION: $SOLUTION_VERSION is not as expected, unset it"
+                    unset SOLUTION_VERSION
+                fi
+            }
+
             cd ${CODEBUILD_SRC_DIR}/deployment
             chmod +x ./run-unit-tests.sh && ./run-unit-tests.sh
             if [ -n "$VERSION" ]; then
