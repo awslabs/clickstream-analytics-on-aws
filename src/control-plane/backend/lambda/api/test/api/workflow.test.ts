@@ -1637,7 +1637,12 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: [],
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataProcessingCronOrRateExpression',
+                        ParameterValue: 'rate(16 minutes)',
+                      },
+                    ],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
@@ -2224,7 +2229,12 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Delete',
                     Region: 'ap-southeast-1',
-                    Parameters: [],
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataProcessingCronOrRateExpression',
+                        ParameterValue: 'rate(16 minutes)',
+                      },
+                    ],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },

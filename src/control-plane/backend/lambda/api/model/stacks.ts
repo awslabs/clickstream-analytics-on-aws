@@ -753,6 +753,7 @@ export class CDataModelingStack extends JSONObject {
       'MaxFilesLimit',
       'ProcessingFilesLimit',
       'UpsertUsersScheduleExpression',
+      'DataProcessingCronOrRateExpression',
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'RedshiftServerlessRPU',
