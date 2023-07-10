@@ -29,7 +29,7 @@ describe('CloudFrontS3PotalStack', () => {
   test('Global region', () => {
     commonTemplate.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     commonTemplate.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 1);
+    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 2);
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
     commonTemplate.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
@@ -398,7 +398,7 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('AWS::S3::Bucket', 2);
     commonTemplate.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     commonTemplate.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 1);
+    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 2);
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
@@ -451,7 +451,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Route53::RecordSet', 1);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
     template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
@@ -518,7 +518,7 @@ describe('CloudFrontS3PotalStack', () => {
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
     template.resourceCountIs('Custom::CDKBucketDeployment', 1);
 
     // Check Origin Request Policy

@@ -984,6 +984,19 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('Api lambda Function', () => {
+    expect(findResourcesName(newCloudfrontApiStackTemplate, 'AWS::Lambda::LayerVersion'))
+      .toEqual([
+        'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
+      ]);
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::LayerVersion', {
+      CompatibleArchitectures: [
+        'x86_64',
+      ],
+      CompatibleRuntimes: [
+        'nodejs16.x',
+        'nodejs18.x',
+      ],
+    });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
@@ -1036,16 +1049,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Handler: 'run.sh',
       Layers: [
         {
-          'Fn::Join': [
-            '',
-            [
-              'arn:aws:lambda:',
-              {
-                Ref: 'AWS::Region',
-              },
-              ':753240598075:layer:LambdaAdapterLayerX86:16',
-            ],
-          ],
+          Ref: 'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
         },
       ],
       MemorySize: 512,
