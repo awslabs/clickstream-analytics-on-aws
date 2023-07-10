@@ -80,11 +80,6 @@ export class DataReportingQuickSightStack extends Stack {
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
 
-    const principalPrefix = `arn:${Aws.PARTITION}:quicksight:us-east-1:${Aws.ACCOUNT_ID}`;
-    const quickSightNamespace = stackParames.quickSightNamespaceParam.valueAsString;
-    const quickSightUser = stackParames.quickSightUserParam.valueAsString;
-    const principalArn = `${principalPrefix}:user/${quickSightNamespace}/${quickSightUser}`;
-
     const useTemplateArnCondition = new CfnCondition(
       this,
       'useTemplateArnCondition',
@@ -100,7 +95,7 @@ export class DataReportingQuickSightStack extends Stack {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
       permissions: [{
-        principal: principalArn,
+        principal: stackParames.quickSightPrincipalParam.valueAsString,
         actions: [
           'quicksight:UpdateTemplatePermissions',
           'quicksight:DescribeTemplatePermissions',
@@ -145,7 +140,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
       permissions: [
         {
-          principal: principalArn,
+          principal: stackParames.quickSightPrincipalParam.valueAsString,
           actions: [
             'quicksight:UpdateDataSourcePermissions',
             'quicksight:DescribeDataSourcePermissions',
