@@ -16,14 +16,14 @@ import { LayerVersion, Runtime, Code, Architecture } from 'aws-cdk-lib/aws-lambd
 import { Construct } from 'constructs';
 
 export interface LambdaAdapterLayerProps {
-  readonly platform?: string;
+  readonly platform?: 'linux/arm64' | 'linux/amd64';
   readonly arch?: 'aarch64' | 'x86_64';
 }
 
 export class LambdaAdapterLayer extends LayerVersion {
   constructor(scope: Construct, id: string, props?: LambdaAdapterLayerProps) {
     const platform = props?.platform ?? 'linux/amd64';
-    const defaultArch = props?.arch === 'aarch64' ? 'aarch64' : 'x86_64';
+    const defaultArch = props?.arch ?? 'x86_64';
     const architecture = props?.arch === 'aarch64' ? Architecture.ARM_64 : Architecture.X86_64;
 
     super(scope, id, {
