@@ -314,15 +314,6 @@ echo "--------------------------------------------------------------------------
 echo "${bold}[Create] Templates${normal}"
 echo "------------------------------------------------------------------------------"
 
-[[ ! -z $SOLUTION_VERSION ]] && {
-   if [[ $(echo $SOLUTION_VERSION | grep 'v[0-9]\+\.[0-9]\+\.[0-9]\+') ]]; then 
-       echo "SOLUTION_VERSION: $SOLUTION_VERSION"
-   else 
-       echo "SOLUTION_VERSION: $SOLUTION_VERSION is not as expected, unset it"
-       unset SOLUTION_VERSION
-   fi 
-}
-
 if fn_exists create_template_${template_format}; then
     create_template_${template_format}
 else
