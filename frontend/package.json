@@ -44,6 +44,7 @@
     "i18next-http-backend": "^2.1.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.4.3",
+    "jest-junit": "^15",
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
     "lodash": "^4.17.21",
@@ -179,6 +180,15 @@
       "node_modules",
       "src"
     ],
+    "reporters": [
+      "default",
+      [
+        "jest-junit",
+        {
+          "outputDirectory": "test-reports"
+        }
+      ]
+    ],    
     "resetMocks": true
   },
   "resolutions": {

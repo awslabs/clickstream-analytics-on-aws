@@ -49,6 +49,7 @@ src/data-pipeline/spark-etl/.gradle
 src/data-pipeline/spark-etl/build
 src/data-pipeline/spark-etl/bin
 src/data-pipeline/spark-etl/?/
+code-coverage-results.md
 !/.projenrc.js
 /test-reports/
 junit.xml
