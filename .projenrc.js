@@ -140,6 +140,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'src/data-pipeline/spark-etl/build',
     'src/data-pipeline/spark-etl/bin',
     'src/data-pipeline/spark-etl/?/',
+    'code-coverage-results.md',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -260,6 +261,52 @@ apiProject.addFields({ version });
 project.buildWorkflow.buildTask._env = {
   NODE_OPTIONS: '--max_old_space_size=6144',
 };
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.permissions.checks',
+  'write',
+);
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.permissions.pull-requests',
+  'write',
+);
+project.buildWorkflow.addPostBuildSteps({
+  name: 'Publish Test Report',
+  uses: 'mikepenz/action-junit-report@v3',
+  with: {
+    check_name: 'Test results',
+    report_paths: './test-reports/junit.xml',
+    fail_on_failure: true,
+    require_tests: true,
+    detailed_summary: true,
+    job_name: 'build',
+    update_check: true,
+    include_passed: true,
+  },
+});
+project.buildWorkflow.addPostBuildSteps({
+  name: 'Code Coverage Summary Report',
+  uses: 'irongut/CodeCoverageSummary@v1.3.0',
+  with: {
+    filename: 'coverage/cobertura-coverage.xml',
+    badge: 'true',
+    fail_below_min: 'true',
+    format: 'markdown',
+    hide_branch_rate: 'false',
+    hide_complexity: 'true',
+    indicators: 'true',
+    output: 'both',
+    thresholds: '60 80',
+  },
+});
+project.buildWorkflow.addPostBuildSteps({
+  name: 'Add Coverage PR Comment',
+  uses: 'marocchino/sticky-pull-request-comment@v2',
+  if: 'github.event_name == \'pull_request\'',
+  with: {
+    recreate: true,
+    path: 'code-coverage-results.md',
+  },
+});
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
