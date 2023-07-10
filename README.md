@@ -157,5 +157,5 @@ Upon successfully cloning the repository into your local development environment
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
 [configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
 [aws-cdk]: https://aws.amazon.com/cdk/
-[doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/solution-overview.html
+[doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
 [doc-deployment]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/deployment.html
