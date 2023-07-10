@@ -4,3 +4,8 @@ test*
 script
 coverage
 deployment/
+docs/
+coverage/
+.git/
+.gitlab/
+.github/
