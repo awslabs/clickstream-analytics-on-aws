@@ -20,7 +20,7 @@ import {
   NestedStackProps,
   Stack,
 } from 'aws-cdk-lib';
-import { IVpc, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Stream, StreamMode } from 'aws-cdk-lib/aws-kinesis';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -35,6 +35,7 @@ import {
 } from '../../common/cfn-nag';
 
 import { SolutionInfo } from '../../common/solution-info';
+import { getExistVpc } from '../../common/vpc-utils';
 
 export interface CreateKinesisNestStackProps {
   projectIdParam: CfnParameter;
@@ -56,7 +57,7 @@ export function createKinesisNestStack(
   props: CreateKinesisNestStackProps,
 ) {
   // Vpc
-  const vpc = Vpc.fromVpcAttributes(scope, 'from-vpc-for-kinesis', {
+  const vpc = getExistVpc(scope, 'from-vpc-for-kinesis', {
     vpcId: props.vpcIdParam.valueAsString,
     availabilityZones: Fn.getAzs(),
     privateSubnetIds: Fn.split(',', props.privateSubnetIdsParam.valueAsString),

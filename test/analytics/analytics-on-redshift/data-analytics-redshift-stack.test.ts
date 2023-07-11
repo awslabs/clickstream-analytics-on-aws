@@ -17,13 +17,14 @@ import {
 import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
-import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
 import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
+import { getExistVpc } from '../../../src/common/vpc-utils';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
@@ -383,7 +384,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   var count = 1;
 
   // Vpc
-  const vpc = Vpc.fromVpcAttributes(stack, testId+'-from-vpc-for-redshift', {
+  const vpc = getExistVpc(stack, testId+'-from-vpc-for-redshift', {
     vpcId: 'vpc-1',
     availabilityZones: Fn.getAzs(),
     privateSubnetIds: Fn.split(',', 'subnet-1,subnet-2,subnet-3'),

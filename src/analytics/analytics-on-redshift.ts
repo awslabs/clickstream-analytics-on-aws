@@ -20,7 +20,6 @@ import {
 import {
   SubnetSelection,
   IVpc,
-  Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
@@ -37,6 +36,7 @@ import { RedshiftServerless } from './private/redshift-serverless';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { SolutionInfo } from '../common/solution-info';
+import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly vpc: IVpc;
@@ -84,7 +84,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
     const projectDatabaseName = props.projectId;
     var redshiftUserCR: CustomResource | undefined;
     if (props.newRedshiftServerlessProps) {
-      const redshiftVpc = Vpc.fromVpcAttributes(scope, 'vpc-for-redshift-serverless-workgroup', {
+      const redshiftVpc = getExistVpc(scope, 'vpc-for-redshift-serverless-workgroup', {
         vpcId: props.newRedshiftServerlessProps.vpcId,
         availabilityZones: Fn.getAzs(),
         privateSubnetIds: Fn.split(',', props.newRedshiftServerlessProps.subnetIds),
