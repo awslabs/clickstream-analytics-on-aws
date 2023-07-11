@@ -185,7 +185,7 @@ export class CloudFrontS3Portal extends Construct {
 
       this.distribution = new CloudFrontWebDistribution(this, 'PortalDistribution', {
         enableIpV6: false,
-        priceClass: PriceClass.PRICE_CLASS_ALL,
+        priceClass: PriceClass.PRICE_CLASS_100,
         defaultRootObject: 'index.html',
         viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
         originConfigs: [
@@ -324,7 +324,7 @@ export class CloudFrontS3Portal extends Construct {
           responseHeadersPolicy: responseHeadersPolicy,
         },
         defaultRootObject: 'index.html',
-        priceClass: PriceClass.PRICE_CLASS_ALL,
+        priceClass: PriceClass.PRICE_CLASS_100,
         enableIpv6: props.distributionProps?.enableIpv6 ?? false,
         comment: distributionDescription,
       });
