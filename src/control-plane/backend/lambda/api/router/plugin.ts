@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
 import { PluginServ } from '../service/plugin';
 
 const router_plugin = express.Router();
@@ -41,7 +41,8 @@ router_plugin.post(
   '',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
-    body('jarFile').custom(isValidEmpty),
+    body('jarFile').custom(isValidEmpty).custom(isAllowFilesSuffix),
+    body('dependencyFiles').custom(isAllowFilesSuffix),
     body('mainFunction').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),

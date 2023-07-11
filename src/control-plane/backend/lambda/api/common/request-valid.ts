@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
-import { awsRegion } from './constants';
+import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
 import { APP_ID_PATTERN, MUTIL_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
@@ -229,6 +229,28 @@ export const isXSSRequest = (data: any) => {
   const str = JSON.stringify(data);
   if (validateXSS(str)) {
     return Promise.reject('Bad request. Please check and try again.');
+  }
+  return true;
+};
+
+export const isAllowFilesSuffix = (data: any) => {
+  if (isEmpty(data)) {
+    return true;
+  }
+  if (Array.prototype.isPrototypeOf(data)) {
+    for (let filename of data as string[]) {
+      const index = filename.lastIndexOf('.') + 1;
+      const suffix = filename.substring(index);
+      if (!ALLOW_UPLOADED_FILE_TYPES.split(',').includes(suffix)) {
+        return Promise.reject('Bad request. The file type not allow upload.');
+      }
+    }
+  } else {
+    const index = (data as string).lastIndexOf('.') + 1;
+    const suffix = (data as string).substring(index);
+    if (!ALLOW_UPLOADED_FILE_TYPES.split(',').includes(suffix)) {
+      return Promise.reject('Bad request. The file type not allow upload.');
+    }
   }
   return true;
 };

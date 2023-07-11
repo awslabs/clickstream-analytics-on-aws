@@ -39,8 +39,8 @@ describe('Plugin test', () => {
       .send({
         name: 'Plugin-01',
         description: 'Description of Plugin-01',
-        jarFile: 'jarFile',
-        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        jarFile: 'jarFile.jar',
+        dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
         mainFunction: 'com.cn.sre.main',
         pluginType: 'Transform',
       });
@@ -49,6 +49,41 @@ describe('Plugin test', () => {
     expect(res.body.message).toEqual('Plugin created.');
     expect(res.body.success).toEqual(true);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+  });
+  it('Create plugin with not allow file type', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(PutCommand).resolvesOnce({});
+    const res = await request(app)
+      .post('/api/plugin')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        name: 'Plugin-01',
+        description: 'Description of Plugin-01',
+        jarFile: 'jarFile.sh',
+        dependencyFiles: ['dependencyFiles1.exe', 'dependencyFiles2.mmdb'],
+        mainFunction: 'com.cn.sre.main',
+        pluginType: 'Transform',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
+        {
+          location: 'body',
+          msg: 'Bad request. The file type not allow upload.',
+          param: 'dependencyFiles',
+          value: ['dependencyFiles1.exe', 'dependencyFiles2.mmdb'],
+        },
+        {
+          location: 'body',
+          msg: 'Bad request. The file type not allow upload.',
+          param: 'jarFile',
+          value: 'jarFile.sh',
+        },
+      ],
+    });
   });
   it('Create plugin with XSS', async () => {
     tokenMock(ddbMock, false);
@@ -59,8 +94,8 @@ describe('Plugin test', () => {
       .send({
         name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
         description: 'Description of Plugin-01',
-        jarFile: 'jarFile',
-        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        jarFile: 'jarFile.jar',
+        dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
         mainFunction: 'com.cn.sre.main',
         pluginType: 'Transform',
       });
@@ -77,8 +112,8 @@ describe('Plugin test', () => {
           value: {
             name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
             description: 'Description of Plugin-01',
-            jarFile: 'jarFile',
-            dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+            jarFile: 'jarFile.jar',
+            dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
             mainFunction: 'com.cn.sre.main',
             pluginType: 'Transform',
           },
@@ -96,8 +131,8 @@ describe('Plugin test', () => {
       .send({
         name: 'Plugin-01',
         description: 'Description of Plugin-01',
-        jarFile: 'jarFile',
-        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        jarFile: 'jarFile.jar',
+        dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
         mainFunction: 'com.cn.sre.main',
         pluginType: 'Transform',
       });
@@ -123,11 +158,6 @@ describe('Plugin test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: 'jarFile',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
           param: 'mainFunction',
         },
         {
@@ -141,6 +171,11 @@ describe('Plugin test', () => {
           param: '',
           value: {},
         },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'jarFile',
+        },
       ],
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
@@ -153,8 +188,8 @@ describe('Plugin test', () => {
       .send({
         name: 'Plugin-01',
         description: 'Description of Plugin-01',
-        jarFile: 'jarFile',
-        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        jarFile: 'jarFile.jar',
+        dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
         mainFunction: 'com.cn.sre.main',
         pluginType: 'Transform',
       });
@@ -183,7 +218,7 @@ describe('Plugin test', () => {
       .send({
         name: 'Plugin-01',
         description: 'Description of Plugin-01',
-        dependencyFiles: ['dependencyFiles1', 'dependencyFiles2'],
+        dependencyFiles: ['dependencyFiles1.jar', 'dependencyFiles2.mmdb'],
         pluginType: 'Transform',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -195,12 +230,12 @@ describe('Plugin test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: 'jarFile',
+          param: 'mainFunction',
         },
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: 'mainFunction',
+          param: 'jarFile',
         },
       ],
     });
