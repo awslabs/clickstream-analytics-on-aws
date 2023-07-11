@@ -250,7 +250,6 @@ const apiProject = new typescript.TypeScriptProject({
     },
   },
   tsconfigDev: {
-    exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
     },
