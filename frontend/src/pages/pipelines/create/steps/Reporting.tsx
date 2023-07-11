@@ -127,13 +127,13 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       const { success, data }: ApiResponse<QuickSightUserResponse[]> =
         await getQuickSightUsers();
       if (success) {
-        const mskOptions: SelectProps.Options = data.map((element) => ({
+        const userOptions: SelectProps.Options = data.map((element) => ({
           label: element.userName,
-          value: element.userName,
+          value: JSON.stringify(element),
           description: element.email,
           labelTag: element.role,
         }));
-        setQuickSightRoleOptions(mskOptions);
+        setQuickSightRoleOptions(userOptions);
         setLoadingUsers(false);
       }
     } catch (error) {
