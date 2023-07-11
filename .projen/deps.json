@@ -376,6 +376,11 @@
       "type": "runtime"
     },
     {
+      "name": "sql-formatter",
+      "version": "^12.2.3",
+      "type": "runtime"
+    },
+    {
       "name": "ts-json-object",
       "version": "^0.4.0",
       "type": "runtime"

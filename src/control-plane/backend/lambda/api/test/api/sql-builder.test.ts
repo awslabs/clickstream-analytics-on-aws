@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { buildFunnelDataSql } from '../../../src/reporting/private/sql-builder';
+import { buildFunnelDataSql } from '../../common/sql-builder';
 
 describe('SQL Builder test', () => {
 
