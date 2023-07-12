@@ -136,7 +136,7 @@ export class JWTAuthorizer {
     };
   }
 
-  private async getOpenidConfiguration(): Promise<OpenidConfiguration | undefined> {
+  public async getOpenidConfiguration(): Promise<OpenidConfiguration | undefined> {
     try {
       const localCache = nodeCache.get(this.openidConfigurationKey);
       if (localCache) {
@@ -166,7 +166,7 @@ export class JWTAuthorizer {
     }
   }
 
-  private async getOpenidConfigurationFromDDB(): Promise<OpenidConfiguration | undefined> {
+  public async getOpenidConfigurationFromDDB(): Promise<OpenidConfiguration | undefined> {
     try {
       const params: GetCommand = new GetCommand({
         TableName: this.dynamodbTableName,
@@ -185,7 +185,7 @@ export class JWTAuthorizer {
     }
   }
 
-  private async setOpenidConfigurationToDDB(key: string, data: OpenidConfiguration, ttl: number): Promise<void> {
+  public async setOpenidConfigurationToDDB(key: string, data: OpenidConfiguration, ttl: number): Promise<void> {
     try {
       const params: PutCommand = new PutCommand({
         TableName: this.dynamodbTableName,
