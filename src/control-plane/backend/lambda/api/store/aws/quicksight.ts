@@ -23,6 +23,7 @@ import {
   AccessDeniedException,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION } from '../../common/constants';
+import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
@@ -38,11 +39,16 @@ export const listQuickSightUsers = async () => {
   } catch (err) {
     if (err instanceof AccessDeniedException) {
       const message = (err as AccessDeniedException).message;
-      if (message.includes('Operation is being called from endpoint')) {
-        // Please use the <identity region> endpoint.
-        const startIndex = message.indexOf('Please use the ') + 15;
-        const endIndex = message.indexOf('endpoint.') - 1;
-        const identityRegion = message.substring(startIndex, endIndex);
+      const regexp = new RegExp(REGION_PATTERN, 'g');
+      const matchValues = [...message.matchAll(regexp)];
+      let identityRegion = '';
+      for (let v of matchValues) {
+        if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
+          identityRegion = v[0];
+          break;
+        }
+      }
+      if (identityRegion) {
         return await listQuickSightUsersByRegion(identityRegion);
       }
     }

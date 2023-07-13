@@ -232,6 +232,7 @@ export const SCHEDULE_EXPRESSION_PATTERN =
 
 export const CORS_PATTERN = `^$|\\*$|^(${DOMAIN_NAME_PATTERN}(,\\s*${DOMAIN_NAME_PATTERN})*)$`;
 export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
+export const REGION_PATTERN = '[a-z]{2}-[a-z0-9]{1,10}-[0-9]{1}';
 
 // cloudformation parameters
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
