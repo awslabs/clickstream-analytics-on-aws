@@ -439,5 +439,4 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
       },
       `arn:${partition}:s3:::${bucket}/clickstream/*`);
   }
-  return false;
 };

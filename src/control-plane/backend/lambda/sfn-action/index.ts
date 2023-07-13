@@ -117,7 +117,7 @@ export const updateStack = async (event: SfnStackEvent) => {
     const params: UpdateStackCommand = new UpdateStackCommand({
       StackName: event.Input.StackName,
       Parameters: event.Input.Parameters,
-      DisableRollback: true,
+      DisableRollback: false,
       UsePreviousTemplate: true,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
       Tags: event.Input.Tags,

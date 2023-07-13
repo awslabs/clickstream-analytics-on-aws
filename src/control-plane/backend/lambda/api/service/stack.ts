@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter, StackStatus } from '@aws-sdk/client-cloudformation';
+import { Parameter, StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
@@ -97,12 +97,12 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
   }
 
-  public upgradeWorkflow(stackTemplateMap: Map<string, string>): void {
+  public upgradeWorkflow(stackTemplateMap: Map<string, string>, stackTags: Tag[]): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
-    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, stackTemplateMap, false);
-    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, stackTemplateMap, true);
+    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, stackTemplateMap, stackTags, false);
+    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, stackTemplateMap, stackTags, true);
   }
 
   public retryWorkflow(): void {
@@ -276,11 +276,11 @@ export class StackManager {
     return state;
   }
 
-  private getUpgradeWorkflow(state: WorkflowState, stackTemplateMap: Map<string, string>, origin: boolean): WorkflowState {
+  private getUpgradeWorkflow(state: WorkflowState, stackTemplateMap: Map<string, string>, stackTags: Tag[], origin: boolean): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], stackTemplateMap, origin);
+          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], stackTemplateMap, stackTags, origin);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input) {
@@ -288,6 +288,7 @@ export class StackManager {
       if (!origin) {
         state.Data.Input.Action = 'Upgrade';
       }
+      state.Data.Input.Tags = stackTags;
       state.Data!.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
         BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
