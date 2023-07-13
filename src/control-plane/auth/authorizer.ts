@@ -95,7 +95,6 @@ export class JWTAuthorizer {
     if (!openidConfiguration) {
       throw Error(ERR_OPENID_CONFIGURATION);
     }
-
     const client = jwksClient({
       jwksUri: openidConfiguration.jwks_uri,
       cache: true,
@@ -136,7 +135,7 @@ export class JWTAuthorizer {
     };
   }
 
-  public async getOpenidConfiguration(): Promise<OpenidConfiguration | undefined> {
+  private async getOpenidConfiguration(): Promise<OpenidConfiguration | undefined> {
     try {
       const localCache = nodeCache.get(this.openidConfigurationKey);
       if (localCache) {
@@ -166,7 +165,7 @@ export class JWTAuthorizer {
     }
   }
 
-  public async getOpenidConfigurationFromDDB(): Promise<OpenidConfiguration | undefined> {
+  private async getOpenidConfigurationFromDDB(): Promise<OpenidConfiguration | undefined> {
     try {
       const params: GetCommand = new GetCommand({
         TableName: this.dynamodbTableName,
@@ -185,7 +184,7 @@ export class JWTAuthorizer {
     }
   }
 
-  public async setOpenidConfigurationToDDB(key: string, data: OpenidConfiguration, ttl: number): Promise<void> {
+  private async setOpenidConfigurationToDDB(key: string, data: OpenidConfiguration, ttl: number): Promise<void> {
     try {
       const params: PutCommand = new PutCommand({
         TableName: this.dynamodbTableName,
