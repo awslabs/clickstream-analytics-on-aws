@@ -1,0 +1,84 @@
+name: dist scans
+on:
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  build-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Test build dist
+        run: |-
+          chmod +x ./deployment/test-build-dist-1.sh
+          ./deployment/test-build-dist-1.sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: templates-${{ github.event.pull_request.number }}
+          path: deployment/global-s3-assets
+  cfn-lint-scan:
+    name: cfn-lint scan
+    needs: build-dist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: templates-${{ github.event.pull_request.number }}
+          path: templates
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
+      - name: Print the Cloud Formation Linter Version & run Linter.
+        id: cfn-lint
+        run: |
+          cfn-lint --version
+          TEMPLATE_ROOT=templates/default
+          cfn-lint -i W3005 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
+          cfn-lint -i W3005 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
+          TEMPLATE_ROOT=templates/cn
+          cfn-lint -i W3005 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
+  cfn-nag-scan:
+    name: cfn-nag scan
+    needs: build-dist
+    runs-on: ubuntu-latest
+    container:
+      image: stelligent/cfn_nag
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: templates-${{ github.event.pull_request.number }}
+          path: templates
+      - name: Run cfn-nag scan
+        run: |
+          set -xeuo pipefail
+          cfn_nag -f -b .cfnnag_global_suppress_list templates/**/*.template.json
+  post-build-scan:
+    name: post-build scan
+    needs: build-dist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: actions/download-artifact@v3
+        with:
+          name: templates-${{ github.event.pull_request.number }}
+          path: deployment/global-s3-assets
+      - name: Post-build scan
+        run: |-
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh
+          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip
+          unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip
+          ./codescan-prebuild-custom.sh
