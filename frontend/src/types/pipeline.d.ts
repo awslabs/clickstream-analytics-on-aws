@@ -150,6 +150,7 @@ declare global {
       quickSight: {
         accountName: string;
         user: string;
+        arn: string;
       };
     };
     status?: {

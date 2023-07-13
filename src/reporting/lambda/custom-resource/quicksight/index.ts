@@ -57,19 +57,13 @@ export type MustacheParamType = {
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {
   const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
   const region = props.awsRegion;
-  const partition = props.awsPartition;
   const quickSight = new QuickSight({
     region,
     ...aws_sdk_client_common_config,
   });
 
   const awsAccountId = props.awsAccountId;
-  const namespace: string = props.quickSightNamespace;
-  const quickSightUser: string = props.quickSightUser;
-  let principalArn = `arn:${partition}:quicksight:us-east-1:${awsAccountId}:user/${namespace}/${quickSightUser}`;
-  if (props.quickSightPrincipalArn !== '') {
-    principalArn = props.quickSightPrincipalArn;
-  }
+  const principalArn = props.quickSightPrincipalArn;
 
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, principalArn, event);

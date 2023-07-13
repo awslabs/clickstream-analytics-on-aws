@@ -20,10 +20,11 @@ import {
   IdentityType,
   UserRole,
   DescribeAccountSubscriptionCommandOutput,
+  AccessDeniedException,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION } from '../../common/constants';
+import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
-import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils';
@@ -31,47 +32,85 @@ import { generateRandomStr } from '../../common/utils';
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
+
 export const listQuickSightUsers = async () => {
-  const users: QuickSightUser[] = [];
   try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
-      region: QUICKSIGHT_CONTROL_PLANE_REGION,
-    });
-    const records = await getPaginatedResults(async (NextToken: any) => {
-      const params: ListUsersCommand = new ListUsersCommand({
-        AwsAccountId: awsAccountId,
-        Namespace: 'default',
-        NextToken,
-      });
-      const queryResponse = await quickSightClient.send(params);
-      return {
-        marker: queryResponse.NextToken,
-        results: queryResponse.UserList,
-      };
-    });
-    for (let user of records as User[]) {
-      if (!user.UserName?.startsWith(APIRoleName!)) {
-        users.push({
-          userName: user.UserName ?? '',
-          arn: user.Arn ?? '',
-          email: user.Email ?? '',
-          role: user.Role ?? '',
-          active: user.Active ?? false,
-        });
+    return await listQuickSightUsersByRegion(QUICKSIGHT_CONTROL_PLANE_REGION);
+  } catch (err) {
+    if (err instanceof AccessDeniedException) {
+      const message = (err as AccessDeniedException).message;
+      const regexp = new RegExp(REGION_PATTERN, 'g');
+      const matchValues = [...message.matchAll(regexp)];
+      let identityRegion = '';
+      for (let v of matchValues) {
+        if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
+          identityRegion = v[0];
+          break;
+        }
+      }
+      if (identityRegion) {
+        return await listQuickSightUsersByRegion(identityRegion);
       }
     }
-  } catch (err) {
-    logger.warn('List QuickSight users error.', { err });
+  }
+  return [];
+};
+
+export const listQuickSightUsersByRegion = async (region: string) => {
+  const users: QuickSightUser[] = [];
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: region,
+  });
+  const records = await getPaginatedResults(async (NextToken: any) => {
+    const params: ListUsersCommand = new ListUsersCommand({
+      AwsAccountId: awsAccountId,
+      Namespace: 'default',
+      NextToken,
+    });
+    const queryResponse = await quickSightClient.send(params);
+    return {
+      marker: queryResponse.NextToken,
+      results: queryResponse.UserList,
+    };
+  });
+  for (let user of records as User[]) {
+    if (!user.UserName?.startsWith(APIRoleName!)) {
+      users.push({
+        userName: user.UserName ?? '',
+        arn: user.Arn ?? '',
+        email: user.Email ?? '',
+        role: user.Role ?? '',
+        active: user.Active ?? false,
+      });
+    }
   }
   return users;
 };
 
 // Creates an Amazon QuickSight user
 export const registerQuickSightUser = async (email: string, username?: string) => {
+  try {
+    return await registerQuickSightUserByRegion(QUICKSIGHT_CONTROL_PLANE_REGION, email, username);
+  } catch (err) {
+    if (err instanceof AccessDeniedException) {
+      const message = (err as AccessDeniedException).message;
+      if (message.includes('Operation is being called from endpoint')) {
+        // Please use the <identity region> endpoint.
+        const startIndex = message.indexOf('Please use the ') + 15;
+        const endIndex = message.indexOf('endpoint.') - 1;
+        const identityRegion = message.substring(startIndex, endIndex);
+        return await registerQuickSightUserByRegion(identityRegion, email, username);
+      }
+    }
+  }
+  return [];
+};
+
+export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
   const quickSightClient = new QuickSightClient({
     ...aws_sdk_client_common_config,
-    region: QUICKSIGHT_CONTROL_PLANE_REGION,
+    region: region,
   });
   const command: RegisterUserCommand = new RegisterUserCommand({
     IdentityType: IdentityType.QUICKSIGHT,

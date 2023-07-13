@@ -171,6 +171,7 @@ export interface Reporting {
   readonly quickSight?: {
     readonly accountName: string;
     readonly user: string;
+    readonly arn: string;
     readonly namespace?: string;
     readonly vpcConnection?: string;
   };

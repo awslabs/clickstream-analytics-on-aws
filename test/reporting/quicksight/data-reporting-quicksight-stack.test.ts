@@ -627,27 +627,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateTemplate',
         ],
         Principal: {
-          'Fn::Join': [
-            '',
-            [
-              'arn:',
-              {
-                Ref: 'AWS::Partition',
-              },
-              ':quicksight:us-east-1:',
-              {
-                Ref: 'AWS::AccountId',
-              },
-              ':user/',
-              {
-                Ref: 'QuickSightNamespaceParam',
-              },
-              '/',
-              {
-                Ref: 'QuickSightUserParam',
-              },
-            ],
-          ],
+          Ref: 'QuickSightPrincipalParam',
         },
       },
     ],
@@ -795,27 +775,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateDataSource',
         ],
         Principal: {
-          'Fn::Join': [
-            '',
-            [
-              'arn:',
-              {
-                Ref: 'AWS::Partition',
-              },
-              ':quicksight:us-east-1:',
-              {
-                Ref: 'AWS::AccountId',
-              },
-              ':user/',
-              {
-                Ref: 'QuickSightNamespaceParam',
-              },
-              '/',
-              {
-                Ref: 'QuickSightUserParam',
-              },
-            ],
-          ],
+          Ref: 'QuickSightPrincipalParam',
         },
       },
     ],
