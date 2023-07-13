@@ -5,13 +5,26 @@ title: ""
 labels: feature-request, needs-triage
 ---
 
-## Summary
+## Describe the feature
 
-<!-- short description of the feature you are proposing: -->
+<!-- A clear and concise description of the feature you are proposing. -->
 
-## What is the expected correct behavior?
+## Use Case
 
-<!-- What you should see instead -->
+<!-- Why do you need this feature? For example: "I’m always frustrated when..." -->
+
+## Proposed Solution - Optional
+
+<!--Suggest how to implement the addition or change. Please include prototype/workaround/sketch/reference implementation. -->
+
+## Other Information
+
+<!-- Any alternative solutions or features you considered, a more detailed explanation, stack traces, related issues, links for context, etc. -->
+
+**Notes**:
+
+- [ ] this feature has an UI update
+- [ ] this feature contains an implementation guide update
 
 ---
 
