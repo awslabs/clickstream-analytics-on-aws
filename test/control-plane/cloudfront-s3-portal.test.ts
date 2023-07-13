@@ -139,7 +139,7 @@ describe('CloudFrontS3Portal', () => {
             },
           },
         ],
-        PriceClass: 'PriceClass_100',
+        PriceClass: 'PriceClass_200',
       },
     });
 
@@ -397,7 +397,7 @@ describe('CloudFrontS3Portal', () => {
             OriginPath: '/prod',
           },
         ],
-        PriceClass: 'PriceClass_100',
+        PriceClass: 'PriceClass_200',
       },
     });
     template.hasResourceProperties('AWS::CloudFront::OriginRequestPolicy', {

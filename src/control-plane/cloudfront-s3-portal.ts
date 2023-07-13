@@ -324,7 +324,7 @@ export class CloudFrontS3Portal extends Construct {
           responseHeadersPolicy: responseHeadersPolicy,
         },
         defaultRootObject: 'index.html',
-        priceClass: PriceClass.PRICE_CLASS_100,
+        priceClass: PriceClass.PRICE_CLASS_200,
         enableIpv6: props.distributionProps?.enableIpv6 ?? false,
         comment: distributionDescription,
       });
