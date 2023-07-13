@@ -2063,6 +2063,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeQuickSightSelectedUser={(user) => {
                 setQuickSightUserEmptyError(false);
                 setPipelineInfo((prev) => {
+                  const userObj = JSON.parse(user.value ?? '{}');
                   return {
                     ...prev,
                     selectedQuickSightUser: user,
@@ -2070,7 +2071,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.reporting,
                       quickSight: {
                         ...prev.reporting.quickSight,
-                        user: user.value || '',
+                        user: userObj.userName,
+                        arn: userObj.arn
                       },
                     },
                   };
@@ -2517,7 +2519,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         )[0];
         pipelineInfo.selectedQuickSightUser = {
           label: selectUser.userName,
-          value: selectUser.userName,
+          value: JSON.stringify(selectUser),
           description: selectUser.email,
           labelTag: selectUser.role,
         };
