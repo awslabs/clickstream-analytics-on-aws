@@ -19,7 +19,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: templates-${{ github.event.pull_request.number }}
-          path: deployment/global-s3-assets
+          path: |
+            deployment/global-s3-assets
+            !deployment/global-s3-assets/**/asset.*
   cfn-lint-scan:
     name: cfn-lint scan
     needs: build-dist
