@@ -601,6 +601,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE: I
     quickSight: {
       accountName: 'clickstream-acc-xxx',
       user: 'Admin/clickstream-user-xxx',
+      arn: 'arn:aws:quicksight:us-west-2:555555555555:user/default/clickstream-user-xxx',
     },
   },
 };
@@ -629,6 +630,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline
     quickSight: {
       accountName: 'clickstream-acc-xxx',
       user: 'clickstream-user-xxx@example.com',
+      arn: 'arn:aws:quicksight:us-west-2:555555555555:user/default/clickstream-user-xxx',
     },
   },
 };

@@ -72,7 +72,6 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
     description: 'Arn of the QuickSight principal, QuickSight resource will be owned by this pricipal.',
     type: 'String',
-    default: '',
   });
   labels[quickSightPrincipalParam.logicalId] = {
     default: 'QuickSight Principal Arn',

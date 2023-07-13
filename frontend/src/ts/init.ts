@@ -143,6 +143,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     quickSight: {
       accountName: '',
       user: '',
+      arn: '',
     },
   },
 
