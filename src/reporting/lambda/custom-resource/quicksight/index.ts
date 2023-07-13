@@ -752,7 +752,7 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
 const buildDashBoardId = function (databaseName: string, schema: string): Identifer {
   const schemaIdentifer = truncateString(schema, 40);
   const databaseIdentifer = truncateString(databaseName, 40);
-  const suffix = crypto.createHash('md5').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
+  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
   return {
     id: `clickstream_dashboard_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
     idSuffix: suffix,
@@ -764,7 +764,7 @@ const buildDashBoardId = function (databaseName: string, schema: string): Identi
 const buildAnalysisId = function (databaseName: string, schema: string): Identifer {
   const schemaIdentifer = truncateString(schema, 40);
   const databaseIdentifer = truncateString(databaseName, 40);
-  const suffix = crypto.createHash('md5').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
+  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
   return {
     id: `clickstream_analysis_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
     idSuffix: suffix,
@@ -777,7 +777,7 @@ const buildDataSetId = function (databaseName: string, schema: string, tableName
   const tableNameIdentifer = truncateString(tableName.replace(/clickstream_/g, ''), 40);
   const schemaIdentifer = truncateString(schema, 15);
   const databaseIdentifer = truncateString(databaseName, 15);
-  const suffix = crypto.createHash('md5').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);
+  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);
   return {
     id: `clickstream_dataset_${databaseIdentifer}_${schemaIdentifer}_${tableNameIdentifer}_${suffix}`,
     idSuffix: suffix,

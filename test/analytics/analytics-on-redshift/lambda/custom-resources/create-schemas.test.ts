@@ -358,7 +358,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     lambdaMock.on(ListTagsCommand).resolves({
       Tags: { tag_key: 'tag_value' },
     });
-    const regex = new RegExp(`^CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD 'md5[a-f0-9]{32}'$`);
+    const regex = new RegExp(`^CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD 'sha256|[a-zA-Z0-9!#$%^&-_=+|]{32}'$`);
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'Id-1' })
       .callsFakeOnce(input => {
         if (input as ExecuteStatementCommandInput && regex.test(input.Sql)) {
