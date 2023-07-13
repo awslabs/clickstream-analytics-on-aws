@@ -33,21 +33,26 @@ const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
 
+const getIdentityRegionFromMessage = (message: string) => {
+  const regexp = new RegExp(REGION_PATTERN, 'g');
+  const matchValues = [...message.matchAll(regexp)];
+  let identityRegion = '';
+  for (let v of matchValues) {
+    if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
+      identityRegion = v[0];
+      break;
+    }
+  }
+  return identityRegion;
+};
+
 export const listQuickSightUsers = async () => {
   try {
     return await listQuickSightUsersByRegion(QUICKSIGHT_CONTROL_PLANE_REGION);
   } catch (err) {
     if (err instanceof AccessDeniedException) {
       const message = (err as AccessDeniedException).message;
-      const regexp = new RegExp(REGION_PATTERN, 'g');
-      const matchValues = [...message.matchAll(regexp)];
-      let identityRegion = '';
-      for (let v of matchValues) {
-        if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
-          identityRegion = v[0];
-          break;
-        }
-      }
+      const identityRegion = getIdentityRegionFromMessage(message);
       if (identityRegion) {
         return await listQuickSightUsersByRegion(identityRegion);
       }
@@ -95,16 +100,13 @@ export const registerQuickSightUser = async (email: string, username?: string) =
   } catch (err) {
     if (err instanceof AccessDeniedException) {
       const message = (err as AccessDeniedException).message;
-      if (message.includes('Operation is being called from endpoint')) {
-        // Please use the <identity region> endpoint.
-        const startIndex = message.indexOf('Please use the ') + 15;
-        const endIndex = message.indexOf('endpoint.') - 1;
-        const identityRegion = message.substring(startIndex, endIndex);
+      const identityRegion = getIdentityRegionFromMessage(message);
+      if (identityRegion) {
         return await registerQuickSightUserByRegion(identityRegion, email, username);
       }
     }
   }
-  return [];
+  return '';
 };
 
 export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
