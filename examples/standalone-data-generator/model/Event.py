@@ -24,7 +24,7 @@ sampleEvent = {
     "app_id": "",
     "timestamp": 0,
     "device_id": "",
-    "platform": "ANDROID",
+    "platform": "Android",
     "os_version": "",
     "make": "",
     "brand": "",

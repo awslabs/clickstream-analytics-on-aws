@@ -21,7 +21,7 @@ def send_events_to_server(user, events):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
     request_param = {
-        "platform": "ANDROID",
+        "platform": "Android",
         "appId": enums.APP_ID,
         "compression": "gzip",
         "fakeIp": user.device.ip_address,
