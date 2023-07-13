@@ -75,7 +75,7 @@ describe('Auth test', () => {
         exp: 1689155476,
         iat: 1689151876,
         jti: '7470d28d-183d-4f7c-8313-e6b19554362d',
-        email: 'test@fake.com',
+        email: 'fake@example.com',
       },
       signature: 'JZiSa52FhVd_dAVucOWpwRSwBKV4NQp1UpxuGfaeJwoepYhLkv89g0Pnr5tZdizLUNsdZwUyULvnlsHditXhYWfcs7nPRvgAJfU3HsCJkITxc31kfZbj3CETXujdfU7eX0_HFlfxEwzc9AuYbj3qL5oNpasLUNdKsZRQzMNt8hlcn5gLCtnudFsoseHbtw1hRkviIwgdhDItHB3xh2UO26F3NIaTPfpiM98-1NThWDAHlsJL5hz3MXCbyvIz5qfQETwryTBVnTPXShJRA8hALO0aSDWMKqBbAFctflssEFG1Cp12NhElqZ5s16Ut8JUaF6AwGC1oQROAQidhFIx1VQ',
     }));
