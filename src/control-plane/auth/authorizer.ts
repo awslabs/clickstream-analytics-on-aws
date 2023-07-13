@@ -95,7 +95,6 @@ export class JWTAuthorizer {
     if (!openidConfiguration) {
       throw Error(ERR_OPENID_CONFIGURATION);
     }
-
     const client = jwksClient({
       jwksUri: openidConfiguration.jwks_uri,
       cache: true,

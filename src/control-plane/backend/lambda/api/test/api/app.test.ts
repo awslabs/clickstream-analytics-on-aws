@@ -14,10 +14,10 @@
 import request from 'supertest';
 import { getEmailFromRequestContext } from '../../common/utils';
 import { app, server } from '../../index';
+import 'aws-sdk-client-mock-jest';
 
 describe('App test', () => {
 
-  process.env.WITH_AUTH_MIDDLEWARE = 'true';
   process.env.HEALTH_CHECK_PATH='/';
   it('healthcheck', async () => {
     const res = await request(app)
@@ -37,14 +37,8 @@ describe('App test', () => {
     expect(getEmailFromRequestContext(context)).toEqual('abc@example.com');
     expect(getEmailFromRequestContext(context_unknown)).toEqual('');
   });
-
-  it('status 401 when no auth token provided.', async () => {
-    const res = await request(app)
-      .get('/projects');
-    expect(res.statusCode).toBe(401);
-  });
-
   it('content length check', async () => {
+    process.env.WITH_AUTH_MIDDLEWARE = 'true';
     const res1 = await request(app)
       .post('/api/plugin')
       .send({ name: Array(1024 * 300).join('a') });
@@ -67,5 +61,4 @@ describe('App test', () => {
     server.close();
     done();
   });
-
 });

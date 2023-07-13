@@ -18,9 +18,6 @@ import { amznRequestContextHeader } from '../common/constants';
 import { logger } from '../common/powertools';
 import { getEmailFromRequestContext, isEmpty } from '../common/utils';
 
-const issuerInput = process.env.ISSUER ?? '';
-const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
-
 // Implement access log middleware function
 export async function authOIDC(req: express.Request, res: express.Response, next: express.NextFunction) {
   let operator = '';
@@ -36,6 +33,8 @@ export async function authOIDC(req: express.Request, res: express.Response, next
       });
     } else {
       try {
+        const issuerInput = process.env.ISSUER ?? '';
+        const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
         const authorizer = new JWTAuthorizer({
           issuer: issuerInput,
           dynamodbTableName: authorizerTable,
