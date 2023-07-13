@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import crypto from 'crypto';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -395,7 +394,7 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
   props: CreateDatabaseAndSchemas) => {
   try {
     await executeStatementsWithWait(redshiftClient, [
-      `CREATE USER ${credential.username} PASSWORD 'md5${md5Hash(credential.password+credential.username)}'`,
+      `CREATE USER ${credential.username} PASSWORD 'sha256|${credential.password}'`,
     ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
     props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
@@ -404,11 +403,6 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
     }
     throw err;
   }
-};
-
-// write a function to cacluate md5 hash of string
-const md5Hash = (str: string) => {
-  return crypto.createHash('md5').update(str).digest('hex');
 };
 
 const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatements: string[], props: CreateDatabaseAndSchemas) => {
@@ -489,5 +483,3 @@ function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourceProp
     oldSchemaSqlArray: oldSchemaSqlArray,
   };
 }
-
-
