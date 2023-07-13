@@ -16,7 +16,6 @@ import {
   aws_iam as iam,
   CfnResource,
   Duration,
-  IgnoreMode,
   RemovalPolicy,
   Stack,
   Aws,
@@ -40,11 +39,12 @@ import {
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
-import { Architecture, DockerImageCode, DockerImageFunction } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import dictionary from './config/dictionary.json';
+import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
@@ -85,7 +85,7 @@ export interface ClickStreamApiProps {
 }
 
 export class ClickStreamApiConstruct extends Construct {
-  public readonly clickStreamApiFunction: DockerImageFunction;
+  public readonly clickStreamApiFunction: Function;
   public readonly lambdaRestApi?: RestApi;
 
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
@@ -274,13 +274,17 @@ export class ClickStreamApiConstruct extends Construct {
     });
     props.stackWorkflowS3Bucket.grantPut(uploadRole, `${props.pluginPrefix}*`);
 
-    this.clickStreamApiFunction = new DockerImageFunction(this, 'ClickStreamApiFunction', {
+    this.clickStreamApiFunction = new Function(this, 'ClickStreamApiFunction', {
       description: 'Lambda function for api of solution Click Stream Analytics on AWS',
-      code: DockerImageCode.fromImageAsset(path.join(__dirname, './lambda/api'), {
-        file: 'Dockerfile',
-        ignoreMode: IgnoreMode.DOCKER,
+      code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
+        file: 'Dockerfile.backend.build',
       }),
+      handler: 'run.sh',
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.X86_64,
+      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayerX86')],
       environment: {
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
@@ -298,7 +302,6 @@ export class ClickStreamApiConstruct extends Construct {
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         ... POWERTOOLS_ENVS,
       },
-      architecture: Architecture.X86_64,
       timeout: Duration.seconds(30),
       memorySize: 512,
       role: clickStreamApiFunctionRole,

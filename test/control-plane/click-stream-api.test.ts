@@ -14,17 +14,17 @@
 import { findResourcesName, TestEnv } from './test-utils';
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
+  const newALBApiStackTemplate = TestEnv.newALBApiStack().template;
+  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(true).template;
 
   test('DynamoDB table', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    expect(findResourcesName(template, 'AWS::DynamoDB::Table'))
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::DynamoDB::Table'))
       .toEqual([
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
       ]);
 
-    template.hasResourceProperties('AWS::DynamoDB::Table', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
           AttributeName: 'name',
@@ -45,7 +45,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         SSEEnabled: true,
       },
     });
-    template.hasResourceProperties('AWS::DynamoDB::Table', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
           AttributeName: 'id',
@@ -107,9 +107,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('Api lambda Function', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    expect(findResourcesName(template, 'AWS::Lambda::Function'))
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::Lambda::Function'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
@@ -119,7 +117,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
 
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -140,7 +138,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         },
       },
       MemorySize: 512,
-      PackageType: 'Image',
       Timeout: 30,
       VpcConfig: {
         SecurityGroupIds: [
@@ -157,7 +154,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
       },
     });
-    template.hasResource('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
         'apifunceni59253B5A',
         'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
@@ -165,7 +162,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       ],
     });
 
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Environment: {
         Variables: {
           LOG_LEVEL: 'WARN',
@@ -174,14 +171,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
     });
 
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -202,7 +199,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Mode: 'Active',
       },
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -223,34 +220,31 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Mode: 'Active',
       },
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
-      PackageType: 'Image',
       Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
     });
 
   });
 
   test('Api lambda Function in GCR', () => {
-    const { template } = TestEnv.newALBApiStack(true);
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -259,10 +253,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('IAM Resource for Api Lambda', () => {
-    const { template } = TestEnv.newALBApiStack();
-
     // Creates the function's execution role...
-    template.hasResourceProperties('AWS::IAM::Role', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Role', {
       AssumeRolePolicyDocument: {
         Statement: [
           {
@@ -278,9 +270,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('Check SecurityGroup', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::EC2::SecurityGroup', {
       GroupDescription: 'apiTestStack/testClickStreamALBApi/ClickStreamApiFunctionSG',
       SecurityGroupEgress: [
         {
@@ -292,7 +282,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       VpcId: 'vpc-11111111111111111',
     });
 
-    template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
       IpProtocol: 'tcp',
       Description: 'allow all traffic from application load balancer',
       GroupId: {
@@ -308,14 +298,10 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
       },
     });
-
-
   });
 
   test('Policy', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    expect(findResourcesName(template, 'AWS::IAM::Policy'))
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Policy'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
@@ -340,7 +326,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       ]);
 
     // StateMachineActionFunctionRoleDefaultPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -363,7 +349,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
 
     // StateMachineRoleDefaultPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -428,7 +414,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
 
     // ApiFunctionRoleDefaultPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -505,7 +491,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
 
     // ApiStepFunctionPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -527,7 +513,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
 
     // ApiAWSSdkPolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -589,7 +575,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
 
     // ActionFunctionRolePolicy
-    template.hasResourceProperties('AWS::IAM::Policy', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
           {
@@ -671,15 +657,13 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('LogGroup', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    expect(findResourcesName(template, 'AWS::Logs::LogGroup'))
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::Logs::LogGroup'))
       .toEqual([
         'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
         'testClickStreamALBApiStackWorkflowStateMachineLogGroupD7FD1922',
       ]);
 
-    template.hasResourceProperties('AWS::Logs::LogGroup', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Logs::LogGroup', {
       LogGroupName: {
         'Fn::Join': [
           '',
@@ -716,14 +700,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('Custom Resource', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    expect(findResourcesName(template, 'AWS::CloudFormation::CustomResource'))
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::CloudFormation::CustomResource'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResource5AE5EDD9',
       ]);
 
-    template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
       ServiceToken: {
         'Fn::GetAtt': [
           'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
@@ -735,7 +717,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
     });
 
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -757,8 +739,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   });
 
   test('State Machine', () => {
-    const { template } = TestEnv.newALBApiStack();
-    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',
@@ -801,7 +782,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         ],
       },
     });
-    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',
@@ -915,11 +896,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 });
 
 describe('Click Stream Api Cloudfront deploy Construct Test', () => {
+  const newALBApiStackTemplate = TestEnv.newALBApiStack().template;
+  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(true).template;
+  const newCloudfrontApiStackTemplate = TestEnv.newCloudfrontApiStack().template;
 
   test('DynamoDB table', () => {
-    const { template } = TestEnv.newCloudfrontApiStack();
-
-    template.hasResourceProperties('AWS::DynamoDB::Table', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
           AttributeName: 'name',
@@ -940,7 +922,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         SSEEnabled: true,
       },
     });
-    template.hasResourceProperties('AWS::DynamoDB::Table', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
       KeySchema: [
         {
           AttributeName: 'id',
@@ -1002,29 +984,79 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('Api lambda Function', () => {
-    const { template } = TestEnv.newCloudfrontApiStack();
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    expect(findResourcesName(newCloudfrontApiStackTemplate, 'AWS::Lambda::LayerVersion'))
+      .toEqual([
+        'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
+      ]);
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::LayerVersion', {
+      CompatibleArchitectures: [
+        'x86_64',
+      ],
+      CompatibleRuntimes: [
+        'nodejs16.x',
+        'nodejs18.x',
+      ],
+    });
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
       Environment: {
         Variables: {
+          AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
           CLICK_STREAM_TABLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickstreamMetadata11A455BB',
           },
           DICTIONARY_TABLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
           },
-          QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
+          STACK_ACTION_SATE_MACHINE: {
+            Ref: 'testClickStreamCloudfrontApiStackActionStateMachineF9686748',
+          },
+          STACK_WORKFLOW_SATE_MACHINE: {
+            Ref: 'testClickStreamCloudfrontApiStackWorkflowStateMachine74FBB0F0',
+          },
+          STACK_WORKFLOW_S3_BUCKET: {
+            Ref: 'stackWorkflowS3BucketF67B9562',
+          },
+          PREFIX_TIME_GSI_NAME: 'prefix-time-index',
+          AWS_ACCOUNT_ID: {
+            Ref: 'AWS::AccountId',
+          },
+          AWS_URL_SUFFIX: {
+            Ref: 'AWS::URLSuffix',
+          },
+          WITH_AUTH_MIDDLEWARE: 'false',
+          ISSUER: '',
+          AUTHORIZER_TABLE_NAME: '',
+          STS_UPLOAD_ROLE_ARN: {
+            'Fn::GetAtt': [
+              'testClickStreamCloudfrontApiUploadRole7D6ED157',
+              'Arn',
+            ],
+          },
+          API_ROLE_NAME: {
+            Ref: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
+          },
+          HEALTH_CHECK_PATH: '/',
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
         },
       },
+      Handler: 'run.sh',
+      Layers: [
+        {
+          Ref: 'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
+        },
+      ],
       MemorySize: 512,
-      PackageType: 'Image',
+      Runtime: 'nodejs18.x',
       Timeout: 30,
     });
-    template.hasResource('AWS::Lambda::Function', {
+    newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
         'apifunceni59253B5A',
         'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
@@ -1032,48 +1064,45 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       ],
     });
 
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
-      PackageType: 'Image',
       Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
     });
 
   });
 
   test('Api lambda Function in GCR', () => {
-    const { template } = TestEnv.newALBApiStack(true);
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         'x86_64',
       ],
@@ -1088,10 +1117,8 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('IAM Resource for Api Lambda', () => {
-    const { template } = TestEnv.newCloudfrontApiStack();
-
     // Creates the function's execution role...
-    template.hasResourceProperties('AWS::IAM::Role', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::IAM::Role', {
       AssumeRolePolicyDocument: {
         Statement: [
           {
@@ -1107,8 +1134,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('ApiGateway', () => {
-    const { template } = TestEnv.newCloudfrontApiStack();
-    template.hasResourceProperties('AWS::ApiGateway::Method', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::Method', {
       HttpMethod: 'ANY',
       ResourceId: {
         Ref: 'testClickStreamCloudfrontApiClickStreamApiproxyF7B82220',
@@ -1145,7 +1171,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         },
       },
     });
-    template.hasResourceProperties('AWS::ApiGateway::Method', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::Method', {
       HttpMethod: 'ANY',
       ResourceId: {
         'Fn::GetAtt': [
@@ -1185,7 +1211,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         },
       },
     });
-    template.hasResourceProperties('AWS::ApiGateway::RestApi', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::RestApi', {
       EndpointConfiguration: {
         Types: [
           'REGIONAL',
@@ -1193,20 +1219,20 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       },
       Name: 'ClickStreamApi',
     });
-    template.hasResourceProperties('AWS::ApiGateway::Deployment', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::Deployment', {
       RestApiId: {
         Ref: 'testClickStreamCloudfrontApiClickStreamApi77242134',
       },
       Description: 'Automatically created by the RestApi construct',
     });
-    template.hasResource('AWS::ApiGateway::Deployment', {
+    newCloudfrontApiStackTemplate.hasResource('AWS::ApiGateway::Deployment', {
       DependsOn: [
         'testClickStreamCloudfrontApiClickStreamApiproxyANY2AD1F4B4',
         'testClickStreamCloudfrontApiClickStreamApiproxyF7B82220',
         'testClickStreamCloudfrontApiClickStreamApiANY34E982F9',
       ],
     });
-    template.hasResourceProperties('AWS::ApiGateway::Stage', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::Stage', {
       RestApiId: {
         Ref: 'testClickStreamCloudfrontApiClickStreamApi77242134',
       },
@@ -1234,7 +1260,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       StageName: 'api',
       TracingEnabled: true,
     });
-    template.hasResourceProperties('AWS::ApiGateway::UsagePlan', {
+    newCloudfrontApiStackTemplate.hasResourceProperties('AWS::ApiGateway::UsagePlan', {
       ApiStages: [
         {
           ApiId: {
@@ -1254,9 +1280,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('LogGroup', () => {
-    const { template } = TestEnv.newALBApiStack();
-
-    template.hasResourceProperties('AWS::Logs::LogGroup', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::Logs::LogGroup', {
       LogGroupName: {
         'Fn::Join': [
           '',
@@ -1293,8 +1317,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   });
 
   test('State Machine', () => {
-    const { template } = TestEnv.newALBApiStack();
-    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',
@@ -1337,7 +1360,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         ],
       },
     });
-    template.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+    newALBApiStackTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: {
         'Fn::Join': [
           '',

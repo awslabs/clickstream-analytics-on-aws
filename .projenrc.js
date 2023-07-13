@@ -244,6 +244,7 @@ const apiProject = new typescript.TypeScriptProject({
   eslint: false,
   minNodeVersion: '16.18.0',
   tsconfig: {
+    exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
     },
