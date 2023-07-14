@@ -19,6 +19,8 @@ import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
+import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
+import AnalyticsHome from 'pages/analytics/home/Home';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -114,6 +116,8 @@ const SignedInPage: React.FC = () => {
                   path="/project/:pid/application/detail/:id"
                   element={<ApplicationDetail />}
                 />
+                <Route path="/analytics" element={<AnalyticsHome />} />
+                <Route path="/analytics/funnel" element={<AnalyticsFunnel />} />
               </Routes>
             </div>
           </Suspense>

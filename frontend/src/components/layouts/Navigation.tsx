@@ -50,11 +50,24 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       external: true,
     },
   ];
+  const navAnalyticsItems: SideNavigationProps.Item[] = [
+    { type: 'link', text: t('nav.analytics'), href: '/analytics' },
+    {
+      text: t('nav.analytics'),
+      type: 'section',
+      defaultExpanded: true,
+      items: [
+        { type: 'link', text: t('nav.funnel'), href: '/analytics/funnel' },
+      ],
+    },
+  ];
   return (
     <>
       <SideNavigation
         header={navHeader}
-        items={navItems}
+        items={
+          activeHref.startsWith('/analytics') ? navAnalyticsItems : navItems
+        }
         activeHref={activeHref}
         onFollow={(e) => {
           console.info(e);
