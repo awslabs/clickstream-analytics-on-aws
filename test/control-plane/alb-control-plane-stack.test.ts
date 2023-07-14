@@ -240,7 +240,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
-        'ClickStreamApiClickStreamApiFunction8C843168',
+        'ClickStreamApiApiFunction684A4D61',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
