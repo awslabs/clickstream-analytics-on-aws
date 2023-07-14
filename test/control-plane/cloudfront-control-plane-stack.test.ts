@@ -403,9 +403,9 @@ describe('CloudFrontS3PotalStack', () => {
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
@@ -432,9 +432,9 @@ describe('CloudFrontS3PotalStack', () => {
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
@@ -504,9 +504,9 @@ describe('CloudFrontS3PotalStack', () => {
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiClickStreamApiFunction8C843168',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',

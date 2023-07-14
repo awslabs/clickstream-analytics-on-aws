@@ -274,8 +274,8 @@ export class ClickStreamApiConstruct extends Construct {
     });
     props.stackWorkflowS3Bucket.grantPut(uploadRole, `${props.pluginPrefix}*`);
 
-    this.clickStreamApiFunction = new Function(this, 'ClickStreamApiFunction', {
-      description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+    this.clickStreamApiFunction = new Function(this, 'ApiFunction', {
+      description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
         file: 'Dockerfile.backend.build',
       }),

@@ -113,7 +113,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
         'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
-        'testClickStreamALBApiClickStreamApiFunction4A01DB3A',
+        'testClickStreamALBApiApiFunction9890103B',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
 
@@ -121,7 +121,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       Environment: {
         Variables: {
           CLICK_STREAM_TABLE_NAME: {
@@ -224,7 +224,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
 
   });
@@ -248,7 +248,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
   });
 
@@ -1001,7 +1001,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       Environment: {
         Variables: {
           AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
@@ -1082,7 +1082,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Architectures: [
         'x86_64',
       ],
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
 
   });
@@ -1111,7 +1111,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           QUICKSIGHT_CONTROL_PLANE_REGION: 'cn-north-1',
         },
       },
-      Description: 'Lambda function for api of solution Click Stream Analytics on AWS',
+      Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
 
   });
@@ -1161,7 +1161,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               ':lambda:path/2015-03-31/functions/',
               {
                 'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickStreamApiFunction25FEE34E',
+                  'testClickStreamCloudfrontApiApiFunctionD30AC413',
                   'Arn',
                 ],
               },
@@ -1201,7 +1201,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               ':lambda:path/2015-03-31/functions/',
               {
                 'Fn::GetAtt': [
-                  'testClickStreamCloudfrontApiClickStreamApiFunction25FEE34E',
+                  'testClickStreamCloudfrontApiApiFunctionD30AC413',
                   'Arn',
                 ],
               },
@@ -1246,7 +1246,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         Format: '$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId',
       },
       DeploymentId: {
-        Ref: 'testClickStreamCloudfrontApiClickStreamApiDeploymentD81E884Adde54841819a5cb2bcfcf208847bd745',
+        Ref: 'testClickStreamCloudfrontApiClickStreamApiDeploymentD81E884A50b4b46e84c4d3354fa978ebcd6c1d08',
       },
       MethodSettings: [
         {
