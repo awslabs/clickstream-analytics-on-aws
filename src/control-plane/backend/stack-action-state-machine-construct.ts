@@ -100,7 +100,7 @@ export class StackActionStateMachine extends Construct {
           actions: [
             'iam:PassRole',
           ],
-          resources: ['*'],
+          resources: [`arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/control-plane-ClickStreamApi`],
         }),
         // This list of actions is to ensure the call stack can be create/update/delete successfully.
         new iam.PolicyStatement({
