@@ -176,7 +176,7 @@
     "bufferTypeDesc": "选择要使用的数据宿(Data sink)类型。",
     "bufferS3": "Amazon S3",
     "bufferS3Desc": "数据缓存在采集服务器内存中，然后保存到 S3 存储桶中，如果您不需要实时数据流，请使用此选项。",
-    "bufferMSK": "Apach Kafka",
+    "bufferMSK": "Apache Kafka",
     "bufferMSKDesc": "数据将流式传输到 Kafka 集群中的主题中以供实时使用，Kafka 连接器将定期读取数据并将其存储到 S3 存储桶中。",
     "bufferKDS": "Amazon Kinesis Data Streams (KDS)",
     "bufferKDSDesc": "数据将流式传输到 Amazon KDS 以供实时使用，而 lambda 程序将定期读取数据并将其存储到 S3 存储桶中。",
