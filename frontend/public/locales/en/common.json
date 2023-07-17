@@ -245,5 +245,5 @@
   "enabled": "Enabled",
   "disabled": "Disabled",
   "maxmindCopyRight": "IP Enrichment plug-in includes GeoLite2 data created by MaxMind, available from ",
-  "checkingAvailable": "Checking AWS services available"
+  "checkingAvailable": "Checking AWS services availability"
 }
