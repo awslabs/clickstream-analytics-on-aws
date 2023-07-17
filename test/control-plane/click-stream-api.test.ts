@@ -605,9 +605,92 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             },
           },
           {
-            Action: 'iam:PassRole',
+            Action: [
+              'iam:GetRole',
+              'iam:PassRole',
+              'iam:DetachRolePolicy',
+              'iam:GetPolicy',
+              'iam:DeleteRolePolicy',
+              'iam:CreateRole',
+              'iam:DeleteRole',
+              'iam:AttachRolePolicy',
+              'iam:PutRolePolicy',
+              'iam:ListRolePolicies',
+              'iam:GetRolePolicy',
+              'iam:CreateInstanceProfile',
+              'iam:DeleteInstanceProfile',
+              'iam:RemoveRoleFromInstanceProfile',
+              'iam:AddRoleToInstanceProfile',
+              'iam:ListPolicies',
+              'iam:ListRoles',
+            ],
             Effect: 'Allow',
-            Resource: '*',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':policy/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':instance-profile/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
+                  ],
+                ],
+              },
+            ],
           },
           {
             Action: [
@@ -622,7 +705,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'autoscaling:*',
               'application-autoscaling:*',
               'glue:*',
-              'iam:*',
               'cloudwatch:*',
               'emr-serverless:*',
               'ssm:*',
