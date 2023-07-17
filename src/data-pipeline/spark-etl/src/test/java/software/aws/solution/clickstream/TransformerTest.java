@@ -15,11 +15,9 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -57,6 +55,7 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(-44, row.getLong(row.fieldIndex("event_server_timestamp_offset")));
 
         assertNull(device.getString(device.fieldIndex("ua_browser")));
+        assertNull(device.getString(device.fieldIndex("host_name")));
 
         Row geo_for_enrich = row.getStruct(row.fieldIndex("geo_for_enrich"));
         assertEquals("13.212.229.59", geo_for_enrich.getString(geo_for_enrich.fieldIndex("ip")));
@@ -93,7 +92,20 @@ class TransformerTest extends BaseSparkTest {
         assertEquals("PIUTT", uses_transient_token_value);
     }
 
+    @Test
+    public void should_have_host_name_in_device() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
 
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_nozip.json")).getPath());
+        Dataset<Row> transformedDataset = transformer.transform(dataset);
+        assertEquals(1, transformedDataset.count());
+        Row row = transformedDataset.first();
+        Row device = row.getStruct(row.fieldIndex("device"));
+        assertEquals("https://host-name-001.com", device.getString(device.fieldIndex("host_name")));
+    }
+    
     @Test
     public void should_transform_with_no_seq_id() {
         System.setProperty("app.ids", "uba-app");
