@@ -8,5 +8,9 @@ region = "%%AWS_REGION%%"
 stream_name = "%%AWS_KINESIS_STREAM_NAME%%"
 
 acknowledgements.enabled = true
+request_retry_partial = true
+request.retry_attempts = 4
+request.retry_max_duration_secs = 3
+
   [sinks.kinesis_sink.encoding]
   codec = "json"
