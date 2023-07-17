@@ -21,6 +21,8 @@ import {
   UserRole,
   DescribeAccountSubscriptionCommandOutput,
   AccessDeniedException,
+  GenerateEmbedUrlForRegisteredUserCommand,
+  GenerateEmbedUrlForRegisteredUserCommandOutput,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
@@ -155,6 +157,53 @@ export const registerQuickSightUserByRegion = async (region: string, email: stri
   });
   const response = await quickSightClient.send(command);
   return response.UserInvitationUrl;
+};
+
+export const registerEmbddingUserByRegion = async (region: string) => {
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: region,
+  });
+  const command: RegisterUserCommand = new RegisterUserCommand({
+    IdentityType: IdentityType.IAM,
+    AwsAccountId: awsAccountId,
+    Email: 'mingfeiq@amazon.com',
+    IamArn: 'arn:aws:iam::615633583142:role/quicksigthEmbedRole',
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserRole: UserRole.READER,
+    SessionName: 'mingfeiq',
+  });
+  await quickSightClient.send(command);
+};
+
+export const generateEmbedUrlForRegisteredUser = async (
+  region: string,
+  dashboardId: string,
+  sheetId: string,
+  visualId: string,
+): Promise<GenerateEmbedUrlForRegisteredUserCommandOutput> => {
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: region,
+  });
+  // await registerEmbddingUserByRegion(region);
+  const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
+    AwsAccountId: awsAccountId,
+    UserArn: `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`,
+    ExperienceConfiguration: {
+      // Dashboard: { // RegisteredUserDashboardEmbeddingConfiguration
+      //   InitialDashboardId: dashboardId, // required
+      // },
+      DashboardVisual: {
+        InitialDashboardVisualId: {
+          DashboardId: dashboardId,
+          SheetId: sheetId,
+          VisualId: visualId,
+        },
+      },
+    },
+  });
+  return quickSightClient.send(command);
 };
 
 // Determine if QuickSight has already subscribed
