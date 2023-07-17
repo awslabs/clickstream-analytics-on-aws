@@ -152,6 +152,12 @@
       "metadata": {}
     },
     {
+      "name": "host_name",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
       "name": "app_version",
       "type": "string",
       "nullable": true,

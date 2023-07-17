@@ -238,6 +238,10 @@ export class GlueUtil {
               name: 'advertising_id',
               type: Schema.STRING,
             },
+            {
+              name: 'host_name',
+              type: Schema.STRING,
+            },
           ],
           ),
         },
