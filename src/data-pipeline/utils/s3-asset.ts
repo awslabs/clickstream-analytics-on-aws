@@ -22,7 +22,7 @@ export function uploadBuiltInSparkJarsAndFiles(
   bucket: IBucket,
   prefix: string,
 ) {
-  const jarFile = 'spark-etl-1.0.0.jar';
+  const jarFile = 'spark-etl-1.1.0.jar';
   let shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
