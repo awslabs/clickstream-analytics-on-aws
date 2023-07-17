@@ -205,7 +205,8 @@ public final class Transformer {
                         (col("data").getItem("system_language")).alias("system_language"),
                         (col("data").getItem("zone_offset").$div(1000)).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),
                         (col("data").getItem("device_id")).alias("vendor_id"),
-                        (col("data").getItem("device_unique_id")).alias("advertising_id")
+                        (col("data").getItem("device_unique_id")).alias("advertising_id"),
+                        (col("data").getItem("host_name")).alias("host_name")
 
                 ));
     }
