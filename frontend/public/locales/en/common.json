@@ -33,6 +33,7 @@
   "header": {
     "solution": "AWS Solutions",
     "solutionLibrary": "Solution Library",
+    "analytics": "Clickstream Analytics",
     "notifications": "Notifications",
     "settings": "Settings",
     "projectSettings": "Project settings",

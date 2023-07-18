@@ -36,6 +36,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
+  console.log(window.location);
 
   useEffect(() => {
     setDisplayName(
@@ -78,7 +79,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/',
-          title: t('header.solution') || '',
+          title: t('header.solution') ?? '',
         }}
         utilities={[
           {
