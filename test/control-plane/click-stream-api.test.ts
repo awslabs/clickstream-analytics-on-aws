@@ -1071,9 +1071,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
       ]);
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::LayerVersion', {
-      CompatibleArchitectures: [
-        'x86_64',
-      ],
       CompatibleRuntimes: [
         'nodejs16.x',
         'nodejs18.x',

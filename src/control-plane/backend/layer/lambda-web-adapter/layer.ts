@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { LayerVersion, Runtime, Code, Architecture } from 'aws-cdk-lib/aws-lambda';
+import { LayerVersion, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 export interface LambdaAdapterLayerProps {
@@ -26,7 +26,6 @@ export class LambdaAdapterLayer extends LayerVersion {
     const defaultVersion = props?.arch ?? '0.7.0';
     const defaultPlatform = props?.platform ?? 'linux/amd64';
     const defaultArch = props?.arch ?? 'x86_64';
-    const architecture = defaultArch === 'aarch64' ? Architecture.ARM_64 : Architecture.X86_64;
 
     super(scope, id, {
       code: Code.fromDockerBuild(path.join(__dirname, '.'), {
@@ -38,7 +37,6 @@ export class LambdaAdapterLayer extends LayerVersion {
         },
       }),
       compatibleRuntimes: [Runtime.NODEJS_16_X, Runtime.NODEJS_18_X],
-      compatibleArchitectures: [architecture],
     });
   }
 }
