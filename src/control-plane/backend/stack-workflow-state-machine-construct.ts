@@ -174,7 +174,7 @@ export class StackWorkflowStateMachine extends Construct {
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
-      timeout: Duration.minutes(60),
+      timeout: Duration.days(3),
     });
 
     const wildcardResources = ruleRolePolicyWithWildcardResources('StackWorkflowStateMachine/Role/DefaultPolicy/Resource', 'StackWorkflowStateMachine', 'xray/logs');

@@ -215,7 +215,7 @@ export class StackActionStateMachine extends Construct {
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
-      timeout: Duration.minutes(30),
+      timeout: Duration.minutes(120),
     });
 
     const wildcardResourcesStackActionStateMachine = ruleRolePolicyWithWildcardResources('ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
