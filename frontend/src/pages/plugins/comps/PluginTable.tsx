@@ -191,7 +191,11 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
             id: 'description',
             header: t('plugin:list.desc'),
             cell: (e) => {
-              return <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>;
+              return e.id?.startsWith('BUILT-IN') ? (
+                <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>
+              ) : (
+                e.description
+              );
             },
             sortingField: 'desc',
           },
