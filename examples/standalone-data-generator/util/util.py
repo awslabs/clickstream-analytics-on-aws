@@ -122,15 +122,15 @@ def convert_to_gzip_events_process_pool(events_of_day):
     manager = multiprocessing.Manager()
     day_event_lines = manager.list()
     pool = multiprocessing.Pool(processes=enums.process_number)
-    day_event_lines = pool.map(get_gzipped_line, [small_arr[i] for i in range(len(small_arr))])
+    day_event_lines = pool.starmap(get_gzipped_line, [(enums.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
     pool.close()
     pool.join()
     return day_event_lines
 
 
-def get_gzipped_line(arr):
+def get_gzipped_line(is_gzip, arr):
     events_str = json.dumps(arr, default=to_json)
-    if enums.IS_GZIP:
+    if is_gzip:
         return get_gzip(events_str)
     else:
         return events_str
