@@ -31,7 +31,7 @@ export const ANDROID_CONFIG_JSON_TEMPLATE = `{
       "awsClickstreamPlugin": {
         "appId": "${TEMPLATE_APP_ID}",
         "endpoint": "${TEMPLATE_SERVER_ENDPOINT}",
-        "isCompressEvents": false,
+        "isCompressEvents": true,
         "autoFlushEventsInterval": 10000,
         "isTrackAppExceptionEvents": false
       }
@@ -112,7 +112,7 @@ export const IOS_CONFIG_JSON_TEMPLATE = `{
       "awsClickstreamPlugin": {
         "appId": "${TEMPLATE_APP_ID}",
         "endpoint": "${TEMPLATE_SERVER_ENDPOINT}",
-        "isCompressEvents": false,
+        "isCompressEvents": true,
         "autoFlushEventsInterval": 10000,
         "isTrackAppExceptionEvents": false
       }
