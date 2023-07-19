@@ -31,7 +31,7 @@
         "type": "PLUGIN#BUILT-IN-1",
         "prefix": "PLUGIN",
         "name": "Transformer",
-        "description": "Description of Transformer",
+        "description": "Convert the data format reported by SDK into the data format in the data warehouse",
         "builtIn": true,
         "mainFunction": "software.aws.solution.clickstream.Transformer",
         "jarFile": "",
