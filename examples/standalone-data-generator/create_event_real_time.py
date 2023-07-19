@@ -17,7 +17,6 @@ import util.util as utils
 import model.Event as Event
 from model.User import User
 import time
-import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 global_current_time = utils.current_timestamp()
@@ -113,7 +112,3 @@ if __name__ == '__main__':
             users_count = random.choices(enums.RANDOM_DAU_REALTIME)[0]
             day_users = random.sample(users, users_count)
             create_day_event(day_users)
-            tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-            tomorrow = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = tomorrow - datetime.datetime.now()
-            time.sleep(delta.seconds)

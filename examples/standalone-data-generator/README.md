@@ -13,11 +13,14 @@ for the second scenarios we define the notepad app have total 10000 users and th
 > pip3 install requests
 
 ### requirement
-
+hardware: 2 vCPU 4G memory 10G disk, eg: c6a.large
+network: upstream bandwidth: 3MB/s
 python version: 3.8+
 
 ### Add configuration file:
 Please download your `amplifyconfiguration.json` file from your web console of the solution, then copy it to the root folder which at the same level as README file. then you can execute the following command to create and send your sample data.
+
+In the `amplifyconfiguration.json` file, we will only parse `appId`, `endpoint` and `isCompressEvents` three parameter to run the program.
 
 ### how to generate last 30 days events
 

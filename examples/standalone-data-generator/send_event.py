@@ -25,7 +25,7 @@ def send_events_to_server(events):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
     request_param = {
-        "platform": "ANDROID",
+        "platform": "Android",
         "appId": enums.APP_ID,
         "compression": "gzip",
         "fakeIp": utils.get_random_ip(),
@@ -45,13 +45,19 @@ def send_events_to_server(events):
 def send_events_of_day(events_of_day):
     start_time = utils.current_timestamp()
     # gzip
-    print("start gzip")
+    if enums.IS_GZIP:
+        print("start gzip")
+    else:
+        print("start parse events")
     n = int(len(events_of_day) / enums.gzip_times_per_day) + 1
     events_of_day_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     for event_arr in events_of_day_arr:
         executor = ThreadPoolExecutor(enums.max_upload_thread_number)
         day_event_lines = utils.convert_to_gzip_events_process_pool(event_arr)
-        print("gzip events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")
+        if enums.IS_GZIP:
+            print("gzip events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")
+        else:
+            print("parse events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")
         print("start send: " + str(len(day_event_lines)) + " requests")
         start_time = utils.current_timestamp()
         for line in day_event_lines:

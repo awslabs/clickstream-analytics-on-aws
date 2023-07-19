@@ -208,12 +208,17 @@ ENDPOINT = ""
 
 
 def init_config():
-    global APP_ID, ENDPOINT
+    global APP_ID, ENDPOINT, IS_GZIP, request_sleep_time, max_upload_thread_number, events_per_request
     try:
         with open('amplifyconfiguration.json') as file:
             data = json.load(file)
             APP_ID = data['analytics']['plugins']['awsClickstreamPlugin']['appId']
             ENDPOINT = data['analytics']['plugins']['awsClickstreamPlugin']['endpoint']
+            IS_GZIP = data['analytics']['plugins']['awsClickstreamPlugin']['isCompressEvents']
+            if not IS_GZIP:
+                request_sleep_time = 0.1
+                max_upload_thread_number = 1
+                events_per_request = 500
     except FileNotFoundError:
         print("Error: amplifyconfiguration.json file not found.")
     except json.JSONDecodeError:
