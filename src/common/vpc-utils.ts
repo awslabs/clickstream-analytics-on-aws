@@ -31,7 +31,7 @@ export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc
     publicSubnetIds: props.publicSubnetIds,
     privateSubnetIds: props.privateSubnetIds,
     publicSubnetRouteTableIds: props.publicSubnetRouteTableIds ?? props.publicSubnetIds,
-    privateSubnetRouteTableIds: props.privateSubnetRouteTableIds ?? props.privateSubnetIds
+    privateSubnetRouteTableIds: props.privateSubnetRouteTableIds ?? props.privateSubnetIds,
   });
 
   (vpc as any).node._metadata = vpc.node.metadata.filter((item) =>
@@ -40,5 +40,3 @@ export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc
 
   return vpc;
 }
-
-
