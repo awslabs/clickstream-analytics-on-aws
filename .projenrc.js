@@ -148,7 +148,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.11',
     'jsonpath-plus@^7.2.0',
-    'readline@^1.3.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKDeps,

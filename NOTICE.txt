@@ -63,7 +63,6 @@ mustache under the MIT
 node-cache under the MIT
 node-fetch under the MIT
 p-limit under the MIT
-readline under the BSD
 ts-json-object under the MIT
 uuid under the MIT
 @aws-sdk/lib-storage under the Apache-2.0
