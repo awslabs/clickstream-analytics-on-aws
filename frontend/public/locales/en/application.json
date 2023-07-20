@@ -1,6 +1,6 @@
 {
   "valid": {
-    "nameEmpty": "Plase input application name",
+    "nameEmpty": "Please input application name",
     "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters"
   },
   "appName": "App Name",
