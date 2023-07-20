@@ -19,6 +19,8 @@ export interface VpcProps {
   availabilityZones: string[];
   publicSubnetIds?: string[];
   privateSubnetIds: string[];
+  publicSubnetRouteTableIds?: string[];
+  privateSubnetRouteTableIds?: string[];
 }
 
 export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc {
@@ -28,25 +30,13 @@ export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc
     availabilityZones: props.availabilityZones,
     publicSubnetIds: props.publicSubnetIds,
     privateSubnetIds: props.privateSubnetIds,
+    publicSubnetRouteTableIds: props.publicSubnetRouteTableIds ?? props.publicSubnetIds,
+    privateSubnetRouteTableIds: props.privateSubnetRouteTableIds ?? props.privateSubnetIds
   });
 
   (vpc as any).node._metadata = vpc.node.metadata.filter((item) =>
     item.type !== 'aws:cdk:warning' || !/the imported VPC will not work with constructs that require a list of subnets at synthesis time/.test(item.data),
   );
-
-  const privateSubnet1 = vpc.node.tryFindChild('PrivateSubnet1');
-  const publicSubnet1 = vpc.node.tryFindChild('PublicSubnet1');
-  if (privateSubnet1 !== undefined) {
-    ( privateSubnet1 as any).node._metadata = privateSubnet1.node.metadata.filter((item) =>
-      item.type !== 'aws:cdk:warning' || !/No routeTableId was provided to the subnet/.test(item.data),
-    );
-  }
-
-  if (publicSubnet1 !== undefined) {
-    ( publicSubnet1 as any).node._metadata = publicSubnet1.node.metadata.filter((item) =>
-      item.type !== 'aws:cdk:warning' || !/No routeTableId was provided to the subnet/.test(item.data),
-    );
-  }
 
   return vpc;
 }
