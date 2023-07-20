@@ -115,28 +115,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 }
               }
             },
-            items: [
-              {
-                id: 'support-group',
-                text: t('header.support') || '',
-                items: [
-                  {
-                    id: 'documentation',
-                    text: t('header.doc') || '',
-                    href: '#',
-                    external: true,
-                  },
-                  { id: 'support', text: t('header.support') || '' },
-                  {
-                    id: 'feedback',
-                    text: t('header.feedback') || '',
-                    href: '#',
-                    external: true,
-                  },
-                ],
-              },
-              { id: 'signout', text: t('header.signOut') || '' },
-            ],
+            items: [{ id: 'signout', text: t('header.signOut') || '' }],
           },
         ]}
         i18nStrings={{
