@@ -394,7 +394,7 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
   props: CreateDatabaseAndSchemas) => {
   try {
     await executeStatementsWithWait(redshiftClient, [
-      `CREATE USER ${credential.username} PASSWORD 'sha256|${credential.password}'`,
+      `CREATE USER ${credential.username} PASSWORD '${credential.password}'`,
     ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
     props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
