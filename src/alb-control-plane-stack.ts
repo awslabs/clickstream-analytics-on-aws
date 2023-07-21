@@ -21,7 +21,7 @@ import {
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { AttributeType, BillingMode, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import { Vpc, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
@@ -37,6 +37,7 @@ import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
+import { getExistVpc } from './common/vpc-utils';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { SolutionCognito } from './control-plane/private/solution-cognito';
@@ -86,7 +87,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       const networkParameters = Parameters.createNetworkParameters(this, props.internetFacing,
         SubnetParameterType.List, this.paramGroups, this.paramLabels);
 
-      vpc = Vpc.fromVpcAttributes(this, 'PortalVPC', {
+      vpc = getExistVpc(this, 'PortalVPC', {
         vpcId: networkParameters.vpcId.valueAsString,
         availabilityZones: Fn.getAzs(),
         publicSubnetIds: networkParameters.publicSubnets?.valueAsList,

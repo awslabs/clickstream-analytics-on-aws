@@ -12,7 +12,7 @@
  */
 
 import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
-import { IVpc, SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
@@ -21,6 +21,7 @@ import {
 } from '../common/constant';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
+import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftAnalyticsStackProps {
   network: {
@@ -655,7 +656,7 @@ export function createStackParameters(scope: Construct): {
       },
     },
   };
-  const vpc = Vpc.fromVpcAttributes(scope, 'vpc-for-analytics-in-redshift', {
+  const vpc = getExistVpc(scope, 'vpc-for-analytics-in-redshift', {
     vpcId: networkProps.vpcId.valueAsString,
     availabilityZones: Fn.getAzs(),
     privateSubnetIds: Fn.split(',', networkProps.privateSubnets.valueAsString),

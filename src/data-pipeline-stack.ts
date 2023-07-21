@@ -13,7 +13,7 @@
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
-import { SubnetSelection, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
@@ -24,6 +24,7 @@ import {
 } from './common/cfn-nag';
 import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { getExistVpc } from './common/vpc-utils';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
 
@@ -87,7 +88,7 @@ export class DataPipelineStack extends Stack {
     );
 
     // Vpc
-    const vpc = Vpc.fromVpcAttributes(this, 'from-vpc-for-data-pipeline', {
+    const vpc = getExistVpc(this, 'from-vpc-for-data-pipeline', {
       vpcId: vpcIdParam.valueAsString,
       availabilityZones: Fn.getAzs(),
       privateSubnetIds: Fn.split(',', privateSubnetIdsParam.valueAsString),

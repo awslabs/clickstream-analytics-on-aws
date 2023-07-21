@@ -25,7 +25,6 @@ import {
   InstanceType,
   SecurityGroup,
   SubnetType,
-  Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
@@ -34,6 +33,7 @@ import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
   createCommonConditions,
@@ -112,7 +112,7 @@ export class IngestionServerNestedStack extends NestedStack {
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     // Vpc
-    const vpc = Vpc.fromVpcAttributes(this, 'from-vpc', {
+    const vpc = getExistVpc(this, 'from-vpc', {
       vpcId: props.vpcId,
       availabilityZones: Fn.getAzs(),
       publicSubnetIds: Fn.split(',', props.publicSubnetIds),
