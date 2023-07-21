@@ -22,6 +22,9 @@ import {
   Stack,
   StackStatus,
   UpdateTerminationProtectionCommand,
+  CloudFormationServiceException,
+  UpdateStackCommandInput,
+  UpdateStackCommandOutput,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { logger } from '../../../../common/powertools';
@@ -110,11 +113,7 @@ export const createStack = async (event: SfnStackEvent) => {
 
 export const updateStack = async (event: SfnStackEvent) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
-      region: event.Input.Region,
-    });
-    const params: UpdateStackCommand = new UpdateStackCommand({
+    const result = await doUpdate(event.Input.Region, {
       StackName: event.Input.StackName,
       Parameters: event.Input.Parameters,
       DisableRollback: false,
@@ -122,7 +121,6 @@ export const updateStack = async (event: SfnStackEvent) => {
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
       Tags: event.Input.Tags,
     });
-    const result = await cloudFormationClient.send(params);
     return {
       Action: StackAction.DESCRIBE,
       Input: event.Input,
@@ -142,11 +140,7 @@ export const updateStack = async (event: SfnStackEvent) => {
 
 export const upgradeStack = async (event: SfnStackEvent) => {
   try {
-    const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
-      region: event.Input.Region,
-    });
-    const params: UpdateStackCommand = new UpdateStackCommand({
+    const result = await doUpdate(event.Input.Region, {
       StackName: event.Input.StackName,
       TemplateURL: event.Input.TemplateURL,
       Parameters: event.Input.Parameters,
@@ -155,7 +149,6 @@ export const upgradeStack = async (event: SfnStackEvent) => {
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
       Tags: event.Input.Tags,
     });
-    const result = await cloudFormationClient.send(params);
     return {
       Action: StackAction.DESCRIBE,
       Input: event.Input,
@@ -290,4 +283,23 @@ export const callback = async (event: SfnStackEvent) => {
   }
 
   return event;
+};
+
+export const doUpdate = async (region: string, input: UpdateStackCommandInput): Promise<UpdateStackCommandOutput> => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region: region,
+    });
+    const params: UpdateStackCommand = new UpdateStackCommand(input);
+    return await cloudFormationClient.send(params);
+  } catch (err) {
+    if (err instanceof CloudFormationServiceException &&
+      err.name === 'ValidationError' &&
+      err.message.includes('please use the disable-rollback parameter with update-stack API')) {
+      input.DisableRollback = true;
+      return doUpdate(region, input);
+    }
+    throw Error((err as Error).message);
+  }
 };

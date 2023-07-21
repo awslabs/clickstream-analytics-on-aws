@@ -13,6 +13,7 @@
 
 import {
   CloudFormationClient,
+  CloudFormationServiceException,
   CreateStackCommand,
   DescribeStacksCommand, StackStatus, UpdateStackCommand, UpdateTerminationProtectionCommand,
 } from '@aws-sdk/client-cloudformation';
@@ -103,6 +104,35 @@ describe('SFN Action Lambda Function', () => {
     expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
     expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+  });
+
+  test('Update stack with rollback exception', async () => {
+    const event: SfnStackEvent = {
+      ...baseStackActionEvent,
+      Action: StackAction.UPDATE,
+    };
+    const mockValidationError = new CloudFormationServiceException({
+      $metadata: {
+        httpStatusCode: 200,
+        requestId: 'asdsad',
+      },
+      $fault: 'client',
+      name: 'ValidationError',
+      message: 'please use the disable-rollback parameter with update-stack API',
+    });
+
+    cloudFormationMock.on(UpdateStackCommand)
+      .rejectsOnce(mockValidationError)
+      .resolves({
+        StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+      });
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Action).toEqual(StackAction.DESCRIBE);
+    expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
+    expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
+    expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 2);
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
   });
 
