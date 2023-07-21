@@ -371,11 +371,6 @@
       "type": "runtime"
     },
     {
-      "name": "readline",
-      "version": "^1.3.0",
-      "type": "runtime"
-    },
-    {
       "name": "sql-formatter",
       "version": "^12.2.3",
       "type": "runtime"
