@@ -15,12 +15,12 @@ import { IVpc, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 export interface VpcProps {
-  vpcId: string;
-  availabilityZones: string[];
-  publicSubnetIds?: string[];
-  privateSubnetIds: string[];
-  publicSubnetRouteTableIds?: string[];
-  privateSubnetRouteTableIds?: string[];
+  readonly vpcId: string;
+  readonly availabilityZones: string[];
+  readonly publicSubnetIds?: string[];
+  readonly privateSubnetIds: string[];
+  readonly publicSubnetRouteTableIds?: string[];
+  readonly privateSubnetRouteTableIds?: string[];
 }
 
 export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc {
