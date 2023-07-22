@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-const { awscdk, github, gitlab, typescript } = require('projen');
+const { awscdk, gitlab, javascript, typescript } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.81.0';
 
@@ -192,6 +192,11 @@ const project = new awscdk.AwsCdkTypeScriptApp({
       },
     },
   },
+  depsUpgradeOptions: {
+    workflowOptions: {
+      schedule: javascript.UpgradeDependenciesSchedule.WEEKLY,
+    },
+  },
 });
 
 project.eslint?.addRules({
@@ -302,11 +307,19 @@ project.buildWorkflow.addPostBuildSteps({
 project.buildWorkflow.addPostBuildSteps({
   name: 'Add Coverage PR Comment',
   uses: 'marocchino/sticky-pull-request-comment@v2',
-  if: 'github.event_name == \'pull_request\'',
+  if: 'github.event_name == \'pull_request\' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name',
   with: {
     recreate: true,
     path: 'code-coverage-results.md',
   },
+});
+project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
+  name: 'Upgrade frontend dependencies',
+  run: 'yarn upgrade --cwd frontend',
+});
+project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
+  name: 'Upgrade API dependencies',
+  run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
 });
 
 const provisionViperlightScripts = [
