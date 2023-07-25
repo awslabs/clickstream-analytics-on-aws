@@ -176,7 +176,7 @@ export const updateItem = async (
   };
   try {
     const data = await ddbClient.send(new UpdateCommand(params));
-    logger.debug('Success - item update', data);
+    logger.debug('Success - item update');
     return data;
   } catch (err) {
     if (err instanceof Error) {

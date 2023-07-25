@@ -553,7 +553,6 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
         ODS_EVENT_BUCKET: props.odsSource.s3Bucket.bucketName,
         ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
         QUERY_RESULT_LIMIT: props.loadDataProps.maxFilesLimit.toString(),
-        PROCESSING_LIMIT: props.loadDataProps.processingFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: odsEventTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
         ...POWERTOOLS_ENVS,
@@ -587,7 +586,6 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
       environment: {
         PROJECT_ID: props.projectId,
         QUERY_RESULT_LIMIT: props.loadDataProps.maxFilesLimit.toString(),
-        PROCESSING_LIMIT: props.loadDataProps.processingFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: odsEventTable.tableName,
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_ROLE: copyRole.roleArn,

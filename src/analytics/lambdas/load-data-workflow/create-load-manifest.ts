@@ -44,7 +44,6 @@ const MANIFEST_BUCKET_PREFIX = process.env.MANIFEST_BUCKET_PREFIX!;
 const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
 const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;
 const QUERY_RESULT_LIMIT = process.env.QUERY_RESULT_LIMIT!;
-const PROCESSING_LIMIT = process.env.PROCESSING_LIMIT!;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
 const PROJECT_ID = process.env.PROJECT_ID!;
@@ -101,7 +100,6 @@ export const handler = async (_event: any, context: Context) => {
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
 
   const queryResultLimit = parseInt(QUERY_RESULT_LIMIT);
-  const processingLimit = parseInt(PROCESSING_LIMIT);
 
   const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}`;
 
@@ -112,7 +110,7 @@ export const handler = async (_event: any, context: Context) => {
   var newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
   // all JOB_NEW count for metrics
   var allJobNewCount = newRecordResp.Count;
-  logger.info('queryItems response: ', newRecordResp);
+  logger.info('queryItems response count=' + newRecordResp.Count);
 
   if (newRecordResp.Count! > 0) {
     newMinFileTimestamp = newRecordResp.Items[0].timestamp;
@@ -134,40 +132,15 @@ export const handler = async (_event: any, context: Context) => {
 
   logger.info(`allJobNewCount: ${allJobNewCount}`);
 
-  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
-  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
-
-  const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
-
-  let maxFileAgeSeconds = 0;
-  maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
-  logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
-
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processInfo.jobNum);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_ENQUEUE, MetricUnits.Count, enQueueInfo.jobNum);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_MAX_AGE, MetricUnits.Seconds, maxFileAgeSeconds);
-  metrics.publishStoredMetrics();
-
-  const processJobNum = processInfo.jobNum;
-  if (processJobNum >= processingLimit) {
-    const msg = `Abort this loading data due to jobs with JobStatus=JOB_PROCESSING [${processJobNum}] exceeded the allowed quota [${processingLimit}]`;
-    logger.warn(msg);
-    return {
-      message: msg,
-      manifestList: [],
-      count: 0,
-    };
-  }
-
   const groupedManifestItems: { [key: string]: ManifestItem[] } = {};
   const manifestFiles: ManifestBody[] = [];
-  logger.info('candidateItems', { candidateItems });
+  logger.info('queryResultLimit=' + queryResultLimit);
+  logger.info('candidateItems length=' + candidateItems.length);
   if (candidateItems.length > 0) {
-    const loadItemsLength = candidateItems.length > (queryResultLimit - processJobNum) ? (queryResultLimit - processJobNum) : candidateItems.length;
-
+    const loadItemsLength = Math.min(queryResultLimit, candidateItems.length);
     const itemsToBeLoaded = candidateItems.slice(0, loadItemsLength);
-    logger.info('Queried candidate to be loaded ', { itemsToBeLoaded });
+    logger.info('Queried candidate to be loaded length=' + itemsToBeLoaded.length);
+
     const updateItemsPromise = itemsToBeLoaded.map(
       (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE));
     await Promise.all(updateItemsPromise);
@@ -202,6 +175,23 @@ export const handler = async (_event: any, context: Context) => {
       });
     }
   }
+
+  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
+  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
+  const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
+  const maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
+  
+  logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
+
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processInfo.jobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_ENQUEUE, MetricUnits.Count, enQueueInfo.jobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_MAX_AGE, MetricUnits.Seconds, maxFileAgeSeconds);
+  metrics.publishStoredMetrics();
+
+  logger.info('FILE_NEW=' + allJobNewCount + ', FILE_PROCESSING=' + processInfo.jobNum
+    + ', FILE_ENQUEUE=' + enQueueInfo.jobNum + ', FILE_MAX_AGE=' + maxFileAgeSeconds);
+
 
   return {
     manifestList: manifestFiles,
@@ -260,7 +250,7 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
   try {
     logger.debug('queryCommand: ', params);
     const data = await ddbClient.send(new QueryCommand(params));
-    logger.info(`Success - items with status ${jobStatus} query`, data);
+    logger.info(`Success - items with status ${jobStatus} query`);
     return {
       Count: data.Count ?? 0,
       Items: data.Items?.map((item) => (
@@ -309,7 +299,7 @@ const updateItem = async (tableName: string, s3Uri: string, requestId: string, j
   try {
     logger.debug('UpdateCommand: ', params);
     const data = await ddbClient.send(new UpdateCommand(params));
-    logger.info(`Success - item ${s3Uri} update`, data);
+    logger.info(`Success - item ${s3Uri} update`);
     return data;
   } catch (err) {
     if (err instanceof Error) {
