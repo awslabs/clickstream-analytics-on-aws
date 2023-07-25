@@ -10,6 +10,10 @@
     "id": "ID",
     "description": "Description",
     "createAt": "CreateAt"
-    
+  },
+  "header": {
+    "modalTitle": "Swich Project Space",
+    "selectProjectTitle": "Please select a project",
+    "selectAppTitle": "Please select an application"
   }
 }

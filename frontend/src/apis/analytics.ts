@@ -42,4 +42,57 @@ const getAnalyticsDashboardList = async (params: {
   return result;
 };
 
-export { getAnalyticsDashboardList };
+const getMetadataEventsList = async (params: {
+  pid: string;
+  appId: string;
+  pageNumber: number;
+  pageSize: number;
+}) => {
+  const result: any = await new Promise((resolve, reject) => {
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {
+        totalCount: 2,
+        items: [
+          {
+            id: '1',
+            key: '1',
+            name: 'Event Name 1',
+            type: 'built-in',
+            description: 'Event description 1',
+            createAt: 1690251290,
+          },
+          {
+            id: '2',
+            key: '2',
+            name: 'Event Name 2',
+            type: 'customer',
+            description: 'Event description 2',
+            createAt: 1690251290,
+          },
+          {
+            id: '3',
+            key: '3',
+            name: 'Event Name 3',
+            type: 'customer',
+            description: 'Event description 3',
+            createAt: 1690251290,
+          },
+          {
+            id: '4',
+            key: '4',
+            name: 'Event Name 4',
+            type: 'customer',
+            description: 'Event description 4',
+            createAt: 1690251290,
+          },
+        ],
+      },
+      error: '',
+    });
+  });
+  return result;
+};
+
+export { getAnalyticsDashboardList, getMetadataEventsList };

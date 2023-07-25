@@ -36,6 +36,7 @@ import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
+import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
 
 const LoginCallback: React.FC = () => {
   useEffect(() => {
@@ -117,12 +118,22 @@ const SignedInPage: React.FC = () => {
                   path="/project/:pid/application/detail/:id"
                   element={<ApplicationDetail />}
                 />
-                <Route path="/analytics" element={<AnalyticsHome />} />
                 <Route
-                  path="/analytics/dashboard/detail/:id"
+                  path="/analytics/:pid/app/:appid/dashboards"
+                  element={<AnalyticsHome />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/dashboard/:did"
                   element={<AnalyticsDashboardDetail />}
                 />
-                <Route path="/analytics/funnel" element={<AnalyticsFunnel />} />
+                <Route
+                  path="/analytics/:pid/app/:appid/funnel"
+                  element={<AnalyticsFunnel />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/events"
+                  element={<MetadataEvents />}
+                />
               </Routes>
             </div>
           </Suspense>

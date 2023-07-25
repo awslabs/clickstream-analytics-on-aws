@@ -11,9 +11,21 @@
  *  and limitations under the License.
  */
 
-import { TopNavigation } from '@cloudscape-design/components';
+import {
+  Box,
+  Button,
+  FormField,
+  Modal,
+  Select,
+  SelectProps,
+  SpaceBetween,
+  TopNavigation,
+} from '@cloudscape-design/components';
+import { getApplicationListByPipeline } from 'apis/application';
+import { getProjectList } from 'apis/project';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router-dom';
 import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from 'ts/const';
 
 interface IHeaderProps {
@@ -30,14 +42,65 @@ const LANGUAGE_ITEMS = [
 
 const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
   const [curProject, setCurProject] = useState('');
-  const [swichProject, setSwichProject] = useState(false);
+  const [swichProjectVisible, setSwichProjectVisible] = useState(false);
+  const [allProjectOptions, setAllProjectOptions] =
+    useState<SelectProps.Options>([]);
+  const [selectedProject, setSelectedProject] =
+    useState<SelectProps.Option | null>(null);
+  const [allAppOptions, setAllAppOptions] = useState<SelectProps.Options>([]);
+  const [selectedApp, setSelectedApp] = useState<SelectProps.Option | null>(
+    null
+  );
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+  };
+
+  const listProjects = async () => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        const projectOptions: SelectProps.Options = data.items.map(
+          (element) => ({
+            label: element.name,
+            value: element.id,
+            description: element.status,
+          })
+        );
+        setAllProjectOptions(projectOptions);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const listApplicationByProject = async (pid: string) => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IApplication>> =
+        await getApplicationListByPipeline({
+          pid: pid,
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        const appOptions: SelectProps.Options = data.items.map((element) => ({
+          label: element.name,
+          value: element.appId,
+        }));
+        setAllAppOptions(appOptions);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -76,6 +139,12 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (location.pathname.startsWith('/analytics')) {
+      listProjects();
+    }
+  }, []);
+
   return (
     <header id="h">
       <TopNavigation
@@ -84,14 +153,14 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           title: t('header.solution') ?? '',
         }}
         utilities={
-          window.location.pathname.startsWith('/analytics')
+          location.pathname.startsWith('/analytics')
             ? [
                 {
                   type: 'button',
                   variant: 'primary-button',
-                  text: `Project: ${curProject}`,
+                  text: t('header.switchSpace') ?? '',
                   onClick: () => {
-                    setSwichProject(true);
+                    setSwichProjectVisible(true);
                   },
                 },
                 {
@@ -179,6 +248,63 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
         }}
       />
+      <Modal
+        onDismiss={() => {
+          setSwichProjectVisible(false);
+        }}
+        visible={swichProjectVisible}
+        closeAriaLabel="Close modal"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => {
+                  setSwichProjectVisible(false);
+                }}
+                variant="link"
+              >
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                href={`/analytics/${selectedProject?.value}/app/${selectedApp?.value}/dashboards`}
+                onClick={() => {
+                  setSwichProjectVisible(false);
+                }}
+              >
+                {t('button.confirm')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('analytics:header.modalTitle')}
+      >
+        <FormField label={t('analytics:header.selectProjectTitle')}>
+          <SpaceBetween direction="vertical" size="xs">
+            <Select
+              selectedOption={selectedProject}
+              onChange={(e) => {
+                console.log(e);
+                setSelectedProject(e.detail.selectedOption);
+                listApplicationByProject(e.detail.selectedOption.value ?? '');
+              }}
+              options={allProjectOptions}
+            />
+          </SpaceBetween>
+        </FormField>
+        <FormField label={t('analytics:header.selectAppTitle')}>
+          <SpaceBetween direction="vertical" size="xs">
+            <Select
+              selectedOption={selectedApp}
+              onChange={(e) => {
+                console.log(e);
+                setSelectedApp(e.detail.selectedOption);
+              }}
+              options={allAppOptions}
+            />
+          </SpaceBetween>
+        </FormField>
+      </Modal>
     </header>
   );
 };

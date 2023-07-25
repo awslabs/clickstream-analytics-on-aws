@@ -17,6 +17,7 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { getDoucmentList } from 'ts/url';
 
 interface INavigationProps {
@@ -26,6 +27,7 @@ interface INavigationProps {
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
   const { t, i18n } = useTranslation();
+  const { pid, appid } = useParams();
   const navHeader = { text: t('name'), href: '/' };
   const navItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
@@ -51,7 +53,11 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     },
   ];
   const navAnalyticsItems: SideNavigationProps.Item[] = [
-    { type: 'link', text: t('nav.analytics.dashboards'), href: '/analytics' },
+    {
+      type: 'link',
+      text: t('nav.analytics.dashboards'),
+      href: `/analytics/${pid}/app/${appid}/dashboards`,
+    },
     {
       text: t('nav.analytics.explore'),
       type: 'section',
@@ -60,17 +66,17 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
         {
           type: 'link',
           text: t('nav.analytics.explore-event'),
-          href: '/analytics/event',
+          href: `/analytics/${pid}/app/${appid}/event`,
         },
         {
           type: 'link',
           text: t('nav.analytics.explore-retention'),
-          href: '/analytics/retention',
+          href: `/analytics/${pid}/app/${appid}/retention`,
         },
         {
           type: 'link',
           text: t('nav.analytics.explore-funnel'),
-          href: '/analytics/funnel',
+          href: `/analytics/${pid}/app/${appid}/funnel`,
         },
       ],
     },
@@ -82,17 +88,17 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
         {
           type: 'link',
           text: t('nav.analytics.metadata-events'),
-          href: '/analytics/metadata/events',
+          href: `/analytics/${pid}/app/${appid}/metadata/events`,
         },
         {
           type: 'link',
           text: t('nav.analytics.metadata-event-attributes'),
-          href: '/analytics/metadata/event-attributes',
+          href: `/analytics/${pid}/app/${appid}/metadata/event-attributes`,
         },
         {
           type: 'link',
           text: t('nav.analytics.metadata-user-attributes'),
-          href: '/analytics/metadata/user-attributes',
+          href: `/analytics/${pid}/app/${appid}/metadata/user-attributes`,
         },
       ],
     },

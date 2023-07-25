@@ -23,20 +23,15 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import DashboardHeader from '../comps/DashboardHeader';
 
-interface AnalyticsDashboardCardProps {
-  selectedItems: IAnalyticsDashboard[];
-}
-
-const AnalyticsDashboardCard: React.FC<AnalyticsDashboardCardProps> = (
-  props: AnalyticsDashboardCardProps
-) => {
+const AnalyticsDashboardCard: React.FC<any> = () => {
   const { t } = useTranslation();
-  const { selectedItems } = props;
+  const { pid, appid } = useParams();
   const [pageSize] = useState(12);
-  const [loadingData, setLoadingData] = useState(true);
+  const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [analyticsDashboardList, setAnalyticsDashboardList] = useState<
@@ -45,7 +40,10 @@ const AnalyticsDashboardCard: React.FC<AnalyticsDashboardCardProps> = (
   const CARD_DEFINITIONS = {
     header: (item: IAnalyticsDashboard) => (
       <div>
-        <Link fontSize="heading-m" href={`/analytics/dashboard/detail/${item.id}`}>
+        <Link
+          fontSize="heading-m"
+          href={`/analytics/${pid}/app/${appid}/dashboard/${item.id}`}
+        >
           {item.name}
         </Link>
       </div>
@@ -92,13 +90,15 @@ const AnalyticsDashboardCard: React.FC<AnalyticsDashboardCardProps> = (
   };
 
   useEffect(() => {
-    listAnalyticsDashboards();
+    console.log(pid, appid);
+    if (pid && appid) {
+      listAnalyticsDashboards();
+    }
   }, [currentPage]);
 
   return (
     <div className="pb-30">
       <Cards
-        selectedItems={selectedItems}
         loading={loadingData}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
@@ -128,16 +128,10 @@ const AnalyticsDashboardCard: React.FC<AnalyticsDashboardCardProps> = (
 };
 
 const AnalyticsHome: React.FC = () => {
-  const [selectedItems] = useState<IAnalyticsDashboard[]>([]);
-
   return (
     <AppLayout
       toolsHide
-      content={
-        <AnalyticsDashboardCard
-          selectedItems={selectedItems}
-        />
-      }
+      content={<AnalyticsDashboardCard />}
       headerSelector="#header"
       navigation={<Navigation activeHref="/analytics" />}
     />

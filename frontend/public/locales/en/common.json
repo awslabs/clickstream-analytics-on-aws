@@ -57,7 +57,8 @@
     "more": "More",
     "all": "All",
     "back": "Back",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "switchSpace": "Switch Space"
   },
   "tag": {
     "name": "Tags",

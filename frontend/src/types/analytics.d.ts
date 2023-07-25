@@ -19,4 +19,12 @@ declare global {
     description: string;
     createAt: number;
   }
+
+  interface IMetadataEvent {
+    id: string;
+    name: string;
+    description: string;
+    type: string;
+    createAt: number;
+  }
 }
