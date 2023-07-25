@@ -70,6 +70,8 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-sfn',
   '@aws-sdk/client-kafka',
   '@aws-sdk/client-redshift',
+  '@aws-sdk/client-redshift-data',
+  '@aws-sdk/credential-providers',
   '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-dynamodb',

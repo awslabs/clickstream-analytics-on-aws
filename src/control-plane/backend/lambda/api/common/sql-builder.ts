@@ -366,4 +366,9 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
   });
 };
 
+export function buildFunnelView(schema: string, name: string, sqlPatameters: FunnelSQLPatameters) : string {
+  return `CREATE OR REPLACE VIEW ${schema}.${name} AS
+   ${buildFunnelDataSql(sqlPatameters)}
+   with no schema binding`
+}
 
