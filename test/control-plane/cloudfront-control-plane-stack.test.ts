@@ -177,7 +177,7 @@ describe('CloudFrontS3PotalStack', () => {
       },
       Timeout: 900,
       MemorySize: 128,
-      Handler: '__entrypoint__.handler',
+      Handler: 'index.handler',
       Role: {
         'Fn::GetAtt': [
           Match.anyValue(),
