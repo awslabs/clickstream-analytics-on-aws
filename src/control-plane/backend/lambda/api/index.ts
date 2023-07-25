@@ -22,6 +22,7 @@ import { router_env } from './router/environment';
 import { router_pipeline } from './router/pipeline';
 import { router_plugin } from './router/plugin';
 import { router_project } from './router/project';
+import { reporting_project } from './router/reporting';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -46,6 +47,7 @@ app.use('/api/project', router_project);
 app.use('/api/app', router_app);
 app.use('/api/pipeline', router_pipeline);
 app.use('/api/plugin', router_plugin);
+app.use('/api/reporting', reporting_project);
 
 // Implement the “catch-all” errorHandler function
 app.use(errorHandler);

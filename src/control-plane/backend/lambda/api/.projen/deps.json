@@ -161,6 +161,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-redshift-data",
+      "version": "^3.338.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-redshift-serverless",
       "version": "^3.338.0",
       "type": "runtime"
@@ -192,6 +197,11 @@
     },
     {
       "name": "@aws-sdk/client-sts",
+      "version": "^3.338.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/credential-providers",
       "version": "^3.338.0",
       "type": "runtime"
     },
