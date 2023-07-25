@@ -51,13 +51,49 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     },
   ];
   const navAnalyticsItems: SideNavigationProps.Item[] = [
-    { type: 'link', text: t('nav.analytics'), href: '/analytics' },
+    { type: 'link', text: t('nav.analytics.dashboards'), href: '/analytics' },
     {
-      text: t('nav.analytics'),
+      text: t('nav.analytics.explore'),
       type: 'section',
       defaultExpanded: true,
       items: [
-        { type: 'link', text: t('nav.funnel'), href: '/analytics/funnel' },
+        {
+          type: 'link',
+          text: t('nav.analytics.explore-event'),
+          href: '/analytics/event',
+        },
+        {
+          type: 'link',
+          text: t('nav.analytics.explore-retention'),
+          href: '/analytics/retention',
+        },
+        {
+          type: 'link',
+          text: t('nav.analytics.explore-funnel'),
+          href: '/analytics/funnel',
+        },
+      ],
+    },
+    {
+      text: t('nav.analytics.metadata'),
+      type: 'section',
+      defaultExpanded: true,
+      items: [
+        {
+          type: 'link',
+          text: t('nav.analytics.metadata-events'),
+          href: '/analytics/metadata/events',
+        },
+        {
+          type: 'link',
+          text: t('nav.analytics.metadata-event-attributes'),
+          href: '/analytics/metadata/event-attributes',
+        },
+        {
+          type: 'link',
+          text: t('nav.analytics.metadata-user-attributes'),
+          href: '/analytics/metadata/user-attributes',
+        },
       ],
     },
   ];

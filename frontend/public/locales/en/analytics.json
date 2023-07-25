@@ -1,0 +1,15 @@
+{
+  "analytics": "Analytics",
+  "dashboard": {
+    "title": "Dashboards",
+    "description": "This page lists all the dashboards."
+  },
+  "list": {
+    "loading": "Loading dashboards.",
+    "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
+    "id": "ID",
+    "description": "Description",
+    "createAt": "CreateAt"
+    
+  }
+}

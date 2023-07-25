@@ -13,42 +13,10 @@
 
 export {};
 declare global {
-  enum EPlatfom {
-    Web = 'Web',
-    Android = 'Android',
-    iOS = 'iOS',
-  }
-
-  interface IProject {
+  interface IAnalyticsDashboard {
     id: string;
     name: string;
-    platform: string;
-    environment: string;
-    emails: string;
-    region: string;
     description: string;
-    updateAt?: number;
-    operator?: string;
-    deleted?: boolean;
-    createAt?: number;
-    type?: string;
-    status?: string;
-    pipelineId?: string;
-  }
- 
-  interface IAlarmPromiseResult {
-    status: string;
-    value?: {
-      success: boolean;
-      message: string;
-      data: ResponseTableData<IAlarm>;
-    };
-  }
-
-  interface IProjectWithAlarm {
-    project: IProject;
-    status: DisplayStatus;
-    inAlarm: number;
-    alarms: IAlarm[];
+    createAt: number;
   }
 }

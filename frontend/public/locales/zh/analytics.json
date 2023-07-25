@@ -1,0 +1,10 @@
+{
+  "analytics": "Analytics",
+  "dashboard": {
+    "title": "Dashboards",
+    "description": "This page lists all the dashboards."
+  },
+  "list": {
+    "loading": "Loading dashboards."
+  }
+}

@@ -20,7 +20,17 @@
     "projects": "Projects",
     "pipelines": "Pipelines",
     "plugins": "Plugins",
-    "analytics": "Analytics",
+    "analytics": {
+      "dashboards": "Dashboards",
+      "explore": "Explore",
+      "metadata": "Metadata",
+      "explore-event": "Event Analysis",
+      "explore-retention": "Retention Analysis",
+      "explore-funnel": "Funnel Analysis",
+      "metadata-events": "Origin Events",
+      "metadata-event-attributes": "Event Attributes",
+      "metadata-user-attributes": "User Attributes"
+    },
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
     "monitorAlerts": "Alarms",

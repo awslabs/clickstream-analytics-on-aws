@@ -11,36 +11,26 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, ContentLayout } from '@cloudscape-design/components';
-import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
+import { AppLayout } from '@cloudscape-design/components';
 import Navigation from 'components/layouts/Navigation';
-import HomeHeader from 'pages/home/comps/HomeHeader';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
-const AnalyticsHome: React.FC = () => {
-  const { t } = useTranslation();
-  const breadcrumbItems = [
-    {
-      text: t('breadCrumb.name'),
-      href: '/',
-    },
-    {
-      text: t('breadCrumb.analytics'),
-      href: '/analytics',
-    },
-  ];
+const AnalyticsDashboardDetail: React.FC = () => {
+
   return (
     <AppLayout
       toolsHide
       content={
-        <ContentLayout header={<HomeHeader />}>AnalyticsHome</ContentLayout>
+        <iframe
+          title='iframe'
+          src="https://toladata.io/dashboards/public/b30c3fa6-32a9-4d5e-841d-8cf85d906897/15v6-057ba175c7601f60bfbb"
+          style={{height:'100%', width:'100%', border: 0, overflow:'hidden'}}
+        ></iframe>
       }
       headerSelector="#header"
-      breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
-      navigation={<Navigation activeHref="/analytics" />}
+      navigation={<Navigation activeHref="/analytics/dashboard/detail" />}
     />
   );
 };
 
-export default AnalyticsHome;
+export default AnalyticsDashboardDetail;
