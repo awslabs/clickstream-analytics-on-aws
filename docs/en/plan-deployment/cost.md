@@ -42,20 +42,24 @@ Key assumptions include:
 - KDS configuration (on-demand, provision - shard 2)
 - 10/100/1000RPS
 
-| Request Per Second | ALB | EC2 | Buffer type       | Buffer cost | S3   |  Total (USD/Month) |
-| ------------------ | --- | --- | ----------------- | ----------- | ---  |  --------- |
-| 10RPS             |   7  | 122    | Kinesis (On-Demand) |    36         |   3   |     168  |
-|                         |   7  |  122   | Kinesis (Provisioned 2 shard)   |      22       |  3   |   154  |
-|                         |   7  |  122   | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     549   |
-|                         | 7    |  122   | None              |             |  3    |      132   |
-|100RPS           |   43  |  122  |     Kinesis(On-demand)              |      86       |  3   |     254 |
-|                         | 43    |   122  | Kinesis (Provisioned 2 shard)   |      26       | 3    |     194  |
-|           |   43  |  122  |     MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     585
-|           |   43  |  122  |     None              |             |  3    |     168
-|1000RPS           |   396  |   122 |     Kinesis(On-demand)              |      576       |  14   |    1108 |
-|                         |  396   |  122   | Kinesis (Provisioned 10 shard)   |    146         |   14  |     678  |
-|           |  396   | 122   |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1062
-|           |  396   | 122   |     None              |            |  14   |     532
+| Request Per Second | ALB | EC2  | NAT(1) | Buffer type      | Buffer cost | S3   |  Total (USD/Month) |
+| ------------------ | --- | ---  | ---    | --------------   | ----------- | ---  |  --------- |
+| 10RPS              |  7  |  122 | 32  | Kinesis (On-Demand) |    36       |   3  |     200  |
+|                    |  7  |  122 | 32  | Kinesis (Provisioned 2 shard)   |      22       |  3   |   186  |
+|                    |  7  |  122 | 32  | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     581   |
+|                         | 7    |  122 | 32  | None              |             |  3    |      164   |
+|100RPS           |   43  |  122  | 32    | Kinesis(On-demand)              |      86       |  3   |     286 |
+|                         | 43    |   122 | 32 | Kinesis (Provisioned 2 shard)   |      26       | 3    |     226  |
+|           |   43  |  122  |  32   | MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     617
+|           |   43  |  122 | 32 |     None              |             |  3    |     200
+|1000RPS           |   396  |   122 | 32|     Kinesis(On-demand)              |      576       |  14   |    1140 |
+|                         |  396   |  122  | 32. | Kinesis (Provisioned 10 shard)   |    146         |   14  |     710  |
+|           |  396   | 122  | 32 |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1094
+|           |  396   | 122   | 32|     None              |            |  14   |     564
+
+!!! info "Note"
+    To save NAT fees, please configure the [VPC endpoint][vpce] to connect to S3/KDS/MSK.
+
 
 ## Data processing & data modeling modules
 
@@ -80,8 +84,8 @@ Key assumptions include:
 |                         | 6-hourly              |     99     | Serverless(8 based RPU)               |       17.2        |   116.2    |
 |                         | Daily                 |     140     | Serverless(8 based RPU)               |       16.9        |    156.9   |
 | 1000RPS             | Hourly                |      1362   | Serverless (8 based RPU) |       172        |  1534    |
-|              | 6-Hourly                |      678   | Serverless (8 based RPU) |       176        |  854    |
-|              | Daily                |     873   | Serverless (8 based RPU) |        352       |   1225   |
+|              | 6-Hourly                |      678   | Serverless (8 based RPU) |       117        |  795    |
+|              | Daily                |     873   | Serverless (8 based RPU) |        161       |   1034   |
 
 !!! info "Note"
     For the cost of 1000 PRS Daily, we used below EMR configuration.
@@ -157,3 +161,5 @@ You are charged storage costs for Amazon S3, but not charged for the bandwidth u
 | 10 RPS           |    16.5       |    0.38     |
 | 100 RPS         |     165     |      3.8   |
 | 1000 RPS       |     1650     |    38     |
+
+[vpce]: https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html
