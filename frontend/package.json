@@ -4,7 +4,10 @@
   "private": true,
   "license": "Apache-2.0",
   "description": "frontend",
-  "author": {"name": "Amazon Web Services", "url": "https://aws.amazon.com/solutions"},
+  "author": {
+    "name": "Amazon Web Services",
+    "url": "https://aws.amazon.com/solutions"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.353.0",
     "@aws-sdk/lib-storage": "^3.353.0",
@@ -188,7 +191,7 @@
           "outputDirectory": "test-reports"
         }
       ]
-    ],    
+    ],
     "resetMocks": true
   },
   "resolutions": {
