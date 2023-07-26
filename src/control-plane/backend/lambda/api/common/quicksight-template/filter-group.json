@@ -1,0 +1,31 @@
+{
+  "FilterGroupId": "",
+  "Filters": [
+      {
+          "TimeRangeFilter": {
+              "FilterId": "",
+              "Column": {
+                  "DataSetIdentifier": "",
+                  "ColumnName": ""
+              },
+              "NullOption": "NON_NULLS_ONLY",
+              "TimeGranularity": "DAY"
+          }
+      }
+  ],
+  "ScopeConfiguration": {
+      "SelectedSheets": {
+          "SheetVisualScopingConfigurations": [
+              {
+                  "SheetId": "",
+                  "Scope": "SELECTED_VISUALS",
+                  "VisualIds": [
+                      ""
+                  ]
+              }
+          ]
+      }
+  },
+  "Status": "ENABLED",
+  "CrossDataset": "SINGLE_DATASET"
+}
