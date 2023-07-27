@@ -19,8 +19,11 @@ import {
   Pagination,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
+import { getApplicationListByPipeline } from 'apis/application';
+import { getProjectList } from 'apis/project';
 import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
+import { save } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -89,9 +92,63 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     }
   };
 
+  const getDefaultProjectAndApp = async () => {
+    const projects = await listProjects();
+    const projectFilter = projects.filter((p) => p.id === pid);
+    if (projectFilter && projectFilter.length > 0) {
+      const project = projectFilter[0];
+      const apps = await listApplicationByProject(project.id);
+      const appsFilter = apps.filter((a) => a.appId === appid);
+      if (appsFilter && appsFilter.length > 0) {
+        const app = appsFilter[0];
+        save('Analytics-ProjectId-AppId', {
+          pid: project.id,
+          pname: project.name,
+          appid: app.appId,
+          appname: app.name,
+        });
+      }
+    }
+  };
+
+  const listProjects = async () => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
+  const listApplicationByProject = async (pid: string) => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IApplication>> =
+        await getApplicationListByPipeline({
+          pid: pid,
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
   useEffect(() => {
-    console.log(pid, appid);
     if (pid && appid) {
+      getDefaultProjectAndApp();
       listAnalyticsDashboards();
     }
   }, [currentPage]);
@@ -127,7 +184,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   );
 };
 
-const AnalyticsHome: React.FC = () => {
+const AnalyticsDashboard: React.FC = () => {
   return (
     <AppLayout
       toolsHide
@@ -138,4 +195,4 @@ const AnalyticsHome: React.FC = () => {
   );
 };
 
-export default AnalyticsHome;
+export default AnalyticsDashboard;

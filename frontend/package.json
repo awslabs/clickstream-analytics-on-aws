@@ -15,6 +15,7 @@
     "@babel/core": "^7.16.0",
     "@cloudscape-design/components": "^3.0.294",
     "@cloudscape-design/global-styles": "^1.0.7",
+    "@cloudscape-design/design-tokens": "^3.0.22",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.16.5",

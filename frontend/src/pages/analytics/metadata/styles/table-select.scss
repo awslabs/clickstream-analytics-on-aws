@@ -1,0 +1,63 @@
+/**
+ *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  with the License. A copy of the License is located at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
+ *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
+ *  and limitations under the License.
+ */
+
+@use '@cloudscape-design/design-tokens' as cs;
+
+.input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  order: 0;
+  flex-grow: 10;
+  margin-right: 0;
+  margin-bottom: calc(-1 * #{cs.$space-scaled-m});
+
+  > *:not(:empty) {
+    margin-right: cs.$space-scaled-m;
+    margin-bottom: cs.$space-scaled-s;
+  }
+}
+
+.input-filter {
+  order: 0;
+  flex-grow: 6;
+  width: auto;
+  max-width: 728px;
+}
+
+.select-filter {
+  max-width: 130px;
+  flex-grow: 2;
+  width: auto;
+}
+
+.filtering-results {
+  margin-left: 1rem;
+  line-height: 3rem;
+  color: cs.$color-text-form-default;
+}
+
+@media (max-width: 1152px) {
+  .input-container {
+    margin-right: calc(-1 * #{cs.$space-scaled-m});
+  }
+
+  .select-filter {
+    max-width: none;
+  }
+
+  .input-filter {
+    width: 100%;
+    max-width: none;
+  }
+}

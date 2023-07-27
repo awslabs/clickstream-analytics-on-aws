@@ -49,45 +49,22 @@ const getMetadataEventsList = async (params: {
   pageSize: number;
 }) => {
   const result: any = await new Promise((resolve, reject) => {
+    const data = [];
+    for (let index = 0; index <= 20; index++) {
+      data.push({
+        id: `${index}`,
+        name: `Event Name ${index}`,
+        displayName: `事件${index}`,
+        type: index > 10 ? 'built-in' : 'customer',
+        description: `Event description ${index}`,
+      });
+    }
     resolve({
       success: true,
       message: 'OK',
       data: {
         totalCount: 2,
-        items: [
-          {
-            id: '1',
-            key: '1',
-            name: 'Event Name 1',
-            type: 'built-in',
-            description: 'Event description 1',
-            createAt: 1690251290,
-          },
-          {
-            id: '2',
-            key: '2',
-            name: 'Event Name 2',
-            type: 'customer',
-            description: 'Event description 2',
-            createAt: 1690251290,
-          },
-          {
-            id: '3',
-            key: '3',
-            name: 'Event Name 3',
-            type: 'customer',
-            description: 'Event description 3',
-            createAt: 1690251290,
-          },
-          {
-            id: '4',
-            key: '4',
-            name: 'Event Name 4',
-            type: 'customer',
-            description: 'Event description 4',
-            createAt: 1690251290,
-          },
-        ],
+        items: data,
       },
       error: '',
     });
@@ -95,4 +72,20 @@ const getMetadataEventsList = async (params: {
   return result;
 };
 
-export { getAnalyticsDashboardList, getMetadataEventsList };
+const updateMetadataEvent = async (event: IMetadataEvent) => {
+  const result: any = await new Promise((resolve, reject) => {
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {},
+      error: '',
+    });
+  });
+  return result;
+};
+
+export {
+  getAnalyticsDashboardList,
+  getMetadataEventsList,
+  updateMetadataEvent,
+};

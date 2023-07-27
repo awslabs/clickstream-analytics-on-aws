@@ -11,35 +11,103 @@
  *  and limitations under the License.
  */
 
+import { useCollection } from '@cloudscape-design/collection-hooks';
 import {
   Box,
-  Button,
+  FormField,
   Header,
+  Input,
   Pagination,
-  SpaceBetween,
+  Select,
+  SelectProps,
   Table,
 } from '@cloudscape-design/components';
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { getMetadataEventsList } from 'apis/analytics';
-import React, { useEffect, useState } from 'react';
+import {
+  TableEmptyState,
+  TableNoMatchState,
+} from 'pages/common/common-components';
+import { useColumnWidths } from 'pages/common/use-column-widths';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DEFAULT_PREFERENCES, SEARCHABLE_COLUMNS } from './table-config';
+import '../styles/table-select.scss';
+
+const defaultEventType = { value: '0', label: 'Any Type' };
 
 interface EventTableProps {
   selectionType?: 'multi' | 'single';
   projectId: string;
   appId: string;
+  refresh: number;
+  defaultSelectedItems: IMetadataEvent[];
+  changeSelectedItems: (item: IMetadataEvent[]) => void;
 }
 
 const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
-  const { selectionType, projectId, appId } = props;
+  const {
+    selectionType,
+    projectId,
+    appId,
+    defaultSelectedItems,
+    changeSelectedItems,
+  } = props;
   const { t } = useTranslation();
   const [loadingData, setLoadingData] = useState(false);
-  const [pageSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [selectedItems, setSelectedItems] = useState(defaultSelectedItems);
   const [eventList, setEventList] = useState<IMetadataEvent[]>([]);
-  const [selectedItems, setSelectedItems] = useState<IMetadataEvent[]>([]);
+  const COLUMN_DEFINITIONS = [
+    {
+      id: 'id',
+      header: t('analytics:metadata.event.tableColumnID'),
+      cell: (e: { id: any }) => {
+        return e.id;
+      },
+    },
+    {
+      id: 'name',
+      header: t('analytics:metadata.event.tableColumnName'),
+      cell: (e: { name: any }) => {
+        return e.name;
+      },
+    },
+    {
+      id: 'displayName',
+      header: t('analytics:metadata.event.tableColumnDisplayName'),
+      cell: (e: { displayName: any }) => {
+        return e.displayName;
+      },
+    },
+    {
+      id: 'description',
+      header: t('analytics:metadata.event.tableColumnDescription'),
+      cell: (e: { description: any }) => {
+        return e.description;
+      },
+    },
+    {
+      id: 'type',
+      header: t('analytics:metadata.event.tableColumnType'),
+      cell: (e: { type: any }) => {
+        return e.type;
+      },
+    },
+  ];
+  const [columnDefinitions, saveWidths] = useColumnWidths(
+    'Metadata-Event-TableSelectFilter-Widths',
+    COLUMN_DEFINITIONS
+  );
+  const [eventType, setEventType] =
+    useState<OptionDefinition>(defaultEventType);
 
-  const listAlarms = async () => {
+  const eventTypeOptions = [
+    defaultEventType,
+    { value: '1', label: 'built-in' },
+    { value: '2', label: 'customer' },
+  ];
+
+  const listMetadataEvents = async () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
@@ -51,7 +119,6 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
         });
       if (success) {
         setEventList(data.items);
-        setTotalCount(data.totalCount);
         setLoadingData(false);
       }
     } catch (error) {
@@ -60,24 +127,71 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
   };
 
   useEffect(() => {
-    listAlarms();
-  }, [currentPage]);
+    listMetadataEvents();
+  }, []);
+
+  function matchesEventType(item: any, selectedType: SelectProps.Option) {
+    console.log(item, selectedType);
+    return (
+      selectedType === defaultEventType || item.type === selectedType.label
+    );
+  }
+
+  const {
+    items,
+    actions,
+    filteredItemsCount,
+    collectionProps,
+    filterProps,
+    paginationProps,
+  } = useCollection(JSON.parse(JSON.stringify(eventList)), {
+    filtering: {
+      empty: <TableEmptyState resourceName="Event" />,
+      noMatch: <TableNoMatchState onClearFilter={clearFilter} />,
+      filteringFunction: (item: any, filteringText) => {
+        if (!matchesEventType(item, eventType)) {
+          return false;
+        }
+        const filteringTextLowerCase = filteringText.toLowerCase();
+
+        return SEARCHABLE_COLUMNS.map((key) => item[key]).some(
+          (value) =>
+            typeof value === 'string' &&
+            value.toLowerCase().indexOf(filteringTextLowerCase) > -1
+        );
+      },
+    },
+    pagination: { pageSize: DEFAULT_PREFERENCES.pageSize },
+    sorting: { defaultState: { sortingColumn: columnDefinitions[0] } },
+    selection: {},
+  });
+  useLayoutEffect(() => {
+    collectionProps.ref.current?.scrollToTop();
+  }, [eventType, collectionProps.ref, filterProps.filteringText]);
+
+  function clearFilter() {
+    actions.setFiltering('');
+    setEventType(defaultEventType);
+  }
 
   return (
     <div>
       <Table
+        {...collectionProps}
         variant="full-page"
         selectedItems={selectedItems}
         stickyHeader={true}
         resizableColumns={true}
         loading={loadingData}
-        items={eventList}
-        loadingText={t('pipeline:detail.alarmTableLoading') || 'Loading'}
+        items={items}
+        trackBy="id"
+        loadingText={t('analytics:metadata.event.tableLoading') || 'Loading'}
         selectionType={selectionType ?? 'single'}
-        stripedRows={true}
         onSelectionChange={({ detail }) => {
           setSelectedItems(detail.selectedItems);
+          changeSelectedItems(detail.selectedItems);
         }}
+        onColumnWidthsChange={saveWidths}
         ariaLabels={{
           allItemsSelectionLabel: ({ selectedItems }) =>
             `${selectedItems.length} ${
@@ -92,73 +206,66 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
             )}`;
           },
         }}
-        columnDefinitions={[
-          {
-            id: 'id',
-            header: 'ID',
-            cell: (e) => {
-              return e.id;
-            },
-          },
-          {
-            id: 'name',
-            header: t('pipeline:detail.alarmTableColumnName'),
-            cell: (e) => {
-              return e.name;
-            },
-          },
-          {
-            id: 'description',
-            header: t('pipeline:detail.alarmDescription'),
-            cell: (e) => {
-              return e.description;
-            },
-          },
-        ]}
+        columnDefinitions={columnDefinitions}
+        columnDisplay={DEFAULT_PREFERENCES.contentDisplay}
         empty={
           <Box textAlign="center" color="inherit">
-            <b>{t('pipeline:detail.alarmTableNoAlarm')}</b>
+            <b>{t('analytics:metadata.event.tableEmpty')}</b>
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('pipeline:detail.alarmTableNoAlarmDisplay')}
+              {t('analytics:metadata.event.tableNoDataDisplay')}
             </Box>
           </Box>
         }
         header={
           <>
-            <Header
-              counter={`(${eventList.length})`}
-              actions={
-                <SpaceBetween direction="horizontal" size="xs">
-                  <Button
-                    iconName="refresh"
-                    loading={loadingData}
-                    onClick={() => {
-                      listAlarms();
-                    }}
-                  />
-                </SpaceBetween>
-              }
-            >
-              title
+            <Header counter={`(${eventList.length})`}>
+              {t('analytics:metadata.event.title')}
             </Header>
-            desc
+            {t('analytics:metadata.event.description')}
           </>
         }
-        pagination={
-          <Pagination
-            currentPageIndex={currentPage}
-            pagesCount={Math.ceil(totalCount / pageSize)}
-            onChange={(e) => {
-              setCurrentPage(e.detail.currentPageIndex);
-            }}
-            ariaLabels={{
-              nextPageLabel: t('nextPage') || '',
-              previousPageLabel: t('prePage') || '',
-              pageLabel: (pageNumber) =>
-                `${t('page')} ${pageNumber} ${t('allPages')}`,
-            }}
-          />
+        filter={
+          <div className="input-container">
+            <div className="input-filter">
+              <Input
+                data-testid="input-filter"
+                type="search"
+                value={filterProps.filteringText}
+                onChange={(event) => {
+                  actions.setFiltering(event.detail.value);
+                }}
+                ariaLabel="Find instances"
+                placeholder="Find instances"
+                clearAriaLabel="clear"
+              />
+            </div>
+            <div className="select-filter">
+              <FormField label="Filter Type">
+                <Select
+                  data-testid="type-filter"
+                  options={eventTypeOptions}
+                  selectedAriaLabel="Selected"
+                  selectedOption={eventType}
+                  onChange={(event) => {
+                    setEventType(event.detail.selectedOption);
+                  }}
+                  expandToViewport={true}
+                />
+              </FormField>
+            </div>
+            <div aria-live="polite">
+              {(filterProps.filteringText ||
+                eventType !== defaultEventType) && (
+                <span className="filtering-results">
+                  {`${filteredItemsCount} ${
+                    filteredItemsCount === 1 ? 'match' : 'matches'
+                  }`}
+                </span>
+              )}
+            </div>
+          </div>
         }
+        pagination={<Pagination {...paginationProps} />}
       />
     </div>
   );

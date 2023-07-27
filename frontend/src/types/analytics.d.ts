@@ -23,8 +23,8 @@ declare global {
   interface IMetadataEvent {
     id: string;
     name: string;
+    displayName: string;
     description: string;
     type: string;
-    createAt: number;
   }
 }

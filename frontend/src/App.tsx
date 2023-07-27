@@ -19,9 +19,11 @@ import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
-import AnalyticsHome from 'pages/analytics/dashboard/AnalyticsDashboard';
+import AnalyticsHome from 'pages/analytics/AnalyticsHome';
+import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
 import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
+import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -36,7 +38,6 @@ import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
-import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
 
 const LoginCallback: React.FC = () => {
   useEffect(() => {
@@ -118,9 +119,10 @@ const SignedInPage: React.FC = () => {
                   path="/project/:pid/application/detail/:id"
                   element={<ApplicationDetail />}
                 />
+                <Route path="/analytics" element={<AnalyticsHome />} />
                 <Route
                   path="/analytics/:pid/app/:appid/dashboards"
-                  element={<AnalyticsHome />}
+                  element={<AnalyticsDashboard />}
                 />
                 <Route
                   path="/analytics/:pid/app/:appid/dashboard/:did"

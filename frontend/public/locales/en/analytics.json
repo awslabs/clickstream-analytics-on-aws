@@ -15,5 +15,29 @@
     "modalTitle": "Swich Project Space",
     "selectProjectTitle": "Please select a project",
     "selectAppTitle": "Please select an application"
+  },
+  "metadata": {
+    "event": {
+      "title": "Origin Events",
+      "description": "Description of the Origin Events",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Name",
+      "tableColumnDisplayName": "DisplayName",
+      "tableColumnDescription": "Description",
+      "tableColumnType": "Type",
+      "tableEmpty": "No events",
+      "tableNoDataDisplay": "No events to display.",
+      "split": {
+        "id": "ID",
+        "name": "Name",
+        "displayName": "DisplayName",
+        "description": "Description"
+      }
+    }
+  },
+  "valid": {
+    "projectSelectError": "Must select a project",
+    "appSelectError": "Must select an application"
   }
 }
