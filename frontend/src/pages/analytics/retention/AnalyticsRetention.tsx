@@ -10,32 +10,24 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Header } from '@cloudscape-design/components';
+
+import { AppLayout, ContentLayout } from '@cloudscape-design/components';
+import Navigation from 'components/layouts/Navigation';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
-interface MetadataHeaderProps {
-  title: string;
-  totalNum: number;
-}
-
-const MetadataHeader: React.FC<MetadataHeaderProps> = (
-  props: MetadataHeaderProps
-) => {
-  const { t } = useTranslation();
-  const { totalNum } = props;
-
+const AnalyticsRetention: React.FC = () => {
+  const { pid, appid } = useParams();
   return (
-    <>
-      <Header
-        variant="h1"
-        counter={`(${totalNum})`}
-        description={t('analytics:metadata.description')}
-      >
-        {t('analytics:metadata.title')}
-      </Header>
-    </>
+    <AppLayout
+      toolsHide
+      content={<ContentLayout>retention</ContentLayout>}
+      headerSelector="#header"
+      navigation={
+        <Navigation activeHref={`/analytics/${pid}/app/${appid}/retention`} />
+      }
+    />
   );
 };
 
-export default MetadataHeader;
+export default AnalyticsRetention;

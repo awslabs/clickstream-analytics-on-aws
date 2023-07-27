@@ -22,8 +22,12 @@ import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
 import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
+import AnalyticsEvent from 'pages/analytics/event/AnalyticsEvent';
 import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
+import MetadataAttributes from 'pages/analytics/metadata/event-attributes/MetadataAttributes';
 import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
+import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
+import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -129,12 +133,28 @@ const SignedInPage: React.FC = () => {
                   element={<AnalyticsDashboardDetail />}
                 />
                 <Route
+                  path="/analytics/:pid/app/:appid/event"
+                  element={<AnalyticsEvent />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/retention"
+                  element={<AnalyticsRetention />}
+                />
+                <Route
                   path="/analytics/:pid/app/:appid/funnel"
                   element={<AnalyticsFunnel />}
                 />
                 <Route
                   path="/analytics/:pid/app/:appid/metadata/events"
                   element={<MetadataEvents />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/event-attributes"
+                  element={<MetadataAttributes />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/user-attributes"
+                  element={<MetadataUserAttributes />}
                 />
               </Routes>
             </div>

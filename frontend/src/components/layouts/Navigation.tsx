@@ -47,6 +47,13 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     { type: 'divider' },
     {
       type: 'link',
+      text: t('nav.explore'),
+      href: '/analytics',
+      external: true,
+    },
+    { type: 'divider' },
+    {
+      type: 'link',
       text: t('nav.doc'),
       href: getDoucmentList(i18n.language),
       external: true,

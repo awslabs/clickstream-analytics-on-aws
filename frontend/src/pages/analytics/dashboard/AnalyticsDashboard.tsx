@@ -185,12 +185,16 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 };
 
 const AnalyticsDashboard: React.FC = () => {
+  const { pid, appid } = useParams();
+
   return (
     <AppLayout
       toolsHide
       content={<AnalyticsDashboardCard />}
       headerSelector="#header"
-      navigation={<Navigation activeHref="/analytics" />}
+      navigation={
+        <Navigation activeHref={`/analytics/${pid}/app/${appid}/dashboards`} />
+      }
     />
   );
 };

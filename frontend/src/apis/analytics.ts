@@ -84,8 +84,96 @@ const updateMetadataEvent = async (event: IMetadataEvent) => {
   return result;
 };
 
+const getMetadataAttributesList = async (params: {
+  pid: string;
+  appId: string;
+  pageNumber: number;
+  pageSize: number;
+}) => {
+  const result: any = await new Promise((resolve, reject) => {
+    const data = [];
+    for (let index = 0; index <= 67; index++) {
+      data.push({
+        id: `${index}`,
+        name: `Event Attribute Name ${index}`,
+        displayName: `事件属性${index}`,
+        type: index > 10 ? 'built-in' : 'customer',
+        description: `Event Attribute description ${index}`,
+      });
+    }
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {
+        totalCount: 2,
+        items: data,
+      },
+      error: '',
+    });
+  });
+  return result;
+};
+
+const updateMetadataAttribute = async (event: IMetadataAttribute) => {
+  const result: any = await new Promise((resolve, reject) => {
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {},
+      error: '',
+    });
+  });
+  return result;
+};
+
+const getMetadataUserAttributesList = async (params: {
+  pid: string;
+  appId: string;
+  pageNumber: number;
+  pageSize: number;
+}) => {
+  const result: any = await new Promise((resolve, reject) => {
+    const data = [];
+    for (let index = 0; index <= 38; index++) {
+      data.push({
+        id: `${index}`,
+        name: `User Attribute Name ${index}`,
+        displayName: `用户属性${index}`,
+        type: index > 10 ? 'built-in' : 'customer',
+        description: `User Attribute description ${index}`,
+      });
+    }
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {
+        totalCount: 2,
+        items: data,
+      },
+      error: '',
+    });
+  });
+  return result;
+};
+
+const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
+  const result: any = await new Promise((resolve, reject) => {
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {},
+      error: '',
+    });
+  });
+  return result;
+};
+
 export {
   getAnalyticsDashboardList,
   getMetadataEventsList,
   updateMetadataEvent,
+  getMetadataAttributesList,
+  updateMetadataAttribute,
+  getMetadataUserAttributesList,
+  updateMetadataUserAttribute,
 };

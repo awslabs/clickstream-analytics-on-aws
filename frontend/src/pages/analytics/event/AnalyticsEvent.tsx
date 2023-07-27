@@ -11,36 +11,21 @@
  *  and limitations under the License.
  */
 
-export {};
-declare global {
-  interface IAnalyticsDashboard {
-    id: string;
-    name: string;
-    description: string;
-    createAt: number;
-  }
+import { AppLayout, ContentLayout } from '@cloudscape-design/components';
+import Navigation from 'components/layouts/Navigation';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 
-  interface IMetadataEvent {
-    id: string;
-    name: string;
-    displayName: string;
-    description: string;
-    type: string;
-  }
+const AnalyticsEvent: React.FC = () => {
+  const { pid, appid } = useParams();
+  return (
+    <AppLayout
+      toolsHide
+      content={<ContentLayout>event</ContentLayout>}
+      headerSelector="#header"
+      navigation={<Navigation activeHref={`/analytics/${pid}/app/${appid}/event`} />}
+    />
+  );
+};
 
-  interface IMetadataAttribute {
-    id: string;
-    name: string;
-    displayName: string;
-    description: string;
-    type: string;
-  }
-
-  interface IMetadataUserAttribute {
-    id: string;
-    name: string;
-    displayName: string;
-    description: string;
-    type: string;
-  }
-}
+export default AnalyticsEvent;

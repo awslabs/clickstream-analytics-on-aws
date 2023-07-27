@@ -12,33 +12,21 @@
  */
 
 import { AppLayout, ContentLayout } from '@cloudscape-design/components';
-import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import HomeHeader from 'pages/home/comps/HomeHeader';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 const AnalyticsFunnel: React.FC = () => {
-  const { t } = useTranslation();
-  const breadcrumbItems = [
-    {
-      text: t('breadCrumb.name'),
-      href: '/',
-    },
-    {
-      text: t('breadCrumb.analytics'),
-      href: '/analytics/funnel',
-    },
-  ];
+  const { pid, appid } = useParams();
+
   return (
     <AppLayout
       toolsHide
-      content={
-        <ContentLayout header={<HomeHeader />}>AnalyticsHome</ContentLayout>
-      }
+      content={<ContentLayout>funnel</ContentLayout>}
       headerSelector="#header"
-      breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
-      navigation={<Navigation activeHref="/analytics/funnel" />}
+      navigation={
+        <Navigation activeHref={`/analytics/${pid}/app/${appid}/funnel`} />
+      }
     />
   );
 };

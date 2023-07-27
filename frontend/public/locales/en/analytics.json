@@ -34,6 +34,42 @@
         "displayName": "DisplayName",
         "description": "Description"
       }
+    },
+    "eventAttribute": {
+      "title": "Event Attribute",
+      "description": "Description of the Event Attribute",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Name",
+      "tableColumnDisplayName": "DisplayName",
+      "tableColumnDescription": "Description",
+      "tableColumnType": "Type",
+      "tableEmpty": "No event attributes",
+      "tableNoDataDisplay": "No event attributes to display.",
+      "split": {
+        "id": "ID",
+        "name": "Name",
+        "displayName": "DisplayName",
+        "description": "Description"
+      }
+    },
+    "userAttribute": {
+      "title": "User Attribute",
+      "description": "Description of the User Attribute",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Name",
+      "tableColumnDisplayName": "DisplayName",
+      "tableColumnDescription": "Description",
+      "tableColumnType": "Type",
+      "tableEmpty": "No event attributes",
+      "tableNoDataDisplay": "No event attributes to display.",
+      "split": {
+        "id": "ID",
+        "name": "Name",
+        "displayName": "DisplayName",
+        "description": "Description"
+      }
     }
   },
   "valid": {

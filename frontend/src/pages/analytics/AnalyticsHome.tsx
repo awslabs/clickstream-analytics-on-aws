@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
+import { AppLayout, Spinner } from '@cloudscape-design/components';
 import { getApplicationListByPipeline } from 'apis/application';
 import { getProjectList } from 'apis/project';
 import Navigation from 'components/layouts/Navigation';
@@ -20,6 +20,7 @@ import { load, save } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 
 const AnalyticsHome: React.FC = () => {
+  const [loadingData, setLoadingData] = useState(true);
   const [swichProjectVisible, setSwichProjectVisible] = useState(false);
 
   const getDefaultProjectAndApp = async () => {
@@ -36,6 +37,7 @@ const AnalyticsHome: React.FC = () => {
           appname: app.name,
         });
         window.location.href = `/analytics/${project.id}/app/${app.appId}/dashboards`;
+        return;
       }
       setSwichProjectVisible(true);
     }
@@ -78,12 +80,14 @@ const AnalyticsHome: React.FC = () => {
   };
 
   useEffect(() => {
+    setLoadingData(true);
     const analyticsIds = load('Analytics-ProjectId-AppId');
     if (analyticsIds) {
       window.location.href = `/analytics/${analyticsIds.pid}/app/${analyticsIds.appid}/dashboards`;
     } else {
       getDefaultProjectAndApp();
     }
+    setLoadingData(false);
   }, []);
 
   return (
@@ -91,11 +95,15 @@ const AnalyticsHome: React.FC = () => {
       toolsHide
       content={
         <div>
-          <SwitchSpaceModal
-            visible={swichProjectVisible}
-            disableClose={true}
-            setSwichProjectVisible={setSwichProjectVisible}
-          />
+          {loadingData ? (
+            <Spinner />
+          ) : (
+            <SwitchSpaceModal
+              visible={swichProjectVisible}
+              disableClose={true}
+              setSwichProjectVisible={setSwichProjectVisible}
+            />
+          )}
         </div>
       }
       headerSelector="#header"

@@ -25,7 +25,7 @@ import {
   Table,
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { getMetadataEventsList } from 'apis/analytics';
+import { getMetadataUserAttributesList } from 'apis/analytics';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -38,7 +38,7 @@ import '../styles/table-select.scss';
 
 const defaultEventType = { value: '0', label: 'Any Type' };
 
-interface EventTableProps {
+interface UserAttributeTableProps {
   selectionType?: 'multi' | 'single';
   projectId: string;
   appId: string;
@@ -47,7 +47,9 @@ interface EventTableProps {
   changeSelectedItems: (item: IMetadataEvent[]) => void;
 }
 
-const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
+const UserAttributeTable: React.FC<UserAttributeTableProps> = (
+  props: UserAttributeTableProps
+) => {
   const {
     selectionType,
     projectId,
@@ -62,7 +64,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
-      header: t('analytics:metadata.event.tableColumnID'),
+      header: t('analytics:metadata.userAttribute.tableColumnID'),
       sortingField: 'id',
       cell: (e: { id: any }) => {
         return e.id;
@@ -70,7 +72,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     },
     {
       id: 'name',
-      header: t('analytics:metadata.event.tableColumnName'),
+      header: t('analytics:metadata.userAttribute.tableColumnName'),
       sortingField: 'name',
       cell: (e: { name: any }) => {
         return e.name;
@@ -78,7 +80,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     },
     {
       id: 'displayName',
-      header: t('analytics:metadata.event.tableColumnDisplayName'),
+      header: t('analytics:metadata.userAttribute.tableColumnDisplayName'),
       sortingField: 'displayName',
       cell: (e: { displayName: any }) => {
         return e.displayName;
@@ -86,14 +88,14 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     },
     {
       id: 'description',
-      header: t('analytics:metadata.event.tableColumnDescription'),
+      header: t('analytics:metadata.userAttribute.tableColumnDescription'),
       cell: (e: { description: any }) => {
         return e.description;
       },
     },
     {
       id: 'type',
-      header: t('analytics:metadata.event.tableColumnType'),
+      header: t('analytics:metadata.userAttribute.tableColumnType'),
       cell: (e: { type: any }) => {
         return e.type;
       },
@@ -116,7 +118,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({
+        await getMetadataUserAttributesList({
           pid: projectId,
           appId: appId,
           pageNumber: 1,
@@ -190,7 +192,9 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
         loading={loadingData}
         items={items}
         trackBy="id"
-        loadingText={t('analytics:metadata.event.tableLoading') || 'Loading'}
+        loadingText={
+          t('analytics:metadata.userAttribute.tableLoading') || 'Loading'
+        }
         selectionType={selectionType ?? 'single'}
         onSelectionChange={({ detail }) => {
           setSelectedItems(detail.selectedItems);
@@ -215,9 +219,9 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
         columnDisplay={DEFAULT_PREFERENCES.contentDisplay}
         empty={
           <Box textAlign="center" color="inherit">
-            <b>{t('analytics:metadata.event.tableEmpty')}</b>
+            <b>{t('analytics:metadata.userAttribute.tableEmpty')}</b>
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('analytics:metadata.event.tableNoDataDisplay')}
+              {t('analytics:metadata.userAttribute.tableNoDataDisplay')}
             </Box>
           </Box>
         }
@@ -233,9 +237,9 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
                 </SpaceBetween>
               }
             >
-              {t('analytics:metadata.event.title')}
+              {t('analytics:metadata.userAttribute.title')}
             </Header>
-            {t('analytics:metadata.event.description')}
+            {t('analytics:metadata.userAttribute.description')}
           </>
         }
         filter={
@@ -285,4 +289,4 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
   );
 };
 
-export default EventTable;
+export default UserAttributeTable;
