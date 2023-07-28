@@ -13,7 +13,7 @@ import { SelectProps } from '@cloudscape-design/components';
  *  and limitations under the License.
  */
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
-export const SUPPORT_SELF_HOSTED_KAFKA = false;
+export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const CONFIG_URL = '/aws-exports.json';
