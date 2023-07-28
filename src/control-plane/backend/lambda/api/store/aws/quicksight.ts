@@ -23,6 +23,7 @@ import {
   AccessDeniedException,
   GenerateEmbedUrlForRegisteredUserCommand,
   GenerateEmbedUrlForRegisteredUserCommandOutput,
+  UpdateDashboardPermissionsCommand,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
@@ -179,31 +180,63 @@ export const registerEmbddingUserByRegion = async (region: string) => {
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   dashboardId: string,
-  sheetId: string,
-  visualId: string,
+  sheetId?: string,
+  visualId?: string,
 ): Promise<GenerateEmbedUrlForRegisteredUserCommandOutput> => {
   const quickSightClient = new QuickSightClient({
     ...aws_sdk_client_common_config,
     region: region,
   });
   // await registerEmbddingUserByRegion(region);
-  const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
-    AwsAccountId: awsAccountId,
-    UserArn: `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`,
-    ExperienceConfiguration: {
-      // Dashboard: { // RegisteredUserDashboardEmbeddingConfiguration
-      //   InitialDashboardId: dashboardId, // required
-      // },
-      DashboardVisual: {
-        InitialDashboardVisualId: {
-          DashboardId: dashboardId,
-          SheetId: sheetId,
-          VisualId: visualId,
+  const userArn = `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`;
+  await updateDashboardPermissionsCommand(region, dashboardId, userArn);
+  if (sheetId && visualId) {
+    const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
+      AwsAccountId: awsAccountId,
+      UserArn: userArn,
+      ExperienceConfiguration: {
+        DashboardVisual: {
+          InitialDashboardVisualId: {
+            DashboardId: dashboardId,
+            SheetId: sheetId,
+            VisualId: visualId,
+          },
         },
       },
-    },
+    });
+    return quickSightClient.send(command);
+  } else {
+    const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
+      AwsAccountId: awsAccountId,
+      UserArn: `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`,
+      ExperienceConfiguration: {
+        Dashboard: { // RegisteredUserDashboardEmbeddingConfiguration
+          InitialDashboardId: dashboardId, // required
+        },
+      },
+    });
+    return quickSightClient.send(command);
+  }
+};
+
+export const updateDashboardPermissionsCommand = async (
+  region: string,
+  dashboardId: string,
+  userArn: string,
+): Promise<void> => {
+  const quickSightClient = new QuickSightClient({
+    ...aws_sdk_client_common_config,
+    region: region,
   });
-  return quickSightClient.send(command);
+  const command: UpdateDashboardPermissionsCommand = new UpdateDashboardPermissionsCommand({
+    AwsAccountId: awsAccountId,
+    DashboardId: dashboardId,
+    GrantPermissions: [{
+      Principal: userArn,
+      Actions: ['quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions'],
+    }],
+  });
+  await quickSightClient.send(command);
 };
 
 // Determine if QuickSight has already subscribed

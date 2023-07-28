@@ -265,6 +265,8 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:ListUsers',
             'quicksight:DescribeAccountSubscription',
             'quicksight:RegisterUser',
+            'quicksight:GenerateEmbedUrlForRegisteredUser',
+            'quicksight:UpdateDashboardPermissions',
             'ds:AuthorizeApplication',
             'ds:UnauthorizeApplication',
             'ds:CheckAlias',

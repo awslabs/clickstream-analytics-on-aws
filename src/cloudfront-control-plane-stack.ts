@@ -162,12 +162,16 @@ export class CloudFrontControlPlaneStack extends Stack {
       solutionBucket.bucket.bucketRegionalDomainName,
     ].join(' ');
 
+    const frameCSPUrl = [
+      `*.quicksight.${Aws.PARTITION}.amazon.com`,
+    ].join(' ');
+
     if (createCognitoUserPool) {
       responseHeadersPolicy = new ResponseHeadersPolicy(this, 'response_headers_policy', {
         responseHeadersPolicyName: `clickstream-response_header-policy-${getShortIdOfStack(this)}`,
         securityHeadersBehavior: {
           contentSecurityPolicy: {
-            contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}`,
+            contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}; frame-src ${frameCSPUrl};`,
             override: true,
           },
           contentTypeOptions: { override: true },

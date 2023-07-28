@@ -11,21 +11,71 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
+import { AppLayout, Spinner } from '@cloudscape-design/components';
+import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
+import { fetchEmbeddingUrl } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const AnalyticsDashboardDetail: React.FC = () => {
+  const [loadingData, setLoadingData] = useState(false);
+
+  const getEmbeddingUrl = async () => {
+    try {
+      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
+        'us-west-2',
+        '06699301-ba58-4ad3-8b74-585dac04d275'
+      );
+      if (success) {
+        const embedDashboard = async () => {
+          const embeddingContext = await createEmbeddingContext();
+          await embeddingContext.embedDashboard({
+            url: data.EmbedUrl,
+            container: '#qs-container',
+          });
+        };
+        embedDashboard();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setLoadingData(true);
+    getEmbeddingUrl();
+    setLoadingData(false);
+  }, []);
 
   return (
     <AppLayout
       toolsHide
       content={
-        <iframe
-          title='iframe'
-          src="https://toladata.io/dashboards/public/b30c3fa6-32a9-4d5e-841d-8cf85d906897/15v6-057ba175c7601f60bfbb"
-          style={{height:'100%', width:'100%', border: 0, overflow:'hidden'}}
-        ></iframe>
+        loadingData ? (
+          <Spinner />
+        ) : (
+          // <iframe
+          //   title="iframe"
+          //   src={embeddingUrl}
+          //   // src="https://toladata.io/dashboards/public/b30c3fa6-32a9-4d5e-841d-8cf85d906897/15v6-057ba175c7601f60bfbb"
+          //   style={{
+          //     height: '100%',
+          //     width: '100%',
+          //     border: 0,
+          //     overflow: 'hidden',
+          //   }}
+          // ></iframe>
+          <div
+            id={'qs-container'}
+            style={{
+              height: '100%',
+              width: '100%',
+              border: 0,
+              overflow: 'hidden',
+            }}
+          >
+          </div>
+        )
       }
       headerSelector="#header"
       navigation={<Navigation activeHref="/analytics/dashboard/detail" />}

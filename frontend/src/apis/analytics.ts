@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
+import { apiRequest } from 'ts/request';
+
 const getAnalyticsDashboardList = async (params: {
   pageNumber: number;
   pageSize: number;
@@ -168,6 +170,14 @@ const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
   return result;
 };
 
+const fetchEmbeddingUrl = async (region: string, dashboardId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/env/quicksight/embedUrl?region=${region}&dashboardId=${dashboardId}`
+  );
+  return result;
+};
+
 export {
   getAnalyticsDashboardList,
   getMetadataEventsList,
@@ -176,4 +186,5 @@ export {
   updateMetadataAttribute,
   getMetadataUserAttributesList,
   updateMetadataUserAttribute,
+  fetchEmbeddingUrl,
 };
