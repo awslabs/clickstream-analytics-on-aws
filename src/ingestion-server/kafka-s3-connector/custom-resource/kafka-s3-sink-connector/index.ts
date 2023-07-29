@@ -360,6 +360,7 @@ function getConnectorConfiguration(
     'flush.size': `${props.flushSize}`,
     'rotate.interval.ms': `${props.rotateIntervalMS}`,
     'rotate.schedule.interval.ms': `${props.rotateIntervalMS}`,
+    'errors.tolerance': 'all',
     's3.compression.type': 'gzip',
     'storage.class': 'io.confluent.connect.s3.storage.S3Storage',
     'format.class': 'io.confluent.connect.s3.format.json.JsonFormat',

@@ -448,6 +448,7 @@ test('Check connector hardcode configurations are correct', async () => {
     expect(cmd.connectorConfiguration['partition.duration.ms']).toEqual('60000');
     expect(cmd.connectorConfiguration['rotate.interval.ms']).toEqual('60000');
     expect(cmd.connectorConfiguration['rotate.schedule.interval.ms']).toEqual('60000');
+    expect(cmd.connectorConfiguration['errors.tolerance']).toEqual('all');
     expect(cmd.connectorConfiguration.timezone).toEqual('UTC');
     expect(cmd.connectorConfiguration.locale).toEqual('en-US');
     expect(cmd.connectorConfiguration['key.converter']).toEqual('org.apache.kafka.connect.storage.StringConverter');
