@@ -277,7 +277,7 @@ export class ClickStreamApiConstruct extends Construct {
     this.clickStreamApiFunction = new Function(this, 'ApiFunction', {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
-        file: 'Dockerfile.backend.build',
+        file: './src/control-plane/backend/Dockerfile',
       }),
       handler: 'run.sh',
       runtime: Runtime.NODEJS_18_X,
