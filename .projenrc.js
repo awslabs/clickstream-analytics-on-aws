@@ -275,6 +275,31 @@ project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.permissions.pull-requests',
   'write',
 );
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.permissions.id-token',
+  'write',
+);
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.env.iam_role_to_assume',
+  '${{ secrets.ROLE_ARN }}',
+);
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Configure AWS Credentials',
+  if: '${{ env.iam_role_to_assume != \'\' }}',
+  uses: 'aws-actions/configure-aws-credentials@v2',
+  with: {
+    'role-to-assume': '${{ env.iam_role_to_assume }}',
+    'aws-region': 'us-east-1',
+  },
+});
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Login to Amazon ECR Public',
+  if: '${{ env.iam_role_to_assume != \'\' }}',
+  uses: 'aws-actions/amazon-ecr-login@v1',
+  with: {
+    'registry-type': 'public',
+  },
+});
 project.buildWorkflow.addPostBuildSteps({
   name: 'Publish Test Report',
   uses: 'mikepenz/action-junit-report@v3',
