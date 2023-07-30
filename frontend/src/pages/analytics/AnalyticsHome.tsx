@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Spinner } from '@cloudscape-design/components';
+import { AppLayout } from '@cloudscape-design/components';
 import { getApplicationListByPipeline } from 'apis/application';
 import { getProjectList } from 'apis/project';
+import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import SwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
 import { load, save } from 'pages/common/use-local-storage';
@@ -96,7 +97,7 @@ const AnalyticsHome: React.FC = () => {
       content={
         <div>
           {loadingData ? (
-            <Spinner />
+            <Loading />
           ) : (
             <SwitchSpaceModal
               visible={swichProjectVisible}

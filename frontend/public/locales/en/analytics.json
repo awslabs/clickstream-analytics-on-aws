@@ -14,7 +14,8 @@
   "header": {
     "modalTitle": "Swich Project Space",
     "selectProjectTitle": "Please select a project",
-    "selectAppTitle": "Please select an application"
+    "selectAppTitle": "Please select an application",
+    "configurations": "Configurations"
   },
   "metadata": {
     "event": {
@@ -70,6 +71,18 @@
         "displayName": "DisplayName",
         "description": "Description"
       }
+    }
+  },
+  "funnel": {
+    "labels": {
+      "reset": "Reset",
+      "save": "Save to Dashboard",
+      "metrics": "Metrics",
+      "associateParameter": "Associate parameter",
+      "window": "Funnel window",
+      "funnelSteps": "Funnel steps",
+      "conversionWindowPeriod": "Conversion window period",
+      "filters": "Filters"
     }
   },
   "valid": {

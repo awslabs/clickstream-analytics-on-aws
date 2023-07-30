@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Spinner } from '@cloudscape-design/components';
+import { AppLayout } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import { fetchEmbeddingUrl } from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -52,7 +53,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
       toolsHide
       content={
         loadingData ? (
-          <Spinner />
+          <Loading />
         ) : (
           // <iframe
           //   title="iframe"
@@ -73,8 +74,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
               border: 0,
               overflow: 'hidden',
             }}
-          >
-          </div>
+          ></div>
         )
       }
       headerSelector="#header"

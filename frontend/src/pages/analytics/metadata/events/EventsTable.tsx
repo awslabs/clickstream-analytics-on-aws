@@ -136,7 +136,6 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
   }, []);
 
   function matchesEventType(item: any, selectedType: SelectProps.Option) {
-    console.log(item, selectedType);
     return (
       selectedType === defaultEventType || item.type === selectedType.label
     );
