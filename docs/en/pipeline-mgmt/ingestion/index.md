@@ -12,7 +12,7 @@ You can create a data ingestion module with the following settings:
     - [Amazon Kinesis Data Stream (KDS)](./create-data-sink-w-kinesis.md)
 
 ## Throttle
-Currently, there is no built-in throttling feature available with this solution. If you require throttling feature, you can configure WAF to implement throttling feature. Please refer [WAF][waf] document.
+Currently, there is no built-in throttling feature available with this solution. If you require throttling feature, you can configure AWS WAF to implement throttling feature. Please refer [WAF][waf] document.
 
 [waf]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html
 

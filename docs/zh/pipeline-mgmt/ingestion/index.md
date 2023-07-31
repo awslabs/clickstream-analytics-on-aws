@@ -12,6 +12,6 @@
     - [Amazon Kinesis Data Stream (KDS)](./create-data-sink-w-kinesis.md)
 
 ## 限流
-目前，本方案没有内置的限流功能。如果您需要限流功能，您可以通过配置AWF来实现限流的功能。请参考[WAF][waf]文档。
+目前，本方案没有内置的限流功能。如果您需要限流功能，您可以通过配置AWS WAF来实现限流的功能。请参考[WAF][waf]文档。
 
 [waf]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html
