@@ -19,7 +19,7 @@ import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { Choice, Condition, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
+import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import {
@@ -229,7 +229,7 @@ export class StackActionStateMachine extends Construct {
     });
     // Define a state machine
     this.stateMachine = new StateMachine(this, 'StackActionStateMachine', {
-      definition: executeTask,
+      definitionBody: DefinitionBody.fromChainable(executeTask),
       logs: {
         destination: stackActionLogGroup,
         level: LogLevel.ALL,
