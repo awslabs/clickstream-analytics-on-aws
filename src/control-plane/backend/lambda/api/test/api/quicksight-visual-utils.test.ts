@@ -13,7 +13,7 @@
 
 import { applyChangeToDashboard } from '../../common/quicksight-visual-utils';
 
-describe('SQL Builder test', () => {
+describe('QuickSight visual management test', () => {
 
   beforeEach(() => {
   });
