@@ -80,7 +80,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     let redshiftDataAPIExecRole: IRole;
     let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
-    let _redshiftClusterPolicy: Policy;
 
     const projectDatabaseName = props.projectId;
     let redshiftUserCR: CustomResource | undefined;
@@ -122,7 +121,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
       });
-      _redshiftClusterPolicy = new Policy(this, 'RedshiftClusterPolicy', {
+      new Policy(this, 'RedshiftClusterPolicy', {
         roles: [redshiftDataAPIExecRole],
         statements: [
           new PolicyStatement({
@@ -183,7 +182,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
             },
           }),
         ],
-      });
+      }).addStatements(PolicyStatement.fromJson({}));
       (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
         actions: ['redshift-data:DescribeStatement', 'redshift-data:GetStatementResult'],
         resources: ['*'],

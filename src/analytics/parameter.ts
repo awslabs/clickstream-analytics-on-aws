@@ -209,8 +209,7 @@ export function createStackParameters(scope: Construct): {
     default: '',
   });
 
-  let _cfnRule: CfnRule;
-  _cfnRule = new CfnRule(scope, 'S3BucketReadinessRule', {
+  new CfnRule(scope, 'S3BucketReadinessRule', {
     assertions: [
       {
         assert:
@@ -232,7 +231,7 @@ export function createStackParameters(scope: Construct): {
           'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
       },
     ],
-  });
+  }).overrideLogicalId('S3BucketReadinessRule');
 
   // Set Redshift common parameters
   const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
@@ -304,7 +303,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  _cfnRule = new CfnRule(scope, 'NewRedshiftServerlessParameters', {
+  new CfnRule(scope, 'NewRedshiftServerlessParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.NEW_SERVERLESS),
     assertions: [
       {
@@ -331,7 +330,7 @@ export function createStackParameters(scope: Construct): {
           'All subnets of Redshift Serverless must be in the VPC',
       },
     ],
-  });
+  }).overrideLogicalId('NewRedshiftServerlessParameters');
 
   // Set existing Redshift serverless parameters
   const existingRedshiftServerlessParamsGroup = [];
@@ -384,7 +383,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  _cfnRule = new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
+  new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
     assertions: [
       {
@@ -400,7 +399,7 @@ export function createStackParameters(scope: Construct): {
             'Namespace, Workgroup and Role Arn are required for using existing Redshift Serverless.',
       },
     ],
-  });
+  }).overrideLogicalId('ExistingRedshiftServerlessParameters');
 
   // Set Redshift cluster parameters
   const redshiftClusterParamsGroup = [];
@@ -436,7 +435,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  _cfnRule = new CfnRule(scope, 'RedshiftProvisionedParameters', {
+  new CfnRule(scope, 'RedshiftProvisionedParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
     assertions: [
       {
@@ -452,7 +451,7 @@ export function createStackParameters(scope: Construct): {
             'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
       },
     ],
-  });
+  }).overrideLogicalId('RedshiftProvisionedParameters');
 
   // Set load job parameters
   const loadJobParamsGroup = [];
