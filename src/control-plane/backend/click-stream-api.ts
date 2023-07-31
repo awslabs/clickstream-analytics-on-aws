@@ -139,6 +139,7 @@ export class ClickStreamApiConstruct extends Construct {
         name: 'type',
         type: AttributeType.STRING,
       },
+
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
@@ -155,9 +156,9 @@ export class ClickStreamApiConstruct extends Construct {
         type: AttributeType.NUMBER,
       },
     });
-    const reversalGSIName = 'reversal-index';
+    const invertedGSIName = 'inverted-index';
     analyticsMetadataTable.addGlobalSecondaryIndex({
-      indexName: reversalGSIName,
+      indexName: invertedGSIName,
       partitionKey: {
         name: 'type',
         type: AttributeType.STRING,
@@ -330,7 +331,7 @@ export class ClickStreamApiConstruct extends Construct {
         STACK_WORKFLOW_SATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
         STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
-        REVERSAL_GSI_NAME: reversalGSIName,
+        INVERTED_GSI_NAME: invertedGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',

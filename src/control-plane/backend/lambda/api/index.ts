@@ -19,6 +19,7 @@ import { responseTime } from './middle-ware/response-time';
 import { router_app } from './router/application';
 import { router_dictionary } from './router/dictionary';
 import { router_env } from './router/environment';
+import { router_metadata } from './router/metadata';
 import { router_pipeline } from './router/pipeline';
 import { router_plugin } from './router/plugin';
 import { router_project } from './router/project';
@@ -46,6 +47,7 @@ app.use('/api/project', router_project);
 app.use('/api/app', router_app);
 app.use('/api/pipeline', router_pipeline);
 app.use('/api/plugin', router_plugin);
+app.use('/api/metadata', router_metadata);
 
 // Implement the “catch-all” errorHandler function
 app.use(errorHandler);

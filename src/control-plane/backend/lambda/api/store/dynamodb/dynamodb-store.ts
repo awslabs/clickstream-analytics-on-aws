@@ -19,12 +19,10 @@ import {
   UpdateCommand,
   ScanCommandInput,
   QueryCommandInput,
-  paginateScan,
-  paginateQuery,
 } from '@aws-sdk/lib-dynamodb';
-import { marshall, NativeAttributeValue } from '@aws-sdk/util-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { docClient, marshallOptions } from '../../common/dynamodb-client';
+import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
@@ -35,21 +33,6 @@ import { IProject } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
-
-  private async query(input: QueryCommandInput) {
-    const records: Record<string, NativeAttributeValue>[] = [];
-    for await (const page of paginateQuery({ client: docClient }, input)) {
-      records.push(...page.Items as Record<string, NativeAttributeValue>[]);
-    }
-    return records;
-  }
-  private async scan(input: ScanCommandInput) {
-    const records: Record<string, NativeAttributeValue>[] = [];
-    for await (const page of paginateScan({ client: docClient }, input)) {
-      records.push(...page.Items as Record<string, NativeAttributeValue>[]);
-    }
-    return records;
-  }
 
   public async createProject(project: IProject): Promise<string> {
     const params: PutCommand = new PutCommand({
@@ -178,7 +161,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':d': false,
       },
     };
-    const records = await this.scan(input);
+    const records = await scan(input);
     const projects = records as IProject[];
     for (let index in projects) {
       const params: UpdateCommand = new UpdateCommand({
@@ -217,7 +200,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       ScanIndexForward: order === 'asc',
     };
-    const records = await this.query(input);
+    const records = await query(input);
     return records as IProject[];
   };
 
@@ -316,7 +299,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       ScanIndexForward: order === 'asc',
     };
-    const records = await this.query(input);
+    const records = await query(input);
     return records as IApplication[];
   };
 
@@ -614,7 +597,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':d': false,
       },
     };
-    const records = await this.scan(input);
+    const records = await scan(input);
     const pipelines = records as IPipeline[];
     for (let index in pipelines) {
       const status = pipelines[index].status;
@@ -668,7 +651,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ExpressionAttributeValues: expressionAttributeValues,
       ScanIndexForward: order === 'asc',
     };
-    const records = await this.query(input);
+    const records = await query(input);
     return records as IPipeline[];
   };
 
@@ -706,7 +689,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const input: ScanCommandInput = {
       TableName: dictionaryTableName,
     };
-    const records = await this.scan(input);
+    const records = await scan(input);
     return records as IDictionary[];
   };
 
@@ -898,7 +881,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ExpressionAttributeValues: expressionAttributeValues,
       ScanIndexForward: order === 'asc',
     };
-    const records = await this.query(input);
+    const records = await query(input);
     return (plugins).concat(records as IPlugin[]);
   };
 
