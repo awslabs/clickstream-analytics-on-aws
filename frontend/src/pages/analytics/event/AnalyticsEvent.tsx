@@ -11,19 +11,160 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, ContentLayout } from '@cloudscape-design/components';
+import {
+  AppLayout,
+  Box,
+  Button,
+  ColumnLayout,
+  Container,
+  ContentLayout,
+  Header,
+  Select,
+  SelectProps,
+  SpaceBetween,
+  Toggle,
+} from '@cloudscape-design/components';
+import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
+import { fetchEmbeddingUrl } from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 const AnalyticsEvent: React.FC = () => {
+  const { t } = useTranslation();
   const { pid, appid } = useParams();
+  const [loadingData, setLoadingData] = useState(false);
+
+  const [metricOptions, setMetricOptions] = useState<SelectProps.Options>([
+    { value: 'event', label: 'Event number' },
+    { value: 'user', label: 'User number' },
+  ]);
+  const [selectedMetric, setSelectedMetric] =
+    useState<SelectProps.Option | null>({
+      value: 'event',
+      label: 'Event number',
+    });
+
+  const [associateParameterChecked, setAssociateParameterChecked] =
+    useState<boolean>(true);
+
+  const getEmbeddingUrl = async () => {
+    try {
+      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
+        'ap-southeast-1',
+        'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
+        'ef2f9b18-8093-47d3-a3cf-59e890cfe338',
+        'e0ab637b-ebc3-470c-a107-54a6b38ae07c'
+      );
+      if (success) {
+        const embedDashboard = async () => {
+          const embeddingContext = await createEmbeddingContext();
+          console.log(data.EmbedUrl);
+          await embeddingContext.embedVisual({
+            url: data.EmbedUrl,
+            container: '#qs-funnel-container',
+          });
+        };
+        embedDashboard();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setLoadingData(true);
+    getEmbeddingUrl();
+    setLoadingData(false);
+  }, []);
+
   return (
     <AppLayout
       toolsHide
-      content={<ContentLayout>event</ContentLayout>}
+      content={
+        <ContentLayout
+          header={
+            <SpaceBetween size="m">
+              <Header variant="h1">Event Analytics</Header>
+            </SpaceBetween>
+          }
+        >
+          <SpaceBetween direction="vertical" size="l">
+            <Container
+              header={
+                <Header
+                  variant="h2"
+                  actions={
+                    <SpaceBetween direction="horizontal" size="xs">
+                      <Button iconName="refresh">
+                        {t('analytics:funnel.labels.reset')}
+                      </Button>
+                      <Button variant="primary">
+                        {t('analytics:funnel.labels.save')}
+                      </Button>
+                    </SpaceBetween>
+                  }
+                >
+                  {t('analytics:header.configurations')}
+                </Header>
+              }
+            >
+              <ColumnLayout columns={3} variant="text-grid">
+                <SpaceBetween direction="vertical" size="l">
+                  <div>
+                    <Box variant="awsui-key-label">
+                      {t('analytics:funnel.labels.metrics')}
+                    </Box>
+                    <Select
+                      selectedOption={selectedMetric}
+                      options={metricOptions}
+                      onChange={(event) => {
+                        setSelectedMetric(event.detail.selectedOption);
+                      }}
+                    />
+                  </div>
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="l">
+                  <div>
+                    <Box variant="awsui-key-label">
+                      {t('analytics:funnel.labels.associateParameter')}
+                    </Box>
+                    <Toggle
+                      onChange={({ detail }) =>
+                        setAssociateParameterChecked(detail.checked)
+                      }
+                      checked={associateParameterChecked}
+                    >
+                      {associateParameterChecked ? 'On' : 'Off'}
+                    </Toggle>
+                  </div>
+                </SpaceBetween>
+              </ColumnLayout>
+            </Container>
+            <Container>
+              {loadingData ? (
+                <Loading />
+              ) : (
+                <div
+                  id={'qs-funnel-container'}
+                  style={{
+                    height: '400px',
+                    width: '100%',
+                    border: 0,
+                    overflow: 'hidden',
+                  }}
+                ></div>
+              )}
+            </Container>
+          </SpaceBetween>
+        </ContentLayout>
+      }
       headerSelector="#header"
-      navigation={<Navigation activeHref={`/analytics/${pid}/app/${appid}/event`} />}
+      navigation={
+        <Navigation activeHref={`/analytics/${pid}/app/${appid}/event`} />
+      }
     />
   );
 };

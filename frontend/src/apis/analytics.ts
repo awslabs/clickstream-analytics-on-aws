@@ -170,10 +170,22 @@ const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
   return result;
 };
 
-const fetchEmbeddingUrl = async (region: string, dashboardId: string) => {
+const fetchEmbeddingUrl = async (
+  region: string,
+  dashboardId: string,
+  sheetId?: string,
+  visualId?: string
+) => {
+  let reqParams = `region=${region}&dashboardId=${dashboardId}`;
+  if (sheetId) {
+    reqParams = reqParams.concat(`&sheetId=${sheetId}`);
+  }
+  if (visualId) {
+    reqParams = reqParams.concat(`&visualId=${visualId}`);
+  }
   const result: any = await apiRequest(
     'get',
-    `/env/quicksight/embedUrl?region=${region}&dashboardId=${dashboardId}`
+    `/env/quicksight/embedUrl?${reqParams}`
   );
   return result;
 };

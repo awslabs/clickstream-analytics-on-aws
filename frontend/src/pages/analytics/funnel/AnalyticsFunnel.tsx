@@ -44,13 +44,16 @@ const AnalyticsFunnel: React.FC = () => {
   const getEmbeddingUrl = async () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'us-west-2',
-        '06699301-ba58-4ad3-8b74-585dac04d275'
+        'ap-southeast-1',
+        'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
+        'ef2f9b18-8093-47d3-a3cf-59e890cfe338',
+        '91e59887-a1c1-4b65-aca3-b1926db946eb'
       );
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();
-          await embeddingContext.embedDashboard({
+          console.log(data.EmbedUrl);
+          await embeddingContext.embedVisual({
             url: data.EmbedUrl,
             container: '#qs-funnel-container',
           });
@@ -244,7 +247,7 @@ const AnalyticsFunnel: React.FC = () => {
                 <div
                   id={'qs-funnel-container'}
                   style={{
-                    height: '100%',
+                    height: '400px',
                     width: '100%',
                     border: 0,
                     overflow: 'hidden',

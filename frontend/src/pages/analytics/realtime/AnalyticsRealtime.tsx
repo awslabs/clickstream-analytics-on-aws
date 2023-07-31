@@ -17,15 +17,17 @@ import { fetchEmbeddingUrl } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-const AnalyticsDashboardDetail: React.FC = () => {
+const AnalyticsRealtime: React.FC = () => {
+  const { pid, appid } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const getEmbeddingUrl = async () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'ap-southeast-1',
-        'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f'
+        'us-west-2',
+        '06699301-ba58-4ad3-8b74-585dac04d275'
       );
       if (success) {
         const embedDashboard = async () => {
@@ -55,17 +57,6 @@ const AnalyticsDashboardDetail: React.FC = () => {
         loadingData ? (
           <Loading />
         ) : (
-          // <iframe
-          //   title="iframe"
-          //   src={embeddingUrl}
-          //   // src="https://toladata.io/dashboards/public/b30c3fa6-32a9-4d5e-841d-8cf85d906897/15v6-057ba175c7601f60bfbb"
-          //   style={{
-          //     height: '100%',
-          //     width: '100%',
-          //     border: 0,
-          //     overflow: 'hidden',
-          //   }}
-          // ></iframe>
           <div
             id={'qs-container'}
             style={{
@@ -78,9 +69,11 @@ const AnalyticsDashboardDetail: React.FC = () => {
         )
       }
       headerSelector="#header"
-      navigation={<Navigation activeHref="/analytics/dashboard/detail" />}
+      navigation={
+        <Navigation activeHref={`/analytics/${pid}/app/${appid}/realtime`} />
+      }
     />
   );
 };
 
-export default AnalyticsDashboardDetail;
+export default AnalyticsRealtime;

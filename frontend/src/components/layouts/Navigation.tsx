@@ -62,6 +62,11 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const navAnalyticsItems: SideNavigationProps.Item[] = [
     {
       type: 'link',
+      text: t('nav.analytics.realtime'),
+      href: `/analytics/${pid}/app/${appid}/realtime`,
+    },
+    {
+      type: 'link',
       text: t('nav.analytics.dashboards'),
       href: `/analytics/${pid}/app/${appid}/dashboards`,
     },

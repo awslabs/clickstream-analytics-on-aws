@@ -27,6 +27,7 @@ import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
 import MetadataAttributes from 'pages/analytics/metadata/event-attributes/MetadataAttributes';
 import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
 import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
+import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
@@ -124,6 +125,10 @@ const SignedInPage: React.FC = () => {
                   element={<ApplicationDetail />}
                 />
                 <Route path="/analytics" element={<AnalyticsHome />} />
+                <Route
+                  path="/analytics/:pid/app/:appid/realtime"
+                  element={<AnalyticsRealtime />}
+                />
                 <Route
                   path="/analytics/:pid/app/:appid/dashboards"
                   element={<AnalyticsDashboard />}

@@ -22,6 +22,7 @@
     "plugins": "Plugins",
     "explore": "Explore",
     "analytics": {
+      "realtime": "Realtime",
       "dashboards": "Dashboards",
       "explore": "Explore",
       "metadata": "Metadata",

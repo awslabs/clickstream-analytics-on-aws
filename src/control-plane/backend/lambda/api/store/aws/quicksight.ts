@@ -171,7 +171,7 @@ export const registerEmbddingUserByRegion = async (region: string) => {
     Email: 'mingfeiq@amazon.com',
     IamArn: 'arn:aws:iam::615633583142:role/quicksigthEmbedRole',
     Namespace: QUICKSIGHT_NAMESPACE,
-    UserRole: UserRole.READER,
+    UserRole: UserRole.ADMIN,
     SessionName: 'mingfeiq',
   });
   await quickSightClient.send(command);
@@ -188,7 +188,7 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   // await registerEmbddingUserByRegion(region);
-  const userArn = `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`;
+  const userArn = `arn:aws:quicksight:us-west-2:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`;
   await updateDashboardPermissionsCommand(region, dashboardId, userArn);
   if (sheetId && visualId) {
     const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
@@ -208,7 +208,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   } else {
     const command: GenerateEmbedUrlForRegisteredUserCommand = new GenerateEmbedUrlForRegisteredUserCommand({
       AwsAccountId: awsAccountId,
-      UserArn: `arn:aws:quicksight:${region}:${awsAccountId}:user/default/quicksigthEmbedRole/mingfeiq`,
+      UserArn: userArn,
       ExperienceConfiguration: {
         Dashboard: { // RegisteredUserDashboardEmbeddingConfiguration
           InitialDashboardId: dashboardId, // required
