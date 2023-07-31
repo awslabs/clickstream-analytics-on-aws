@@ -61,6 +61,34 @@ export const listQuickSightUsers = async () => {
   return [];
 };
 
+export const getQuickSightSubscribeRegion = async () => {
+  try {
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: QUICKSIGHT_CONTROL_PLANE_REGION,
+    });
+    await getPaginatedResults(async (NextToken: any) => {
+      const params: ListUsersCommand = new ListUsersCommand({
+        AwsAccountId: awsAccountId,
+        Namespace: 'default',
+        NextToken,
+      });
+      await quickSightClient.send(params);
+    });
+
+    return QUICKSIGHT_CONTROL_PLANE_REGION;
+  } catch (err) {
+    if (err instanceof AccessDeniedException) {
+      const message = (err as AccessDeniedException).message;
+      const identityRegion = getIdentityRegionFromMessage(message);
+      if (identityRegion) {
+        return identityRegion;
+      }
+    }
+  }
+  return '';
+};
+
 export const listQuickSightUsersByRegion = async (region: string) => {
   const users: QuickSightUser[] = [];
   const quickSightClient = new QuickSightClient({

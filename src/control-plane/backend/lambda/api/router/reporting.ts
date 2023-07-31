@@ -24,7 +24,7 @@ reporting_project.post(
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight report')
-    return reportingServ.create(req, res, next);
+    return reportingServ.createFunnelVisual(req, res, next);
   });
 
 export {

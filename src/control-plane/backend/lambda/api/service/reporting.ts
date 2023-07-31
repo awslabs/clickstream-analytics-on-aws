@@ -11,23 +11,25 @@
  *  and limitations under the License.
  */
 
-import crypto from 'crypto';
-import Mustache from 'mustache';
-import { ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { CreateDataSetCommandOutput, QuickSight,
-  ColumnGroup,
-  TransformOperation,
-  ColumnTag, 
-  InputColumn,
-} from '@aws-sdk/client-quicksight'
+import { DataSetReference, QuickSight, TemplateVersionDefinition } from '@aws-sdk/client-quicksight'
 import { logger } from '../common/powertools';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { buildFunnelView } from '../common/sql-builder';
+import { getQuickSightSubscribeRegion } from '../store/aws/quicksight';
+import { awsAccountId, awsPartition, awsRegion } from '../common/constants';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { CPipeline } from '../model/pipeline';
+import { createAnalysis, createDataSet, createTemplateFromDefinition, funnelVisualColumns, getTemplateDefinition } from '../common/quicksight/reporting-utils';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
+const store: ClickStreamStore = new DynamoDbStore();
 const stsClient = new STSClient({region: 'us-east-1'});
 const quickSight = new QuickSight({
-  region: 'us-east-1'
+  region: awsRegion
 });
 
 async function getCredentialsFromRole(roleArn: string) {
@@ -49,43 +51,107 @@ async function getCredentialsFromRole(roleArn: string) {
 
 export class ReportingServ {
 
-  public async create(req: any, res: any, next: any) {
+  public async createFunnelVisual(req: any, res: any, next: any) {
     try {
+      logger.info(`req: ${req}`);
 
-      logger.info(`req: ${req}`)
+      const query = req.body;
       //construct parameters to build sql
-      const sql = buildFunnelView('app1', 'test_view_001', {
-        schemaName: 'app1',
-        computeMethod: 'USER_CNT',
-        specifyJoinColumn: true,
-        joinColumn: 'user_pseudo_id',
-        conversionIntervalType: 'CUSTOMIZE',
-        conversionIntervalInSeconds: 10*60,
-        eventAndConditions: [
-          {
-            eventName: 'add_button_click',
-          },
-          {
-            eventName: 'note_share',
-          },
-          {
-            eventName: 'note_export',
-          },
-        ],
-        timeStart: '2023-04-30',
-        timeEnd: '2023-06-30',
-        groupColumn: 'day',
+      const viewName = query.viewName;
+      const sql = buildFunnelView(query.appId, viewName, {
+        schemaName: query.schemaName,
+        computeMethod: query.computeMethod,
+        specifyJoinColumn: query.specifyJoinColumn,
+        joinColumn: query.joinColumn,
+        conversionIntervalType: query.conversionIntervalType,
+        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+        eventAndConditions: query.eventAndConditions,
+        timeScopeType: query.timeScopeType,
+        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        groupColumn: query.groupColumn,
       });
 
       logger.info(`sql: ${sql}`)
 
+      //get requied parameters from ddb and stack output.
+      const pipeline = await store.getPipeline(query.projectId, query.pipelineId);
+      if (!pipeline) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const redshiftRegion = pipeline.region
 
-      const credentials = await getCredentialsFromRole('arn:aws:iam::451426793911:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-1B641805YKFF7')
+      if (!pipeline.dataModeling?.redshift) {
+        return res.status(404).send(new ApiFail('Redshift not enabled in the pipeline'));
+      }
+      const isProvisionedRedshift = pipeline.dataModeling?.redshift?.provisioned ? true : false;
+
+      let workgroupName = undefined;
+      let dataApiRole = undefined;
+
+      const cPipeline = new CPipeline(pipeline);
+      const modelingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.DATA_MODELING_REDSHIFT);
+
+      for (const [name, value] of modelingStackOutputs) {
+        if(name.endsWith('WorkgroupName')){
+          workgroupName = value;
+        }
+        if(name.endsWith('DataApiRole')){
+          dataApiRole = value;
+        }
+      }
+      if(!workgroupName && !isProvisionedRedshift) {
+        return res.status(404).send(new ApiFail('Redshift serverless workgroup not found'));
+      }
+      if(!dataApiRole) {
+        return res.status(404).send(new ApiFail('Redshift data api role not found'));
+      }
+
+      let datasourceArn = undefined;
+      let quicksightInternalUser = undefined;
+      const reportingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.REPORTING);
+      for (const [name, value] of reportingStackOutputs) {
+        if(name.endsWith('DataSourceArn')){
+          datasourceArn = value;
+        }
+        if(name.endsWith('QuickSightInternalUser')){
+          quicksightInternalUser = value;
+        }
+      }
+      if(!datasourceArn) {
+        return res.status(404).send(new ApiFail('QuickSight data source arn not found'));
+      }
+      if(!quicksightInternalUser) {
+        return res.status(404).send(new ApiFail('QuickSight internal user not found'));
+      }
+
+      //quicksight user name
+      const quicksightPublicUser = pipeline.reporting?.quickSight?.user;
+      if(!quicksightPublicUser) {
+        return res.status(404).send(new ApiFail('QuickSight user not found'));
+      }
+
+      // let quicksightUser = ''
+      // if(query.action === 'PREVIEW') {
+      //   quicksightUser = quicksightInternalUser!;
+      // } else if(query.action === 'PUBLISH') {
+        
+      //   quicksightUser = quicksightPublicUser;
+      // } else {
+      //   return res.status(400).send(new ApiFail('Bad request'));
+      // }
+      //get requied parameters from ddb and stack output.
       
-      logger.info(JSON.stringify(credentials));
+      const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
+      const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${awsAccountId}:user/default/${quicksightPublicUser}`;
+      // const quickSightInternalUserPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${awsAccountId}:user/default/${quicksightInternalUser}`;
 
+      //get redshift client
+      const credentials = await getCredentialsFromRole(dataApiRole);
       const redshiftDataClient = new RedshiftDataClient({
-        region: 'us-east-1',
+        region: redshiftRegion,
         credentials: {
           accessKeyId: credentials?.AccessKeyId!,
           secretAccessKey: credentials?.SecretAccessKey!,
@@ -93,34 +159,48 @@ export class ReportingServ {
         }
       })
 
-      //create redshift view 
+      //create view in redshift
       const params = new BatchExecuteStatementCommand({
         Sqls: [sql],
-        WorkgroupName: 'clickstream-project01-wvzh',
-        // DbUser: 'admin',
-        Database: 'project04',
-        WithEvent: true,
+        WorkgroupName: workgroupName,
+        Database: query.projectId,
+        WithEvent: false,
+        ClusterIdentifier: isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.clusterIdentifier : undefined,
+        DbUser: isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.dbUser : undefined,
       });
 
       await redshiftDataClient.send(params);
 
       //create quicksight dataset
-      createDataSet(quickSight, '451426793911', 'arn:aws:quicksight:us-east-1:451426793911:user/default/clickstream', 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project01_wvzh_f3635de0', 'app1', 'project_04', {
-        name: 'test-0001',
-        tableName: 'test_view_001',
-        columns: test_columns,
+      createDataSet(quickSight, awsAccountId!, quickSightPricipal, datasourceArn, {
+        name: '',
+        tableName: viewName,
+        columns: funnelVisualColumns,
         importMode: 'DIRECT_QUERY',
-        customSql: 'select * from app1.test_view_001',
+        customSql: `select * from ${query.appId}.${viewName}`,
         projectedColumns: [
-          'day',
-          'add_button_click',
-          'note_share',
-          'note_export'
+          'event_date',
+          'event_name',
+          'x_id',
         ],
       })
 
 
+      let templateDef = JSON.parse(readFileSync(join(__dirname, '')).toString()) as TemplateVersionDefinition;
+
+      //create quicksight tempalte
+      const templateArn = await createTemplateFromDefinition(quickSight, awsAccountId!, quickSightPricipal, templateDef)
+
+    
       // create quicksight analysis
+      const datasetRefs: DataSetReference[] = [];
+      const sourceEntity = {
+        SourceTemplate: {
+          Arn: templateArn,
+          DataSetReferences: datasetRefs,
+        },
+      };
+      createAnalysis(quickSight, awsAccountId!, quickSightPricipal, sourceEntity, '')
       
       //create quicksight dashboard
 
@@ -133,223 +213,3 @@ export class ReportingServ {
 
 }
 
-export const test_columns: InputColumn[] = [
-  {
-    Name: 'day',
-    Type: 'STRING',
-  },
-  {
-    Name: 'add_button_click',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'note_share',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'note_export',
-    Type: 'INTEGER',
-  },
-];
-
-const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
-  dataSourceArn: string,
-  schema: string,
-  databaseName: string,
-  props: DataSetProps)
-: Promise<CreateDataSetCommandOutput|undefined> => {
-
-  try {
-    const identifer = buildDataSetId(databaseName, schema, props.tableName);
-    const datasetId = identifer.id;
-
-    const mustacheParam: MustacheParamType = {
-      schema,
-    };
-
-    logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
-
-    let colGroups: ColumnGroup[] = [];
-    if (props.columnGroups !== undefined) {
-      for (const columnsGroup of props.columnGroups ) {
-        colGroups.push({
-          GeoSpatialColumnGroup: {
-            Name: columnsGroup.geoSpatialColumnGroupName,
-            Columns: columnsGroup.geoSpatialColumnGroupColumns,
-          },
-        });
-      }
-    }
-
-    let dataTransforms: TransformOperation[] = [];
-    let needLogicalMap = false;
-    if (props.tagColumnOperations !== undefined) {
-      needLogicalMap = true;
-      for (const tagColOperation of props.tagColumnOperations ) {
-        const tags: ColumnTag[] = [];
-        for (const role of tagColOperation.columnGeographicRoles) {
-          tags.push({
-            ColumnGeographicRole: role,
-          });
-        }
-        dataTransforms.push({
-          TagColumnOperation: {
-            ColumnName: tagColOperation.columnName,
-            Tags: tags,
-          },
-        });
-      }
-    }
-
-    if (props.projectedColumns !== undefined) {
-      needLogicalMap = true;
-      dataTransforms.push({
-        ProjectOperation: {
-          ProjectedColumns: props.projectedColumns,
-        },
-      });
-    }
-
-    let logicalMap = undefined;
-    if (needLogicalMap) {
-      logicalMap = {
-        LogialTable1: {
-          Alias: 'Alias_LogialTable1',
-          Source: {
-            PhysicalTableId: 'PhyTable1',
-          },
-          DataTransforms: dataTransforms,
-        },
-      };
-    }
-
-    logger.info('start to create dataset');
-    // logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
-    const dataset = await quickSight.createDataSet({
-      AwsAccountId: awsAccountId,
-      DataSetId: datasetId,
-      Name: `${props.name}${identifer.tableNameIdentifer}-${identifer.schemaIdentifer}-${identifer.databaseIdentifer}`,
-      Permissions: [{
-        Principal: principalArn,
-        Actions: [
-          'quicksight:UpdateDataSetPermissions',
-          'quicksight:DescribeDataSet',
-          'quicksight:DescribeDataSetPermissions',
-          'quicksight:PassDataSet',
-          'quicksight:DescribeIngestion',
-          'quicksight:ListIngestions',
-          'quicksight:UpdateDataSet',
-          'quicksight:DeleteDataSet',
-          'quicksight:CreateIngestion',
-          'quicksight:CancelIngestion',
-        ],
-      }],
-
-      ImportMode: props.importMode,
-      PhysicalTableMap: {
-        PhyTable1: {
-          CustomSql: {
-            DataSourceArn: dataSourceArn,
-            Name: props.tableName,
-            SqlQuery: Mustache.render(props.customSql, mustacheParam),
-            Columns: props.columns,
-          },
-        },
-      },
-      LogicalTableMap: needLogicalMap ? logicalMap : undefined,
-      ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
-      DataSetUsageConfiguration: {
-        DisableUseAsDirectQuerySource: false,
-        DisableUseAsImportedSource: false,
-      },
-    });
-
-    logger.info(`create dataset finished. Id: ${datasetId}`);
-
-    return dataset;
-
-  } catch (err: any) {
-    logger.error(`Create QuickSight dataset failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-export const buildDashBoardId = function (databaseName: string, schema: string): Identifer {
-  const schemaIdentifer = truncateString(schema, 40);
-  const databaseIdentifer = truncateString(databaseName, 40);
-  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
-  return {
-    id: `clickstream_dashboard_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
-    idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
-  };
-};
-
-export const buildAnalysisId = function (databaseName: string, schema: string): Identifer {
-  const schemaIdentifer = truncateString(schema, 40);
-  const databaseIdentifer = truncateString(databaseName, 40);
-  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
-  return {
-    id: `clickstream_analysis_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
-    idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
-  };
-};
-
-const buildDataSetId = function (databaseName: string, schema: string, tableName: string): Identifer {
-  const tableNameIdentifer = truncateString(tableName.replace(/clickstream_/g, ''), 40);
-  const schemaIdentifer = truncateString(schema, 15);
-  const databaseIdentifer = truncateString(databaseName, 15);
-  const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);
-  return {
-    id: `clickstream_dataset_${databaseIdentifer}_${schemaIdentifer}_${tableNameIdentifer}_${suffix}`,
-    idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
-    tableNameIdentifer,
-  };
-
-};
-
-interface Identifer {
-  id: string;
-  idSuffix: string;
-  databaseIdentifer: string;
-  schemaIdentifer: string;
-  tableNameIdentifer?: string;
-}
-
-export function truncateString(source: string, length: number): string {
-  if (source.length > length) {
-    return source.substring(0, length);
-  }
-  return source;
-};
-
-export type MustacheParamType = {
-  schema: string;
-}
-
-
-export interface TagColumnOperationProps {
-  columnName: string;
-  columnGeographicRoles: string[];
-};
-
-export interface ColumnGroupsProps {
-  geoSpatialColumnGroupName: string;
-  geoSpatialColumnGroupColumns: string[];
-};
-
-export interface DataSetProps {
-  name: string;
-  tableName: string;
-  columns: InputColumn[];
-  importMode: string;
-  columnGroups?: ColumnGroupsProps[];
-  projectedColumns?: string[];
-  tagColumnOperations?: TagColumnOperationProps[];
-  customSql: string;
-};

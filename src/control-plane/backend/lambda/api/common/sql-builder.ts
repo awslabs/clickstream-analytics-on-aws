@@ -13,7 +13,6 @@
 
 import { format } from 'sql-formatter';
 
-
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
   readonly property: string;
@@ -37,12 +36,15 @@ export interface FunnelSQLPatameters {
   readonly conversionIntervalInSeconds?: number;
   readonly firstEventExtraCondition?: EventAndCondition;
   readonly eventAndConditions: EventAndCondition[];
-  readonly timeStart: string;
-  readonly timeEnd: string;
+  readonly timeScopeType: 'FIXED' | 'RELATIVE';
+  readonly timeStart?: string;
+  readonly timeEnd?: string;
+  readonly lastN?: number;
+  readonly timeUnit?: 'DAY' | 'WEEK' | 'MONTH';
   readonly groupColumn: 'week' | 'day' | 'hour';
 }
 
-export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string {
+function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatameters) : string {
 
   const baseColumns = `
     ,event_date
@@ -152,10 +154,7 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
     ,items as items####
   `;
 
-  let eventNames: string[] = [];
-  for (const e of sqlPatameters.eventAndConditions) {
-    eventNames.push(e.eventName);
-  }
+  
 
   let sql = `
     with base_data as (
@@ -290,6 +289,7 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
       continue;
     }
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_id_${index} \n`);
+    joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_name_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.user_pseudo_id_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
 
@@ -326,19 +326,13 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
     ,hour
   `;
 
-  let prefix = 'e';
-  if (sqlPatameters.computeMethod === 'USER_CNT') {
-    prefix = 'u';
-  }
-  let resultCntSQL ='';
-
   for (const [index, _item] of eventNames.entries()) {
-    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_id_${index})  as ${eventNames[index]} \n`);
-
     finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_id_${index} as e_id_${index} \n`);
+    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_name_${index} as e_name_${index} \n`);
     finalTableColumnsSQL = finalTableColumnsSQL.concat(`, user_pseudo_id_${index} as u_id_${index} \n`);
 
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${index} \n`);
+    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_name_${index} \n`);
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${index} \n`);
   }
 
@@ -351,6 +345,28 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
       ${finalTableGroupBySQL}
     )
   `);
+
+  return sql;
+};
+
+export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string {
+
+  let eventNames: string[] = [];
+  for (const e of sqlPatameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+
+  let sql = _buildFunnelbaseSql(eventNames, sqlPatameters);
+
+  let prefix = 'e';
+  if (sqlPatameters.computeMethod === 'USER_CNT') {
+    prefix = 'u';
+  }
+  let resultCntSQL ='';
+
+  for (const [index, _item] of eventNames.entries()) {
+    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_id_${index})  as ${eventNames[index]} \n`);
+  }
 
   sql = sql.concat(`
     select 
@@ -367,8 +383,34 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
 };
 
 export function buildFunnelView(schema: string, name: string, sqlPatameters: FunnelSQLPatameters) : string {
-  return `CREATE OR REPLACE VIEW ${schema}.${name} AS
-   ${buildFunnelDataSql(sqlPatameters)}
-   with no schema binding`
+
+  let resultSql = ''
+  let eventNames: string[] = [];
+  let index = 0
+  let prefix = 'e';
+  if (sqlPatameters.computeMethod === 'USER_CNT') {
+    prefix = 'u';
+  }
+
+  for (const e of sqlPatameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+    resultSql = resultSql.concat(`
+    ${ index === 0 ? '' : 'union all'}
+    select 
+       day::date as event_date
+      ,e_name_${index}::varchar as event_name
+      ,${prefix}_id_${index}::varchar as x_id
+    from final_table where ${prefix}_id_${index} is not null
+    `)
+  }
+
+  let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+   ${_buildFunnelbaseSql(eventNames, sqlPatameters)}
+   ${resultSql}
+   with no schema binding
+   `
+   return format(sql, {
+    language: 'postgresql',
+  });
 }
 
