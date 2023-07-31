@@ -20,6 +20,7 @@ const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
+const awsPartition = process.env.AWS_PARTITION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
@@ -67,6 +68,7 @@ export {
   prefixTimeGSIName,
   serviceName,
   awsRegion,
+  awsPartition,
   awsAccountId,
   awsUrlSuffix,
   STSUploadRole,

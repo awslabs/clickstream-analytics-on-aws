@@ -906,6 +906,24 @@ export class CPipeline {
     return res;
   }
 
+  public async getStackOutputs(stackType: PipelineStackType): Promise<Array<[string, string]>> {
+    const stack = await describeStack(
+      this.pipeline.region,
+      getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
+    );
+    const res: Array<[string, string]> = [];
+    if (stack && stack.Outputs) {
+        let value = '';
+        for (let out of stack.Outputs as Output[]) {
+          if (out.OutputKey) {
+            value = out.OutputValue ?? '';
+            res.push([out.OutputKey, value])
+          }
+        }
+    }
+    return res;
+  }
+
   public async getReportingDashboardsUrl() {
     let dashboards: ReportingDashboardOutput[] = [];
     const reportOutputs = await this.getStackOutputBySuffixs(
