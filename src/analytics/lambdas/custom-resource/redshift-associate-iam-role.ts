@@ -22,8 +22,8 @@ import { Sleep } from '../redshift-data';
 
 interface CustomProperties {
   readonly roleArn: string;
-  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessProps | undefined;
-  readonly provisionedRedshiftProps?: ProvisionedRedshiftProps | undefined;
+  readonly serverlessRedshiftProps: ExistingRedshiftServerlessProps | undefined;
+  readonly provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 }
 
 type ResourcePropertiesType = CustomProperties & {
@@ -49,7 +49,7 @@ function iamRoleToArn(iamRoles: ClusterIamRole[]): string[] {
 
 function getNewDefaultIAMRole(rolesToBeHaved: string[], rolesToBeAssociated?: string, roleToRemoved?: string,
   currentDefaultRole?: string): string | undefined {
-  var defaultRole = currentDefaultRole;
+  let defaultRole = currentDefaultRole;
   if (currentDefaultRole == roleToRemoved) {defaultRole = '';}
   if (!defaultRole && rolesToBeAssociated) {defaultRole = rolesToBeAssociated;}
   if (!defaultRole) {defaultRole = rolesToBeHaved.length > 0 ? rolesToBeHaved[0] : '';}
@@ -69,12 +69,11 @@ function excludeToBeUnassociated(roles: string[], toBeUnasscoiated?: string): st
 
 export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent) => {
   logger.info(JSON.stringify(event));
+  let physicalRequestId: string | undefined;
   try {
     const resourceProps = event.ResourceProperties as ResourcePropertiesType;
-    var roleToBeAssociated: string | undefined;
-    var roleToBeUnassociated: string | undefined;
-
-    var physicalRequestId: string | undefined;
+    let roleToBeAssociated: string | undefined;
+    let roleToBeUnassociated: string | undefined;
     switch (event.RequestType) {
       case 'Create':
         physicalRequestId = 'redshift-associate-iam-role';
@@ -93,53 +92,9 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
     }
 
     if (resourceProps.serverlessRedshiftProps) {
-      const client = new RedshiftServerlessClient({
-        ...aws_sdk_client_common_config,
-      });
-      const getWorkgroup = new GetWorkgroupCommand({
-        workgroupName: resourceProps.serverlessRedshiftProps.workgroupName,
-      });
-      const workgroupResp = await client.send(getWorkgroup);
-      const namespaceName = workgroupResp.workgroup!.namespaceName!;
-      const [iamRoles, defaultRoleArn] = await getRedshiftServerlessIAMRoles(namespaceName, client);
-      const roles = excludeToBeUnassociated(
-        iamRoleToArn(iamRoles), roleToBeUnassociated);
-      if (roleToBeAssociated) {
-        roles.push(roleToBeAssociated);
-      }
-
-      const defaultRole = getNewDefaultIAMRole(roles, roleToBeAssociated, roleToBeUnassociated, defaultRoleArn);
-
-      const updateNamespace = new UpdateNamespaceCommand({
-        namespaceName,
-        iamRoles: roles,
-        defaultIamRoleArn: defaultRole,
-      });
-      logger.info('Update namespace command ', { updateNamespace });
-      await client.send(updateNamespace);
-
-      if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client);}
+      await doServerlessRedshift(resourceProps.serverlessRedshiftProps.workgroupName, roleToBeAssociated, roleToBeUnassociated);
     } else if (resourceProps.provisionedRedshiftProps) {
-      const client = new RedshiftClient({
-        ...aws_sdk_client_common_config,
-      });
-      const getCluster = new DescribeClustersCommand({
-        ClusterIdentifier: resourceProps.provisionedRedshiftProps.clusterIdentifier,
-      });
-      const cluster = (await client.send(getCluster)).Clusters![0];
-      var defaultIAMRole = cluster.DefaultIamRoleArn;
-      const updateIAM = new ModifyClusterIamRolesCommand({
-        ClusterIdentifier: resourceProps.provisionedRedshiftProps.clusterIdentifier,
-        AddIamRoles: roleToBeAssociated ? [roleToBeAssociated] : [],
-        RemoveIamRoles: roleToBeUnassociated ? [roleToBeUnassociated] : [],
-        DefaultIamRoleArn: getNewDefaultIAMRole([
-          ...excludeToBeUnassociated(
-            iamRoleToArn(cluster.IamRoles ?? []), roleToBeUnassociated),
-          ...(roleToBeAssociated ? [roleToBeAssociated] : []),
-        ], roleToBeAssociated, roleToBeUnassociated, defaultIAMRole),
-      });
-      logger.info('Updating iam roles of Redshift cluster', { updateIAM });
-      await client.send(updateIAM);
+      await doProvisionedRedshift(resourceProps.provisionedRedshiftProps.clusterIdentifier, roleToBeAssociated, roleToBeUnassociated);
     } else {
       const msg = 'Can\'t identity the mode Redshift cluster!';
       logger.error(msg);
@@ -159,6 +114,60 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
   };
   return response;
 };
+
+async function doServerlessRedshift(workgroupName: string,
+  roleToBeAssociated: string | undefined, roleToBeUnassociated: string | undefined) {
+  const client = new RedshiftServerlessClient({
+    ...aws_sdk_client_common_config,
+  });
+  const getWorkgroup = new GetWorkgroupCommand({
+    workgroupName: workgroupName,
+  });
+  const workgroupResp = await client.send(getWorkgroup);
+  const namespaceName = workgroupResp.workgroup!.namespaceName!;
+  const [iamRoles, defaultRoleArn] = await getRedshiftServerlessIAMRoles(namespaceName, client);
+  const roles = excludeToBeUnassociated(
+    iamRoleToArn(iamRoles), roleToBeUnassociated);
+  if (roleToBeAssociated) {
+    roles.push(roleToBeAssociated);
+  }
+
+  const defaultRole = getNewDefaultIAMRole(roles, roleToBeAssociated, roleToBeUnassociated, defaultRoleArn);
+
+  const updateNamespace = new UpdateNamespaceCommand({
+    namespaceName,
+    iamRoles: roles,
+    defaultIamRoleArn: defaultRole,
+  });
+  logger.info('Update namespace command ', { updateNamespace });
+  await client.send(updateNamespace);
+
+  if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client);}
+}
+
+async function doProvisionedRedshift(clusterIdentifier: string,
+  roleToBeAssociated: string | undefined, roleToBeUnassociated: string | undefined) {
+  const client = new RedshiftClient({
+    ...aws_sdk_client_common_config,
+  });
+  const getCluster = new DescribeClustersCommand({
+    ClusterIdentifier: clusterIdentifier,
+  });
+  const cluster = (await client.send(getCluster)).Clusters![0];
+  let defaultIAMRole = cluster.DefaultIamRoleArn;
+  const updateIAM = new ModifyClusterIamRolesCommand({
+    ClusterIdentifier: clusterIdentifier,
+    AddIamRoles: roleToBeAssociated ? [roleToBeAssociated] : [],
+    RemoveIamRoles: roleToBeUnassociated ? [roleToBeUnassociated] : [],
+    DefaultIamRoleArn: getNewDefaultIAMRole([
+      ...excludeToBeUnassociated(
+        iamRoleToArn(cluster.IamRoles ?? []), roleToBeUnassociated),
+      ...(roleToBeAssociated ? [roleToBeAssociated] : []),
+    ], roleToBeAssociated, roleToBeUnassociated, defaultIAMRole),
+  });
+  logger.info('Updating iam roles of Redshift cluster', { updateIAM });
+  await client.send(updateIAM);
+}
 
 async function getRedshiftServerlessIAMRoles(
   namespaceName: string, client: RedshiftServerlessClient): Promise<[ClusterIamRole[], string | undefined]> {

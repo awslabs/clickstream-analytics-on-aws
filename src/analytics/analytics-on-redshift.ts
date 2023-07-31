@@ -78,11 +78,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    var redshiftDataAPIExecRole: IRole;
-    var existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
+    let redshiftDataAPIExecRole: IRole;
+    let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
+    let _redshiftClusterPolicy: Policy;
 
     const projectDatabaseName = props.projectId;
-    var redshiftUserCR: CustomResource | undefined;
+    let redshiftUserCR: CustomResource | undefined;
     if (props.newRedshiftServerlessProps) {
       const redshiftVpc = getExistVpc(scope, 'vpc-for-redshift-serverless-workgroup', {
         vpcId: props.newRedshiftServerlessProps.vpcId,
@@ -121,7 +122,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
       });
-      new Policy(this, 'RedshiftClusterPolicy', {
+      _redshiftClusterPolicy = new Policy(this, 'RedshiftClusterPolicy', {
         roles: [redshiftDataAPIExecRole],
         statements: [
           new PolicyStatement({

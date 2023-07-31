@@ -108,10 +108,10 @@ export const handler = async (_event: any, context: Context) => {
   let newMinFileTimestamp = nowMillis;
 
   // Get all items with status=NEW
-  var candidateItems: Array<ODSEventItem> = [];
-  var newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
+  let candidateItems: Array<ODSEventItem> = [];
+  let newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
   // all JOB_NEW count for metrics
-  var allJobNewCount = newRecordResp.Count;
+  let allJobNewCount = newRecordResp.Count;
   logger.info('queryItems response: ', newRecordResp);
 
   if (newRecordResp.Count! > 0) {
@@ -160,9 +160,15 @@ export const handler = async (_event: any, context: Context) => {
     };
   }
 
+  const response = await doManifestFiles(candidateItems, queryResultLimit, processJobNum, tableName, requestId);
+  return response;
+};
+
+const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
+  queryResultLimit: number, processJobNum: number, tableName: string, requestId: string) => {
+  logger.info('candidateItems', { candidateItems });
   const groupedManifestItems: { [key: string]: ManifestItem[] } = {};
   const manifestFiles: ManifestBody[] = [];
-  logger.info('candidateItems', { candidateItems });
   if (candidateItems.length > 0) {
     const loadItemsLength = candidateItems.length > (queryResultLimit - processJobNum) ? (queryResultLimit - processJobNum) : candidateItems.length;
 
@@ -202,7 +208,6 @@ export const handler = async (_event: any, context: Context) => {
       });
     }
   }
-
   return {
     manifestList: manifestFiles,
     count: manifestFiles.length,

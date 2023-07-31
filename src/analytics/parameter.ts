@@ -209,7 +209,8 @@ export function createStackParameters(scope: Construct): {
     default: '',
   });
 
-  new CfnRule(scope, 'S3BucketReadinessRule', {
+  let _cfnRule: CfnRule;
+  _cfnRule = new CfnRule(scope, 'S3BucketReadinessRule', {
     assertions: [
       {
         assert:
@@ -303,7 +304,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  new CfnRule(scope, 'NewRedshiftServerlessParameters', {
+  _cfnRule = new CfnRule(scope, 'NewRedshiftServerlessParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.NEW_SERVERLESS),
     assertions: [
       {
@@ -383,7 +384,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
+  _cfnRule = new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
     assertions: [
       {
@@ -435,7 +436,7 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  new CfnRule(scope, 'RedshiftProvisionedParameters', {
+  _cfnRule = new CfnRule(scope, 'RedshiftProvisionedParameters', {
     ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
     assertions: [
       {

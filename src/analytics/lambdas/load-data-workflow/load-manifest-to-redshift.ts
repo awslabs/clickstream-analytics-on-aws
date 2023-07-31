@@ -21,7 +21,6 @@ import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 import { ManifestBody } from '../../private/model';
-//import { putMetricsData } from '../../private/put-analytics-custom-metrics';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 // Set the AWS Region.
@@ -79,14 +78,14 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 export const handler = async (event: LoadManifestEvent, context: Context) => {
   logger.debug('requestJson:', JSON.stringify(event, undefined, 2));
   logger.debug(`context.awsRequestId:${context.awsRequestId}`);
-  var appId = event.detail.appId;
+  let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const jobList = event.detail.jobList;
   logger.info(`appId:${appId}, manifestFileName:${manifestFileName}, jobList:${JSON.stringify(jobList)}`);
   /**
    * The appId will be used as the schema of Redshift, '.' and '-' are not supported.
    */
-  for (var i=0; i < appId.length; i++) {
+  for (let i=0; i < appId.length; i++) {
     appId = appId.replace('.', '_').replace('-', '_');
   }
   logger.debug(`appId:${appId}`);
@@ -100,7 +99,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
   );
 
-  for (var i=0;i < jobList.entries.length; i++) {
+  for (let i=0;i < jobList.entries.length; i++) {
     await updateItem(DYNAMODB_TABLE_NAME, jobList.entries[i].url, JobStatus.JOB_PROCESSING);
   }
 
