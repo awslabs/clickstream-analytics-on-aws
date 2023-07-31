@@ -21,7 +21,7 @@ import {
   SubnetSelection,
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
