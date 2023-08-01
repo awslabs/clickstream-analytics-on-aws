@@ -23,7 +23,7 @@ export interface VisualPorps {
   readonly filterControl: any;
   readonly parameterDeclarations: any[];
   readonly filterGroup: any;
-  readonly enventCount: number;
+  readonly eventCount: number;
 }
 
 export interface DashboardAction {
@@ -104,7 +104,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       logger.info(`firstObj: ${JSON.stringify(firstObj)}`);
 
       layoutControl.ElementId = firstObj.FilterControlId;
-      visualControl.RowSpan = (visual.enventCount as number) * 2;
+      visualControl.RowSpan = (visual.eventCount as number) * 2;
 
       logger.info(`visual.visualContent: ${visual.visualContent}`);
       logger.info(`visualContent first child: ${findFirstChild(visual.visualContent)}`);

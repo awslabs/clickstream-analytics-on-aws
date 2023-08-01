@@ -40,7 +40,7 @@ export interface FunnelSQLPatameters {
   readonly timeStart?: string;
   readonly timeEnd?: string;
   readonly lastN?: number;
-  readonly timeUnit?: 'DAY' | 'WEEK' | 'MONTH';
+  readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
   readonly groupColumn: 'week' | 'day' | 'hour';
 }
 
@@ -154,7 +154,20 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
     ,items as items####
   `;
 
-  
+  let eventDateSQL = ''
+  if(sqlPatameters.timeScopeType === 'FIXED') {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlPatameters.timeStart}'  and event_date <= '${sqlPatameters.timeEnd}'`)
+  } else {
+    let lastN = sqlPatameters.lastN!
+    if(sqlPatameters.timeUnit === 'WK'){
+      lastN = lastN * 7
+    } else if(sqlPatameters.timeUnit === 'MM'){
+      lastN = lastN * 31
+    } else if(sqlPatameters.timeUnit === 'Q'){
+      lastN = lastN * 31 * 3
+    } 
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+  }
 
   let sql = `
     with base_data as (
@@ -166,7 +179,7 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
       , user_properties
       ${baseColumns}
       from ${sqlPatameters.schemaName}.ods_events ods 
-      where event_date >= '${sqlPatameters.timeStart}'  and event_date <= '${sqlPatameters.timeEnd}'
+      where ${eventDateSQL}
       and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
     ),
   `;
@@ -402,6 +415,7 @@ export function buildFunnelView(schema: string, name: string, sqlPatameters: Fun
       ,${prefix}_id_${index}::varchar as x_id
     from final_table where ${prefix}_id_${index} is not null
     `)
+    index += 1
   }
 
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS

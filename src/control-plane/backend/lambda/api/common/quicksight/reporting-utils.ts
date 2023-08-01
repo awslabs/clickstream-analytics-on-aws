@@ -20,9 +20,10 @@ import { CreateDataSetCommandOutput, QuickSight,
   InputColumn,
   AnalysisSourceEntity,
   CreateAnalysisCommandOutput,
-  DashboardSourceEntity,
   CreateDashboardCommandOutput,
   TemplateVersionDefinition,
+  DataSetIdentifierDeclaration,
+  DashboardVersionDefinition,
 } from '@aws-sdk/client-quicksight'
 import { logger } from '../powertools';
 
@@ -191,7 +192,7 @@ export const createAnalysis = async (quickSight: QuickSight, awsAccountId: strin
 };
 
 export const createDashboard = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
-  sourceEntity: DashboardSourceEntity, dashboardName: string)
+  definition: DashboardVersionDefinition, dashboardName: string)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
     const dashboardId = uuidv4()
@@ -215,7 +216,7 @@ export const createDashboard = async (quickSight: QuickSight, awsAccountId: stri
         ],
       }],
 
-      SourceEntity: sourceEntity,
+      Definition: definition,
 
     });
     await waitForDashboardCreateCompleted(quickSight, awsAccountId, dashboardId);
@@ -249,6 +250,46 @@ export  const createTemplateFromDefinition = async (quickSight: QuickSight, awsA
       ]
     }],
     Definition: dashboardDef
+  })
+
+  return template.Arn
+}
+
+export  const getDatasetConfigsOfAnalysis = async (quickSight: QuickSight, awsAccountId: string, analysisId: string)
+: Promise<DataSetIdentifierDeclaration[]|undefined> => {
+  const analysisDef = await quickSight.describeAnalysisDefinition({
+    AwsAccountId: awsAccountId,
+    AnalysisId: analysisId,
+  })
+
+  return analysisDef.Definition?.DataSetIdentifierDeclarations
+}
+
+export  const createTemplateFromDashboard = async (quickSight: QuickSight, awsAccountId: string,  principalArn: string, _dashboardId: string)
+: Promise<string|undefined> => {
+
+  const templateId = uuidv4();
+  const template = await quickSight.createTemplate({
+    AwsAccountId: awsAccountId,
+    TemplateId: templateId,
+    Permissions: [{
+      Principal: principalArn,
+      Actions: [
+        'quicksight:CreateTemplate',
+        'quicksight:DescribeTemplate',
+        'quicksight:UpdateTemplate',
+        'quicksight:DeleteTemplate',
+        'quicksight:PassTemplate',
+        'quicksight:UpdateTemplatePermissions',
+        'quicksight:DescribeTemplatePermissions',
+      ]
+    }],
+    SourceEntity: {
+      SourceAnalysis: {
+        Arn: '',
+        DataSetReferences:[]
+      }
+    }
   })
 
   return template.Arn
