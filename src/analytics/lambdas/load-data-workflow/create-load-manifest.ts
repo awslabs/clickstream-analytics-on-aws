@@ -180,7 +180,7 @@ export const handler = async (_event: any, context: Context) => {
   const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
   const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
   const maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
-  
+
   logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
 
   metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
