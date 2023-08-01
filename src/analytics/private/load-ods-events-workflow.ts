@@ -21,7 +21,7 @@ import { IRole, Role, ServicePrincipal, Policy, PolicyStatement } from 'aws-cdk-
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map, Condition, Pass, Fail } from 'aws-cdk-lib/aws-stepfunctions';
+import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map, Condition, Pass, Fail, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -501,7 +501,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
 
     // Create state machine
     const loadDataStateMachine = new StateMachine(this, 'LoadManifestStateMachine', {
-      definition,
+      definitionBody: DefinitionBody.fromChainable(definition),
       logs: {
         destination: createLogGroup(this,
           {

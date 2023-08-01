@@ -27,8 +27,9 @@ import {
   Pass,
   StateMachine,
   TaskInput,
+  IStateMachine,
+  DefinitionBody,
 } from 'aws-cdk-lib/aws-stepfunctions';
-import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions/lib/state-machine';
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { StackActionStateMachineFuncProps } from './stack-action-state-machine-construct';
@@ -168,7 +169,7 @@ export class StackWorkflowStateMachine extends Construct {
     // Define a state machine
     this.stackWorkflowMachine = new StateMachine(this, 'StackWorkflowStateMachine', {
       stateMachineName: stackWorkflowMachineName,
-      definition: inputTask,
+      definitionBody: DefinitionBody.fromChainable(inputTask),
       logs: {
         destination: stackWorkflowLogGroup,
         level: LogLevel.ALL,
