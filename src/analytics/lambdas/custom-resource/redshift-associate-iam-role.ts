@@ -22,8 +22,8 @@ import { Sleep } from '../redshift-data';
 
 interface CustomProperties {
   readonly roleArn: string;
-  readonly serverlessRedshiftProps: ExistingRedshiftServerlessProps | undefined;
-  readonly provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
+  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessProps;
+  readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
 }
 
 type ResourcePropertiesType = CustomProperties & {

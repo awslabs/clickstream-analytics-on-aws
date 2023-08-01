@@ -91,8 +91,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         const s3Response = await delFinishedJobInS3(s3Bucket, s3Object);
         logger.debug('delFinishedJobInS3 response:', JSON.stringify(s3Response));
       } catch (err) {
-        errMsg = `Error when deleting manifest file ${s3Object} in S3 bucket ${s3Bucket}.`;
-        throw err;
+        logger.error(`Error when deleting manifest file ${s3Object} in S3 bucket ${s3Bucket}.`, (err as Error));
       }
       return {
         detail: {
@@ -111,18 +110,17 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
           jobList: jobList,
         },
       };
-    } else {
-      logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
-      return {
-        detail: {
-          id: queryId,
-          status: response.Status,
-          appId: appId,
-          manifestFileName: manifestFileName,
-          jobList: jobList,
-        },
-      };
     }
+    logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
+    return {
+      detail: {
+        id: queryId,
+        status: response.Status,
+        appId: appId,
+        manifestFileName: manifestFileName,
+        jobList: jobList,
+      },
+    };
   } catch (err) {
     if (err instanceof Error) {
       logger.error(errMsg, err);
