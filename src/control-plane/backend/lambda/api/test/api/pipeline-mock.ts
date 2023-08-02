@@ -413,7 +413,6 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
         prefix: '',
       },
       maxFilesLimit: 50,
-      processingFilesLimit: 50,
     },
     upsertUsers: {
       scheduleExpression: 'rate(5 minutes)',
@@ -475,7 +474,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE: IPipeline = {
         prefix: '',
       },
       maxFilesLimit: 50,
-      processingFilesLimit: 50,
     },
     upsertUsers: {
       scheduleExpression: 'rate(5 minutes)',
@@ -537,7 +535,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE: IPipe
         prefix: '',
       },
       maxFilesLimit: 50,
-      processingFilesLimit: 50,
     },
     upsertUsers: {
       scheduleExpression: 'rate(5 minutes)',
@@ -587,7 +584,6 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
         prefix: '',
       },
       maxFilesLimit: 50,
-      processingFilesLimit: 50,
     },
     upsertUsers: {
       scheduleExpression: 'rate(5 minutes)',
