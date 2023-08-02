@@ -97,6 +97,7 @@ export function createApplicationLoadBalancer(
     vpcSubnets: {
       subnetType: SubnetType.PUBLIC,
     },
+    dropInvalidHeaderFields: true,
   });
 
   if (props.albLogProps?.enableAccessLog) {

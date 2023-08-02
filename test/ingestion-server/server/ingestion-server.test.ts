@@ -489,6 +489,29 @@ test('Alb is internet-facing and ipv4 by default', () => {
   });
 });
 
+test('Alb drop_invalid_header_fields is enabled', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withMskConfig: true,
+    withAlbAccessLog: true,
+  });
+  const template = Template.fromStack(stack);
+  const alb = findFirstResource(
+    template,
+    'AWS::ElasticLoadBalancingV2::LoadBalancer',
+  )?.resource;
+  const albAttrs = alb.Properties.LoadBalancerAttributes;
+
+  let drop_invalid_header_fields = false;
+
+  for (const attr of albAttrs) {
+    if (attr.Key == 'routing.http.drop_invalid_header_fields.enabled') {
+      drop_invalid_header_fields = attr.Value;
+    }
+  }
+  expect(drop_invalid_header_fields).toBeTruthy();
+});
+
 test('enable Alb access log is configured', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
