@@ -106,7 +106,7 @@ export const getStatementResult = async (client: RedshiftDataClient, queryId: st
   const checkParams = new GetStatementResultCommand({
     Id: queryId,
   });
-  let response = await client.send(checkParams);
+  const response = await client.send(checkParams);
   logger.info(`Get statement result: ${response.TotalNumRows}`, JSON.stringify(response));
   return response;
 };

@@ -67,7 +67,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
   logger.debug(`query_id:${queryId}`);
   // There is a loading job need to check result.
   const response = await checkLoadStatus(queryId);
-  let errMsg: string | undefined = '';
+  let errMsg = '';
   try {
     if (response.Status == StatusString.FINISHED) {
       logger.info('Load success and delete the job in Dynamodb.');
