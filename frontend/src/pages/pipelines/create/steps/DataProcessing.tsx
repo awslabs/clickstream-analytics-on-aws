@@ -102,6 +102,7 @@ interface DataProcessingProps {
   redshiftServerlessSubnetInvalidError: boolean;
   redshiftProvisionedCulsterEmptyError: boolean;
   redshiftProvisionedDBUserEmptyError: boolean;
+  redshiftProvisionedDBUserFormatError: boolean;
 }
 
 const DataProcessing: React.FC<DataProcessingProps> = (
@@ -143,6 +144,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     redshiftServerlessSubnetInvalidError,
     redshiftProvisionedCulsterEmptyError,
     redshiftProvisionedDBUserEmptyError,
+    redshiftProvisionedDBUserFormatError,
   } = props;
 
   const [selectedExecution, setSelectedExecution] = useState(
@@ -934,6 +936,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           redshiftProvisionedDBUserEmptyError
                             ? t(
                                 'pipeline:valid.redshiftProvisionedDBUserEmptyError'
+                              )
+                            : redshiftProvisionedDBUserFormatError
+                            ? t(
+                                'pipeline:valid.redshiftProvisionedDBUserFormatError'
                               )
                             : ''
                         }
