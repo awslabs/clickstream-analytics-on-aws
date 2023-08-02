@@ -20,6 +20,7 @@
   "metadata": {
     "event": {
       "title": "Origin Events",
+      "createButton": "Create Event",
       "description": "Description of the Origin Events",
       "tableLoading": "Loading",
       "tableColumnID": "ID",

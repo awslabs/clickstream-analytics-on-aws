@@ -45,6 +45,7 @@ const AnalyticsFunnel: React.FC = () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
         'ap-southeast-1',
+        window.location.origin,
         'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
         'ef2f9b18-8093-47d3-a3cf-59e890cfe338',
         '91e59887-a1c1-4b65-aca3-b1926db946eb'

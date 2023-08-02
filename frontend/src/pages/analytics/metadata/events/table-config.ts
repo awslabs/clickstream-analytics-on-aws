@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-
 export const SEARCHABLE_COLUMNS = ['id', 'name', 'displayName', 'description'];
 
 export const CONTENT_DISPLAY_OPTIONS = [
@@ -41,4 +40,55 @@ export const PAGE_SIZE_OPTIONS = [
   { value: 10, label: '10 Items' },
   { value: 30, label: '30 Items' },
   { value: 50, label: '50 Items' },
+];
+
+export const FILTERING_PROPERTIES = [
+  {
+    propertyLabel: 'Domain name',
+    key: 'domainName',
+    groupValuesLabel: 'Domain name values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'Delivery method',
+    key: 'deliveryMethod',
+    groupValuesLabel: 'Delivery method values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'Price class',
+    key: 'priceClass',
+    groupValuesLabel: 'Price class values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'Origin',
+    key: 'origin',
+    groupValuesLabel: 'Origin values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'Status',
+    key: 'status',
+    groupValuesLabel: 'Status values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'State',
+    key: 'state',
+    groupValuesLabel: 'State values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'Logging',
+    key: 'logging',
+    groupValuesLabel: 'Logging values',
+    operators: [':', '!:', '=', '!='],
+  },
+  {
+    propertyLabel: 'SSL certificate',
+    key: 'sslCertificate',
+    groupValuesLabel: 'SSL certificate values',
+    operators: [':', '!:', '=', '!='],
+  },
 ];

@@ -172,11 +172,12 @@ const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
 
 const fetchEmbeddingUrl = async (
   region: string,
+  allowedDomain: string,
   dashboardId: string,
   sheetId?: string,
   visualId?: string
 ) => {
-  let reqParams = `region=${region}&dashboardId=${dashboardId}`;
+  let reqParams = `region=${region}&allowedDomain=${allowedDomain}&dashboardId=${dashboardId}`;
   if (sheetId) {
     reqParams = reqParams.concat(`&sheetId=${sheetId}`);
   }

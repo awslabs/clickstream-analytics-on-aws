@@ -54,6 +54,7 @@ const AnalyticsEvent: React.FC = () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
         'ap-southeast-1',
+        window.location.origin,
         'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
         'ef2f9b18-8093-47d3-a3cf-59e890cfe338',
         'e0ab637b-ebc3-470c-a107-54a6b38ae07c'
@@ -61,7 +62,6 @@ const AnalyticsEvent: React.FC = () => {
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();
-          console.log(data.EmbedUrl);
           await embeddingContext.embedVisual({
             url: data.EmbedUrl,
             container: '#qs-funnel-container',

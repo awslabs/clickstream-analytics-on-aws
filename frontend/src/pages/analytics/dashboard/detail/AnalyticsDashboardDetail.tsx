@@ -25,6 +25,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
         'ap-southeast-1',
+        window.location.origin,
         'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f'
       );
       if (success) {

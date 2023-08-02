@@ -12,31 +12,22 @@
  */
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import {
-  Box,
-  Button,
-  FormField,
-  Header,
-  Input,
-  Pagination,
-  Select,
-  SelectProps,
-  SpaceBetween,
-  Table,
-} from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { Box } from '@cloudscape-design/components';
+import Pagination from '@cloudscape-design/components/pagination';
+import PropertyFilter from '@cloudscape-design/components/property-filter';
+import Table from '@cloudscape-design/components/table';
+
 import { getMetadataEventsList } from 'apis/analytics';
 import {
   TableEmptyState,
   TableNoMatchState,
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DEFAULT_PREFERENCES, SEARCHABLE_COLUMNS } from './table-config';
+import { EventsTableHeader } from './EventsTableHeader';
+import { DEFAULT_PREFERENCES } from './table-config';
 import '../styles/table-select.scss';
-
-const defaultEventType = { value: '0', label: 'Any Type' };
 
 interface EventTableProps {
   selectionType?: 'multi' | 'single';
@@ -45,6 +36,7 @@ interface EventTableProps {
   refresh: number;
   defaultSelectedItems: IMetadataEvent[];
   changeSelectedItems: (item: IMetadataEvent[]) => void;
+  loadHelpPanelContent: () => void;
 }
 
 const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
@@ -54,6 +46,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     appId,
     defaultSelectedItems,
     changeSelectedItems,
+    loadHelpPanelContent,
   } = props;
   const { t } = useTranslation();
   const [loadingData, setLoadingData] = useState(false);
@@ -103,14 +96,6 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     'Metadata-Event-TableSelectFilter-Widths',
     COLUMN_DEFINITIONS
   );
-  const [eventType, setEventType] =
-    useState<OptionDefinition>(defaultEventType);
-
-  const eventTypeOptions = [
-    defaultEventType,
-    { value: '1', label: 'built-in' },
-    { value: '2', label: 'customer' },
-  ];
 
   const listMetadataEvents = async () => {
     setLoadingData(true);
@@ -135,48 +120,48 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     listMetadataEvents();
   }, []);
 
-  function matchesEventType(item: any, selectedType: SelectProps.Option) {
-    return (
-      selectedType === defaultEventType || item.type === selectedType.label
-    );
-  }
-
   const {
     items,
     actions,
     filteredItemsCount,
     collectionProps,
-    filterProps,
     paginationProps,
-  } = useCollection(JSON.parse(JSON.stringify(eventList)), {
-    filtering: {
-      empty: <TableEmptyState resourceName="Event" />,
-      noMatch: <TableNoMatchState onClearFilter={clearFilter} />,
-      filteringFunction: (item: any, filteringText) => {
-        if (!matchesEventType(item, eventType)) {
-          return false;
-        }
-        const filteringTextLowerCase = filteringText.toLowerCase();
-
-        return SEARCHABLE_COLUMNS.map((key) => item[key]).some(
-          (value) =>
-            typeof value === 'string' &&
-            value.toLowerCase().indexOf(filteringTextLowerCase) > -1
-        );
-      },
+    propertyFilterProps,
+  } = useCollection(eventList, {
+    propertyFiltering: {
+      filteringProperties: [
+        {
+          propertyLabel: 'Event name',
+          key: 'name',
+          groupValuesLabel: 'Event name values',
+          operators: [':', '!:', '=', '!='],
+        },
+        {
+          propertyLabel: 'Event display name',
+          key: 'displayName',
+          groupValuesLabel: 'Event display name values',
+          operators: [':', '!:', '=', '!='],
+        },
+        {
+          propertyLabel: 'Event type',
+          key: 'type',
+          groupValuesLabel: 'Event type values',
+          operators: [':', '!:', '=', '!='],
+        },
+      ],
+      empty: <TableEmptyState resourceName="Events" />,
+      noMatch: (
+        <TableNoMatchState
+          onClearFilter={() => {
+            actions.setPropertyFiltering({ tokens: [], operation: 'and' });
+          }}
+        />
+      ),
     },
     pagination: { pageSize: DEFAULT_PREFERENCES.pageSize },
     sorting: { defaultState: { sortingColumn: columnDefinitions[0] } },
     selection: {},
   });
-  useLayoutEffect(() => {
-    collectionProps.ref.current?.scrollToTop();
-  }, [eventType, collectionProps.ref, filterProps.filteringText]);
-
-  function clearFilter() {
-    actions.setFiltering('');
-    setEventType(defaultEventType);
-  }
 
   return (
     <div>
@@ -188,28 +173,9 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
         resizableColumns={true}
         loading={loadingData}
         items={items}
-        trackBy="id"
         loadingText={t('analytics:metadata.event.tableLoading') || 'Loading'}
-        selectionType={selectionType ?? 'single'}
-        onSelectionChange={({ detail }) => {
-          setSelectedItems(detail.selectedItems);
-          changeSelectedItems(detail.selectedItems);
-        }}
+        selectionType={selectionType ?? 'multi'}
         onColumnWidthsChange={saveWidths}
-        ariaLabels={{
-          allItemsSelectionLabel: ({ selectedItems }) =>
-            `${selectedItems.length} ${
-              selectedItems.length === 1 ? t('item') : t('items')
-            } ${t('selected')}`,
-          itemSelectionLabel: ({ selectedItems }, item) => {
-            const isItemSelected = selectedItems.filter(
-              (i) => i.name === item.name
-            ).length;
-            return `${item.name} is ${isItemSelected ? '' : t('not')} ${t(
-              'selected'
-            )}`;
-          },
-        }}
         columnDefinitions={columnDefinitions}
         columnDisplay={DEFAULT_PREFERENCES.contentDisplay}
         empty={
@@ -221,62 +187,49 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
           </Box>
         }
         header={
-          <>
-            <Header
-              counter={`(${eventList.length})`}
-              actions={
-                <SpaceBetween size="xs" direction="horizontal">
-                  <Button data-testid="header-btn-create" variant="primary">
-                    Create Events
-                  </Button>
-                </SpaceBetween>
-              }
-            >
-              {t('analytics:metadata.event.title')}
-            </Header>
-            {t('analytics:metadata.event.description')}
-          </>
+          <EventsTableHeader
+            title={t('analytics:metadata.event.title') ?? ''}
+            createButtonText={t('analytics:metadata.event.createButton') ?? ''}
+            selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
+            counter={
+              !loadingData &&
+              collectionProps.selectedItems &&
+              collectionProps.selectedItems?.length > 0
+                ? `(${collectionProps.selectedItems.length}/${eventList.length})`
+                : `(${eventList.length})`
+            }
+            onInfoLinkClick={loadHelpPanelContent}
+          />
         }
+        // header={
+        //   <>
+        //     <Header
+        //       counter={`(${eventList.length})`}
+        //       actions={
+        //         <SpaceBetween size="xs" direction="horizontal">
+        //           <Button data-testid="header-btn-create" variant="primary">
+        //             Create Events
+        //           </Button>
+        //         </SpaceBetween>
+        //       }
+        //     >
+        //       {t('analytics:metadata.event.title')}
+        //     </Header>
+        //     {t('analytics:metadata.event.description')}
+        //   </>
+        // }
         filter={
-          <div className="input-container">
-            <div className="input-filter">
-              <Input
-                data-testid="input-filter"
-                type="search"
-                value={filterProps.filteringText}
-                onChange={(event) => {
-                  actions.setFiltering(event.detail.value);
-                }}
-                ariaLabel="Find instances"
-                placeholder="Find instances"
-                clearAriaLabel="clear"
-              />
-            </div>
-            <div className="select-filter">
-              <FormField label="Filter Type">
-                <Select
-                  data-testid="type-filter"
-                  options={eventTypeOptions}
-                  selectedAriaLabel="Selected"
-                  selectedOption={eventType}
-                  onChange={(event) => {
-                    setEventType(event.detail.selectedOption);
-                  }}
-                  expandToViewport={true}
-                />
-              </FormField>
-            </div>
-            <div aria-live="polite">
-              {(filterProps.filteringText ||
-                eventType !== defaultEventType) && (
-                <span className="filtering-results">
-                  {`${filteredItemsCount} ${
-                    filteredItemsCount === 1 ? 'match' : 'matches'
-                  }`}
-                </span>
-              )}
-            </div>
-          </div>
+          <PropertyFilter
+            {...propertyFilterProps}
+            i18nStrings={{
+              filteringAriaLabel: 'Find events',
+              filteringPlaceholder: 'Find events',
+            }}
+            countText={`${filteredItemsCount} ${
+              filteredItemsCount === 1 ? 'match' : 'matches'
+            }`}
+            expandToViewport={true}
+          />
         }
         pagination={<Pagination {...paginationProps} />}
       />

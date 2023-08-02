@@ -27,6 +27,7 @@ const AnalyticsRealtime: React.FC = () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
         'us-west-2',
+        window.location.origin,
         '06699301-ba58-4ad3-8b74-585dac04d275'
       );
       if (success) {

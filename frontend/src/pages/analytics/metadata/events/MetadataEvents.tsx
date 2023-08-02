@@ -48,6 +48,7 @@ const MetadataEvents: React.FC = () => {
           changeSelectedItems={(items) => {
             setSelectedItems(items);
           }}
+          loadHelpPanelContent={() => {console.log(1)}}
         ></EventTable>
       }
       headerSelector="#header"
