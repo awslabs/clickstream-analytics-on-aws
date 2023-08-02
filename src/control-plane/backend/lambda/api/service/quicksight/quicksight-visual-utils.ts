@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { logger } from './powertools';
+import { logger } from '../../common/powertools';
 
 export interface VisualPorps {
   readonly name: string;
@@ -23,7 +23,7 @@ export interface VisualPorps {
   readonly filterControl: any;
   readonly parameterDeclarations: any[];
   readonly filterGroup: any;
-  readonly enventCount: number;
+  readonly eventCount: number;
 }
 
 export interface DashboardAction {
@@ -51,9 +51,6 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
   for (const visual of visuals) {
     logger.info('start to add visual');
     const sheet = findElementWithProperyValue(dashboard, 'Sheets', 'SheetId', visual.sheetId);
-
-    logger.info(`sheet: ${JSON.stringify(sheet)}`);
-
     if ( sheet !== undefined) {
       //add visual to sheet
       const charts = findElementByPath(sheet, 'Visuals') as Array<any>;
@@ -81,33 +78,21 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
 
       // visual layout
       const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
-      logger.info(`layout: ${JSON.stringify(layout)}`);
-
       const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
-
-      logger.info(`elements: ${JSON.stringify(elements)}`);
-
-      const layoutControl = JSON.parse(readFileSync(join(__dirname, './quicksight-template/layout-control.json')).toString());
-      const visualControl = JSON.parse(readFileSync(join(__dirname, './quicksight-template/layout-visual.json')).toString());
+      const layoutControl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/layout-control.json')).toString());
+      const visualControl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/layout-visual.json')).toString());
 
       if (elements.length > 0) {
-
         const lastElement = elements.at(elements.length - 1);
         logger.info(`lastElement: ${JSON.stringify(lastElement)}`);
         layoutControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan;
         visualControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan + layoutControl.RowSpan;
       }
-
-      logger.info('start to find first child');
-
       const firstObj = findFirstChild(visual.filterControl);
-      logger.info(`firstObj: ${JSON.stringify(firstObj)}`);
-
       layoutControl.ElementId = firstObj.FilterControlId;
-      visualControl.RowSpan = (visual.enventCount as number) * 2;
+      visualControl.RowSpan = (visual.eventCount as number) * 2;
 
       logger.info(`visual.visualContent: ${visual.visualContent}`);
-      logger.info(`visualContent first child: ${findFirstChild(visual.visualContent)}`);
       visualControl.ElementId = findFirstChild(visual.visualContent).VisualId;
       elements.push(layoutControl);
       elements.push(visualControl);
@@ -154,12 +139,9 @@ function findKthElement(jsonData: any, path: string, index: number): any {
 
 function findFirstChild(jsonData: any): any {
   if (Array.isArray(jsonData)) {
-    logger.info('array');
     return undefined; // Return the kth element of the array
   } else if (jsonData && typeof jsonData === 'object') {
-    logger.info('object');
     for (const key in jsonData) {
-      logger.info(`key: ${key}`);
       if (jsonData.hasOwnProperty(key)) {
         return jsonData[key];
       }
@@ -171,14 +153,10 @@ function findFirstChild(jsonData: any): any {
 
 function findElementWithProperyValue(root: any, path: string, property: string, value: string): any {
   const jsonData = findElementByPath(root, path);
-  logger.info(`jsonData: ${JSON.stringify(jsonData)}`);
-  logger.info(`sheetID: ${value}`);
   if (Array.isArray(jsonData)) {
     for ( const e of jsonData as Array<any>) {
-      logger.info(`e: ${JSON.stringify(e)}`);
       if (e && typeof e === 'object' && property in e) {
         const v = e[property];
-        logger.info(`v: ${JSON.stringify(v)}`);
         if ((v as string) === value ) {
           return e;
         }

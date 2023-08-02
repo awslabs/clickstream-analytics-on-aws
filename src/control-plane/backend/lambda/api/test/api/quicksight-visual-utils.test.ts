@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { applyChangeToDashboard } from '../../common/quicksight-visual-utils';
+import { applyChangeToDashboard } from '../../service/quicksight/quicksight-visual-utils';
 
 describe('QuickSight visual management test', () => {
 
@@ -255,14 +255,12 @@ describe('QuickSight visual management test', () => {
             Status: 'ENABLED',
             CrossDataset: 'SINGLE_DATASET',
           },
-          enventCount: 5,
+          eventCount: 5,
         },
       ],
       dashboardDef: dashboardDef,
 
     });
-
-    console.log(dashbaord);
 
     expect(JSON.stringify(dashbaord)).toEqual(JSON.stringify({
       DataSetConfigurations: [
