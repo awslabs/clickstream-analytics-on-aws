@@ -2892,11 +2892,99 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
       });
     }
 
-    if (stack.nestedStacks.redshiftProvisionedStack) {
+    if (stack.nestedStacks.redshiftProvisionedStack) { //RedshiftDataExecRoleDefaultPolicy
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
         PolicyDocument: {
           Statement: [
+            {
+              Action: [
+                'redshift-data:ExecuteStatement',
+                'redshift-data:BatchExecuteStatement',
+              ],
+              Effect: 'Allow',
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    RefAnyValue,
+                    ':redshift:',
+                    RefAnyValue,
+                    ':',
+                    RefAnyValue,
+                    ':cluster:',
+                    RefAnyValue,
+                  ],
+                ],
+              },
+            },
+            {
+              Action: 'redshift:GetClusterCredentials',
+              Condition: {
+                StringEquals: {
+                  'redshift:DbUser': RefAnyValue,
+                  'redshift:DbName': [
+                    Match.anyValue(),
+                    RefAnyValue,
+                  ],
+                },
+              },
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':redshift:',
+                      RefAnyValue,
+                      ':',
+                      RefAnyValue,
+                      ':dbuser:',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':redshift:',
+                      RefAnyValue,
+                      ':',
+                      RefAnyValue,
+                      ':dbname:',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':redshift:',
+                      RefAnyValue,
+                      ':',
+                      RefAnyValue,
+                      ':dbname:',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               Action: [
                 'redshift-data:DescribeStatement',

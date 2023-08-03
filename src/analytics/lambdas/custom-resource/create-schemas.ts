@@ -268,9 +268,9 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
       if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true' ) {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
         sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
-      } else {
-        sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+        continue;
       }
+      sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
     }
   };
 
@@ -296,7 +296,10 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
       }
     }
   };
+  await doUpdate(sqlStatements, props);
+}
 
+async function doUpdate(sqlStatements: string[], props: ResourcePropertiesType) {
   if (sqlStatements.length == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
   } else {
@@ -380,7 +383,8 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
 const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string,
   props: CreateDatabaseAndSchemas, owner?: string) => {
   try {
-    await executeStatementsWithWait(redshiftClient, [`CREATE DATABASE ${databaseName}${owner ? ` WITH OWNER "${owner}"` : ''};`],
+    const ownerStatement = owner ? ` WITH OWNER "${owner}"` : '';
+    await executeStatementsWithWait(redshiftClient, [`CREATE DATABASE ${databaseName}${ownerStatement};`],
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {

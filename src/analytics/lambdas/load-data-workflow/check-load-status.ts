@@ -67,53 +67,50 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
   logger.debug(`query_id:${queryId}`);
   // There is a loading job need to check result.
   const response = await checkLoadStatus(queryId);
-
-  if (response.Status == StatusString.FINISHED) {
-    logger.info('Load success and delete the job in Dynamodb.');
-    for (let index = 0; index < jobList.entries.length; index++) {
-      const url = jobList.entries[index].url;
-      logger.debug(`delFinishedJobInDynamodb s3Uri:${url}`);
+  let errMsg = '';
+  try {
+    if (response.Status == StatusString.FINISHED) {
+      logger.info('Load success and delete the job in Dynamodb.');
+      for (let index = 0; index < jobList.entries.length; index++) {
+        const url = jobList.entries[index].url;
+        logger.debug(`delFinishedJobInDynamodb s3Uri:${url}`);
+        try {
+          const dynamodbResponse = await delFinishedJobInDynamodb(dynamodbTableName, url);
+          logger.debug('delFinishedJobInDynamodb response:', JSON.stringify(dynamodbResponse));
+        } catch (err) {
+          errMsg = 'Error when deleting loaded jobs in DDB.';
+          throw err;
+        };
+      }
+      logger.info('Load success and delete the manifest file on S3.');
+      const key = manifestFileName.substr('s3://'.length, manifestFileName.length - 's3://'.length);
+      const s3Bucket = key.split('/')[0];
+      const s3Object = key.substr(s3Bucket.length + '/'.length, key.length - s3Bucket.length);
+      logger.debug(`delFinishedJobInS3 s3Bucket:${s3Bucket}, s3Object:${s3Object}`);
       try {
-        const dynamodbResponse = await delFinishedJobInDynamodb(dynamodbTableName, url);
-        logger.debug('delFinishedJobInDynamodb response:', JSON.stringify(dynamodbResponse));
+        const s3Response = await delFinishedJobInS3(s3Bucket, s3Object);
+        logger.debug('delFinishedJobInS3 response:', JSON.stringify(s3Response));
       } catch (err) {
-        if (err instanceof Error) {
-          logger.error('Error when deleting loaded jobs in DDB.', err);
-        }
-        throw err;
+        logger.error(`Error when deleting manifest file ${s3Object} in S3 bucket ${s3Bucket}.`, (err as Error));
       }
+      return {
+        detail: {
+          status: response.Status,
+        },
+      };
+    } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
+      logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
+      return {
+        detail: {
+          id: queryId,
+          status: response.Status,
+          message: response.Error,
+          appId: appId,
+          manifestFileName: manifestFileName,
+          jobList: jobList,
+        },
+      };
     }
-    logger.info('Load success and delete the manifest file on S3.');
-    const key = manifestFileName.substr('s3://'.length, manifestFileName.length - 's3://'.length);
-    const s3Bucket = key.split('/')[0];
-    const s3Object = key.substr(s3Bucket.length + '/'.length, key.length - s3Bucket.length);
-    logger.debug(`delFinishedJobInS3 s3Bucket:${s3Bucket}, s3Object:${s3Object}`);
-    try {
-      const s3Response = await delFinishedJobInS3(s3Bucket, s3Object);
-      logger.debug('delFinishedJobInS3 response:', JSON.stringify(s3Response));
-    } catch (err) {
-      if (err instanceof Error) {
-        logger.warn(`Error when deleting manifest file ${s3Object} in S3 bucket ${s3Bucket}.`, err);
-      }
-    }
-    return {
-      detail: {
-        status: response.Status,
-      },
-    };
-  } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
-    logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
-    return {
-      detail: {
-        id: queryId,
-        status: response.Status,
-        message: response.Error,
-        appId: appId,
-        manifestFileName: manifestFileName,
-        jobList: jobList,
-      },
-    };
-  } else {
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
     return {
       detail: {
@@ -124,6 +121,11 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         jobList: jobList,
       },
     };
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(errMsg, err);
+    }
+    throw err;
   }
 };
 

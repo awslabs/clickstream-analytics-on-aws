@@ -66,7 +66,7 @@ async function onCreate(event: CdkCustomResourceEvent) {
       'GRANT create user to role clickstream',
       `GRANT ROLE clickstream TO "IAMR:${props.dataRoleName}"`,
     ],
-    props.serverlessRedshiftProps, undefined);
+    props.serverlessRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
       logger.error('Error when creating database in serverless Redshift.', err);

@@ -49,7 +49,7 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
     logger.warn('No SQL statement to execute.');
     return;
   }
-  var queryId: string;
+  let queryId: string;
   if (sqlStatements.length == 1) {
     const params = new ExecuteStatementCommand({
       Sql: sqlStatements[0],
@@ -86,9 +86,9 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   const checkParams = new DescribeStatementCommand({
     Id: queryId,
   });
-  var response = await client.send(checkParams);
+  let response = await client.send(checkParams);
   logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
-  var count = 0;
+  let count = 0;
   while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
     await Sleep(1000);
     count++;
@@ -106,7 +106,7 @@ export const getStatementResult = async (client: RedshiftDataClient, queryId: st
   const checkParams = new GetStatementResultCommand({
     Id: queryId,
   });
-  var response = await client.send(checkParams);
+  const response = await client.send(checkParams);
   logger.info(`Get statement result: ${response.TotalNumRows}`, JSON.stringify(response));
   return response;
 };
@@ -143,7 +143,7 @@ export function getRedshiftProps(
   workgroupName: string,
   clusterIdentifier: string,
 ) {
-  var serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
+  let serverlessRedshiftProps: ExistingRedshiftServerlessCustomProps | undefined,
     provisionedRedshiftProps: ProvisionedRedshiftProps | undefined;
 
   if (redshiftMode == REDSHIFT_MODE.SERVERLESS) {

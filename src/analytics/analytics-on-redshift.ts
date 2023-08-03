@@ -21,7 +21,7 @@ import {
   SubnetSelection,
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, Policy, IRole } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
@@ -78,11 +78,11 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    var redshiftDataAPIExecRole: IRole;
-    var existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
+    let redshiftDataAPIExecRole: IRole;
+    let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
 
     const projectDatabaseName = props.projectId;
-    var redshiftUserCR: CustomResource | undefined;
+    let redshiftUserCR: CustomResource | undefined;
     if (props.newRedshiftServerlessProps) {
       const redshiftVpc = getExistVpc(scope, 'vpc-for-redshift-serverless-workgroup', {
         vpcId: props.newRedshiftServerlessProps.vpcId,
@@ -121,68 +121,66 @@ export class RedshiftAnalyticsStack extends NestedStack {
       redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
       });
-      new Policy(this, 'RedshiftClusterPolicy', {
-        roles: [redshiftDataAPIExecRole],
-        statements: [
-          new PolicyStatement({
-            actions: [
-              'redshift-data:ExecuteStatement',
-              'redshift-data:BatchExecuteStatement',
-            ],
-            resources: [
-              Arn.format({
+      const policyStatements = [
+        new PolicyStatement({
+          actions: [
+            'redshift-data:ExecuteStatement',
+            'redshift-data:BatchExecuteStatement',
+          ],
+          resources: [
+            Arn.format({
+              service: 'redshift',
+              resource: 'cluster',
+              resourceName: props.provisionedRedshiftProps!.clusterIdentifier,
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            }, Stack.of(this)),
+          ],
+        }),
+        new PolicyStatement({
+          actions: [
+            'redshift:GetClusterCredentials',
+          ],
+          resources: [
+            Arn.format(
+              {
+                resource: 'dbuser',
+                resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.dbUser}`,
                 service: 'redshift',
-                resource: 'cluster',
-                resourceName: props.provisionedRedshiftProps!.clusterIdentifier,
                 arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-              }, Stack.of(this)),
-            ],
-          }),
-          new PolicyStatement({
-            actions: [
-              'redshift:GetClusterCredentials',
-            ],
-            resources: [
-              Arn.format(
-                {
-                  resource: 'dbuser',
-                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.dbUser}`,
-                  service: 'redshift',
-                  arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-                },
-                Stack.of(this),
-              ),
-              Arn.format(
-                {
-                  resource: 'dbname',
-                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.databaseName}`,
-                  service: 'redshift',
-                  arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-                },
-                Stack.of(this),
-              ),
-              Arn.format(
-                {
-                  resource: 'dbname',
-                  resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${projectDatabaseName}`,
-                  service: 'redshift',
-                  arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-                },
-                Stack.of(this),
-              ),
-            ],
-            conditions: {
-              StringEquals: {
-                'redshift:DbUser': props.provisionedRedshiftProps!.dbUser,
-                'redshift:DbName': [
-                  'dev',
-                  projectDatabaseName,
-                ],
               },
+              Stack.of(this),
+            ),
+            Arn.format(
+              {
+                resource: 'dbname',
+                resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${props.provisionedRedshiftProps!.databaseName}`,
+                service: 'redshift',
+                arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+              },
+              Stack.of(this),
+            ),
+            Arn.format(
+              {
+                resource: 'dbname',
+                resourceName: `${props.provisionedRedshiftProps!.clusterIdentifier}/${projectDatabaseName}`,
+                service: 'redshift',
+                arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+              },
+              Stack.of(this),
+            ),
+          ],
+          conditions: {
+            StringEquals: {
+              'redshift:DbUser': props.provisionedRedshiftProps!.dbUser,
+              'redshift:DbName': [
+                'dev',
+                projectDatabaseName,
+              ],
             },
-          }),
-        ],
-      });
+          },
+        }),
+      ];
+      policyStatements.forEach((ps) => (redshiftDataAPIExecRole as Role).addToPolicy(ps));
       (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
         actions: ['redshift-data:DescribeStatement', 'redshift-data:GetStatementResult'],
         resources: ['*'],

@@ -106,10 +106,10 @@ export const handler = async (_event: any, context: Context) => {
   let newMinFileTimestamp = nowMillis;
 
   // Get all items with status=NEW
-  var candidateItems: Array<ODSEventItem> = [];
-  var newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
+  let candidateItems: Array<ODSEventItem> = [];
+  let newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
   // all JOB_NEW count for metrics
-  var allJobNewCount = newRecordResp.Count;
+  let allJobNewCount = newRecordResp.Count;
   logger.info('queryItems response count=' + newRecordResp.Count);
 
   if (newRecordResp.Count! > 0) {
@@ -132,6 +132,29 @@ export const handler = async (_event: any, context: Context) => {
 
   logger.info(`allJobNewCount: ${allJobNewCount}`);
 
+  const response = await doManifestFiles(candidateItems, queryResultLimit, tableName, requestId);
+
+  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
+  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
+  const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
+  const maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
+
+  logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
+
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processInfo.jobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_ENQUEUE, MetricUnits.Count, enQueueInfo.jobNum);
+  metrics.addMetric(AnalyticsCustomMetricsName.FILE_MAX_AGE, MetricUnits.Seconds, maxFileAgeSeconds);
+  metrics.publishStoredMetrics();
+
+  logger.info('FILE_NEW=' + allJobNewCount + ', FILE_PROCESSING=' + processInfo.jobNum
+    + ', FILE_ENQUEUE=' + enQueueInfo.jobNum + ', FILE_MAX_AGE=' + maxFileAgeSeconds);
+
+  return response;
+};
+
+const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
+  queryResultLimit: number, tableName: string, requestId: string) => {
   const groupedManifestItems: { [key: string]: ManifestItem[] } = {};
   const manifestFiles: ManifestBody[] = [];
   logger.info('queryResultLimit=' + queryResultLimit);
@@ -175,23 +198,6 @@ export const handler = async (_event: any, context: Context) => {
       });
     }
   }
-
-  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
-  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
-  const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
-  const maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
-
-  logger.info('minFileTimestamp:' + minFileTimestamp + ', maxFileAgeSeconds:' + maxFileAgeSeconds);
-
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_NEW, MetricUnits.Count, allJobNewCount);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_PROCESSING, MetricUnits.Count, processInfo.jobNum);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_ENQUEUE, MetricUnits.Count, enQueueInfo.jobNum);
-  metrics.addMetric(AnalyticsCustomMetricsName.FILE_MAX_AGE, MetricUnits.Seconds, maxFileAgeSeconds);
-  metrics.publishStoredMetrics();
-
-  logger.info('FILE_NEW=' + allJobNewCount + ', FILE_PROCESSING=' + processInfo.jobNum
-    + ', FILE_ENQUEUE=' + enQueueInfo.jobNum + ', FILE_MAX_AGE=' + maxFileAgeSeconds);
-
 
   return {
     manifestList: manifestFiles,

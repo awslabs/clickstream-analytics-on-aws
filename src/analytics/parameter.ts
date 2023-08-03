@@ -233,7 +233,7 @@ export function createStackParameters(scope: Construct): {
           'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
       },
     ],
-  });
+  }).overrideLogicalId('S3BucketReadinessRule');
 
   // Set Redshift common parameters
   const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
@@ -332,7 +332,7 @@ export function createStackParameters(scope: Construct): {
           'All subnets of Redshift Serverless must be in the VPC',
       },
     ],
-  });
+  }).overrideLogicalId('NewRedshiftServerlessParameters');
 
   // Set existing Redshift serverless parameters
   const existingRedshiftServerlessParamsGroup = [];
@@ -401,7 +401,7 @@ export function createStackParameters(scope: Construct): {
             'Namespace, Workgroup and Role Arn are required for using existing Redshift Serverless.',
       },
     ],
-  });
+  }).overrideLogicalId('ExistingRedshiftServerlessParameters');
 
   // Set Redshift cluster parameters
   const redshiftClusterParamsGroup = [];
@@ -453,7 +453,7 @@ export function createStackParameters(scope: Construct): {
             'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
       },
     ],
-  });
+  }).overrideLogicalId('RedshiftProvisionedParameters');
 
   // Set load job parameters
   const loadJobParamsGroup = [];

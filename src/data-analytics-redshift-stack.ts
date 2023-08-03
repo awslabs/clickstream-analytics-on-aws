@@ -181,37 +181,37 @@ export function createRedshiftAnalyticsStack(
     value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupWorkgroupName ?? '',
     description: 'Workgroup name of Redshift Serverless',
     condition: isNewRedshiftServerless,
-  });
+  }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
   new CfnOutput(scope, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, {
     value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupEndpointAddress ?? '',
     description: 'Endpoint address of Redshift Serverless',
     condition: isNewRedshiftServerless,
-  });
+  }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS);
   new CfnOutput(scope, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
     value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroupPort ?? '5439',
     description: 'Endpoint port of Redshift Serverless',
     condition: isNewRedshiftServerless,
-  });
+  }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT);
   new CfnOutput(scope, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, {
     value: newRedshiftServerlessStack.redshiftServerlessWorkgroup?.workgroup.attrWorkgroupNamespaceName ?? '',
     description: 'Namespace name of Redshift Serverless',
     condition: isNewRedshiftServerless,
-  });
+  }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME);
   new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
     value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter,
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isNewRedshiftServerless,
-  });
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
     value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter,
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isExistingRedshiftServerless,
-  });
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
     value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter,
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isRedshiftProvisioned,
-  });
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,
     newRedshiftServerlessStack,
