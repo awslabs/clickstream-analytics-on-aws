@@ -27,6 +27,11 @@ export interface IMetadataEvent {
   readonly deleted: boolean;
 }
 
+export interface IMetadataAttributeValue {
+  readonly value: string;
+  readonly displayValue: string;
+}
+
 export interface IMetadataEventAttribute {
   readonly id: string;
   readonly type: string;
@@ -35,7 +40,8 @@ export interface IMetadataEventAttribute {
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: string;
+  readonly valueType: string;
+  readonly valueEnum: IMetadataAttributeValue[];
 
   readonly createAt: number;
   readonly updateAt: number;

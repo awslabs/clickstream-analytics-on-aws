@@ -14,12 +14,12 @@
 import express from 'express';
 import { body, header, param, query } from 'express-validator';
 import { defaultOrderValueValid, isMetadataEventExisted, isMetadataEventNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { MetadataEventAttributeServ, MetadataEventServ } from '../service/metadata';
+import { MetadataEventAttributeServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
 const metadataEventServ: MetadataEventServ = new MetadataEventServ();
 const metadataEventAttributeServ: MetadataEventAttributeServ = new MetadataEventAttributeServ();
-// const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
+const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
 
 router_metadata.get(
   '/events',
@@ -94,12 +94,12 @@ router_metadata.post(
     return metadataEventAttributeServ.add(req, res, next);
   });
 
-router_metadata.get('/event/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/event_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventAttributeServ.details(req, res, next);
 });
 
 router_metadata.put(
-  '/event',
+  '/event_attribute',
   validate([
     body().custom(isValidEmpty),
     body('name')
@@ -110,12 +110,60 @@ router_metadata.put(
   });
 
 router_metadata.delete(
-  '/event/:name',
+  '/event_attribute/:name',
   validate([
     param('name').custom(isMetadataEventExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventAttributeServ.delete(req, res, next);
+  });
+
+router_metadata.get(
+  '/user_attributes',
+  validate([
+    query()
+      .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
+        req,
+        location: 'body',
+        path: '',
+      })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataUserAttributeServ.list(req, res, next);
+  });
+
+router_metadata.post(
+  '/user_attribute',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataUserAttributeServ.add(req, res, next);
+  });
+
+router_metadata.get('/user_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataUserAttributeServ.details(req, res, next);
+});
+
+router_metadata.put(
+  '/user_attribute',
+  validate([
+    body().custom(isValidEmpty),
+    body('name')
+      .custom(isMetadataEventExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataUserAttributeServ.update(req, res, next);
+  });
+
+router_metadata.delete(
+  '/user_attribute/:name',
+  validate([
+    param('name').custom(isMetadataEventExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataUserAttributeServ.delete(req, res, next);
   });
 
 export {
