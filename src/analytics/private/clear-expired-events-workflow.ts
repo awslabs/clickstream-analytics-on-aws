@@ -20,7 +20,7 @@ import { IRole } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass } from 'aws-cdk-lib/aws-stepfunctions';
+import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { ClearExpiredEventsWorkflowData, ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from './model';
@@ -139,7 +139,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
 
     // Create state machine
     const clearExpiredEventsStateMachine = new StateMachine(this, 'ClearExpiredEventsStateMachine', {
-      definition,
+      definitionBody: DefinitionBody.fromChainable(definition),
       logs: {
         destination: createLogGroup(this,
           {
