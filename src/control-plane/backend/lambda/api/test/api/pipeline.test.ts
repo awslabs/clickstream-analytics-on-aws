@@ -842,7 +842,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: RedshiftDbUser: HGF%$#@BHHGF not match ^([a-z0-9-]{1,63})?$. Please check and try again.');
+    expect(res.body.message).toEqual('Validation error: RedshiftDbUser: HGF%$#@BHHGF not match ^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$. Please check and try again.');
   });
   it('Create pipeline with dictionary no found', async () => {
     tokenMock(ddbMock, false);
