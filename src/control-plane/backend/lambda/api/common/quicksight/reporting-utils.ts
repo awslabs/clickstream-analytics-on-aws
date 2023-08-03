@@ -24,6 +24,7 @@ import { CreateDataSetCommandOutput, QuickSight,
   TemplateVersionDefinition,
   DataSetIdentifierDeclaration,
   DashboardVersionDefinition,
+  AnalysisDefinition,
 } from '@aws-sdk/client-quicksight'
 import { logger } from '../powertools';
 
@@ -304,4 +305,14 @@ export  const getTemplateDefinition = async (quickSight: QuickSight, awsAccountI
   })
 
   return templateDef.Definition
+}
+
+export  const getAnalysisDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string,  analysisId: string,)
+: Promise<AnalysisDefinition|undefined> => {
+  const analysisDef = await quickSight.describeAnalysisDefinition({
+    AwsAccountId: awsAccountId,
+    AnalysisId: analysisId,
+  })
+
+  return analysisDef.Definition
 }

@@ -21,9 +21,11 @@ import { buildFunnelView } from '../common/sql-builder';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 import { ClickStreamStore } from '../store/click-stream-store';
-import { createDataSet, funnelVisualColumns } from '../common/quicksight/reporting-utils';
+import { createDataSet, funnelVisualColumns, getAnalysisDefinitionFromArn } from '../common/quicksight/reporting-utils';
 import { applyChangeToDashboard } from '../common/quicksight-visual-utils';
-import { getDashboardCreateParameters, getDashboardDef, getVisualDef, getVisualRalatedDefs } from './quicksight/utils';
+import { getDashboardCreateParameters, getVisualDef, getVisualRalatedDefs } from './quicksight/utils';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const store: ClickStreamStore = new DynamoDbStore();
 const stsClient = new STSClient({region: 'us-east-1'});
@@ -33,7 +35,7 @@ const quickSight = new QuickSight({
 
 export class ReportingServ {
 
-  public async createFunnelVisual(req: any, res: any, next: any) {
+  async createFunnelVisual(req: any, res: any, next: any) {
     try {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
@@ -59,6 +61,7 @@ export class ReportingServ {
       console.log(`sql: ${sql}`)
 
       const dashboardCreateParameters = await getDashboardCreateParameters({
+        action: query.action,
         accountId: awsAccountId!,
         projectId: query.projectId,
         appId: query.appId,
@@ -99,9 +102,19 @@ export class ReportingServ {
       })
 
       // gererate dashboard definition
-      const dashboardDef = getDashboardDef();
-      const sheetId = uuidv4()
-      dashboardDef!.Sheets![0].SheetId = sheetId
+      let dashboardDef
+      let sheetId 
+      if(!query.analysisId) {
+        dashboardDef = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
+        sheetId = uuidv4()
+        dashboardDef.Sheets![0].SheetId = sheetId
+      } else {
+        if(!query.sheetId) {
+          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
+        }
+        sheetId = query.sheetId
+        dashboardDef = getAnalysisDefinitionFromArn(quickSight, awsAccountId!, query.analysisId)
+      }
 
       const datasetConfg = {
         Identifier: viewName,
