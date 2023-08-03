@@ -160,7 +160,6 @@ export interface DataModeling {
   readonly loadWorkflow?: {
     readonly bucket?: S3Bucket;
     readonly maxFilesLimit?: number;
-    readonly processingFilesLimit?: number;
   };
   readonly upsertUsers: {
     readonly scheduleExpression: string;

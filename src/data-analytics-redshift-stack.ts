@@ -91,7 +91,6 @@ export function createRedshiftAnalyticsStack(
     loadDataProps: {
       scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
       maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-      processingFilesLimit: props.loadConfiguration.processingFilesLimit,
     },
     upsertUsersWorkflowData: {
       scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,

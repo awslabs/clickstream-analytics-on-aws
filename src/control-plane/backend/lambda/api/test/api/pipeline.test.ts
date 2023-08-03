@@ -517,7 +517,6 @@ describe('Pipeline test', () => {
             },
             loadJobScheduleIntervalExpression: 'rate(5 minutes)',
             maxFilesLimit: 50,
-            processingFilesLimit: 50,
           },
           upsertUsers: {
             scheduleExpression: 'rate(5 minutes)',
@@ -584,7 +583,6 @@ describe('Pipeline test', () => {
             },
             loadJobScheduleIntervalExpression: 'rate(5 minutes)',
             maxFilesLimit: 50,
-            processingFilesLimit: 50,
           },
           upsertUsers: {
             scheduleExpression: 'rate(5 minutes)',

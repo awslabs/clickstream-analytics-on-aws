@@ -11,18 +11,30 @@
  *  and limitations under the License.
  */
 
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { ScheduledEvent } from 'aws-lambda';
-import { mockClient } from 'aws-sdk-client-mock';
+import {
+  DynamoDBClient,
+} from '@aws-sdk/client-dynamodb';
+import {
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import {
+  QueryCommand,
+  UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
+import {
+  ScheduledEvent,
+} from 'aws-lambda';
+import {
+  mockClient,
+} from 'aws-sdk-client-mock';
 
 const addMetricMock = jest.fn(() => {});
 const publishStoredMetricsMock = jest.fn(() => {});
 const MetricsMock = jest.fn(() => {
   return {
     addMetric: addMetricMock,
-    addDimensions: jest.fn(()=>{}),
+    addDimensions: jest.fn(() => {}),
     publishStoredMetrics: publishStoredMetricsMock,
   };
 });
@@ -38,19 +50,31 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
 });
 
 
-import { handler, ODSEventItem } from '../../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
-import { JobStatus } from '../../../../../src/analytics/private/constant';
+import {
+  handler,
+  ODSEventItem,
+} from '../../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
+import {
+  JobStatus,
+} from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
-import { PARTITION_APP } from '../../../../../src/common/constant';
-import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../../../src/common/model';
-import { getMockContext } from '../../../../common/lambda-context';
+import {
+  PARTITION_APP,
+} from '../../../../../src/common/constant';
+import {
+  AnalyticsCustomMetricsName,
+  MetricsNamespace,
+  MetricsService,
+} from '../../../../../src/common/model';
+import {
+  getMockContext,
+} from '../../../../common/lambda-context';
 
 //@ts-ignore
-expect(MetricsMock.mock.calls[0][0]).toEqual(
-  {
-    namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
-    serviceName: MetricsService.WORKFLOW,
-  });
+expect(MetricsMock.mock.calls[0][0]).toEqual({
+  namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
+  serviceName: MetricsService.WORKFLOW,
+});
 
 
 describe('Lambda - Create manifest for Redshift COPY', () => {
@@ -83,13 +107,11 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
   test('Get 1 new item from store then create manifest', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
       Count: 1,
-      Items: [
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 1823224,
-          job_status: JobStatus.JOB_NEW,
-        },
-      ],
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_NEW,
+      }],
 
     }).resolves({
       Count: 0,
@@ -100,22 +122,18 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
 
     const response = await handler(scheduleEvent, context);
     expect(response).toEqual(expect.objectContaining({
-      manifestList: [
-        {
-          appId: 'app1',
-          jobList: {
-            entries: [
-              {
-                meta: {
-                  content_length: 1823224,
-                },
-                url: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-              },
-            ],
-          },
-          manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app1-${context.awsRequestId}.manifest`,
+      manifestList: [{
+        appId: 'app1',
+        jobList: {
+          entries: [{
+            meta: {
+              content_length: 1823224,
+            },
+            url: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          }],
         },
-      ],
+        manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app1-${context.awsRequestId}.manifest`,
+      }],
       count: 1,
     }));
 
@@ -130,53 +148,47 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
   test('Get 4 new items with different applications from store then create three manifest', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
       Count: 4,
-      Items: [
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 1823224,
-          job_status: JobStatus.JOB_NEW,
-          timestamp: new Date(new Date().getTime() - 4 * 3600 * 1000).getTime(),
-        },
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00001.parquet.snappy`,
-          s3_object_size: 232322,
-          job_status: JobStatus.JOB_NEW,
-          timestamp: new Date(new Date().getTime() - 3 * 3600 * 1000).getTime(),
-        },
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app2/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 200200,
-          job_status: JobStatus.JOB_NEW,
-          timestamp: new Date(new Date().getTime() - 2 * 3600 * 1000).getTime(),
-        },
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 1233232,
-          job_status: JobStatus.JOB_NEW,
-          timestamp: new Date(new Date().getTime() - 1 * 3600 * 1000).getTime(),
-        },
-      ],
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 4 * 3600 * 1000).getTime(),
+      },
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00001.parquet.snappy`,
+        s3_object_size: 232322,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 3 * 3600 * 1000).getTime(),
+      },
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app2/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 200200,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 2 * 3600 * 1000).getTime(),
+      },
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1233232,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date(new Date().getTime() - 1 * 3600 * 1000).getTime(),
+      }],
     }).resolvesOnce({
       Count: 1,
-      Items: [
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 1233232,
-          job_status: JobStatus.JOB_PROCESSING,
-          timestamp: new Date(new Date().getTime() - 5 * 3600 * 1000).getTime(),
-        },
-      ],
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1233232,
+        job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date(new Date().getTime() - 5 * 3600 * 1000).getTime(),
+      }],
     })
       .resolvesOnce({
         Count: 1,
-        Items: [
-          {
-            s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-            s3_object_size: 1233232,
-            job_status: JobStatus.JOB_ENQUEUE,
-            timestamp: new Date(new Date().getTime() - 1 * 3600 * 1000).getTime(),
-          },
-        ],
+        Items: [{
+          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          s3_object_size: 1233232,
+          job_status: JobStatus.JOB_ENQUEUE,
+          timestamp: new Date(new Date().getTime() - 1 * 3600 * 1000).getTime(),
+        }],
       });
 
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
@@ -215,30 +227,28 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 3);
     expect(addMetricMock).toBeCalledTimes(4);
     expect(addMetricMock.mock.calls[0]).toEqual([AnalyticsCustomMetricsName.FILE_NEW, 'Count', 4]);
-    expect(addMetricMock.mock.calls[1]).toEqual( [AnalyticsCustomMetricsName.FILE_PROCESSING, 'Count', 1]);
-    expect(addMetricMock.mock.calls[2]).toEqual( [AnalyticsCustomMetricsName.FILE_ENQUEUE, 'Count', 1]);
+    expect(addMetricMock.mock.calls[1]).toEqual([AnalyticsCustomMetricsName.FILE_PROCESSING, 'Count', 1]);
+    expect(addMetricMock.mock.calls[2]).toEqual([AnalyticsCustomMetricsName.FILE_ENQUEUE, 'Count', 1]);
 
     //@ts-ignore
     expect(addMetricMock.mock.calls[3][0]).toEqual(AnalyticsCustomMetricsName.FILE_MAX_AGE);
     //@ts-ignore
     expect(addMetricMock.mock.calls[3][1]).toEqual('Seconds');
     //@ts-ignore
-    expect(addMetricMock.mock.calls[3][2] - 5 * 3600 ).toBeLessThan(1);
+    expect(addMetricMock.mock.calls[3][2] - 5 * 3600).toBeLessThan(1);
     //@ts-ignore
-    expect(addMetricMock.mock.calls[3][2] - 5 * 3600 ).toBeGreaterThanOrEqual(0);
+    expect(addMetricMock.mock.calls[3][2] - 5 * 3600).toBeGreaterThanOrEqual(0);
 
   });
 
-  test('Get 8 processing items from store that equals or greater than the PROCESSING_LIMIT', async () => {
+  test('Get 8 processing items from store that equals or greater than the QUERY_RESULT_LIMIT', async () => {
     const items: ODSEventItem[] = [];
-    Array(8).fill(0).map((_, i) => items.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_PROCESSING,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(8).fill(0).map((_, i) => items.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_PROCESSING,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     dynamoDBClientMock.on(QueryCommand)
       .resolvesOnce({
         Count: 0,
@@ -264,23 +274,19 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
 
   test('Get more processing items from store processing with paging', async () => {
     const firstBatchItems: ODSEventItem[] = [];
-    Array(3).fill(0).map((_, i) => firstBatchItems.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_PROCESSING,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(3).fill(0).map((_, i) => firstBatchItems.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_PROCESSING,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     const secondBatchItems: ODSEventItem[] = [];
-    Array(6).fill(0).map((_, i) => secondBatchItems.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_PROCESSING,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(6).fill(0).map((_, i) => secondBatchItems.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_PROCESSING,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     const lastEvaluatedKey = {
       s3_uri: 'nextToken',
     };
@@ -311,35 +317,29 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(addMetricMock).toBeCalledTimes(4);
   });
 
-  test('Get 5 new items from store with paging that the processing items are less than queryResultLimit', async () => {
+  test('Get 6 new items from store with paging that the processing items are less than queryResultLimit', async () => {
     const processingItems: ODSEventItem[] = [];
     const processingCount = 2;
-    Array(processingCount).fill(0).map((_, i) => processingItems.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0030${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_PROCESSING,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(processingCount).fill(0).map((_, i) => processingItems.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0030${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_PROCESSING,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     const firstBatchNewItems: ODSEventItem[] = [];
-    Array(3).fill(0).map((_, i) => firstBatchNewItems.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_NEW,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(3).fill(0).map((_, i) => firstBatchNewItems.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part0000${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_NEW,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     const secondBatchNewItems: ODSEventItem[] = [];
-    Array(3).fill(0).map((_, i) => secondBatchNewItems.push(
-      {
-        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
-        s3_object_size: '1823224',
-        job_status: JobStatus.JOB_NEW,
-        timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
-      },
-    ));
+    Array(3).fill(0).map((_, i) => secondBatchNewItems.push({
+      s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part1000${i}.parquet.snappy`,
+      s3_object_size: '1823224',
+      job_status: JobStatus.JOB_NEW,
+      timestamp: new Date(new Date().getTime() - 3600 * 1000).getTime(),
+    } ));
     const lastEvaluatedKey = {
       s3_uri: 'nextToken',
     };
@@ -369,9 +369,9 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       ]),
       count: 1,
     }));
-    expect(response.manifestList[0].jobList.entries).toHaveLength(parseInt(process.env.PROCESSING_LIMIT!) - processingCount);
+    expect(response.manifestList[0].jobList.entries).toHaveLength(parseInt(process.env.QUERY_RESULT_LIMIT!));
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 4);
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, parseInt(process.env.PROCESSING_LIMIT!) - processingCount);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, parseInt(process.env.QUERY_RESULT_LIMIT!));
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
     expect(addMetricMock).toBeCalledTimes(4);
 
@@ -431,13 +431,11 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     })
       .resolvesOnce({
         Count: 1,
-        Items: [
-          {
-            s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-            s3_object_size: 1823224,
-            job_status: JobStatus.JOB_PROCESSING,
-          },
-        ],
+        Items: [{
+          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+          s3_object_size: 1823224,
+          job_status: JobStatus.JOB_PROCESSING,
+        }],
       }).resolves({
         Count: 0,
         Items: [],
@@ -459,13 +457,11 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
   test('Put the manifest to S3 error after finding new items', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
       Count: 1,
-      Items: [
-        {
-          s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
-          s3_object_size: 1823224,
-          job_status: JobStatus.JOB_NEW,
-        },
-      ],
+      Items: [{
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_NEW,
+      }],
     }).resolves({
       Count: 0,
       Items: [],
@@ -477,10 +473,10 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       await handler(scheduleEvent, context);
       fail('The error of S3 put manifest was caught');
     } catch (error) {
-      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 3);
+      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 1);
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
       expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
-      expect(addMetricMock).toBeCalledTimes(4);
+      expect(addMetricMock).toBeCalledTimes(0);
     }
   });
 
@@ -625,7 +621,24 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       TableName: 'project1_ods_events_trigger',
     });
 
-    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(5, QueryCommand, {
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(5, UpdateCommand, {
+      ConditionExpression: 'attribute_exists(s3_uri)',
+      ExpressionAttributeNames: {
+        '#execution_id': 'execution_id',
+        '#job_status': 'job_status',
+      },
+      ExpressionAttributeValues: {
+        ':p1': 'ENQUEUE',
+        ':p2': 'request-id-1',
+      },
+      Key: {
+        s3_uri: 's3://EXAMPLE-BUCKET-2/project1/ods_external_events/partition_app=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy',
+      },
+      TableName: 'project1_ods_events_trigger',
+      UpdateExpression: 'SET #job_status= :p1, #execution_id= :p2',
+    });
+
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(9, QueryCommand, {
       ExclusiveStartKey: undefined,
       ExpressionAttributeNames: {
         '#job_status': 'job_status',
@@ -633,6 +646,22 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       },
       ExpressionAttributeValues: {
         ':job_status': 'PROCESSING',
+        ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
+      },
+      FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+      IndexName: 'by_status',
+      KeyConditionExpression: '#job_status = :job_status',
+      ScanIndexForward: true,
+      TableName: 'project1_ods_events_trigger',
+    });
+    expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(10, QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames: {
+        '#job_status': 'job_status',
+        '#s3_uri': 's3_uri',
+      },
+      ExpressionAttributeValues: {
+        ':job_status': 'ENQUEUE',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
