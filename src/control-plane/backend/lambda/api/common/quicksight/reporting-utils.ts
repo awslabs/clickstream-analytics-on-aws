@@ -47,6 +47,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
   props: DataSetProps)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
+  console.log(`props: ${JSON.stringify(props)}`)
   try {
     const datasetId = uuidv4();
     let colGroups: ColumnGroup[] = [];
