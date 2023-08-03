@@ -17,6 +17,8 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
+  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
 } from '../common/constant';
 import { REDSHIFT_MODE } from '../common/model';
@@ -407,14 +409,14 @@ export function createStackParameters(scope: Construct): {
   const redshiftClusterIdentifierParam = new CfnParameter(scope, 'RedshiftClusterIdentifier', {
     description: 'The cluster identifier of Redshift.',
     type: 'String',
-    allowedPattern: '^([a-z0-9-]{1,63})?$',
+    allowedPattern: REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
     default: '',
   });
 
   const redshiftDbUserParam = new CfnParameter(scope, 'RedshiftDbUser', {
     description: 'The name of Redshift database user.',
     type: 'String',
-    allowedPattern: '^([a-z0-9-]{1,63})?$',
+    allowedPattern: REDSHIFT_DB_USER_NAME_PATTERN,
     default: '',
   });
 

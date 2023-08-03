@@ -67,6 +67,7 @@ import {
   DOMAIN_NAME_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
 } from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
@@ -172,6 +173,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     redshiftProvisionedDBUserEmptyError,
     setRedshiftProvisionedDBUserEmptyError,
   ] = useState(false);
+  const [
+    redshiftProvisionedDBUserFormatError,
+    setRedshiftProvisionedDBUserFormatError,
+  ] = useState(false);
+  
 
   const [quickSightUserEmptyError, setQuickSightUserEmptyError] =
     useState(false);
@@ -533,6 +539,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             !pipelineInfo.dataModeling?.redshift?.provisioned?.dbUser.trim()
           ) {
             setRedshiftProvisionedDBUserEmptyError(true);
+            return false;
+          }
+          if (
+            !checkStringValidRegex(
+              pipelineInfo.dataModeling?.redshift?.provisioned?.dbUser,
+              new RegExp(REDSHIFT_DB_USER_NAME_PATTERN)
+            )
+          ) {
+            setRedshiftProvisionedDBUserFormatError(true);
             return false;
           }
         }
@@ -1706,6 +1721,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               }
               redshiftProvisionedDBUserEmptyError={
                 redshiftProvisionedDBUserEmptyError
+              }
+              redshiftProvisionedDBUserFormatError={
+                redshiftProvisionedDBUserFormatError
               }
               changeEnableDataProcessing={(enable) => {
                 if (enable) {
