@@ -14,7 +14,6 @@
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, CfnResource, Duration } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
@@ -24,6 +23,7 @@ import { Construct } from 'constructs';
 import {
   InitPartitionCustomResourceProps,
   createCopyAssetsCustomResource,
+  createEMRServelsssApplicationCustomResource,
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
 import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
@@ -34,7 +34,6 @@ import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
-export const EMR_VERSION = 'emr-6.11.0';
 
 export interface DataPipelineProps {
   readonly vpc: IVpc;
@@ -54,6 +53,8 @@ export interface DataPipelineProps {
   readonly s3PathPluginFiles?: string;
   readonly scheduleExpression: string;
   readonly outputFormat: 'json' | 'parquet';
+  readonly emrVersion: string;
+  readonly emrApplicationIdleTimeoutMinutes: number;
 }
 
 export class DataPipelineConstruct extends Construct {
@@ -66,7 +67,7 @@ export class DataPipelineConstruct extends Construct {
   private readonly lambdaUtil: LambdaUtil;
   private readonly glueUtil: GlueUtil;
 
-  public readonly emrServerlessApp: CfnApplication;
+  public readonly emrServerlessApplicationId: string;
 
   constructor(scope: Construct, id: string, props: DataPipelineProps) {
     super(scope, id);
@@ -141,7 +142,7 @@ export class DataPipelineConstruct extends Construct {
       this.roleUtil,
     );
 
-    this.emrServerlessApp = this.createEmrServerlessApplication();
+    this.emrServerlessApplicationId = this.createEmrServerlessApplication();
     const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
       scope,
       this.props,
@@ -150,16 +151,16 @@ export class DataPipelineConstruct extends Construct {
       glueDatabase,
       sourceTable,
       sinkTable,
-      this.emrServerlessApp.attrApplicationId,
+      this.emrServerlessApplicationId,
     );
 
     this.glueDatabase = glueDatabase;
     this.glueIngestionTable = sourceTable;
     this.glueEventTable = sinkTable;
 
-    this.createEmrServerlessJobStateEventListener(this.emrServerlessApp.attrApplicationId, dlQueue);
+    this.createEmrServerlessJobStateEventListener(this.emrServerlessApplicationId, dlQueue);
 
-    const emrApplicationId = this.emrServerlessApp.attrApplicationId;
+    const emrApplicationId = this.emrServerlessApplicationId;
     // Metrics
     createMetricsWidget(this, {
       projectId: props.projectId,
@@ -248,24 +249,18 @@ export class DataPipelineConstruct extends Construct {
     });
     addCfnNagToSecurityGroup(emrSg, ['W40', 'W5']);
 
-    const serverlessApp = new CfnApplication(this, 'clickstream-app', {
+    const emrServerlessAppCr = createEMRServelsssApplicationCustomResource(this, {
+      projectId: this.props.projectId,
       name: `${DATA_PROCESSING_APPLICATION_NAME_PREFIX}-Spark-APP-${this.props.projectId}`,
-      releaseLabel: EMR_VERSION,
-      type: 'SPARK',
-      networkConfiguration: {
-        subnetIds: this.props.vpcSubnets.subnets?.map((s) => s.subnetId),
-        securityGroupIds: [emrSg.securityGroupId],
-      },
-      autoStartConfiguration: {
-        enabled: true,
-      },
-      autoStopConfiguration: {
-        enabled: true,
-        idleTimeoutMinutes: 5,
-      },
+      version: this.props.emrVersion,
+      secourityGroupId: emrSg.securityGroupId,
+      idleTimeoutMinutes: this.props.emrApplicationIdleTimeoutMinutes,
+      subnetIds: Fn.join(',', this.props.vpcSubnets.subnets!.map((s) => s.subnetId)),
+      pipelineS3Bucket: this.props.pipelineS3Bucket,
+      pipelineS3Prefix: this.props.pipelineS3Prefix,
     });
-
-    return serverlessApp;
+    const applicationId = emrServerlessAppCr.getAttString('ApplicationId');
+    return applicationId;
   }
 
   private createEmrServerlessJobStateEventListener(applicationId: string, dlSQS: Queue) {

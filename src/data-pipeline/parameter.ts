@@ -13,7 +13,7 @@
 
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN } from '../common/constant';
+import { EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -103,6 +103,21 @@ export function createStackParameters(scope: Construct) {
     type: 'String',
   });
 
+  const emrVersionParam = new CfnParameter(scope, 'EmrVersion', {
+    description: 'EMR Version',
+    allowedPattern: EMR_VERSION_PATTERN,
+    default: 'emr-6.11.0',
+    type: 'String',
+  });
+
+  const emrApplicationIdleTimeoutMinutesParam = new CfnParameter(scope, 'EmrApplicationIdleTimeoutMinutes', {
+    description: 'Emr-Serverless application idle timeout minutes',
+    default: 5,
+    minValue: 1,
+    maxValue: 10080,
+    type: 'Number',
+  });
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -153,6 +168,14 @@ export function createStackParameters(scope: Construct) {
             s3PathPluginJarsParam.logicalId,
             s3PathPluginFilesParam.logicalId,
             outputFormatParam.logicalId,
+          ],
+        },
+
+        {
+          Label: { default: 'EMR serverless application configuration' },
+          Parameters: [
+            emrVersionParam.logicalId,
+            emrApplicationIdleTimeoutMinutesParam.logicalId,
           ],
         },
       ],
@@ -218,6 +241,14 @@ export function createStackParameters(scope: Construct) {
         [outputFormatParam.logicalId]: {
           default: 'Output Format',
         },
+
+        [emrVersionParam.logicalId]: {
+          default: 'EMR version',
+        },
+
+        [emrApplicationIdleTimeoutMinutesParam.logicalId]: {
+          default: 'EMR serverless idle timeout minutes',
+        },
       },
     },
   };
@@ -242,6 +273,8 @@ export function createStackParameters(scope: Construct) {
       s3PathPluginJarsParam,
       s3PathPluginFilesParam,
       outputFormatParam,
+      emrVersionParam,
+      emrApplicationIdleTimeoutMinutesParam,
     },
   };
 }

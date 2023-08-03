@@ -14,7 +14,6 @@
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { CfnApplication } from 'aws-cdk-lib/aws-emrserverless';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
@@ -59,6 +58,8 @@ export class DataPipelineStack extends Stack {
         s3PathPluginJarsParam,
         s3PathPluginFilesParam,
         outputFormatParam,
+        emrVersionParam,
+        emrApplicationIdleTimeoutMinutesParam,
       },
     } = createStackParameters(this);
 
@@ -135,6 +136,8 @@ export class DataPipelineStack extends Stack {
       s3PathPluginJars: s3PathPluginJarsParam.valueAsString,
       s3PathPluginFiles: s3PathPluginFilesParam.valueAsString,
       outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
+      emrApplicationIdleTimeoutMinutes: emrApplicationIdleTimeoutMinutesParam.valueAsNumber,
+      emrVersion: emrVersionParam.valueAsString,
     });
 
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
@@ -153,7 +156,7 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
-      value: dataPipelineStackWithCustomPlugins.emrServerlessApp.attrApplicationId,
+      value: dataPipelineStackWithCustomPlugins.emrServerlessApplicationId,
     }).condition = withCustomPluginsCondition;
 
     const dataPipelineStackWithoutCustomPlugins = new DataPipelineNestedStack(this, 'DataPipelineWithoutCustomPlugins', {
@@ -172,6 +175,8 @@ export class DataPipelineStack extends Stack {
       scheduleExpression: scheduleExpressionParam.valueAsString,
       transformerAndEnrichClassNames: transformerAndEnrichClassNamesParam.valueAsString,
       outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
+      emrApplicationIdleTimeoutMinutes: emrApplicationIdleTimeoutMinutesParam.valueAsNumber,
+      emrVersion: emrVersionParam.valueAsString,
     });
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
@@ -189,7 +194,7 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
-      value: dataPipelineStackWithoutCustomPlugins.emrServerlessApp.attrApplicationId,
+      value: dataPipelineStackWithoutCustomPlugins.emrServerlessApplicationId,
     }).condition = withoutCustomPluginsCondition;
   }
 }
@@ -201,7 +206,7 @@ class DataPipelineNestedStack extends NestedStack {
   public readonly glueDatabase: Database;
   public readonly glueEventTable: Table;
   public readonly glueIngestionTable: Table;
-  public readonly emrServerlessApp: CfnApplication;
+  public readonly emrServerlessApplicationId: string;
 
   constructor(scope: Construct, id: string, props: DataPipelineNestedStackProps) {
     super(scope, id, props);
@@ -212,7 +217,7 @@ class DataPipelineNestedStack extends NestedStack {
       ... props,
     });
 
-    this.emrServerlessApp = dataPipeline.emrServerlessApp;
+    this.emrServerlessApplicationId = dataPipeline.emrServerlessApplicationId;
 
     addCfnNag(this);
 
@@ -230,6 +235,7 @@ function addCfnNag(stack: Stack) {
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
     'EmrJobStateListenerLambdaRole/DefaultPolicy/Resource',
+    'CreateEMRServelsssApplicationLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
   );
@@ -259,7 +265,7 @@ function addCfnNag(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'InitPartition', 'InitPartitionCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
-
+  addCfnNagForCustomResourceProvider(stack, 'CreateEMRServelsssApplication', 'CreateEMRServelsssApplicationCustomResourceProvider', '');
   addCfnNagForBucketDeployment(stack, 'data-pipeline');
 
 }
