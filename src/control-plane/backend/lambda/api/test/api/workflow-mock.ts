@@ -620,10 +620,6 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: '50',
   },
   {
-    ParameterKey: 'ProcessingFilesLimit',
-    ParameterValue: '50',
-  },
-  {
     ParameterKey: 'UpsertUsersScheduleExpression',
     ParameterValue: 'rate(5 minutes)',
   },

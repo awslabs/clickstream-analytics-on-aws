@@ -432,7 +432,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'LoadWorkflowBucketPrefix',
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
-      'ProcessingFilesLimit',
       'LoadJobScheduleInterval',
       'UpsertUsersScheduleExpression',
       'ClearExpiredEventsScheduleExpression',
@@ -595,7 +594,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       loadDataProps: {
         scheduleInterval: '5',
         maxFilesLimit: 50,
-        processingFilesLimit: 100,
       },
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
@@ -650,7 +648,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       loadDataProps: {
         scheduleInterval: '5',
         maxFilesLimit: 50,
-        processingFilesLimit: 100,
       },
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
@@ -708,7 +705,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       loadDataProps: {
         scheduleInterval: '5',
         maxFilesLimit: 50,
-        processingFilesLimit: 100,
       },
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       upsertUsersWorkflowData: {
@@ -1807,7 +1803,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             ODS_EVENT_BUCKET: RefAnyValue,
             ODS_EVENT_BUCKET_PREFIX: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
-            PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
             POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
@@ -1864,7 +1859,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             ODS_EVENT_BUCKET: RefAnyValue,
             ODS_EVENT_BUCKET_PREFIX: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
-            PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
             POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
@@ -2130,7 +2124,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
-            PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
@@ -2195,7 +2188,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
-            PROCESSING_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),

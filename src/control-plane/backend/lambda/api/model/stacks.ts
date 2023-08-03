@@ -751,7 +751,6 @@ export class CDataModelingStack extends JSONObject {
       'LoadWorkflowBucket',
       'LoadWorkflowBucketPrefix',
       'MaxFilesLimit',
-      'ProcessingFilesLimit',
       'UpsertUsersScheduleExpression',
       'DataProcessingCronOrRateExpression',
       'ClearExpiredEventsScheduleExpression',
@@ -813,10 +812,6 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional(50)
   @JSONObject.gte(1)
     MaxFilesLimit?: number;
-
-  @JSONObject.optional(100)
-  @JSONObject.gte(1)
-    ProcessingFilesLimit?: number;
 
   @JSONObject.optional('cron(0 1 * * ? *)')
   @JSONObject.custom( (_:any, key:string, value:any) => {
@@ -1001,7 +996,6 @@ export class CDataModelingStack extends JSONObject {
       LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
       LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
       MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
-      ProcessingFilesLimit: pipeline.dataModeling?.loadWorkflow?.processingFilesLimit,
       UpsertUsersScheduleExpression: pipeline.dataModeling?.upsertUsers.scheduleExpression,
 
       EMRServerlessApplicationId: getValueFromStackOutputSuffix(

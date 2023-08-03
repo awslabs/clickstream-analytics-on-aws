@@ -470,7 +470,7 @@ export function createStackParameters(scope: Construct): {
   });
 
   const processingFilesLimitParam = new CfnParameter(scope, 'ProcessingFilesLimit', {
-    description: 'Maximum number of files currently being loaded, recommended to be twice the `MaxFilesLimit`.',
+    description: 'Maximum number of files currently being loaded, recommended to be twice the `MaxFilesLimit`.(Deprecated)',
     type: 'Number',
     default: 100,
   });

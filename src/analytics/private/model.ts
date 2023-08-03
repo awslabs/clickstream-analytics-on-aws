@@ -17,7 +17,6 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 export interface LoadDataProps {
   readonly scheduleInterval: string;
   readonly maxFilesLimit: number;
-  readonly processingFilesLimit: number;
 }
 
 interface BucketInfo {
