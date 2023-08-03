@@ -79,8 +79,8 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       // visual layout
       const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
       const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
-      const layoutControl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/layout-control.json')).toString());
-      const visualControl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/layout-visual.json')).toString());
+      const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json')).toString());
+      const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json')).toString());
 
       if (elements.length > 0) {
         const lastElement = elements.at(elements.length - 1);
@@ -90,7 +90,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       }
       const firstObj = findFirstChild(visual.filterControl);
       layoutControl.ElementId = firstObj.FilterControlId;
-      visualControl.RowSpan = (visual.eventCount as number) * 2;
+      visualControl.RowSpan = visual.eventCount * 2;
 
       logger.info(`visual.visualContent: ${visual.visualContent}`);
       visualControl.ElementId = findFirstChild(visual.visualContent).VisualId;
@@ -154,7 +154,7 @@ function findFirstChild(jsonData: any): any {
 function findElementWithProperyValue(root: any, path: string, property: string, value: string): any {
   const jsonData = findElementByPath(root, path);
   if (Array.isArray(jsonData)) {
-    for ( const e of jsonData as Array<any>) {
+    for ( const e of jsonData) {
       if (e && typeof e === 'object' && property in e) {
         const v = e[property];
         if ((v as string) === value ) {
