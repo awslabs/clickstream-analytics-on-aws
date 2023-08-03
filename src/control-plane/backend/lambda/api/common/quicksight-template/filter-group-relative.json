@@ -1,0 +1,37 @@
+{
+  "FilterGroupId": "",
+  "Filters": [
+      {
+          "RelativeDatesFilter": {
+              "FilterId": "",
+              "Column": {
+                  "DataSetIdentifier": "",
+                  "ColumnName": ""
+              },
+              "AnchorDateConfiguration": {
+                  "AnchorOption": "NOW"
+              },
+              "MinimumGranularity": "DAY",
+              "TimeGranularity": "DAY",
+              "RelativeDateType": "LAST",
+              "RelativeDateValue": 30,
+              "NullOption": "NON_NULLS_ONLY"
+          }
+      }
+  ],
+  "ScopeConfiguration": {
+      "SelectedSheets": {
+          "SheetVisualScopingConfigurations": [
+              {
+                  "SheetId": "",
+                  "Scope": "SELECTED_VISUALS",
+                  "VisualIds": [
+                      ""
+                  ]
+              }
+          ]
+      }
+  },
+  "Status": "ENABLED",
+  "CrossDataset": "SINGLE_DATASET"
+}

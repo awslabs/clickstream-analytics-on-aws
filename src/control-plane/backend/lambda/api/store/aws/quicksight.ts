@@ -67,24 +67,27 @@ export const getQuickSightSubscribeRegion = async () => {
       ...aws_sdk_client_common_config,
       region: QUICKSIGHT_CONTROL_PLANE_REGION,
     });
-    await getPaginatedResults(async (NextToken: any) => {
-      const params: ListUsersCommand = new ListUsersCommand({
-        AwsAccountId: awsAccountId,
-        Namespace: 'default',
-        NextToken,
-      });
-      await quickSightClient.send(params);
+
+    const params: ListUsersCommand = new ListUsersCommand({
+      AwsAccountId: awsAccountId,
+      Namespace: 'default',
     });
+    await quickSightClient.send(params);
+
+    console.log(`quicksightRegion: ${QUICKSIGHT_CONTROL_PLANE_REGION}` )
 
     return QUICKSIGHT_CONTROL_PLANE_REGION;
   } catch (err) {
     if (err instanceof AccessDeniedException) {
       const message = (err as AccessDeniedException).message;
+      console.log(`quicksight error message: ${message}` )
       const identityRegion = getIdentityRegionFromMessage(message);
       if (identityRegion) {
         return identityRegion;
       }
     }
+
+    console.log(`quicksight error message: ${(err as Error).message}`)
   }
   return '';
 };

@@ -14,12 +14,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { FilterControl, FilterGroup, ParameterDeclaration, QuickSight, TemplateVersionDefinition, Visual } from '@aws-sdk/client-quicksight'
+import { AnalysisDefinition, DashboardVersionDefinition, FilterControl, FilterGroup, ParameterDeclaration, QuickSight, TemplateVersionDefinition, Visual } from '@aws-sdk/client-quicksight'
 import { logger } from '../common/powertools';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { buildFunnelView } from '../common/sql-builder';
 import { getQuickSightSubscribeRegion } from '../store/aws/quicksight';
-import { awsAccountId, awsPartition, awsRegion } from '../common/constants';
+import { awsAccountId, awsRegion } from '../common/constants';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { CPipeline } from '../model/pipeline';
@@ -69,8 +69,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : new Date(new Date().getTime() - 180 * 24 * 3600 * 1000),
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : new Date(),
+        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -101,6 +101,7 @@ export class ReportingServ {
       const cPipeline = new CPipeline(pipeline);
       const modelingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.DATA_MODELING_REDSHIFT);
 
+      console.log(`stackoutput: ${JSON.stringify(modelingStackOutputs)}`)
       for (const [name, value] of modelingStackOutputs) {
         if(name.endsWith('WorkgroupName')){
           workgroupName = value;
@@ -113,7 +114,8 @@ export class ReportingServ {
         return res.status(404).send(new ApiFail('Redshift serverless workgroup not found'));
       }
       if(!dataApiRole) {
-        return res.status(404).send(new ApiFail('Redshift data api role not found'));
+        dataApiRole = 'arn:aws:iam::451426793911:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-1B641805YKFF7'
+        // return res.status(404).send(new ApiFail('Redshift data api role not found'));
       }
 
       let datasourceArn = undefined;
@@ -128,10 +130,13 @@ export class ReportingServ {
         }
       }
       if(!datasourceArn) {
-        return res.status(404).send(new ApiFail('QuickSight data source arn not found'));
+
+        datasourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project01_wvzh_f3635de0'
+        // return res.status(404).send(new ApiFail('QuickSight data source arn not found'));
       }
       if(!quicksightInternalUser) {
-        return res.status(404).send(new ApiFail('QuickSight internal user not found'));
+        quicksightInternalUser = 'clickstream'
+        // return res.status(404).send(new ApiFail('QuickSight internal user not found'));
       }
 
       //quicksight user name
@@ -151,9 +156,14 @@ export class ReportingServ {
       // }
       //get requied parameters from ddb and stack output.
       
+      const awsPartition = 'aws'
       const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
-      const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${awsAccountId}:user/default/${quicksightPublicUser}`;
+      logger.info(`quickSightSubscribeRegion: ${quickSightSubscribeRegion}`);
+
+      const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${awsAccountId}:user/default/${quicksightInternalUser}`;
       // const quickSightInternalUserPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${awsAccountId}:user/default/${quicksightInternalUser}`;
+      
+      console.log(`quickSightPricipal: ${quickSightPricipal}`)
 
       //get redshift client
       const credentials = await getCredentialsFromRole(dataApiRole);
@@ -167,19 +177,22 @@ export class ReportingServ {
       })
 
       //create view in redshift
-      const params = new BatchExecuteStatementCommand({
+      const input = {
         Sqls: [sql],
         WorkgroupName: workgroupName,
         Database: query.projectId,
         WithEvent: false,
         ClusterIdentifier: isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.clusterIdentifier : undefined,
         DbUser: isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.dbUser : undefined,
-      });
+      }
+      const params = new BatchExecuteStatementCommand(input);
 
-      await redshiftDataClient.send(params);
+      const sqlOut = await redshiftDataClient.send(params);
+
+      logger.info(`sqlOut.Database: ${sqlOut.Database}`)
 
       //create quicksight dataset
-      createDataSet(quickSight, awsAccountId!, quickSightPricipal, datasourceArn, {
+      const datasetOutput =  await createDataSet(quickSight, awsAccountId!, quickSightPricipal, datasourceArn, {
         name: '',
         tableName: viewName,
         columns: funnelVisualColumns,
@@ -193,31 +206,19 @@ export class ReportingServ {
       })
 
       const dashboardDef = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/dashboard.json')).toString()) as TemplateVersionDefinition;
+      const sheetId = uuidv4()
+      dashboardDef.Sheets![0].SheetId = sheetId
+
       const datasetConfg = {
-        Placeholder: viewName,
-        DataSetSchema: {
-          ColumnSchemaList: [
-            {
-              "Name": "event_date",
-              "DataType": "DATETIME"
-            },
-            {
-              "Name": "event_name",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "x_id",
-              "DataType": "STRING"
-            },
-          ]
-        },
-        ColumnGroupSchemaList: [],
+        Identifier: viewName,
+        DataSetArn: datasetOutput?.Arn
       }
 
       const visualDef = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/funnel-chart.json')).toString()) as Visual
       const eventNameFiledId = uuidv4()
       const idFilefId = uuidv4()
-      visualDef.FunnelChartVisual!.VisualId = uuidv4()
+      const visualId = uuidv4()
+      visualDef.FunnelChartVisual!.VisualId = visualId
 
       const fieldWells = visualDef.FunnelChartVisual!.ChartConfiguration!.FieldWells!;
       const sortConfiguration = visualDef.FunnelChartVisual!.ChartConfiguration!.SortConfiguration!;
@@ -240,6 +241,7 @@ export class ReportingServ {
 
       const parameterDeclarations = []
 
+      let filterGroup: FilterGroup
       if (query.timeScopeType === 'FIXED') {
 
         filterContrl = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-datetime.json')).toString()) as FilterControl
@@ -247,65 +249,73 @@ export class ReportingServ {
         filterContrl.DateTimePicker!.Title = 'event_date between'
         filterContrl.DateTimePicker!.SourceFilterId = sourceFilterId
 
-        const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as ParameterDeclaration
+        const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration
         parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`
         parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY'
         parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(req.timeStart)]
         parameterDeclarations.push(parameterDeclarationStart)
 
-        const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as ParameterDeclaration
+        const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration
         parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`
         parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY'
         parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(req.timeEnd)]
         parameterDeclarations.push(parameterDeclarationEnd)
 
+        filterGroup = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-group.json')).toString()) as FilterGroup;
+
+        filterGroup.FilterGroupId = uuidv4()
+        filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId
+        filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date'
+        filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = viewName
+  
+        filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = sheetId;
+        filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [visualId];  
+
       } else {
         filterContrl = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as FilterControl
-        filterContrl.DateTimePicker!.FilterControlId = filterControlId
-        filterContrl.DateTimePicker!.Title = 'event_date'
-        filterContrl.DateTimePicker!.SourceFilterId = sourceFilterId
+        filterContrl.RelativeDateTime!.FilterControlId = filterControlId
+        filterContrl.RelativeDateTime!.Title = 'event_date'
+        filterContrl.RelativeDateTime!.SourceFilterId = sourceFilterId
 
-        const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as ParameterDeclaration
+        const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration
         parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`
         parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY'
         parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = `addDateTime(-${query.lastN}, '${query.timeUnit}', truncDate('${query.timeUnit}', now()))`,
         parameterDeclarations.push(parameterDeclarationStart)
 
-        const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as ParameterDeclaration
+        const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration
         parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`
         parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY'
         parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = `addDateTime(1, 'DD', truncDate('DD', now()))`,
         parameterDeclarations.push(parameterDeclarationEnd)
+
+        let unit = 'DAY'
+        if(query.timeUnit == 'WK'){
+          unit = 'WEEK'
+        } else if(query.timeUnit == 'MM') {
+          unit = 'MONTH'
+        } else if(query.timeUnit == 'Q') {
+          unit = 'QUARTER'
+        } 
+
+        filterGroup = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-group-relative.json')).toString()) as FilterGroup;
+
+        filterGroup.FilterGroupId = uuidv4()
+        filterGroup.Filters![0].RelativeDatesFilter!.FilterId = sourceFilterId
+        filterGroup.Filters![0].RelativeDatesFilter!.Column!.ColumnName = 'event_date'
+        filterGroup.Filters![0].RelativeDatesFilter!.Column!.DataSetIdentifier = viewName
+
+        filterGroup.Filters![0].RelativeDatesFilter!.RelativeDateValue = query.lastN
+        filterGroup.Filters![0].RelativeDatesFilter!.TimeGranularity = unit
+  
+        filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = sheetId;
+        filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [visualId];
+  
       }
-
-
-      const filterGroup = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-group.json')).toString()) as FilterGroup;
-
-      filterGroup.FilterGroupId = uuidv4()
-      filterGroup.Filters![0].TimeRangeFilter!.FilterId = filterControlId
-      filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date'
-      filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = viewName
-
-      
-
-      // //create quicksight tempalte
-      // const templateArn = await createTemplateFromDefinition(quickSight, awsAccountId!, quickSightPricipal, templateDef)
-
-      // // create quicksight analysis
-      // const datasetRefs: DataSetReference[] = [];
-      // const sourceEntity = {
-      //   SourceTemplate: {
-      //     Arn: templateArn,
-      //     DataSetReferences: datasetRefs,
-      //   },
-      // };
-      // createAnalysis(quickSight, awsAccountId!, quickSightPricipal, sourceEntity, '')
-      
-      //create quicksight dashboard
 
       const visualPorps = {
         name: `visual-${viewName}`,
-        sheetId: 'sheet1',
+        sheetId: sheetId,
         visualContent: visualDef,
         dataSetConfiguration: datasetConfg,
         filterControl: filterContrl,
@@ -320,14 +330,47 @@ export class ReportingServ {
         dashboardDef: JSON.stringify(dashboardDef),
       })
 
-      logger.info(`final dashboard def: ${dashboard}`)
+      logger.info(`final dashboard def`)
+      console.log(dashboard)
 
-      // quickSight.createDashboard({
-      //   AwsAccountId: awsAccountId,
-      //   DashboardId: `dashboard-${uuidv4()}`,
-      //   Name: `dashboard-${viewName}`,
-      //   Definition: JSON.parse(dashboard) as DashboardVersionDefinition
-      // })
+      quickSight.createAnalysis({
+        AwsAccountId: awsAccountId,
+        AnalysisId: `analysis${uuidv4()}`,
+        Name: `analysis-${viewName}`,
+        Permissions: [{
+          Principal: quickSightPricipal,
+          Actions: [
+            'quicksight:DescribeAnalysis',
+            'quicksight:QueryAnalysis',
+            'quicksight:UpdateAnalysis',
+            'quicksight:RestoreAnalysis',
+            'quicksight:DeleteAnalysis',
+            'quicksight:UpdateAnalysisPermissions',
+            'quicksight:DescribeAnalysisPermissions',
+          ],
+        }],
+        Definition: JSON.parse(dashboard) as AnalysisDefinition
+      })
+
+      quickSight.createDashboard({
+        AwsAccountId: awsAccountId,
+        DashboardId: `dashboard-${uuidv4()}`,
+        Name: `dashboard-${viewName}`,
+        Permissions: [{
+          Principal: quickSightPricipal,
+          Actions: [
+            'quicksight:DescribeDashboard',
+            'quicksight:ListDashboardVersions',
+            'quicksight:QueryDashboard',
+            'quicksight:UpdateDashboard',
+            'quicksight:DeleteDashboard',
+            'quicksight:UpdateDashboardPermissions',
+            'quicksight:DescribeDashboardPermissions',
+            'quicksight:UpdateDashboardPublishedVersion',
+          ],
+        }],
+        Definition: JSON.parse(dashboard) as DashboardVersionDefinition
+      })
 
       return res.status(201).json(new ApiSuccess({ }, 'funnel visual created'));
     } catch (error) {

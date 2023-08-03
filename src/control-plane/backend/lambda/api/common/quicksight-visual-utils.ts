@@ -61,7 +61,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       charts.push(visual.visualContent);
 
       //add dataset configuration
-      const configs = findElementByPath(dashboard, 'DataSetConfigurations') as Array<any>;
+      const configs = findElementByPath(dashboard, 'DataSetIdentifierDeclarations') as Array<any>;
       configs.push(visual.dataSetConfiguration);
 
       //add filter
@@ -72,7 +72,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       //add parameters
       const parameters = findElementByPath(dashboard, 'ParameterDeclarations') as Array<any>;
       logger.info(`parameters: ${JSON.stringify(parameters)}`);
-      parameters.push(visual.parameterDeclarations);
+      parameters.push(...visual.parameterDeclarations);
 
       //add dataset configuration
       const fiterGroups = findElementByPath(dashboard, 'FilterGroups') as Array<any>;
@@ -115,7 +115,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
     }
   }
 
-  return dashboard;
+  return JSON.stringify(dashboard);
 };
 
 function findElementByPath(jsonData: any, path: string): any {
