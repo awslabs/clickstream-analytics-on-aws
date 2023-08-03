@@ -21,7 +21,7 @@ import { getQuickSightSubscribeRegion } from "../../store/aws/quicksight";
 import { RedshiftDataClient } from "@aws-sdk/client-redshift-data";
 import { readFileSync } from "fs";
 import { join } from 'path';
-import { DashboardVersionDefinition, FilterControl, FilterGroup, ParameterDeclaration, Visual } from '@aws-sdk/client-quicksight';
+import { FilterControl, FilterGroup, ParameterDeclaration, Visual } from '@aws-sdk/client-quicksight';
 
 
 export  interface Status {
@@ -43,6 +43,7 @@ export  interface DashboardCreateParameters {
 }
 
 export  interface DashboardCreateInputParameters {
+  readonly action: 'PREVIEW' | 'PUBLISH';
   readonly accountId: string;
   readonly projectId: string;
   readonly appId: string;
@@ -122,22 +123,18 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     return {status: {code: 404, message: 'QuickSight user not found'}};
   }
 
-  // let quicksightUser = ''
-  // if(query.action === 'PREVIEW') {
-  //   quicksightUser = quicksightInternalUser!;
-  // } else if(query.action === 'PUBLISH') {
-    
-  //   quicksightUser = quicksightPublicUser;
-  // } else {
-  //   return res.status(400).send(new ApiFail('Bad request'));
-  // }
-  //get requied parameters from ddb and stack output.
+  let quicksightUser
+  if(input.action === 'PREVIEW') {
+    quicksightUser = quicksightInternalUser!;
+  } else {
+    quicksightUser = quicksightPublicUser;
+  }
 
   const awsPartition = 'aws'
   const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
   logger.info(`quickSightSubscribeRegion: ${quickSightSubscribeRegion}`);
 
-  const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightInternalUser}`;
+  const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightUser}`;
   console.log(`quickSightPricipal: ${quickSightPricipal}`)
 
   //get redshift client
@@ -179,16 +176,6 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
     throw error;
   }
 }
-
-export function getDashboardDef(dashboardArn?: string) : DashboardVersionDefinition | undefined {
-
-  if(!dashboardArn) {
-    return JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
-  } 
-
-  return undefined
-}
-
 
 export function getVisualDef(visualId: string, viewName: string) : Visual {
 
