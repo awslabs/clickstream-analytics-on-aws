@@ -85,9 +85,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   /**
    * The appId will be used as the schema of Redshift, '.' and '-' are not supported.
    */
-  for (let i=0; i < appId.length; i++) {
-    appId = appId.replace('.', '_').replace('-', '_');
-  }
+  appId = appId.replace(/\./g, '_').replace(/\-/g, '_');
   logger.debug(`appId:${appId}`);
 
   const redshiftProps = getRedshiftProps(
