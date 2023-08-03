@@ -45,6 +45,7 @@
     "redshiftServerlessSubnetInvalidError": "Please select at least 3 subnets locates in at least 2 different AZ",
     "redshiftProvisionedCulsterEmptyError": "Please select a culster",
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
+    "redshiftProvisionedDBUserFormatError": "Database user format error",
     "quickSightUserEmptyError": "Please select a QuickSight user.",
     "emailInvalid": "Email invalid."
   },

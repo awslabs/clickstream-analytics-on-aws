@@ -45,6 +45,7 @@
     "redshiftServerlessSubnetInvalidError": "请选择位于至少 2 个不同可用区的至少 3 个子网",
     "redshiftProvisionedCulsterEmptyError": "请选择群集",
     "redshiftProvisionedDBUserEmptyError": "请输入数据库用户。",
+    "redshiftProvisionedDBUserFormatError": "数据库用户格式错误",
     "quickSightUserEmptyError": "请选择 QuickSight 用户。",
     "emailInvalid": "电子邮件无效。"
   },

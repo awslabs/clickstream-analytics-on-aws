@@ -34,6 +34,8 @@ import {
   OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
   S3_PREFIX_PATTERN,
+  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
@@ -851,18 +853,24 @@ export class CDataModelingStack extends JSONObject {
     RedshiftMode?: REDSHIFT_MODE;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, value:any) => {
     if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
-      return stack._pipeline?.dataModeling?.redshift?.provisioned.clusterIdentifier;
+      value = stack._pipeline?.dataModeling?.redshift?.provisioned.clusterIdentifier;
+    }
+    if (!isEmpty(value)) {
+      validatePattern(key, REDSHIFT_CLUSTER_IDENTIFIER_PATTERN, value);
     }
     return value;
   })
     RedshiftClusterIdentifier?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack :CDataModelingStack, _key:string, value:any) => {
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, value:any) => {
     if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
-      return stack._pipeline?.dataModeling?.redshift?.provisioned.dbUser;
+      value = stack._pipeline?.dataModeling?.redshift?.provisioned.dbUser;
+    }
+    if (!isEmpty(value)) {
+      validatePattern(key, REDSHIFT_DB_USER_NAME_PATTERN, value);
     }
     return value;
   })

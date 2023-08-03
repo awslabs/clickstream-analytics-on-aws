@@ -620,6 +620,24 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGH
   },
 };
 
+export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE,
+  dataModeling: {
+    ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE.dataModeling,
+    athena: true,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      provisioned: {
+        clusterIdentifier: 'redshift-cluster-1',
+        dbUser: 'HGF%$#@BHHGF',
+      },
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+};
+
 export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline = {
   ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
   reporting: {
