@@ -75,6 +75,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provisioned Redshift.');
     }
 
+    if (!props.newRedshiftServerlessProps && !props.existingRedshiftServerlessProps && !props.provisionedRedshiftProps ) {
+      throw new Error('Wrong Redshift cluster type.');
+    }
+
     const featureName = `Analytics-${id}`;
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
