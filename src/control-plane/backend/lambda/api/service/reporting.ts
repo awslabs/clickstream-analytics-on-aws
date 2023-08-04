@@ -70,6 +70,8 @@ export class ReportingServ {
         store,
       })
 
+      logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`)
+
       if(dashboardCreateParameters.status.code !== 200) {
         return res.status(dashboardCreateParameters.status.code).send(new ApiFail(dashboardCreateParameters.status.message ?? 'unknown error'));
       }
@@ -105,7 +107,7 @@ export class ReportingServ {
       let dashboardDef
       let sheetId 
       if(!query.analysisId) {
-        dashboardDef = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
+        dashboardDef = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
         sheetId = uuidv4()
         dashboardDef.Sheets![0].SheetId = sheetId
       } else {
@@ -151,7 +153,7 @@ export class ReportingServ {
         dashboardDef: JSON.stringify(dashboardDef),
       })
 
-      logger.info(`final dashboard def`)
+      logger.info(`final dashboard def:`)
       console.log(dashboard)
 
       //crate QuickSight analysis

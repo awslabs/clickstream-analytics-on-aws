@@ -156,6 +156,9 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     dataApiRole,
     clusterIdentifier,
     dbUser,
+    workgroupName,
+    datasourceArn,
+    isProvisionedRedshift,
   }
 
 }
@@ -284,7 +287,7 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
       unit = 'QUARTER'
     } 
 
-    filterGroup = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/filter-group-relative.json')).toString()) as FilterGroup;
+    filterGroup = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/filter-group-relative.json')).toString()) as FilterGroup;
 
     filterGroup.FilterGroupId = uuidv4()
     filterGroup.Filters![0].RelativeDatesFilter!.FilterId = sourceFilterId
