@@ -21,7 +21,7 @@ import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
-import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS } from '../../../src/common/constant';
+import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, REDSHIFT_DATA_API_ROLE_ARN } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
 import { getExistVpc } from '../../../src/common/vpc-utils';
@@ -4209,6 +4209,15 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     });
     stackTemplate.hasOutput(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, {
       Value: '5439',
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`, {
+      Condition: 'redshiftProvisioned',
+    });
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
+      Condition: 'existingRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
       Condition: 'newRedshiftServerless',
     });
   });
