@@ -1,0 +1,12 @@
+{
+  "DateTimeParameterDeclaration": {
+      "Name": "",
+      "DefaultValues": {
+          "StaticValues": [],
+          "RollingDate": {
+              "Expression": "truncDate('DD', now())"
+          }
+      },
+      "TimeGranularity": "DAY"
+  }
+}

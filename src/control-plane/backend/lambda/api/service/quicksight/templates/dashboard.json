@@ -1,0 +1,45 @@
+{
+  "DataSetConfigurations": [],
+  "Sheets": [
+      {
+          "SheetId": "",
+          "Name": "",
+          "FilterControls": [],
+          "Visuals": [],
+          "Layouts": [
+              {
+                  "Configuration": {
+                      "GridLayout": {
+                          "Elements": [],
+                          "CanvasSizeOptions": {
+                              "ScreenCanvasSizeOptions": {
+                                  "ResizeOption": "FIXED",
+                                  "OptimizedViewPortWidth": "1600px"
+                              }
+                          }
+                      }
+                  }
+              }
+          ],
+          "ContentType": "INTERACTIVE"
+      }
+  ],
+  "CalculatedFields": [],
+  "ParameterDeclarations": [],
+  "FilterGroups": [],
+  "AnalysisDefaults": {
+      "DefaultNewSheetConfiguration": {
+          "InteractiveLayoutConfiguration": {
+              "Grid": {
+                  "CanvasSizeOptions": {
+                      "ScreenCanvasSizeOptions": {
+                          "ResizeOption": "FIXED",
+                          "OptimizedViewPortWidth": "1600px"
+                      }
+                  }
+              }
+          },
+          "SheetContentType": "INTERACTIVE"
+      }
+  }
+}
