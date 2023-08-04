@@ -278,6 +278,8 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME =
   'StackCreatedRedshiftServerlessNamespaceName';
 export const OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX =
   'BIUserCredentialParameterName';
+export const REDSHIFT_DATA_API_ROLE_ARN =
+  'RedshiftDataApiRoleArn';
 
 export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';

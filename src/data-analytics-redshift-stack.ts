@@ -31,6 +31,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+  REDSHIFT_DATA_API_ROLE_ARN,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -212,6 +213,23 @@ export function createRedshiftAnalyticsStack(
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isRedshiftProvisioned,
   }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
+
+  new CfnOutput(scope, `ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`, {
+    value: redshiftProvisionedStack.redshiftDataAPIExecRole.roleArn,
+    description: 'Reshift data api role arn',
+    condition: isRedshiftProvisioned,
+  }).overrideLogicalId(`ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`);
+  new CfnOutput(scope, `NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
+    value: newRedshiftServerlessStack.redshiftDataAPIExecRole.roleArn,
+    description: 'Reshift data api role arn',
+    condition: isNewRedshiftServerless,
+  }).overrideLogicalId(`NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
+    value: redshiftExistingServerlessStack.redshiftDataAPIExecRole.roleArn,
+    description: 'Reshift data api role arn',
+    condition: isExistingRedshiftServerless,
+  }).overrideLogicalId(`ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
+
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,
     newRedshiftServerlessStack,
