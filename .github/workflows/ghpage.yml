@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main  # Set a branch name to trigger deployment
+    paths:
+      - docs/**
+      - src/analytics/private/sqls/**
   pull_request:
 
 jobs:
