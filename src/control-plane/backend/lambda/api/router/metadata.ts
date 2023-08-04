@@ -12,8 +12,8 @@
  */
 
 import express from 'express';
-import { body, header, param, query } from 'express-validator';
-import { defaultOrderValueValid, isMetadataEventExisted, isMetadataEventNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { body, header, query } from 'express-validator';
+import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { MetadataEventAttributeServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
@@ -24,6 +24,8 @@ const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAtt
 router_metadata.get(
   '/events',
   validate([
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
     query()
       .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
         req,
@@ -39,23 +41,29 @@ router_metadata.post(
   '/event',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
-    body('name').custom(isMetadataEventNotExisted),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventServ.add(req, res, next);
   });
 
-router_metadata.get('/event/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  return metadataEventServ.details(req, res, next);
-});
+router_metadata.get('/event/:name',
+  validate([
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataEventServ.details(req, res, next);
+  });
 
 router_metadata.put(
   '/event',
   validate([
     body().custom(isValidEmpty),
-    body('name')
-      .custom(isMetadataEventExisted),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventServ.update(req, res, next);
@@ -64,7 +72,8 @@ router_metadata.put(
 router_metadata.delete(
   '/event/:name',
   validate([
-    param('name').custom(isMetadataEventExisted),
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventServ.delete(req, res, next);
@@ -88,13 +97,15 @@ router_metadata.post(
   '/event_attribute',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventAttributeServ.add(req, res, next);
   });
 
-router_metadata.get('/event_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/event_attribute/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventAttributeServ.details(req, res, next);
 });
 
@@ -102,17 +113,18 @@ router_metadata.put(
   '/event_attribute',
   validate([
     body().custom(isValidEmpty),
-    body('name')
-      .custom(isMetadataEventExisted),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventAttributeServ.update(req, res, next);
   });
 
 router_metadata.delete(
-  '/event_attribute/:name',
+  '/event_attribute/:id',
   validate([
-    param('name').custom(isMetadataEventExisted),
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventAttributeServ.delete(req, res, next);
@@ -121,6 +133,8 @@ router_metadata.delete(
 router_metadata.get(
   '/user_attributes',
   validate([
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
     query()
       .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
         req,
@@ -136,13 +150,15 @@ router_metadata.post(
   '/user_attribute',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.add(req, res, next);
   });
 
-router_metadata.get('/user_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/user_attribute/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataUserAttributeServ.details(req, res, next);
 });
 
@@ -150,17 +166,18 @@ router_metadata.put(
   '/user_attribute',
   validate([
     body().custom(isValidEmpty),
-    body('name')
-      .custom(isMetadataEventExisted),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.update(req, res, next);
   });
 
 router_metadata.delete(
-  '/user_attribute/:name',
+  '/user_attribute/:id',
   validate([
-    param('name').custom(isMetadataEventExisted),
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.delete(req, res, next);

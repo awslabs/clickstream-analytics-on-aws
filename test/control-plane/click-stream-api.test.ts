@@ -22,6 +22,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
+        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {

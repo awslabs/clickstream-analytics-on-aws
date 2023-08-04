@@ -24,6 +24,7 @@ export function isEmpty(a: any): boolean {
   return false;
 }
 
+
 /**
  * Given an object, converts all keys to PascalCase given they are currently in camel case.
  * @param obj The object.

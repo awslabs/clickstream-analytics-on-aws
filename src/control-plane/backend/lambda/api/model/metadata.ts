@@ -11,15 +11,24 @@
  *  and limitations under the License.
  */
 
+import { MetadataEventType } from '../common/types';
+
 export interface IMetadataEvent {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
 
+  readonly projectId: string;
+  readonly appId: string;
+
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: string;
+  readonly eventType: MetadataEventType;
+  readonly hasData: boolean;
+  readonly platform: string;
+  readonly dataVolumeLastDay: number;
+  attributes? : IMetadataEventAttribute[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -37,6 +46,9 @@ export interface IMetadataEventAttribute {
   readonly type: string;
   readonly prefix: string;
 
+  readonly projectId: string;
+  readonly appId: string;
+
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
@@ -53,6 +65,9 @@ export interface IMetadataUserAttribute {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
 
   readonly name: string;
   readonly displayName: string;

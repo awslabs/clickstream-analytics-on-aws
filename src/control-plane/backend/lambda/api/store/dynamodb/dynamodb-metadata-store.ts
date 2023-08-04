@@ -27,12 +27,12 @@ import { MetadataStore } from '../metadata-store';
 
 export class DynamoDbMetadataStore implements MetadataStore {
 
-  public async isEventExisted(eventName: string): Promise<boolean> {
+  public async isEventExisted(projectId: string, appId: string, eventName: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT#${eventName}`,
-        type: `#METADATA#${eventName}`,
+        id: `EVENT#${projectId}#${appId}#${eventName}`,
+        type: `#METADATA#${projectId}#${appId}#${eventName}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -47,9 +47,9 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
-        id: `EVENT#${event.name}`,
-        type: `#METADATA#${event.name}`,
-        prefix: 'EVENT',
+        id: `EVENT#${event.projectId}#${event.appId}#${event.name}`,
+        type: `#METADATA#${event.projectId}#${event.appId}#${event.name}`,
+        prefix: `EVENT#${event.projectId}#${event.appId}`,
         name: event.name,
         displayName: event.displayName ?? '',
         description: event.description ?? '',
@@ -63,7 +63,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return event.name;
   };
 
-  public async getEvent(eventName: string): Promise<any> {
+  public async getEvent(projectId: string, appId: string, eventName: string): Promise<any> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       KeyConditionExpression: 'id = :id AND #type BETWEEN :metadata AND :attribute',
@@ -73,8 +73,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ExpressionAttributeValues: {
         ':d': false,
-        ':id': `EVENT#${eventName}`,
-        ':metadata': `#METADATA#${eventName}`,
+        ':id': `EVENT#${projectId}#${appId}#${eventName}`,
+        ':metadata': `#METADATA#${projectId}#${appId}#${eventName}`,
         ':attribute': 'EVENT_ATTRIBUTE$',
       },
     };
@@ -102,8 +102,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT#${event.name}`,
-        type: `#METADATA#${event.name}`,
+        id: `EVENT#${event.projectId}#${event.appId}#${event.name}`,
+        type: `#METADATA#${event.projectId}#${event.appId}#${event.name}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -114,12 +114,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  public async deleteEvent(eventName: string, operator: string): Promise<void> {
+  public async deleteEvent(projectId: string, appId: string, eventName: string, operator: string): Promise<void> {
     const input: ScanCommandInput = {
       TableName: analyticsMetadataTable,
       FilterExpression: 'id = :p AND deleted = :d',
       ExpressionAttributeValues: {
-        ':p': `EVENT#${eventName}`,
+        ':p': `EVENT#${projectId}#${appId}#${eventName}`,
         ':d': false,
       },
     };
@@ -129,7 +129,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const params: UpdateCommand = new UpdateCommand({
         TableName: analyticsMetadataTable,
         Key: {
-          id: `EVENT#${eventName}`,
+          id: `EVENT#${projectId}#${appId}#${eventName}`,
           type: events[index].type,
         },
         // Define expressions for the new or updated attributes
@@ -147,7 +147,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
   };
 
-  public async listEvents(order: string): Promise<IMetadataEvent[]> {
+  public async listEvents(projectId: string, appId: string, order: string): Promise<IMetadataEvent[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixTimeGSIName,
@@ -158,7 +158,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ExpressionAttributeValues: {
         ':d': false,
-        ':prefix': 'EVENT',
+        ':prefix': `EVENT#${projectId}#${appId}`,
       },
       ScanIndexForward: order === 'asc',
     };
@@ -166,12 +166,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records as IMetadataEvent[];
   };
 
-  public async isEventAttributeExisted(eventAttributeId: string): Promise<boolean> {
+  public async isEventAttributeExisted(projectId: string, appId: string, eventAttributeId: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT_ATTRIBUTE#${eventAttributeId}`,
-        type: `#METADATA#${eventAttributeId}`,
+        id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
+        type: `#METADATA#${projectId}#${appId}#${eventAttributeId}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -186,12 +186,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
-        id: `EVENT_ATTRIBUTE#${eventAttribute.id}`,
-        type: `#METADATA#${eventAttribute.id}`,
-        prefix: 'EVENT_ATTRIBUTE',
+        id: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
+        type: `#METADATA#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
+        prefix: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}`,
         name: eventAttribute.name,
         displayName: eventAttribute.displayName,
         description: eventAttribute.description,
+        valueType: eventAttribute.valueType,
+        valueEnum: eventAttribute.valueEnum,
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: eventAttribute.operator?? '',
@@ -202,12 +204,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return eventAttribute.id;
   };
 
-  public async getEventAttribute(eventAttributeId: string): Promise<IMetadataEventAttribute | undefined> {
+  public async getEventAttribute(projectId: string, appId: string, eventAttributeId: string): Promise<IMetadataEventAttribute | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT_ATTRIBUTE#${eventAttributeId}`,
-        type: `#METADATA#${eventAttributeId}`,
+        id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
+        type: `#METADATA#${projectId}#${appId}#${eventAttributeId}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -238,8 +240,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT_ATTRIBUTE#${eventAttribute.id}`,
-        type: `#METADATA#${eventAttribute.id}`,
+        id: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
+        type: `#METADATA#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -250,13 +252,13 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  public async deleteEventAttribute(eventAttributeId: string, operator: string): Promise<void> {
+  public async deleteEventAttribute(projectId: string, appId: string, eventAttributeId: string, operator: string): Promise<void> {
     // TODO: if attribute binded with any event, should not delete
     const input: ScanCommandInput = {
       TableName: analyticsMetadataTable,
       FilterExpression: 'id = :p AND deleted = :d',
       ExpressionAttributeValues: {
-        ':p': `EVENT_ATTRIBUTE#${eventAttributeId}`,
+        ':p': `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
         ':d': false,
       },
     };
@@ -266,7 +268,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const params: UpdateCommand = new UpdateCommand({
         TableName: analyticsMetadataTable,
         Key: {
-          id: `EVENT_ATTRIBUTE#${eventAttributeId}`,
+          id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
           type: eventAttributes[index].type,
         },
         // Define expressions for the new or updated attributes
@@ -284,7 +286,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
   };
 
-  public async listEventAttributes(order: string): Promise<IMetadataEventAttribute[]> {
+  public async listEventAttributes(projectId: string, appId: string, order: string): Promise<IMetadataEventAttribute[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixTimeGSIName,
@@ -295,7 +297,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ExpressionAttributeValues: {
         ':d': false,
-        ':prefix': 'EVENT',
+        ':prefix': `EVENT_ATTRIBUTE#${projectId}#${appId}`,
       },
       ScanIndexForward: order === 'asc',
     };
@@ -303,12 +305,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records as IMetadataEventAttribute[];
   };
 
-  public async isUserAttributeExisted(userAttributeId: string): Promise<boolean> {
+  public async isUserAttributeExisted(projectId: string, appId: string, userAttributeId: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `USER_ATTRIBUTE#${userAttributeId}`,
-        type: `#METADATA#${userAttributeId}`,
+        id: `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeId}`,
+        type: `#METADATA#${projectId}#${appId}#${userAttributeId}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -323,9 +325,9 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
-        id: `USER_ATTRIBUTE#${userAttribute.id}`,
-        type: `#METADATA#${userAttribute.id}`,
-        prefix: 'USER_ATTRIBUTE',
+        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
+        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
+        prefix: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}`,
         name: userAttribute.name,
         displayName: userAttribute.displayName,
         description: userAttribute.description,
@@ -339,12 +341,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return userAttribute.id;
   };
 
-  public async getUserAttribute(userAttributeId: string): Promise<IMetadataUserAttribute | undefined> {
+  public async getUserAttribute(projectId: string, appId: string, userAttributeId: string): Promise<IMetadataUserAttribute | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `USER_ATTRIBUTE#${userAttributeId}`,
-        type: `#METADATA#${userAttributeId}`,
+        id: `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeId}`,
+        type: `#METADATA#${projectId}#${appId}#${userAttributeId}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -375,8 +377,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `USER_ATTRIBUTE#${userAttribute.id}`,
-        type: `#METADATA#${userAttribute.id}`,
+        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
+        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -387,12 +389,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  public async deleteUserAttribute(userAttributeId: string, operator: string): Promise<void> {
+  public async deleteUserAttribute(projectId: string, appId: string, userAttributeId: string, operator: string): Promise<void> {
     const input: ScanCommandInput = {
       TableName: analyticsMetadataTable,
       FilterExpression: 'id = :p AND deleted = :d',
       ExpressionAttributeValues: {
-        ':p': `USER_ATTRIBUTE#${userAttributeId}`,
+        ':p': `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeId}`,
         ':d': false,
       },
     };
@@ -402,7 +404,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const params: UpdateCommand = new UpdateCommand({
         TableName: analyticsMetadataTable,
         Key: {
-          id: `USER_ATTRIBUTE#${userAttributeId}`,
+          id: `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeId}`,
           type: userAttributes[index].type,
         },
         // Define expressions for the new or updated attributes
@@ -420,7 +422,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
   };
 
-  public async listUserAttributes(order: string): Promise<IMetadataUserAttribute[]> {
+  public async listUserAttributes(projectId: string, appId: string, order: string): Promise<IMetadataUserAttribute[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixTimeGSIName,
@@ -431,7 +433,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ExpressionAttributeValues: {
         ':d': false,
-        ':prefix': 'EVENT',
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
       },
       ScanIndexForward: order === 'asc',
     };

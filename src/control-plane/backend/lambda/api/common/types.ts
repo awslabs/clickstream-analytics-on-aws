@@ -408,3 +408,15 @@ export enum FetchType {
   PIPELINE_DNS= 'PipelineDNS',
 }
 
+export enum MetadataEventType {
+  PRESET = 'Preset',
+  CUSTOM = 'Custom',
+}
+
+export enum MetadataEventPlatform {
+  ANDROID = 'Android',
+  IOS = 'iOS',
+  WEB = 'Web',
+  MINIPROGRAM = 'MiniProgram',
+}
+
