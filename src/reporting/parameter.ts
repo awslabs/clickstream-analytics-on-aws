@@ -77,6 +77,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'QuickSight Principal Arn',
   };
 
+  const quickSightInternelUserEmailParam = new CfnParameter(scope, 'QuickSightInternelUserEmailParam', {
+    description: 'QuickSight user for internal use.',
+    type: 'String',
+    default: 'fakeuser@example.com',
+  });
+  labels[quickSightInternelUserEmailParam.logicalId] = {
+    default: 'QuickSight Internal User Email',
+  };
+
   const quickSightTemplateArnParam = new CfnParameter(scope, 'QuickSightTemplateArnParam', {
     description: 'Arn of the QuickSight template.',
     type: 'String',
@@ -142,6 +151,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightVpcConnectionSubnetParam.logicalId,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
+      quickSightInternelUserEmailParam.logicalId,
     ],
   });
 
@@ -163,6 +173,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightVpcConnectionSubnetParam,
     quickSightPrincipalParam,
     quickSightTemplateArnParam,
+    quickSightInternelUserEmailParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redShiftDBSchemaParam,

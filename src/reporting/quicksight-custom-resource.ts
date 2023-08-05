@@ -33,6 +33,7 @@ import {
   CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
   QuickSightDashboardDefProps,
   QuicksightCustomResourceProps,
+  QuicksightInternalUserCustomResourceProps,
 } from './private/dashboard';
 import {
   clickstream_device_view_columns,
@@ -46,7 +47,7 @@ import {
   clickstream_user_attr_view_columns,
   clickstream_user_dim_view_columns,
 } from './private/dataset-col-def';
-import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
+import { createRoleForQuicksightCustomResourceLambda, createRoleForQuicksightInternalCustomResourceLambda } from './private/iam';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export function createQuicksightCustomResource(
@@ -459,6 +460,59 @@ function createQuicksightLambda(
   return fn;
 }
 
+
+export function createInternelUserCustomResource(
+  scope: Construct,
+  props: QuicksightInternalUserCustomResourceProps,
+): CustomResource {
+  const fn = createQuicksightInternelUserLambda(scope, props.quickSightNamespace);
+  const provider = new Provider(
+    scope,
+    'QuicksightInternalUserCustomResourceProvider',
+    {
+      onEventHandler: fn,
+      logRetention: RetentionDays.ONE_WEEK,
+    },
+  );
+
+  const cr = new CustomResource(scope, 'QuicksightInternalUserCustomResource', {
+    serviceToken: provider.serviceToken,
+    properties: {
+      awsAccountId: Aws.ACCOUNT_ID,
+      awsRegion: Aws.REGION,
+      awsPartition: Aws.PARTITION,
+      quickSightNamespace: props.quickSightNamespace,
+      email: props.email,
+    },
+  });
+  return cr;
+}
+
+function createQuicksightInternelUserLambda(
+  scope: Construct,
+  namespace: string,
+): NodejsFunction {
+  const role = createRoleForQuicksightInternalCustomResourceLambda(scope, namespace);
+  const fn = new NodejsFunction(scope, 'QuicksightInternalUserCustomResourceLambda', {
+    runtime: Runtime.NODEJS_18_X,
+    entry: join(
+      __dirname,
+      'lambda',
+      'custom-resource/user',
+      'index.ts',
+    ),
+    handler: 'handler',
+    memorySize: 256,
+    timeout: Duration.minutes(15),
+    logRetention: RetentionDays.ONE_WEEK,
+    role,
+    environment: {
+      ...POWERTOOLS_ENVS,
+    },
+  });
+
+  return fn;
+}
 function getDate(index: number) {
   const newDate = new Date();
   newDate.setDate(new Date().getDate() + index);
