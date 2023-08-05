@@ -104,3 +104,41 @@ export function createRoleForQuicksightCustomResourceLambda(
   return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
 
 }
+
+export function createRoleForQuicksightInternalCustomResourceLambda(
+  scope: Construct,
+  namespace: string,
+) {
+  const logGroupArn = Arn.format(
+    {
+      resource: 'log-group',
+      service: 'logs',
+      resourceName: '/aws/lambda/*',
+      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+      region: Aws.REGION,
+      account: Aws.ACCOUNT_ID,
+      partition: Aws.PARTITION,
+    },
+  );
+
+  const arnPrefix = `arn:${Aws.PARTITION}:quicksight:${Aws.REGION}:${Aws.ACCOUNT_ID}`;
+
+  const policyStatements = [
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        `${arnPrefix}:user/${namespace}/clickstream*`,
+      ],
+      actions: [
+        'quicksight:DescribeUser',
+        'quicksight:DeleteUser',
+        'quicksight:RegisterUser',
+      ],
+    }),
+
+  ];
+
+  const principal = new ServicePrincipal('lambda.amazonaws.com');
+  return createLambdaRole(scope, 'QuicksightInternalUserCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
+
+}

@@ -34,7 +34,7 @@ import {
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
-import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
+import { createInternelUserCustomResource, createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
 
@@ -174,6 +174,13 @@ export class DataReportingQuickSightStack extends Stack {
     cr.node.addDependency(vPCConnectionResource);
     cr.node.addDependency(template);
 
+    const userCustomResource = createInternelUserCustomResource(this, {
+      quickSightNamespace: stackParames.quickSightNamespaceParam.valueAsString,
+      email: stackParames.quickSightInternelUserEmailParam.valueAsString,
+    });
+
+    const internalUserName = userCustomResource.getAttString('user');
+
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
         ParameterGroups: this.paramGroups,
@@ -186,6 +193,11 @@ export class DataReportingQuickSightStack extends Stack {
       description: 'The QuickSight dashboard list',
       value: dababoards,
     }).overrideLogicalId('Dashboards');
+
+    new CfnOutput(this, 'InternalUser', {
+      description: 'The QuickSight Internel User Name',
+      value: internalUserName,
+    }).overrideLogicalId('InternalUser');
 
     addCfnNag(this);
   }

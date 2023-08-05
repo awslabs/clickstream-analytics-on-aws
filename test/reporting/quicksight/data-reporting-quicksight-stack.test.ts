@@ -72,6 +72,12 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter QuickSightInternelUserEmailParam', () => {
+    template.hasParameter('QuickSightInternelUserEmailParam', {
+      Type: 'String',
+    });
+  });
+
   test('QuickSightUserParam pattern', () => {
     const param = template.toJSON().Parameters.QuickSightUserParam;
     const pattern = param.AllowedPattern;
@@ -524,7 +530,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     Description: 'IAM role use to create QuickSight VPC connection.',
   }, 1);
 
-
   template.resourcePropertiesCountIs('AWS::Lambda::Function', {
     Code: Match.anyValue(),
     Role: {
@@ -567,7 +572,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     },
     RetentionInDays: 7,
   }, 1);
-
 
   template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
     AwsAccountId: {
@@ -1610,5 +1614,30 @@ describe('DataReportingQuickSightStack resource test', () => {
 
       },
     }, 1);
+
+
+  template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource', {
+    ServiceToken: {
+      'Fn::GetAtt': [
+        'QuicksightInternalUserCustomResourceProviderframeworkonEventE2074535',
+        'Arn',
+      ],
+    },
+    awsAccountId: {
+      Ref: 'AWS::AccountId',
+    },
+    awsRegion: {
+      Ref: 'AWS::Region',
+    },
+    awsPartition: {
+      Ref: 'AWS::Partition',
+    },
+    quickSightNamespace: {
+      Ref: 'QuickSightNamespaceParam',
+    },
+    email: {
+      Ref: 'QuickSightInternelUserEmailParam',
+    },
+  }, 1);
 
 });
