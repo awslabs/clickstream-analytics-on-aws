@@ -99,18 +99,19 @@ export function createECSClusterAndService(
     ],
   });
 
-
   if (Token.isUnresolved(ecsAsgSetting.warmPoolSize)) {
     // warmPoolSize is passed by CfnParameter
     new CfnWarmPool(scope, 'warmPool', {
       autoScalingGroupName: autoScalingGroup.autoScalingGroupName,
       minSize: ecsAsgSetting.warmPoolSize,
+      maxGroupPreparedCapacity: ecsAsgSetting.warmPoolSize,
     });
   } else {
     // warmPoolSize is passed by normal variable
     if (ecsAsgSetting.warmPoolSize && ecsAsgSetting.warmPoolSize > 0) {
       autoScalingGroup.addWarmPool({
         minSize: ecsAsgSetting.warmPoolSize,
+        maxGroupPreparedCapacity: ecsAsgSetting.warmPoolSize,
       });
     }
   }
