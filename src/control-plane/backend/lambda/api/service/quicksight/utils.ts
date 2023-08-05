@@ -84,7 +84,7 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     if (name.endsWith('WorkgroupName')) {
       workgroupName = value;
     }
-    if (name.endsWith('DataApiRole')) {
+    if (name.endsWith('DataApiRoleArn')) {
       dataApiRole = value;
     }
   }
@@ -108,7 +108,7 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     }
   }
   if (!datasourceArn) {
-    datasourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project01_wvzh_f3635de0';
+    datasourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project11_50543d10';
     // return res.status(404).send(new ApiFail('QuickSight data source arn not found'));
   }
   if (!quicksightInternalUser) {
@@ -181,7 +181,7 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 
 export function getVisualDef(visualId: string, viewName: string) : Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/funnel-chart.json')).toString()) as Visual;
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-chart.json')).toString()) as Visual;
   const eventNameFiledId = uuidv4();
   const idFilefId = uuidv4();
   visualDef.FunnelChartVisual!.VisualId = visualId;
@@ -232,24 +232,24 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
 
   if (props.timeScopeType === 'FIXED') {
 
-    filterContrl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/filter-control-datetime.json')).toString()) as FilterControl;
+    filterContrl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString()) as FilterControl;
     filterContrl.DateTimePicker!.FilterControlId = filterControlId;
     filterContrl.DateTimePicker!.Title = 'event_date between';
     filterContrl.DateTimePicker!.SourceFilterId = sourceFilterId;
 
-    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(props.timeStart!)];
     parameterDeclarations.push(parameterDeclarationStart);
 
-    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(props.timeEnd!)];
     parameterDeclarations.push(parameterDeclarationEnd);
 
-    filterGroup = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/filter-group.json')).toString()) as FilterGroup;
+    filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group.json')).toString()) as FilterGroup;
 
     filterGroup.FilterGroupId = uuidv4();
     filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId;
@@ -260,18 +260,18 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 
   } else {
-    filterContrl = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/filter-control-relative-datetime.json')).toString()) as FilterControl;
+    filterContrl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json')).toString()) as FilterControl;
     filterContrl.RelativeDateTime!.FilterControlId = filterControlId;
     filterContrl.RelativeDateTime!.Title = 'event_date';
     filterContrl.RelativeDateTime!.SourceFilterId = sourceFilterId;
 
-    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = `addDateTime(-${props.lastN}, '${props.timeUnit}', truncDate('${props.timeUnit}', now()))`;
     parameterDeclarations.push(parameterDeclarationStart);
 
-    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = 'addDateTime(1, \'DD\', truncDate(\'DD\', now()))';
@@ -286,7 +286,7 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
       unit = 'QUARTER';
     }
 
-    filterGroup = JSON.parse(readFileSync(join(__dirname, '../../common/quicksight-template/filter-group-relative.json')).toString()) as FilterGroup;
+    filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group-relative.json')).toString()) as FilterGroup;
 
     filterGroup.FilterGroupId = uuidv4();
     filterGroup.Filters![0].RelativeDatesFilter!.FilterId = sourceFilterId;

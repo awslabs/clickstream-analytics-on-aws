@@ -376,7 +376,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
       //add parameters
       const parameters = findElementByPath(dashboard, 'ParameterDeclarations') as Array<any>;
       logger.info(`parameters: ${JSON.stringify(parameters)}`);
-      parameters.push(visual.parameterDeclarations);
+      parameters.push(...visual.parameterDeclarations);
 
       //add dataset configuration
       const fiterGroups = findElementByPath(dashboard, 'FilterGroups') as Array<any>;
@@ -407,7 +407,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: string) : string {
     }
   }
 
-  return dashboard;
+  return JSON.stringify(dashboard);
 };
 
 function findElementByPath(jsonData: any, path: string): any {
