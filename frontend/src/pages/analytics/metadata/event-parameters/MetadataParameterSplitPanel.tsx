@@ -20,17 +20,17 @@ import {
   SplitPanel,
   Textarea,
 } from '@cloudscape-design/components';
-import { updateMetadataAttribute } from 'apis/analytics';
+import { updateMetadataParameter } from 'apis/analytics';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-interface MetadataAttributeSplitPanelProps {
-  event: IMetadataAttribute;
+interface MetadataParameterSplitPanelProps {
+  event: IMetadataEventParameter;
   refreshPage?: () => void;
 }
 
-const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = (
-  props: MetadataAttributeSplitPanelProps
+const MetadataParameterSplitPanel: React.FC<MetadataParameterSplitPanelProps> = (
+  props: MetadataParameterSplitPanelProps
 ) => {
   const { t } = useTranslation();
   const { event, refreshPage } = props;
@@ -67,7 +67,7 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
     }
 
     try {
-      const { success }: ApiResponse<null> = await updateMetadataAttribute(
+      const { success }: ApiResponse<null> = await updateMetadataParameter(
         newEvent
       );
       if (success) {
@@ -131,7 +131,7 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
                     rows={3}
                     value={newEvent.displayName}
                     onChange={(e) => {
-                      setNewEvent((prev) => {
+                      setNewEvent((prev: any) => {
                         return {
                           ...prev,
                           displayName: e.detail.value,
@@ -144,7 +144,7 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
                   <SpaceBetween direction="horizontal" size="xs">
                     <Button
                       onClick={() => {
-                        setNewEvent((prev) => {
+                        setNewEvent((prev: any) => {
                           return {
                             ...prev,
                             displayName: prevDisplayName,
@@ -192,7 +192,7 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
                     rows={3}
                     value={newEvent.description}
                     onChange={(e) => {
-                      setNewEvent((prev) => {
+                      setNewEvent((prev: any) => {
                         return {
                           ...prev,
                           description: e.detail.value,
@@ -205,7 +205,7 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
                   <SpaceBetween direction="horizontal" size="xs">
                     <Button
                       onClick={() => {
-                        setNewEvent((prev) => {
+                        setNewEvent((prev: any) => {
                           return {
                             ...prev,
                             description: prevDesc,
@@ -236,4 +236,4 @@ const MetadataAttributeSplitPanel: React.FC<MetadataAttributeSplitPanelProps> = 
   );
 };
 
-export default MetadataAttributeSplitPanel;
+export default MetadataParameterSplitPanel;

@@ -16,7 +16,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MetadataUserAttributeSplitPanel from './MetadataUserAttributeSplitPanel';
-import EventTable from './UserAttributesTable';
+import UserAttributeTable from './UserAttributesTable';
 
 const MetadataUserAttributes: React.FC = () => {
   const { pid, appid } = useParams();
@@ -42,7 +42,7 @@ const MetadataUserAttributes: React.FC = () => {
     <AppLayout
       toolsHide
       content={
-        <EventTable
+        <UserAttributeTable
           projectId={pid ?? ''}
           appId={appid ?? ''}
           refresh={refreshPage}
@@ -50,7 +50,7 @@ const MetadataUserAttributes: React.FC = () => {
           changeSelectedItems={(items) => {
             setSelectedItems(items);
           }}
-        ></EventTable>
+        ></UserAttributeTable>
       }
       headerSelector="#header"
       navigation={

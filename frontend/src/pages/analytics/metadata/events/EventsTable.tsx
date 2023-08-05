@@ -12,12 +12,17 @@
  */
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import { Box } from '@cloudscape-design/components';
+import {
+  Badge,
+  Box,
+  Input,
+  StatusIndicator,
+} from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
 
-import { getMetadataEventsList } from 'apis/analytics';
+import { getMetadataEventsList, updateMetadataEvent } from 'apis/analytics';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -28,15 +33,17 @@ import { useTranslation } from 'react-i18next';
 import { EventsTableHeader } from './EventsTableHeader';
 import { DEFAULT_PREFERENCES } from './table-config';
 import '../styles/table-select.scss';
+import { MetadataEventType } from 'ts/const';
+
+const displayNameRegex = /^[a-z][a-z0-9_]{0,126}/i;
+const descriptionRegex = /^[a-z][a-z0-9_]{0,126}/i;
 
 interface EventTableProps {
   selectionType?: 'multi' | 'single';
   projectId: string;
   appId: string;
-  refresh: number;
-  defaultSelectedItems: IMetadataEvent[];
-  changeSelectedItems: (item: IMetadataEvent[]) => void;
   loadHelpPanelContent: () => void;
+  setShowDetails: (show: boolean, data?: IMetadataEvent) => void;
 }
 
 const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
@@ -44,51 +51,101 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     selectionType,
     projectId,
     appId,
-    defaultSelectedItems,
-    changeSelectedItems,
     loadHelpPanelContent,
+    setShowDetails,
   } = props;
   const { t } = useTranslation();
   const [loadingData, setLoadingData] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(defaultSelectedItems);
   const [eventList, setEventList] = useState<IMetadataEvent[]>([]);
+  const [itemsSnap, setItemsSnap] = useState<IMetadataEvent[]>([]);
+
   const COLUMN_DEFINITIONS = [
-    {
-      id: 'id',
-      header: t('analytics:metadata.event.tableColumnID'),
-      sortingField: 'id',
-      cell: (e: { id: any }) => {
-        return e.id;
-      },
-    },
     {
       id: 'name',
       header: t('analytics:metadata.event.tableColumnName'),
-      sortingField: 'name',
-      cell: (e: { name: any }) => {
+      cell: (e: { name: string }) => {
         return e.name;
       },
     },
     {
       id: 'displayName',
       header: t('analytics:metadata.event.tableColumnDisplayName'),
-      sortingField: 'displayName',
-      cell: (e: { displayName: any }) => {
+      cell: (e: { displayName: string }) => {
         return e.displayName;
+      },
+      minWidth: 180,
+      editConfig: {
+        ariaLabel: 'Edit domain name',
+        errorIconAriaLabel: 'Domain Name Validation Error',
+        editIconAriaLabel: 'editable',
+        validation(item: any, value: any) {
+          return displayNameRegex.test(value)
+            ? undefined
+            : 'Invalid display name';
+        },
+        editingCell: (
+          item: { displayName: string },
+          { setValue, currentValue }: any
+        ) => {
+          return (
+            <Input
+              autoFocus={true}
+              ariaLabel="Edit display name"
+              value={currentValue ?? item.displayName}
+              onChange={(event) => {
+                setValue(event.detail.value);
+              }}
+              placeholder="Enter display name"
+            />
+          );
+        },
       },
     },
     {
       id: 'description',
       header: t('analytics:metadata.event.tableColumnDescription'),
-      cell: (e: { description: any }) => {
+      cell: (e: { description: string }) => {
         return e.description;
       },
     },
     {
       id: 'type',
       header: t('analytics:metadata.event.tableColumnType'),
-      cell: (e: { type: any }) => {
-        return e.type;
+      sortingField: 'type',
+      cell: (e: { type: string }) => {
+        return (
+          <Badge color={e.type === MetadataEventType.CUSTOM ? 'blue' : 'grey'}>
+            {e.type}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'hasData',
+      header: t('analytics:metadata.event.tableColumnHasData'),
+      sortingField: 'hasData',
+      cell: (e: { hasData: boolean }) => {
+        return (
+          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+            {e.hasData ? 'Yes' : 'No'}
+          </StatusIndicator>
+        );
+      },
+    },
+    {
+      id: 'platform',
+      header: t('analytics:metadata.event.tableColumnPlatform'),
+      sortingField: 'platform',
+      cell: (e: { platform: string }) => {
+        return e.platform;
+      },
+    },
+    {
+      id: 'dataVolumeLastDay',
+      header: t('analytics:metadata.event.tableColumnDataVolumeLastDay'),
+      sortingField: 'platform',
+      cell: (e: { dataVolumeLastDay: number }) => {
+        return e.dataVolumeLastDay;
       },
     },
   ];
@@ -96,6 +153,11 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     'Metadata-Event-TableSelectFilter-Widths',
     COLUMN_DEFINITIONS
   );
+
+  const persistChanges = () => {
+    setEventList(eventList);
+    setItemsSnap([]);
+  };
 
   const listMetadataEvents = async () => {
     setLoadingData(true);
@@ -131,21 +193,35 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     propertyFiltering: {
       filteringProperties: [
         {
-          propertyLabel: 'Event name',
+          propertyLabel: t('analytics:metadata.event.tableColumnName'),
           key: 'name',
-          groupValuesLabel: 'Event name values',
+          groupValuesLabel: t('analytics:metadata.event.tableColumnName'),
           operators: [':', '!:', '=', '!='],
         },
         {
-          propertyLabel: 'Event display name',
+          propertyLabel: t('analytics:metadata.event.tableColumnDisplayName'),
           key: 'displayName',
-          groupValuesLabel: 'Event display name values',
+          groupValuesLabel: t(
+            'analytics:metadata.event.tableColumnDisplayName'
+          ),
           operators: [':', '!:', '=', '!='],
         },
         {
-          propertyLabel: 'Event type',
+          propertyLabel: t('analytics:metadata.event.tableColumnType'),
           key: 'type',
-          groupValuesLabel: 'Event type values',
+          groupValuesLabel: t('analytics:metadata.event.tableColumnType'),
+          operators: [':', '!:', '=', '!='],
+        },
+        {
+          propertyLabel: t('analytics:metadata.event.tableColumnHasData'),
+          key: 'hasData',
+          groupValuesLabel: t('analytics:metadata.event.tableColumnHasData'),
+          operators: [':', '!:', '=', '!='],
+        },
+        {
+          propertyLabel: t('analytics:metadata.event.tableColumnPlatform'),
+          key: 'platform',
+          groupValuesLabel: t('analytics:metadata.event.tableColumnPlatform'),
           operators: [':', '!:', '=', '!='],
         },
       ],
@@ -160,23 +236,103 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
     },
     pagination: { pageSize: DEFAULT_PREFERENCES.pageSize },
     sorting: { defaultState: { sortingColumn: columnDefinitions[0] } },
-    selection: {},
+    selection: { keepSelection: true },
   });
+
+  useEffect(() => {
+    if (
+      collectionProps.selectedItems &&
+      collectionProps.selectedItems?.length > 0
+    ) {
+      setShowDetails(true, collectionProps.selectedItems[0]);
+    } else {
+      setShowDetails(false);
+    }
+  }, [collectionProps.selectedItems]);
+
+  const tablePaginationProps = {
+    ...paginationProps,
+    onChange: (event: any) => {
+      paginationProps.onChange(event);
+      persistChanges();
+    },
+  };
+
+  const tableFilterProps = {
+    ...propertyFilterProps,
+    onChange: (event: any) => {
+      propertyFilterProps.onChange(event);
+      persistChanges();
+    },
+  };
+
+  const tableCollectionProps = {
+    ...collectionProps,
+    onSortingChange: (event: any) => {
+      if (collectionProps.onSortingChange) {
+        collectionProps.onSortingChange(event);
+      }
+      persistChanges();
+    },
+  };
+
+  const updateEventInfo = async (newItem: IMetadataEvent) => {
+    try {
+      const { success, message }: ApiResponse<null> = await updateMetadataEvent(
+        newItem
+      );
+      if (!success) {
+        throw new Error(message);
+      }
+    } catch (error) {
+      throw new Error('Inline error');
+    }
+  };
+
+  const handleSubmit = async (
+    currentItem: IMetadataEvent,
+    column: any,
+    value: any
+  ) => {
+    if (column.id === 'displayName' && !displayNameRegex.test(value)) {
+      throw new Error('Inline error');
+    }
+    const newItem = { ...currentItem, [column.id]: value };
+    await updateEventInfo(newItem);
+    let fullCollection = eventList;
+
+    if (propertyFilterProps.filteringProperties.length > 0) {
+      fullCollection = eventList;
+    }
+
+    if (
+      collectionProps.sortingColumn === column ||
+      propertyFilterProps.filteringProperties.length > 0
+    ) {
+      setItemsSnap(
+        items.map((item) => (item === currentItem ? newItem : item))
+      );
+    }
+
+    setEventList(
+      fullCollection.map((item) => (item === currentItem ? newItem : item))
+    );
+  };
 
   return (
     <div>
       <Table
-        {...collectionProps}
+        {...tableCollectionProps}
         variant="full-page"
-        selectedItems={selectedItems}
         stickyHeader={true}
         resizableColumns={true}
         loading={loadingData}
-        items={items}
+        items={itemsSnap.length > 0 ? itemsSnap : items}
         loadingText={t('analytics:metadata.event.tableLoading') || 'Loading'}
-        selectionType={selectionType ?? 'multi'}
+        selectionType={selectionType ?? 'single'}
         onColumnWidthsChange={saveWidths}
         columnDefinitions={columnDefinitions}
+        submitEdit={handleSubmit}
         columnDisplay={DEFAULT_PREFERENCES.contentDisplay}
         empty={
           <Box textAlign="center" color="inherit">
@@ -189,7 +345,12 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
         header={
           <EventsTableHeader
             title={t('analytics:metadata.event.title') ?? ''}
-            createButtonText={t('analytics:metadata.event.createButton') ?? ''}
+            refreshButtonText={
+              t('analytics:metadata.event.refreshButton') ?? ''
+            }
+            detailsButtonText={
+              t('analytics:metadata.event.detailsButton') ?? ''
+            }
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
               !loadingData &&
@@ -199,31 +360,26 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
                 : `(${eventList.length})`
             }
             onInfoLinkClick={loadHelpPanelContent}
+            onRefreshButtonClick={() => {
+              console.log('refresh button clicked');
+            }}
+            onDetailsButtonClick={() => {
+              console.log('details button clicked');
+            }}
           />
         }
-        // header={
-        //   <>
-        //     <Header
-        //       counter={`(${eventList.length})`}
-        //       actions={
-        //         <SpaceBetween size="xs" direction="horizontal">
-        //           <Button data-testid="header-btn-create" variant="primary">
-        //             Create Events
-        //           </Button>
-        //         </SpaceBetween>
-        //       }
-        //     >
-        //       {t('analytics:metadata.event.title')}
-        //     </Header>
-        //     {t('analytics:metadata.event.description')}
-        //   </>
-        // }
         filter={
           <PropertyFilter
-            {...propertyFilterProps}
+            {...tableFilterProps}
             i18nStrings={{
               filteringAriaLabel: 'Find events',
               filteringPlaceholder: 'Find events',
+              groupPropertiesText: 'Properties',
+              operatorsText: 'Operators',
+              clearFiltersText: 'Clear filters',
+              enteredTextLabel: (value) => {
+                return `Use: ${value}`;
+              },
             }}
             countText={`${filteredItemsCount} ${
               filteredItemsCount === 1 ? 'match' : 'matches'
@@ -231,7 +387,7 @@ const EventTable: React.FC<EventTableProps> = (props: EventTableProps) => {
             expandToViewport={true}
           />
         }
-        pagination={<Pagination {...paginationProps} />}
+        pagination={<Pagination {...tablePaginationProps} />}
       />
     </div>
   );

@@ -392,3 +392,8 @@ export const CLOUDFORMATION_STATUS_MAP: any = {
   UPDATE_ROLLBACK_IN_PROGRESS: 'loading',
   UPDATE_FAILED: 'error',
 };
+
+export enum MetadataEventType {
+  PRESET = 'Preset',
+  CUSTOM = 'Custom',
+}

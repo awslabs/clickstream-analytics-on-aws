@@ -25,7 +25,7 @@ import {
   Table,
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { getMetadataAttributesList } from 'apis/analytics';
+import { getMetadataParametersList } from 'apis/analytics';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -38,17 +38,17 @@ import '../styles/table-select.scss';
 
 const defaultEventType = { value: '0', label: 'Any Type' };
 
-interface AttributeTableProps {
+interface MetadataParameterTableProps {
   selectionType?: 'multi' | 'single';
   projectId: string;
   appId: string;
   refresh: number;
-  defaultSelectedItems: IMetadataEvent[];
-  changeSelectedItems: (item: IMetadataEvent[]) => void;
+  defaultSelectedItems: IMetadataEventParameter[];
+  changeSelectedItems: (item: IMetadataEventParameter[]) => void;
 }
 
-const AttributeTable: React.FC<AttributeTableProps> = (
-  props: AttributeTableProps
+const MetadataParameterTable: React.FC<MetadataParameterTableProps> = (
+  props: MetadataParameterTableProps
 ) => {
   const {
     selectionType,
@@ -64,7 +64,7 @@ const AttributeTable: React.FC<AttributeTableProps> = (
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
-      header: t('analytics:metadata.eventAttribute.tableColumnID'),
+      header: t('analytics:metadata.eventParameter.tableColumnID'),
       sortingField: 'id',
       cell: (e: { id: any }) => {
         return e.id;
@@ -72,7 +72,7 @@ const AttributeTable: React.FC<AttributeTableProps> = (
     },
     {
       id: 'name',
-      header: t('analytics:metadata.eventAttribute.tableColumnName'),
+      header: t('analytics:metadata.eventParameter.tableColumnName'),
       sortingField: 'name',
       cell: (e: { name: any }) => {
         return e.name;
@@ -80,7 +80,7 @@ const AttributeTable: React.FC<AttributeTableProps> = (
     },
     {
       id: 'displayName',
-      header: t('analytics:metadata.eventAttribute.tableColumnDisplayName'),
+      header: t('analytics:metadata.eventParameter.tableColumnDisplayName'),
       sortingField: 'displayName',
       cell: (e: { displayName: any }) => {
         return e.displayName;
@@ -88,14 +88,14 @@ const AttributeTable: React.FC<AttributeTableProps> = (
     },
     {
       id: 'description',
-      header: t('analytics:metadata.eventAttribute.tableColumnDescription'),
+      header: t('analytics:metadata.eventParameter.tableColumnDescription'),
       cell: (e: { description: any }) => {
         return e.description;
       },
     },
     {
       id: 'type',
-      header: t('analytics:metadata.eventAttribute.tableColumnType'),
+      header: t('analytics:metadata.eventParameter.tableColumnType'),
       cell: (e: { type: any }) => {
         return e.type;
       },
@@ -118,7 +118,7 @@ const AttributeTable: React.FC<AttributeTableProps> = (
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataAttributesList({
+        await getMetadataParametersList({
           pid: projectId,
           appId: appId,
           pageNumber: 1,
@@ -193,7 +193,7 @@ const AttributeTable: React.FC<AttributeTableProps> = (
         items={items}
         trackBy="id"
         loadingText={
-          t('analytics:metadata.eventAttribute.tableLoading') || 'Loading'
+          t('analytics:metadata.eventParameter.tableLoading') || 'Loading'
         }
         selectionType={selectionType ?? 'single'}
         onSelectionChange={({ detail }) => {
@@ -219,9 +219,9 @@ const AttributeTable: React.FC<AttributeTableProps> = (
         columnDisplay={DEFAULT_PREFERENCES.contentDisplay}
         empty={
           <Box textAlign="center" color="inherit">
-            <b>{t('analytics:metadata.eventAttribute.tableEmpty')}</b>
+            <b>{t('analytics:metadata.eventParameter.tableEmpty')}</b>
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('analytics:metadata.eventAttribute.tableNoDataDisplay')}
+              {t('analytics:metadata.eventParameter.tableNoDataDisplay')}
             </Box>
           </Box>
         }
@@ -237,9 +237,9 @@ const AttributeTable: React.FC<AttributeTableProps> = (
                 </SpaceBetween>
               }
             >
-              {t('analytics:metadata.eventAttribute.title')}
+              {t('analytics:metadata.eventParameter.title')}
             </Header>
-            {t('analytics:metadata.eventAttribute.description')}
+            {t('analytics:metadata.eventParameter.description')}
           </>
         }
         filter={
@@ -289,4 +289,4 @@ const AttributeTable: React.FC<AttributeTableProps> = (
   );
 };
 
-export default AttributeTable;
+export default MetadataParameterTable;

@@ -11,24 +11,16 @@
  *  and limitations under the License.
  */
 
-export const SEARCHABLE_COLUMNS = ['id', 'name', 'displayName', 'description'];
-
-export const CONTENT_DISPLAY_OPTIONS = [
-  { id: 'id', label: 'ID', alwaysVisible: true },
-  { id: 'name', label: 'Name1' },
-  { id: 'displayName', label: 'DisplayName' },
-  { id: 'description', label: 'Description' },
-  { id: 'type', label: 'Type' },
-];
-
 export const DEFAULT_PREFERENCES = {
   pageSize: 10,
   contentDisplay: [
-    { id: 'id', visible: true },
     { id: 'name', visible: true },
     { id: 'displayName', visible: true },
     { id: 'description', visible: true },
     { id: 'type', visible: true },
+    { id: 'hasData', visible: true },
+    { id: 'platform', visible: true },
+    { id: 'dataVolumeLastDay', visible: true },
   ],
   wrapLines: false,
   stripedRows: false,
@@ -40,55 +32,4 @@ export const PAGE_SIZE_OPTIONS = [
   { value: 10, label: '10 Items' },
   { value: 30, label: '30 Items' },
   { value: 50, label: '50 Items' },
-];
-
-export const FILTERING_PROPERTIES = [
-  {
-    propertyLabel: 'Domain name',
-    key: 'domainName',
-    groupValuesLabel: 'Domain name values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'Delivery method',
-    key: 'deliveryMethod',
-    groupValuesLabel: 'Delivery method values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'Price class',
-    key: 'priceClass',
-    groupValuesLabel: 'Price class values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'Origin',
-    key: 'origin',
-    groupValuesLabel: 'Origin values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'Status',
-    key: 'status',
-    groupValuesLabel: 'Status values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'State',
-    key: 'state',
-    groupValuesLabel: 'State values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'Logging',
-    key: 'logging',
-    groupValuesLabel: 'Logging values',
-    operators: [':', '!:', '=', '!='],
-  },
-  {
-    propertyLabel: 'SSL certificate',
-    key: 'sslCertificate',
-    groupValuesLabel: 'SSL certificate values',
-    operators: [':', '!:', '=', '!='],
-  },
 ];

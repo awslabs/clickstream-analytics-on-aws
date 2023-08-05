@@ -12,6 +12,7 @@
  */
 
 import { AppLayout } from '@cloudscape-design/components';
+import { getMetadataEventDetails } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -22,19 +23,7 @@ const MetadataEvents: React.FC = () => {
   const { pid, appid } = useParams();
 
   const [showSplit, setShowSplit] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<IMetadataEvent[]>([]);
   const [curEvent, setCurEvent] = useState<IMetadataEvent | null>();
-  const [refreshPage, setRefreshPage] = useState(0);
-
-  useEffect(() => {
-    if (selectedItems.length >= 1) {
-      setShowSplit(true);
-      setCurEvent(selectedItems[0]);
-    } else {
-      setShowSplit(false);
-      setCurEvent(null);
-    }
-  }, [selectedItems]);
 
   return (
     <AppLayout
@@ -43,12 +32,15 @@ const MetadataEvents: React.FC = () => {
         <EventTable
           projectId={pid ?? ''}
           appId={appid ?? ''}
-          refresh={refreshPage}
-          defaultSelectedItems={selectedItems}
-          changeSelectedItems={(items) => {
-            setSelectedItems(items);
+          loadHelpPanelContent={() => {
+            console.log(1);
           }}
-          loadHelpPanelContent={() => {console.log(1)}}
+          setShowDetails={(show: boolean, data?: IMetadataEvent) => {
+            setShowSplit(show);
+            if (data) {
+              setCurEvent(data);
+            }
+          }}
         ></EventTable>
       }
       headerSelector="#header"
@@ -61,20 +53,7 @@ const MetadataEvents: React.FC = () => {
       onSplitPanelToggle={(e) => {
         setShowSplit(e.detail.open);
       }}
-      splitPanel={
-        curEvent ? (
-          <MetadataEventSplitPanel
-            event={curEvent}
-            refreshPage={() => {
-              setRefreshPage((prev) => {
-                return prev + 1;
-              });
-            }}
-          />
-        ) : (
-          ''
-        )
-      }
+      splitPanel={curEvent ? <MetadataEventSplitPanel event={curEvent} /> : ''}
     />
   );
 };

@@ -15,15 +15,18 @@ import { AppLayout } from '@cloudscape-design/components';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import EventTable from './AttributesTable';
-import MetadataAttributeSplitPanel from './MetadataAttributeSplitPanel';
+import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
+import EventTable from './MetadataParameterTable';
+import MetadataParameterTable from './MetadataParameterTable';
 
-const MetadataAttributes: React.FC = () => {
+const MetadataParameters: React.FC = () => {
   const { pid, appid } = useParams();
 
   const [showSplit, setShowSplit] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<IMetadataAttribute[]>([]);
-  const [curEvent, setCurEvent] = useState<IMetadataAttribute | null>();
+  const [selectedItems, setSelectedItems] = useState<IMetadataEventParameter[]>(
+    []
+  );
+  const [curEvent, setCurEvent] = useState<IMetadataEventParameter | null>();
   const [refreshPage, setRefreshPage] = useState(0);
 
   useEffect(() => {
@@ -40,7 +43,7 @@ const MetadataAttributes: React.FC = () => {
     <AppLayout
       toolsHide
       content={
-        <EventTable
+        <MetadataParameterTable
           projectId={pid ?? ''}
           appId={appid ?? ''}
           refresh={refreshPage}
@@ -48,12 +51,12 @@ const MetadataAttributes: React.FC = () => {
           changeSelectedItems={(items) => {
             setSelectedItems(items);
           }}
-        ></EventTable>
+        ></MetadataParameterTable>
       }
       headerSelector="#header"
       navigation={
         <Navigation
-          activeHref={`/analytics/${pid}/app/${appid}/metadata/event-attributes`}
+          activeHref={`/analytics/${pid}/app/${appid}/metadata/event-parameters`}
         />
       }
       splitPanelOpen={showSplit}
@@ -62,7 +65,7 @@ const MetadataAttributes: React.FC = () => {
       }}
       splitPanel={
         curEvent ? (
-          <MetadataAttributeSplitPanel
+          <MetadataParameterSplitPanel
             event={curEvent}
             refreshPage={() => {
               setRefreshPage((prev) => {
@@ -78,4 +81,4 @@ const MetadataAttributes: React.FC = () => {
   );
 };
 
-export default MetadataAttributes;
+export default MetadataParameters;

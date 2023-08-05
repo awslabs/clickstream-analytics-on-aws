@@ -21,22 +21,26 @@ import React from 'react';
 
 interface EventsTableHeaderProps extends HeaderProps {
   title?: string;
-  createButtonText?: string;
+  refreshButtonText?: string;
+  detailsButtonText?: string;
   extraActions?: React.ReactNode;
   selectedItemsCount: number;
+  onRefreshButtonClick?: () => void;
+  onDetailsButtonClick?: () => void;
   onInfoLinkClick?: () => void;
 }
 
 export function EventsTableHeader({
   title = '',
-  createButtonText = '',
+  refreshButtonText = '',
+  detailsButtonText = '',
   extraActions = null,
   selectedItemsCount,
+  onRefreshButtonClick,
+  onDetailsButtonClick,
   onInfoLinkClick,
   ...props
 }: EventsTableHeaderProps) {
-  const isOnlyOneSelected = selectedItemsCount === 1;
-
   return (
     <Header
       variant="awsui-h1-sticky"
@@ -51,22 +55,11 @@ export function EventsTableHeader({
         <SpaceBetween size="xs" direction="horizontal">
           {extraActions}
           <Button
-            data-testid="header-btn-view-details"
-            disabled={!isOnlyOneSelected}
+            data-testid="header-btn-create"
+            variant="primary"
+            onClick={onRefreshButtonClick}
           >
-            View details
-          </Button>
-          <Button data-testid="header-btn-edit" disabled={!isOnlyOneSelected}>
-            Edit
-          </Button>
-          <Button
-            data-testid="header-btn-delete"
-            disabled={selectedItemsCount === 0}
-          >
-            Delete
-          </Button>
-          <Button data-testid="header-btn-create" variant="primary">
-            {createButtonText}
+            {refreshButtonText}
           </Button>
         </SpaceBetween>
       }

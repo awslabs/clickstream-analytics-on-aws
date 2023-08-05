@@ -13,10 +13,11 @@
 
 import { apiRequest } from 'ts/request';
 
-const getAnalyticsDashboardList = async (params: {
+export const getAnalyticsDashboardList = async (params: {
   pageNumber: number;
   pageSize: number;
 }) => {
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     resolve({
       success: true,
@@ -44,12 +45,13 @@ const getAnalyticsDashboardList = async (params: {
   return result;
 };
 
-const getMetadataEventsList = async (params: {
+export const getMetadataEventsList = async (params: {
   pid: string;
   appId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     const data = [];
     for (let index = 0; index <= 20; index++) {
@@ -57,8 +59,11 @@ const getMetadataEventsList = async (params: {
         id: `${index}`,
         name: `Event Name ${index}`,
         displayName: `事件${index}`,
-        type: index > 10 ? 'built-in' : 'customer',
+        type: index % 2 === 0 ? 'Preset' : 'Custom',
         description: `Event description ${index}`,
+        hasData: index % 2 === 0,
+        platform: index % 2 === 0 ? 'Android' : 'iOS',
+        dataVolumeLastDay: index * 100,
       });
     }
     resolve({
@@ -74,7 +79,49 @@ const getMetadataEventsList = async (params: {
   return result;
 };
 
-const updateMetadataEvent = async (event: IMetadataEvent) => {
+export const getMetadataEventDetails = async (params: {
+  pid: string;
+  appId: string;
+  eventName: string;
+}) => {
+  await new Promise((r) => setTimeout(r, 3000));
+  const result: any = await new Promise((resolve, reject) => {
+    const parameters = [];
+    for (let index = 0; index <= 20; index++) {
+      parameters.push({
+        id: `${index}`,
+        name: `Parameter Name ${index}`,
+        displayName: `属性${index}`,
+        type: index % 2 === 0 ? 'Preset' : 'Custom',
+        description: `Parameter description ${index}`,
+        platform: index % 2 === 0 ? 'Android' : 'iOS',
+        dataType: index % 2 === 0 ? 'String' : 'Number',
+      });
+    }
+    const index = Math.floor(Math.random() * 100);
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {
+        id: index,
+        name: `Event Name ${index}`,
+        displayName: `事件${index}`,
+        type: index % 2 === 0 ? 'Preset' : 'Custom',
+        description: `Event description ${index}`,
+        hasData: index % 2 === 0,
+        platform: index % 2 === 0 ? 'Android' : 'iOS',
+        dataVolumeLastDay: index * 100,
+        parameters: parameters,
+      },
+      error: '',
+    });
+  });
+  return result;
+};
+
+export const updateMetadataEvent = async (event: IMetadataEvent) => {
+  console.log(event);
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     resolve({
       success: true,
@@ -86,12 +133,13 @@ const updateMetadataEvent = async (event: IMetadataEvent) => {
   return result;
 };
 
-const getMetadataAttributesList = async (params: {
+export const getMetadataParametersList = async (params: {
   pid: string;
   appId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     const data = [];
     for (let index = 0; index <= 67; index++) {
@@ -116,7 +164,11 @@ const getMetadataAttributesList = async (params: {
   return result;
 };
 
-const updateMetadataAttribute = async (event: IMetadataAttribute) => {
+export const updateMetadataParameter = async (
+  event: IMetadataEventParameter
+) => {
+  console.log(event);
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     resolve({
       success: true,
@@ -128,12 +180,13 @@ const updateMetadataAttribute = async (event: IMetadataAttribute) => {
   return result;
 };
 
-const getMetadataUserAttributesList = async (params: {
+export const getMetadataUserAttributesList = async (params: {
   pid: string;
   appId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     const data = [];
     for (let index = 0; index <= 38; index++) {
@@ -158,7 +211,10 @@ const getMetadataUserAttributesList = async (params: {
   return result;
 };
 
-const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
+export const updateMetadataUserAttribute = async (
+  event: IMetadataUserAttribute
+) => {
+  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
     resolve({
       success: true,
@@ -170,7 +226,7 @@ const updateMetadataUserAttribute = async (event: IMetadataUserAttribute) => {
   return result;
 };
 
-const fetchEmbeddingUrl = async (
+export const fetchEmbeddingUrl = async (
   region: string,
   allowedDomain: string,
   dashboardId: string,
@@ -189,15 +245,4 @@ const fetchEmbeddingUrl = async (
     `/env/quicksight/embedUrl?${reqParams}`
   );
   return result;
-};
-
-export {
-  getAnalyticsDashboardList,
-  getMetadataEventsList,
-  updateMetadataEvent,
-  getMetadataAttributesList,
-  updateMetadataAttribute,
-  getMetadataUserAttributesList,
-  updateMetadataUserAttribute,
-  fetchEmbeddingUrl,
 };

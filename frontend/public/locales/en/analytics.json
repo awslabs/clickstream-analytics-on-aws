@@ -20,39 +20,47 @@
   "metadata": {
     "event": {
       "title": "Origin Events",
-      "createButton": "Create Event",
+      "detailsButton": "View details",
+      "refreshButton": "Refresh Metadata",
       "description": "Description of the Origin Events",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
-      "tableColumnName": "Name",
-      "tableColumnDisplayName": "DisplayName",
+      "tableColumnName": "Event name",
+      "tableColumnDisplayName": "Display name",
       "tableColumnDescription": "Description",
-      "tableColumnType": "Type",
+      "tableColumnType": "Event type",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnDataVolumeLastDay": "Data volume last day",
       "tableEmpty": "No events",
       "tableNoDataDisplay": "No events to display.",
       "split": {
-        "id": "ID",
-        "name": "Name",
-        "displayName": "DisplayName",
-        "description": "Description"
+        "title": "Event details",
+        "associatedPresetParameters": "Associated preset parameters",
+        "associatedCustomParameters": "Associated custom parameters",
+        "parameterName": "Parameter name",
+        "displayName": "Display name",
+        "description": "Description",
+        "dataType": "Data type"
       }
     },
-    "eventAttribute": {
-      "title": "Event Attribute",
-      "description": "Description of the Event Attribute",
+    "eventParameter": {
+      "title": "Event Parameter",
+      "description": "Description of the Event Parameter",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
-      "tableColumnName": "Name",
-      "tableColumnDisplayName": "DisplayName",
+      "tableColumnName": "Parameter name",
+      "tableColumnDisplayName": "Display name",
       "tableColumnDescription": "Description",
-      "tableColumnType": "Type",
-      "tableEmpty": "No event attributes",
-      "tableNoDataDisplay": "No event attributes to display.",
+      "tableColumnType": "Parameter type",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnSource": "Source",
+      "tableEmpty": "No event parameters",
+      "tableNoDataDisplay": "No event parameters to display.",
       "split": {
-        "id": "ID",
-        "name": "Name",
-        "displayName": "DisplayName",
-        "description": "Description"
+        "title": "Event parameter details",
+        "associatedEvents": "Associated events"
       }
     },
     "userAttribute": {
@@ -60,17 +68,18 @@
       "description": "Description of the User Attribute",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
-      "tableColumnName": "Name",
-      "tableColumnDisplayName": "DisplayName",
+      "tableColumnName": "Attribute name",
+      "tableColumnDisplayName": "Display name",
       "tableColumnDescription": "Description",
-      "tableColumnType": "Type",
+      "tableColumnType": "Attribute type",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnSource": "Source",
       "tableEmpty": "No event attributes",
       "tableNoDataDisplay": "No event attributes to display.",
       "split": {
-        "id": "ID",
-        "name": "Name",
-        "displayName": "DisplayName",
-        "description": "Description"
+        "title": "User parameter details",
+        "associatedEvents": "Associated events"
       }
     }
   },

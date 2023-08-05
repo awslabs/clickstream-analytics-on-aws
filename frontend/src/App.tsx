@@ -24,9 +24,7 @@ import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
 import AnalyticsEvent from 'pages/analytics/event/AnalyticsEvent';
 import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
-import MetadataAttributes from 'pages/analytics/metadata/event-attributes/MetadataAttributes';
 import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
-import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
@@ -43,6 +41,8 @@ import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
+import MetadataParameters from 'pages/analytics/metadata/event-parameters/MetadataParameters';
+import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
 
 const LoginCallback: React.FC = () => {
   useEffect(() => {
@@ -154,8 +154,8 @@ const SignedInPage: React.FC = () => {
                   element={<MetadataEvents />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/metadata/event-attributes"
-                  element={<MetadataAttributes />}
+                  path="/analytics/:pid/app/:appid/metadata/event-parameters"
+                  element={<MetadataParameters />}
                 />
                 <Route
                   path="/analytics/:pid/app/:appid/metadata/user-attributes"

@@ -43,7 +43,7 @@ interface UserAttributeTableProps {
   projectId: string;
   appId: string;
   refresh: number;
-  defaultSelectedItems: IMetadataEvent[];
+  defaultSelectedItems: IMetadataUserAttribute[];
   changeSelectedItems: (item: IMetadataEvent[]) => void;
 }
 

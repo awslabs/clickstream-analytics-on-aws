@@ -30,7 +30,7 @@
       "explore-retention": "Retention Analysis",
       "explore-funnel": "Funnel Analysis",
       "metadata-events": "Origin Events",
-      "metadata-event-attributes": "Event Attributes",
+      "metadata-event-parameters": "Event Parameters",
       "metadata-user-attributes": "User Attributes"
     },
     "operation": "Operation",

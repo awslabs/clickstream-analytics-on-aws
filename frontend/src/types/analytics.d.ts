@@ -25,15 +25,20 @@ declare global {
     name: string;
     displayName: string;
     description: string;
-    type: string;
+    type: MetadataEventType;
+    hasData: boolean;
+    platform: string;
+    dataVolumeLastDay: number;
+    parameters?: IMetadataEventParameter[];
   }
 
-  interface IMetadataAttribute {
+  interface IMetadataEventParameter {
     id: string;
     name: string;
     displayName: string;
     description: string;
     type: string;
+    dataType: string;
   }
 
   interface IMetadataUserAttribute {

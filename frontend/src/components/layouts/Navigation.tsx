@@ -104,8 +104,8 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
         },
         {
           type: 'link',
-          text: t('nav.analytics.metadata-event-attributes'),
-          href: `/analytics/${pid}/app/${appid}/metadata/event-attributes`,
+          text: t('nav.analytics.metadata-event-parameters'),
+          href: `/analytics/${pid}/app/${appid}/metadata/event-parameters`,
         },
         {
           type: 'link',
