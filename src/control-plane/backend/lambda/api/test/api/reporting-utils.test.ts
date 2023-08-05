@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { applyChangeToDashboard } from '../../service/quicksight/quicksight-visual-utils';
+import { applyChangeToDashboard } from '../../service/quicksight/reporting-utils';
 
 describe('QuickSight visual management test', () => {
 
@@ -20,7 +20,7 @@ describe('QuickSight visual management test', () => {
 
   const dashboardDef = `
   {
-    "DataSetConfigurations": [],
+    "DataSetIdentifierDeclarations": [],
     "Sheets": [
         {
             "SheetId": "f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64",
@@ -263,7 +263,7 @@ describe('QuickSight visual management test', () => {
     });
 
     expect(JSON.stringify(dashbaord)).toEqual(JSON.stringify({
-      DataSetConfigurations: [
+      DataSetIdentifierDeclarations: [
         {
           Placeholder: 'clickstream_funnel_chart_view',
           DataSetSchema: {

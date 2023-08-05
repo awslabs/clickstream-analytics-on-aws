@@ -1,9 +1,9 @@
 {
-  "DataSetConfigurations": [],
+  "DataSetIdentifierDeclarations": [],
   "Sheets": [
       {
           "SheetId": "",
-          "Name": "",
+          "Name": "sheet1",
           "FilterControls": [],
           "Visuals": [],
           "Layouts": [

@@ -913,13 +913,13 @@ export class CPipeline {
     );
     const res: Array<[string, string]> = [];
     if (stack && stack.Outputs) {
-        let value = '';
-        for (let out of stack.Outputs as Output[]) {
-          if (out.OutputKey) {
-            value = out.OutputValue ?? '';
-            res.push([out.OutputKey, value])
-          }
+      let value = '';
+      for (let out of stack.Outputs as Output[]) {
+        if (out.OutputKey) {
+          value = out.OutputValue ?? '';
+          res.push([out.OutputKey, value]);
         }
+      }
     }
     return res;
   }
