@@ -74,20 +74,20 @@ export const getQuickSightSubscribeRegion = async () => {
     });
     await quickSightClient.send(params);
 
-    console.log(`quicksightRegion: ${QUICKSIGHT_CONTROL_PLANE_REGION}` )
+    console.log(`quicksightRegion: ${QUICKSIGHT_CONTROL_PLANE_REGION}` );
 
     return QUICKSIGHT_CONTROL_PLANE_REGION;
   } catch (err) {
     if (err instanceof AccessDeniedException) {
       const message = (err as AccessDeniedException).message;
-      console.log(`quicksight error message: ${message}` )
+      console.log(`quicksight error message: ${message}` );
       const identityRegion = getIdentityRegionFromMessage(message);
       if (identityRegion) {
         return identityRegion;
       }
     }
 
-    console.log(`quicksight error message: ${(err as Error).message}`)
+    console.log(`quicksight error message: ${(err as Error).message}`);
   }
   return '';
 };

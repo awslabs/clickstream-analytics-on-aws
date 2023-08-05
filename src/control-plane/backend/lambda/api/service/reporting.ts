@@ -11,26 +11,25 @@
  *  and limitations under the License.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { ApiFail, ApiSuccess } from '../common/types';
-import { BatchExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
-import { AnalysisDefinition, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight'
-import { logger } from '../common/powertools';
-import { STSClient } from '@aws-sdk/client-sts';
-import { buildFunnelView } from '../common/sql-builder';
-import { awsAccountId, awsRegion } from '../common/constants';
-import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
-import { ClickStreamStore } from '../store/click-stream-store';
-import { createDataSet, funnelVisualColumns, getAnalysisDefinitionFromArn } from '../common/quicksight/reporting-utils';
-import { applyChangeToDashboard } from '../common/quicksight-visual-utils';
-import { getDashboardCreateParameters, getVisualDef, getVisualRalatedDefs } from './quicksight/utils';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { AnalysisDefinition, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight';
+import { BatchExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
+import { STSClient } from '@aws-sdk/client-sts';
+import { v4 as uuidv4 } from 'uuid';
+import { createDataSet, funnelVisualColumns, getAnalysisDefinitionFromArn, applyChangeToDashboard } from './quicksight/reporting-utils';
+import { getDashboardCreateParameters, getVisualDef, getVisualRalatedDefs } from './quicksight/utils';
+import { awsAccountId, awsRegion } from '../common/constants';
+import { logger } from '../common/powertools';
+import { buildFunnelView } from '../common/sql-builder';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
-const stsClient = new STSClient({region: 'us-east-1'});
+const stsClient = new STSClient({ region: 'us-east-1' });
 const quickSight = new QuickSight({
-  region: awsRegion
+  region: awsRegion,
 });
 
 export class ReportingServ {
@@ -58,7 +57,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      console.log(`sql: ${sql}`)
+      console.log(`sql: ${sql}`);
 
       const dashboardCreateParameters = await getDashboardCreateParameters({
         action: query.action,
@@ -68,11 +67,11 @@ export class ReportingServ {
         pipelineId: query.pipelineId,
         stsClient,
         store,
-      })
+      });
 
-      logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`)
+      logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
 
-      if(dashboardCreateParameters.status.code !== 200) {
+      if (dashboardCreateParameters.status.code !== 200) {
         return res.status(dashboardCreateParameters.status.code).send(new ApiFail(dashboardCreateParameters.status.message ?? 'unknown error'));
       }
 
@@ -84,53 +83,56 @@ export class ReportingServ {
         WithEvent: false,
         ClusterIdentifier: dashboardCreateParameters.clusterIdentifier,
         DbUser: dashboardCreateParameters.dbUser,
-      }
+      };
       const params = new BatchExecuteStatementCommand(input);
 
       await dashboardCreateParameters.redshiftDataClient!.send(params);
 
       //create quicksight dataset
-      const datasetOutput =  await createDataSet(quickSight, awsAccountId!, dashboardCreateParameters.quickSightPricipal!, dashboardCreateParameters.datasourceArn!, {
-        name: '',
-        tableName: viewName,
-        columns: funnelVisualColumns,
-        importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${viewName}`,
-        projectedColumns: [
-          'event_date',
-          'event_name',
-          'x_id',
-        ],
-      })
+      const datasetOutput = await createDataSet(
+        quickSight, awsAccountId!,
+        dashboardCreateParameters.quickSightPricipal!,
+        dashboardCreateParameters.datasourceArn!, {
+          name: '',
+          tableName: viewName,
+          columns: funnelVisualColumns,
+          importMode: 'DIRECT_QUERY',
+          customSql: `select * from ${query.appId}.${viewName}`,
+          projectedColumns: [
+            'event_date',
+            'event_name',
+            'x_id',
+          ],
+        });
 
       // gererate dashboard definition
-      let dashboardDef
-      let sheetId 
-      if(!query.analysisId) {
+      let dashboardDef;
+      let sheetId;
+      if (!query.analysisId) {
         dashboardDef = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
-        sheetId = uuidv4()
-        dashboardDef.Sheets![0].SheetId = sheetId
+        sheetId = uuidv4();
+        dashboardDef.Sheets![0].SheetId = sheetId;
       } else {
-        if(!query.sheetId) {
+        if (!query.sheetId) {
           return res.status(400).send(new ApiFail('missing required parameter sheetId'));
         }
-        sheetId = query.sheetId
-        dashboardDef = getAnalysisDefinitionFromArn(quickSight, awsAccountId!, query.analysisId)
+        sheetId = query.sheetId;
+        dashboardDef = getAnalysisDefinitionFromArn(quickSight, awsAccountId!, query.analysisId);
       }
 
       const datasetConfg = {
         Identifier: viewName,
-        DataSetArn: datasetOutput?.Arn
-      }
+        DataSetArn: datasetOutput?.Arn,
+      };
 
-      const visualId = uuidv4()
+      const visualId = uuidv4();
       const visualDef = getVisualDef(visualId, viewName);
       const visualRelatedParams = getVisualRalatedDefs({
-        timeScopeType: query.timeScopeType, 
-        sheetId, 
-        visualId, 
-        viewName, 
-        lastN: query.lastN, 
+        timeScopeType: query.timeScopeType,
+        sheetId,
+        visualId,
+        viewName,
+        lastN: query.lastN,
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
@@ -145,19 +147,19 @@ export class ReportingServ {
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
         eventCount: query.eventAndConditions.length,
-      }
+      };
 
       const dashboard = applyChangeToDashboard({
         action: 'ADD',
-        visuals:[visualPorps],
+        visuals: [visualPorps],
         dashboardDef: JSON.stringify(dashboardDef),
-      })
+      });
 
-      logger.info(`final dashboard def:`)
-      console.log(dashboard)
+      logger.info('final dashboard def:');
+      console.log(dashboard);
 
       //crate QuickSight analysis
-      quickSight.createAnalysis({
+      await quickSight.createAnalysis({
         AwsAccountId: awsAccountId,
         AnalysisId: `analysis${uuidv4()}`,
         Name: `analysis-${viewName}`,
@@ -173,11 +175,11 @@ export class ReportingServ {
             'quicksight:DescribeAnalysisPermissions',
           ],
         }],
-        Definition: JSON.parse(dashboard) as AnalysisDefinition
-      })
+        Definition: JSON.parse(dashboard) as AnalysisDefinition,
+      });
 
       //crate QuickSight dashboard
-      quickSight.createDashboard({
+      await quickSight.createDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: `dashboard-${uuidv4()}`,
         Name: `dashboard-${viewName}`,
@@ -194,8 +196,8 @@ export class ReportingServ {
             'quicksight:UpdateDashboardPublishedVersion',
           ],
         }],
-        Definition: JSON.parse(dashboard) as DashboardVersionDefinition
-      })
+        Definition: JSON.parse(dashboard) as DashboardVersionDefinition,
+      });
 
       return res.status(201).json(new ApiSuccess({ }, 'funnel visual created'));
     } catch (error) {

@@ -154,18 +154,18 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
     ,items as items####
   `;
 
-  let eventDateSQL = ''
-  if(sqlPatameters.timeScopeType === 'FIXED') {
-    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlPatameters.timeStart}'  and event_date <= '${sqlPatameters.timeEnd}'`)
+  let eventDateSQL = '';
+  if (sqlPatameters.timeScopeType === 'FIXED') {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlPatameters.timeStart}'  and event_date <= '${sqlPatameters.timeEnd}'`);
   } else {
-    let lastN = sqlPatameters.lastN!
-    if(sqlPatameters.timeUnit === 'WK'){
-      lastN = lastN * 7
-    } else if(sqlPatameters.timeUnit === 'MM'){
-      lastN = lastN * 31
-    } else if(sqlPatameters.timeUnit === 'Q'){
-      lastN = lastN * 31 * 3
-    } 
+    let lastN = sqlPatameters.lastN!;
+    if (sqlPatameters.timeUnit === 'WK') {
+      lastN = lastN * 7;
+    } else if (sqlPatameters.timeUnit === 'MM') {
+      lastN = lastN * 31;
+    } else if (sqlPatameters.timeUnit === 'Q') {
+      lastN = lastN * 31 * 3;
+    }
     eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
   }
 
@@ -397,9 +397,9 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
 
 export function buildFunnelView(schema: string, name: string, sqlPatameters: FunnelSQLPatameters) : string {
 
-  let resultSql = ''
+  let resultSql = '';
   let eventNames: string[] = [];
-  let index = 0
+  let index = 0;
   let prefix = 'e';
   if (sqlPatameters.computeMethod === 'USER_CNT') {
     prefix = 'u';
@@ -414,16 +414,16 @@ export function buildFunnelView(schema: string, name: string, sqlPatameters: Fun
       ,e_name_${index}::varchar as event_name
       ,${prefix}_id_${index}::varchar as x_id
     from final_table where ${prefix}_id_${index} is not null
-    `)
-    index += 1
+    `);
+    index += 1;
   }
 
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
    ${_buildFunnelbaseSql(eventNames, sqlPatameters)}
    ${resultSql}
    with no schema binding
-   `
-   return format(sql, {
+   `;
+  return format(sql, {
     language: 'postgresql',
   });
 }

@@ -13,8 +13,8 @@
 
 import express from 'express';
 // import { validate } from '../common/request-valid';
-import { ReportingServ } from '../service/reporting';
 import { logger } from '../common/powertools';
+import { ReportingServ } from '../service/reporting';
 
 const reporting_project = express.Router();
 const reportingServ: ReportingServ = new ReportingServ();
@@ -23,7 +23,7 @@ reporting_project.post(
   '',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-    logger.info('start to create quicksight report')
+    logger.info('start to create quicksight report');
     return reportingServ.createFunnelVisual(req, res, next);
   });
 
