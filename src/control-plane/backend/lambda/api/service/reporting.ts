@@ -109,7 +109,7 @@ export class ReportingServ {
       let dashboardDef;
       let sheetId;
       if (!query.analysisId) {
-        dashboardDef = JSON.parse(readFileSync(join(__dirname, '../common/quicksight-template/dashboard.json')).toString()) as DashboardVersionDefinition;
+        dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
         sheetId = uuidv4();
         dashboardDef.Sheets![0].SheetId = sheetId;
       } else {
