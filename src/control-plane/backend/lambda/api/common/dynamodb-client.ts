@@ -12,7 +12,8 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
+import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
 // Create DynamoDB Client and patch it for tracing
@@ -39,8 +40,26 @@ const translateConfig = { marshallOptions, unmarshallOptions };
 // Create the DynamoDB Document client.
 const docClient = DynamoDBDocumentClient.from(ddbClient, translateConfig);
 
+async function query(input: QueryCommandInput) {
+  const records: Record<string, NativeAttributeValue>[] = [];
+  for await (const page of paginateQuery({ client: docClient }, input)) {
+    records.push(...page.Items as Record<string, NativeAttributeValue>[]);
+  }
+  return records;
+}
+
+async function scan(input: ScanCommandInput) {
+  const records: Record<string, NativeAttributeValue>[] = [];
+  for await (const page of paginateScan({ client: docClient }, input)) {
+    records.push(...page.Items as Record<string, NativeAttributeValue>[]);
+  }
+  return records;
+}
+
 export {
   docClient,
   ddbClient,
   marshallOptions,
+  query,
+  scan,
 };

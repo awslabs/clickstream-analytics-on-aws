@@ -14,10 +14,12 @@
 // Get the DynamoDB table name from environment variables
 const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
+const analyticsMetadataTable = process.env.ANALYTICS_METADATA_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
 const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_SATE_MACHINE;
 const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
+const invertedGSIName = process.env.INVERTED_GSI_NAME;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
@@ -61,10 +63,12 @@ const PIPELINE_SUPPORTED_REGIONS = [
 export {
   clickStreamTableName,
   dictionaryTableName,
+  analyticsMetadataTable,
   stackActionStateMachineArn,
   stackWorkflowStateMachineArn,
   stackWorkflowS3Bucket,
   prefixTimeGSIName,
+  invertedGSIName,
   serviceName,
   awsRegion,
   awsAccountId,

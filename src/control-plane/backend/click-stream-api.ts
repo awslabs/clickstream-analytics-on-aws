@@ -130,6 +130,45 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
 
+    const analyticsMetadataTable = new Table(this, 'ClickstreamAnalyticsMetadata', {
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'type',
+        type: AttributeType.STRING,
+      },
+
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+      encryption: TableEncryption.AWS_MANAGED,
+    });
+    analyticsMetadataTable.addGlobalSecondaryIndex({
+      indexName: prefixTimeGSIName,
+      partitionKey: {
+        name: 'prefix',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'createAt',
+        type: AttributeType.NUMBER,
+      },
+    });
+    const invertedGSIName = 'inverted-index';
+    analyticsMetadataTable.addGlobalSecondaryIndex({
+      indexName: invertedGSIName,
+      partitionKey: {
+        name: 'type',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+    });
+
     // Dictionary data init
     new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
       table: dictionaryTable,
@@ -287,10 +326,12 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
+        ANALYTICS_METADATA_TABLE_NAME: analyticsMetadataTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         STACK_WORKFLOW_SATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
         STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
+        INVERTED_GSI_NAME: invertedGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
