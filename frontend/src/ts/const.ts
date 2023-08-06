@@ -397,3 +397,8 @@ export enum MetadataEventType {
   PRESET = 'Preset',
   CUSTOM = 'Custom',
 }
+
+export enum MetadataDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+}

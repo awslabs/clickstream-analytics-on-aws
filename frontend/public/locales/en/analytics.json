@@ -45,12 +45,15 @@
         "parameterName": "Parameter name",
         "displayName": "Display name",
         "description": "Description",
-        "dataType": "Data type"
+        "dataType": "Data type",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
       }
     },
     "eventParameter": {
-      "title": "Event Parameter",
+      "title": "Event Parameters",
       "description": "Description of the Event Parameter",
+      "refreshButton": "Refresh Metadata",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Parameter name",
@@ -59,12 +62,19 @@
       "tableColumnType": "Parameter type",
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
+      "tableColumnDataType": "Data type",
       "tableColumnSource": "Source",
       "tableEmpty": "No event parameters",
-      "tableNoDataDisplay": "No event parameters to display.",
+      "filteringAriaLabel": "Find parameters",
+      "filteringPlaceholder": "Find parameters",
+      "groupPropertiesText": "Properties",
+      "operatorsText": "Operators",
+      "clearFiltersText": "Clear filters",
       "split": {
         "title": "Event parameter details",
-        "associatedEvents": "Associated events"
+        "associatedEvents": "Associated events",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
       }
     },
     "userAttribute": {
@@ -83,7 +93,9 @@
       "tableNoDataDisplay": "No event attributes to display.",
       "split": {
         "title": "User parameter details",
-        "associatedEvents": "Associated events"
+        "associatedEvents": "Associated events",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
       }
     }
   },

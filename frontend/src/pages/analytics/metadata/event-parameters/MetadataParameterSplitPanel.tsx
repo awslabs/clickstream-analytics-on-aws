@@ -12,28 +12,37 @@
  */
 
 import {
+  Badge,
   Box,
   Button,
   ColumnLayout,
   FormField,
   SpaceBetween,
   SplitPanel,
+  StatusIndicator,
+  Tabs,
+  TextContent,
   Textarea,
 } from '@cloudscape-design/components';
-import { updateMetadataParameter } from 'apis/analytics';
+import {
+  getMetadataParametersDetails,
+  updateMetadataParameter,
+} from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MetadataEventType } from 'ts/const';
+import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataParameterSplitPanelProps {
-  event: IMetadataEventParameter;
-  refreshPage?: () => void;
+  parameter: IMetadataEventParameter;
 }
 
-const MetadataParameterSplitPanel: React.FC<MetadataParameterSplitPanelProps> = (
-  props: MetadataParameterSplitPanelProps
-) => {
+const MetadataParameterSplitPanel: React.FC<
+  MetadataParameterSplitPanelProps
+> = (props: MetadataParameterSplitPanelProps) => {
   const { t } = useTranslation();
-  const { event, refreshPage } = props;
+  const { parameter } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
     preferencesPositionLabel: t('splitPanel.preferencesPositionLabel'),
@@ -49,9 +58,44 @@ const MetadataParameterSplitPanel: React.FC<MetadataParameterSplitPanelProps> = 
     resizeHandleAriaLabel: t('splitPanel.resizeHandleAriaLabel'),
   };
 
-  const [newEvent, setNewEvent] = useState(event);
-  const [prevDisplayName, setPrevDisplayName] = useState(event.name);
-  const [prevDesc, setPrevDesc] = useState(event.description);
+  const COLUMN_DEFINITIONS = [
+    {
+      id: 'name',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.tableColumnName')}
+        </Box>
+      ),
+      cell: (item: { name: any }) => item.name || '-',
+      sortingField: 'name',
+      isRowHeader: true,
+    },
+    {
+      id: 'displayName',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.tableColumnDisplayName')}
+        </Box>
+      ),
+      cell: (item: { displayName: any }) => item.displayName || '-',
+    },
+    {
+      id: 'description',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.tableColumnDescription')}
+        </Box>
+      ),
+      cell: (item: { description: any }) => item.description || '-',
+    },
+  ];
+
+  const [loadingData, setLoadingData] = useState(false);
+  const [parameterDetails, setParameterDetails] = useState(
+    {} as IMetadataEventParameter
+  );
+  const [prevDisplayName, setPrevDisplayName] = useState(parameter.name);
+  const [prevDesc, setPrevDesc] = useState(parameter.description);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [loadingUpdateDesc, setLoadingUpdateDesc] = useState(false);
   const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
@@ -68,170 +112,252 @@ const MetadataParameterSplitPanel: React.FC<MetadataParameterSplitPanelProps> = 
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataParameter(
-        newEvent
+        parameterDetails
       );
       if (success) {
         if (type === 'displayName') {
-          setPrevDisplayName(newEvent.displayName);
+          setPrevDisplayName(parameterDetails.displayName);
           setIsEditingDisplayName(false);
         }
         if (type === 'description') {
-          setPrevDesc(newEvent.description);
+          setPrevDesc(parameterDetails.description);
           setIsEditingDesc(false);
         }
-        refreshPage && refreshPage();
       }
+      setLoadingUpdateDisplayName(false);
       setLoadingUpdateDesc(false);
     } catch (error) {
+      setLoadingUpdateDisplayName(false);
       setLoadingUpdateDesc(false);
     }
   };
 
+  const metadataParameterDetails = async (
+    parameter: IMetadataEventParameter
+  ) => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IMetadataEventParameter> =
+        await getMetadataParametersDetails({
+          parameterId: parameter.id,
+        });
+      if (success) {
+        setParameterDetails(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
+
   useEffect(() => {
+    setIsEditingDisplayName(false);
     setIsEditingDesc(false);
-    setNewEvent(event);
-  }, [event.id]);
+    metadataParameterDetails(parameter);
+  }, [parameter.id]);
 
   return (
     <SplitPanel
-      header={event.name}
+      header={t('analytics:metadata.eventParameter.split.title')}
       i18nStrings={SPLIT_PANEL_I18NSTRINGS}
       closeBehavior="hide"
     >
-      <ColumnLayout columns={2} variant="text-grid">
+      {loadingData ? (
+        <Loading />
+      ) : (
         <div>
-          <Box variant="awsui-key-label">
-            {t('analytics:metadata.event.split.id')}
-          </Box>
-          <div className="mb-10">{event.id}</div>
-          <Box variant="awsui-key-label">
-            {t('analytics:metadata.event.split.name')}
-          </Box>
-          <div className="mb-10">{event.name}</div>
-          <Box variant="awsui-key-label">
-            {t('analytics:metadata.event.split.displayName')}
-          </Box>
-          <div>
-            {!isEditingDisplayName && (
-              <div className="flex align-center">
-                <div>{newEvent.displayName}</div>
-                <Button
-                  onClick={() => {
-                    setIsEditingDisplayName(true);
-                  }}
-                  variant="icon"
-                  iconName="edit"
-                />
-              </div>
+          <TextContent>
+            <h1>{parameterDetails.name}</h1>
+            {parameterDetails.type === MetadataEventType.CUSTOM ? (
+              <Badge color="blue">{MetadataEventType.CUSTOM}</Badge>
+            ) : (
+              <Badge>{MetadataEventType.PRESET}</Badge>
             )}
-            {isEditingDisplayName && (
+          </TextContent>
+          <br />
+          <ColumnLayout columns={3} variant="text-grid">
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.eventParameter.tableColumnDisplayName')}
+              </Box>
               <div>
-                <FormField>
-                  <Textarea
-                    rows={3}
-                    value={newEvent.displayName}
-                    onChange={(e) => {
-                      setNewEvent((prev: any) => {
-                        return {
-                          ...prev,
-                          displayName: e.detail.value,
-                        };
-                      });
+                {!isEditingDisplayName && (
+                  <div className="flex align-center">
+                    <div>{parameterDetails.displayName}</div>
+                    <Button
+                      onClick={() => {
+                        setIsEditingDisplayName(true);
+                      }}
+                      variant="icon"
+                      iconName="edit"
+                    />
+                  </div>
+                )}
+                {isEditingDisplayName && (
+                  <div>
+                    <FormField>
+                      <Textarea
+                        rows={3}
+                        value={parameterDetails.displayName}
+                        onChange={(e) => {
+                          setParameterDetails((prev) => {
+                            return {
+                              ...prev,
+                              displayName: e.detail.value,
+                            };
+                          });
+                        }}
+                      />
+                    </FormField>
+                    <div className="mt-5">
+                      <SpaceBetween direction="horizontal" size="xs">
+                        <Button
+                          onClick={() => {
+                            setParameterDetails((prev) => {
+                              return {
+                                ...prev,
+                                displayName: prevDisplayName,
+                              };
+                            });
+                            setIsEditingDisplayName(false);
+                          }}
+                        >
+                          {t('button.cancel')}
+                        </Button>
+                        <Button
+                          loading={loadingUpdateDisplayName}
+                          variant="primary"
+                          onClick={() => {
+                            updateEventInfo('displayName');
+                          }}
+                        >
+                          {t('button.save')}
+                        </Button>
+                      </SpaceBetween>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.eventParameter.tableColumnDataType')}
+              </Box>
+              <div className="mb-10">{parameter.dataType}</div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.eventParameter.tableColumnPlatform')}
+              </Box>
+              <div className="mb-10">{parameter.platform}</div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.eventParameter.tableColumnDescription')}
+              </Box>
+              <div>
+                {!isEditingDesc && (
+                  <div className="flex align-center">
+                    <div>{parameterDetails.description}</div>
+                    <Button
+                      onClick={() => {
+                        setIsEditingDesc(true);
+                      }}
+                      variant="icon"
+                      iconName="edit"
+                    />
+                  </div>
+                )}
+                {isEditingDesc && (
+                  <div>
+                    <FormField>
+                      <Textarea
+                        rows={3}
+                        value={parameterDetails.description}
+                        onChange={(e) => {
+                          setParameterDetails((prev) => {
+                            return {
+                              ...prev,
+                              description: e.detail.value,
+                            };
+                          });
+                        }}
+                      />
+                    </FormField>
+                    <div className="mt-5">
+                      <SpaceBetween direction="horizontal" size="xs">
+                        <Button
+                          onClick={() => {
+                            setParameterDetails((prev) => {
+                              return {
+                                ...prev,
+                                description: prevDesc,
+                              };
+                            });
+                            setIsEditingDesc(false);
+                          }}
+                        >
+                          {t('button.cancel')}
+                        </Button>
+                        <Button
+                          loading={loadingUpdateDesc}
+                          variant="primary"
+                          onClick={() => {
+                            updateEventInfo('description');
+                          }}
+                        >
+                          {t('button.save')}
+                        </Button>
+                      </SpaceBetween>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.eventParameter.tableColumnHasData')}
+              </Box>
+              <div className="mb-10">
+                <StatusIndicator
+                  type={parameter.hasData ? 'success' : 'stopped'}
+                >
+                  {parameter.hasData ? 'Yes' : 'No'}
+                </StatusIndicator>
+              </div>
+            </div>
+          </ColumnLayout>
+          <br />
+          <Tabs
+            tabs={[
+              {
+                label: (
+                  <Box fontWeight="bold">
+                    {t(
+                      'analytics:metadata.eventParameter.split.associatedEvents'
+                    )}
+                  </Box>
+                ),
+                id: 'first',
+                content: (
+                  <MetadataDetailsTable
+                    data={parameterDetails.events ?? []}
+                    tableColumnDefinitions={COLUMN_DEFINITIONS}
+                    tableI18nStrings={{
+                      loadingText: t(
+                        'analytics:metadata.eventParameter.split.tableLoading'
+                      ),
+                      emptyText: t(
+                        'analytics:metadata.eventParameter.split.tableEmpty'
+                      ),
                     }}
                   />
-                </FormField>
-                <div className="mt-5">
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Button
-                      onClick={() => {
-                        setNewEvent((prev: any) => {
-                          return {
-                            ...prev,
-                            displayName: prevDisplayName,
-                          };
-                        });
-                        setIsEditingDisplayName(false);
-                      }}
-                    >
-                      {t('button.cancel')}
-                    </Button>
-                    <Button
-                      loading={loadingUpdateDisplayName}
-                      variant="primary"
-                      onClick={() => {
-                        updateEventInfo('displayName');
-                      }}
-                    >
-                      {t('button.save')}
-                    </Button>
-                  </SpaceBetween>
-                </div>
-              </div>
-            )}
-          </div>
-          <Box variant="awsui-key-label">
-            {t('analytics:metadata.event.split.description')}
-          </Box>
-          <div>
-            {!isEditingDesc && (
-              <div className="flex align-center">
-                <div>{newEvent.description}</div>
-                <Button
-                  onClick={() => {
-                    setIsEditingDesc(true);
-                  }}
-                  variant="icon"
-                  iconName="edit"
-                />
-              </div>
-            )}
-            {isEditingDesc && (
-              <div>
-                <FormField>
-                  <Textarea
-                    rows={3}
-                    value={newEvent.description}
-                    onChange={(e) => {
-                      setNewEvent((prev: any) => {
-                        return {
-                          ...prev,
-                          description: e.detail.value,
-                        };
-                      });
-                    }}
-                  />
-                </FormField>
-                <div className="mt-5">
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Button
-                      onClick={() => {
-                        setNewEvent((prev: any) => {
-                          return {
-                            ...prev,
-                            description: prevDesc,
-                          };
-                        });
-                        setIsEditingDesc(false);
-                      }}
-                    >
-                      {t('button.cancel')}
-                    </Button>
-                    <Button
-                      loading={loadingUpdateDesc}
-                      variant="primary"
-                      onClick={() => {
-                        updateEventInfo('description');
-                      }}
-                    >
-                      {t('button.save')}
-                    </Button>
-                  </SpaceBetween>
-                </div>
-              </div>
-            )}
-          </div>
+                ),
+              },
+            ]}
+          />
         </div>
-      </ColumnLayout>
+      )}
     </SplitPanel>
   );
 };

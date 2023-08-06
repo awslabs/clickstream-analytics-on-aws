@@ -11,47 +11,295 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
+import {
+  AppLayout,
+  Badge,
+  Input,
+  StatusIndicator,
+} from '@cloudscape-design/components';
+import {
+  getMetadataParametersList,
+  updateMetadataParameter,
+} from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { MetadataEventType } from 'ts/const';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
-import EventTable from './MetadataParameterTable';
-import MetadataParameterTable from './MetadataParameterTable';
+import MetadataTable from '../table/MetadataTable';
+import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
 const MetadataParameters: React.FC = () => {
   const { pid, appid } = useParams();
+  const { t } = useTranslation();
 
   const [showSplit, setShowSplit] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<IMetadataEventParameter[]>(
-    []
-  );
-  const [curEvent, setCurEvent] = useState<IMetadataEventParameter | null>();
-  const [refreshPage, setRefreshPage] = useState(0);
+  const [curEventParameter, setCurEventParameter] =
+    useState<IMetadataEventParameter | null>();
+  const COLUMN_DEFINITIONS = [
+    {
+      id: 'name',
+      header: t('analytics:metadata.eventParameter.tableColumnName'),
+      sortingField: 'name',
+      cell: (e: { name: any }) => {
+        return e.name;
+      },
+    },
+    {
+      id: 'displayName',
+      header: t('analytics:metadata.eventParameter.tableColumnDisplayName'),
+      cell: (e: { displayName: string }) => {
+        return e.displayName;
+      },
+      minWidth: 180,
+      editConfig: {
+        ariaLabel: 'Edit display name',
+        errorIconAriaLabel: 'Display Name Validation Error',
+        editIconAriaLabel: 'editable',
+        validation(item: any, value: any) {
+          return displayNameRegex.test(value) ? undefined : 'Invalid input';
+        },
+        editingCell: (
+          item: { displayName: string },
+          { setValue, currentValue }: any
+        ) => {
+          return (
+            <Input
+              autoFocus={true}
+              ariaLabel="Edit display name"
+              value={currentValue ?? item.displayName}
+              onChange={(event) => {
+                setValue(event.detail.value);
+              }}
+              placeholder="Enter display name"
+            />
+          );
+        },
+      },
+    },
+    {
+      id: 'description',
+      header: t('analytics:metadata.eventParameter.tableColumnDescription'),
+      cell: (e: { description: string }) => {
+        return e.description;
+      },
+      minWidth: 180,
+      editConfig: {
+        ariaLabel: 'Edit description',
+        errorIconAriaLabel: 'Description Validation Error',
+        editIconAriaLabel: 'editable',
+        validation(item: any, value: any) {
+          return descriptionRegex.test(value) ? undefined : 'Invalid input';
+        },
+        editingCell: (
+          item: { description: string },
+          { setValue, currentValue }: any
+        ) => {
+          return (
+            <Input
+              autoFocus={true}
+              ariaLabel="Edit description"
+              value={currentValue ?? item.description}
+              onChange={(event) => {
+                setValue(event.detail.value);
+              }}
+              placeholder="Enter description"
+            />
+          );
+        },
+      },
+    },
+    {
+      id: 'type',
+      header: t('analytics:metadata.eventParameter.tableColumnType'),
+      cell: (e: { type: string }) => {
+        return (
+          <Badge color={e.type === MetadataEventType.CUSTOM ? 'blue' : 'grey'}>
+            {e.type}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'dataType',
+      header: t('analytics:metadata.eventParameter.tableColumnDataType'),
+      cell: (e: { dataType: string }) => {
+        return e.dataType;
+      },
+    },
+    {
+      id: 'hasData',
+      header: t('analytics:metadata.eventParameter.tableColumnHasData'),
+      cell: (e: { hasData: boolean }) => {
+        return (
+          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+            {e.hasData ? 'Yes' : 'No'}
+          </StatusIndicator>
+        );
+      },
+    },
+    {
+      id: 'platform',
+      header: t('analytics:metadata.eventParameter.tableColumnPlatform'),
+      cell: (e: { platform: string }) => {
+        return e.platform;
+      },
+    },
+    {
+      id: 'source',
+      header: t('analytics:metadata.eventParameter.tableColumnSource'),
+      cell: (e: { source: string }) => {
+        return e.source;
+      },
+    },
+  ];
+  const CONTENT_DISPLAY = [
+    { id: 'name', visible: true },
+    { id: 'displayName', visible: true },
+    { id: 'description', visible: true },
+    { id: 'type', visible: true },
+    { id: 'hasData', visible: true },
+    { id: 'dataType', visible: true },
+    { id: 'platform', visible: true },
+    { id: 'source', visible: true },
+  ];
+  const FILTERING_PROPERTIES = [
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnName'),
+      key: 'name',
+      groupValuesLabel: t('analytics:metadata.eventParameter.tableColumnName'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t(
+        'analytics:metadata.eventParameter.tableColumnDisplayName'
+      ),
+      key: 'displayName',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnDisplayName'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnType'),
+      key: 'type',
+      groupValuesLabel: t('analytics:metadata.eventParameter.tableColumnType'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnHasData'),
+      key: 'hasData',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnHasData'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnDataType'),
+      key: 'dataType',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnDataType'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnPlatform'),
+      key: 'platform',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnPlatform'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.eventParameter.tableColumnSource'),
+      key: 'source',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnSource'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+  ];
 
-  useEffect(() => {
-    if (selectedItems.length >= 1) {
-      setShowSplit(true);
-      setCurEvent(selectedItems[0]);
-    } else {
-      setShowSplit(false);
-      setCurEvent(null);
+  const listMetadataEventParameters = async () => {
+    try {
+      if (!pid || !appid) {
+        return [];
+      }
+      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+        await getMetadataParametersList({ pid: pid, appId: appid });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      return [];
     }
-  }, [selectedItems]);
+  };
+
+  const updateMetadataEventParameterInfo = async (
+    newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
+  ) => {
+    try {
+      const { success, message }: ApiResponse<null> =
+        await updateMetadataParameter(newItem as IMetadataEventParameter);
+      if (!success) {
+        throw new Error(message);
+      }
+    } catch (error) {
+      throw new Error('Edit error');
+    }
+  };
 
   return (
     <AppLayout
       toolsHide
       content={
-        <MetadataParameterTable
-          projectId={pid ?? ''}
-          appId={appid ?? ''}
-          refresh={refreshPage}
-          defaultSelectedItems={selectedItems}
-          changeSelectedItems={(items) => {
-            setSelectedItems(items);
+        <MetadataTable
+          resourceName="EventParameter"
+          tableColumnDefinitions={COLUMN_DEFINITIONS}
+          tableContentDisplay={CONTENT_DISPLAY}
+          tableFilteringProperties={FILTERING_PROPERTIES}
+          tableI18nStrings={{
+            loadingText:
+              t('analytics:metadata.eventParameter.tableLoading') || 'Loading',
+            emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
+            headerTitle: t('analytics:metadata.eventParameter.title'),
+            headerRefreshButtonText: t(
+              'analytics:metadata.eventParameter.refreshButton'
+            ),
+            filteringAriaLabel: t(
+              'analytics:metadata.eventParameter.filteringAriaLabel'
+            ),
+            filteringPlaceholder: t(
+              'analytics:metadata.eventParameter.filteringPlaceholder'
+            ),
+            groupPropertiesText: t(
+              'analytics:metadata.eventParameter.groupPropertiesText'
+            ),
+            operatorsText: t('analytics:metadata.eventParameter.operatorsText'),
+            clearFiltersText: t(
+              'analytics:metadata.eventParameter.clearFiltersText'
+            ),
           }}
-        ></MetadataParameterTable>
+          loadHelpPanelContent={() => {
+            console.log(1);
+          }}
+          setShowDetails={(
+            show: boolean,
+            data?:
+              | IMetadataEvent
+              | IMetadataEventParameter
+              | IMetadataUserAttribute
+          ) => {
+            setShowSplit(show);
+            if (data) {
+              setCurEventParameter(data as IMetadataEventParameter);
+            }
+          }}
+          fetchDataFunc={listMetadataEventParameters}
+          fetchUpdateFunc={updateMetadataEventParameterInfo}
+        ></MetadataTable>
       }
       headerSelector="#header"
       navigation={
@@ -64,15 +312,8 @@ const MetadataParameters: React.FC = () => {
         setShowSplit(e.detail.open);
       }}
       splitPanel={
-        curEvent ? (
-          <MetadataParameterSplitPanel
-            event={curEvent}
-            refreshPage={() => {
-              setRefreshPage((prev) => {
-                return prev + 1;
-              });
-            }}
-          />
+        curEventParameter ? (
+          <MetadataParameterSplitPanel parameter={curEventParameter} />
         ) : (
           ''
         )

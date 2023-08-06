@@ -37,8 +37,12 @@ declare global {
     name: string;
     displayName: string;
     description: string;
-    type: string;
-    dataType: string;
+    type: MetadataEventType;
+    hasData: boolean;
+    platform: string;
+    dataType: MetadataDataType;
+    source: string;
+    events?: IMetadataEvent[];
   }
 
   interface IMetadataUserAttribute {

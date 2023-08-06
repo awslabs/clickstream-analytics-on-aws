@@ -30,7 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataEventType } from 'ts/const';
-import EventsDetailsTable from './EventsDetailsTable';
+import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataEventSplitPanelProps {
   event: IMetadataEvent;
@@ -56,6 +56,46 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
     openButtonAriaLabel: t('splitPanel.openButtonAriaLabel'),
     resizeHandleAriaLabel: t('splitPanel.resizeHandleAriaLabel'),
   };
+  const COLUMN_DEFINITIONS = [
+    {
+      id: 'name',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.split.parameterName')}
+        </Box>
+      ),
+      cell: (item: { name: any }) => item.name || '-',
+      sortingField: 'name',
+      isRowHeader: true,
+    },
+    {
+      id: 'displayName',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.split.displayName')}
+        </Box>
+      ),
+      cell: (item: { displayName: any }) => item.displayName || '-',
+    },
+    {
+      id: 'description',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.split.description')}
+        </Box>
+      ),
+      cell: (item: { description: any }) => item.description || '-',
+    },
+    {
+      id: 'dataType',
+      header: (
+        <Box fontWeight="bold">
+          {t('analytics:metadata.event.split.dataType')}
+        </Box>
+      ),
+      cell: (item: { dataType: any }) => item.dataType || '-',
+    },
+  ];
 
   const [loadingData, setLoadingData] = useState(false);
   const [eventDetails, setEventDetails] = useState({} as IMetadataEvent);
@@ -303,7 +343,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                 ),
                 id: 'first',
                 content: (
-                  <EventsDetailsTable
+                  <MetadataDetailsTable
                     data={
                       eventDetails.parameters
                         ? eventDetails.parameters?.filter(
@@ -311,6 +351,15 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                           )
                         : []
                     }
+                    tableColumnDefinitions={COLUMN_DEFINITIONS}
+                    tableI18nStrings={{
+                      loadingText: t(
+                        'analytics:metadata.eventParameter.split.tableLoading'
+                      ),
+                      emptyText: t(
+                        'analytics:metadata.eventParameter.split.tableEmpty'
+                      ),
+                    }}
                   />
                 ),
               },
@@ -324,7 +373,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                 ),
                 id: 'second',
                 content: (
-                  <EventsDetailsTable
+                  <MetadataDetailsTable
                     data={
                       eventDetails.parameters
                         ? eventDetails.parameters?.filter(
@@ -332,6 +381,13 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                           )
                         : []
                     }
+                    tableColumnDefinitions={COLUMN_DEFINITIONS}
+                    tableI18nStrings={{
+                      loadingText: t(
+                        'analytics:metadata.event.split.tableLoading'
+                      ),
+                      emptyText: t('analytics:metadata.event.split.tableEmpty'),
+                    }}
                   />
                 ),
               },

@@ -143,8 +143,12 @@ export const getMetadataParametersList = async (params: {
         id: `${index}`,
         name: `Event Attribute Name ${index}`,
         displayName: `事件属性${index}`,
-        type: index > 10 ? 'built-in' : 'customer',
-        description: `Event Attribute description ${index}`,
+        type: index % 2 === 0 ? 'Preset' : 'Custom',
+        description: `Description ${index}`,
+        hasData: index % 2 === 0,
+        platform: index % 2 === 0 ? 'Android' : 'iOS',
+        dataType: index % 2 === 0 ? 'String' : 'Number',
+        source: index % 2 === 1 ? 'Template' : 'Custom',
       });
     }
     resolve({
@@ -153,6 +157,41 @@ export const getMetadataParametersList = async (params: {
       data: {
         totalCount: 2,
         items: data,
+      },
+      error: '',
+    });
+  });
+  return result;
+};
+
+export const getMetadataParametersDetails = async (params: {
+  parameterId: string;
+}) => {
+  await new Promise((r) => setTimeout(r, 3000));
+  const result: any = await new Promise((resolve, reject) => {
+    const events = [];
+    for (let index = 0; index <= 3; index++) {
+      events.push({
+        name: `Event Name ${index}`,
+        displayName: `事件${index}`,
+        description: `Parameter description ${index}`,
+      });
+    }
+    const index = Math.floor(Math.random() * 100);
+    resolve({
+      success: true,
+      message: 'OK',
+      data: {
+        id: `${index}`,
+        name: `Event Attribute Name ${index}`,
+        displayName: `事件属性${index}`,
+        type: index % 2 === 0 ? 'Preset' : 'Custom',
+        description: `Description ${index}`,
+        hasData: index % 2 === 0,
+        platform: index % 2 === 0 ? 'Android' : 'iOS',
+        dataType: index % 2 === 0 ? 'String' : 'Number',
+        source: index % 2 === 1 ? 'Template' : 'Custom',
+        events: events,
       },
       error: '',
     });
