@@ -11,37 +11,261 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
-import { getMetadataEventDetails } from 'apis/analytics';
+import {
+  AppLayout,
+  Badge,
+  Input,
+  StatusIndicator,
+} from '@cloudscape-design/components';
+import { getMetadataEventsList, updateMetadataEvent } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import EventTable from './EventsTable';
+import { MetadataEventType } from 'ts/const';
 import MetadataEventSplitPanel from './MetadataEventSplitPanel';
+import MetadataTable from '../table/MetadataTable';
+import { descriptionRegex, displayNameRegex } from '../table/table-config';
 
 const MetadataEvents: React.FC = () => {
   const { pid, appid } = useParams();
+  const { t } = useTranslation();
 
   const [showSplit, setShowSplit] = useState(false);
   const [curEvent, setCurEvent] = useState<IMetadataEvent | null>();
+  const COLUMN_DEFINITIONS = [
+    {
+      id: 'name',
+      header: t('analytics:metadata.event.tableColumnName'),
+      cell: (e: { name: string }) => {
+        return e.name;
+      },
+    },
+    {
+      id: 'displayName',
+      header: t('analytics:metadata.event.tableColumnDisplayName'),
+      cell: (e: { displayName: string }) => {
+        return e.displayName;
+      },
+      minWidth: 180,
+      editConfig: {
+        ariaLabel: 'Edit display name',
+        errorIconAriaLabel: 'Display Name Validation Error',
+        editIconAriaLabel: 'editable',
+        validation(item: any, value: any) {
+          return displayNameRegex.test(value) ? undefined : 'Invalid input';
+        },
+        editingCell: (
+          item: { displayName: string },
+          { setValue, currentValue }: any
+        ) => {
+          return (
+            <Input
+              autoFocus={true}
+              ariaLabel="Edit display name"
+              value={currentValue ?? item.displayName}
+              onChange={(event) => {
+                setValue(event.detail.value);
+              }}
+              placeholder="Enter display name"
+            />
+          );
+        },
+      },
+    },
+    {
+      id: 'description',
+      header: t('analytics:metadata.event.tableColumnDescription'),
+      cell: (e: { description: string }) => {
+        return e.description;
+      },
+      minWidth: 180,
+      editConfig: {
+        ariaLabel: 'Edit description',
+        errorIconAriaLabel: 'Description Validation Error',
+        editIconAriaLabel: 'editable',
+        validation(item: any, value: any) {
+          return descriptionRegex.test(value) ? undefined : 'Invalid input';
+        },
+        editingCell: (
+          item: { description: string },
+          { setValue, currentValue }: any
+        ) => {
+          return (
+            <Input
+              autoFocus={true}
+              ariaLabel="Edit description"
+              value={currentValue ?? item.description}
+              onChange={(event) => {
+                setValue(event.detail.value);
+              }}
+              placeholder="Enter description"
+            />
+          );
+        },
+      },
+    },
+    {
+      id: 'type',
+      header: t('analytics:metadata.event.tableColumnType'),
+      sortingField: 'type',
+      cell: (e: { type: string }) => {
+        return (
+          <Badge color={e.type === MetadataEventType.CUSTOM ? 'blue' : 'grey'}>
+            {e.type}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'hasData',
+      header: t('analytics:metadata.event.tableColumnHasData'),
+      sortingField: 'hasData',
+      cell: (e: { hasData: boolean }) => {
+        return (
+          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+            {e.hasData ? 'Yes' : 'No'}
+          </StatusIndicator>
+        );
+      },
+    },
+    {
+      id: 'platform',
+      header: t('analytics:metadata.event.tableColumnPlatform'),
+      sortingField: 'platform',
+      cell: (e: { platform: string }) => {
+        return e.platform;
+      },
+    },
+    {
+      id: 'dataVolumeLastDay',
+      header: t('analytics:metadata.event.tableColumnDataVolumeLastDay'),
+      sortingField: 'dataVolumeLastDay',
+      cell: (e: { dataVolumeLastDay: number }) => {
+        return e.dataVolumeLastDay;
+      },
+    },
+  ];
+  const CONTENT_DISPLAY = [
+    { id: 'name', visible: true },
+    { id: 'displayName', visible: true },
+    { id: 'description', visible: true },
+    { id: 'type', visible: true },
+    { id: 'hasData', visible: true },
+    { id: 'platform', visible: true },
+    { id: 'dataVolumeLastDay', visible: true },
+  ];
+  const FILTERING_PROPERTIES = [
+    {
+      propertyLabel: t('analytics:metadata.event.tableColumnName'),
+      key: 'name',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnName'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.event.tableColumnDisplayName'),
+      key: 'displayName',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnDisplayName'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.event.tableColumnType'),
+      key: 'type',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnType'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.event.tableColumnHasData'),
+      key: 'hasData',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnHasData'),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t('analytics:metadata.event.tableColumnPlatform'),
+      key: 'platform',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnPlatform'),
+      operators: [':', '!:', '=', '!='],
+    },
+  ];
+
+  const listMetadataEvents = async () => {
+    try {
+      if (!pid || !appid) {
+        return [];
+      }
+      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+        await getMetadataEventsList({ pid: pid, appId: appid });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const updateMetadataEventInfo = async (
+    newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
+  ) => {
+    try {
+      const { success, message }: ApiResponse<null> = await updateMetadataEvent(
+        newItem as IMetadataEvent
+      );
+      if (!success) {
+        throw new Error(message);
+      }
+    } catch (error) {
+      throw new Error('Edit error');
+    }
+  };
 
   return (
     <AppLayout
       toolsHide
       content={
-        <EventTable
-          projectId={pid ?? ''}
-          appId={appid ?? ''}
+        <MetadataTable
+          resourceName="Event"
+          tableColumnDefinitions={COLUMN_DEFINITIONS}
+          tableContentDisplay={CONTENT_DISPLAY}
+          tableFilteringProperties={FILTERING_PROPERTIES}
+          tableI18nStrings={{
+            loadingText:
+              t('analytics:metadata.event.tableLoading') || 'Loading',
+            emptyText: t('analytics:metadata.event.tableEmpty'),
+            headerTitle: t('analytics:metadata.event.title'),
+            headerRefreshButtonText: t(
+              'analytics:metadata.event.refreshButton'
+            ),
+            filteringAriaLabel: t(
+              'analytics:metadata.event.filteringAriaLabel'
+            ),
+            filteringPlaceholder: t(
+              'analytics:metadata.event.filteringPlaceholder'
+            ),
+            groupPropertiesText: t(
+              'analytics:metadata.event.groupPropertiesText'
+            ),
+            operatorsText: t('analytics:metadata.event.operatorsText'),
+            clearFiltersText: t('analytics:metadata.event.clearFiltersText'),
+          }}
           loadHelpPanelContent={() => {
             console.log(1);
           }}
-          setShowDetails={(show: boolean, data?: IMetadataEvent) => {
+          setShowDetails={(
+            show: boolean,
+            data?:
+              | IMetadataEvent
+              | IMetadataEventParameter
+              | IMetadataUserAttribute
+          ) => {
             setShowSplit(show);
             if (data) {
-              setCurEvent(data);
+              setCurEvent(data as IMetadataEvent);
             }
           }}
-        ></EventTable>
+          fetchDataFunc={listMetadataEvents}
+          fetchUpdateFunc={updateMetadataEventInfo}
+        ></MetadataTable>
       }
       headerSelector="#header"
       navigation={

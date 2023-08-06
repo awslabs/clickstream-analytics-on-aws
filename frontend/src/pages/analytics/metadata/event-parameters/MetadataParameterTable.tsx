@@ -121,8 +121,6 @@ const MetadataParameterTable: React.FC<MetadataParameterTableProps> = (
         await getMetadataParametersList({
           pid: projectId,
           appId: appId,
-          pageNumber: 1,
-          pageSize: 9999,
         });
       if (success) {
         setEventList(data.items);

@@ -121,8 +121,6 @@ const UserAttributeTable: React.FC<UserAttributeTableProps> = (
         await getMetadataUserAttributesList({
           pid: projectId,
           appId: appId,
-          pageNumber: 1,
-          pageSize: 9999,
         });
       if (success) {
         setEventList(data.items);

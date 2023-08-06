@@ -48,8 +48,6 @@ export const getAnalyticsDashboardList = async (params: {
 export const getMetadataEventsList = async (params: {
   pid: string;
   appId: string;
-  pageNumber: number;
-  pageSize: number;
 }) => {
   await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
@@ -136,8 +134,6 @@ export const updateMetadataEvent = async (event: IMetadataEvent) => {
 export const getMetadataParametersList = async (params: {
   pid: string;
   appId: string;
-  pageNumber: number;
-  pageSize: number;
 }) => {
   await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {
@@ -183,8 +179,6 @@ export const updateMetadataParameter = async (
 export const getMetadataUserAttributesList = async (params: {
   pid: string;
   appId: string;
-  pageNumber: number;
-  pageSize: number;
 }) => {
   await new Promise((r) => setTimeout(r, 3000));
   const result: any = await new Promise((resolve, reject) => {

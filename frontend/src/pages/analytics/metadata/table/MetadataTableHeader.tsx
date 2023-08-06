@@ -19,28 +19,24 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 
-interface EventsTableHeaderProps extends HeaderProps {
+interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
   refreshButtonText?: string;
-  detailsButtonText?: string;
   extraActions?: React.ReactNode;
   selectedItemsCount: number;
   onRefreshButtonClick?: () => void;
-  onDetailsButtonClick?: () => void;
   onInfoLinkClick?: () => void;
 }
 
-export function EventsTableHeader({
+export function MetadataTableHeader({
   title = '',
   refreshButtonText = '',
-  detailsButtonText = '',
   extraActions = null,
   selectedItemsCount,
   onRefreshButtonClick,
-  onDetailsButtonClick,
   onInfoLinkClick,
   ...props
-}: EventsTableHeaderProps) {
+}: MetadataTableHeaderProps) {
   return (
     <Header
       variant="awsui-h1-sticky"

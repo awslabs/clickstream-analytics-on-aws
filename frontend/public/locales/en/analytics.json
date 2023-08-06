@@ -33,7 +33,11 @@
       "tableColumnPlatform": "Platform",
       "tableColumnDataVolumeLastDay": "Data volume last day",
       "tableEmpty": "No events",
-      "tableNoDataDisplay": "No events to display.",
+      "filteringAriaLabel": "Find events",
+      "filteringPlaceholder": "Find events",
+      "groupPropertiesText": "Properties",
+      "operatorsText": "Operators",
+      "clearFiltersText": "Clear filters",
       "split": {
         "title": "Event details",
         "associatedPresetParameters": "Associated preset parameters",
