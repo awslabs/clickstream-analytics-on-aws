@@ -171,8 +171,8 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     value: any
   ) => {
     if (
-      (column.id === 'displayName' && !displayNameRegex.test(value)) ||
-      (column.id === 'description' && !descriptionRegex.test(value))
+      (column.id === 'displayName' && displayNameRegex.test(value)) ||
+      (column.id === 'description' && descriptionRegex.test(value))
     ) {
       throw new Error('Inline error');
     }

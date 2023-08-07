@@ -14,7 +14,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { isEmpty } from '../common/utils';
-import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataEvent, IMetadataEventParameter, IMetadataRelation, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
@@ -53,15 +53,8 @@ export class MetadataEventServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      const event = results[0] as IMetadataEvent;
-
-      for (let index = 1; index < results.length; index++) {
-        const parameter = results[index] as IMetadataEventParameter;
-        if (!event.associatedParameters) {
-          event.associatedParameters = [];
-        }
-        event.associatedParameters.push(parameter);
-      }
+      const event = results.filter((r: any) => r.type === `#METADATA#${projectId}#${appId}#${name}`)[0] as IMetadataEvent;
+      event.associatedParameters = results.filter((r: any) => r.type !== `#METADATA#${projectId}#${appId}#${name}`) as IMetadataRelation[];
       return res.json(new ApiSuccess(event));
     } catch (error) {
       next(error);
@@ -118,7 +111,7 @@ export class MetadataEventParameterServ {
   public async add(req: any, res: any, next: any) {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
-      req.body.id = uuidv4().replace(/-/g, '');
+      req.body.parameterId = uuidv4().replace(/-/g, '');
       const eventParameter: IMetadataEventParameter = req.body;
       const id = await metadataStore.createEventParameter(eventParameter);
       return res.status(201).json(new ApiSuccess({ id }, 'Event attribute created.'));
@@ -131,11 +124,13 @@ export class MetadataEventParameterServ {
     try {
       const { id } = req.params;
       const { projectId, appId } = req.query;
-      const result = await metadataStore.getEventParameter(projectId, appId, id);
-      if (isEmpty(result)) {
+      const results = await metadataStore.getEventParameter(projectId, appId, id);
+      if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      return res.json(new ApiSuccess(result));
+      const parameter = results.filter((r: any) => r.prefix === `EVENT_PARAMETER#${projectId}#${appId}`)[0] as IMetadataEventParameter;
+      parameter.associatedEvents = results.filter((r: any) => r.prefix === `RELATION#${projectId}#${appId}`) as IMetadataRelation[];
+      return res.json(new ApiSuccess(parameter));
     } catch (error) {
       next(error);
     }
@@ -145,7 +140,7 @@ export class MetadataEventParameterServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const eventParameter: IMetadataEventParameter = req.body as IMetadataEventParameter;
-      const isEventExisted = await metadataStore.isEventParameterExisted(eventParameter.projectId, eventParameter.appId, eventParameter.id);
+      const isEventExisted = await metadataStore.isEventParameterExisted(eventParameter.projectId, eventParameter.appId, eventParameter.parameterId);
       if (!isEventExisted) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }

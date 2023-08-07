@@ -44,7 +44,7 @@ interface UserAttributeTableProps {
   appId: string;
   refresh: number;
   defaultSelectedItems: IMetadataUserAttribute[];
-  changeSelectedItems: (item: IMetadataEvent[]) => void;
+  changeSelectedItems: (item: IMetadataUserAttribute[]) => void;
 }
 
 const UserAttributeTable: React.FC<UserAttributeTableProps> = (
@@ -60,7 +60,7 @@ const UserAttributeTable: React.FC<UserAttributeTableProps> = (
   const { t } = useTranslation();
   const [loadingData, setLoadingData] = useState(false);
   const [selectedItems, setSelectedItems] = useState(defaultSelectedItems);
-  const [eventList, setEventList] = useState<IMetadataEvent[]>([]);
+  const [eventList, setEventList] = useState<IMetadataUserAttribute[]>([]);
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
@@ -117,7 +117,10 @@ const UserAttributeTable: React.FC<UserAttributeTableProps> = (
   const listMetadataEvents = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({
           pid: projectId,
           appId: appId,
@@ -136,7 +139,6 @@ const UserAttributeTable: React.FC<UserAttributeTableProps> = (
   }, []);
 
   function matchesEventType(item: any, selectedType: SelectProps.Option) {
-    console.log(item, selectedType);
     return (
       selectedType === defaultEventType || item.type === selectedType.label
     );

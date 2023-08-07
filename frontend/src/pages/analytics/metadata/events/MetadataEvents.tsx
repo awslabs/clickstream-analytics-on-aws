@@ -22,7 +22,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataEventType } from 'ts/const';
+import { MetadataSource } from 'ts/const';
 import MetadataEventSplitPanel from './MetadataEventSplitPanel';
 import MetadataTable from '../table/MetadataTable';
 import { descriptionRegex, displayNameRegex } from '../table/table-config';
@@ -53,7 +53,7 @@ const MetadataEvents: React.FC = () => {
         errorIconAriaLabel: 'Display Name Validation Error',
         editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return displayNameRegex.test(value) ? undefined : 'Invalid input';
+          return !displayNameRegex.test(value) ? undefined : 'Invalid input';
         },
         editingCell: (
           item: { displayName: string },
@@ -85,7 +85,7 @@ const MetadataEvents: React.FC = () => {
         errorIconAriaLabel: 'Description Validation Error',
         editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return descriptionRegex.test(value) ? undefined : 'Invalid input';
+          return !descriptionRegex.test(value) ? undefined : 'Invalid input';
         },
         editingCell: (
           item: { description: string },
@@ -106,13 +106,15 @@ const MetadataEvents: React.FC = () => {
       },
     },
     {
-      id: 'type',
-      header: t('analytics:metadata.event.tableColumnType'),
-      sortingField: 'type',
-      cell: (e: { type: string }) => {
+      id: 'metadataSource',
+      header: t('analytics:metadata.event.tableColumnMetadataSource'),
+      sortingField: 'metadataSource',
+      cell: (e: { metadataSource: string }) => {
         return (
-          <Badge color={e.type === MetadataEventType.CUSTOM ? 'blue' : 'grey'}>
-            {e.type}
+          <Badge
+            color={e.metadataSource === MetadataSource.CUSTOM ? 'blue' : 'grey'}
+          >
+            {e.metadataSource}
           </Badge>
         );
       },
@@ -150,7 +152,7 @@ const MetadataEvents: React.FC = () => {
     { id: 'name', visible: true },
     { id: 'displayName', visible: true },
     { id: 'description', visible: true },
-    { id: 'type', visible: true },
+    { id: 'metadataSource', visible: true },
     { id: 'hasData', visible: true },
     { id: 'platform', visible: true },
     { id: 'dataVolumeLastDay', visible: true },
@@ -169,9 +171,9 @@ const MetadataEvents: React.FC = () => {
       operators: [':', '!:', '=', '!='],
     },
     {
-      propertyLabel: t('analytics:metadata.event.tableColumnType'),
-      key: 'type',
-      groupValuesLabel: t('analytics:metadata.event.tableColumnType'),
+      propertyLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
+      key: 'metadataSource',
+      groupValuesLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
       operators: [':', '!:', '=', '!='],
     },
     {

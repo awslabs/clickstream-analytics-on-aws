@@ -49,31 +49,35 @@ export const getMetadataEventsList = async (params: {
   pid: string;
   appId: string;
 }) => {
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    const data = [];
-    for (let index = 0; index <= 20; index++) {
-      data.push({
-        id: `${index}`,
-        name: `Event Name ${index}`,
-        displayName: `事件${index}`,
-        type: index % 2 === 0 ? 'Preset' : 'Custom',
-        description: `Event description ${index}`,
-        hasData: index % 2 === 0,
-        platform: index % 2 === 0 ? 'Android' : 'iOS',
-        dataVolumeLastDay: index * 100,
-      });
-    }
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {
-        totalCount: 2,
-        items: data,
-      },
-      error: '',
-    });
-  });
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   const data = [];
+  //   for (let index = 0; index <= 20; index++) {
+  //     data.push({
+  //       id: `${index}`,
+  //       name: `Event Name ${index}`,
+  //       displayName: `事件${index}`,
+  //       type: index % 2 === 0 ? 'Preset' : 'Custom',
+  //       description: `Event description ${index}`,
+  //       hasData: index % 2 === 0,
+  //       platform: index % 2 === 0 ? 'Android' : 'iOS',
+  //       dataVolumeLastDay: index * 100,
+  //     });
+  //   }
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {
+  //       totalCount: 2,
+  //       items: data,
+  //     },
+  //     error: '',
+  //   });
+  // });
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/events?projectId=${params.pid}&appId=${params.appId}`
+  );
   return result;
 };
 
@@ -82,52 +86,57 @@ export const getMetadataEventDetails = async (params: {
   appId: string;
   eventName: string;
 }) => {
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    const parameters = [];
-    for (let index = 0; index <= 20; index++) {
-      parameters.push({
-        id: `${index}`,
-        name: `Parameter Name ${index}`,
-        displayName: `属性${index}`,
-        type: index % 2 === 0 ? 'Preset' : 'Custom',
-        description: `Parameter description ${index}`,
-        platform: index % 2 === 0 ? 'Android' : 'iOS',
-        dataType: index % 2 === 0 ? 'String' : 'Number',
-      });
-    }
-    const index = Math.floor(Math.random() * 100);
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {
-        id: index,
-        name: `Event Name ${index}`,
-        displayName: `事件${index}`,
-        type: index % 2 === 0 ? 'Preset' : 'Custom',
-        description: `Event description ${index}`,
-        hasData: index % 2 === 0,
-        platform: index % 2 === 0 ? 'Android' : 'iOS',
-        dataVolumeLastDay: index * 100,
-        parameters: parameters,
-      },
-      error: '',
-    });
-  });
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   const parameters = [];
+  //   for (let index = 0; index <= 20; index++) {
+  //     parameters.push({
+  //       id: `${index}`,
+  //       name: `Parameter Name ${index}`,
+  //       displayName: `属性${index}`,
+  //       type: index % 2 === 0 ? 'Preset' : 'Custom',
+  //       description: `Parameter description ${index}`,
+  //       platform: index % 2 === 0 ? 'Android' : 'iOS',
+  //       dataType: index % 2 === 0 ? 'String' : 'Number',
+  //     });
+  //   }
+  //   const index = Math.floor(Math.random() * 100);
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {
+  //       id: index,
+  //       name: `Event Name ${index}`,
+  //       displayName: `事件${index}`,
+  //       type: index % 2 === 0 ? 'Preset' : 'Custom',
+  //       description: `Event description ${index}`,
+  //       hasData: index % 2 === 0,
+  //       platform: index % 2 === 0 ? 'Android' : 'iOS',
+  //       dataVolumeLastDay: index * 100,
+  //       parameters: parameters,
+  //     },
+  //     error: '',
+  //   });
+  // });
+  // return result;
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/event/${params.eventName}?projectId=${params.pid}&appId=${params.appId}`
+  );
   return result;
 };
 
 export const updateMetadataEvent = async (event: IMetadataEvent) => {
-  console.log(event);
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {},
-      error: '',
-    });
-  });
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {},
+  //     error: '',
+  //   });
+  // });
+  const result: any = await apiRequest('put', '/metadata/event', event);
   return result;
 };
 
@@ -135,83 +144,101 @@ export const getMetadataParametersList = async (params: {
   pid: string;
   appId: string;
 }) => {
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    const data = [];
-    for (let index = 0; index <= 67; index++) {
-      data.push({
-        id: `${index}`,
-        name: `Event Attribute Name ${index}`,
-        displayName: `事件属性${index}`,
-        type: index % 2 === 0 ? 'Preset' : 'Custom',
-        description: `Description ${index}`,
-        hasData: index % 2 === 0,
-        platform: index % 2 === 0 ? 'Android' : 'iOS',
-        dataType: index % 2 === 0 ? 'String' : 'Number',
-        source: index % 2 === 1 ? 'Template' : 'Custom',
-      });
-    }
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {
-        totalCount: 2,
-        items: data,
-      },
-      error: '',
-    });
-  });
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   const data = [];
+  //   for (let index = 0; index <= 67; index++) {
+  //     data.push({
+  //       id: `${index}`,
+  //       name: `Event Attribute Name ${index}`,
+  //       displayName: `事件属性${index}`,
+  //       type: index % 2 === 0 ? 'Preset' : 'Custom',
+  //       description: `Description ${index}`,
+  //       hasData: index % 2 === 0,
+  //       platform: index % 2 === 0 ? 'Android' : 'iOS',
+  //       dataType: index % 2 === 0 ? 'String' : 'Number',
+  //       source: index % 2 === 1 ? 'Template' : 'Custom',
+  //     });
+  //   }
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {
+  //       totalCount: 2,
+  //       items: data,
+  //     },
+  //     error: '',
+  //   });
+  // });
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/event_parameters?projectId=${params.pid}&appId=${params.appId}`
+  );
   return result;
 };
 
 export const getMetadataParametersDetails = async (params: {
+  pid: string;
+  appId: string;
   parameterId: string;
 }) => {
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    const events = [];
-    for (let index = 0; index <= 3; index++) {
-      events.push({
-        name: `Event Name ${index}`,
-        displayName: `事件${index}`,
-        description: `Parameter description ${index}`,
-      });
-    }
-    const index = Math.floor(Math.random() * 100);
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {
-        id: `${index}`,
-        name: `Event Attribute Name ${index}`,
-        displayName: `事件属性${index}`,
-        type: index % 2 === 0 ? 'Preset' : 'Custom',
-        description: `Description ${index}`,
-        hasData: index % 2 === 0,
-        platform: index % 2 === 0 ? 'Android' : 'iOS',
-        dataType: index % 2 === 0 ? 'String' : 'Number',
-        source: index % 2 === 1 ? 'Template' : 'Custom',
-        events: events,
-      },
-      error: '',
-    });
-  });
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   const events = [];
+  //   for (let index = 0; index <= 3; index++) {
+  //     events.push({
+  //       name: `Event Name ${index}`,
+  //       displayName: `事件${index}`,
+  //       description: `Parameter description ${index}`,
+  //     });
+  //   }
+  //   const index = Math.floor(Math.random() * 100);
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {
+  //       id: `${index}`,
+  //       name: `Event Attribute Name ${index}`,
+  //       displayName: `事件属性${index}`,
+  //       type: index % 2 === 0 ? 'Preset' : 'Custom',
+  //       description: `Description ${index}`,
+  //       hasData: index % 2 === 0,
+  //       platform: index % 2 === 0 ? 'Android' : 'iOS',
+  //       dataType: index % 2 === 0 ? 'String' : 'Number',
+  //       source: index % 2 === 1 ? 'Template' : 'Custom',
+  //       events: events,
+  //     },
+  //     error: '',
+  //   });
+  // });
+  // return result;
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/event_parameter/${params.parameterId}?projectId=${params.pid}&appId=${params.appId}`
+  );
   return result;
 };
 
 export const updateMetadataParameter = async (
-  event: IMetadataEventParameter
+  parameter: IMetadataEventParameter
 ) => {
-  console.log(event);
-  await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {},
-      error: '',
-    });
-  });
+  // console.log(event);
+  // await new Promise((r) => setTimeout(r, 3000));
+  // const result: any = await new Promise((resolve, reject) => {
+  //   resolve({
+  //     success: true,
+  //     message: 'OK',
+  //     data: {},
+  //     error: '',
+  //   });
+  // });
+  // return result;
+
+  const result: any = await apiRequest(
+    'put',
+    '/metadata/event_parameter',
+    parameter
+  );
   return result;
 };
 

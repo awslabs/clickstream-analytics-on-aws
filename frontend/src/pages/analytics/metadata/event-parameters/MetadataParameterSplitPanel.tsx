@@ -31,7 +31,8 @@ import {
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetadataEventType } from 'ts/const';
+import { useParams } from 'react-router-dom';
+import { MetadataSource } from 'ts/const';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataParameterSplitPanelProps {
@@ -42,6 +43,7 @@ const MetadataParameterSplitPanel: React.FC<
   MetadataParameterSplitPanelProps
 > = (props: MetadataParameterSplitPanelProps) => {
   const { t } = useTranslation();
+  const { pid, appid } = useParams();
   const { parameter } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
@@ -60,33 +62,33 @@ const MetadataParameterSplitPanel: React.FC<
 
   const COLUMN_DEFINITIONS = [
     {
-      id: 'name',
+      id: 'eventName',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.tableColumnName')}
         </Box>
       ),
-      cell: (item: { name: any }) => item.name || '-',
-      sortingField: 'name',
+      cell: (item: { eventName: any }) => item.eventName || '-',
+      sortingField: 'eventName',
       isRowHeader: true,
     },
     {
-      id: 'displayName',
+      id: 'eventDisplayName',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.tableColumnDisplayName')}
         </Box>
       ),
-      cell: (item: { displayName: any }) => item.displayName || '-',
+      cell: (item: { eventDisplayName: any }) => item.eventDisplayName || '-',
     },
     {
-      id: 'description',
+      id: 'eventDescription',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.tableColumnDescription')}
         </Box>
       ),
-      cell: (item: { description: any }) => item.description || '-',
+      cell: (item: { eventDescription: any }) => item.eventDescription || '-',
     },
   ];
 
@@ -139,7 +141,9 @@ const MetadataParameterSplitPanel: React.FC<
     try {
       const { success, data }: ApiResponse<IMetadataEventParameter> =
         await getMetadataParametersDetails({
-          parameterId: parameter.id,
+          pid: pid ?? '',
+          appId: appid ?? '',
+          parameterId: parameter.parameterId,
         });
       if (success) {
         setParameterDetails(data);
@@ -168,10 +172,10 @@ const MetadataParameterSplitPanel: React.FC<
         <div>
           <TextContent>
             <h1>{parameterDetails.name}</h1>
-            {parameterDetails.type === MetadataEventType.CUSTOM ? (
-              <Badge color="blue">{MetadataEventType.CUSTOM}</Badge>
+            {parameterDetails.metadataSource === MetadataSource.CUSTOM ? (
+              <Badge color="blue">{MetadataSource.CUSTOM}</Badge>
             ) : (
-              <Badge>{MetadataEventType.PRESET}</Badge>
+              <Badge>{MetadataSource.PRESET}</Badge>
             )}
           </TextContent>
           <br />
@@ -243,7 +247,7 @@ const MetadataParameterSplitPanel: React.FC<
               <Box variant="awsui-key-label">
                 {t('analytics:metadata.eventParameter.tableColumnDataType')}
               </Box>
-              <div className="mb-10">{parameter.dataType}</div>
+              <div className="mb-10">{parameter.valueType}</div>
             </div>
             <div>
               <Box variant="awsui-key-label">
@@ -341,7 +345,7 @@ const MetadataParameterSplitPanel: React.FC<
                 id: 'first',
                 content: (
                   <MetadataDetailsTable
-                    data={parameterDetails.events ?? []}
+                    data={parameterDetails.associatedEvents ?? []}
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
                       loadingText: t(

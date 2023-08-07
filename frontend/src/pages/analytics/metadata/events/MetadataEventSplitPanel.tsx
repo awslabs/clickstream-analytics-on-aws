@@ -29,7 +29,7 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataEventType } from 'ts/const';
+import { MetadataSource } from 'ts/const';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataEventSplitPanelProps {
@@ -58,42 +58,44 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
   };
   const COLUMN_DEFINITIONS = [
     {
-      id: 'name',
+      id: 'parameterName',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.split.parameterName')}
         </Box>
       ),
-      cell: (item: { name: any }) => item.name || '-',
-      sortingField: 'name',
+      cell: (item: { parameterName: any }) => item.parameterName || '-',
       isRowHeader: true,
     },
     {
-      id: 'displayName',
+      id: 'parameterDisplayName',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.split.displayName')}
         </Box>
       ),
-      cell: (item: { displayName: any }) => item.displayName || '-',
+      cell: (item: { parameterDisplayName: any }) =>
+        item.parameterDisplayName || '-',
     },
     {
-      id: 'description',
+      id: 'parameterDescription',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.split.description')}
         </Box>
       ),
-      cell: (item: { description: any }) => item.description || '-',
+      cell: (item: { parameterDescription: any }) =>
+        item.parameterDescription || '-',
     },
     {
-      id: 'dataType',
+      id: 'parameterValueType',
       header: (
         <Box fontWeight="bold">
           {t('analytics:metadata.event.split.dataType')}
         </Box>
       ),
-      cell: (item: { dataType: any }) => item.dataType || '-',
+      cell: (item: { parameterValueType: any }) =>
+        item.parameterValueType || '-',
     },
   ];
 
@@ -173,10 +175,10 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
         <div>
           <TextContent>
             <h1>{eventDetails.name}</h1>
-            {eventDetails.type === MetadataEventType.CUSTOM ? (
-              <Badge color="blue">{MetadataEventType.CUSTOM}</Badge>
+            {eventDetails.metadataSource === MetadataSource.CUSTOM ? (
+              <Badge color="blue">{MetadataSource.CUSTOM}</Badge>
             ) : (
-              <Badge>{MetadataEventType.PRESET}</Badge>
+              <Badge>{MetadataSource.PRESET}</Badge>
             )}
           </TextContent>
           <br />
@@ -345,9 +347,11 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                 content: (
                   <MetadataDetailsTable
                     data={
-                      eventDetails.parameters
-                        ? eventDetails.parameters?.filter(
-                            (p) => p.type === MetadataEventType.PRESET
+                      eventDetails.associatedParameters
+                        ? eventDetails.associatedParameters?.filter(
+                            (p) =>
+                              p.parameterMetadataSource ===
+                              MetadataSource.PRESET
                           )
                         : []
                     }
@@ -375,9 +379,11 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                 content: (
                   <MetadataDetailsTable
                     data={
-                      eventDetails.parameters
-                        ? eventDetails.parameters?.filter(
-                            (p) => p.type === MetadataEventType.CUSTOM
+                      eventDetails.associatedParameters
+                        ? eventDetails.associatedParameters?.filter(
+                            (p) =>
+                              p.parameterMetadataSource ===
+                              MetadataSource.CUSTOM
                           )
                         : []
                     }

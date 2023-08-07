@@ -22,27 +22,41 @@ declare global {
 
   interface IMetadataEvent {
     id: string;
+    type: string;
+    prefix: string;
+  
+    projectId: string;
+    appId: string;
+  
     name: string;
     displayName: string;
     description: string;
-    type: MetadataEventType;
+    metadataSource: MetadataSource;
     hasData: boolean;
-    platform: string;
+    platform: MetadataPlatform;
     dataVolumeLastDay: number;
-    parameters?: IMetadataEventParameter[];
+    associatedParameters? : IMetadataRelation[];
   }
 
   interface IMetadataEventParameter {
     id: string;
+    type: string;
+    prefix: string;
+  
+    projectId: string;
+    appId: string;
+  
+    parameterId: string;
     name: string;
     displayName: string;
     description: string;
-    type: MetadataEventType;
+    metadataSource: MetadataSource;
     hasData: boolean;
-    platform: string;
-    dataType: MetadataDataType;
-    source: string;
-    events?: IMetadataEvent[];
+    platform: MetadataPlatform;
+    parameterType: MetadataParameterType;
+    valueType: MetadataValueType;
+    valueEnum: IMetadataAttributeValue[];
+    associatedEvents? : IMetadataRelation[];
   }
 
   interface IMetadataUserAttribute {
@@ -51,5 +65,35 @@ declare global {
     displayName: string;
     description: string;
     type: string;
+  }
+
+  interface IMetadataAttributeValue {
+    value: string;
+    displayValue: string;
+  }
+
+  interface IMetadataRelation {
+    id: string;
+    type: string;
+    prefix: string;
+
+    projectId: string;
+    appId: string;
+
+    eventName: string;
+    eventDisplayName: string;
+    eventDescription: string;
+
+    parameterId: string;
+    parameterName: string;
+    parameterDisplayName: string;
+    parameterDescription: string;
+    parameterValueType: MetadataValueType;
+    parameterMetadataSource: MetadataSource;
+
+    createAt: number;
+    updateAt: number;
+    operator: string;
+    deleted: boolean;
   }
 }

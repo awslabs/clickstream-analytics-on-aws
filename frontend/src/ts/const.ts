@@ -393,12 +393,21 @@ export const CLOUDFORMATION_STATUS_MAP: any = {
   UPDATE_FAILED: 'error',
 };
 
-export enum MetadataEventType {
+export enum MetadataSource {
   PRESET = 'Preset',
   CUSTOM = 'Custom',
+  TEMPLATE = 'Template',
 }
 
-export enum MetadataDataType {
+export enum MetadataPlatform {
+  ANDROID = 'Android',
+  IOS = 'iOS',
+  WEB = 'Web',
+  MINIPROGRAM = 'MiniProgram',
+}
+
+export enum MetadataValueType {
   STRING = 'String',
   NUMBER = 'Number',
+  BOOLEAN = 'Boolean',
 }

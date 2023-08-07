@@ -28,7 +28,7 @@ export interface IMetadataEvent {
   readonly hasData: boolean;
   readonly platform: MetadataPlatform;
   readonly dataVolumeLastDay: number;
-  associatedParameters? : IMetadataEventParameter[];
+  associatedParameters? : IMetadataRelation[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -49,6 +49,7 @@ export interface IMetadataEventParameter {
   readonly projectId: string;
   readonly appId: string;
 
+  readonly parameterId: string;
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
@@ -58,7 +59,7 @@ export interface IMetadataEventParameter {
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
   readonly valueEnum: IMetadataAttributeValue[];
-  associatedEvents? : IMetadataEventParameter[];
+  associatedEvents? : IMetadataRelation[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -78,6 +79,31 @@ export interface IMetadataUserAttribute {
   readonly displayName: string;
   readonly description: string;
   readonly metadataSource: MetadataSource;
+
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
+}
+
+export interface IMetadataRelation {
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
+
+  readonly eventName: string;
+  readonly eventDisplayName: string;
+  readonly eventDescription: string;
+
+  readonly parameterId: string;
+  readonly parameterName: string;
+  readonly parameterDisplayName: string;
+  readonly parameterDescription: string;
+  readonly parameterValueType: MetadataValueType;
+  readonly parameterMetadataSource: MetadataSource;
 
   readonly createAt: number;
   readonly updateAt: number;

@@ -25,7 +25,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataEventType } from 'ts/const';
+import { MetadataSource } from 'ts/const';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
@@ -58,7 +58,7 @@ const MetadataParameters: React.FC = () => {
         errorIconAriaLabel: 'Display Name Validation Error',
         editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return displayNameRegex.test(value) ? undefined : 'Invalid input';
+          return !displayNameRegex.test(value) ? undefined : 'Invalid input';
         },
         editingCell: (
           item: { displayName: string },
@@ -90,7 +90,7 @@ const MetadataParameters: React.FC = () => {
         errorIconAriaLabel: 'Description Validation Error',
         editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return descriptionRegex.test(value) ? undefined : 'Invalid input';
+          return !descriptionRegex.test(value) ? undefined : 'Invalid input';
         },
         editingCell: (
           item: { description: string },
@@ -111,21 +111,30 @@ const MetadataParameters: React.FC = () => {
       },
     },
     {
-      id: 'type',
-      header: t('analytics:metadata.eventParameter.tableColumnType'),
-      cell: (e: { type: string }) => {
+      id: 'metadataSource',
+      header: t('analytics:metadata.eventParameter.tableColumnMetadataSource'),
+      cell: (e: { metadataSource: string }) => {
         return (
-          <Badge color={e.type === MetadataEventType.CUSTOM ? 'blue' : 'grey'}>
-            {e.type}
+          <Badge
+            color={e.metadataSource === MetadataSource.CUSTOM ? 'blue' : 'grey'}
+          >
+            {e.metadataSource}
           </Badge>
         );
       },
     },
     {
-      id: 'dataType',
+      id: 'parameterType',
+      header: t('analytics:metadata.eventParameter.tableColumnParameterType'),
+      cell: (e: { parameterType: string }) => {
+        return e.parameterType;
+      },
+    },
+    {
+      id: 'valueType',
       header: t('analytics:metadata.eventParameter.tableColumnDataType'),
-      cell: (e: { dataType: string }) => {
-        return e.dataType;
+      cell: (e: { valueType: string }) => {
+        return e.valueType;
       },
     },
     {
@@ -146,23 +155,16 @@ const MetadataParameters: React.FC = () => {
         return e.platform;
       },
     },
-    {
-      id: 'source',
-      header: t('analytics:metadata.eventParameter.tableColumnSource'),
-      cell: (e: { source: string }) => {
-        return e.source;
-      },
-    },
   ];
   const CONTENT_DISPLAY = [
     { id: 'name', visible: true },
     { id: 'displayName', visible: true },
     { id: 'description', visible: true },
-    { id: 'type', visible: true },
+    { id: 'metadataSource', visible: true },
+    { id: 'parameterType', visible: true },
     { id: 'hasData', visible: true },
-    { id: 'dataType', visible: true },
+    { id: 'valueType', visible: true },
     { id: 'platform', visible: true },
-    { id: 'source', visible: true },
   ];
   const FILTERING_PROPERTIES = [
     {
@@ -182,9 +184,23 @@ const MetadataParameters: React.FC = () => {
       operators: [':', '!:', '=', '!='],
     },
     {
-      propertyLabel: t('analytics:metadata.eventParameter.tableColumnType'),
-      key: 'type',
-      groupValuesLabel: t('analytics:metadata.eventParameter.tableColumnType'),
+      propertyLabel: t(
+        'analytics:metadata.eventParameter.tableColumnMetadataSource'
+      ),
+      key: 'metadataSource',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnMetadataSource'
+      ),
+      operators: [':', '!:', '=', '!='],
+    },
+    {
+      propertyLabel: t(
+        'analytics:metadata.eventParameter.tableColumnParameterType'
+      ),
+      key: 'parameterType',
+      groupValuesLabel: t(
+        'analytics:metadata.eventParameter.tableColumnParameterType'
+      ),
       operators: [':', '!:', '=', '!='],
     },
     {
@@ -197,7 +213,7 @@ const MetadataParameters: React.FC = () => {
     },
     {
       propertyLabel: t('analytics:metadata.eventParameter.tableColumnDataType'),
-      key: 'dataType',
+      key: 'valueType',
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnDataType'
       ),
@@ -208,14 +224,6 @@ const MetadataParameters: React.FC = () => {
       key: 'platform',
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnPlatform'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
-      propertyLabel: t('analytics:metadata.eventParameter.tableColumnSource'),
-      key: 'source',
-      groupValuesLabel: t(
-        'analytics:metadata.eventParameter.tableColumnSource'
       ),
       operators: [':', '!:', '=', '!='],
     },
