@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { MetadataEventType } from '../common/types';
+import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/types';
 
 export interface IMetadataEvent {
   readonly id: string;
@@ -24,11 +24,11 @@ export interface IMetadataEvent {
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: MetadataEventType;
+  readonly metadataSource: MetadataSource;
   readonly hasData: boolean;
-  readonly platform: string;
+  readonly platform: MetadataPlatform;
   readonly dataVolumeLastDay: number;
-  attributes? : IMetadataEventAttribute[];
+  associatedParameters? : IMetadataEventParameter[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -41,7 +41,7 @@ export interface IMetadataAttributeValue {
   readonly displayValue: string;
 }
 
-export interface IMetadataEventAttribute {
+export interface IMetadataEventParameter {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -52,8 +52,13 @@ export interface IMetadataEventAttribute {
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly valueType: string;
+  readonly metadataSource: MetadataSource;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform;
+  readonly parameterType: MetadataParameterType;
+  readonly valueType: MetadataValueType;
   readonly valueEnum: IMetadataAttributeValue[];
+  associatedEvents? : IMetadataEventParameter[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -72,7 +77,7 @@ export interface IMetadataUserAttribute {
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: string;
+  readonly metadataSource: MetadataSource;
 
   readonly createAt: number;
   readonly updateAt: number;

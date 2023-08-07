@@ -14,7 +14,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { isEmpty } from '../common/utils';
-import { IMetadataEvent, IMetadataEventAttribute, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
@@ -56,11 +56,11 @@ export class MetadataEventServ {
       const event = results[0] as IMetadataEvent;
 
       for (let index = 1; index < results.length; index++) {
-        const attribute = results[index] as IMetadataEventAttribute;
-        if (!event.attributes) {
-          event.attributes = [];
+        const parameter = results[index] as IMetadataEventParameter;
+        if (!event.associatedParameters) {
+          event.associatedParameters = [];
         }
-        event.attributes.push(attribute);
+        event.associatedParameters.push(parameter);
       }
       return res.json(new ApiSuccess(event));
     } catch (error) {
@@ -101,11 +101,11 @@ export class MetadataEventServ {
 
 }
 
-export class MetadataEventAttributeServ {
+export class MetadataEventParameterServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, order } = req.query;
-      const result = await metadataStore.listEventAttributes(projectId, appId, order);
+      const result = await metadataStore.listEventParameters(projectId, appId, order);
       return res.json(new ApiSuccess({
         totalCount: result.length,
         items: result,
@@ -119,8 +119,8 @@ export class MetadataEventAttributeServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       req.body.id = uuidv4().replace(/-/g, '');
-      const eventAttribute: IMetadataEventAttribute = req.body;
-      const id = await metadataStore.createEventAttribute(eventAttribute);
+      const eventParameter: IMetadataEventParameter = req.body;
+      const id = await metadataStore.createEventParameter(eventParameter);
       return res.status(201).json(new ApiSuccess({ id }, 'Event attribute created.'));
     } catch (error) {
       next(error);
@@ -131,7 +131,7 @@ export class MetadataEventAttributeServ {
     try {
       const { id } = req.params;
       const { projectId, appId } = req.query;
-      const result = await metadataStore.getEventAttribute(projectId, appId, id);
+      const result = await metadataStore.getEventParameter(projectId, appId, id);
       if (isEmpty(result)) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
@@ -144,12 +144,12 @@ export class MetadataEventAttributeServ {
   public async update(req: any, res: any, next: any) {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
-      const eventAttribute: IMetadataEventAttribute = req.body as IMetadataEventAttribute;
-      const isEventExisted = await metadataStore.isEventAttributeExisted(eventAttribute.projectId, eventAttribute.appId, eventAttribute.id);
+      const eventParameter: IMetadataEventParameter = req.body as IMetadataEventParameter;
+      const isEventExisted = await metadataStore.isEventParameterExisted(eventParameter.projectId, eventParameter.appId, eventParameter.id);
       if (!isEventExisted) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      await metadataStore.updateEventAttribute(eventAttribute);
+      await metadataStore.updateEventParameter(eventParameter);
       return res.status(201).json(new ApiSuccess(null, 'Event attribute updated.'));
     } catch (error) {
       next(error);
@@ -161,11 +161,11 @@ export class MetadataEventAttributeServ {
       const { id } = req.params;
       const { projectId, appId } = req.query;
       const operator = res.get('X-Click-Stream-Operator');
-      const isEventExisted = await metadataStore.isEventAttributeExisted(projectId, appId, id);
+      const isEventExisted = await metadataStore.isEventParameterExisted(projectId, appId, id);
       if (!isEventExisted) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      await metadataStore.deleteEventAttribute(projectId, appId, id, operator);
+      await metadataStore.deleteEventParameter(projectId, appId, id, operator);
       return res.json(new ApiSuccess(null, 'Event attribute deleted.'));
     } catch (error) {
       next(error);

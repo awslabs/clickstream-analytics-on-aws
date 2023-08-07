@@ -208,7 +208,7 @@ describe('Metadata Event test', () => {
         prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
         updateAt: 1690788840458,
-        attributes: [
+        associatedParameters: [
           {
             createAt: 1690788840458,
             deleted: false,

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { IMetadataEvent, IMetadataEventAttribute, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
   createEvent: (event: IMetadataEvent) => Promise<string>;
@@ -21,12 +21,12 @@ export interface MetadataStore {
   deleteEvent: (projectId: string, appId: string, eventName: string, operator: string) => Promise<void>;
   isEventExisted: (projectId: string, appId: string, eventName: string) => Promise<boolean>;
 
-  createEventAttribute: (eventAttribute: IMetadataEventAttribute) => Promise<string>;
-  getEventAttribute: (projectId: string, appId: string, eventAttributeId: string) => Promise<IMetadataEventAttribute | undefined>;
-  updateEventAttribute: (eventAttribute: IMetadataEventAttribute) => Promise<void>;
-  listEventAttributes: (projectId: string, appId: string, order: string) => Promise<IMetadataEventAttribute[]>;
-  deleteEventAttribute: (projectId: string, appId: string, eventAttributeId: string, operator: string) => Promise<void>;
-  isEventAttributeExisted: (projectId: string, appId: string, eventAttributeId: string) => Promise<boolean>;
+  createEventParameter: (eventParameter: IMetadataEventParameter) => Promise<string>;
+  getEventParameter: (projectId: string, appId: string, eventParameterId: string) => Promise<IMetadataEventParameter | undefined>;
+  updateEventParameter: (eventParameter: IMetadataEventParameter) => Promise<void>;
+  listEventParameters: (projectId: string, appId: string, order: string) => Promise<IMetadataEventParameter[]>;
+  deleteEventParameter: (projectId: string, appId: string, eventParameterId: string, operator: string) => Promise<void>;
+  isEventParameterExisted: (projectId: string, appId: string, eventParameterId: string) => Promise<boolean>;
 
   createUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<string>;
   getUserAttribute: (projectId: string, appId: string, userAttributeId: string) => Promise<IMetadataUserAttribute | undefined>;
