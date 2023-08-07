@@ -80,7 +80,7 @@ router_metadata.delete(
   });
 
 router_metadata.get(
-  '/event_attributes',
+  '/event_parameters',
   validate([
     query()
       .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
@@ -94,7 +94,7 @@ router_metadata.get(
   });
 
 router_metadata.post(
-  '/event_attribute',
+  '/event_parameter',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isValidEmpty),
@@ -105,12 +105,12 @@ router_metadata.post(
     return metadataEventParameterServ.add(req, res, next);
   });
 
-router_metadata.get('/event_attribute/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/event_parameter/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventParameterServ.details(req, res, next);
 });
 
 router_metadata.put(
-  '/event_attribute',
+  '/event_parameter',
   validate([
     body().custom(isValidEmpty),
     body('projectId').custom(isValidEmpty),
@@ -121,7 +121,7 @@ router_metadata.put(
   });
 
 router_metadata.delete(
-  '/event_attribute/:id',
+  '/event_parameter/:id',
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
