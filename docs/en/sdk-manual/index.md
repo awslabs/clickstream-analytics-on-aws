@@ -3,10 +3,11 @@
 
 - [Android](./android.md) 
 - [Swift](./swift.md)  
+- [Web](./web.md)
 
 ## Key features and benefits
 
-- **Automatic data collection**. Clickstream SDKs provide built-in capabilities to automatically collect common events, such as screen view, session, and user engagement, so that you only need to focus on recording business-specific events.
+- **Automatic data collection**. Clickstream SDKs provide built-in capabilities to automatically collect common events, such as screen view or page view, session, and user engagement, so that you only need to focus on recording business-specific events.
 - **Ease of use**. Clickstream SDKs provide multiple APIs and configuration options to simplify the event reporting and attribute setting operation.
 - **Cross-platform analytics**. Clickstream SDKs are consistent in event data structure, attribute validation rules, and event sending mechanism, so that data can be normalized in the same structure for cross-platform analytics.
 

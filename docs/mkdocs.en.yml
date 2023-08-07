@@ -35,7 +35,7 @@ nav:
       - Overview: pipeline-mgmt/index.md
       - Data ingestion:
         - Overview: pipeline-mgmt/ingestion/index.md
-        - Ingeston endpoint: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
+        - Ingestion endpoint: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
         - Data sink - Kafka: pipeline-mgmt/ingestion/create-data-sink-w-kafka.md
         - Data sink - Kinesis: pipeline-mgmt/ingestion/create-data-sink-w-kinesis.md
         - Data sink - S3: pipeline-mgmt/ingestion/create-data-sink-w-s3.md
@@ -51,6 +51,7 @@ nav:
       - Overview: sdk-manual/index.md
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
+      - Web SDK: sdk-manual/web.md
     - Dashboards:
       - Overview: dashboard/index.md
       - Acquisition report: dashboard/acquisition.md
