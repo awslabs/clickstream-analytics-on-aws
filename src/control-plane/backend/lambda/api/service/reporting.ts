@@ -13,15 +13,22 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
 import { STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
-import { createDataSet, funnelVisualColumns, getAnalysisDefinitionFromArn, applyChangeToDashboard } from './quicksight/reporting-utils';
-import { getDashboardCreateParameters, getVisualDef, getVisualRalatedDefs } from './quicksight/utils';
+import { 
+  createDataSet, 
+  funnelVisualColumns, 
+  getDashboardCreateParameters, 
+  getVisualDef, 
+  getVisualRalatedDefs, 
+  applyChangeToDashboard, 
+  getDashboardDefinitionFromArn
+} from './quicksight/reporting-utils';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { logger } from '../common/powertools';
-import { buildFunnelView } from '../common/sql-builder';
+import { buildFunnelView } from './quicksight/sql-builder';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -112,15 +119,16 @@ export class ReportingServ {
         dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
         sheetId = uuidv4();
         dashboardDef.Sheets![0].SheetId = sheetId;
+        dashboardDef.Sheets![0].Name = query.sheetName;
       } else {
         if (!query.sheetId) {
           return res.status(400).send(new ApiFail('missing required parameter sheetId'));
         }
         sheetId = query.sheetId;
-        dashboardDef = getAnalysisDefinitionFromArn(quickSight, awsAccountId!, query.analysisId);
+        dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
       }
 
-      const datasetConfg = {
+      const dataSetIdentifierDeclaration = {
         Identifier: viewName,
         DataSetArn: datasetOutput?.Arn,
       };
@@ -141,8 +149,8 @@ export class ReportingServ {
       const visualPorps = {
         name: `visual-${viewName}`,
         sheetId: sheetId,
-        visualContent: visualDef,
-        dataSetConfiguration: datasetConfg,
+        visual: visualDef,
+        dataSetIdentifierDeclaration: dataSetIdentifierDeclaration,
         filterControl: visualRelatedParams.filterContrl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
@@ -152,52 +160,90 @@ export class ReportingServ {
       const dashboard = applyChangeToDashboard({
         action: 'ADD',
         visuals: [visualPorps],
-        dashboardDef: JSON.stringify(dashboardDef),
+        dashboardDef: dashboardDef as DashboardVersionDefinition,
       });
 
-      logger.info('final dashboard def:');
-      console.log(dashboard);
+      logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
-      //crate QuickSight analysis
-      await quickSight.createAnalysis({
-        AwsAccountId: awsAccountId,
-        AnalysisId: `analysis${uuidv4()}`,
-        Name: `analysis-${viewName}`,
-        Permissions: [{
-          Principal: dashboardCreateParameters.quickSightPricipal,
-          Actions: [
-            'quicksight:DescribeAnalysis',
-            'quicksight:QueryAnalysis',
-            'quicksight:UpdateAnalysis',
-            'quicksight:RestoreAnalysis',
-            'quicksight:DeleteAnalysis',
-            'quicksight:UpdateAnalysisPermissions',
-            'quicksight:DescribeAnalysisPermissions',
-          ],
-        }],
-        Definition: JSON.parse(dashboard) as AnalysisDefinition,
-      });
+      if (!query.dashboardId) {
 
-      //crate QuickSight dashboard
-      await quickSight.createDashboard({
-        AwsAccountId: awsAccountId,
-        DashboardId: `dashboard-${uuidv4()}`,
-        Name: `dashboard-${viewName}`,
-        Permissions: [{
-          Principal: dashboardCreateParameters.quickSightPricipal,
-          Actions: [
-            'quicksight:DescribeDashboard',
-            'quicksight:ListDashboardVersions',
-            'quicksight:QueryDashboard',
-            'quicksight:UpdateDashboard',
-            'quicksight:DeleteDashboard',
-            'quicksight:UpdateDashboardPermissions',
-            'quicksight:DescribeDashboardPermissions',
-            'quicksight:UpdateDashboardPublishedVersion',
-          ],
-        }],
-        Definition: JSON.parse(dashboard) as DashboardVersionDefinition,
-      });
+        //crate QuickSight analysis
+        await quickSight.createAnalysis({
+          AwsAccountId: awsAccountId,
+          AnalysisId: `analysis${uuidv4()}`,
+          Name: `analysis-${viewName}`,
+          Permissions: [{
+            Principal: dashboardCreateParameters.quickSightPricipal,
+            Actions: [
+              'quicksight:DescribeAnalysis',
+              'quicksight:QueryAnalysis',
+              'quicksight:UpdateAnalysis',
+              'quicksight:RestoreAnalysis',
+              'quicksight:DeleteAnalysis',
+              'quicksight:UpdateAnalysisPermissions',
+              'quicksight:DescribeAnalysisPermissions',
+            ],
+          }],
+          Definition: dashboard as AnalysisDefinition,
+        });
+
+        //crate QuickSight dashboard
+        await quickSight.createDashboard({
+          AwsAccountId: awsAccountId,
+          DashboardId: `dashboard-${uuidv4()}`,
+          Name: `dashboard-${viewName}`,
+          Permissions: [{
+            Principal: dashboardCreateParameters.quickSightPricipal,
+            Actions: [
+              'quicksight:DescribeDashboard',
+              'quicksight:ListDashboardVersions',
+              'quicksight:QueryDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:DeleteDashboard',
+              'quicksight:UpdateDashboardPermissions',
+              'quicksight:DescribeDashboardPermissions',
+              'quicksight:UpdateDashboardPublishedVersion',
+            ],
+          }],
+          Definition: dashboard,
+        });
+        logger.info('funnel chart successfully created')
+      } else {
+        //crate QuickSight analysis
+        await quickSight.updateAnalysis({
+          AwsAccountId: awsAccountId,
+          AnalysisId: query.analysisId,
+          Name:  query.analysisName,
+          Definition: dashboard as AnalysisDefinition,
+        });
+
+        //crate QuickSight dashboard
+        const newDashboard = await quickSight.updateDashboard({
+          AwsAccountId: awsAccountId,
+          DashboardId: query.dashboardId,
+          Name: query.dashboardName,
+          Definition: dashboard,
+        });
+        const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1)
+
+        for (const _i of Array(60).keys()) {
+          try {
+            await quickSight.updateDashboardPublishedVersion({
+              AwsAccountId: awsAccountId,
+              DashboardId: query.dashboardId,
+              VersionNumber: Number.parseInt(versionNumber!),
+            })
+      
+          } catch (err: any) {
+            if (err instanceof ConflictException ) {
+              logger.warn(`sleep 1000ms to wait updateDashboard finish`)
+              sleep(1000)
+            }
+          }
+        }
+
+        logger.info('funnel chart successfully updated')
+      }
 
       return res.status(201).json(new ApiSuccess({ }, 'funnel visual created'));
     } catch (error) {
@@ -206,4 +252,8 @@ export class ReportingServ {
   };
 
 }
+
+function sleep(ms: number) {
+  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
+};
 

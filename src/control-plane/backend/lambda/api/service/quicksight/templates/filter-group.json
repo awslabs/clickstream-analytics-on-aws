@@ -8,6 +8,14 @@
                   "DataSetIdentifier": "",
                   "ColumnName": ""
               },
+              "IncludeMinimum": true,
+              "IncludeMaximum": true,
+              "RangeMinimumValue": {
+                  "StaticValue": ""
+              },
+              "RangeMaximumValue": {
+                  "StaticValue": ""
+              },
               "NullOption": "NON_NULLS_ONLY",
               "TimeGranularity": "DAY"
           }
