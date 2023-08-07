@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { buildFunnelDataSql } from '../../common/sql-builder';
+import { buildFunnelDataSql } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -41,6 +41,7 @@ describe('SQL Builder test', () => {
 
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
@@ -389,6 +390,7 @@ describe('SQL Builder test', () => {
 
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
@@ -737,6 +739,7 @@ describe('SQL Builder test', () => {
 
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
@@ -1092,6 +1095,7 @@ describe('SQL Builder test', () => {
 
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
@@ -1478,6 +1482,7 @@ describe('SQL Builder test', () => {
           eventName: 'note_export',
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
@@ -1885,6 +1890,7 @@ describe('SQL Builder test', () => {
           eventName: 'note_export',
         },
       ],
+      timeScopeType: 'FIXED',
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
       groupColumn: 'day',
