@@ -24,10 +24,10 @@ declare global {
     id: string;
     type: string;
     prefix: string;
-  
+
     projectId: string;
     appId: string;
-  
+
     name: string;
     displayName: string;
     description: string;
@@ -35,17 +35,17 @@ declare global {
     hasData: boolean;
     platform: MetadataPlatform;
     dataVolumeLastDay: number;
-    associatedParameters? : IMetadataRelation[];
+    associatedParameters?: IMetadataRelation[];
   }
 
   interface IMetadataEventParameter {
     id: string;
     type: string;
     prefix: string;
-  
+
     projectId: string;
     appId: string;
-  
+
     parameterId: string;
     name: string;
     displayName: string;
@@ -56,15 +56,25 @@ declare global {
     parameterType: MetadataParameterType;
     valueType: MetadataValueType;
     valueEnum: IMetadataAttributeValue[];
-    associatedEvents? : IMetadataRelation[];
+    associatedEvents?: IMetadataRelation[];
   }
 
   interface IMetadataUserAttribute {
     id: string;
+    type: string;
+    prefix: string;
+
+    projectId: string;
+    appId: string;
+
+    attributeId: string;
     name: string;
     displayName: string;
     description: string;
-    type: string;
+    metadataSource: MetadataSource;
+    hasData: boolean;
+    valueType: MetadataValueType;
+    valueEnum: IMetadataAttributeValue[];
   }
 
   interface IMetadataAttributeValue {

@@ -24,6 +24,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataSource } from 'ts/const';
 import MetadataEventSplitPanel from './MetadataEventSplitPanel';
+import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
+import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { descriptionRegex, displayNameRegex } from '../table/table-config';
 
@@ -109,14 +111,8 @@ const MetadataEvents: React.FC = () => {
       id: 'metadataSource',
       header: t('analytics:metadata.event.tableColumnMetadataSource'),
       sortingField: 'metadataSource',
-      cell: (e: { metadataSource: string }) => {
-        return (
-          <Badge
-            color={e.metadataSource === MetadataSource.CUSTOM ? 'blue' : 'grey'}
-          >
-            {e.metadataSource}
-          </Badge>
-        );
+      cell: (e: { metadataSource: MetadataSource }) => {
+        return <MetadataSourceFC source={e.metadataSource} />;
       },
     },
     {
@@ -144,7 +140,7 @@ const MetadataEvents: React.FC = () => {
       header: t('analytics:metadata.event.tableColumnDataVolumeLastDay'),
       sortingField: 'dataVolumeLastDay',
       cell: (e: { dataVolumeLastDay: number }) => {
-        return e.dataVolumeLastDay;
+        return <MetadataDataVolumeFC dataVolume={e.dataVolumeLastDay} />;
       },
     },
   ];

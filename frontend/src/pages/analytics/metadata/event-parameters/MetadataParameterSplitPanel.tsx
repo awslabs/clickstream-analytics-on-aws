@@ -33,6 +33,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataSource } from 'ts/const';
+import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataParameterSplitPanelProps {
@@ -172,11 +173,7 @@ const MetadataParameterSplitPanel: React.FC<
         <div>
           <TextContent>
             <h1>{parameterDetails.name}</h1>
-            {parameterDetails.metadataSource === MetadataSource.CUSTOM ? (
-              <Badge color="blue">{MetadataSource.CUSTOM}</Badge>
-            ) : (
-              <Badge>{MetadataSource.PRESET}</Badge>
-            )}
+            <MetadataSourceFC source={parameterDetails.metadataSource} />
           </TextContent>
           <br />
           <ColumnLayout columns={3} variant="text-grid">

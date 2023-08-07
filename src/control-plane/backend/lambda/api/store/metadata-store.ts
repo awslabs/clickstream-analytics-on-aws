@@ -24,7 +24,7 @@ export interface MetadataStore {
   createEventParameter: (eventParameter: IMetadataEventParameter) => Promise<string>;
   getEventParameter: (projectId: string, appId: string, eventParameterId: string) => Promise<any>;
   updateEventParameter: (eventParameter: IMetadataEventParameter) => Promise<void>;
-  listEventParameters: (projectId: string, appId: string, order: string) => Promise<IMetadataEventParameter[]>;
+  listEventParameters: (projectId: string, appId: string, order: string, source?: string) => Promise<IMetadataEventParameter[]>;
   deleteEventParameter: (projectId: string, appId: string, eventParameterId: string, operator: string) => Promise<void>;
   isEventParameterExisted: (projectId: string, appId: string, eventParameterId: string) => Promise<boolean>;
 

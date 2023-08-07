@@ -75,10 +75,14 @@ export interface IMetadataUserAttribute {
   readonly projectId: string;
   readonly appId: string;
 
+  readonly attributeId: string;
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
   readonly metadataSource: MetadataSource;
+  readonly hasData: boolean;
+  readonly valueType: MetadataValueType;
+  readonly valueEnum: IMetadataAttributeValue[];
 
   readonly createAt: number;
   readonly updateAt: number;

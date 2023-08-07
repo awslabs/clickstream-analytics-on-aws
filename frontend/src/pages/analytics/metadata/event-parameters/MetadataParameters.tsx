@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataSource } from 'ts/const';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
+import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
@@ -113,14 +114,8 @@ const MetadataParameters: React.FC = () => {
     {
       id: 'metadataSource',
       header: t('analytics:metadata.eventParameter.tableColumnMetadataSource'),
-      cell: (e: { metadataSource: string }) => {
-        return (
-          <Badge
-            color={e.metadataSource === MetadataSource.CUSTOM ? 'blue' : 'grey'}
-          >
-            {e.metadataSource}
-          </Badge>
-        );
+      cell: (e: { metadataSource: MetadataSource }) => {
+        return <MetadataSourceFC source={e.metadataSource} />;
       },
     },
     {

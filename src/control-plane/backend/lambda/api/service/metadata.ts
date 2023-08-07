@@ -186,7 +186,7 @@ export class MetadataUserAttributeServ {
   public async add(req: any, res: any, next: any) {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
-      req.body.id = uuidv4().replace(/-/g, '');
+      req.body.attributeId = uuidv4().replace(/-/g, '');
       const userAttribute: IMetadataUserAttribute = req.body;
       const id = await metadataStore.createUserAttribute(userAttribute);
       return res.status(201).json(new ApiSuccess({ id }, 'User attribute created.'));
@@ -213,7 +213,7 @@ export class MetadataUserAttributeServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const userAttribute: IMetadataUserAttribute = req.body as IMetadataUserAttribute;
-      const isEventExisted = await metadataStore.isUserAttributeExisted(userAttribute.projectId, userAttribute.appId, userAttribute.id);
+      const isEventExisted = await metadataStore.isUserAttributeExisted(userAttribute.projectId, userAttribute.appId, userAttribute.attributeId);
       if (!isEventExisted) {
         return res.status(404).json(new ApiFail('User attribute not found'));
       }

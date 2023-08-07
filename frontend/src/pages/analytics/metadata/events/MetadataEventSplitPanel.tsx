@@ -30,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataSource } from 'ts/const';
+import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
 interface MetadataEventSplitPanelProps {
@@ -175,11 +176,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
         <div>
           <TextContent>
             <h1>{eventDetails.name}</h1>
-            {eventDetails.metadataSource === MetadataSource.CUSTOM ? (
-              <Badge color="blue">{MetadataSource.CUSTOM}</Badge>
-            ) : (
-              <Badge>{MetadataSource.PRESET}</Badge>
-            )}
+            <MetadataSourceFC source={eventDetails.metadataSource} />
           </TextContent>
           <br />
           <ColumnLayout columns={3} variant="text-grid">
