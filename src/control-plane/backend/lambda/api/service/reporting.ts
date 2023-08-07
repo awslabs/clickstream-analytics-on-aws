@@ -24,7 +24,8 @@ import {
   getVisualDef, 
   getVisualRalatedDefs, 
   applyChangeToDashboard, 
-  getDashboardDefinitionFromArn
+  getDashboardDefinitionFromArn,
+  CreateDashboardResult
 } from './quicksight/reporting-utils';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { logger } from '../common/powertools';
@@ -165,12 +166,16 @@ export class ReportingServ {
 
       logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
+
+      let result: CreateDashboardResult
+
       if (!query.dashboardId) {
 
         //crate QuickSight analysis
-        await quickSight.createAnalysis({
+        const analysisId = `analysis${uuidv4()}`
+        const newAnalysis = await quickSight.createAnalysis({
           AwsAccountId: awsAccountId,
-          AnalysisId: `analysis${uuidv4()}`,
+          AnalysisId: analysisId,
           Name: `analysis-${viewName}`,
           Permissions: [{
             Principal: dashboardCreateParameters.quickSightPricipal,
@@ -188,10 +193,11 @@ export class ReportingServ {
         });
 
         //crate QuickSight dashboard
-        await quickSight.createDashboard({
+        const dashboardId = `dashboard-${uuidv4()}`;
+        const newDashboard = await quickSight.createDashboard({
           AwsAccountId: awsAccountId,
-          DashboardId: `dashboard-${uuidv4()}`,
-          Name: `dashboard-${viewName}`,
+          DashboardId: dashboardId,
+          Name: `dashboard${viewName}`,
           Permissions: [{
             Principal: dashboardCreateParameters.quickSightPricipal,
             Actions: [
@@ -208,9 +214,20 @@ export class ReportingServ {
           Definition: dashboard,
         });
         logger.info('funnel chart successfully created')
+
+        result = {
+          dashboardId,
+          dashboardArn: newDashboard.Arn!,
+          dashboardName: `analysis-${viewName}`,
+          dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
+          analysisId,
+          analysisArn: newAnalysis.Arn!,
+          analysisaName: `analysis-${viewName}`,
+          visualId
+        }
       } else {
         //crate QuickSight analysis
-        await quickSight.updateAnalysis({
+        const newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
           Name:  query.analysisName,
@@ -236,16 +253,27 @@ export class ReportingServ {
       
           } catch (err: any) {
             if (err instanceof ConflictException ) {
-              logger.warn(`sleep 1000ms to wait updateDashboard finish`)
-              sleep(1000)
+              logger.warn(`sleep 100ms to wait updateDashboard finish`)
+              sleep(100)
             }
           }
+        }
+
+        result = {
+          dashboardId: query.dashboardId,
+          dashboardArn: newDashboard.Arn!,
+          dashboardName: query.dashboardName,
+          dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
+          analysisId: query.analysisId,
+          analysisArn: newAnalysis.Arn!,
+          analysisaName: query.analysisName,
+          visualId
         }
 
         logger.info('funnel chart successfully updated')
       }
 
-      return res.status(201).json(new ApiSuccess({ }, 'funnel visual created'));
+      return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
