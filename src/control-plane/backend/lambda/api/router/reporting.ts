@@ -12,7 +12,6 @@
  */
 
 import express from 'express';
-// import { validate } from '../common/request-valid';
 import { logger } from '../common/powertools';
 import { ReportingServ } from '../service/reporting';
 

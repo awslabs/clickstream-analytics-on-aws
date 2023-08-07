@@ -76,6 +76,17 @@ export interface DashboardCreateInputParameters {
   readonly store: ClickStreamStore;
 }
 
+export interface CreateDashboardResult {
+  readonly dashboardId: string;
+  readonly dashboardName: string;
+  readonly dashboardArn: string;
+  readonly dashboardVersion: number;
+  readonly analysisId: string;
+  readonly analysisaName: string;
+  readonly analysisArn: string;
+  readonly visualId: string;
+}
+
 export const funnelVisualColumns: InputColumn[] = [
   {
     Name: 'event_date',
