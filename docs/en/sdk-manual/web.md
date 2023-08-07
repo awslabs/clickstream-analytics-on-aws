@@ -44,88 +44,7 @@ ClickstreamAnalytics.record({
   attributes: { _channel: 'SMS', Successful: true }
 });
 ```
-
-#### Login and logout
-
-```typescript
-import { ClickstreamAnalytics } from '@aws/clickstream-web';
-
-// when user login success.
-ClickstreamAnalytics.setUserId("UserId");
-
-// when user logout
-ClickstreamAnalytics.setUserId(null);
-```
-
-#### Add user attribute
-
-```typescript
-ClickstreamAnalytics.setUserAttributes({
-  userName:"carl",
-  userAge: 22
-});
-```
-
-Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
-
-#### Other configurations
-
-In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage:
-
-```typescript
-import { ClickstreamAnalytics, EventMode, PageType } from '@aws/clickstream-web';
-
-ClickstreamAnalytics.configure({
-   appId: "your appId",
-   endpoint: "https://example.com/collect",
-   sendMode: EventMode.Batch,
-   sendEventsInterval: 5000,
-   isTrackPageViewEvents: true,
-   isTrackClickEvents: true,
-   isTrackSearchEvents: true,
-   isTrackScrollEvents: true,
-   pageType: PageType.SPA,
-   isLogEvents: false,
-   authCookie: "your auth cookie",
-   sessionTimeoutDuration: 1800000,
-   searchKeyWords: ['product', 'class'],
-   domainList: ['example1.com', 'example2.com'],
-});
-```
-
-Here is an explanation of each property:
-
-- **appId (Required)**: the app id of your project in control plane.
-- **endpoint (Required)**: the endpoint path you will upload the event to AWS server.
-- **sendMode**: EventMode.Immediate, EventMode.Batch, default is Immediate mode.
-- **sendEventsInterval**: event sending interval millisecond, works only bath send mode, the default value is `5000`
-- **isTrackPageViewEvents**: whether auto record page view events in browser, default is `true`
-- **isTrackClickEvents**: whether auto record link click events in browser, default is `true`
-- **isTrackSearchEvents**: whether auto record search result page events in browser, default is `true`
-- **isTrackScrollEvents**: whether auto record page scroll events in browser, default is `true`
-- **pageType**: the website type, `SPA` for single page application, `multiPageApp` for multiple page application, default is `SPA`. This attribute works only when the attribute `isTrackPageViewEvents`'s value is `true`.
-- **isLogEvents**: whether to print out event json for debugging, default is false.
-- **authCookie**: your auth cookie for AWS application load balancer auth cookie.
-- **sessionTimeoutDuration**: the duration for session timeout millisecond, default is 1800000
-- **searchKeyWords**: the customized Keywords for trigger the `_search` event, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters.
-- **domainList**: if your website cross multiple domain, you can customize the domain list. The `_outbound` attribute of the `_click` event will be true when a link leads to a website that's not a part of your configured domain.
-
-#### Configuration update
-
-You can update the default configuration after initializing the SDK, below are the additional configuration options you can customize.
-
-```typescript
-import { ClickstreamAnalytics } from '@aws/clickstream-web';
-
-ClickstreamAnalytics.updateConfigure({
-  isLogEvents: true,
-  authCookie: 'your auth cookie',
-  isTrackPageViewEvents: false,
-  isTrackClickEvents: false,
-  isTrackScrollEvents: false,
-  isTrackSearchEvents: false,
-});
-```
+For more usage refer to [GitHub start using](https://github.com/awslabs/clickstream-web#start-using)
 
 ## Data format definition
 
@@ -141,7 +60,7 @@ Clickstream Web SDK supports the following data types:
 
 ### Naming rules
 
-1. The event name and attribute name cannot start with a number, and only contains: uppercase and lowercase letters, numbers, underscores, if the event name is invalid, the SDK will record `_clickstream_error` event, if the attribute or user attribute name is invalid, the attribute will discard and also record `_clickstream_error` event.
+1. The event name and attribute name cannot start with a number, and only contains: uppercase and lowercase letters, numbers, underscores, if the event name is invalid, the SDK will record `_clickstream_error` event, if the attribute or user attribute name is invalid, the attribute will be discarded and also record `_clickstream_error` event.
 
 2. Do not use `_` as prefix to naming event name and attribute name, `_` is the preset from Clickstream Analytics.
 
@@ -151,20 +70,18 @@ Clickstream Web SDK supports the following data types:
 
 In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:
 
-In order to improve the efficiency of querying and analysis, we need to limit events as follows:
-
-| Name                            | Suggestion          | Hard limit          | strategy                         | error code |
-| ------------------------------- | ------------------- | ------------------- | -------------------------------- | ---------- |
-| Event name invalid              | --                  | --                  | record `_clickstream_error`event | 1001       |
-| Length of event name            | under 25 character  | 50 character        | discard, record error event      | 1002       |
-| Length of event attribute name  | under 25 character  | 50 character        | discard, log and record error    | 2001       |
-| Attribute name invalid          | --                  | --                  | record `_clickstream_error`event | 2002       |
-| Length of event attribute value | under 100 character | 1024 character      | discard, log and record error    | 2003       |
-| Event attribute per event       | under 50 attribute  | 500 evnet attribute | discard, log and record error    | 2004       |
-| User attribute number           | under 25 attribute  | 100 user attribute  | discard, log and record error    | 3001       |
-| Length of User attribute name   | under 25 character  | 50 character        | discard, log and record error    | 3002       |
-| User attribute name invalid     | --                  | --                  | record `_clickstream_error`event | 3003       |
-| Length of User attribute value  | under 50 character  | 256 character       | discard, log and record error    | 3004       |
+| Name                            | Suggestion            | Hard limit            | strategy                           | error code   |
+|---------------------------------|-----------------------|-----------------------|------------------------------------|--------------|
+| Event name invalid              | --                    | --                    | record `_clickstream_error`event   | 1001         |
+| Length of event name            | under 25 character    | 50 character          | discard, record error event        | 1002         |
+| Length of event attribute name  | under 25 character    | 50 character          | discard, log and record error      | 2001         |
+| Attribute name invalid          | --                    | --                    | record `_clickstream_error`event   | 2002         |
+| Length of event attribute value | under 100 character   | 1024 character        | discard, log and record error      | 2003         |
+| Event attribute per event       | under 50 attribute    | 500 evnet attribute   | discard, log and record error      | 2004         |
+| User attribute number           | under 25 attribute    | 100 user attribute    | discard, log and record error      | 3001         |
+| Length of User attribute name   | under 25 character    | 50 character          | discard, log and record error      | 3002         |
+| User attribute name invalid     | --                    | --                    | record `_clickstream_error`event   | 3003         |
+| Length of User attribute value  | under 50 character    | 256 character         | discard, log and record error      | 3004         |
 
 !!! info "Important"
 
@@ -178,18 +95,18 @@ In order to improve the efficiency of querying and analysis, we need to limit ev
 
 Automatically collected events:
 
-| Event name         | Triggered                                                                                               | Event Attributes                                                                                                                                                                                                                                                                                                    |
-|--------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _session_start     | first visit or the user is more than 30 minutes away from the last exit                                 | 1._session_id <br>2._session_start_timestamp<br>3._session_duration                                                                                                                                                                                                                                                 |
-| _page_view         | when new page is open                                                                                   | 1._page_url<br>2._page_referrer                                                                                                                                                                                                                                                                                     |
-| _first_open        | the first time user launches an website                                                                 |                                                                                                                                                                                                                                                                                                                     |
-| _app_start         | every time the browser goes to visibility                                                               | 1._is_first_time                                                                                                                                                                                                                                                                                                    |
-| _user_engagement   | when the webpage is in focus at least one second                                                        | 1._engagement_time_msec<br>                                                                                                                                                                                                                                                                                         |
-| _profile_set       | when the `addUserAttributes()` or `setUserId()` api called                                              |                                                                                                                                                                                                                                                                                                                     |
-| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible) | 1._engagement_time_msec                                                                                                                                                                                                                                                                                             |
-| _search            | each time a user performs a site search, indicated by the presence of a URL query parameter             | 1._search_key (the keyword name)<br>2._search_term (the search content)                                                                                                                                                                                                                                             |
-| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list)      | 1._link_classes (the content of `class` in tag `<a>` )<br>2._link_domain (the domain of `herf` in tag `<a>` )<br>3._link_id (the content of `id` in tag `<a>` )<br>4._link_url (the content of `herf` in tag `<a>` )<br>5._outbound (if the domain is not in configured domain list, the attribute value is `true`) |
-| _clickstream_error | event_name is invalid or user attribute is invalid                                                      | 1._error_code <br>2._error_value                                                                                                                                                                                                                                                                                    |
+| Event name         | Triggered                                                                                                                                                                         | Event Attributes                                                                                                                                                                                                                                                                                                    |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _session_start     | when a user first visit the site or a user returns to the website after 30 minutes of inactivity period                                                                           | 1._session_id <br>2._session_start_timestamp<br>3._session_duration                                                                                                                                                                                                                                                 |
+| _page_view         | when new page is open                                                                                                                                                             | 1._page_url<br>2._page_referrer                                                                                                                                                                                                                                                                                     |
+| _first_open        | the first time user launches an website                                                                                                                                           |                                                                                                                                                                                                                                                                                                                     |
+| _app_start         | every time the browser goes to visibility                                                                                                                                         | 1._is_first_time                                                                                                                                                                                                                                                                                                    |
+| _user_engagement   | when the webpage is in focus at least one second                                                                                                                                  | 1._engagement_time_msec<br>                                                                                                                                                                                                                                                                                         |
+| _profile_set       | when the `addUserAttributes()` or `setUserId()` api called                                                                                                                        |                                                                                                                                                                                                                                                                                                                     |
+| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible)                                                                           | 1._engagement_time_msec                                                                                                                                                                                                                                                                                             |
+| _search            | each time a user performs a site search, indicated by the presence of a URL query parameter, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters.  | 1._search_key (the keyword name)<br>2._search_term (the search content)                                                                                                                                                                                                                                             |
+| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list)                                                                                | 1._link_classes (the content of `class` in tag `<a>` )<br>2._link_domain (the domain of `herf` in tag `<a>` )<br>3._link_id (the content of `id` in tag `<a>` )<br>4._link_url (the content of `herf` in tag `<a>` )<br>5._outbound (if the domain is not in configured domain list, the attribute value is `true`) |
+| _clickstream_error | event_name is invalid or user attribute is invalid                                                                                                                                | 1._error_code <br>2._error_value                                                                                                                                                                                                                                                                                    |
 
 #### Session definition
 
@@ -270,26 +187,26 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 #### Common attribute
 
-| attribute        | describe                                                          | how to generate                                                                                                                                                                                                                                         | use and purpose                                                                                      |
-|------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| hashCode         | the event object's hash code                                      | calculate by library @aws-crypto/sha256-js                                                                                                                                                                                                              | distinguish different event                                                                          |
-| app_id           | clickstream app id                                                | generated when clickstream app create from solution control plane.                                                                                                                                                                                      | identify the events for your apps                                                                    |
-| unique_id        | the unique id for user                                            | generate from `uuidV4()` when the sdk first initialization<br> it will be changed after user relogin to another user who never login, and when user relogin to the before user in same browser, the unique_id will reset to the before user's unique_id | the unique for identity different user and associating the behavior of logging in and not logging in |
-| device_id        | the unique id for device                                          | generate form `uuidV4()` when the website is first open, then the uuid will stored in localStorage and will never change it                                                                                                                             | distinguish different device                                                                         |
-| event_type       | event name                                                        | set by developer or SDK                                                                                                                                                                                                                                 | distinguish different event type                                                                     |
-| event_id         | the unique id for event                                           | generate from `uuidV4()` when the event create                                                                                                                                                                                                          | distinguish each event                                                                               |
-| timestamp        | event create timestamp                                            | generate from `new Date().getTime()` when event create                                                                                                                                                                                                  | data analysis needs                                                                                  |
-| platform         | the platform name                                                 | for browser is always `Web`                                                                                                                                                                                                                             | data analysis needs                                                                                  |
-| make             | the browser make                                                  | generate from `window.navigator.product` or `window.navigator.vendor`                                                                                                                                                                                   | data analysis needs                                                                                  |
-| screen_height    | the website window height pixel                                   | generate from `window.innerHeight`                                                                                                                                                                                                                      | data analysis needs                                                                                  |
-| screen_width     | the website window width pixel                                    | generate from `window.innerWidth`                                                                                                                                                                                                                       | data analysis needs                                                                                  |
-| zone_offset      | the device raw offset from GMT in milliseconds.                   | generate from `-currentDate.getTimezoneOffset()*60000`                                                                                                                                                                                                  | data analysis needs                                                                                  |
-| locale           | the default locale(language, country and variant) for the browser | generate from `window.navigator.language`                                                                                                                                                                                                               | data analysis needs                                                                                  |
-| system_language  | the browser language code                                         | generate from `window.navigator.language`                                                                                                                                                                                                               | data analysis needs                                                                                  |
-| country_code     | country/region code for the browser                               | generate from `window.navigator.language`                                                                                                                                                                                                               | data analysis needs                                                                                  |
-| sdk_version      | clickstream sdk version                                           | generate from `package.json`                                                                                                                                                                                                                            | data analysis needs                                                                                  |
-| sdk_name         | clickstream sdk name                                              | this will always be `aws-solution-clickstream-sdk`                                                                                                                                                                                                      | data analysis needs                                                                                  |
-| host_name        | the website hostname                                              | generate from `window.location.hostname`                                                                                                                                                                                                                | data analysis needs                                                                                  |
+| attribute        | describe                                                          | how to generate                                                                                                                                                                                                                                           | use and purpose                                                                                      |
+|------------------|-------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| hashCode         | the event object's hash code                                      | calculate by library `@aws-crypto/sha256-js`                                                                                                                                                                                                              | distinguish different event                                                                          |
+| app_id           | clickstream app id                                                | generated when clickstream app create from solution control plane.                                                                                                                                                                                        | identify the events for your apps                                                                    |
+| unique_id        | the unique id for user                                            | generate from `uuidV4()` when the sdk first initialization<br> it will be changed after user re-login to another user who never login, and when user re-login to the before user in same browser, the unique_id will reset to the before user's unique_id | the unique for identity different user and associating the behavior of logging in and not logging in |
+| device_id        | the unique id for device                                          | generate form `uuidV4()` when the website is first open, then the uuid will stored in localStorage and will never change it                                                                                                                               | distinguish different device                                                                         |
+| event_type       | event name                                                        | set by developer or SDK                                                                                                                                                                                                                                   | distinguish different event type                                                                     |
+| event_id         | the unique id for event                                           | generate from `uuidV4()` when the event create                                                                                                                                                                                                            | distinguish each event                                                                               |
+| timestamp        | event create timestamp                                            | generate from `new Date().getTime()` when event create                                                                                                                                                                                                    | data analysis needs                                                                                  |
+| platform         | the platform name                                                 | for browser is always `Web`                                                                                                                                                                                                                               | data analysis needs                                                                                  |
+| make             | the browser make                                                  | generate from `window.navigator.product` or `window.navigator.vendor`                                                                                                                                                                                     | data analysis needs                                                                                  |
+| screen_height    | the website window height pixel                                   | generate from `window.innerHeight`                                                                                                                                                                                                                        | data analysis needs                                                                                  |
+| screen_width     | the website window width pixel                                    | generate from `window.innerWidth`                                                                                                                                                                                                                         | data analysis needs                                                                                  |
+| zone_offset      | the device raw offset from GMT in milliseconds.                   | generate from `-currentDate.getTimezoneOffset()*60000`                                                                                                                                                                                                    | data analysis needs                                                                                  |
+| locale           | the default locale(language, country and variant) for the browser | generate from `window.navigator.language`                                                                                                                                                                                                                 | data analysis needs                                                                                  |
+| system_language  | the browser language code                                         | generate from `window.navigator.language`                                                                                                                                                                                                                 | data analysis needs                                                                                  |
+| country_code     | country/region code for the browser                               | generate from `window.navigator.language`                                                                                                                                                                                                                 | data analysis needs                                                                                  |
+| sdk_version      | clickstream sdk version                                           | generate from `package.json`                                                                                                                                                                                                                              | data analysis needs                                                                                  |
+| sdk_name         | clickstream sdk name                                              | this will always be `aws-solution-clickstream-sdk`                                                                                                                                                                                                        | data analysis needs                                                                                  |
+| host_name        | the website hostname                                              | generate from `window.location.hostname`                                                                                                                                                                                                                  | data analysis needs                                                                                  |
 
 #### Reserved attributes
 
@@ -304,18 +221,16 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 **Event attributes**
 
-| Attribute name           | Description                                                                                                               |
-|--------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged.           |
-| _traffic_source_name     | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. |
-| _traffic_source_source   | Reserved for traffic source. Name of the network source that acquired the user when the event were reported.              |
-| _device_vendor_id        | Vendor id of the device.                                                                                                  |
-| _device_advertising_id   | Advertising id of the device.                                                                                             |
-| _entrances               | Added in `_screen_view` event. The first `_screen_view` event in a session has the value 1, and others 0.                 |
-| _session_id              | Added in all events.                                                                                                      |
-| _session_start_timestamp | Added in all events.                                                                                                      |
-| _session_duration        | Added in all events.                                                                                                      |
-| _session_number          | Added in all events. The initial value is 1, and the value is automatically incremented by user device.                   |
-| _error_code              | The `_clickstream_error` event's attribute.                                                                               |
-| _page_title              | Added in all events.                                                                                                      |
-| _page_url                | Added in all events.                                                                                                      |
+| Attribute name           | Description                                                                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_medium   | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_name     | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion        |
+| _traffic_source_source   | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _entrances               | Added in `_page_view` event. The first `_page_view` event in a session has the value 1, and others 0.                                                      |
+| _session_id              | Added in all events.                                                                                                                                       |
+| _session_start_timestamp | Added in all events.                                                                                                                                       |
+| _session_duration        | Added in all events.                                                                                                                                       |
+| _session_number          | Added in all events. The initial value is 1, and the value is automatically incremented by user device.                                                    |
+| _error_code              | The `_clickstream_error` event's attribute.                                                                                                                |
+| _page_title              | Added in all events.                                                                                                                                       |
+| _page_url                | Added in all events.                                                                                                                                       |

@@ -2,6 +2,7 @@
 
 - [Android](./android.md)
 - [Swift](./swift.md)
+- [Web](./web.md)
 
 ## 主要功能和优势
 

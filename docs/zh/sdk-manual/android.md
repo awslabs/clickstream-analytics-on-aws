@@ -12,13 +12,13 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ## 集成 SDK
 
-### 1. 包含 SDK
+### 1. 添加 SDK
 
 将以下依赖项添加到您的 `app` 模块的 `build.gradle` 文件中。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.5.1'
+    implementation 'software.aws.solution:clickstream:0.5.2'
 }
 ```
 
@@ -50,8 +50,8 @@ dependencies {
 
 在文件中，您的 `appId` 和 `endpoint` 已经配置好。每个属性的说明如下：
 
-- **appId**：控制平面上项目的应用程序 ID。
-- **endpoint**：将事件上传到 AWS 服务器的端点 URL。
+- **appId（必须）**：控制平面上项目的应用程序 ID。
+- **endpoint（必须）**：将事件上传到 AWS 服务器的端点 URL。
 - **isCompressEvents**：上传事件时是否压缩事件内容，默认值为 `true`。
 - **autoFlushEventsInterval**：事件发送间隔，默认值为 `10s`。
 - **isTrackAppExceptionEvents**：是否自动跟踪应用程序中的异常事件，默认值为 `false`。
@@ -67,7 +67,7 @@ public void onCreate() {
     super.onCreate();
 
     try {
-        ClickstreamAnalytics.init(this);
+        ClickstreamAnalytics.init(getApplicationContext());
         Log.i("MyApp", "Initialized ClickstreamAnalytics");
     } catch (AmplifyException error) {
         Log.e("MyApp", "Could not initialize ClickstreamAnalytics", error);
@@ -100,7 +100,7 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 ### 5. 记录事件
 
-在需要报告事件的位置添加以下代码。有关更多信息，请参阅 [Github](https://github.com/awslabs/clickstream-android#start-using)。
+在需要报告事件的位置添加以下代码。有关更多信息，请参阅 [GitHub](https://github.com/awslabs/clickstream-android#start-using)。
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
@@ -158,7 +158,7 @@ Clickstream Android SDK 支持以下数据类型：
 !!! info "重要提示"
 
     - 字符限制对于单字节字符语言（例如英语）和双字节字符语言（例如中文）是相同的。
-    - 事件属性数每个事件包括常见属性和预设属性。
+    - 事件属性数包括事件中公共属性和预设属性。
     - 如果添加了具有相同名称的属性或用户属性超过两次，将使用最新的值。
 
 ## 预置事件和属性
@@ -182,13 +182,13 @@ Clickstream Android SDK 支持以下数据类型：
 
 在 Clickstream Android SDK 中，我们不限制会话的总时间。只要应用程序的下一次进入时间与上次退出时间之间的时间在允许的超时期限内，当前会话就被视为连续的。
 
-- **_session_start**：当应用程序首次启动或应用程序进入前台，并且与上次退出的时间间隔超过 `session_time_out` 期限时，触发此事件。
+- **_session_start（会话开始）**：当应用程序首次启动或应用程序进入前台，并且与上次退出的时间间隔超过 `session_time_out` 期限时，触发此事件。
 
-- **_session_duration**：我们通过当前事件创建时间戳与会话的 `_session_start_timestamp` 相减来计算 `_session_duration`。在会话期间的每个事件中都会添加此属性。
+- **_session_duration（会话时长）**：我们通过当前事件创建时间戳与会话的 `_session_start_timestamp` 相减来计算 `_session_duration`。在会话期间的每个事件中都会添加此属性。
 
-- **session_time_out**：默认为 30 分钟，可以通过配置 API 进行自定义设置。
+- **session_time_out（会话超时）**：默认为 30 分钟，可以通过配置 API 进行自定义设置。
 
-- **_session_number**：不同会话 ID 的总会话数，每个事件的属性对象中都会出现 `_session_number`。
+- **_session_number（会话数）**：不同会话 ID 的总会话数，每个事件的属性对象中都会出现 `_session_number`。
 
 #### 用户参与度定义
 
@@ -301,16 +301,16 @@ Clickstream Android SDK 支持以下数据类型：
 
 **事件属性**
 
-| 属性名称                     | 描述                                                     |
-| ------------------------ | ------------------------------------------------------ |
-| _traffic_source_medium   | 保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介                         |
-| _traffic_source_name     | 保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity                 |
-| _traffic_source_source   | 保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称                       |
-| _channel                 | 下载应用程序的渠道                                              |
-| _device_vendor_id        | 设备供应商ID                                                    |
-| _device_advertising_id   | 设备广告ID                                                    |
+| 属性名称                     | 描述                                                            |
+|--------------------------|---------------------------------------------------------------|
+| _traffic_source_medium   | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎                 |
+| _traffic_source_name     | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                         |
+| _traffic_source_source   | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu      |
+| _channel                 | 下载应用程序的渠道                                                     |
+| _device_vendor_id        | 设备供应商ID                                                       |
+| _device_advertising_id   | 设备广告ID                                                        |
 | _entrances               | 在 `_screen_view` 事件中添加。会话中的第一个 `_screen_view` 事件具有值 1，其他事件为 0 |
-| _session_id              | 在所有事件中添加                                               |
-| _session_start_timestamp | 在所有事件中添加                                               |
-| _session_duration        | 在所有事件中添加                                               |
-| _session_number          | 在所有事件中添加。初始值为 1，并且用户设备会自动递增该值                          |
+| _session_id              | 在所有事件中添加                                                      |
+| _session_start_timestamp | 在所有事件中添加                                                      |
+| _session_duration        | 在所有事件中添加                                                      |
+| _session_number          | 在所有事件中添加。初始值为 1，并且用户设备会自动递增该值                                 |
