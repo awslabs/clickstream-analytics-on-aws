@@ -235,6 +235,7 @@ export const SCHEDULE_EXPRESSION_PATTERN =
 export const CORS_PATTERN = `^$|\\*$|^(${DOMAIN_NAME_PATTERN}(,\\s*${DOMAIN_NAME_PATTERN})*)$`;
 export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
 export const REGION_PATTERN = '[a-z]{2}-[a-z0-9]{1,10}-[0-9]{1}';
+export const EMR_VERSION_PATTERN='^emr-[0-9]+\\.[0-9]+\\.[0-9]+$';
 
 export const METADATA_EVENT_NAME_PATTERN = '[a-z][a-z0-9_]{0,64}';
 

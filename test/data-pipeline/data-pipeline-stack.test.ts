@@ -13,8 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
-import { EMR_VERSION } from '../../src/data-pipeline/data-pipeline';
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
@@ -271,6 +270,47 @@ describe('DataPipelineStack parameter test', () => {
     });
   });
 
+  test('Should has parameter EmrVersion', () => {
+    template.hasParameter('EmrVersion', {
+      AllowedPattern: EMR_VERSION_PATTERN,
+      Default: 'emr-6.11.0',
+      Type: 'String',
+    });
+  });
+
+  test('Should check EmrVersion pattern', () => {
+    [getParameter(template, 'EmrVersion')].forEach(param => {
+      const pattern = param.AllowedPattern;
+      const regex = new RegExp(`${pattern}`);
+      const validValues = [
+        'emr-6.10.0',
+        'emr-6.9.0',
+        'emr-6.12.1',
+      ];
+
+      for (const v of validValues) {
+        expect(v).toMatch(regex);
+      }
+
+      const invalidValues = [
+        'emr6.10.0',
+        '6.9.0',
+        'emr-6.12',
+      ];
+      for (const v of invalidValues) {
+        expect(v).not.toMatch(regex);
+      }
+    });
+  });
+
+  test('Should has parameter EmrApplicationIdleTimeoutMinutes', () => {
+    template.hasParameter('EmrApplicationIdleTimeoutMinutes', {
+      Default: 5,
+      MinValue: 1,
+      MaxValue: 10080,
+      Type: 'Number',
+    });
+  });
 
   test('Should has ParameterGroups and ParameterLabels', () => {
     const cfnInterface =
@@ -278,7 +318,7 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(17);
+    expect(paramCount).toEqual(19);
   });
 
 
@@ -856,22 +896,6 @@ describe('Data Processing job submitter', () => {
     });
   });
 
-  test('Has EMR EMRServerless Application', () => {
-    template.hasResourceProperties('AWS::EMRServerless::Application', {
-      Name: Match.anyValue(),
-      ReleaseLabel: EMR_VERSION,
-      Type: 'SPARK',
-      AutoStartConfiguration: {
-        Enabled: true,
-      },
-      AutoStopConfiguration: {
-        Enabled: true,
-        IdleTimeoutMinutes: 5,
-      },
-      NetworkConfiguration: Match.anyValue(),
-    });
-  });
-
   test('The role of EMR submitter function has lambda:ListTags permission', () => {
     template.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -1222,6 +1246,145 @@ test('Plugins nested stack has CopyAssetsCustomResource', () => {
   });
 });
 
+test('Nested stack has CreateEMRServelsssApplicationCustomResource', () => {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    projectId: RefAnyValue,
+    name: {
+      'Fn::Join': [
+        '',
+        [
+          'Clickstream-Spark-APP-',
+          RefAnyValue,
+        ],
+      ],
+    },
+    version: RefAnyValue,
+    secourityGroupId: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        'GroupId',
+      ],
+    },
+    subnetIds: {
+      'Fn::Join': [
+        ',',
+        {
+          'Fn::Split': [
+            ',',
+            RefAnyValue,
+          ],
+        },
+      ],
+    },
+    idleTimeoutMinutes: RefAnyValue,
+    pipelineS3BucketName: RefAnyValue,
+    pipelineS3Prefix: RefAnyValue,
+  });
+});
+
+test('CreateEMRServelsssApplicationLambdaRole policy is set correctly', () => {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::IAM::Policy', {
+    PolicyDocument: {
+      Statement: [
+        {
+          Action: [
+            'logs:CreateLogStream',
+            'logs:PutLogEvents',
+            'logs:CreateLogGroup',
+          ],
+          Effect: 'Allow',
+          Resource: '*',
+        },
+        {
+          Action: [
+            'ec2:CreateNetworkInterface',
+            'ec2:DescribeNetworkInterfaces',
+            'ec2:DeleteNetworkInterface',
+            'ec2:AssignPrivateIpAddresses',
+            'ec2:UnassignPrivateIpAddresses',
+          ],
+          Effect: 'Allow',
+          Resource: '*',
+        },
+        {
+          Action: [
+            'emr-serverless:CreateApplication',
+            'emr-serverless:DeleteApplication',
+          ],
+          Effect: 'Allow',
+          Resource: {
+            'Fn::Join': [
+              '',
+              [
+                'arn:',
+                {
+                  Ref: 'AWS::Partition',
+                },
+                ':emr-serverless:',
+                {
+                  Ref: 'AWS::Region',
+                },
+                ':',
+                {
+                  Ref: 'AWS::AccountId',
+                },
+                ':/*',
+              ],
+            ],
+          },
+        },
+        {
+          Action: [
+            's3:GetObject*',
+            's3:GetBucket*',
+            's3:List*',
+            's3:DeleteObject*',
+            's3:PutObject',
+            's3:PutObjectLegalHold',
+            's3:PutObjectRetention',
+            's3:PutObjectTagging',
+            's3:PutObjectVersionTagging',
+            's3:Abort*',
+          ],
+          Effect: 'Allow',
+          Resource: [
+            {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':s3:::',
+                  RefAnyValue,
+                ],
+              ],
+            },
+            {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':s3:::',
+                  RefAnyValue,
+                  '/*',
+                ],
+              ],
+            },
+          ],
+        },
+      ],
+      Version: '2012-10-17',
+    },
+
+  });
+});
 
 test('AWS::Events::Rule for EMR Serverless Job Run State Change', () => {
   const template = nestedTemplates[0];

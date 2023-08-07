@@ -13,17 +13,17 @@
 
 
 import { join } from 'path';
-import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
+import { Arn, ArnFormat, Aws, CfnResource, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Function } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { createLambdaRole } from '../../common/lambda';
+import { LAMBDA_NODEJS_RUNTIME, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 
@@ -101,7 +101,7 @@ function createCopyAssetsLambda(
   props.pipelineS3Bucket.grantReadWrite(role);
 
   const fn = new NodejsFunction(scope, 'CopyAssetsCustomResourceLambda', {
-    runtime: Runtime.NODEJS_16_X,
+    runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,
       '..',
@@ -169,3 +169,108 @@ export function createInitPartitionCustomResource(
   return cr;
 }
 
+//
+//  EMRServelsssApplication
+//
+export interface EMRServelsssApplicationProps {
+  projectId: string;
+  name: string;
+  version: string;
+  secourityGroupId: string;
+  subnetIds: string;
+  idleTimeoutMinutes: number;
+  pipelineS3Bucket: IBucket;
+  pipelineS3Prefix: string;
+}
+
+function createEMRServelsssApplicationLambda(
+  scope: Construct,
+  props: EMRServelsssApplicationProps,
+): NodejsFunction {
+
+  const ermAppArn = Arn.format(
+    {
+      resource: '*',
+      region: Aws.REGION,
+      account: Aws.ACCOUNT_ID,
+      service: 'emr-serverless',
+      arnFormat: ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
+    },
+    Stack.of(scope),
+  );
+
+  const role = createLambdaRole(scope, 'CreateEMRServelsssApplicationLambdaRole', true, [
+    new PolicyStatement({
+      actions: [
+        'emr-serverless:CreateApplication',
+        'emr-serverless:DeleteApplication',
+      ],
+      resources: [`${ermAppArn}`],
+    }),
+  ]);
+
+  props.pipelineS3Bucket.grantReadWrite(role);
+
+  const fn = new NodejsFunction(scope, 'CreateEMRServelsssApplicationLambda', {
+    runtime: LAMBDA_NODEJS_RUNTIME,
+    entry: join(
+      __dirname,
+      '..',
+      'lambda',
+      'emr-serverless-app',
+      'index.ts',
+    ),
+    handler: 'handler',
+    memorySize: 256,
+    role,
+    timeout: Duration.minutes(15),
+    logRetention: RetentionDays.ONE_WEEK,
+    environment: {
+      STACK_ID: getShortIdOfStack(Stack.of(scope)),
+      PROJECT_ID: props.projectId,
+      NAME: props.name,
+      VERSION: props.version,
+      SECOURITYGROUPID: props.secourityGroupId,
+      SUBNETIDS: props.subnetIds,
+      PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
+      PIPELINE_S3_PREFIX: props.pipelineS3Prefix,
+      ... POWERTOOLS_ENVS,
+    },
+  });
+
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
+  return fn;
+}
+
+
+export function createEMRServelsssApplicationCustomResource(
+  scope: Construct,
+  props: EMRServelsssApplicationProps,
+): CustomResource {
+
+  const fn = createEMRServelsssApplicationLambda(scope, props);
+
+  const provider = new Provider(
+    scope,
+    'CreateEMRServelsssApplicationCustomResourceProvider',
+    {
+      onEventHandler: fn,
+      logRetention: RetentionDays.FIVE_DAYS,
+    },
+  );
+  const cr = new CustomResource(scope, 'CreateEMRServelsssApplicationCustomResource', {
+    serviceToken: provider.serviceToken,
+    properties: {
+      projectId: props.projectId,
+      name: props.name,
+      version: props.version,
+      secourityGroupId: props.secourityGroupId,
+      subnetIds: props.subnetIds,
+      idleTimeoutMinutes: props.idleTimeoutMinutes,
+      pipelineS3BucketName: props.pipelineS3Bucket.bucketName,
+      pipelineS3Prefix: props.pipelineS3Prefix,
+    },
+  });
+  return cr;
+}
