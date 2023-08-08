@@ -11,10 +11,8 @@
  *  and limitations under the License.
  */
 
-import { useContainerQuery } from '@cloudscape-design/component-toolkit';
 import {
   AppLayout,
-  Badge,
   Box,
   Button,
   ColumnLayout,
@@ -53,7 +51,6 @@ const AnalyticsFunnel: React.FC = () => {
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();
-          console.log(data.EmbedUrl);
           await embeddingContext.embedVisual({
             url: data.EmbedUrl,
             container: '#qs-funnel-container',
@@ -72,11 +69,12 @@ const AnalyticsFunnel: React.FC = () => {
     setLoadingData(false);
   }, []);
 
-  const [windowValue, setWindowValue] = useState<string>('5');
-  const [metricOptions, setMetricOptions] = useState<SelectProps.Options>([
+  const metricOptions = [
     { value: 'event', label: 'Event number' },
     { value: 'user', label: 'User number' },
-  ]);
+  ];
+
+  const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',
@@ -84,21 +82,19 @@ const AnalyticsFunnel: React.FC = () => {
     });
 
   const customWindowType = { value: 'custom', label: 'Custom' };
-  const [windowTypeOptions, setWindowTypeOptions] =
-    useState<SelectProps.Options>([
-      customWindowType,
-      { value: 'theDay', label: 'The Day' },
-    ]);
+  const windowTypeOptions = [
+    customWindowType,
+    { value: 'theDay', label: 'The Day' },
+  ];
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
 
-  const [windowUnitOptions, setWindowUnitOptions] =
-    useState<SelectProps.Options>([
-      { value: 'second', label: 'Second(s)' },
-      { value: 'minute', label: 'Minute(s)' },
-      { value: 'hour', label: 'Hour(s)' },
-      { value: 'day', label: 'Day(s)' },
-    ]);
+  const windowUnitOptions = [
+    { value: 'second', label: 'Second(s)' },
+    { value: 'minute', label: 'Minute(s)' },
+    { value: 'hour', label: 'Hour(s)' },
+    { value: 'day', label: 'Day(s)' },
+  ];
   const [selectedWindowUnit, setSelectedWindowUnit] =
     useState<SelectProps.Option | null>({
       value: 'minute',

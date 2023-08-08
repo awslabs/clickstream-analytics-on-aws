@@ -37,10 +37,11 @@ const AnalyticsEvent: React.FC = () => {
   const { pid, appid } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
-  const [metricOptions, setMetricOptions] = useState<SelectProps.Options>([
+  const metricOptions = [
     { value: 'event', label: 'Event number' },
     { value: 'user', label: 'User number' },
-  ]);
+  ];
+
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',

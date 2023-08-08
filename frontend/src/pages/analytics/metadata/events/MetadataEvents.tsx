@@ -13,7 +13,6 @@
 
 import {
   AppLayout,
-  Badge,
   Input,
   StatusIndicator,
 } from '@cloudscape-design/components';

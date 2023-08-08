@@ -12,7 +12,6 @@
  */
 
 import {
-  Badge,
   Box,
   Button,
   ColumnLayout,
@@ -32,7 +31,6 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataSource } from 'ts/const';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 

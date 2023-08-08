@@ -17,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from 'ts/const';
-import SwitchSpaceModal from './SwitchSpaceModal';
+import HeaderSwitchSpaceModal from './SwitchSpaceModal';
 
 interface IHeaderProps {
   user: any;
@@ -181,9 +181,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                       }
                     }
                   },
-                  items: [
-                    { id: 'signout', text: t('header.signOut') || '' },
-                  ],
+                  items: [{ id: 'signout', text: t('header.signOut') || '' }],
                 },
               ]
         }
@@ -196,9 +194,11 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
         }}
       />
-      <SwitchSpaceModal
+      <HeaderSwitchSpaceModal
         visible={swichProjectVisible}
+        disableClose={false}
         setSwichProjectVisible={setSwichProjectVisible}
+        setAnalyticsInfo={setAnalyticsInfo}
       />
     </header>
   );

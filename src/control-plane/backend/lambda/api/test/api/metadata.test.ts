@@ -166,7 +166,7 @@ describe('Metadata Event test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get metadata event by name', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
         {
           deleted: false,
@@ -176,23 +176,54 @@ describe('Metadata Event test', () => {
           operator: '',
           id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
           description: 'description of event 1',
-          name: 'event1',
+          name: `${MOCK_EVENT_NAME}`,
           type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
         },
         {
-          deleted: false,
-          updateAt: 1690788840458,
-          createAt: 1690788840458,
-          prefix: 'RELATION',
-          operator: '',
           id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-          name: 'EventAttributeName1',
-          type: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#eventAttribute1`,
+          type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#5db475a818f54f2892ecf84244e2d0d4`,
+          appId: `${MOCK_APP_ID}`,
+          createAt: 1691387954066,
+          deleted: false,
+          eventDescription: 'description 5 des5',
+          eventDisplayName: '测试事件5dis5',
+          eventName: `${MOCK_EVENT_NAME}`,
+          operator: '',
+          parameterDescription: 'd2',
+          parameterDisplayName: '事件参数2disp2',
+          parameterId: '5db475a818f54f2892ecf84244e2d0d4',
+          parameterMetadataSource: 'Custom',
+          parameterName: 'eventAttri2',
+          parameterValueType: 'String',
+          prefix: `RELATION#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: `${MOCK_PROJECT_ID}`,
+        },
+      ],
+    }).resolves({
+      Items: [
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#ap${MOCK_APP_ID}p1#9e944f193e3d4521ae81427423d28daf`,
+          type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#9e944f193e3d4521ae81427423d28daf`,
+          appId: `${MOCK_APP_ID}`,
+          createAt: 1691415932588,
+          deleted: false,
+          description: 'descriptionIII',
+          displayName: '事件参数DVM',
+          hasData: true,
+          metadataSource: 'Preset',
+          name: 'eventAttriII',
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: 'Web',
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: `${MOCK_PROJECT_ID}`,
         },
       ],
     });
     let res = await request(app)
       .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -203,21 +234,39 @@ describe('Metadata Event test', () => {
         deleted: false,
         description: 'description of event 1',
         id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        name: 'event1',
+        name: `${MOCK_EVENT_NAME}`,
         operator: '',
         prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
         updateAt: 1690788840458,
         associatedParameters: [
           {
-            createAt: 1690788840458,
-            deleted: false,
             id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-            name: 'EventAttributeName1',
+            type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#5db475a818f54f2892ecf84244e2d0d4`,
+            appId: `${MOCK_APP_ID}`,
+            createAt: 1691387954066,
+            deleted: false,
+            eventDescription: 'description 5 des5',
+            eventDisplayName: '测试事件5dis5',
+            eventName: `${MOCK_EVENT_NAME}`,
             operator: '',
-            prefix: 'RELATION',
-            type: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#eventAttribute1`,
-            updateAt: 1690788840458,
+            parameterDescription: 'd2',
+            parameterDisplayName: '事件参数2disp2',
+            parameterId: '5db475a818f54f2892ecf84244e2d0d4',
+            parameterMetadataSource: 'Custom',
+            parameterName: 'eventAttri2',
+            parameterValueType: 'String',
+            prefix: `RELATION#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: `${MOCK_PROJECT_ID}`,
+          },
+          {
+            appId: `${MOCK_APP_ID}`,
+            parameterDescription: 'descriptionIII',
+            parameterDisplayName: '事件参数DVM',
+            parameterMetadataSource: 'Preset',
+            parameterName: 'eventAttriII',
+            parameterId: '9e944f193e3d4521ae81427423d28daf',
+            projectId: `${MOCK_PROJECT_ID}`,
           },
         ],
       },
@@ -276,6 +325,15 @@ describe('Metadata Event test', () => {
   });
   it('Update metadata event', async () => {
     metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        {
+          id: 'EVENT',
+          type: 'EVENT',
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        },
+      ],
+    });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .put('/api/metadata/event')
@@ -286,6 +344,8 @@ describe('Metadata Event test', () => {
         description: 'Description of event',
         displayName: 'display name of event 555',
       });
+    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -533,8 +593,8 @@ describe('Metadata Event Attribute test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get metadata event attribute by name', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item:
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
         {
           deleted: false,
           updateAt: 1690788840458,
@@ -546,6 +606,18 @@ describe('Metadata Event Attribute test', () => {
           name: 'event1',
           type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_ID}`,
         },
+        {
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          prefix: `RELATION#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          operator: '',
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          description: 'description of event 1',
+          name: 'event1',
+          type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        },
+      ],
     });
     let res = await request(app)
       .get(`/api/metadata/event_parameter/${MOCK_EVENT_PARAMETER_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
@@ -564,11 +636,26 @@ describe('Metadata Event Attribute test', () => {
         prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_ID}`,
         updateAt: 1690788840458,
+        associatedEvents: [
+          {
+            createAt: 1690788840458,
+            deleted: false,
+            description: 'description of event 1',
+            id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            name: 'event1',
+            operator: '',
+            prefix: `RELATION#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            updateAt: 1690788840458,
+          },
+        ],
       },
     });
   });
   it('Get non-existent metadata event attribute', async () => {
-    ddbMock.on(GetCommand).resolves({});
+    ddbMock.on(QueryCommand).resolves({
+      Items: [],
+    });
     const res = await request(app)
       .get(`/api/metadata/event_parameter/${MOCK_EVENT_PARAMETER_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -618,17 +705,30 @@ describe('Metadata Event Attribute test', () => {
   });
   it('Update metadata event attribute', async () => {
     metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          id: 'EVENT#project1#app1#event2',
+          type: 'EVENT',
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        },
+      ],
+    });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .put('/api/metadata/event_parameter')
       .send({
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
-        id: MOCK_EVENT_PARAMETER_ID,
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_ID}`,
+        parameterId: MOCK_EVENT_PARAMETER_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
         description: 'Description of event',
         displayName: 'display name of event 555',
       });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -676,7 +776,8 @@ describe('Metadata Event Attribute test', () => {
       .send({
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
-        id: MOCK_EVENT_PARAMETER_ID,
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_ID}`,
+        parameterId: MOCK_EVENT_PARAMETER_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
         description: 'Description of event',
         displayName: 'display name of event 555',
@@ -687,6 +788,7 @@ describe('Metadata Event Attribute test', () => {
       success: false,
       message: 'Event attribute not found',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
   it('Delete metadata event attribute', async () => {
     metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
@@ -970,7 +1072,8 @@ describe('Metadata User Attribute test', () => {
       .send({
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
-        id: MOCK_USER_ATTRIBUTE_ID,
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_ID}`,
+        attributeId: MOCK_USER_ATTRIBUTE_ID,
         name: MOCK_USER_ATTRIBUTE_NAME,
         description: 'Description of event',
         displayName: 'display name of event 555',
@@ -1022,7 +1125,8 @@ describe('Metadata User Attribute test', () => {
       .send({
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
-        id: MOCK_USER_ATTRIBUTE_ID,
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_ID}`,
+        attributeId: MOCK_USER_ATTRIBUTE_ID,
         name: MOCK_USER_ATTRIBUTE_NAME,
         description: 'Description of event',
         displayName: 'display name of event 555',

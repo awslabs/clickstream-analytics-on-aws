@@ -22,21 +22,22 @@ import {
 } from '@cloudscape-design/components';
 import { getApplicationListByPipeline } from 'apis/application';
 import { getProjectList } from 'apis/project';
-import { save } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
-interface ISwitchSpaceModalProps {
+interface IHeaderSwitchSpaceModalProps {
   visible: boolean;
-  disableClose?: boolean;
+  disableClose: boolean;
   setSwichProjectVisible: (v: boolean) => void;
+  setAnalyticsInfo: (newValue: any) => void;
 }
 
-const SwitchSpaceModal: React.FC<ISwitchSpaceModalProps> = (
-  props: ISwitchSpaceModalProps
+const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
+  props: IHeaderSwitchSpaceModalProps
 ) => {
-  const { visible, disableClose, setSwichProjectVisible } = props;
+  const { visible, disableClose, setSwichProjectVisible, setAnalyticsInfo } =
+    props;
   const { t } = useTranslation();
   const location = useLocation();
   const [allProjectOptions, setAllProjectOptions] =
@@ -93,7 +94,7 @@ const SwitchSpaceModal: React.FC<ISwitchSpaceModalProps> = (
   };
 
   const saveAnalyticsIds = () => {
-    save('Analytics-ProjectId-AppId', {
+    setAnalyticsInfo({
       pid: selectedProject?.value,
       pname: selectedProject?.label,
       appid: selectedApp?.value,
@@ -197,4 +198,4 @@ const SwitchSpaceModal: React.FC<ISwitchSpaceModalProps> = (
   );
 };
 
-export default SwitchSpaceModal;
+export default HeaderSwitchSpaceModal;

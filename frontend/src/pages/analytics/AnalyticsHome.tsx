@@ -16,13 +16,22 @@ import { getApplicationListByPipeline } from 'apis/application';
 import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
-import SwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
-import { load, save } from 'pages/common/use-local-storage';
+import HeaderSwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
+import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 
 const AnalyticsHome: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [swichProjectVisible, setSwichProjectVisible] = useState(false);
+  const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
+    'Analytics-ProjectId-AppId',
+    {
+      pid: '',
+      pname: '',
+      appid: '',
+      appname: '',
+    }
+  );
 
   const getDefaultProjectAndApp = async () => {
     const projects = await listProjects();
@@ -31,7 +40,7 @@ const AnalyticsHome: React.FC = () => {
       const apps = await listApplicationByProject(project.id);
       if (apps && apps.length > 0) {
         const app = apps[0];
-        save('Analytics-ProjectId-AppId', {
+        setAnalyticsInfo({
           pid: project.id,
           pname: project.name,
           appid: app.appId,
@@ -82,9 +91,8 @@ const AnalyticsHome: React.FC = () => {
 
   useEffect(() => {
     setLoadingData(true);
-    const analyticsIds = load('Analytics-ProjectId-AppId');
-    if (analyticsIds) {
-      window.location.href = `/analytics/${analyticsIds.pid}/app/${analyticsIds.appid}/dashboards`;
+    if (analyticsInfo.pid && analyticsInfo.appid) {
+      window.location.href = `/analytics/${analyticsInfo.pid}/app/${analyticsInfo.appid}/dashboards`;
     } else {
       getDefaultProjectAndApp();
     }
@@ -99,10 +107,11 @@ const AnalyticsHome: React.FC = () => {
           {loadingData ? (
             <Loading />
           ) : (
-            <SwitchSpaceModal
+            <HeaderSwitchSpaceModal
               visible={swichProjectVisible}
               disableClose={true}
               setSwichProjectVisible={setSwichProjectVisible}
+              setAnalyticsInfo={setAnalyticsInfo}
             />
           )}
         </div>

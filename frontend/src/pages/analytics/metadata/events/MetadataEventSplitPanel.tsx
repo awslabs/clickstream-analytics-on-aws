@@ -12,7 +12,6 @@
  */
 
 import {
-  Badge,
   Box,
   Button,
   ColumnLayout,

@@ -26,7 +26,6 @@ import { updateMetadataUserAttribute } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -37,7 +36,6 @@ const MetadataUserAttributeSplitPanel: React.FC<
   MetadataUserAttributeSplitPanelProps
 > = (props: MetadataUserAttributeSplitPanelProps) => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
   const { attribute } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
@@ -95,9 +93,11 @@ const MetadataUserAttributeSplitPanel: React.FC<
   };
 
   useEffect(() => {
+    setLoadingData(true);
     setIsEditingDisplayName(false);
     setIsEditingDesc(false);
     setAttributeDetails(attribute);
+    setLoadingData(false);
   }, [attribute.id]);
 
   return (
