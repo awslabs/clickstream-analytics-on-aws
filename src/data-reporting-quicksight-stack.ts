@@ -213,6 +213,7 @@ function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider');
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
+  addCfnNagForCfnResource(stack, 'QuicksightInternalUserCustomResourceLambda', 'QuicksightInternalUserCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {
       paths_endswith: ['QuicksightCustomResourceLambdaRole/DefaultPolicy/Resource'],
