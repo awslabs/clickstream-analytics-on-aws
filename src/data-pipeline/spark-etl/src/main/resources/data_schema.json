@@ -175,14 +175,12 @@
       "nullable": true,
       "metadata": {}
     },
-
     {
       "name": "user",
       "type": "string",
       "nullable": true,
       "metadata": {}
     },
-
     {
       "name": "attributes",
       "type": "string",
@@ -255,14 +253,12 @@
       "nullable": true,
       "metadata": {}
     },
-
     {
       "name": "event_dimensions",
       "type": "string",
       "nullable": true,
       "metadata": {}
     },
-
     {
       "name": "ecommerce",
       "type": {
@@ -339,169 +335,94 @@
       "nullable": true,
       "metadata": {}
     },
-
     {
       "name": "items",
       "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "name": "item_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_brand",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_variant",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_category",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_category2",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_category3",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_category4",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_category5",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "price_in_usd",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "price",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "quantity",
-            "type": "long",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_revenue_in_usd",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_revenue",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_refund_in_usd",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_refund",
-            "type": "double",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "coupon",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "affiliation",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "location_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_list_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_list_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "item_list_index",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "promotion_id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "promotion_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "creative_name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "creative_slot",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          }
-        ]
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "brand",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "category",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "category2",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "category3",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "category4",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "category5",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "creative_name",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "creative_slot",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "location_id",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "price",
+              "type": "double",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "quantity",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            }
+          ]
+        },
+        "containsNull" : true
       },
       "nullable": true,
       "metadata": {}
