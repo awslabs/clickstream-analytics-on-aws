@@ -22,6 +22,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TransformerTest extends BaseSparkTest {
 
@@ -142,5 +143,29 @@ class TransformerTest extends BaseSparkTest {
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_raw_json_error.json")).getPath());
         Dataset<Row> transformedDataset = transformer.transform(dataset);
         assertEquals(0, transformedDataset.count());
+    }
+
+    @Test
+    public void should_transform_items() {
+        System.setProperty("app.ids", "uba-app");
+        System.setProperty("project.id", "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
+        Dataset<Row> transformedDataset = transformer.transform(dataset);
+        Row row = transformedDataset.first();
+        List<Row> items = row.getList(row.fieldIndex("items"));
+        assertEquals(3, items.size());
+        String item1 = items.get(0).json();
+        String item1Expected = "{\"brand\":\"Brand1\",\"category\":\"housewares\",\"category2\":\"Category-2\",\"category3\":\"Category-3\",\"category4\":\"Category-4\"," +
+                "\"category5\":\"Category-5\",\"creative_name\":\"Creative Name\",\"creative_slot\":\"Creative Slot\",\"id\":\"item_id1\",\"location_id\":\"Location#001\"," +
+                "\"name\":\"French Press1\",\"price\":52.99,\"quantity\":42}";
+        assertEquals(item1Expected, item1);
+
+        String item2Expected = "{\"brand\":null,\"category\":\"housewares\",\"category2\":null,\"category3\":null,\"category4\":null,\"category5\":null," +
+                "\"creative_name\":null,\"creative_slot\":null,\"id\":\"d3b237ae-6039-45f9-9692-495ad2141c54\",\"location_id\":null,\"name\":\"French Press\"," +
+                "\"price\":52.99,\"quantity\":null}";
+        String item2 = items.get(1).json();
+        assertEquals(item2Expected, item2);
     }
 }
