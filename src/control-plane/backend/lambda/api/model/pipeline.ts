@@ -914,10 +914,28 @@ export class CPipeline {
     const res: Array<[string, string]> = [];
     if (stack && stack.Outputs) {
       let value = '';
-      for (let out of stack.Outputs as Output[]) {
+      for (let out of stack.Outputs) {
         if (out.OutputKey) {
           value = out.OutputValue ?? '';
           res.push([out.OutputKey, value]);
+        }
+      }
+    }
+    return res;
+  }
+
+  public async getStackParameters(stackType: PipelineStackType): Promise<Array<[string, string]>> {
+    const stack = await describeStack(
+      this.pipeline.region,
+      getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
+    );
+    const res: Array<[string, string]> = [];
+    if (stack && stack.Parameters) {
+      let value = '';
+      for (let p of stack.Parameters) {
+        if (p.ParameterKey) {
+          value = p.ParameterValue ?? '';
+          res.push([p.ParameterKey, value]);
         }
       }
     }

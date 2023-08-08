@@ -305,6 +305,7 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
   }
 
   const isProvisionedRedshift = pipeline.dataModeling?.redshift?.provisioned ? true : false;
+  const isNewServerless = pipeline.dataModeling?.redshift?.newServerless ? true : false;
   const clusterIdentifier = isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.clusterIdentifier : undefined;
   const dbUser= isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.dbUser : undefined;
 
@@ -325,9 +326,19 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
       dataApiRole = value;
     }
   }
-  if (!workgroupName && !isProvisionedRedshift) {
+  if (!isNewServerless && !isProvisionedRedshift) {
+    const modelingStackParameters = await cPipeline.getStackParameters(PipelineStackType.DATA_MODELING_REDSHIFT);
+    for (const [name, value] of modelingStackParameters) {
+      if (name.endsWith('WorkgroupName')) {
+        workgroupName = value;
+      }
+    }
+  }
+
+  if (!isProvisionedRedshift && !workgroupName) {
     return { status: { code: 400, message: 'Redshift serverless workgroup not found' } };
   }
+
   if (!dataApiRole) {
     return { status: { code: 404, message: 'Redshift data api role not found' } };
   }
@@ -539,7 +550,6 @@ function findElementByPath(jsonData: any, path: string): any {
     if (jsonData && typeof jsonData === 'object' && key in jsonData) {
       jsonData = jsonData[key];
     } else {
-      // If the key doesn't exist in the JSON object, return undefined
       return undefined;
     }
   }
@@ -554,21 +564,20 @@ function findKthElement(jsonData: any, path: string, index: number): any {
     if (jsonData && typeof jsonData === 'object' && key in jsonData) {
       jsonData = jsonData[key];
     } else {
-      // If the key doesn't exist in the JSON object, return undefined
       return undefined;
     }
   }
 
   if (Array.isArray(jsonData) && jsonData.length >= index) {
-    return jsonData[index-1]; // Return the kth element of the array
+    return jsonData[index-1];
   } else {
-    return undefined; // If the path doesn't lead to an array or the array is too short, return undefined
+    return undefined;
   }
 }
 
 function findFirstChild(jsonData: any): any {
   if (Array.isArray(jsonData)) {
-    return undefined; // Return the kth element of the array
+    return undefined;
   } else if (jsonData && typeof jsonData === 'object') {
     for (const key in jsonData) {
       if (jsonData.hasOwnProperty(key)) {
@@ -576,7 +585,6 @@ function findFirstChild(jsonData: any): any {
       }
     }
   }
-  logger.info('other');
   return undefined;
 }
 
