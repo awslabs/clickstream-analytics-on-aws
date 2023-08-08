@@ -182,7 +182,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       frontendProps: {
         assetPath: join(__dirname, '..'),
 
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'export APP_PATH=/tmp/app && mkdir $APP_PATH && cd ./frontend/ && find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" \

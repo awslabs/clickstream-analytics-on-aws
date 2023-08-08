@@ -36,7 +36,7 @@ const commonTestStack = new Stack(commontApp, 'comTestStack');
 new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
   frontendProps: {
     assetPath: 'frontend',
-    dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+    dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
     buildCommand: [
       'bash', '-c',
       'echo test > /asset-output/test',
@@ -175,7 +175,7 @@ describe('CloudFrontS3Portal', () => {
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'echo test > /asset-output/test',
@@ -204,7 +204,7 @@ describe('CloudFrontS3Portal', () => {
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'echo test > /asset-output/test',
@@ -237,7 +237,7 @@ describe('CloudFrontS3Portal', () => {
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'echo test > /asset-output/test',
@@ -312,7 +312,7 @@ describe('CloudFrontS3Portal', () => {
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'echo test > /asset-output/test',
@@ -426,7 +426,7 @@ describe('CloudFrontS3Portal', () => {
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V16),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
           'echo test > /asset-output/test',

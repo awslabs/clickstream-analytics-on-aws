@@ -29,7 +29,7 @@
     "@types/jsonpath-plus": "^5.0.2",
     "@types/mock-fs": "^4.13.1",
     "@types/mustache": "^4.2.2",
-    "@types/node": "^16",
+    "@types/node": "^18",
     "@types/node-fetch": "^2.6.4",
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5",
@@ -108,7 +108,7 @@
     "uuid": "^9.0.0"
   },
   "engines": {
-    "node": ">= 16.18.0"
+    "node": ">= 18.17.0"
   },
   "license": "Apache-2.0",
   "version": "1.0.0",

@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - name: Configure AWS Credentials
         if: ${{ env.iam_role_to_assume != '' }}
         uses: aws-actions/configure-aws-credentials@v2

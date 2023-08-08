@@ -22,7 +22,7 @@
     "@types/jest": "^29.5.3",
     "@types/mock-fs": "^4.13.1",
     "@types/mustache": "^4.2.2",
-    "@types/node": "^16",
+    "@types/node": "^18",
     "@types/node-fetch": "^2.6.4",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.0",
@@ -83,7 +83,7 @@
     "uuid": "^9.0.0"
   },
   "engines": {
-    "node": ">= 16.18.0"
+    "node": ">= 18.17.0"
   },
   "main": "index.js",
   "license": "Apache-2.0",
