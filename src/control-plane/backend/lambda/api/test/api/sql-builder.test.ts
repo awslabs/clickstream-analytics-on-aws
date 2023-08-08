@@ -18,7 +18,7 @@ describe('SQL Builder test', () => {
   beforeEach(() => {
   });
 
-  test('funnelsql - user_cnt', () => {
+  test('funnel sql - user_cnt', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -375,7 +375,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('funnelsql - event_cnt', () => {
+  test('funnel sql - event_cnt', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -732,7 +732,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('funnelsql - conversionIntervalType', () => {
+  test('funnel sql - conversionIntervalType', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -1097,7 +1097,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('funnelsql - specifyJoinColumn', () => {
+  test('funnel sql - specifyJoinColumn', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -1463,7 +1463,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('funnelsql - conditions', () => {
+  test('funnel visual sql - conditions', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -1475,7 +1475,7 @@ describe('SQL Builder test', () => {
       eventAndConditions: [
         {
           eventName: 'add_button_click',
-          condations: [{
+          conditions: [{
             category: 'other',
             property: 'platform',
             operator: '=',
@@ -1489,11 +1489,11 @@ describe('SQL Builder test', () => {
             value: '1400',
             dataType: 'INT',
           }],
-          condationsOprerator: 'and',
+          conditionOperator: 'and',
         },
         {
           eventName: 'note_share',
-          condations: [{
+          conditions: [{
             category: 'other',
             property: 'platform',
             operator: '=',
@@ -1507,7 +1507,7 @@ describe('SQL Builder test', () => {
             value: '1400',
             dataType: 'INT',
           }],
-          condationsOprerator: 'or',
+          conditionOperator: 'or',
 
         },
         {
@@ -1858,7 +1858,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('funnelsql - first event extra conditions', () => {
+  test('funnel sql - first event extra conditions', () => {
 
     const sql = buildFunnelDataSql({
       schemaName: 'app1',
@@ -1869,7 +1869,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       firstEventExtraCondition: {
         eventName: 'add_button_click',
-        condations: [
+        conditions: [
           {
             category: 'event',
             property: '_session_duration',
@@ -1885,13 +1885,13 @@ describe('SQL Builder test', () => {
             dataType: 'INT',
           },
         ],
-        condationsOprerator: 'and',
+        conditionOperator: 'and',
 
       },
       eventAndConditions: [
         {
           eventName: 'add_button_click',
-          condations: [{
+          conditions: [{
             category: 'other',
             property: 'platform',
             operator: '=',
@@ -1905,11 +1905,11 @@ describe('SQL Builder test', () => {
             value: '1400',
             dataType: 'INT',
           }],
-          condationsOprerator: 'and',
+          conditionOperator: 'and',
         },
         {
           eventName: 'note_share',
-          condations: [{
+          conditions: [{
             category: 'other',
             property: 'platform',
             operator: '=',
@@ -1923,7 +1923,7 @@ describe('SQL Builder test', () => {
             value: '1400',
             dataType: 'INT',
           }],
-          condationsOprerator: 'or',
+          conditionOperator: 'or',
 
         },
         {

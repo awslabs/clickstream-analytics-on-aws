@@ -23,11 +23,11 @@ export interface Condition {
 
 export interface EventAndCondition {
   readonly eventName: string;
-  readonly condations?: Condition[];
-  readonly condationsOprerator?: 'and' | 'or' ;
+  readonly conditions?: Condition[];
+  readonly conditionOperator?: 'and' | 'or' ;
 }
 
-export interface FunnelSQLPatameters {
+export interface FunnelSQLParameters {
   readonly schemaName: string;
   readonly computeMethod: 'USER_CNT' | 'EVENT_CNT';
   readonly specifyJoinColumn: boolean;
@@ -44,7 +44,7 @@ export interface FunnelSQLPatameters {
   readonly groupColumn: 'week' | 'day' | 'hour';
 }
 
-function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatameters) : string {
+function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
 
   const baseColumns = `
     ,event_date
@@ -155,15 +155,15 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
   `;
 
   let eventDateSQL = '';
-  if (sqlPatameters.timeScopeType === 'FIXED') {
-    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlPatameters.timeStart}'  and event_date <= '${sqlPatameters.timeEnd}'`);
+  if (sqlParameters.timeScopeType === 'FIXED') {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
   } else {
-    let lastN = sqlPatameters.lastN!;
-    if (sqlPatameters.timeUnit === 'WK') {
+    let lastN = sqlParameters.lastN!;
+    if (sqlParameters.timeUnit === 'WK') {
       lastN = lastN * 7;
-    } else if (sqlPatameters.timeUnit === 'MM') {
+    } else if (sqlParameters.timeUnit === 'MM') {
       lastN = lastN * 31;
-    } else if (sqlPatameters.timeUnit === 'Q') {
+    } else if (sqlParameters.timeUnit === 'Q') {
       lastN = lastN * 31 * 3;
     }
     eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
@@ -178,7 +178,7 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
       , event_params
       , user_properties
       ${baseColumns}
-      from ${sqlPatameters.schemaName}.ods_events ods 
+      from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
       and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
     ),
@@ -186,10 +186,10 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
 
   for (const [index, event] of eventNames.entries()) {
 
-    const eventCondition = sqlPatameters.eventAndConditions[index];
+    const eventCondition = sqlParameters.eventAndConditions[index];
     let eventConditionSql = '';
-    if (eventCondition.condations !== undefined) {
-      for (const condition of eventCondition.condations) {
+    if (eventCondition.conditions !== undefined) {
+      for (const condition of eventCondition.conditions) {
         if (condition.category === 'user' || condition.category === 'event') {
           continue;
         }
@@ -203,7 +203,7 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
           category = '';
         }
         eventConditionSql = eventConditionSql.concat(`
-          ${eventCondition.condationsOprerator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
+          ${eventCondition.conditionOperator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
         `);
       }
     }
@@ -220,10 +220,10 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
       ,hour
       ,${columnTemplate.replace(/####/g, '_0')}
     `;
-    if ( index === 0 && sqlPatameters.firstEventExtraCondition !== undefined
-      && sqlPatameters.firstEventExtraCondition.condations !== undefined ) {
+    if ( index === 0 && sqlParameters.firstEventExtraCondition !== undefined
+      && sqlParameters.firstEventExtraCondition.conditions !== undefined ) {
 
-      for (const condition of sqlPatameters.firstEventExtraCondition.condations) {
+      for (const condition of sqlParameters.firstEventExtraCondition.conditions) {
         let value = condition.value;
         if (condition.dataType === 'STRING') {
           value = `'${value}'`;
@@ -307,12 +307,12 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
 
     let joinCondition = 'on 1 = 1';
-    if ( sqlPatameters.specifyJoinColumn) {
-      joinCondition = `on table_${index-1}.${sqlPatameters.joinColumn}_${index-1} = table_${index}.${sqlPatameters.joinColumn}_${index}`;
+    if ( sqlParameters.specifyJoinColumn) {
+      joinCondition = `on table_${index-1}.${sqlParameters.joinColumn}_${index-1} = table_${index}.${sqlParameters.joinColumn}_${index}`;
     }
 
-    if (sqlPatameters.conversionIntervalType == 'CUSTOMIZE') {
-      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} < ${sqlPatameters.conversionIntervalInSeconds}*1000 \n`);
+    if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
+      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} < ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
     } else {
       joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
     }
@@ -362,17 +362,17 @@ function _buildFunnelbaseSql(eventNames: string[], sqlPatameters: FunnelSQLPatam
   return sql;
 };
 
-export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string {
+export function buildFunnelDataSql(sqlParameters: FunnelSQLParameters) : string {
 
   let eventNames: string[] = [];
-  for (const e of sqlPatameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions) {
     eventNames.push(e.eventName);
   }
 
-  let sql = _buildFunnelbaseSql(eventNames, sqlPatameters);
+  let sql = _buildFunnelBaseSql(eventNames, sqlParameters);
 
   let prefix = 'e';
-  if (sqlPatameters.computeMethod === 'USER_CNT') {
+  if (sqlParameters.computeMethod === 'USER_CNT') {
     prefix = 'u';
   }
   let resultCntSQL ='';
@@ -383,11 +383,11 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
 
   sql = sql.concat(`
     select 
-      ${sqlPatameters.groupColumn}
+      ${sqlParameters.groupColumn}
       ${resultCntSQL}
     from final_table
     group by 
-      ${sqlPatameters.groupColumn}
+      ${sqlParameters.groupColumn}
   `);
 
   return format(sql, {
@@ -395,17 +395,17 @@ export function buildFunnelDataSql(sqlPatameters: FunnelSQLPatameters) : string 
   });
 };
 
-export function buildFunnelView(schema: string, name: string, sqlPatameters: FunnelSQLPatameters) : string {
+export function buildFunnelView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
 
   let resultSql = '';
   let eventNames: string[] = [];
   let index = 0;
   let prefix = 'e';
-  if (sqlPatameters.computeMethod === 'USER_CNT') {
+  if (sqlParameters.computeMethod === 'USER_CNT') {
     prefix = 'u';
   }
 
-  for (const e of sqlPatameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions) {
     eventNames.push(e.eventName);
     resultSql = resultSql.concat(`
     ${ index === 0 ? '' : 'union all'}
@@ -419,7 +419,7 @@ export function buildFunnelView(schema: string, name: string, sqlPatameters: Fun
   }
 
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
-   ${_buildFunnelbaseSql(eventNames, sqlPatameters)}
+   ${_buildFunnelBaseSql(eventNames, sqlParameters)}
    ${resultSql}
    with no schema binding
    `;

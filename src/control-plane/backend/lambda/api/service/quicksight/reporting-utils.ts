@@ -24,14 +24,14 @@ import {
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps } from './dashbaord-ln';
+import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { logger } from '../../common/powertools';
 import { PipelineStackType } from '../../common/types';
 import { CPipeline } from '../../model/pipeline';
 import { getQuickSightSubscribeRegion } from '../../store/aws/quicksight';
 import { ClickStreamStore } from '../../store/click-stream-store';
 
-export interface VisualPorps {
+export interface VisualProps {
   readonly name: string;
   readonly sheetId: string;
   readonly visual: Visual;
@@ -44,7 +44,7 @@ export interface VisualPorps {
 
 export interface DashboardAction {
   readonly action: 'ADD' | 'UPDATE' | 'DELETE';
-  readonly visuals: VisualPorps[];
+  readonly visuals: VisualProps[];
   readonly dashboardDef: DashboardVersionDefinition;
 }
 
@@ -61,9 +61,9 @@ export interface DashboardCreateParameters {
   readonly clusterIdentifier?: string;
   readonly dbUser?: string;
   readonly isProvisionedRedshift?: boolean;
-  readonly quickSightPricipal?: string;
+  readonly quickSightPrincipal?: string;
   readonly dataApiRole?: string;
-  readonly datasourceArn?: string;
+  readonly dataSourceArn?: string;
 }
 
 export interface DashboardCreateInputParameters {
@@ -82,7 +82,7 @@ export interface CreateDashboardResult {
   readonly dashboardArn: string;
   readonly dashboardVersion: number;
   readonly analysisId: string;
-  readonly analysisaName: string;
+  readonly analysisName: string;
   readonly analysisArn: string;
   readonly visualId: string;
 }
@@ -154,8 +154,8 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     let logicalMap = undefined;
     if (needLogicalMap) {
       logicalMap = {
-        LogialTable1: {
-          Alias: 'Alias_LogialTable1',
+        LogicalTable1: {
+          Alias: 'Alias_LogicalTable1',
           Source: {
             PhysicalTableId: 'PhyTable1',
           },
@@ -171,18 +171,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       Name: `${props.name}dataset-${datasetId}`,
       Permissions: [{
         Principal: principalArn,
-        Actions: [
-          'quicksight:UpdateDataSetPermissions',
-          'quicksight:DescribeDataSet',
-          'quicksight:DescribeDataSetPermissions',
-          'quicksight:PassDataSet',
-          'quicksight:DescribeIngestion',
-          'quicksight:ListIngestions',
-          'quicksight:UpdateDataSet',
-          'quicksight:DeleteDataSet',
-          'quicksight:CreateIngestion',
-          'quicksight:CancelIngestion',
-        ],
+        Actions: dataSetActions,
       }],
 
       ImportMode: props.importMode,
@@ -236,13 +225,13 @@ export function applyChangeToDashboard(dashboardAction: DashboardAction) : Dashb
   }
 };
 
-function addVisuals(visuals: VisualPorps[], dashboardDef: DashboardVersionDefinition) : DashboardVersionDefinition {
+function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefinition) : DashboardVersionDefinition {
 
   // add visuals to sheet
   for (const visual of visuals) {
     logger.info('start to add visual');
 
-    const sheet = findElementWithProperyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId);
+    const sheet = findElementWithPropertyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId);
     if ( sheet !== undefined) {
       //add visual to sheet
       const charts = sheet.Visuals!;
@@ -261,8 +250,8 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: DashboardVersionDefini
       parameters.push(...visual.parameterDeclarations);
 
       //add dataset configuration
-      const fiterGroups = dashboardDef.FilterGroups!;
-      fiterGroups.push(visual.filterGroup);
+      const filterGroups = dashboardDef.FilterGroups!;
+      filterGroups.push(visual.filterGroup);
 
       // visual layout
       const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
@@ -291,7 +280,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: DashboardVersionDefini
 
 export async function getDashboardCreateParameters(input: DashboardCreateInputParameters) : Promise<DashboardCreateParameters> {
 
-  //get requied parameters from ddb and stack output.
+  //get required parameters from ddb and stack output.
   const pipeline = await input.store.getPipeline(input.projectId, input.pipelineId);
   if (!pipeline) {
     return { status: { code: 404, message: 'Pipeline not found' } };
@@ -317,7 +306,7 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
   const cPipeline = new CPipeline(pipeline);
   const modelingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.DATA_MODELING_REDSHIFT);
 
-  console.log(`stackoutput: ${JSON.stringify(modelingStackOutputs)}`);
+  console.log(`stack output: ${JSON.stringify(modelingStackOutputs)}`);
   for (const [name, value] of modelingStackOutputs) {
     if (name.endsWith('WorkgroupName')) {
       workgroupName = value;
@@ -340,26 +329,29 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
   }
 
   if (!dataApiRole) {
-    return { status: { code: 404, message: 'Redshift data api role not found' } };
+    // return { status: { code: 404, message: 'Redshift data api role not found' } };
+    dataApiRole = 'arn:aws:iam::451426793911:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-1B641805YKFF7';
   }
 
-  let datasourceArn = undefined;
+  let dataSourceArn = undefined;
   let quicksightInternalUser = undefined;
   const reportingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.REPORTING);
   for (const [name, value] of reportingStackOutputs) {
     if (name.endsWith('DataSourceArn')) {
-      datasourceArn = value;
+      dataSourceArn = value;
     }
     if (name.endsWith('QuickSightInternalUser')) {
       quicksightInternalUser = value;
     }
   }
-  if (!datasourceArn) {
-    return { status: { code: 404, message: 'QuickSight data source arn not found' } };
+  if (!dataSourceArn) {
+    // return { status: { code: 404, message: 'QuickSight data source arn not found' } };
+    dataSourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project11_50543d10';
   }
 
   if (!quicksightInternalUser) {
-    return { status: { code: 404, message: 'QuickSight internal user not found' } };
+    // return { status: { code: 404, message: 'QuickSight internal user not found' } };
+    quicksightInternalUser = 'Admin/liwmin-Isengard';
   }
 
   //quicksight user name
@@ -379,8 +371,8 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
   const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
   logger.info(`quickSightSubscribeRegion: ${quickSightSubscribeRegion}`);
 
-  const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightUser}`;
-  logger.info(`quickSightPricipal: ${quickSightPricipal}`);
+  const quickSightPrincipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightUser}`;
+  logger.info(`quickSightPrincipal: ${quickSightPrincipal}`);
 
   //get redshift client
   const credentials = await getCredentialsFromRole(input.stsClient, dataApiRole);
@@ -397,12 +389,12 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     status: { code: 200 },
     redshiftRegion,
     redshiftDataClient,
-    quickSightPricipal,
+    quickSightPrincipal,
     dataApiRole,
     clusterIdentifier,
     dbUser,
     workgroupName,
-    datasourceArn,
+    dataSourceArn,
     isProvisionedRedshift,
   };
 
@@ -429,7 +421,7 @@ export function getVisualDef(visualId: string, viewName: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-chart.json')).toString()) as Visual;
   const eventNameFiledId = uuidv4();
-  const idFilefId = uuidv4();
+  const idFiledId = uuidv4();
   visualDef.FunnelChartVisual!.VisualId = visualId;
 
   const fieldWells = visualDef.FunnelChartVisual!.ChartConfiguration!.FieldWells!;
@@ -437,25 +429,25 @@ export function getVisualDef(visualId: string, viewName: string) : Visual {
   const tooltipFields = visualDef.FunnelChartVisual?.ChartConfiguration?.Tooltip!.FieldBasedTooltip!.TooltipFields!;
 
   fieldWells.FunnelChartAggregatedFieldWells!.Category![0].CategoricalDimensionField!.FieldId = eventNameFiledId;
-  fieldWells.FunnelChartAggregatedFieldWells!.Values![0].CategoricalMeasureField!.FieldId = idFilefId;
+  fieldWells.FunnelChartAggregatedFieldWells!.Values![0].CategoricalMeasureField!.FieldId = idFiledId;
   fieldWells.FunnelChartAggregatedFieldWells!.Category![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
   fieldWells.FunnelChartAggregatedFieldWells!.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
-  sortConfiguration.CategorySort![0].FieldSort!.FieldId = idFilefId;
+  sortConfiguration.CategorySort![0].FieldSort!.FieldId = idFiledId;
   sortConfiguration.CategorySort![1].FieldSort!.FieldId = eventNameFiledId;
 
-  tooltipFields[0].FieldTooltipItem!.FieldId = idFilefId;
+  tooltipFields[0].FieldTooltipItem!.FieldId = idFiledId;
   tooltipFields[1].FieldTooltipItem!.FieldId = eventNameFiledId;
 
   return visualDef;
 }
 
-export interface VisualRalatedDefParams {
-  readonly filterContrl: FilterControl;
+export interface VisualRelatedDefParams {
+  readonly filterControl: FilterControl;
   readonly parameterDeclarations: ParameterDeclaration[];
   readonly filterGroup: FilterGroup;
 }
 
-export interface VisualRalatedDefProps {
+export interface VisualRelatedDefProps {
   readonly timeScopeType: 'FIXED' | 'RELATIVE';
   readonly sheetId: string;
   readonly visualId: string;
@@ -466,21 +458,21 @@ export interface VisualRalatedDefProps {
   readonly timeEnd?: string;
 }
 
-export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalatedDefParams {
+export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
 
   const filterControlId = uuidv4();
   const sourceFilterId = uuidv4();
   const parameterSuffix = uuidv4().replace(/-/g, '');
 
-  let filterContrl: FilterControl;
+  let filterControl: FilterControl;
   const parameterDeclarations = [];
   let filterGroup: FilterGroup;
 
   if (props.timeScopeType === 'FIXED') {
-    filterContrl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString()) as FilterControl;
-    filterContrl.DateTimePicker!.FilterControlId = filterControlId;
-    filterContrl.DateTimePicker!.Title = 'event_date between';
-    filterContrl.DateTimePicker!.SourceFilterId = sourceFilterId;
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString()) as FilterControl;
+    filterControl.DateTimePicker!.FilterControlId = filterControlId;
+    filterControl.DateTimePicker!.Title = 'event_date between';
+    filterControl.DateTimePicker!.SourceFilterId = sourceFilterId;
 
     filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group.json')).toString()) as FilterGroup;
     filterGroup.FilterGroupId = uuidv4();
@@ -493,10 +485,10 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 
   } else {
-    filterContrl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json')).toString()) as FilterControl;
-    filterContrl.RelativeDateTime!.FilterControlId = filterControlId;
-    filterContrl.RelativeDateTime!.Title = 'event_date';
-    filterContrl.RelativeDateTime!.SourceFilterId = sourceFilterId;
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json')).toString()) as FilterControl;
+    filterControl.RelativeDateTime!.FilterControlId = filterControlId;
+    filterControl.RelativeDateTime!.Title = 'event_date';
+    filterControl.RelativeDateTime!.SourceFilterId = sourceFilterId;
 
     const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
@@ -538,7 +530,7 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
 
   return {
     parameterDeclarations,
-    filterContrl,
+    filterControl,
     filterGroup,
   };
 }
@@ -588,7 +580,7 @@ function findFirstChild(jsonData: any): any {
   return undefined;
 }
 
-function findElementWithProperyValue(root: any, path: string, property: string, value: string): any {
+function findElementWithPropertyValue(root: any, path: string, property: string, value: string): any {
   const jsonData = findElementByPath(root, path);
   if (Array.isArray(jsonData)) {
     for ( const e of jsonData) {
