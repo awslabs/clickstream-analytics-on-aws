@@ -34,7 +34,7 @@ const dashboardDef =
     Sheets: [
       {
         SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
-        Name: 'shee1',
+        Name: 'sheet1',
         FilterControls: [],
         Visuals: [],
         Layouts: [
@@ -200,7 +200,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
     expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisaName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualId).toBeDefined();
@@ -335,7 +335,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
     expect(res.body.data.dashboardName).toEqual('dashboard-testview0003');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
-    expect(res.body.data.analysisaName).toEqual('analysis-testview0004');
+    expect(res.body.data.analysisName).toEqual('analysis-testview0004');
     expect(res.body.data.visualId).toBeDefined();
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();

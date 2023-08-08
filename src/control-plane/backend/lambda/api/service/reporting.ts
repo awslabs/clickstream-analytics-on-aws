@@ -22,7 +22,7 @@ import {
   funnelVisualColumns,
   getDashboardCreateParameters,
   getVisualDef,
-  getVisualRalatedDefs,
+  getVisualRelatedDefs,
   applyChangeToDashboard,
   getDashboardDefinitionFromArn,
   CreateDashboardResult,
@@ -100,8 +100,8 @@ export class ReportingServ {
       //create quicksight dataset
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSightPricipal!,
-        dashboardCreateParameters.datasourceArn!, {
+        dashboardCreateParameters.quickSightPrincipal!,
+        dashboardCreateParameters.dataSourceArn!, {
           name: '',
           tableName: viewName,
           columns: funnelVisualColumns,
@@ -114,7 +114,7 @@ export class ReportingServ {
           ],
         });
 
-      // gererate dashboard definition
+      // generate dashboard definition
       let dashboardDef;
       let sheetId;
       if (!query.dashboardId) {
@@ -137,7 +137,7 @@ export class ReportingServ {
 
       const visualId = uuidv4();
       const visualDef = getVisualDef(visualId, viewName);
-      const visualRelatedParams = getVisualRalatedDefs({
+      const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -148,12 +148,12 @@ export class ReportingServ {
         timeEnd: query.timeEnd,
       });
 
-      const visualPorps = {
+      const visualProps = {
         name: `visual-${viewName}`,
         sheetId: sheetId,
         visual: visualDef,
         dataSetIdentifierDeclaration: dataSetIdentifierDeclaration,
-        filterControl: visualRelatedParams.filterContrl,
+        filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
         eventCount: query.eventAndConditions.length,
@@ -161,7 +161,7 @@ export class ReportingServ {
 
       const dashboard = applyChangeToDashboard({
         action: 'ADD',
-        visuals: [visualPorps],
+        visuals: [visualProps],
         dashboardDef: dashboardDef as DashboardVersionDefinition,
       });
 
@@ -177,7 +177,7 @@ export class ReportingServ {
           AnalysisId: analysisId,
           Name: `analysis-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSightPricipal,
+            Principal: dashboardCreateParameters.quickSightPrincipal,
             Actions: [
               'quicksight:DescribeAnalysis',
               'quicksight:QueryAnalysis',
@@ -198,7 +198,7 @@ export class ReportingServ {
           DashboardId: dashboardId,
           Name: `dashboard-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSightPricipal,
+            Principal: dashboardCreateParameters.quickSightPrincipal,
             Actions: [
               'quicksight:DescribeDashboard',
               'quicksight:ListDashboardVersions',
@@ -221,7 +221,7 @@ export class ReportingServ {
           dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
           analysisId,
           analysisArn: newAnalysis.Arn!,
-          analysisaName: `analysis-${viewName}`,
+          analysisName: `analysis-${viewName}`,
           visualId,
         };
       } else {
@@ -265,7 +265,7 @@ export class ReportingServ {
           dashboardVersion: Number.parseInt(versionNumber!),
           analysisId: query.analysisId,
           analysisArn: newAnalysis.Arn!,
-          analysisaName: query.analysisName,
+          analysisName: query.analysisName,
           visualId,
         };
 

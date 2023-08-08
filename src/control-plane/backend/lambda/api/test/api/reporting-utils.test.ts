@@ -24,7 +24,7 @@ describe('QuickSight visual management test', () => {
     Sheets: [
       {
         SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
-        Name: 'shee1',
+        Name: 'sheet1',
         FilterControls: [],
         Visuals: [],
         Layouts: [
@@ -162,7 +162,7 @@ describe('QuickSight visual management test', () => {
 
   test('add visual to dashboard', () => {
 
-    const dashbaord = applyChangeToDashboard({
+    const dashboard = applyChangeToDashboard({
       action: 'ADD',
       visuals: [
         {
@@ -245,7 +245,7 @@ describe('QuickSight visual management test', () => {
 
     });
 
-    expect(JSON.stringify(dashbaord)).toEqual(JSON.stringify({
+    expect(JSON.stringify(dashboard)).toEqual(JSON.stringify({
       DataSetIdentifierDeclarations: [
         {
           Identifier: 'clickstream_funnel_chart_view',
@@ -255,7 +255,7 @@ describe('QuickSight visual management test', () => {
       Sheets: [
         {
           SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
-          Name: 'shee1',
+          Name: 'sheet1',
           FilterControls: [
             {
               DateTimePicker: {
