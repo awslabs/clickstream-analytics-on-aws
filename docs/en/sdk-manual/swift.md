@@ -22,13 +22,16 @@ We use **Swift Package Manager** to distribute Clickstream Swift SDK, open your 
 
 ![](../images/sdk-manual/swift_add_package.png)
 
-Enter the Clickstream Library for Swift GitHub repo URL (`https://github.com/awslabs/clickstream-swift`) into the search bar, You'll see the Clickstream Library for Swift repository rules for which version of Clickstream you want Swift Package Manager to install. Choose **Up to Next Major Version**, then click **Add Package**, make the Clickstream product checked as default, and click **Add Package** again.
+1. Enter the Clickstream Library for Swift GitHub repository URL (`https://github.com/awslabs/clickstream-swift`) in the search bar.
+2. Check the rules for the version of the solution that you want Swift Package Manager to install, it is recommended to choose **Up to Next Major Version**, then click **Add Package**.
+3. Keep the Clickstream product checked as default.
+4. Choose **Add Package** again.
 
 ![](../images/sdk-manual/swift_add_package_url.png)
 
 ### 2.Parameter configuration
 
-Download your `amplifyconfiguration.json` file from your Clickstream solution control plane, and paste it to your project root folder:
+Download your `amplifyconfiguration.json` file from your Clickstream solution web console, and paste it to your project root folder:
 
 ![](../images/sdk-manual/swift_add_amplify_config_json_file.png)
 
@@ -147,15 +150,15 @@ Clickstream Swift SDK supports the following data types:
 
 In order to improve the efficiency of querying and analysis, we need to limit events as follows:
 
-| Name                            | Suggestion           | Hard limit          | Handle strategy for exceed    |
-|---------------------------------|----------------------|---------------------|-------------------------------|
-| Length of event name            | under 25 character   | 50 character        | throw error                   |
-| Length of event attribute name  | under 25 character   | 50 character        | discard, log and record error |
-| Length of event attribute value | under 100 character  | 1024 character      | discard, log and record error |
-| Event attribute per event       | under 50 attribute   | 500 event attribute | discard, log and record error |
-| User attribute number           | under 25 attribute   | 100 user attribute  | discard, log and record error |
-| Length of User attribute name   | under 25 character   | 50 character        | discard, log and record error |
-| Length of User attribute value  | under 50 character   | 256 character       | discard, log and record error |
+| Name                            | Suggestion           | Hard limit           | Handle strategy for exceed    |
+|---------------------------------|----------------------|----------------------|-------------------------------|
+| Length of event name            | under 25 characters  | 50 characters        | throw error                   |
+| Length of event attribute name  | under 25 characters  | 50 characters        | discard, log and record error |
+| Length of event attribute value | under 100 characters | 1024 characters      | discard, log and record error |
+| Event attribute per event       | under 50 attributes  | 500 event attributes | discard, log and record error |
+| User attribute number           | under 25 attributes  | 100 user attributes  | discard, log and record error |
+| Length of User attribute name   | under 25 characters  | 50 characters        | discard, log and record error |
+| Length of User attribute value  | under 50 characters  | 256 characters       | discard, log and record error |
 
 **Explanation of limits**
 
@@ -190,7 +193,7 @@ In Clickstream Swift SDK, we do not limit the total time of a session, as long a
 
 - **session_time_out**: By default is 30 minutes, which can be customized through the configuration api.
 
-- **_session_number**: The total number of session distinct by session id, and `_session_number` will be appeared in every event's attribute object.
+- **_session_number**: The total number of session distinct by session id, and `_session_number` will appear in every event's attribute object.
 
 #### User engagement definition
 
@@ -261,10 +264,10 @@ All user attributes will be included in `user` object, and all custom and global
 
 #### Common attribute
 
-| attribute        | describe                                                          | how to generate                                                                                                                                                                                                                                       | use and purpose                                                                                      |
+| Attribute name   | Description                                                       | How to generate                                                                                                                                                                                                                                       | Usage and purpose                                                                                    |
 |------------------|-------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | hashCode         | the AnalyticsEvent Object's hashCode                              | generate from`String(format: "%08X", hasher.combine(eventjson))`                                                                                                                                                                                      | distinguish different event                                                                          |
-| app_id           | clickstream app id                                                | generated when clickstream app create from solution control plane.                                                                                                                                                                                    | identify the events for your apps                                                                    |
+| app_id           | clickstream app id                                                | generated when clickstream app create from solution web console.                                                                                                                                                                                      | identify the events for your apps                                                                    |
 | unique_id        | the unique id for user                                            | generate from `UUID().uuidString` when the sdk first initialization<br>it will be changed after user re-login to another user, and when user re-login to the before user in same device, the `unique_id` will reset to the before user's `unique_id`. | the unique for identity different user and associating the behavior of logging in and not logging in |
 | device_id        | the unique id for device                                          | generate from`UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString`<br>it will be changed after app reinstall<br>                                                                                                                    | distinguish different device                                                                         |
 | device_unique_id | the device advertising Id                                         | generate from`ASIdentifierManager.shared().advertisingIdentifier.uuidString ?? ""`                                                                                                                                                                    | distinguish different device                                                                         |

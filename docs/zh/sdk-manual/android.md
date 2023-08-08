@@ -50,8 +50,8 @@ dependencies {
 
 在文件中，您的 `appId` 和 `endpoint` 已经配置好。每个属性的说明如下：
 
-- **appId（必须）**：控制平面上项目的应用程序 ID。
-- **endpoint（必须）**：将事件上传到 AWS 服务器的端点 URL。
+- **appId（必需的）**：控制平面上项目的应用程序 ID。
+- **endpoint（必需的）**：将事件上传到 AWS 服务器的端点 URL。
 - **isCompressEvents**：上传事件时是否压缩事件内容，默认值为 `true`。
 - **autoFlushEventsInterval**：事件发送间隔，默认值为 `10s`。
 - **isTrackAppExceptionEvents**：是否自动跟踪应用程序中的异常事件，默认值为 `false`。

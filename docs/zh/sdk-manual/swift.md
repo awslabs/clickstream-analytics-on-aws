@@ -52,8 +52,8 @@ Clickstream 需要 Xcode 13.4 或更高版本才能构建。
 
 其中，您的 `appId` 和 `endpoint` 已经设置好了。下面是每个属性的说明：
 
-- **appId（必须）**：您在控制面板中的app id。
-- **endpoint（必须）**：您将事件上传到 AWS 服务器的端点 URL。
+- **appId（必需的）**：您在控制面板中的app id。
+- **endpoint（必需的）**：您将事件上传到 AWS 服务器的端点 URL。
 - **isCompressEvents**：上传事件时是否压缩事件内容，默认为 `true`。
 - **autoFlushEventsInterval**：事件发送间隔， 默认为 `10s`。
 - **isTrackAppExceptionEvents**：是否自动跟踪应用程序异常事件，默认为 `false`。
