@@ -17,19 +17,20 @@ import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, Quic
 import { BatchExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
 import { STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  createDataSet, 
-  funnelVisualColumns, 
-  getDashboardCreateParameters, 
-  getVisualDef, 
-  getVisualRalatedDefs, 
-  applyChangeToDashboard, 
+import {
+  createDataSet,
+  funnelVisualColumns,
+  getDashboardCreateParameters,
+  getVisualDef,
+  getVisualRalatedDefs,
+  applyChangeToDashboard,
   getDashboardDefinitionFromArn,
-  CreateDashboardResult
+  CreateDashboardResult,
+  sleep,
 } from './quicksight/reporting-utils';
+import { buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { logger } from '../common/powertools';
-import { buildFunnelView } from './quicksight/sql-builder';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -116,7 +117,7 @@ export class ReportingServ {
       // gererate dashboard definition
       let dashboardDef;
       let sheetId;
-      if (!query.analysisId) {
+      if (!query.dashboardId) {
         dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
         sheetId = uuidv4();
         dashboardDef.Sheets![0].SheetId = sheetId;
@@ -166,13 +167,11 @@ export class ReportingServ {
 
       logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
-
-      let result: CreateDashboardResult
-
+      let result: CreateDashboardResult;
       if (!query.dashboardId) {
 
         //crate QuickSight analysis
-        const analysisId = `analysis${uuidv4()}`
+        const analysisId = `analysis${uuidv4()}`;
         const newAnalysis = await quickSight.createAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: analysisId,
@@ -197,7 +196,7 @@ export class ReportingServ {
         const newDashboard = await quickSight.createDashboard({
           AwsAccountId: awsAccountId,
           DashboardId: dashboardId,
-          Name: `dashboard${viewName}`,
+          Name: `dashboard-${viewName}`,
           Permissions: [{
             Principal: dashboardCreateParameters.quickSightPricipal,
             Actions: [
@@ -213,24 +212,24 @@ export class ReportingServ {
           }],
           Definition: dashboard,
         });
-        logger.info('funnel chart successfully created')
+        logger.info('funnel chart successfully created');
 
         result = {
           dashboardId,
           dashboardArn: newDashboard.Arn!,
-          dashboardName: `analysis-${viewName}`,
+          dashboardName: `dashboard-${viewName}`,
           dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
           analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisaName: `analysis-${viewName}`,
-          visualId
-        }
+          visualId,
+        };
       } else {
         //crate QuickSight analysis
         const newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
-          Name:  query.analysisName,
+          Name: query.analysisName,
           Definition: dashboard as AnalysisDefinition,
         });
 
@@ -241,7 +240,7 @@ export class ReportingServ {
           Name: query.dashboardName,
           Definition: dashboard,
         });
-        const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1)
+        const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
         for (const _i of Array(60).keys()) {
           try {
@@ -249,12 +248,12 @@ export class ReportingServ {
               AwsAccountId: awsAccountId,
               DashboardId: query.dashboardId,
               VersionNumber: Number.parseInt(versionNumber!),
-            })
-      
+            });
+
           } catch (err: any) {
             if (err instanceof ConflictException ) {
-              logger.warn(`sleep 100ms to wait updateDashboard finish`)
-              sleep(100)
+              logger.warn('sleep 100ms to wait updateDashboard finish');
+              await sleep(100);
             }
           }
         }
@@ -263,14 +262,14 @@ export class ReportingServ {
           dashboardId: query.dashboardId,
           dashboardArn: newDashboard.Arn!,
           dashboardName: query.dashboardName,
-          dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
+          dashboardVersion: Number.parseInt(versionNumber!),
           analysisId: query.analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisaName: query.analysisName,
-          visualId
-        }
+          visualId,
+        };
 
-        logger.info('funnel chart successfully updated')
+        logger.info('funnel chart successfully updated');
       }
 
       return res.status(201).json(new ApiSuccess(result));
@@ -280,8 +279,4 @@ export class ReportingServ {
   };
 
 }
-
-function sleep(ms: number) {
-  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
-};
 

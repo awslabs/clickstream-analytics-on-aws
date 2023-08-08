@@ -19,17 +19,17 @@ import {
   TransformOperation,
   ColumnTag,
   InputColumn,
-  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration
+  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration,
 } from '@aws-sdk/client-quicksight';
+import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashbaord-ln';
 import { logger } from '../../common/powertools';
-import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { ClickStreamStore } from '../../store/click-stream-store';
-import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
-import { getQuickSightSubscribeRegion } from '../../store/aws/quicksight';
 import { PipelineStackType } from '../../common/types';
 import { CPipeline } from '../../model/pipeline';
+import { getQuickSightSubscribeRegion } from '../../store/aws/quicksight';
+import { ClickStreamStore } from '../../store/click-stream-store';
 
 export interface VisualPorps {
   readonly name: string;
@@ -221,7 +221,7 @@ export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsA
     DashboardId: dashboardId,
   });
 
-  return dashboard.Definition
+  return dashboard.Definition;
 };
 
 export function applyChangeToDashboard(dashboardAction: DashboardAction) : DashboardVersionDefinition {
@@ -261,7 +261,7 @@ function addVisuals(visuals: VisualPorps[], dashboardDef: DashboardVersionDefini
       parameters.push(...visual.parameterDeclarations);
 
       //add dataset configuration
-      const fiterGroups = dashboardDef.FilterGroups!
+      const fiterGroups = dashboardDef.FilterGroups!;
       fiterGroups.push(visual.filterGroup);
 
       // visual layout
@@ -326,11 +326,10 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     }
   }
   if (!workgroupName && !isProvisionedRedshift) {
-    return { status: { code: 404, message: 'Redshift serverless workgroup not found' } };
+    return { status: { code: 400, message: 'Redshift serverless workgroup not found' } };
   }
   if (!dataApiRole) {
-    dataApiRole = 'arn:aws:iam::451426793911:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-1B641805YKFF7';
-    // return {code: 404, message: 'Redshift data api role not found'};
+    return { status: { code: 404, message: 'Redshift data api role not found' } };
   }
 
   let datasourceArn = undefined;
@@ -345,12 +344,11 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     }
   }
   if (!datasourceArn) {
-    datasourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project11_50543d10';
-    // return res.status(404).send(new ApiFail('QuickSight data source arn not found'));
+    return { status: { code: 404, message: 'QuickSight data source arn not found' } };
   }
+
   if (!quicksightInternalUser) {
-    quicksightInternalUser = 'Admin/liwmin-Isengard';
-    // return res.status(404).send(new ApiFail('QuickSight internal user not found'));
+    return { status: { code: 404, message: 'QuickSight internal user not found' } };
   }
 
   //quicksight user name
@@ -366,14 +364,12 @@ export async function getDashboardCreateParameters(input: DashboardCreateInputPa
     quicksightUser = quicksightPublicUser;
   }
 
-  quicksightUser = 'Admin/liwmin-Isengard';
-
   const awsPartition = 'aws';
   const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
   logger.info(`quickSightSubscribeRegion: ${quickSightSubscribeRegion}`);
 
   const quickSightPricipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightUser}`;
-  console.log(`quickSightPricipal: ${quickSightPricipal}`);
+  logger.info(`quickSightPricipal: ${quickSightPricipal}`);
 
   //get redshift client
   const credentials = await getCredentialsFromRole(input.stsClient, dataApiRole);
@@ -475,30 +471,13 @@ export function getVisualRalatedDefs(props: VisualRalatedDefProps) : VisualRalat
     filterContrl.DateTimePicker!.Title = 'event_date between';
     filterContrl.DateTimePicker!.SourceFilterId = sourceFilterId;
 
-    // const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
-    // parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
-    // parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
-    // parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(props.timeStart!)];
-    // parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.RollingDate = undefined;
-    // parameterDeclarations.push(parameterDeclarationStart);
-
-    // const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
-    // parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`;
-    // parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
-    // parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = [new Date(props.timeEnd!)];
-    // parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.RollingDate = undefined;
-    // parameterDeclarations.push(parameterDeclarationEnd);
-
     filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group.json')).toString()) as FilterGroup;
-
     filterGroup.FilterGroupId = uuidv4();
     filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId;
     filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date';
     filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = props.viewName;
-
     filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!);
     filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
-
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 
@@ -617,4 +596,8 @@ function findElementWithProperyValue(root: any, path: string, property: string, 
     return undefined;
   }
 }
+
+export function sleep(ms: number) {
+  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
+};
 
