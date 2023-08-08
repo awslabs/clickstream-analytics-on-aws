@@ -316,9 +316,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -336,10 +338,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -348,10 +353,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
@@ -665,9 +673,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -685,10 +695,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -697,10 +710,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
@@ -1012,9 +1028,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -1042,10 +1060,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -1054,10 +1075,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
@@ -1370,9 +1394,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -1400,10 +1426,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -1412,10 +1441,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
@@ -1767,9 +1799,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -1787,10 +1821,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -1799,10 +1836,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
@@ -2204,9 +2244,11 @@ describe('SQL Builder test', () => {
       select
         table_0.*,
         table_1.event_id_1,
+        table_1.event_name_1,
         table_1.user_pseudo_id_1,
         table_1.event_timestamp_1,
         table_2.event_id_2,
+        table_2.event_name_2,
         table_2.user_pseudo_id_2,
         table_2.event_timestamp_2
       from
@@ -2224,10 +2266,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0 as e_id_0,
+        event_name_0 as e_name_0,
         user_pseudo_id_0 as u_id_0,
         event_id_1 as e_id_1,
+        event_name_1 as e_name_1,
         user_pseudo_id_1 as u_id_1,
         event_id_2 as e_id_2,
+        event_name_2 as e_name_2,
         user_pseudo_id_2 as u_id_2
       from
         join_table
@@ -2236,10 +2281,13 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_id_0,
+        event_name_0,
         user_pseudo_id_0,
         event_id_1,
+        event_name_1,
         user_pseudo_id_1,
         event_id_2,
+        event_name_2,
         user_pseudo_id_2
     )
   select
