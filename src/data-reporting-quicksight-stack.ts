@@ -31,6 +31,7 @@ import {
   addCfnNagToStack,
   addCfnNagForCfnResource,
 } from './common/cfn-nag';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
@@ -47,7 +48,7 @@ export class DataReportingQuickSightStack extends Stack {
     const featureName = 'Reporting - QuickSight';
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-rep) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    const stackParames = createStackParametersQuickSight(this, this.paramGroups, this.paramLabels);
+    const stackParams = createStackParametersQuickSight(this, this.paramGroups, this.paramLabels);
 
     const vpcConnectionCreateRole = new Role(this, 'VPCConnectionCreateRole', {
       assumedBy: new ServicePrincipal('quicksight.amazonaws.com'),
@@ -70,10 +71,10 @@ export class DataReportingQuickSightStack extends Stack {
       type: 'AWS::QuickSight::VPCConnection',
       properties: {
         AwsAccountId: Aws.ACCOUNT_ID,
-        Name: `VPC Connection for Clickstream pipeline ${stackParames.redshiftDBParam.valueAsString}`,
+        Name: `VPC Connection for Clickstream pipeline ${stackParams.redshiftDBParam.valueAsString}`,
         RoleArn: vpcConnectionCreateRole.roleArn,
-        SecurityGroupIds: stackParames.quickSightVpcConnectionSGParam.valueAsList,
-        SubnetIds: Fn.split(',', stackParames.quickSightVpcConnectionSubnetParam.valueAsString),
+        SecurityGroupIds: stackParams.quickSightVpcConnectionSGParam.valueAsList,
+        SubnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
         VPCConnectionId: vpcConnectionId,
       },
     });
@@ -85,17 +86,16 @@ export class DataReportingQuickSightStack extends Stack {
       'useTemplateArnCondition',
       {
         expression:
-          Fn.conditionNot(Fn.conditionEquals(stackParames.quickSightTemplateArnParam.valueAsString, '')),
+          Fn.conditionNot(Fn.conditionEquals(stackParams.quickSightTemplateArnParam.valueAsString, '')),
       },
     );
 
-    // const temptalteDefObj = renderTemplate(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')));
-    const templateId = `clickstream_template_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const templateId = `clickstream_template_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const template = new CfnTemplate(this, 'Clickstream-Template-Def', {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
       permissions: [{
-        principal: stackParames.quickSightPrincipalParam.valueAsString,
+        principal: stackParams.quickSightPrincipalParam.valueAsString,
         actions: [
           'quicksight:UpdateTemplatePermissions',
           'quicksight:DescribeTemplatePermissions',
@@ -107,7 +107,7 @@ export class DataReportingQuickSightStack extends Stack {
 
       sourceEntity: Fn.conditionIf(useTemplateArnCondition.logicalId, {
         SourceTemplate: {
-          Arn: stackParames.quickSightTemplateArnParam.valueAsString,
+          Arn: stackParams.quickSightTemplateArnParam.valueAsString,
         },
       }, Aws.NO_VALUE),
 
@@ -117,13 +117,13 @@ export class DataReportingQuickSightStack extends Stack {
       ),
     });
 
-    const userSecret = Secret.fromSecretNameV2(this, 'Clickstrem-Redshift-Secret', `${stackParames.redshiftParameterKeyParam.valueAsString}`);
+    const userSecret = Secret.fromSecretNameV2(this, 'Clickstream-Redshift-Secret', `${stackParams.redshiftParameterKeyParam.valueAsString}`);
 
-    const datasourceId = `clickstream_datasource_${stackParames.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const dataSourceId = `clickstream_datasource_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const dataSource = new CfnDataSource(this, 'Clickstream-DataSource', {
       awsAccountId: Aws.ACCOUNT_ID,
-      dataSourceId: datasourceId,
-      name: `Clicksteam DataSource ${stackParames.redshiftDBParam.valueAsString}`,
+      dataSourceId: dataSourceId,
+      name: `Clickstream DataSource ${stackParams.redshiftDBParam.valueAsString}`,
       type: 'REDSHIFT',
       credentials: {
         credentialPair: {
@@ -133,14 +133,14 @@ export class DataReportingQuickSightStack extends Stack {
       },
       dataSourceParameters: {
         redshiftParameters: {
-          database: stackParames.redshiftDBParam.valueAsString,
-          host: stackParames.redshiftEndpointParam.valueAsString,
-          port: stackParames.redshiftPortParam.valueAsNumber,
+          database: stackParams.redshiftDBParam.valueAsString,
+          host: stackParams.redshiftEndpointParam.valueAsString,
+          port: stackParams.redshiftPortParam.valueAsNumber,
         },
       },
       permissions: [
         {
-          principal: stackParames.quickSightPrincipalParam.valueAsString,
+          principal: stackParams.quickSightPrincipalParam.valueAsString,
           actions: [
             'quicksight:UpdateDataSourcePermissions',
             'quicksight:DescribeDataSourcePermissions',
@@ -161,14 +161,14 @@ export class DataReportingQuickSightStack extends Stack {
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
       dataSourceArn: dataSource.attrArn,
-      databaseName: stackParames.redshiftDBParam.valueAsString,
+      databaseName: stackParams.redshiftDBParam.valueAsString,
       quickSightProps: {
-        userName: stackParames.quickSightUserParam.valueAsString,
-        namespace: stackParames.quickSightNamespaceParam.valueAsString,
-        principalArn: stackParames.quickSightPrincipalParam.valueAsString,
+        userName: stackParams.quickSightUserParam.valueAsString,
+        namespace: stackParams.quickSightNamespaceParam.valueAsString,
+        principalArn: stackParams.quickSightPrincipalParam.valueAsString,
       },
       redshiftProps: {
-        databaseSchemaNames: stackParames.redShiftDBSchemaParam.valueAsString,
+        databaseSchemaNames: stackParams.redShiftDBSchemaParam.valueAsString,
       },
     });
     cr.node.addDependency(vPCConnectionResource);
@@ -181,11 +181,16 @@ export class DataReportingQuickSightStack extends Stack {
       },
     };
 
-    const dababoards = cr.getAttString('dashboards');
-    new CfnOutput(this, 'Dashboards', {
+    const dashboards = cr.getAttString('dashboards');
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, {
       description: 'The QuickSight dashboard list',
-      value: dababoards,
-    }).overrideLogicalId('Dashboards');
+      value: dashboards,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {
+      description: 'The QuickSight data source arn',
+      value: dataSource.attrArn,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
     addCfnNag(this);
   }
@@ -194,7 +199,7 @@ export class DataReportingQuickSightStack extends Stack {
 function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider');
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {

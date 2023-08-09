@@ -13,6 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '../../../src/common/constant';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
 
 describe('DataReportingQuickSightStack parameter test', () => {
@@ -25,7 +26,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
   });
 
   test('Has Dashboards output', () => {
-    template.hasOutput('Dashboards', {});
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, {});
+  });
+
+  test('Has Dashboards output', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {});
   });
 
   test('Should has Parameter quickSightUserParam', () => {
@@ -524,7 +529,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     Description: 'IAM role use to create QuickSight VPC connection.',
   }, 1);
 
-
   template.resourcePropertiesCountIs('AWS::Lambda::Function', {
     Code: Match.anyValue(),
     Role: {
@@ -567,7 +571,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     },
     RetentionInDays: 7,
   }, 1);
-
 
   template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
     AwsAccountId: {
@@ -757,7 +760,7 @@ describe('DataReportingQuickSightStack resource test', () => {
       'Fn::Join': [
         '',
         [
-          'Clicksteam DataSource ',
+          'Clickstream DataSource ',
           {
             Ref: 'RedshiftDBParam',
           },

@@ -31,7 +31,7 @@ import Mustache from 'mustache';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import {
-  QuicksightCustomResourceLabmdaProps,
+  QuicksightCustomResourceLambdaProps,
   dataSetActions,
   waitForAnalysisCreateCompleted,
   waitForAnalysisDeleteCompleted,
@@ -46,7 +46,7 @@ import {
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
-type QuicksightCustomResourceLabmdaPropsType = QuicksightCustomResourceLabmdaProps & {
+type QuicksightCustomResourceLambdaPropsType = QuicksightCustomResourceLambdaProps & {
   readonly ServiceToken: string;
 }
 
@@ -55,7 +55,7 @@ export type MustacheParamType = {
 }
 
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {
-  const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
+  const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   const region = props.awsRegion;
   const quickSight = new QuickSight({
     region,
@@ -82,7 +82,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principal
 
   logger.info('receive event', JSON.stringify(event));
 
-  const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
+  const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   let dashboards = [];
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
@@ -115,7 +115,7 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
 
   logger.info('receive event', JSON.stringify(event));
 
-  const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
+  const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
     for (const schemaName of databaseSchemaNames.split(',')) {
@@ -135,8 +135,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
   event: CloudFormationCustomResourceUpdateEvent): Promise<CdkCustomResourceResponse> => {
 
   logger.info('receive event', JSON.stringify(event));
-  const props = event.ResourceProperties as QuicksightCustomResourceLabmdaPropsType;
-  const oldProps = event.OldResourceProperties as QuicksightCustomResourceLabmdaPropsType;
+  const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
+  const oldProps = event.OldResourceProperties as QuicksightCustomResourceLambdaPropsType;
 
   let dashboards = [];
 
@@ -319,8 +319,8 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    const identifer = buildDataSetId(databaseName, schema, props.tableName);
-    const datasetId = identifer.id;
+    const identifier = buildDataSetId(databaseName, schema, props.tableName);
+    const datasetId = identifier.id;
 
     const mustacheParam: MustacheParamType = {
       schema,
@@ -372,8 +372,8 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     let logicalMap = undefined;
     if (needLogicalMap) {
       logicalMap = {
-        LogialTable1: {
-          Alias: 'Alias_LogialTable1',
+        LogicalTable1: {
+          Alias: 'Alias_LogicalTable1',
           Source: {
             PhysicalTableId: 'PhyTable1',
           },
@@ -387,7 +387,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name}${identifer.tableNameIdentifer}-${identifer.schemaIdentifer}-${identifer.databaseIdentifer}`,
+      Name: `${props.name}${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: [{
         Principal: principalArn,
         Actions: dataSetActions,
@@ -429,14 +429,14 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
 : Promise<CreateAnalysisCommandOutput|undefined> => {
 
   try {
-    const identifer = buildAnalysisId(databaseName, schema);
-    const analysisId = identifer.id;
+    const identifier = buildAnalysisId(databaseName, schema);
+    const analysisId = identifier.id;
 
     logger.info('start to create analysis');
     const analysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
+      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -467,14 +467,14 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
-    const identifer = buildDashBoardId(databaseName, schema);
-    const dashboardId = identifer.id;
+    const identifier = buildDashBoardId(databaseName, schema);
+    const dashboardId = identifier.id;
 
     logger.info('start to create dashboard');
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer} `,
+      Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
         Principal: principalArn,
         Actions: [
@@ -507,8 +507,8 @@ const deleteDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
 : Promise<DeleteDashboardCommandOutput|undefined> => {
 
   let deleteResult = undefined;
-  const identifer = buildDashBoardId(databaseName, schema);
-  const dashboardId = identifer.id;
+  const identifier = buildDashBoardId(databaseName, schema);
+  const dashboardId = identifier.id;
   try {
     deleteResult = await quickSight.deleteDashboard({
       AwsAccountId: awsAccountId,
@@ -535,8 +535,8 @@ const deleteAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
 : Promise<CreateAnalysisCommandOutput|undefined> => {
 
   let result = undefined;
-  const identifer = buildAnalysisId(databaseName, schema);
-  const analysisId = identifer.id;
+  const identifier = buildAnalysisId(databaseName, schema);
+  const analysisId = identifier.id;
   try {
     result = await quickSight.deleteAnalysis({
       AwsAccountId: awsAccountId,
@@ -567,8 +567,8 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   let result = undefined;
-  const identifer = buildDataSetId(databaseName, schema, props.tableName);
-  const datasetId = identifer.id;
+  const identifier = buildDataSetId(databaseName, schema, props.tableName);
+  const datasetId = identifier.id;
   try {
     result = await quickSight.deleteDataSet({
       AwsAccountId: awsAccountId,
@@ -598,8 +598,8 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
 
   try {
 
-    const identifer = buildDataSetId(databaseName, schema, props.tableName);
-    const datasetId = identifer.id;
+    const identifier = buildDataSetId(databaseName, schema, props.tableName);
+    const datasetId = identifier.id;
 
     const mustacheParam: MustacheParamType = {
       schema,
@@ -651,8 +651,8 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     let logicalMap = undefined;
     if (needLogicalMap) {
       logicalMap = {
-        LogialTable1: {
-          Alias: 'Alias_LogialTable1',
+        LogicalTable1: {
+          Alias: 'Alias_LogicalTable1',
           Source: {
             PhysicalTableId: 'PhyTable1',
           },
@@ -667,7 +667,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     dataset = await quickSight.updateDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${identifer.tableNameIdentifer}-${identifer.schemaIdentifer}-${identifer.databaseIdentifer}`,
+      Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
 
       ImportMode: props.importMode,
       PhysicalTableMap: {
@@ -703,14 +703,14 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
 : Promise<CreateAnalysisCommandOutput|undefined> => {
 
   try {
-    const identifer = buildAnalysisId(databaseName, schema);
-    const analysisId = identifer.id;
+    const identifier = buildAnalysisId(databaseName, schema);
+    const analysisId = identifier.id;
 
     logger.info('start to update analysis');
     const analysis = await quickSight.updateAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
+      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
       SourceEntity: sourceEntity,
     });
     logger.info(`update analysis finished. Id: ${analysisId}`);
@@ -727,14 +727,14 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
-    const identifer = buildDashBoardId(databaseName, schema);
-    const dashboardId = identifer.id;
+    const identifier = buildDashBoardId(databaseName, schema);
+    const dashboardId = identifier.id;
 
     logger.info('start to create dashboard');
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${identifer.schemaIdentifer} - ${identifer.databaseIdentifer}`,
+      Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
 
       SourceEntity: sourceEntity,
 
@@ -749,49 +749,49 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
   }
 };
 
-const buildDashBoardId = function (databaseName: string, schema: string): Identifer {
-  const schemaIdentifer = truncateString(schema, 40);
-  const databaseIdentifer = truncateString(databaseName, 40);
+const buildDashBoardId = function (databaseName: string, schema: string): Identifier {
+  const schemaIdentifier = truncateString(schema, 40);
+  const databaseIdentifier = truncateString(databaseName, 40);
   const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
   return {
-    id: `clickstream_dashboard_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
+    id: `clickstream_dashboard_${databaseIdentifier}_${schemaIdentifier}_${suffix}`,
     idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
+    databaseIdentifier,
+    schemaIdentifier,
   };
 };
 
-const buildAnalysisId = function (databaseName: string, schema: string): Identifer {
-  const schemaIdentifer = truncateString(schema, 40);
-  const databaseIdentifer = truncateString(databaseName, 40);
+const buildAnalysisId = function (databaseName: string, schema: string): Identifier {
+  const schemaIdentifier = truncateString(schema, 40);
+  const databaseIdentifier = truncateString(databaseName, 40);
   const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
   return {
-    id: `clickstream_analysis_${databaseIdentifer}_${schemaIdentifer}_${suffix}`,
+    id: `clickstream_analysis_${databaseIdentifier}_${schemaIdentifier}_${suffix}`,
     idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
+    databaseIdentifier,
+    schemaIdentifier,
   };
 };
 
-const buildDataSetId = function (databaseName: string, schema: string, tableName: string): Identifer {
-  const tableNameIdentifer = truncateString(tableName.replace(/clickstream_/g, ''), 40);
-  const schemaIdentifer = truncateString(schema, 15);
-  const databaseIdentifer = truncateString(databaseName, 15);
+const buildDataSetId = function (databaseName: string, schema: string, tableName: string): Identifier {
+  const tableNameIdentifier = truncateString(tableName.replace(/clickstream_/g, ''), 40);
+  const schemaIdentifier = truncateString(schema, 15);
+  const databaseIdentifier = truncateString(databaseName, 15);
   const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);
   return {
-    id: `clickstream_dataset_${databaseIdentifer}_${schemaIdentifer}_${tableNameIdentifer}_${suffix}`,
+    id: `clickstream_dataset_${databaseIdentifier}_${schemaIdentifier}_${tableNameIdentifier}_${suffix}`,
     idSuffix: suffix,
-    databaseIdentifer,
-    schemaIdentifer,
-    tableNameIdentifer,
+    databaseIdentifier,
+    schemaIdentifier,
+    tableNameIdentifier,
   };
 
 };
 
-interface Identifer {
+interface Identifier {
   id: string;
   idSuffix: string;
-  databaseIdentifer: string;
-  schemaIdentifer: string;
-  tableNameIdentifer?: string;
+  databaseIdentifier: string;
+  schemaIdentifier: string;
+  tableNameIdentifier?: string;
 }

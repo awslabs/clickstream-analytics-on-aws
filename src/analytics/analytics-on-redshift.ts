@@ -59,6 +59,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
   readonly redshiftServerlessWorkgroup: RedshiftServerless | undefined;
   readonly applicationSchema: ApplicationSchemas;
+  readonly redshiftDataAPIExecRole: IRole;
 
   constructor(
     scope: Construct,
@@ -71,14 +72,13 @@ export class RedshiftAnalyticsStack extends NestedStack {
       || (props.existingRedshiftServerlessProps && props.newRedshiftServerlessProps)
       || (props.newRedshiftServerlessProps && props.provisionedRedshiftProps)
       || (!props.existingRedshiftServerlessProps && !props.provisionedRedshiftProps && !props.newRedshiftServerlessProps)) {
-      throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provioned Redshift.');
+      throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provisioned Redshift.');
     }
 
     const featureName = `Analytics-${id}`;
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    let redshiftDataAPIExecRole: IRole;
     let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
 
     const projectDatabaseName = props.projectId;
@@ -100,25 +100,25 @@ export class RedshiftAnalyticsStack extends NestedStack {
         workgroupName: props.newRedshiftServerlessProps.workgroupName,
         projectId: props.projectId,
       });
-      redshiftDataAPIExecRole = this.redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
+      this.redshiftDataAPIExecRole = this.redshiftServerlessWorkgroup.redshiftDataAPIExecRole;
       existingRedshiftServerlessProps = {
         createdInStack: true,
         workgroupId: this.redshiftServerlessWorkgroup.workgroup.attrWorkgroupWorkgroupId,
         workgroupName: this.redshiftServerlessWorkgroup.workgroup.attrWorkgroupWorkgroupName,
         namespaceId: this.redshiftServerlessWorkgroup.namespaceId,
-        dataAPIRoleArn: redshiftDataAPIExecRole.roleArn,
+        dataAPIRoleArn: this.redshiftDataAPIExecRole.roleArn,
         databaseName: this.redshiftServerlessWorkgroup.databaseName,
       };
       redshiftUserCR = this.redshiftServerlessWorkgroup.redshiftUserCR;
 
     } else if (props.existingRedshiftServerlessProps) {
-      redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
+      this.redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
         props.existingRedshiftServerlessProps.dataAPIRoleArn, {
           mutable: true,
         });
 
-    } else if (props.provisionedRedshiftProps) {
-      redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
+    } else {
+      this.redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
         assumedBy: new AccountPrincipal(Aws.ACCOUNT_ID),
       });
       const policyStatements = [
@@ -180,8 +180,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
           },
         }),
       ];
-      policyStatements.forEach((ps) => (redshiftDataAPIExecRole as Role).addToPolicy(ps));
-      (redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
+      policyStatements.forEach((ps) => (this.redshiftDataAPIExecRole as Role).addToPolicy(ps));
+      (this.redshiftDataAPIExecRole as Role).addToPolicy(new PolicyStatement({
         actions: ['redshift-data:DescribeStatement', 'redshift-data:GetStatementResult'],
         resources: ['*'],
       }));
@@ -196,7 +196,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
       databaseName: projectDatabaseName,
-      dataAPIRole: redshiftDataAPIExecRole!,
+      dataAPIRole: this.redshiftDataAPIExecRole,
     });
     if (redshiftUserCR) {
       this.applicationSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
@@ -215,7 +215,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       provisionedRedshift: props.provisionedRedshiftProps,
       odsTableName,
       databaseName: projectDatabaseName,
-      dataAPIRole: redshiftDataAPIExecRole!,
+      dataAPIRole: this.redshiftDataAPIExecRole,
       emrServerlessApplicationId: props.emrServerlessApplicationId,
     });
 
@@ -230,7 +230,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
-      dataAPIRole: redshiftDataAPIExecRole!,
+      dataAPIRole: this.redshiftDataAPIExecRole,
       upsertUsersWorkflowData: props.upsertUsersWorkflowData,
     });
 
@@ -243,7 +243,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
-      dataAPIRole: redshiftDataAPIExecRole!,
+      dataAPIRole: this.redshiftDataAPIExecRole,
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
 

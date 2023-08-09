@@ -32,7 +32,7 @@ export interface QuicksightCustomResourceProps {
   readonly redshiftProps: RedShiftProps;
 };
 
-export interface QuicksightCustomResourceLabmdaProps {
+export interface QuicksightCustomResourceLambdaProps {
   readonly awsAccountId: string;
   readonly awsRegion: string;
   readonly awsPartition: string;
