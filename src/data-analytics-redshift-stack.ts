@@ -31,7 +31,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  REDSHIFT_DATA_API_ROLE_ARN,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -214,21 +214,21 @@ export function createRedshiftAnalyticsStack(
     condition: isRedshiftProvisioned,
   }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
 
-  new CfnOutput(scope, `ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`, {
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`, {
     value: redshiftProvisionedStack.redshiftDataAPIExecRole.roleArn,
     description: 'Redshift data api role arn',
     condition: isRedshiftProvisioned,
-  }).overrideLogicalId(`ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`);
-  new CfnOutput(scope, `NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`, {
     value: newRedshiftServerlessStack.redshiftDataAPIExecRole.roleArn,
     description: 'Redshift data api role arn',
     condition: isNewRedshiftServerless,
-  }).overrideLogicalId(`NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
-  new CfnOutput(scope, `ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`, {
     value: redshiftExistingServerlessStack.redshiftDataAPIExecRole.roleArn,
     description: 'Redshift data api role arn',
     condition: isExistingRedshiftServerless,
-  }).overrideLogicalId(`ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

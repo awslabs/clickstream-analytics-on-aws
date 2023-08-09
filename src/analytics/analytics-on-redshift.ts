@@ -72,11 +72,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       || (props.existingRedshiftServerlessProps && props.newRedshiftServerlessProps)
       || (props.newRedshiftServerlessProps && props.provisionedRedshiftProps)
       || (!props.existingRedshiftServerlessProps && !props.provisionedRedshiftProps && !props.newRedshiftServerlessProps)) {
-      throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provioned Redshift.');
-    }
-
-    if (!props.newRedshiftServerlessProps && !props.existingRedshiftServerlessProps && !props.provisionedRedshiftProps ) {
-      throw new Error('Wrong Redshift cluster type.');
+      throw new Error('Must specify ONLY one of new Redshift Serverless, existing Redshift Serverless or Provisioned Redshift.');
     }
 
     const featureName = `Analytics-${id}`;
