@@ -23,11 +23,8 @@ import {
   MUTIL_APP_ID_PATTERN,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
-  OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-  OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
-import { logger } from '../common/powertools';
 import { SolutionInfo } from '../common/solution-info-ln';
 import { validatePattern, validateSecretModel, validatePipelineNetwork, validateIngestionServerNum } from '../common/stack-params-valid';
 import {
@@ -42,7 +39,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps, ReportingDashboardOutput, PipelineStatusType, IngestionServerSizeProps,
+  IngestionServerSinkBatchProps, PipelineStatusType, IngestionServerSizeProps,
 } from '../common/types';
 import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -883,56 +880,26 @@ export class CPipeline {
     return athenaState;
   }
 
-  public async getStackOutputBySuffixs(stackType: PipelineStackType, outputKeySuffixs: string[]): Promise<Map<string, string>> {
+  public async getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Promise<Map<string, string>> {
+    const res: Map<string, string> = new Map<string, string>();
     const stack = await describeStack(
       this.pipeline.region,
       getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
     );
-    const res: Map<string, string> = new Map<string, string>();
-    if (stack) {
-      for (let suffix of outputKeySuffixs) {
-        let value = '';
-        if (stack.Outputs) {
-          for (let out of stack.Outputs as Output[]) {
-            if (out.OutputKey?.endsWith(suffix)) {
-              value = out.OutputValue ?? '';
-              break;
-            }
+    if (!stack) {
+      return res;
+    }
+    for (let suffix of outputKeySuffixes) {
+      if (stack.Outputs) {
+        for (let out of stack.Outputs as Output[]) {
+          if (out.OutputKey?.endsWith(suffix)) {
+            res.set(suffix, out.OutputValue ?? '');
+            break;
           }
         }
-        res.set(suffix, value);
       }
     }
     return res;
-  }
-
-  public async getReportingDashboardsUrl() {
-    let dashboards: ReportingDashboardOutput[] = [];
-    const reportOutputs = await this.getStackOutputBySuffixs(
-      PipelineStackType.REPORTING,
-      [
-        OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-      ],
-    );
-    const dashboardsOutputs = reportOutputs.get(OUTPUT_REPORT_DASHBOARDS_SUFFIX);
-    if (dashboardsOutputs) {
-      try {
-        dashboards = JSON.parse(dashboardsOutputs);
-      } catch (error) {
-        logger.warn('Reporting Outputs error.', { reportOutputs });
-      }
-    }
-    return dashboards;
-  }
-
-  public async getMetricsDashboardName() {
-    const metricsOutputs = await this.getStackOutputBySuffixs(
-      PipelineStackType.METRICS,
-      [
-        OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
-      ],
-    );
-    return metricsOutputs.get(OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME);
   }
 
   public async getPluginsInfo() {

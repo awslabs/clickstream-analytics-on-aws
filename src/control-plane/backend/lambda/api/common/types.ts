@@ -12,7 +12,7 @@
  */
 
 import { CertificateStatus } from '@aws-sdk/client-acm';
-import { Parameter, Tag, StackStatus } from '@aws-sdk/client-cloudformation';
+import { Parameter, Tag, StackStatus, Output } from '@aws-sdk/client-cloudformation';
 import { RouteTable } from '@aws-sdk/client-ec2';
 import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
@@ -270,7 +270,7 @@ export interface PipelineStatusDetail {
   readonly stackType: PipelineStackType;
   readonly stackStatus: StackStatus | undefined;
   readonly stackStatusReason: string;
-  readonly url: string;
+  readonly outputs: Output[];
 }
 
 export interface SSMSecret {
