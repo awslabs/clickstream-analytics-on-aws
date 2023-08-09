@@ -34,7 +34,7 @@ import {
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
-import { createInternalUserCustomResource, createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
+import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
 
@@ -173,13 +173,6 @@ export class DataReportingQuickSightStack extends Stack {
     cr.node.addDependency(vPCConnectionResource);
     cr.node.addDependency(template);
 
-    const userCustomResource = createInternalUserCustomResource(this, {
-      quickSightNamespace: stackParams.quickSightNamespaceParam.valueAsString,
-      email: stackParams.quickSightInternalUserEmailParam.valueAsString,
-    });
-
-    const internalUserName = userCustomResource.getAttString('user');
-
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
         ParameterGroups: this.paramGroups,
@@ -193,11 +186,6 @@ export class DataReportingQuickSightStack extends Stack {
       value: dashboards,
     }).overrideLogicalId('Dashboards');
 
-    new CfnOutput(this, 'InternalUser', {
-      description: 'The QuickSight Internal User Name',
-      value: internalUserName,
-    }).overrideLogicalId('InternalUser');
-
     addCfnNag(this);
   }
 }
@@ -205,10 +193,8 @@ export class DataReportingQuickSightStack extends Stack {
 function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider', undefined);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightInternalUserCustomResource', 'QuicksightInternalUserCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider');
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
-  addCfnNagForCfnResource(stack, 'QuicksightInternalUserCustomResourceLambda', 'QuicksightInternalUserCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {
       paths_endswith: ['QuicksightCustomResourceLambdaRole/DefaultPolicy/Resource'],

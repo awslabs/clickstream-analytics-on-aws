@@ -72,12 +72,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
-  test('Should has Parameter QuickSightInternalUserEmailParam', () => {
-    template.hasParameter('QuickSightInternalUserEmailParam', {
-      Type: 'String',
-    });
-  });
-
   test('QuickSightUserParam pattern', () => {
     const param = template.toJSON().Parameters.QuickSightUserParam;
     const pattern = param.AllowedPattern;
@@ -1614,30 +1608,5 @@ describe('DataReportingQuickSightStack resource test', () => {
 
       },
     }, 1);
-
-
-  template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource', {
-    ServiceToken: {
-      'Fn::GetAtt': [
-        'QuicksightInternalUserCustomResourceProviderframeworkonEventE2074535',
-        'Arn',
-      ],
-    },
-    awsAccountId: {
-      Ref: 'AWS::AccountId',
-    },
-    awsRegion: {
-      Ref: 'AWS::Region',
-    },
-    awsPartition: {
-      Ref: 'AWS::Partition',
-    },
-    quickSightNamespace: {
-      Ref: 'QuickSightNamespaceParam',
-    },
-    email: {
-      Ref: 'QuickSightInternalUserEmailParam',
-    },
-  }, 1);
 
 });

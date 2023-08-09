@@ -87,19 +87,6 @@ export const dataSetActions = [
   'quicksight:CancelIngestion',
 ];
 
-export interface QuicksightInternalUserCustomResourceProps {
-  readonly quickSightNamespace: string;
-  readonly email: string;
-}
-
-export interface QuicksightInternalUserCustomResourceLambdaProps {
-  readonly awsAccountId: string;
-  readonly awsRegion: string;
-  readonly awsPartition: string;
-  readonly quickSightNamespace: string;
-  readonly email: string;
-}
-
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
 export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
