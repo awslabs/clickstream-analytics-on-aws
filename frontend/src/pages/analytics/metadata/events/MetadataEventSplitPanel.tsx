@@ -29,6 +29,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataSource } from 'ts/const';
+import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
@@ -252,7 +253,9 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
               <Box variant="awsui-key-label">
                 {t('analytics:metadata.event.tableColumnPlatform')}
               </Box>
-              <div className="mb-10">{event.platform}</div>
+              <div className="mb-10">
+                <MetadataPlatformFC platform={event.platform} />
+              </div>
             </div>
             <div>
               <Box variant="awsui-key-label">

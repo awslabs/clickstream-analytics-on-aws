@@ -12,7 +12,7 @@
     "createAt": "CreateAt"
   },
   "header": {
-    "modalTitle": "Swich Project Space",
+    "modalTitle": "Switch Project Space",
     "selectProjectTitle": "Please select a project",
     "selectAppTitle": "Please select an application",
     "configurations": "Configurations"

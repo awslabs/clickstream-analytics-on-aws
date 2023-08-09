@@ -27,7 +27,7 @@ const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
 const APIRoleName = process.env.API_ROLE_NAME;
-const QuickSigthEmbedRoleArn = process.env.QUICKSIGTH_EMBED_ROLE_ARN;
+const QuickSightEmbedRoleArn = process.env.QUICKSIGHT_EMBED_ROLE_ARN;
 const amznRequestContextHeader = 'x-amzn-request-context';
 const ALLOW_UPLOADED_FILE_TYPES = process.env.ALLOW_UPLOADED_FILE_TYPES || 'jar,mmdb';
 const QUICKSIGHT_CONTROL_PLANE_REGION = process.env.QUICKSIGHT_CONTROL_PLANE_REGION || 'us-east-1';
@@ -78,7 +78,7 @@ export {
   awsUrlSuffix,
   STSUploadRole,
   APIRoleName,
-  QuickSigthEmbedRoleArn,
+  QuickSightEmbedRoleArn,
   amznRequestContextHeader,
   QUICKSIGHT_CONTROL_PLANE_REGION,
   SDK_MAVEN_VERSION_API_LINK,

@@ -26,7 +26,7 @@ export interface IMetadataEvent {
   readonly description: string;
   readonly metadataSource: MetadataSource;
   readonly hasData: boolean;
-  readonly platform: MetadataPlatform;
+  readonly platform: MetadataPlatform[];
   readonly dataVolumeLastDay: number;
   associatedParameters? : IMetadataRelation[];
 
@@ -55,7 +55,7 @@ export interface IMetadataEventParameter {
   readonly description: string;
   readonly metadataSource: MetadataSource;
   readonly hasData: boolean;
-  readonly platform: MetadataPlatform;
+  readonly platform: MetadataPlatform[];
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
   readonly valueEnum: IMetadataAttributeValue[];

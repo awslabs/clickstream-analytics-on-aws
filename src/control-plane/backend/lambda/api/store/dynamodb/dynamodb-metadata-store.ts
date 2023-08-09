@@ -21,7 +21,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, query, scan } from '../../common/dynamodb-client';
-import { KeyVal, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/types';
+import { KeyVal, MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/types';
 import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
@@ -57,7 +57,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         description: event.description ?? '',
         metadataSource: event.metadataSource ?? MetadataSource.PRESET,
         hasData: event.hasData ?? false,
-        platform: event.platform ?? MetadataPlatform.ANDROID,
+        platform: event.platform ?? [],
         dataVolumeLastDay: event.dataVolumeLastDay ?? 0,
         createAt: Date.now(),
         updateAt: Date.now(),
@@ -265,7 +265,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         description: eventParameter.description ?? '',
         metadataSource: eventParameter.metadataSource ?? MetadataSource.PRESET,
         hasData: eventParameter.hasData ?? false,
-        platform: eventParameter.platform ?? MetadataPlatform.ANDROID,
+        platform: eventParameter.platform ?? [],
         parameterType: eventParameter.parameterType ?? MetadataParameterType.PUBLIC,
         valueType: eventParameter.valueType ?? MetadataValueType.STRING,
         valueEnum: eventParameter.valueEnum ?? [],

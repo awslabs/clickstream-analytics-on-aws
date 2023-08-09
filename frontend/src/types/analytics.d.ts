@@ -14,96 +14,96 @@
 export {};
 declare global {
   interface IAnalyticsDashboard {
-    id: string;
-    name: string;
-    description: string;
-    createAt: number;
+    readonly id: string;
+    readonly name: string;
+    readonly description: string;
+    readonly createAt: number;
   }
 
   interface IMetadataEvent {
-    id: string;
-    type: string;
-    prefix: string;
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
 
-    projectId: string;
-    appId: string;
+    readonly projectId: string;
+    readonly appId: string;
 
-    name: string;
-    displayName: string;
-    description: string;
-    metadataSource: MetadataSource;
-    hasData: boolean;
-    platform: MetadataPlatform;
-    dataVolumeLastDay: number;
-    associatedParameters?: IMetadataRelation[];
+    readonly name: string;
+    readonly displayName: string;
+    readonly description: string;
+    readonly metadataSource: MetadataSource;
+    readonly hasData: boolean;
+    readonly platform: MetadataPlatform[];
+    readonly dataVolumeLastDay: number;
+    readonly associatedParameters?: IMetadataRelation[];
   }
 
   interface IMetadataEventParameter {
-    id: string;
-    type: string;
-    prefix: string;
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
 
-    projectId: string;
-    appId: string;
+    readonly projectId: string;
+    readonly appId: string;
 
-    parameterId: string;
-    name: string;
-    displayName: string;
-    description: string;
-    metadataSource: MetadataSource;
-    hasData: boolean;
-    platform: MetadataPlatform;
-    parameterType: MetadataParameterType;
-    valueType: MetadataValueType;
-    valueEnum: IMetadataAttributeValue[];
-    associatedEvents?: IMetadataRelation[];
+    readonly parameterId: string;
+    readonly name: string;
+    readonly displayName: string;
+    readonly description: string;
+    readonly metadataSource: MetadataSource;
+    readonly hasData: boolean;
+    readonly platform: MetadataPlatform[];
+    readonly parameterType: MetadataParameterType;
+    readonly valueType: MetadataValueType;
+    readonly valueEnum: IMetadataAttributeValue[];
+    readonly associatedEvents?: IMetadataRelation[];
   }
 
   interface IMetadataUserAttribute {
-    id: string;
-    type: string;
-    prefix: string;
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
 
-    projectId: string;
-    appId: string;
+    readonly projectId: string;
+    readonly appId: string;
 
-    attributeId: string;
-    name: string;
-    displayName: string;
-    description: string;
-    metadataSource: MetadataSource;
-    hasData: boolean;
-    valueType: MetadataValueType;
-    valueEnum: IMetadataAttributeValue[];
+    readonly attributeId: string;
+    readonly name: string;
+    readonly displayName: string;
+    readonly description: string;
+    readonly metadataSource: MetadataSource;
+    readonly hasData: boolean;
+    readonly valueType: MetadataValueType;
+    readonly valueEnum: IMetadataAttributeValue[];
   }
 
   interface IMetadataAttributeValue {
-    value: string;
-    displayValue: string;
+    readonly value: string;
+    readonly displayValue: string;
   }
 
   interface IMetadataRelation {
-    id: string;
-    type: string;
-    prefix: string;
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
 
-    projectId: string;
-    appId: string;
+    readonly projectId: string;
+    readonly appId: string;
 
-    eventName: string;
-    eventDisplayName: string;
-    eventDescription: string;
+    readonly eventName: string;
+    readonly eventDisplayName: string;
+    readonly eventDescription: string;
 
-    parameterId: string;
-    parameterName: string;
-    parameterDisplayName: string;
-    parameterDescription: string;
-    parameterValueType: MetadataValueType;
-    parameterMetadataSource: MetadataSource;
+    readonly parameterId: string;
+    readonly parameterName: string;
+    readonly parameterDisplayName: string;
+    readonly parameterDescription: string;
+    readonly parameterValueType: MetadataValueType;
+    readonly parameterMetadataSource: MetadataSource;
 
-    createAt: number;
-    updateAt: number;
-    operator: string;
-    deleted: boolean;
+    readonly createAt: number;
+    readonly updateAt: number;
+    readonly operator: string;
+    readonly deleted: boolean;
   }
 }

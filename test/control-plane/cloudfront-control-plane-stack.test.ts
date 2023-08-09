@@ -930,7 +930,11 @@ describe('CloudFrontS3PotalStack', () => {
                   {
                     Ref: 'AWS::Partition',
                   },
-                  '.amazon.com;',
+                  '.',
+                  {
+                    Ref: 'AWS::URLSuffix',
+                  },
+                  ';',
                 ],
               ],
             },

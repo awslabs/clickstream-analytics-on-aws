@@ -99,6 +99,7 @@ src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:33
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:34
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:35
 src/control-plane/backend/lambda/api/test/api/env-bucket-policy.test.ts:36
+src/control-plane/backend/lambda/api/store/aws/quicksight.ts:137
 
 [node-yarnoutdated]
 @types/node=16.18.36

@@ -27,7 +27,7 @@ import {
   GenerateEmbedUrlForRegisteredUserCommandInput,
   ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
-import { APIRoleName, awsAccountId, QUICKSIGHT_CONTROL_PLANE_REGION, QuickSigthEmbedRoleArn } from '../../common/constants';
+import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QuickSightEmbedRoleArn } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
@@ -156,7 +156,7 @@ export const registerQuickSightUserByRegion = async (region: string, email: stri
   return response.UserInvitationUrl;
 };
 
-export const registerEmbddingUserByRegion = async (region: string) => {
+export const registerEmbeddingUserByRegion = async (region: string) => {
   try {
     const quickSightClient = new QuickSightClient({
       ...aws_sdk_client_common_config,
@@ -165,8 +165,8 @@ export const registerEmbddingUserByRegion = async (region: string) => {
     const command: RegisterUserCommand = new RegisterUserCommand({
       IdentityType: IdentityType.IAM,
       AwsAccountId: awsAccountId,
-      Email: 'embdding@clickstream.com',
-      IamArn: QuickSigthEmbedRoleArn,
+      Email: 'quicksight-embedding-no-reply@amazon.com',
+      IamArn: QuickSightEmbedRoleArn,
       Namespace: QUICKSIGHT_NAMESPACE,
       UserRole: UserRole.READER,
       SessionName: QUICKSIGHT_EMBED_USER_NAME,
@@ -177,7 +177,7 @@ export const registerEmbddingUserByRegion = async (region: string) => {
     if (err instanceof ResourceExistsException) {
       return true;
     }
-    logger.error('Register Embdding User Error.', { err });
+    logger.error('Register Embedding User Error.', { err });
     return false;
   }
 };
@@ -194,9 +194,10 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   const identityRegion = await getIdentityRegion();
-  const quicksigthEmbedRoleName = QuickSigthEmbedRoleArn?.split(':role/')[1];
-  const quickSightUserArn = `arn:aws:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quicksigthEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
-  await registerEmbddingUserByRegion(identityRegion);
+  const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
+  const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
+  const quickSightUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
+  await registerEmbeddingUserByRegion(identityRegion);
   await updateDashboardPermissionsCommand(region, dashboardId, quickSightUserArn);
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
     AwsAccountId: awsAccountId,

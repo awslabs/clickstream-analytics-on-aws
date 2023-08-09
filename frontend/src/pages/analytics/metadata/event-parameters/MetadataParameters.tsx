@@ -24,8 +24,9 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataSource } from 'ts/const';
+import { MetadataPlatform, MetadataSource } from 'ts/const';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
+import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
@@ -145,8 +146,8 @@ const MetadataParameters: React.FC = () => {
     {
       id: 'platform',
       header: t('analytics:metadata.eventParameter.tableColumnPlatform'),
-      cell: (e: { platform: string }) => {
-        return e.platform;
+      cell: (e: { platform: MetadataPlatform[] }) => {
+        return <MetadataPlatformFC platform={e.platform} />;
       },
     },
   ];
