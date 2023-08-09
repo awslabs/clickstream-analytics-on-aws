@@ -171,7 +171,7 @@ export class ReportingServ {
       if (!query.dashboardId) {
 
         //crate QuickSight analysis
-        const analysisId = `analysis${uuidv4()}`;
+        const analysisId = `clickstream-ext-${uuidv4()}`;
         const newAnalysis = await quickSight.createAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: analysisId,
@@ -192,7 +192,7 @@ export class ReportingServ {
         });
 
         //crate QuickSight dashboard
-        const dashboardId = `dashboard-${uuidv4()}`;
+        const dashboardId = `clickstream-ext-${uuidv4()}`;
         const newDashboard = await quickSight.createDashboard({
           AwsAccountId: awsAccountId,
           DashboardId: dashboardId,
