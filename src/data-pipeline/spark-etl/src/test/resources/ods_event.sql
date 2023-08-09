@@ -14,7 +14,7 @@ CREATE EXTERNAL TABLE `ods_events`(
   `event_value_in_usd` float,
   `geo` struct<city:string,continent:string,country:string,metro:string,region:string,sub_continent:string,locale:string>, 
   `ingest_timestamp` bigint, 
-  `items` struct<item_id:string,item_name:string,item_brand:string,item_variant:string,item_category:string,item_category2:string,item_category3:string,item_category4:string,item_category5:string,price_in_usd:double,price:double,quantity:bigint,item_revenue_in_usd:double,item_revenue:double,item_refund_in_usd:double,item_refund:double,coupon:string,affiliation:string,location_id:string,item_list_id:string,item_list_name:string,item_list_index:string,promotion_id:string,promotion_name:string,creative_name:string,creative_slot:string>, 
+  `items` array<struct<brand:string,category:string,category2:string,category3:string,category4:string,category5:string,creative_name:string,creative_slot:string,id:string,location_id:string,name:string,price:double,quantity:int>>,
   `platform` string, 
   `privacy_info` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string>>>,
   `project_id` string, 
