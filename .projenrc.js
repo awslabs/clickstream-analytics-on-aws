@@ -42,7 +42,7 @@ const commonDevDeps = [
   '@types/node-fetch@^2.6.4',
 ];
 
-const awsSDKVersion = '3.338.0';
+const awsSDKVersion = '3.374.0';
 const awsSDKDeps = [
   '@aws-sdk/credential-providers',
   '@aws-sdk/client-kafkaconnect',
