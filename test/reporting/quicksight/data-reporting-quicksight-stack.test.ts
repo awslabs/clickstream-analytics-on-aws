@@ -72,8 +72,8 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
-  test('Should has Parameter QuickSightInternelUserEmailParam', () => {
-    template.hasParameter('QuickSightInternelUserEmailParam', {
+  test('Should has Parameter QuickSightInternalUserEmailParam', () => {
+    template.hasParameter('QuickSightInternalUserEmailParam', {
       Type: 'String',
     });
   });
@@ -761,7 +761,7 @@ describe('DataReportingQuickSightStack resource test', () => {
       'Fn::Join': [
         '',
         [
-          'Clicksteam DataSource ',
+          'Clickstream DataSource ',
           {
             Ref: 'RedshiftDBParam',
           },
@@ -1636,7 +1636,7 @@ describe('DataReportingQuickSightStack resource test', () => {
       Ref: 'QuickSightNamespaceParam',
     },
     email: {
-      Ref: 'QuickSightInternelUserEmailParam',
+      Ref: 'QuickSightInternalUserEmailParam',
     },
   }, 1);
 

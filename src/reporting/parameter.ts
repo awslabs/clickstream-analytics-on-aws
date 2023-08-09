@@ -29,7 +29,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const labels: any = paramLabels ?? {};
 
   const quickSightUserParam = new CfnParameter(scope, 'QuickSightUserParam', {
-    description: 'The QuichSight user name.',
+    description: 'The QuickSight user name.',
     type: 'String',
     allowedPattern: QUICKSIGHT_USER_NAME_PATTERN,
     constraintDescription: `QuickSight user name must match ${QUICKSIGHT_USER_NAME_PATTERN}`,
@@ -39,14 +39,14 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   };
 
   const quickSightNamespaceParam = new CfnParameter(scope, 'QuickSightNamespaceParam', {
-    description: 'QuickSight nameapce name.',
+    description: 'QuickSight namespace name.',
     type: 'String',
     default: 'default',
     allowedPattern: QUICKSIGHT_NAMESPACE_PATTERN,
     constraintDescription: `QuickSight namespace must match ${QUICKSIGHT_NAMESPACE_PATTERN}`,
   });
   labels[quickSightNamespaceParam.logicalId] = {
-    default: 'QuickSight Nameapce Name',
+    default: 'QuickSight Namespace Name',
   };
 
   const quickSightVpcConnectionSGParam = new CfnParameter(scope, 'QuickSightVpcConnectionSGParam', {
@@ -70,19 +70,19 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   };
 
   const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
-    description: 'Arn of the QuickSight principal, QuickSight resource will be owned by this pricipal.',
+    description: 'Arn of the QuickSight principal, QuickSight resource will be owned by this principal.',
     type: 'String',
   });
   labels[quickSightPrincipalParam.logicalId] = {
     default: 'QuickSight Principal Arn',
   };
 
-  const quickSightInternelUserEmailParam = new CfnParameter(scope, 'QuickSightInternelUserEmailParam', {
+  const quickSightInternalUserEmailParam = new CfnParameter(scope, 'QuickSightInternalUserEmailParam', {
     description: 'QuickSight user for internal use.',
     type: 'String',
     default: 'fakeuser@example.com',
   });
-  labels[quickSightInternelUserEmailParam.logicalId] = {
+  labels[quickSightInternalUserEmailParam.logicalId] = {
     default: 'QuickSight Internal User Email',
   };
 
@@ -151,7 +151,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightVpcConnectionSubnetParam.logicalId,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
-      quickSightInternelUserEmailParam.logicalId,
+      quickSightInternalUserEmailParam.logicalId,
     ],
   });
 
@@ -173,7 +173,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightVpcConnectionSubnetParam,
     quickSightPrincipalParam,
     quickSightTemplateArnParam,
-    quickSightInternelUserEmailParam,
+    quickSightInternalUserEmailParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redShiftDBSchemaParam,

@@ -216,17 +216,17 @@ export function createRedshiftAnalyticsStack(
 
   new CfnOutput(scope, `ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`, {
     value: redshiftProvisionedStack.redshiftDataAPIExecRole.roleArn,
-    description: 'Reshift data api role arn',
+    description: 'Redshift data api role arn',
     condition: isRedshiftProvisioned,
   }).overrideLogicalId(`ProvisionedRedshift${REDSHIFT_DATA_API_ROLE_ARN}`);
   new CfnOutput(scope, `NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
     value: newRedshiftServerlessStack.redshiftDataAPIExecRole.roleArn,
-    description: 'Reshift data api role arn',
+    description: 'Redshift data api role arn',
     condition: isNewRedshiftServerless,
   }).overrideLogicalId(`NewRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
   new CfnOutput(scope, `ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`, {
     value: redshiftExistingServerlessStack.redshiftDataAPIExecRole.roleArn,
-    description: 'Reshift data api role arn',
+    description: 'Redshift data api role arn',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${REDSHIFT_DATA_API_ROLE_ARN}`);
 
