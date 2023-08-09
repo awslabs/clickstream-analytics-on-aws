@@ -31,6 +31,7 @@ import {
   addCfnNagToStack,
   addCfnNagForCfnResource,
 } from './common/cfn-nag';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
@@ -181,10 +182,15 @@ export class DataReportingQuickSightStack extends Stack {
     };
 
     const dashboards = cr.getAttString('dashboards');
-    new CfnOutput(this, 'Dashboards', {
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, {
       description: 'The QuickSight dashboard list',
       value: dashboards,
-    }).overrideLogicalId('Dashboards');
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {
+      description: 'The QuickSight data source arn',
+      value: dataSource.attrArn,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
     addCfnNag(this);
   }

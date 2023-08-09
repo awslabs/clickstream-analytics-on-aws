@@ -13,6 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '../../../src/common/constant';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
 
 describe('DataReportingQuickSightStack parameter test', () => {
@@ -25,7 +26,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
   });
 
   test('Has Dashboards output', () => {
-    template.hasOutput('Dashboards', {});
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, {});
+  });
+
+  test('Has Dashboards output', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {});
   });
 
   test('Should has Parameter quickSightUserParam', () => {
