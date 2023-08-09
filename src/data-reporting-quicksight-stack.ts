@@ -35,7 +35,7 @@ import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DAT
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
-import { createInternelUserCustomResource, createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
+import { createInternalUserCustomResource, createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
 
@@ -174,9 +174,9 @@ export class DataReportingQuickSightStack extends Stack {
     cr.node.addDependency(vPCConnectionResource);
     cr.node.addDependency(template);
 
-    const userCustomResource = createInternelUserCustomResource(this, {
-      quickSightNamespace: stackParames.quickSightNamespaceParam.valueAsString,
-      email: stackParames.quickSightInternelUserEmailParam.valueAsString,
+    const userCustomResource = createInternalUserCustomResource(this, {
+      quickSightNamespace: stackParams.quickSightNamespaceParam.valueAsString,
+      email: stackParams.quickSightInternalUserEmailParam.valueAsString,
     });
 
     const internalUserName = userCustomResource.getAttString('user');
@@ -200,7 +200,7 @@ export class DataReportingQuickSightStack extends Stack {
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
     new CfnOutput(this, 'InternalUser', {
-      description: 'The QuickSight Internel User Name',
+      description: 'The QuickSight Internal User Name',
       value: internalUserName,
     }).overrideLogicalId('InternalUser');
 

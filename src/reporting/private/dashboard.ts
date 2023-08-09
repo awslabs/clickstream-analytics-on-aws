@@ -92,7 +92,7 @@ export interface QuicksightInternalUserCustomResourceProps {
   readonly email: string;
 }
 
-export interface QuicksightInternalUserCustomResourceLabmdaProps {
+export interface QuicksightInternalUserCustomResourceLambdaProps {
   readonly awsAccountId: string;
   readonly awsRegion: string;
   readonly awsPartition: string;

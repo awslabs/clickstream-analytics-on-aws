@@ -461,11 +461,11 @@ function createQuicksightLambda(
 }
 
 
-export function createInternelUserCustomResource(
+export function createInternalUserCustomResource(
   scope: Construct,
   props: QuicksightInternalUserCustomResourceProps,
 ): CustomResource {
-  const fn = createQuicksightInternelUserLambda(scope, props.quickSightNamespace);
+  const fn = createQuicksightInternalUserLambda(scope, props.quickSightNamespace);
   const provider = new Provider(
     scope,
     'QuicksightInternalUserCustomResourceProvider',
@@ -488,7 +488,7 @@ export function createInternelUserCustomResource(
   return cr;
 }
 
-function createQuicksightInternelUserLambda(
+function createQuicksightInternalUserLambda(
   scope: Construct,
   namespace: string,
 ): NodejsFunction {
