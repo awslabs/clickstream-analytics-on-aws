@@ -138,8 +138,8 @@ describe('reporting test', () => {
           workgroupName: 'clickstream-project01-wvzh',
           isProvisionedRedshift: false,
           quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
-          dataApiRole: 'arn:aws:iam::451426793911:role/test_api_role',
-          dataSourceArn: 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_aaaaaaa',
+          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
         },
       });
 
@@ -222,8 +222,8 @@ describe('reporting test', () => {
           workgroupName: 'clickstream-project01-wvzh',
           isProvisionedRedshift: false,
           quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
-          dataApiRole: 'arn:aws:iam::451426793911:role/test_api_role',
-          dataSourceArn: 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_aaaaaaa',
+          dataApiRole: 'arn:aws:iam::111111:role/test_api_role',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
         },
       });
 
