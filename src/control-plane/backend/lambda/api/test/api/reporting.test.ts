@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
@@ -86,65 +86,6 @@ describe('reporting test', () => {
 
   it('funnel visual - preview', async () => {
     tokenMock(ddbMock, false);
-    ddbMock.on(GetCommand).resolvesOnce({
-      Item: {
-        deleted: false,
-        region: 'us-east-1',
-        ingestionServer: {
-          sinkType: 'kafka',
-        },
-        pipelineId: 'pipeline-1111111',
-        dataModeling: {
-          redshift: {
-            newServerless: {
-              baseCapacity: 8,
-            },
-          },
-        },
-        reporting: {
-          quickSight: {
-            user: 'test-quicksight-user',
-          },
-        },
-
-      },
-    });
-
-    cloudFormationMock.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackId: '1111111111',
-        StackName: 'test-stack',
-        CreationTime: new Date(),
-        StackStatus: 'CREATE_COMPLETE',
-        Outputs: [
-          {
-            OutputKey: 'ExistingRedshiftServerlessRedshiftDataApiRoleArn',
-            OutputValue: 'arn:aws:iam::11111111:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-aaaaaaaa',
-          },
-          {
-            OutputKey: 'ExistingRedshiftServerlessRedshiftWorkgroupName',
-            OutputValue: 'test-work-group',
-          },
-        ],
-      }],
-    }).resolvesOnce({
-      Stacks: [{
-        StackId: '22222222',
-        StackName: 'test-stack2',
-        CreationTime: new Date(),
-        StackStatus: 'CREATE_COMPLETE',
-        Outputs: [
-          {
-            OutputKey: 'XXXXXXXXXXDataSourceArn',
-            OutputValue: 'arn:aws:quicksight:us-east-1:11111111:datasource/50543d10',
-          },
-          {
-            OutputKey: 'XXXXXXXXXXQuickSightInternalUser',
-            OutputValue: 'test-quicksight-user',
-          },
-        ],
-      }],
-    });
     stsClientMock.on(AssumeRoleCommand).resolves({
       Credentials: {
         AccessKeyId: '1111',
@@ -192,6 +133,14 @@ describe('reporting test', () => {
         lastN: 4,
         timeUnit: 'wk',
         groupColumn: 'week',
+        dashboardCreateParameters: {
+          redshiftRegion: 'us-east-1',
+          workgroupName: 'clickstream-project01-wvzh',
+          isProvisionedRedshift: false,
+          quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+          dataApiRole: 'arn:aws:iam::451426793911:role/test_api_role',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_aaaaaaa',
+        },
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -208,65 +157,6 @@ describe('reporting test', () => {
 
   it('funnel visual - publish', async () => {
     tokenMock(ddbMock, false);
-    ddbMock.on(GetCommand).resolvesOnce({
-      Item: {
-        deleted: false,
-        region: 'us-east-1',
-        ingestionServer: {
-          sinkType: 'kafka',
-        },
-        pipelineId: 'pipeline-1111111',
-        dataModeling: {
-          redshift: {
-            newServerless: {
-              baseCapacity: 8,
-            },
-          },
-        },
-        reporting: {
-          quickSight: {
-            user: 'test-quicksight-user',
-          },
-        },
-
-      },
-    });
-
-    cloudFormationMock.on(DescribeStacksCommand).resolvesOnce({
-      Stacks: [{
-        StackId: '1111111111',
-        StackName: 'test-stack',
-        CreationTime: new Date(),
-        StackStatus: 'CREATE_COMPLETE',
-        Outputs: [
-          {
-            OutputKey: 'ExistingRedshiftServerlessRedshiftDataApiRoleArn',
-            OutputValue: 'arn:aws:iam::11111111:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-aaaaaaaa',
-          },
-          {
-            OutputKey: 'ExistingRedshiftServerlessRedshiftWorkgroupName',
-            OutputValue: 'test-work-group',
-          },
-        ],
-      }],
-    }).resolvesOnce({
-      Stacks: [{
-        StackId: '22222222',
-        StackName: 'test-stack2',
-        CreationTime: new Date(),
-        StackStatus: 'CREATE_COMPLETE',
-        Outputs: [
-          {
-            OutputKey: 'XXXXXXXXXXDataSourceArn',
-            OutputValue: 'arn:aws:quicksight:us-east-1:11111111:datasource/50543d10',
-          },
-          {
-            OutputKey: 'XXXXXXXXXXQuickSightInternalUser',
-            OutputValue: 'test-quicksight-user',
-          },
-        ],
-      }],
-    });
     stsClientMock.on(AssumeRoleCommand).resolves({
       Credentials: {
         AccessKeyId: '1111',
@@ -327,6 +217,14 @@ describe('reporting test', () => {
         timeStart: '2023-06-30',
         timeEnd: '2023-08-30',
         groupColumn: 'week',
+        dashboardCreateParameters: {
+          redshiftRegion: 'us-east-1',
+          workgroupName: 'clickstream-project01-wvzh',
+          isProvisionedRedshift: false,
+          quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+          dataApiRole: 'arn:aws:iam::451426793911:role/test_api_role',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_aaaaaaa',
+        },
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

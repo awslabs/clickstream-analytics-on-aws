@@ -14,28 +14,26 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createDataSet,
   funnelVisualColumns,
-  getDashboardCreateParameters,
   getVisualDef,
   getVisualRelatedDefs,
   applyChangeToDashboard,
   getDashboardDefinitionFromArn,
   CreateDashboardResult,
   sleep,
+  DashboardCreateParameters,
+  getCredentialsFromRole,
 } from './quicksight/reporting-utils';
 import { buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { ClickStreamStore } from '../store/click-stream-store';
-import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
-const store: ClickStreamStore = new DynamoDbStore();
 const stsClient = new STSClient({ region: 'us-east-1' });
 const quickSight = new QuickSight({
   region: awsRegion,
@@ -48,6 +46,18 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
+
+      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.dataApiRole!);
+      const redshiftDataClient = new RedshiftDataClient({
+        region: dashboardCreateParameters.redshiftRegion,
+        credentials: {
+          accessKeyId: credentials?.AccessKeyId!,
+          secretAccessKey: credentials?.SecretAccessKey!,
+          sessionToken: credentials?.SessionToken,
+        },
+      });
+
       //construct parameters to build sql
       const viewName = query.viewName;
       const sql = buildFunnelView(query.appId, viewName, {
@@ -68,21 +78,7 @@ export class ReportingServ {
 
       console.log(`sql: ${sql}`);
 
-      const dashboardCreateParameters = await getDashboardCreateParameters({
-        action: query.action,
-        accountId: awsAccountId!,
-        projectId: query.projectId,
-        appId: query.appId,
-        pipelineId: query.pipelineId,
-        stsClient,
-        store,
-      });
-
       logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
-
-      if (dashboardCreateParameters.status.code !== 200) {
-        return res.status(dashboardCreateParameters.status.code).send(new ApiFail(dashboardCreateParameters.status.message ?? 'unknown error'));
-      }
 
       //create view in redshift
       const input = {
@@ -95,7 +91,7 @@ export class ReportingServ {
       };
       const params = new BatchExecuteStatementCommand(input);
 
-      await dashboardCreateParameters.redshiftDataClient!.send(params);
+      await redshiftDataClient.send(params);
 
       //create quicksight dataset
       const datasetOutput = await createDataSet(

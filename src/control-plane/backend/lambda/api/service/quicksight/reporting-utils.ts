@@ -21,14 +21,10 @@ import {
   InputColumn,
   FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration,
 } from '@aws-sdk/client-quicksight';
-import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { logger } from '../../common/powertools';
-import { PipelineStackType } from '../../common/types';
-import { CPipeline } from '../../model/pipeline';
-import { getQuickSightSubscribeRegion } from '../../store/aws/quicksight';
 import { ClickStreamStore } from '../../store/click-stream-store';
 
 export interface VisualProps {
@@ -48,22 +44,15 @@ export interface DashboardAction {
   readonly dashboardDef: DashboardVersionDefinition;
 }
 
-export interface Status {
-  readonly code: number;
-  readonly message?: string;
-}
-
 export interface DashboardCreateParameters {
-  readonly status: Status;
-  readonly redshiftRegion?: string;
-  readonly redshiftDataClient?: RedshiftDataClient;
+  readonly redshiftRegion: string;
   readonly workgroupName?: string;
   readonly clusterIdentifier?: string;
   readonly dbUser?: string;
-  readonly isProvisionedRedshift?: boolean;
-  readonly quickSightPrincipal?: string;
-  readonly dataApiRole?: string;
-  readonly dataSourceArn?: string;
+  readonly isProvisionedRedshift: boolean;
+  readonly quickSightPrincipal: string;
+  readonly dataApiRole: string;
+  readonly dataSourceArn: string;
 }
 
 export interface DashboardCreateInputParameters {
@@ -277,128 +266,6 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
 
   return dashboardDef;
 };
-
-export async function getDashboardCreateParameters(input: DashboardCreateInputParameters) : Promise<DashboardCreateParameters> {
-
-  //get required parameters from ddb and stack output.
-  const pipeline = await input.store.getPipeline(input.projectId, input.pipelineId);
-  if (!pipeline) {
-    return { status: { code: 404, message: 'Pipeline not found' } };
-  }
-  const redshiftRegion = pipeline.region;
-
-  logger.info(`redshiftRegion: ${redshiftRegion}`);
-
-  if (!pipeline.dataModeling?.redshift) {
-    return { status: { code: 404, message: 'Redshift not enabled in the pipeline' } };
-  }
-
-  const isProvisionedRedshift = pipeline.dataModeling?.redshift?.provisioned ? true : false;
-  const isNewServerless = pipeline.dataModeling?.redshift?.newServerless ? true : false;
-  const clusterIdentifier = isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.clusterIdentifier : undefined;
-  const dbUser= isProvisionedRedshift ? pipeline.dataModeling?.redshift.provisioned?.dbUser : undefined;
-
-  let workgroupName = undefined;
-  let dataApiRole = undefined;
-
-  logger.info(`pipeline: ${pipeline}`);
-
-  const cPipeline = new CPipeline(pipeline);
-  const modelingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.DATA_MODELING_REDSHIFT);
-
-  console.log(`stack output: ${JSON.stringify(modelingStackOutputs)}`);
-  for (const [name, value] of modelingStackOutputs) {
-    if (name.endsWith('WorkgroupName')) {
-      workgroupName = value;
-    }
-    if (name.endsWith('DataApiRoleArn')) {
-      dataApiRole = value;
-    }
-  }
-  if (!isNewServerless && !isProvisionedRedshift) {
-    const modelingStackParameters = await cPipeline.getStackParameters(PipelineStackType.DATA_MODELING_REDSHIFT);
-    for (const [name, value] of modelingStackParameters) {
-      if (name.endsWith('WorkgroupName')) {
-        workgroupName = value;
-      }
-    }
-  }
-
-  if (!isProvisionedRedshift && !workgroupName) {
-    return { status: { code: 400, message: 'Redshift serverless workgroup not found' } };
-  }
-
-  if (!dataApiRole) {
-    // return { status: { code: 404, message: 'Redshift data api role not found' } };
-    dataApiRole = 'arn:aws:iam::451426793911:role/Clickstream-DataModelingR-RedshiftServerelssWorkgr-1B641805YKFF7';
-  }
-
-  let dataSourceArn = undefined;
-  let quicksightInternalUser = undefined;
-  const reportingStackOutputs = await cPipeline.getStackOutputs(PipelineStackType.REPORTING);
-  for (const [name, value] of reportingStackOutputs) {
-    if (name.endsWith('DataSourceArn')) {
-      dataSourceArn = value;
-    }
-    if (name.endsWith('QuickSightInternalUser')) {
-      quicksightInternalUser = value;
-    }
-  }
-  if (!dataSourceArn) {
-    // return { status: { code: 404, message: 'QuickSight data source arn not found' } };
-    dataSourceArn = 'arn:aws:quicksight:us-east-1:451426793911:datasource/clickstream_datasource_project11_50543d10';
-  }
-
-  if (!quicksightInternalUser) {
-    // return { status: { code: 404, message: 'QuickSight internal user not found' } };
-    quicksightInternalUser = 'Admin/liwmin-Isengard';
-  }
-
-  //quicksight user name
-  const quicksightPublicUser = pipeline.reporting?.quickSight?.user;
-  if (!quicksightPublicUser) {
-    return { status: { code: 404, message: 'QuickSight user not found' } };
-  }
-
-  let quicksightUser;
-  if (input.action === 'PREVIEW') {
-    quicksightUser = quicksightInternalUser!;
-  } else {
-    quicksightUser = quicksightPublicUser;
-  }
-
-  const awsPartition = 'aws';
-  const quickSightSubscribeRegion = await getQuickSightSubscribeRegion();
-  logger.info(`quickSightSubscribeRegion: ${quickSightSubscribeRegion}`);
-
-  const quickSightPrincipal = `arn:${awsPartition}:quicksight:${quickSightSubscribeRegion}:${input.accountId}:user/default/${quicksightUser}`;
-  logger.info(`quickSightPrincipal: ${quickSightPrincipal}`);
-
-  //get redshift client
-  const credentials = await getCredentialsFromRole(input.stsClient, dataApiRole);
-  const redshiftDataClient = new RedshiftDataClient({
-    region: redshiftRegion,
-    credentials: {
-      accessKeyId: credentials?.AccessKeyId!,
-      secretAccessKey: credentials?.SecretAccessKey!,
-      sessionToken: credentials?.SessionToken,
-    },
-  });
-
-  return {
-    status: { code: 200 },
-    redshiftRegion,
-    redshiftDataClient,
-    quickSightPrincipal,
-    dataApiRole,
-    clusterIdentifier,
-    dbUser,
-    workgroupName,
-    dataSourceArn,
-    isProvisionedRedshift,
-  };
-
-}
 
 export async function getCredentialsFromRole(stsClient: STSClient, roleArn: string) {
   try {
