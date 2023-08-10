@@ -51,6 +51,26 @@ import {
 } from '../common/types';
 import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail } from '../common/utils';
 
+export function getStackParameters(stack: JSONObject): Parameter[] {
+  const parameters: Parameter[] = [];
+  Object.entries(stack).forEach(([k, v]) => {
+    if (!k.startsWith('_') && v !== undefined) {
+      let key = k;
+      if (v && typeof v === 'string' && v.startsWith('#.')) {
+        key = `${k}.#`;
+      }
+      if (v && typeof v === 'string' && v.startsWith('$.')) {
+        key = `${k}.$`;
+      }
+      parameters.push({
+        ParameterKey: key,
+        ParameterValue: v || v===0 ? v.toString() : '',
+      });
+    }
+  });
+  return parameters;
+}
+
 export class CIngestionServerStack extends JSONObject {
 
   public static editAllowedList(): string[] {
@@ -393,19 +413,6 @@ export class CIngestionServerStack extends JSONObject {
       KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
     });
   }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_') && v !== undefined) {
-        parameters.push({
-          ParameterKey: k,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
-  }
 }
 
 export class CKafkaConnectorStack extends JSONObject {
@@ -565,19 +572,6 @@ export class CKafkaConnectorStack extends JSONObject {
     });
   }
 
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        parameters.push({
-          ParameterKey: k,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
-  }
-
 }
 
 export class CDataProcessingStack extends JSONObject {
@@ -726,19 +720,6 @@ export class CDataProcessingStack extends JSONObject {
       S3PathPluginFiles: pluginInfo.s3PathPluginFiles.join(','),
       OutputFormat: pipeline.dataProcessing?.outputFormat,
     });
-  }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        parameters.push({
-          ParameterKey: k,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
   }
 }
 
@@ -1014,27 +995,6 @@ export class CDataModelingStack extends JSONObject {
 
     });
   }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        let key = k;
-        let value = v.toString();
-        if (value.startsWith('#.')) {
-          key = `${k}.#`;
-        }
-        if (value.startsWith('$.')) {
-          key = `${k}.$`;
-        }
-        parameters.push({
-          ParameterKey: key,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
-  }
 }
 
 export class CReportingStack extends JSONObject {
@@ -1156,26 +1116,6 @@ export class CReportingStack extends JSONObject {
 
     });
   }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        let key = k;
-        if (v && v.startsWith('#.')) {
-          key = `${k}.#`;
-        }
-        if (v && v.startsWith('$.')) {
-          key = `${k}.$`;
-        }
-        parameters.push({
-          ParameterKey: key,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
-  }
 }
 
 export class CAthenaStack extends JSONObject {
@@ -1205,26 +1145,6 @@ export class CAthenaStack extends JSONObject {
         OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
       ),
     });
-  }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        let key = k;
-        if (v && v.startsWith('#.')) {
-          key = `${k}.#`;
-        }
-        if (v && v.startsWith('$.')) {
-          key = `${k}.$`;
-        }
-        parameters.push({
-          ParameterKey: key,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
   }
 }
 
@@ -1271,18 +1191,4 @@ export class CMetricsStack extends JSONObject {
       Emails: uniqueEmails?.join(','),
     });
   }
-
-  public parameters() {
-    const parameters: Parameter[] = [];
-    Object.entries(this).forEach(([k, v]) => {
-      if (!k.startsWith('_')) {
-        parameters.push({
-          ParameterKey: k,
-          ParameterValue: v || v===0 ? v.toString() : '',
-        });
-      }
-    });
-    return parameters;
-  }
 }
-

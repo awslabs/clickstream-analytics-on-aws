@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack } from './stacks';
+import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack, getStackParameters } from './stacks';
 import { awsUrlSuffix, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
@@ -614,7 +614,7 @@ export class CPipeline {
         throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
       }
       const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
-      const ingestionStackParameters = ingestionStack.parameters();
+      const ingestionStackParameters = getStackParameters(ingestionStack);
       const ingestionStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
       const ingestionState: WorkflowState = {
         Type: WorkflowStateType.STACK,
@@ -640,7 +640,7 @@ export class CPipeline {
           throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
         }
         const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
-        const kafkaConnectorStackParameters = kafkaConnectorStack.parameters();
+        const kafkaConnectorStackParameters = getStackParameters(kafkaConnectorStack);
         const kafkaConnectorStackName = getStackName(
           this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType);
         const kafkaConnectorState: WorkflowState = {
@@ -687,18 +687,19 @@ export class CPipeline {
         throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
       }
 
-      const pipelineStack = new CDataProcessingStack(this.pipeline, this.resources!);
-      const pipelineStackParameters = pipelineStack.parameters();
-      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
+      const dataProcessingStack = new CDataProcessingStack(this.pipeline, this.resources!);
+      const dataProcessingStackParameters = getStackParameters(dataProcessingStack);
+      const dataProcessingStackName = getStackName(
+        this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
       const dataProcessingState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
           Input: {
             Action: 'Create',
             Region: this.pipeline.region,
-            StackName: pipelineStackName,
+            StackName: dataProcessingStackName,
             TemplateURL: dataPipelineTemplateURL,
-            Parameters: pipelineStackParameters,
+            Parameters: dataProcessingStackParameters,
             Tags: this.stackTags,
           },
           Callback: {
@@ -747,7 +748,7 @@ export class CPipeline {
       }
 
       const metricsStack = new CMetricsStack(this.pipeline, this.resources!);
-      const metricsStackParameters = metricsStack.parameters();
+      const metricsStackParameters = getStackParameters(metricsStack);
       const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
       const metricsState: WorkflowState = {
         Type: WorkflowStateType.STACK,
@@ -790,7 +791,7 @@ export class CPipeline {
     }
 
     const dataModelingStack = new CDataModelingStack(this.pipeline, this.resources!);
-    const dataModelingStackParameters = dataModelingStack.parameters();
+    const dataModelingStackParameters = getStackParameters(dataModelingStack);
     const dataModelingStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType);
     const dataModelingState: WorkflowState = {
@@ -823,7 +824,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
     }
     const reportStack = new CReportingStack(this.pipeline, this.resources!);
-    const reportStackParameters = reportStack.parameters();
+    const reportStackParameters = getStackParameters(reportStack);
     const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType);
     const reportState: WorkflowState = {
       Type: WorkflowStateType.STACK,
@@ -856,7 +857,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Template: Athena not found in dictionary.');
     }
     const athenaStack = new CAthenaStack(this.pipeline);
-    const athenaStackParameters = athenaStack.parameters();
+    const athenaStackParameters = getStackParameters(athenaStack);
     const athenaStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ATHENA, this.pipeline.ingestionServer.sinkType);
     const athenaState: WorkflowState = {
       Type: WorkflowStateType.STACK,
