@@ -863,7 +863,7 @@
   
     <li class="md-nav__item">
       <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
-        Ingeston endpoint
+        Ingestion endpoint
       </a>
     </li>
   
@@ -1333,6 +1333,20 @@
     <li class="md-nav__item">
       <a href="../swift/" class="md-nav__link">
         Swift SDK
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web/" class="md-nav__link">
+        Web SDK
       </a>
     </li>
   
@@ -1886,7 +1900,7 @@
 
 <h1 id="clickstream-android-sdk">Clickstream Android SDK</h1>
 <h2 id="introduction">Introduction</h2>
-<p>Clickstream Android SDK can help you easily collect in-app click stream data from Android devices to your AWS environments through the data pipeline privisoned by this solution.</p>
+<p>Clickstream Android SDK can help you easily collect in-app click stream data from Android devices to your AWS environments through the data pipeline provisioned by this solution.</p>
 <p>The SDK is based on the Amplify for Android SDK Core Library and developed according to the Amplify Android SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.</p>
 <h3 id="platform-support">Platform Support</h3>
 <p>Clickstream Android SDK supports Android 4.1 (API level 16) and later. </p>
@@ -1894,7 +1908,7 @@
 <h3 id="1-include-the-sdk">1. Include the SDK</h3>
 <p>Add the following dependency to your <code>app</code> module's <code>build.gradle</code> file.</p>
 <div class="language-groovy highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.5.1&#39;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.5.2&#39;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="o">}</span>
 </span></code></pre></div>
 <p>Next, synchronize your project with the latest version: <a href="https://search.maven.org/artifact/software.aws.solution/clickstream"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a> </p>
@@ -1918,8 +1932,8 @@
 </span></code></pre></div>
 <p>In the file, your <code>appId</code> and <code>endpoint</code> are already configured. The explanation for each property is as follows:</p>
 <ul>
-<li><strong>appId</strong>: the app id of your project in control plane.</li>
-<li><strong>endpoint</strong>: the endpoint url you will upload the event to AWS server.</li>
+<li><strong>appId (Required)</strong>: the app id of your project in control plane.</li>
+<li><strong>endpoint (Required)</strong>: the endpoint url you will upload the event to AWS server.</li>
 <li><strong>isCompressEvents</strong>: whether to compress event content when uploading events, and the default value is <code>true</code></li>
 <li><strong>autoFlushEventsInterval</strong>: event sending interval, and the default value is <code>10s</code></li>
 <li><strong>isTrackAppExceptionEvents</strong>: whether auto track exception event in app, and the default value is <code>false</code></li>
@@ -1932,7 +1946,7 @@
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="kd">super</span><span class="p">.</span><span class="na">onCreate</span><span class="p">();</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">try</span><span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">());</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Initialized ClickstreamAnalytics&quot;</span><span class="p">);</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">AmplifyException</span><span class="w"> </span><span class="n">error</span><span class="p">){</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Could not initialize ClickstreamAnalytics&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span>
@@ -1960,7 +1974,7 @@
 </span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
 </span></code></pre></div>
 <h3 id="5-record-event">5. Record event</h3>
-<p>Add the following code where you need to report an event. For more information, refer to <a href="https://github.com/awslabs/clickstream-android#start-using">Github</a>.</p>
+<p>Add the following code where you need to report an event. For more information, refer to <a href="https://github.com/awslabs/clickstream-android#start-using">GitHub</a>.</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamEvent</span><span class="p">;</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
@@ -2010,7 +2024,7 @@
 </tr>
 <tr>
 <td>String</td>
-<td>max 1024 characters</td>
+<td>max 1024 characters</td>
 <td>"Clickstream"</td>
 </tr>
 </tbody>
@@ -2024,7 +2038,7 @@
 <p>Do not use <code>_</code> as prefix in an event name or attribute name, because the <code>_</code> prefix is reserved for the solution.</p>
 </li>
 <li>
-<p>The event name and attribute name are case sensitive, so <code>Add_to_cart</code> and <code>add_to_cart</code> will be recognized as two different event names.</p>
+<p>The event name and attribute name are case-sensitive, so <code>Add_to_cart</code> and <code>add_to_cart</code> will be recognized as two different event names.</p>
 </li>
 </ol>
 <h3 id="event-and-attribute-limitation">Event and attribute limitation</h3>
@@ -2035,7 +2049,7 @@
 <th>Name</th>
 <th>Recommended</th>
 <th>Maximum</th>
-<th>Handle strategy for exceed</th>
+<th>Handle strategy for exceed</th>
 </tr>
 </thead>
 <tbody>
@@ -2049,37 +2063,37 @@
 <td>Length of event attribute name</td>
 <td>less than 25 characters</td>
 <td>50 characters</td>
-<td>discard, log and record error</td>
+<td>discard, log and record error</td>
 </tr>
 <tr>
 <td>Length of event attribute value</td>
 <td>less than 100 characters</td>
 <td>1024 characters</td>
-<td>discard, log and record error</td>
+<td>discard, log and record error</td>
 </tr>
 <tr>
 <td>Event attribute per event</td>
 <td>less than 50 attributes</td>
-<td>500 event attribute</td>
-<td>discard, log and record error</td>
+<td>500 event attributes</td>
+<td>discard, log and record error</td>
 </tr>
 <tr>
 <td>User attribute number</td>
 <td>less than 25 attributes</td>
 <td>100 user attributes</td>
-<td>discard, log and record error</td>
+<td>discard, log and record error</td>
 </tr>
 <tr>
-<td>Length of user attribute name</td>
+<td>Length of user attribute name</td>
 <td>less than 25 characters</td>
-<td>50 characters</td>
-<td>discard, log and record error</td>
+<td>50 characters</td>
+<td>discard, log and record error</td>
 </tr>
 <tr>
-<td>Length of user attribute value</td>
+<td>Length of user attribute value</td>
 <td>less than 50 characters</td>
 <td>256 characters</td>
-<td>discard, log and record error</td>
+<td>discard, log and record error</td>
 </tr>
 </tbody>
 </table>
@@ -2105,8 +2119,8 @@
 <tbody>
 <tr>
 <td>_session_start</td>
-<td>when users app come to foreground for the first time and there is no on-going session</td>
-<td>_session_id <br>_session_start_timestamp<br>_session_duration</td>
+<td>when user's app comes to the foreground for the first time and there is no ongoing session</td>
+<td>_session_id <br>_session_start_timestamp<br>_session_duration</td>
 </tr>
 <tr>
 <td>_screen_view</td>
@@ -2140,7 +2154,7 @@
 </tr>
 <tr>
 <td>_profile_set</td>
-<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> API is called</td>
+<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> API is called</td>
 <td></td>
 </tr>
 </tbody>
@@ -2158,7 +2172,7 @@
 <p><strong>session_time_out</strong>: By default, it is 30 minutes, which can be customized through the configuration API.</p>
 </li>
 <li>
-<p><strong>_session_number</strong>: The total number of sessions by distinct session id, and <code>_session_number</code> will be appear in every event's attribute object.</p>
+<p><strong>_session_number</strong>: The total number of sessions by distinct session id, and <code>_session_number</code> will appear in every event's attribute object.</p>
 </li>
 </ul>
 <h4 id="user-engagement-definition">User engagement definition</h4>
@@ -2230,53 +2244,53 @@
 <table>
 <thead>
 <tr>
-<th>attribute</th>
-<th>describe</th>
-<th>how to generate</th>
-<th>use and purpose</th>
+<th>Attribute name</th>
+<th>Description</th>
+<th>How to generate</th>
+<th>Usage and purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>hashCode</td>
 <td>the event object's hash code</td>
-<td>generate from <code>Integer.toHexString(AnalyticsEvent.hashCode())</code></td>
-<td>distinguish different event</td>
+<td>generated from <code>Integer.toHexString(AnalyticsEvent.hashCode())</code></td>
+<td>distinguish different events</td>
 </tr>
 <tr>
 <td>app_id</td>
 <td>clickstream app id</td>
-<td>generated when clickstream app create from solution control plane.</td>
+<td>generated when clickstream app create from solution web console</td>
 <td>identify the events for your apps</td>
 </tr>
 <tr>
 <td>unique_id</td>
 <td>the unique id for user</td>
-<td>generate from <code>UUID.randomUUID().toString()</code> when the sdk first initialization<br> it will be changed after user relogin to another user who never login, and when user relogin to the before user in same device, the unique_id will reset to the before user's unique_id.</td>
-<td>the unique for identity different user and associating the behavior of logging in and not logging in</td>
+<td>generated from <code>UUID.randomUUID().toString()</code> during the SDK first initialization<br> it will be changed after user re-login to another user who never login, and when user re-login to the before user in same device, the unique_id will reset to the before user's unique_id.</td>
+<td>the unique for identity different user and associating the behavior of logging in and not logging in</td>
 </tr>
 <tr>
 <td>device_id</td>
 <td>the unique id for device</td>
-<td>generate from <code>Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)</code>, <br>if Android ID is null or "", we will use UUID instead.</td>
-<td>distinguish different device</td>
+<td>generated from <code>Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)</code>, <br>if Android ID is null or "", we will use UUID instead.</td>
+<td>distinguish different devices</td>
 </tr>
 <tr>
 <td>event_type</td>
 <td>event name</td>
-<td>set by developer or SDK.</td>
-<td>distinguish different event type</td>
+<td>set by developer or SDK</td>
+<td>distinguish different events type</td>
 </tr>
 <tr>
 <td>event_id</td>
-<td>the qniue id for event</td>
-<td>generate from <code>UUID.randomUUID().toString()</code> when the event create.</td>
-<td>distinguish each event</td>
+<td>the unique id for event</td>
+<td>generated from <code>UUID.randomUUID().toString()</code> when the event create</td>
+<td>distinguish different events</td>
 </tr>
 <tr>
 <td>timestamp</td>
 <td>event create timestamp</td>
-<td>generate from <code>System.currentTimeMillis()</code> when event create</td>
+<td>generated from <code>System.currentTimeMillis()</code> when event create</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2288,25 +2302,25 @@
 <tr>
 <td>os_version</td>
 <td>the platform version code</td>
-<td>generate from <code>Build.VERSION.RELEASE</code></td>
+<td>generated from <code>Build.VERSION.RELEASE</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>make</td>
 <td>manufacturer of the device</td>
-<td>generate from <code>Build.MANUFACTURER</code></td>
+<td>generated from <code>Build.MANUFACTURER</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>brand</td>
-<td>brand of the device</td>
-<td>generate from <code>Build.BRAND</code></td>
+<td>brand of the device</td>
+<td>generated from <code>Build.BRAND</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>model</td>
 <td>model of the device</td>
-<td>generate from <code>Build.MODEL</code></td>
+<td>generated from <code>Build.MODEL</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2318,73 +2332,73 @@
 <tr>
 <td>network_type</td>
 <td>the current device network type</td>
-<td>"Mobile", "WIFI" or "UNKNOWN"<br>generate from <code>android.netConnectivityManager</code></td>
+<td>"Mobile", "WIFI" or "UNKNOWN"<br>generated from <code>android.netConnectivityManager</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>screen_height</td>
-<td>The absolute height of the available display size in pixels</td>
-<td>generate from <code>applicationContext.resources.displayMetrics.heightPixels</code></td>
+<td>the absolute height of the available display size in pixels</td>
+<td>generated from <code>applicationContext.resources.displayMetrics.heightPixels</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>screen_width</td>
-<td>The absolute width of the available display size in pixels.</td>
-<td>generate from <code>applicationContext.resources.displayMetrics.widthPixels</code></td>
+<td>the absolute width of the available display size in pixels</td>
+<td>generated from <code>applicationContext.resources.displayMetrics.widthPixels</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>zone_offset</td>
-<td>the divece raw offset from GMT in milliseconds.</td>
-<td>generate from <code>java.util.Calendar.get(Calendar.ZONE_OFFSET)</code></td>
+<td>the device raw offset from GMT in milliseconds.</td>
+<td>generated from <code>java.util.Calendar.get(Calendar.ZONE_OFFSET)</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>locale</td>
 <td>the default locale(language, country and variant) for this device of the Java Virtual Machine</td>
-<td>generate from <code>java.util.Local.getDefault()</code></td>
+<td>generated from <code>java.util.Local.getDefault()</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>system_language</td>
-<td>the devie language code</td>
-<td>generate from <code>java.util.Local.getLanguage()</code><br>default is: "UNKNOWN"</td>
+<td>the device language code</td>
+<td>generated from <code>java.util.Local.getLanguage()</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>country_code</td>
 <td>country/region code for this device</td>
-<td>generate from <code>java.util.Local.getCountry()</code><br>default is: "UNKNOWN"</td>
+<td>generated from <code>java.util.Local.getCountry()</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>sdk_version</td>
 <td>clickstream sdk version</td>
-<td>generate from <code>BuildConfig.VERSION_NAME</code></td>
+<td>generated from <code>BuildConfig.VERSION_NAME</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>sdk_name</td>
 <td>clickstream sdk name</td>
-<td>this will always be "aws-solution-clickstream-sdk"</td>
+<td>this will always be "aws-solution-clickstream-sdk"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>app_version</td>
-<td>the app version name of user's app.</td>
-<td>generate from <code>android.content.pm.PackageInfo.versionName</code><br>default is: "UNKNOWN"</td>
+<td>the app version name of user's app</td>
+<td>generated from <code>android.content.pm.PackageInfo.versionName</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>app_package_name</td>
-<td>the app package name  of user's app.</td>
-<td>generate from <code>android.content.pm.PackageInfo.packageName</code><br>default is: "UNKNOWN"</td>
+<td>the app package name of user's app</td>
+<td>generated from <code>android.content.pm.PackageInfo.packageName</code><br>default is: "UNKNOWN"</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>app_title</td>
 <td>the app's display name</td>
-<td>generate from <code>android.content.pm.getApplicationLabel(appInfo)</code></td>
+<td>generated from <code>android.content.pm.getApplicationLabel(appInfo)</code></td>
 <td>data analysis needs</td>
 </tr>
 </tbody>
@@ -2413,7 +2427,7 @@
 </tr>
 <tr>
 <td>_user_first_touch_timestamp</td>
-<td>The time (in microseconds) when the user first opened the app or visited the site, and it is included in every event in <code>user</code> object</td>
+<td>The time (in microseconds) when the user first opened the app or visited the site, and it is included in every event in <code>user</code> object</td>
 </tr>
 </tbody>
 </table>
@@ -2428,15 +2442,15 @@
 <tbody>
 <tr>
 <td>_traffic_source_medium</td>
-<td>Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged.</td>
+<td>Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine</td>
 </tr>
 <tr>
 <td>_traffic_source_name</td>
-<td>Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged.</td>
+<td>Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion</td>
 </tr>
 <tr>
 <td>_traffic_source_source</td>
-<td>Reserved for traffic source.  Name of the network source that acquired the user when the event were reported.</td>
+<td>Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu</td>
 </tr>
 <tr>
 <td>_channel</td>
@@ -2452,7 +2466,7 @@
 </tr>
 <tr>
 <td>_entrances</td>
-<td>Added in <code>_screen_view</code> event. The first <code>_screen_view</code> event in a session has the value 1, and others 0.</td>
+<td>Added in <code>_screen_view</code> event. The first <code>_screen_view</code> event in a session has the value 1, and others 0.</td>
 </tr>
 <tr>
 <td>_session_id</td>

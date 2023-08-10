@@ -762,7 +762,7 @@
   
     <li class="md-nav__item">
       <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
-        步骤4. 查看仪表盘
+        步骤4. 查看仪表板
       </a>
     </li>
   
@@ -1172,7 +1172,7 @@
         
           <li class="md-nav__item">
   <a href="#1-sdk" class="md-nav__link">
-    1. 包含 SDK
+    1. 添加 SDK
   </a>
   
 </li>
@@ -1341,6 +1341,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web/" class="md-nav__link">
+        Web SDK
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -1364,14 +1378,14 @@
       
       
         <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
-          仪表盘
+          仪表板
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_1_9">
           <span class="md-nav__icon md-icon"></span>
-          仪表盘
+          仪表板
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -1722,7 +1736,7 @@
         
           <li class="md-nav__item">
   <a href="#1-sdk" class="md-nav__link">
-    1. 包含 SDK
+    1. 添加 SDK
   </a>
   
 </li>
@@ -1893,10 +1907,10 @@
 <h3 id="_2">平台支持</h3>
 <p>Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。</p>
 <h2 id="sdk">集成 SDK</h2>
-<h3 id="1-sdk">1. 包含 SDK</h3>
+<h3 id="1-sdk">1. 添加 SDK</h3>
 <p>将以下依赖项添加到您的 <code>app</code> 模块的 <code>build.gradle</code> 文件中。</p>
 <div class="language-groovy highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.5.1&#39;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.5.2&#39;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="o">}</span>
 </span></code></pre></div>
 <p>接下来，将您的项目与最新版本进行同步：<a href="https://search.maven.org/artifact/software.aws.solution/clickstream"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a></p>
@@ -1920,8 +1934,8 @@
 </span></code></pre></div>
 <p>在文件中，您的 <code>appId</code> 和 <code>endpoint</code> 已经配置好。每个属性的说明如下：</p>
 <ul>
-<li><strong>appId</strong>：控制平面上项目的应用程序 ID。</li>
-<li><strong>endpoint</strong>：将事件上传到 AWS 服务器的端点 URL。</li>
+<li><strong>appId（必需的）</strong>：控制平面上项目的应用程序 ID。</li>
+<li><strong>endpoint（必需的）</strong>：将事件上传到 AWS 服务器的端点 URL。</li>
 <li><strong>isCompressEvents</strong>：上传事件时是否压缩事件内容，默认值为 <code>true</code>。</li>
 <li><strong>autoFlushEventsInterval</strong>：事件发送间隔，默认值为 <code>10s</code>。</li>
 <li><strong>isTrackAppExceptionEvents</strong>：是否自动跟踪应用程序中的异常事件，默认值为 <code>false</code>。</li>
@@ -1934,7 +1948,7 @@
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="kd">super</span><span class="p">.</span><span class="na">onCreate</span><span class="p">();</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">());</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Initialized ClickstreamAnalytics&quot;</span><span class="p">);</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">AmplifyException</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Could not initialize ClickstreamAnalytics&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span>
@@ -1962,7 +1976,7 @@
 </span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
 </span></code></pre></div>
 <h3 id="5">5. 记录事件</h3>
-<p>在需要报告事件的位置添加以下代码。有关更多信息，请参阅 <a href="https://github.com/awslabs/clickstream-android#start-using">Github</a>。</p>
+<p>在需要报告事件的位置添加以下代码。有关更多信息，请参阅 <a href="https://github.com/awslabs/clickstream-android#start-using">GitHub</a>。</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamEvent</span><span class="p">;</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
@@ -2089,7 +2103,7 @@
 <p class="admonition-title">重要提示</p>
 <ul>
 <li>字符限制对于单字节字符语言（例如英语）和双字节字符语言（例如中文）是相同的。</li>
-<li>事件属性数每个事件包括常见属性和预设属性。</li>
+<li>事件属性数包括事件中公共属性和预设属性。</li>
 <li>如果添加了具有相同名称的属性或用户属性超过两次，将使用最新的值。</li>
 </ul>
 </div>
@@ -2151,16 +2165,16 @@
 <p>在 Clickstream Android SDK 中，我们不限制会话的总时间。只要应用程序的下一次进入时间与上次退出时间之间的时间在允许的超时期限内，当前会话就被视为连续的。</p>
 <ul>
 <li>
-<p><strong>_session_start</strong>：当应用程序首次启动或应用程序进入前台，并且与上次退出的时间间隔超过 <code>session_time_out</code> 期限时，触发此事件。</p>
+<p><strong>_session_start（会话开始）</strong>：当应用程序首次启动或应用程序进入前台，并且与上次退出的时间间隔超过 <code>session_time_out</code> 期限时，触发此事件。</p>
 </li>
 <li>
-<p><strong>_session_duration</strong>：我们通过当前事件创建时间戳与会话的 <code>_session_start_timestamp</code> 相减来计算 <code>_session_duration</code>。在会话期间的每个事件中都会添加此属性。</p>
+<p><strong>_session_duration（会话时长）</strong>：我们通过当前事件创建时间戳与会话的 <code>_session_start_timestamp</code> 相减来计算 <code>_session_duration</code>。在会话期间的每个事件中都会添加此属性。</p>
 </li>
 <li>
-<p><strong>session_time_out</strong>：默认为 30 分钟，可以通过配置 API 进行自定义设置。</p>
+<p><strong>session_time_out（会话超时）</strong>：默认为 30 分钟，可以通过配置 API 进行自定义设置。</p>
 </li>
 <li>
-<p><strong>_session_number</strong>：不同会话 ID 的总会话数，每个事件的属性对象中都会出现 <code>_session_number</code>。</p>
+<p><strong>_session_number（会话数）</strong>：不同会话 ID 的总会话数，每个事件的属性对象中都会出现 <code>_session_number</code>。</p>
 </li>
 </ul>
 <h4 id="_10">用户参与度定义</h4>
@@ -2430,15 +2444,15 @@
 <tbody>
 <tr>
 <td>_traffic_source_medium</td>
-<td>保留用于流量来源媒介。使用此属性存储事件记录时获取用户的媒介</td>
+<td>保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎</td>
 </tr>
 <tr>
 <td>_traffic_source_name</td>
-<td>保留用于流量来源名称。使用此属性存储事件记录时获取用户的营销Activity</td>
+<td>保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销</td>
 </tr>
 <tr>
 <td>_traffic_source_source</td>
-<td>保留用于流量来源。使用此属性存储事件记录时获取用户的网络来源名称</td>
+<td>保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu</td>
 </tr>
 <tr>
 <td>_channel</td>

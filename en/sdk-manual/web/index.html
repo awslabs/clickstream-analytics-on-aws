@@ -9,17 +9,17 @@
       
       
       
-        <link rel="prev" href="../android/">
+        <link rel="prev" href="../swift/">
       
       
-        <link rel="next" href="../web/">
+        <link rel="next" href="../../dashboard/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.20">
     
     
       
-        <title>Swift SDK - Clickstream Analytics on AWS</title>
+        <title>Web SDK - Clickstream Analytics on AWS</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#clickstream-swift-sdk" class="md-skip">
+        <a href="#clickstream-web-sdk" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Swift SDK
+              Web SDK
             
           </span>
         </div>
@@ -1119,6 +1119,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../swift/" class="md-nav__link">
+        Swift SDK
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -1131,12 +1145,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Swift SDK
+          Web SDK
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Swift SDK
+        Web SDK
       </a>
       
         
@@ -1159,61 +1173,47 @@
     Introduction
   </a>
   
-    <nav class="md-nav" aria-label="Introduction">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrate-the-sdk" class="md-nav__link">
+    Integrate the SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrate the SDK">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#platform-support" class="md-nav__link">
-    Platform Support
+  <a href="#include-sdk" class="md-nav__link">
+    Include SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialize-the-sdk" class="md-nav__link">
+    Initialize the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-using" class="md-nav__link">
+    Start using
+  </a>
+  
+    <nav class="md-nav" aria-label="Start using">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#record-event" class="md-nav__link">
+    Record event
   </a>
   
 </li>
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integrate-sdk" class="md-nav__link">
-    Integrate SDK
-  </a>
-  
-    <nav class="md-nav" aria-label="Integrate SDK">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1add-package" class="md-nav__link">
-    1.Add Package
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2parameter-configuration" class="md-nav__link">
-    2.Parameter configuration
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3initialize-the-sdk" class="md-nav__link">
-    3.Initialize the SDK
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4config-the-sdk" class="md-nav__link">
-    4.Config the SDK
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5record-event" class="md-nav__link">
-    5.Record event
-  </a>
   
 </li>
         
@@ -1231,8 +1231,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#data-type" class="md-nav__link">
-    Data type
+  <a href="#data-types" class="md-nav__link">
+    Data types
   </a>
   
 </li>
@@ -1245,8 +1245,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#event-attribute-limitation" class="md-nav__link">
-    Event &amp; Attribute Limitation
+  <a href="#event-and-attribute-limitation" class="md-nav__link">
+    Event and attribute limitation
   </a>
   
 </li>
@@ -1293,15 +1293,15 @@
         
           <li class="md-nav__item">
   <a href="#common-attributes-and-reserved-attributes" class="md-nav__link">
-    Common attributes and Reserved attributes
+    Common attributes and reserved attributes
   </a>
   
-    <nav class="md-nav" aria-label="Common attributes and Reserved attributes">
+    <nav class="md-nav" aria-label="Common attributes and reserved attributes">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#event-structure-sample" class="md-nav__link">
-    Event structure sample
+  <a href="#sample-event-structure" class="md-nav__link">
+    Sample event structure
   </a>
   
 </li>
@@ -1334,20 +1334,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../web/" class="md-nav__link">
-        Web SDK
-      </a>
     </li>
   
 
@@ -1709,61 +1695,47 @@
     Introduction
   </a>
   
-    <nav class="md-nav" aria-label="Introduction">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrate-the-sdk" class="md-nav__link">
+    Integrate the SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrate the SDK">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#platform-support" class="md-nav__link">
-    Platform Support
+  <a href="#include-sdk" class="md-nav__link">
+    Include SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialize-the-sdk" class="md-nav__link">
+    Initialize the SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-using" class="md-nav__link">
+    Start using
+  </a>
+  
+    <nav class="md-nav" aria-label="Start using">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#record-event" class="md-nav__link">
+    Record event
   </a>
   
 </li>
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integrate-sdk" class="md-nav__link">
-    Integrate SDK
-  </a>
-  
-    <nav class="md-nav" aria-label="Integrate SDK">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1add-package" class="md-nav__link">
-    1.Add Package
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2parameter-configuration" class="md-nav__link">
-    2.Parameter configuration
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3initialize-the-sdk" class="md-nav__link">
-    3.Initialize the SDK
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4config-the-sdk" class="md-nav__link">
-    4.Config the SDK
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5record-event" class="md-nav__link">
-    5.Record event
-  </a>
   
 </li>
         
@@ -1781,8 +1753,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#data-type" class="md-nav__link">
-    Data type
+  <a href="#data-types" class="md-nav__link">
+    Data types
   </a>
   
 </li>
@@ -1795,8 +1767,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#event-attribute-limitation" class="md-nav__link">
-    Event &amp; Attribute Limitation
+  <a href="#event-and-attribute-limitation" class="md-nav__link">
+    Event and attribute limitation
   </a>
   
 </li>
@@ -1843,15 +1815,15 @@
         
           <li class="md-nav__item">
   <a href="#common-attributes-and-reserved-attributes" class="md-nav__link">
-    Common attributes and Reserved attributes
+    Common attributes and reserved attributes
   </a>
   
-    <nav class="md-nav" aria-label="Common attributes and Reserved attributes">
+    <nav class="md-nav" aria-label="Common attributes and reserved attributes">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#event-structure-sample" class="md-nav__link">
-    Event structure sample
+  <a href="#sample-event-structure" class="md-nav__link">
+    Sample event structure
   </a>
   
 </li>
@@ -1898,136 +1870,60 @@
   
 
 
-<h1 id="clickstream-swift-sdk">Clickstream Swift SDK</h1>
+<h1 id="clickstream-web-sdk">Clickstream Web SDK</h1>
 <h2 id="introduction">Introduction</h2>
-<p>Clickstream Swift SDK can help you easily collect in-app click stream data from iOS devices to your AWS environments through the data pipeline provisioned by this solution.</p>
-<p>The SDK is based on the Amplify for Swift SDK Core Library and developed according to the Amplify Swift SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.</p>
-<h3 id="platform-support">Platform Support</h3>
-<p>Clickstream Swift SDK supports iOS 13+.</p>
-<p><a href="https://awslabs.github.io/clickstream-swift/"><strong>API Documentation</strong></a></p>
-<h2 id="integrate-sdk">Integrate SDK</h2>
-<p>Clickstream requires Xcode 13.4 or higher to build.</p>
-<h3 id="1add-package">1.Add Package</h3>
-<p>We use <strong>Swift Package Manager</strong> to distribute Clickstream Swift SDK, open your project in Xcode and select <strong>File &gt; Add Packages</strong>.</p>
-<p><a class="glightbox" href="../../images/sdk-manual/swift_add_package.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_package.png" /></a></p>
-<ol>
-<li>Enter the Clickstream Library for Swift GitHub repository URL (<code>https://github.com/awslabs/clickstream-swift</code>) in the search bar.</li>
-<li>Check the rules for the version of the SDK that you want Swift Package Manager to install, it is recommended to choose <strong>Up to Next Major Version</strong>, then click <strong>Add Package</strong>.</li>
-<li>Keep the Clickstream product checked as default.</li>
-<li>Choose <strong>Add Package</strong> again to finish the package installation.</li>
-</ol>
-<p><a class="glightbox" href="../../images/sdk-manual/swift_add_package_url.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_package_url.png" /></a></p>
-<h3 id="2parameter-configuration">2.Parameter configuration</h3>
-<p>Download your <code>amplifyconfiguration.json</code> file from your Clickstream solution web console, and paste it to your project root folder:</p>
-<p><a class="glightbox" href="../../images/sdk-manual/swift_add_amplify_config_json_file.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="" src="../../images/sdk-manual/swift_add_amplify_config_json_file.png" /></a></p>
-<p>the json file will be as follows:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;analytics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&quot;awsClickstreamPlugin &quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="nt">&quot;appId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appId&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">&quot;isCompressEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="nt">&quot;autoFlushEventsInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="nt">&quot;isTrackAppExceptionEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="p">}</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">}</span>
+<p>Clickstream Web SDK can help you easily collect click stream data from browser to your AWS environments through the data pipeline provisioned by this solution.</p>
+<p>The SDK is based on the amplify-js SDK core library and developed according to the amplify-js SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view, and first open) to accelerate data collection for users.</p>
+<h2 id="integrate-the-sdk">Integrate the SDK</h2>
+<h3 id="include-sdk">Include SDK</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>npm<span class="w"> </span>install<span class="w"> </span>@aws/clickstream-web
 </span></code></pre></div>
-<p>Your <code>appId</code> and <code>endpoint</code> are already set up in it, here's an explanation of each property:</p>
-<ul>
-<li><strong>appId (Required)</strong>: the app id of your project in control plane.</li>
-<li><strong>endpoint (Required)</strong>: the endpoint url you will upload the event to AWS server.</li>
-<li><strong>isCompressEvents</strong>: whether to compress event content when uploading events, default is <code>true</code></li>
-<li><strong>autoFlushEventsInterval</strong>: event sending interval, the default is <code>10s</code></li>
-<li><strong>isTrackAppExceptionEvents</strong>: whether auto track exception event in app, default is <code>false</code></li>
-</ul>
-<h3 id="3initialize-the-sdk">3.Initialize the SDK</h3>
-<p>Once you have configured the parameters, you need to initialize it in AppDelegate's <code>didFinishLaunchingWithOptions</code> lifecycle method to use the SDK.</p>
-<div class="language-swift highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">...</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">func</span> <span class="nf">application</span><span class="p">(</span><span class="kc">_</span> <span class="n">application</span><span class="p">:</span> <span class="bp">UIApplication</span><span class="p">,</span> <span class="n">didFinishLaunchingWithOptions</span> <span class="n">launchOptions</span><span class="p">:</span> <span class="p">[</span><span class="bp">UIApplication</span><span class="p">.</span><span class="n">LaunchOptionsKey</span><span class="p">:</span> <span class="nb">Any</span><span class="p">]?)</span> <span class="p">-&gt;</span> <span class="nb">Bool</span> <span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="c1">// Override point for customization after application launch.</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">do</span> <span class="p">{</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="k">try</span> <span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">initSDK</span><span class="p">()</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="bp">assertionFailure</span><span class="p">(</span><span class="s">&quot;Fail to initialize ClickstreamAnalytics: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="kc">true</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">}</span>
+<h3 id="initialize-the-sdk">Initialize the SDK</h3>
+<p>You need to configure the SDK with default information before using it. Copy your configuration code from your clickstream solution web console, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">   </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">   </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">});</span>
 </span></code></pre></div>
-<h3 id="4config-the-sdk">4.Config the SDK</h3>
-<div class="language-swift highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
+<p>Your <code>appId</code> and <code>endpoint</code> are already set up in it.</p>
+<h3 id="start-using">Start using</h3>
+<h4 id="record-event">Record event</h4>
+<p>Add the following code where you need to record event.</p>
+<p><div class="language-typescript highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">// config the sdk after initialize.</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">do</span> <span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="kd">var</span> <span class="nv">configuration</span> <span class="p">=</span> <span class="k">try</span> <span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">getClickstreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">appId</span> <span class="p">=</span> <span class="s">&quot;appId&quot;</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">endpoint</span> <span class="p">=</span> <span class="s">&quot;https://example.com/collect&quot;</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">authCookie</span> <span class="p">=</span> <span class="s">&quot;your authentication cookie&quot;</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">sessionTimeoutDuration</span> <span class="p">=</span> <span class="mi">1800000</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isLogEvents</span> <span class="p">=</span> <span class="kc">true</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isCompressEvents</span> <span class="p">=</span> <span class="kc">true</span>    
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">configuration</span><span class="p">.</span><span class="n">isLogEvents</span> <span class="p">=</span> <span class="kc">true</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="bp">print</span><span class="p">(</span><span class="s">&quot;Failed to config ClickstreamAnalytics: </span><span class="si">\(</span><span class="n">error</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;albumVisit&#39;</span><span class="w"> </span><span class="p">});</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;buttonClick&#39;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nx">attributes</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">_channel</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;SMS&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">Successful</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">});</span>
 </span></code></pre></div>
-<blockquote>
-<p>Note: this configuration will override the default configuration in <code>amplifyconfiguration.json</code> file</p>
-</blockquote>
-<h3 id="5record-event">5.Record event</h3>
-<p>Add the following code where you need to report an event.</p>
-<div class="language-swift highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">import</span> <span class="nc">Clickstream</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">let</span> <span class="nv">attributes</span><span class="p">:</span> <span class="n">ClickstreamAttribute</span> <span class="p">=</span> <span class="p">[</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="s">&quot;channel&quot;</span><span class="p">:</span> <span class="s">&quot;apple&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="s">&quot;uccessful&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="s">&quot;ProcessDuration&quot;</span><span class="p">:</span> <span class="mf">12.33</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="s">&quot;UserAge&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">]</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">recordEvent</span><span class="p">(</span><span class="n">eventName</span><span class="p">:</span> <span class="s">&quot;testEvent&quot;</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">attributes</span><span class="p">)</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1">// for record an event directly</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="n">recordEvent</span><span class="p">(</span><span class="n">eventName</span><span class="p">:</span> <span class="s">&quot;button_click&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p>For more usage refer to <a href="https://github.com/awslabs/clickstream-swift#start-using">GitHub start using</a></p>
-<p>For <strong>Objective-c</strong> project refer to <a href="https://awslabs.github.io/clickstream-swift/Classes/ClickstreamObjc.html">ClickstreamObjc Api Reference</a></p>
+For more usage refer to <a href="https://github.com/awslabs/clickstream-web#start-using">GitHub start using</a></p>
 <h2 id="data-format-definition">Data format definition</h2>
-<h3 id="data-type">Data type</h3>
-<p>Clickstream Swift SDK supports the following data types:</p>
+<h3 id="data-types">Data types</h3>
+<p>Clickstream Web SDK supports the following data types:</p>
 <table>
 <thead>
 <tr>
 <th>Data type</th>
-<th>Range</th>
-<th>Sample</th>
+<th>range</th>
+<th>sample</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Int</td>
-<td>-2147483648～2147483647</td>
-<td>12</td>
+<td>number</td>
+<td>5e-324~1.79e+308</td>
+<td>12, 26854775808, 3.14</td>
 </tr>
 <tr>
-<td>Int64</td>
-<td>-9,223,372,036,854,775,808～ 9,223,372,036,854,775,807</td>
-<td>26854775808</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>-2.22E-308~1.79E+308</td>
-<td>3.14</td>
-</tr>
-<tr>
-<td>Boolean</td>
-<td>true, false</td>
+<td>boolean</td>
+<td>true、false</td>
 <td>true</td>
 </tr>
 <tr>
-<td>String</td>
+<td>string</td>
 <td>max support 1024 characters</td>
 <td>"clickstream"</td>
 </tr>
@@ -2036,77 +1932,108 @@
 <h3 id="naming-rules">Naming rules</h3>
 <ol>
 <li>
-<p>The event name and attribute name cannot start with a number, and only contains uppercase and lowercase letters, numbers, underscores, if the event name is invalid will throw <code>precondition failure</code>, if the attribute or user attribute name is invalid the attribute will be discarded and record error.</p>
+<p>The event name and attribute name cannot start with a number, and only contains: uppercase and lowercase letters, numbers, underscores, if the event name is invalid, the SDK will record <code>_clickstream_error</code> event, if the attribute or user attribute name is invalid, the attribute will be discarded and also record <code>_clickstream_error</code> event.</p>
 </li>
 <li>
-<p>Do not use <code>_</code> as prefix to naming event name and attribute name, <code>_</code> prefix is the reserved from Clickstream Analytics.</p>
+<p>Do not use <code>_</code> as prefix to naming event name and attribute name, <code>_</code> is the preset from Clickstream Analytics.</p>
 </li>
 <li>
-<p>The event name and attribute name are in case-sensitive, So the event <code>Add_to_cart</code> and <code>add_to_cart</code> will be Recognized as two different event.</p>
+<p>The event name and attribute name are in case-sensitive, so the event <code>Add_to_cart</code> and <code>add_to_cart</code> will be recognized as two different event.</p>
 </li>
 </ol>
-<h3 id="event-attribute-limitation">Event &amp; Attribute Limitation</h3>
-<p>In order to improve the efficiency of querying and analysis, we need to limit events as follows:</p>
+<h3 id="event-and-attribute-limitation">Event and attribute limitation</h3>
+<p>In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:</p>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Suggestion</th>
 <th>Hard limit</th>
-<th>Handle strategy for exceed</th>
+<th>strategy</th>
+<th>error code</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td>Event name invalid</td>
+<td>--</td>
+<td>--</td>
+<td>record <code>_clickstream_error</code> event</td>
+<td>1001</td>
+</tr>
+<tr>
 <td>Length of event name</td>
 <td>under 25 characters</td>
 <td>50 characters</td>
-<td>throw error</td>
+<td>discard, record error event</td>
+<td>1002</td>
 </tr>
 <tr>
 <td>Length of event attribute name</td>
 <td>under 25 characters</td>
 <td>50 characters</td>
 <td>discard, log and record error</td>
+<td>2001</td>
+</tr>
+<tr>
+<td>Attribute name invalid</td>
+<td>--</td>
+<td>--</td>
+<td>record <code>_clickstream_error</code> event</td>
+<td>2002</td>
 </tr>
 <tr>
 <td>Length of event attribute value</td>
 <td>under 100 characters</td>
 <td>1024 characters</td>
 <td>discard, log and record error</td>
+<td>2003</td>
 </tr>
 <tr>
 <td>Event attribute per event</td>
 <td>under 50 attributes</td>
-<td>500 event attributes</td>
+<td>500 evnet attributes</td>
 <td>discard, log and record error</td>
+<td>2004</td>
 </tr>
 <tr>
 <td>User attribute number</td>
 <td>under 25 attributes</td>
 <td>100 user attributes</td>
 <td>discard, log and record error</td>
+<td>3001</td>
 </tr>
 <tr>
 <td>Length of User attribute name</td>
 <td>under 25 characters</td>
 <td>50 characters</td>
 <td>discard, log and record error</td>
+<td>3002</td>
+</tr>
+<tr>
+<td>User attribute name invalid</td>
+<td>--</td>
+<td>--</td>
+<td>record <code>_clickstream_error</code> event</td>
+<td>3003</td>
 </tr>
 <tr>
 <td>Length of User attribute value</td>
 <td>under 50 characters</td>
 <td>256 characters</td>
 <td>discard, log and record error</td>
+<td>3004</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Explanation of limits</strong></p>
+<div class="admonition info">
+<p class="admonition-title">Important</p>
 <ul>
 <li>The character limits are the same for single-width character languages (e.g., English) and double-width character languages (e.g., Chinese).</li>
-<li>The limit of event attribute per event include common attributes and preset attributes.</li>
-<li>If you add the same name of attribute or user attribute more than twice, the last value applies.</li>
+<li>The limit of event attribute per event include preset attributes.</li>
+<li>If the attribute or user attribute with the same name is added more than twice, the latest value will apply.</li>
 </ul>
+</div>
 <h2 id="preset-events-and-attributes">Preset events and attributes</h2>
 <h3 id="preset-events">Preset events</h3>
 <p>Automatically collected events:</p>
@@ -2114,133 +2041,125 @@
 <thead>
 <tr>
 <th>Event name</th>
-<th>When to trigger</th>
+<th>Triggered</th>
 <th>Event Attributes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>_session_start</td>
-<td>when users app come to foreground for the first time and their is no on-going session</td>
-<td>_session_id <br>_session_start_timestamp<br>_session_duration</td>
+<td>when a user first visit the site or a user returns to the website after 30 minutes of inactivity period</td>
+<td>1._session_id <br>2._session_start_timestamp<br>3._session_duration</td>
 </tr>
 <tr>
-<td>_screen_view</td>
-<td>when the activity callback <code>viewDidAppear()</code> method</td>
-<td>_screen_name<br>_screen_id<br>_previous_screen_name<br>_previous_screen_id<br>_entrances<br>_engagement_time_msec</td>
-</tr>
-<tr>
-<td>_app_exception</td>
-<td>when the app is crash.</td>
-<td>_exception_message<br>_exception_stack</td>
-</tr>
-<tr>
-<td>_app_update</td>
-<td>when the app is updated to a new version and launched again</td>
-<td>_previous_app_version</td>
+<td>_page_view</td>
+<td>when new page is open</td>
+<td>1._page_url<br>2._page_referrer</td>
 </tr>
 <tr>
 <td>_first_open</td>
-<td>the first time user launches an app after installing</td>
+<td>the first time user launches an website</td>
 <td></td>
 </tr>
 <tr>
-<td>_os_update</td>
-<td>device operating system is updated to a new version</td>
-<td>_previous_os_version</td>
+<td>_app_start</td>
+<td>every time the browser goes to visibility</td>
+<td>1._is_first_time</td>
 </tr>
 <tr>
 <td>_user_engagement</td>
-<td>when the app is in the foreground at least one second</td>
-<td>_engagement_time_msec<br></td>
+<td>when the webpage is in focus at least one second</td>
+<td>1._engagement_time_msec<br></td>
 </tr>
 <tr>
 <td>_profile_set</td>
-<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> api called.</td>
+<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> api called</td>
 <td></td>
+</tr>
+<tr>
+<td>_scroll</td>
+<td>the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible)</td>
+<td>1._engagement_time_msec</td>
+</tr>
+<tr>
+<td>_search</td>
+<td>each time a user performs a site search, indicated by the presence of a URL query parameter, by default we detect <code>q</code>, <code>s</code>, <code>search</code>, <code>query</code> and <code>keyword</code> in query parameters.</td>
+<td>1._search_key (the keyword name)<br>2._search_term (the search content)</td>
+</tr>
+<tr>
+<td>_click</td>
+<td>each time a user clicks a link that leads away from the current domain (or configured domain list)</td>
+<td>1._link_classes (the content of <code>class</code> in tag <code>&lt;a&gt;</code> )<br>2._link_domain (the domain of <code>herf</code> in tag <code>&lt;a&gt;</code> )<br>3._link_id (the content of <code>id</code> in tag <code>&lt;a&gt;</code> )<br>4._link_url (the content of <code>herf</code> in tag <code>&lt;a&gt;</code> )<br>5._outbound (if the domain is not in configured domain list, the attribute value is <code>true</code>)</td>
+</tr>
+<tr>
+<td>_clickstream_error</td>
+<td>event_name is invalid or user attribute is invalid</td>
+<td>1._error_code <br>2._error_value</td>
 </tr>
 </tbody>
 </table>
 <h4 id="session-definition">Session definition</h4>
-<p>In Clickstream Swift SDK, we do not limit the total time of a session, as long as the time between the next entry of the app and the last exit time is within the allowable timeout period, we consider the current session to be continuous.</p>
-<ul>
-<li>
-<p><strong>_session_start</strong>: When the app starts for the first time, or the app was launched to the foreground and the time between the last exit exceeded <code>session_time_out</code> period.</p>
-</li>
-<li>
+<p>In Clickstream Web SDK, we do not limit the total time of a session, as long as the time between the next entry of the browser and the last exit time is within the allowable timeout period, we consider the current session to be continuous.</p>
+<p><strong>_session_start</strong>: When the website open for the first time, or the browser was open to the foreground and the time between the last exit exceeded <code>session_time_out</code> period.</p>
 <p><strong>_session_duration</strong>: We calculate the <code>_session_duration</code> by minus the current event create timestamp and the session's <code>_session_start_timestamp</code>, this attribute will be added in every event during the session.</p>
-</li>
-<li>
 <p><strong>session_time_out</strong>: By default is 30 minutes, which can be customized through the configuration api.</p>
-</li>
-<li>
-<p><strong>_session_number</strong>: The total number of session distinct by session id, and <code>_session_number</code> will appear in every event's attribute object.</p>
-</li>
-</ul>
+<p><strong>_session_number</strong>: The total number of session distinct by session id, and <code>_session_number</code> will be appeared in every event's attribute object.</p>
 <h4 id="user-engagement-definition">User engagement definition</h4>
-<p>In Clickstream Swift SDK, we define the <code>user_engagement</code> as the app is in the foreground at least one second.</p>
-<ul>
-<li>
-<p><strong>when to send</strong>: We send the event when the app navigate to background or navigate to another app.</p>
-</li>
-<li>
-<p><strong>engagement_time_msec</strong>: We count the time from when the app comes in the foreground to when the app goes to the background.</p>
-</li>
-</ul>
-<h3 id="common-attributes-and-reserved-attributes">Common attributes and Reserved attributes</h3>
-<h4 id="event-structure-sample">Event structure sample</h4>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shopping&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.compny.app&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ModerneShopping&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;apple&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UNKNOWN&quot;</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A536A563-65BD-49BE-A6EC-6F3CE7AC8FBE&quot;</span><span class="p">,</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">&quot;device_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;91DA4BBE-933F-4DFA-A489-8AEFBC7A06D8&quot;</span><span class="p">,</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nt">&quot;hashCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;63D7991D&quot;</span><span class="p">,</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en_US (current)&quot;</span><span class="p">,</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;apple&quot;</span><span class="p">,</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iPhone 14 Pro&quot;</span><span class="p">,</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WIFI&quot;</span><span class="p">,</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16.4&quot;</span><span class="p">,</span>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iOS&quot;</span><span class="p">,</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">    </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2556</span><span class="p">,</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1179</span><span class="p">,</span>
-</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">    </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
-</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.4.1&quot;</span><span class="p">,</span>
-</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">    </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
-</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685082174195</span><span class="p">,</span>
-</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">    </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0E6614B7-2D2C-4774-AB2F-B0A9E6C3BFAC&quot;</span><span class="p">,</span>
-</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">    </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
-</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">        </span><span class="nt">&quot;_user_city&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678437</span><span class="p">,</span>
-</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shanghai&quot;</span>
-</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">        </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678434</span><span class="p">,</span>
-</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678432</span>
-</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">        </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685006678437</span><span class="p">,</span>
-</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span>
-</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="w">        </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15349</span><span class="p">,</span>
-</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">        </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0E6614B7-20230526-062238846&quot;</span><span class="p">,</span>
-</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">        </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">        </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1685082158847</span><span class="p">,</span>
-</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">        </span><span class="nt">&quot;product_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;men&#39;s clothing&quot;</span><span class="p">,</span>
-</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">        </span><span class="nt">&quot;product_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a><span class="p">}</span>
+<p>In Clickstream Web SDK, we define the <code>user_engagement</code> as the webpage is in focus at least one second.</p>
+<p><strong>when to send</strong>: We send the event when the browser is close, hide or navigate to another  web page in different domain.</p>
+<p><strong>engagement_time_msec</strong>: We count the time from when the web page is visible to when the web page is hidden.</p>
+<h3 id="common-attributes-and-reserved-attributes">Common attributes and reserved attributes</h3>
+<h4 id="sample-event-structure">Sample event structure</h4>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;hashCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;80452b0&quot;</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PasswordReset&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f24bec657ea8eff7&quot;</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Web&quot;</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google Inc.&quot;</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1080</span><span class="p">,</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1920</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh&quot;</span><span class="p">,</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN&quot;</span><span class="p">,</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">  </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">  </span><span class="nt">&quot;host_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appId&quot;</span><span class="p">,</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">    </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">    </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="mi">1667877267895</span><span class="p">,</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">    </span><span class="nt">&quot;_channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SMS&quot;</span><span class="p">,</span>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="w">    </span><span class="nt">&quot;Successful&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="w">    </span><span class="nt">&quot;Price&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">120.1</span><span class="p">,</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="w">    </span><span class="nt">&quot;ProcessDuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">791</span><span class="p">,</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a><span class="w">    </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a><span class="w">    </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a><span class="w">    </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a><span class="w">    </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a><span class="w">    </span><span class="nt">&quot;_page_referrer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/index.html&quot;</span><span class="p">,</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="w">    </span><span class="nt">&quot;_page_referrer_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;index&quot;</span><span class="p">,</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a><span class="w">    </span><span class="nt">&quot;_page_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;login page&quot;</span><span class="p">,</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a><span class="w">    </span><span class="nt">&quot;_page_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/login.html&quot;</span>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>All user attributes will be included in <code>user</code> object, and all custom and global attribute are stored in <code>attributes</code> object.</p>
+<p>All user attributes will be stored in <code>user</code> object, and all custom attributes are in <code>attributes</code> object.</p>
 <h4 id="common-attribute">Common attribute</h4>
 <table>
 <thead>
@@ -2254,8 +2173,8 @@
 <tbody>
 <tr>
 <td>hashCode</td>
-<td>the AnalyticsEvent Object's hashCode</td>
-<td>generated from<code>String(format: "%08X", hasher.combine(eventjson))</code></td>
+<td>the event object's hash code</td>
+<td>calculated by library <code>@aws-crypto/sha256-js</code></td>
 <td>distinguish different events</td>
 </tr>
 <tr>
@@ -2267,121 +2186,85 @@
 <tr>
 <td>unique_id</td>
 <td>the unique id for user</td>
-<td>generated from <code>UUID().uuidString</code> when the sdk first initialization<br>it will be changed after user re-login to another user, and when user re-login to the before user in same device, the <code>unique_id</code> will reset to the before user's <code>unique_id</code>.</td>
-<td>the unique for identity different user and associating the behavior of logging in and not logging in</td>
+<td>generated from <code>uuidV4()</code> when the sdk first initialization<br> it will be changed after user re-login to another user who never login, and when user re-login to the before user in same browser, the unique_id will reset to the before user's unique_id</td>
+<td>the unique for identity different users and associating the behavior of logging in and not logging in</td>
 </tr>
 <tr>
 <td>device_id</td>
 <td>the unique id for device</td>
-<td>generated from<code>UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString</code><br>it will be changed after app reinstall<br></td>
-<td>distinguish different devices</td>
-</tr>
-<tr>
-<td>device_unique_id</td>
-<td>the device advertising Id</td>
-<td>generated from<code>ASIdentifierManager.shared().advertisingIdentifier.uuidString ?? ""</code></td>
+<td>generated from <code>uuidV4()</code> when the website is first open, then the uuid will stored in localStorage and will never change it</td>
 <td>distinguish different devices</td>
 </tr>
 <tr>
 <td>event_type</td>
 <td>event name</td>
-<td>set by user or sdk.</td>
+<td>set by developer or SDK</td>
 <td>distinguish different events type</td>
 </tr>
 <tr>
 <td>event_id</td>
 <td>the unique id for event</td>
-<td>generated from <code>UUID().uuidString</code> when the event create.</td>
+<td>generated from <code>uuidV4()</code> when the event create</td>
 <td>distinguish different events</td>
 </tr>
 <tr>
 <td>timestamp</td>
 <td>event create timestamp</td>
-<td>generated from <code>Date().timeIntervalSince1970 * 1000</code> when event create</td>
+<td>generated from <code>new Date().getTime()</code> when event create</td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>platform</td>
 <td>the platform name</td>
-<td>for iOS device is always "iOS"</td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>os_version</td>
-<td>the iOS os version</td>
-<td>generated from<code>UIDevice.current.systemVersion</code></td>
+<td>for browser is always <code>Web</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>make</td>
-<td>manufacturer of the device</td>
-<td>for iOS device is always "apple"</td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>brand</td>
-<td>brand of the device</td>
-<td>for iOS device is always "apple"</td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>model</td>
-<td>model of the device</td>
-<td>generated from mapping of device identifier</td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>carrier</td>
-<td>the device network operator name</td>
-<td>generated from<code>CTTelephonyNetworkInfo().serviceSubscriberCellularProviders?.first?.value</code><br>default is: "UNKNOWN"</td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>network_type</td>
-<td>the current device network type</td>
-<td>"Mobile", "WIFI" or "UNKNOWN"<br>generate by  <code>NWPathMonitor</code></td>
+<td>the browser make</td>
+<td>generated from <code>window.navigator.product</code> or <code>window.navigator.vendor</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>screen_height</td>
-<td>The absolute height of the available display size in pixels</td>
-<td>generated from<code>UIScreen.main.bounds.size.height * UIScreen.main.scale</code></td>
+<td>the website window height pixel</td>
+<td>generated from <code>window.innerHeight</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>screen_width</td>
-<td>The absolute width of the available display size in pixels.</td>
-<td>generated from<code>UIScreen.main.bounds.size.width * UIScreen.main.scale</code></td>
+<td>the website window width pixel</td>
+<td>generated from <code>window.innerWidth</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>zone_offset</td>
 <td>the device raw offset from GMT in milliseconds.</td>
-<td>generated from<code>TimeZone.current.secondsFromGMT()*1000</code></td>
+<td>generated from <code>-currentDate.getTimezoneOffset()*60000</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>locale</td>
-<td>the default locale(language, country and variant) for this device</td>
-<td>generated from <code>Locale.current</code></td>
+<td>the default locale(language, country and variant) for the browser</td>
+<td>generated from <code>window.navigator.language</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>system_language</td>
-<td>the device language code</td>
-<td>generated from <code>Locale.current.languageCode</code><br>default is: "UNKNOWN"</td>
+<td>the browser language code</td>
+<td>generated from <code>window.navigator.language</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>country_code</td>
-<td>country/region code for this device</td>
-<td>generated from <code>Locale.current.regionCode</code><br>default is: "UNKNOWN"</td>
+<td>country/region code for the browser</td>
+<td>generated from <code>window.navigator.language</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
 <td>sdk_version</td>
 <td>clickstream sdk version</td>
-<td>generated from<code>PackageInfo.version</code></td>
+<td>generated from <code>package.json</code></td>
 <td>data analysis needs</td>
 </tr>
 <tr>
@@ -2391,21 +2274,9 @@
 <td>data analysis needs</td>
 </tr>
 <tr>
-<td>app_version</td>
-<td>the app version name</td>
-<td>generated from <code>Bundle.main.infoDictionary["CFBundleShortVersionString"] ?? ""</code></td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>app_package_name</td>
-<td>the app package name</td>
-<td>generated from<code>Bundle.main.infoDictionary["CFBundleIdentifier"] ?? ""</code></td>
-<td>data analysis needs</td>
-</tr>
-<tr>
-<td>app_title</td>
-<td>the app's display name</td>
-<td>generated from <code>Bundle.main.infoDictionary["CFBundleName"] ?? ""</code></td>
+<td>host_name</td>
+<td>the website hostname</td>
+<td>generated from <code>window.location.hostname</code></td>
 <td>data analysis needs</td>
 </tr>
 </tbody>
@@ -2415,8 +2286,8 @@
 <table>
 <thead>
 <tr>
-<th>attribute name</th>
-<th>description</th>
+<th>Attribute name</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -2434,7 +2305,7 @@
 </tr>
 <tr>
 <td>_user_first_touch_timestamp</td>
-<td>The time (in microseconds) at which the user first opened the app or visited the site, it is included in every event in <code>user</code> object</td>
+<td>The time (in microseconds) when the user first visited the website, and it is included in every event in <code>user</code> object</td>
 </tr>
 </tbody>
 </table>
@@ -2442,8 +2313,8 @@
 <table>
 <thead>
 <tr>
-<th>attribute name</th>
-<th>description</th>
+<th>Attribute name</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -2460,36 +2331,36 @@
 <td>Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu</td>
 </tr>
 <tr>
-<td>_channel</td>
-<td>the channel for app was downloaded</td>
-</tr>
-<tr>
-<td>_device_vendor_id</td>
-<td>Vendor id of the device</td>
-</tr>
-<tr>
-<td>_device_advertising_id</td>
-<td>Advertising id of the device</td>
-</tr>
-<tr>
 <td>_entrances</td>
-<td>added in <code>_screen_view</code>event , the first <code>_screen_view</code> event in a session the value is 1, others is 0.</td>
+<td>Added in <code>_page_view</code> event. The first <code>_page_view</code> event in a session has the value 1, and others 0.</td>
 </tr>
 <tr>
 <td>_session_id</td>
-<td>added in all event.</td>
+<td>Added in all events.</td>
 </tr>
 <tr>
 <td>_session_start_timestamp</td>
-<td>added in all event.</td>
+<td>Added in all events.</td>
 </tr>
 <tr>
 <td>_session_duration</td>
-<td>added in all event.</td>
+<td>Added in all events.</td>
 </tr>
 <tr>
 <td>_session_number</td>
-<td>added in all event, the initial value is 1, automatically increment by user device.</td>
+<td>Added in all events. The initial value is 1, and the value is automatically incremented by user device.</td>
+</tr>
+<tr>
+<td>_error_code</td>
+<td>The <code>_clickstream_error</code> event's attribute.</td>
+</tr>
+<tr>
+<td>_page_title</td>
+<td>Added in all events.</td>
+</tr>
+<tr>
+<td>_page_url</td>
+<td>Added in all events.</td>
 </tr>
 </tbody>
 </table>
