@@ -821,7 +821,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
       // set dataModeling to null when not enable Redshift
       if (!pipelineInfo.enableRedshift) {
-        createPipelineObj.dataModeling = null;
+        createPipelineObj.dataModeling.redshift = null;
       } else {
         // set serverless to null when user select provisioned
         if (pipelineInfo.redshiftType === 'provisioned') {
