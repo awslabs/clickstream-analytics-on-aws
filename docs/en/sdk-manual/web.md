@@ -120,7 +120,7 @@ In Clickstream Web SDK, we do not limit the total time of a session, as long as 
 
 **_session_number**: The total number of session distinct by session id, and `_session_number` will be appeared in every event's attribute object.
 
-#### 4.1.2 User engagement definition
+#### User engagement definition
 
 In Clickstream Web SDK, we define the `user_engagement` as the webpage is in focus at least one second.
 
