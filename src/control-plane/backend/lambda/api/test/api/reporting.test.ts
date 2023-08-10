@@ -135,12 +135,17 @@ describe('reporting test', () => {
         timeUnit: 'WK',
         groupColumn: 'week',
         dashboardCreateParameters: {
-          redshiftRegion: 'us-east-1',
-          workgroupName: 'clickstream-project01-wvzh',
-          isProvisionedRedshift: false,
-          quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
-          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          region: 'us-east-1',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
         },
       });
 
@@ -221,12 +226,17 @@ describe('reporting test', () => {
         timeEnd: '2023-08-30',
         groupColumn: 'week',
         dashboardCreateParameters: {
-          redshiftRegion: 'us-east-1',
-          workgroupName: 'clickstream-project01-wvzh',
-          isProvisionedRedshift: false,
-          quickSightPrincipal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
-          dataApiRole: 'arn:aws:iam::111111:role/test_api_role',
-          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          region: 'us-east-1',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
         },
       });
 

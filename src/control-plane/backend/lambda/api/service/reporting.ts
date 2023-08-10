@@ -32,14 +32,10 @@ import {
   getFunnelTableVisualDef,
 } from './quicksight/reporting-utils';
 import { buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
-import { awsAccountId, awsRegion } from '../common/constants';
+import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-
-const stsClient = new STSClient({ region: 'us-east-1' });
-const quickSight = new QuickSight({
-  region: awsRegion,
-});
+import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 
 export class ReportingServ {
 
@@ -49,10 +45,20 @@ export class ReportingServ {
 
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
+      const redshiftRegion = dashboardCreateParameters.region;
 
-      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.dataApiRole);
+      const stsClient = new STSClient({ 
+        region: redshiftRegion, 
+        ...aws_sdk_client_common_config 
+      });
+      const quickSight = new QuickSight({
+        region: redshiftRegion,
+        ...aws_sdk_client_common_config
+      });
+
+      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.redshift.dataApiRole);
       const redshiftDataClient = new RedshiftDataClient({
-        region: dashboardCreateParameters.redshiftRegion,
+        region: redshiftRegion,
         credentials: {
           accessKeyId: credentials?.AccessKeyId!,
           secretAccessKey: credentials?.SecretAccessKey!,
@@ -103,11 +109,11 @@ export class ReportingServ {
       //create view in redshift
       const input = {
         Sqls: [sql, sqlTable],
-        WorkgroupName: dashboardCreateParameters.workgroupName,
+        WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
         Database: query.projectId,
         WithEvent: false,
-        ClusterIdentifier: dashboardCreateParameters.clusterIdentifier,
-        DbUser: dashboardCreateParameters.dbUser,
+        ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
+        DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
       };
       const params = new BatchExecuteStatementCommand(input);
       await redshiftDataClient.send(params);
@@ -115,8 +121,8 @@ export class ReportingServ {
       //create quicksight dataset
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSightPrincipal,
-        dashboardCreateParameters.dataSourceArn, {
+        dashboardCreateParameters.quickSight.principal,
+        dashboardCreateParameters.quickSight.dataSourceArn, {
           name: '',
           tableName: viewName,
           columns: funnelVisualColumns,
@@ -160,8 +166,8 @@ export class ReportingServ {
       }
       const datasetOutputForTableChart = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSightPrincipal,
-        dashboardCreateParameters.dataSourceArn, {
+        dashboardCreateParameters.quickSight.principal,
+        dashboardCreateParameters.quickSight.dataSourceArn, {
           name: '',
           tableName: tableVisualViewName,
           columns: tableViewCols,
@@ -262,7 +268,7 @@ export class ReportingServ {
           AnalysisId: analysisId,
           Name: `analysis-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSightPrincipal,
+            Principal: dashboardCreateParameters.quickSight.principal,
             Actions: [
               'quicksight:DescribeAnalysis',
               'quicksight:QueryAnalysis',
@@ -283,7 +289,7 @@ export class ReportingServ {
           DashboardId: dashboardId,
           Name: `dashboard-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSightPrincipal,
+            Principal: dashboardCreateParameters.quickSight.principal,
             Actions: [
               'quicksight:DescribeDashboard',
               'quicksight:ListDashboardVersions',

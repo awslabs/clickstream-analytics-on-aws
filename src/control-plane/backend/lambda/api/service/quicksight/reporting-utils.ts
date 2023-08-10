@@ -25,7 +25,6 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { logger } from '../../common/powertools';
-import { ClickStreamStore } from '../../store/click-stream-store';
 
 export interface VisualProps {
   readonly name: string;
@@ -46,14 +45,21 @@ export interface DashboardAction {
 }
 
 export interface DashboardCreateParameters {
-  readonly redshiftRegion: string;
-  readonly workgroupName?: string;
-  readonly clusterIdentifier?: string;
-  readonly dbUser?: string;
-  readonly isProvisionedRedshift: boolean;
-  readonly quickSightPrincipal: string;
-  readonly dataApiRole: string;
-  readonly dataSourceArn: string;
+  readonly region: string;
+  readonly redshift: {
+    readonly dataApiRole: string;
+    readonly newServerless?: {
+      readonly workgroupName: string;
+    };
+    readonly provisioned?: {
+      readonly clusterIdentifier: string;
+      readonly dbUser: string;
+    };
+  };
+  readonly quickSight: {
+    readonly principal: string;
+    readonly dataSourceArn: string;
+  };
 }
 
 export interface DashboardCreateInputParameters {
@@ -62,8 +68,6 @@ export interface DashboardCreateInputParameters {
   readonly projectId: string;
   readonly appId: string;
   readonly pipelineId: string;
-  readonly stsClient: STSClient;
-  readonly store: ClickStreamStore;
 }
 
 export interface CreateDashboardResult {
