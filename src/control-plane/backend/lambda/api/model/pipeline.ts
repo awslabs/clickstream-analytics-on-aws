@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Output, Tag } from '@aws-sdk/client-cloudformation';
+import { Tag } from '@aws-sdk/client-cloudformation';
 import { getDiff } from 'json-difference';
 import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
@@ -73,7 +73,7 @@ interface IngestionServerSinkKafkaProps {
   readonly topic: string;
   readonly brokers: string[];
   readonly securityGroupId: string;
-  readonly mskCluster?: mskClusterProps;
+  readonly mskCluster?: MSKClusterProps;
   readonly kafkaConnector: KafkaS3Connector;
 }
 
@@ -183,7 +183,7 @@ interface S3Bucket {
   readonly prefix: string;
 }
 
-interface mskClusterProps {
+interface MSKClusterProps {
   readonly name: string;
   readonly arn: string;
 }
@@ -541,9 +541,9 @@ export class CPipeline {
         BuiltInTagKeys.CLICKSTREAM_PROJECT,
       ];
       const keys = this.pipeline.tags.map(tag => tag.key);
-      for (let i = 0; i < builtInTagKeys.length; i++) {
-        if (keys.indexOf(builtInTagKeys[i]) > -1) {
-          const index = keys.indexOf(builtInTagKeys[i]);
+      for (let builtInTagKey of builtInTagKeys) {
+        if (keys.includes(builtInTagKey)) {
+          const index = keys.indexOf(builtInTagKey);
           this.pipeline.tags.splice(index, 1);
           keys.splice(index, 1);
         }
@@ -892,7 +892,7 @@ export class CPipeline {
     }
     for (let suffix of outputKeySuffixes) {
       if (stack.Outputs) {
-        for (let out of stack.Outputs as Output[]) {
+        for (let out of stack.Outputs) {
           if (out.OutputKey?.endsWith(suffix)) {
             res.set(suffix, out.OutputValue ?? '');
             break;

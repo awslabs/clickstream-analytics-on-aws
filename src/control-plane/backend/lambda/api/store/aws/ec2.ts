@@ -51,7 +51,7 @@ export const describeVpcs = async (region: string, vpcId?: string) => {
     records.push(...page.Vpcs as Vpc[]);
   }
   const vpcs: ClickStreamVpc[] = [];
-  for (let vpc of records as Vpc[]) {
+  for (let vpc of records) {
     vpcs.push({
       id: vpc.VpcId ?? '',
       name: getValueFromTags('Name', vpc.Tags!),
@@ -72,7 +72,7 @@ export const describeVpcs3AZ = async (region: string) => {
     records.push(...page.Vpcs as Vpc[]);
   }
   const vpcs: ClickStreamVpc[] = [];
-  for (let vpc of records as Vpc[]) {
+  for (let vpc of records) {
     const subnets = await describeSubnets(region, vpc.VpcId!);
     const azSet = new Set();
     for (let subnet of subnets) {
@@ -128,7 +128,7 @@ export const describeSubnetsWithType = async (region: string, vpcId: string, typ
   const subnets = await describeSubnets(region, vpcId);
   const routeTables = await describeRouteTables(region, vpcId);
   const result: ClickStreamSubnet[] = [];
-  for (let subnet of subnets as Subnet[]) {
+  for (let subnet of subnets) {
     const subnetId = subnet.SubnetId!;
     // Find the routeTable of subnet
     const routeTable = getSubnetRouteTable(routeTables, subnetId);
@@ -158,7 +158,7 @@ export const getSubnet = async (region: string, subnetId: string) => {
     records.push(...page.Subnets as Subnet[]);
   }
   if (records) {
-    return records[0] as Subnet;
+    return records[0];
   }
   return {} as Subnet;
 };
@@ -194,7 +194,7 @@ export const listAvailabilityZones = async (region: string) => {
 export const describeVpcSecurityGroups = async (region: string, vpcId: string) => {
   const records = await describeSecurityGroups(region, vpcId);
   const securityGroups: ClickStreamSecurityGroup[] = [];
-  for (let sg of records as SecurityGroup[]) {
+  for (let sg of records) {
     securityGroups.push({
       id: sg.GroupId ?? '',
       name: sg.GroupName ?? '',

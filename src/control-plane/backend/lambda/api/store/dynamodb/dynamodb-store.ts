@@ -144,7 +144,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -276,7 +276,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -812,7 +812,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ConditionExpression: 'bindCount = :bindCount',
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });

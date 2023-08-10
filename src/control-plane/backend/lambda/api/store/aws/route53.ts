@@ -25,7 +25,7 @@ export const listHostedZones = async () => {
   }
   const hostedZones: Route53HostedZone[] = [];
   if (records) {
-    for (let hostedZone of records as HostedZone[]) {
+    for (let hostedZone of records) {
       if (hostedZone.Id) {
         hostedZones.push({
           id: hostedZone.Id?.split('/')[2],

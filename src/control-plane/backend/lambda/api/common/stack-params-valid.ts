@@ -15,7 +15,7 @@ import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
-import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, PolicyStatement, SubnetType } from './types';
+import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
@@ -438,7 +438,7 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
     Version: '2012-10-17',
     Statement: [],
   };
-  for (let statement of policy.Statement as PolicyStatement[]) {
+  for (let statement of policy.Statement) {
     if (statement.Principal &&
       (typeof statement.Principal[principal.key] === 'string' &&
           statement.Principal[principal.key] === principal.value) ||

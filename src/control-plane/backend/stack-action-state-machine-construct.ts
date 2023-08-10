@@ -82,7 +82,6 @@ export class StackActionStateMachine extends Construct {
       ),
     ]);
 
-    // TODO: Restrict permissions
     const actionFunctionRolePolicy = new iam.Policy(this, 'ActionFunctionRolePolicy', {
       statements: [
         new iam.PolicyStatement({

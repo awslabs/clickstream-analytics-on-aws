@@ -31,7 +31,7 @@ export const listRoles = async (type: AssumeRoleType, key?: string) => {
     records.push(...page.Roles as Role[]);
   }
   const roles: IamRole[] = [];
-  for (let record of records as Role[]) {
+  for (let record of records) {
     if (record.AssumeRolePolicyDocument && awsRegion) {
       const assumeRolePolicyDocument = decodeURIComponent(record.AssumeRolePolicyDocument);
       const partition = awsRegion.startsWith('cn') ? 'aws-cn' : 'aws';

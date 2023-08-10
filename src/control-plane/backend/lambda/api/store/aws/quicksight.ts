@@ -51,7 +51,7 @@ export const listQuickSightUsers = async () => {
     return await listQuickSightUsersByRegion(QUICKSIGHT_CONTROL_PLANE_REGION);
   } catch (err) {
     if (err instanceof AccessDeniedException) {
-      const message = (err as AccessDeniedException).message;
+      const message = err.message;
       const identityRegion = getIdentityRegionFromMessage(message);
       if (identityRegion) {
         return await listQuickSightUsersByRegion(identityRegion);
@@ -130,7 +130,7 @@ export const registerQuickSightUser = async (email: string, username?: string) =
     return await registerQuickSightUserByRegion(QUICKSIGHT_CONTROL_PLANE_REGION, email, username);
   } catch (err) {
     if (err instanceof AccessDeniedException) {
-      const message = (err as AccessDeniedException).message;
+      const message = err.message;
       const identityRegion = getIdentityRegionFromMessage(message);
       if (identityRegion) {
         return await registerQuickSightUserByRegion(identityRegion, email, username);

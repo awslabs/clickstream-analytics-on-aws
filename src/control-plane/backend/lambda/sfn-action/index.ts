@@ -219,14 +219,14 @@ export const describeStack = async (event: SfnStackEvent) => {
       Action: StackAction.DESCRIBE,
       Input: event.Input,
       Callback: event.Callback,
-      Result: stack as Stack,
+      Result: stack,
     } as SfnStackEvent;
   }
   return {
     Action: StackAction.CALLBACK,
     Input: event.Input,
     Callback: event.Callback,
-    Result: stack as Stack,
+    Result: stack,
   } as SfnStackEvent;
 };
 
@@ -241,7 +241,7 @@ export const describe = async (region: string, stackName: string) => {
     });
     const result = await cloudFormationClient.send(params);
     if (result.Stacks) {
-      return result.Stacks[0] as Stack;
+      return result.Stacks[0];
     }
     return undefined;
   } catch (err) {

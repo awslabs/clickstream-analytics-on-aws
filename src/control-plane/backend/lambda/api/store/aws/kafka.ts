@@ -28,7 +28,7 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
   }
 
   const clusters: MSKCluster[] = [];
-  for (let cluster of records as Cluster[]) {
+  for (let cluster of records) {
     if (cluster.ClusterType === ClusterType.PROVISIONED) {
       const securityGroups = cluster.Provisioned?.BrokerNodeGroupInfo?.SecurityGroups;
       const clientSubnets = cluster.Provisioned?.BrokerNodeGroupInfo?.ClientSubnets;
@@ -101,7 +101,7 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
     records.push(...page.NodeInfoList as NodeInfo[]);
   }
 
-  for (let nodeInfo of records as NodeInfo[]) {
+  for (let nodeInfo of records) {
     if (nodeInfo.BrokerNodeInfo !== undefined && nodeInfo.BrokerNodeInfo.Endpoints !== undefined) {
       const endpoints = nodeInfo.BrokerNodeInfo.Endpoints.map(e => `${e}:9092`);
       nodeEndpoints.push(endpoints.join(','));

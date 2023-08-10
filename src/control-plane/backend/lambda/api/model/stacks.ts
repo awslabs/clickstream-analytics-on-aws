@@ -804,8 +804,7 @@ export class CDataModelingStack extends JSONObject {
     UpsertUsersScheduleExpression?: string;
 
   @JSONObject.optional('cron(0 1 * * ? *)')
-  @JSONObject.custom( (stack :CDataModelingStack, key:string, value:any) => {
-    value = stack._pipeline?.dataProcessing?.scheduleExpression;
+  @JSONObject.custom( (_stack :CDataModelingStack, key:string, value:any) => {
     validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);
     return value;
   })
@@ -986,6 +985,7 @@ export class CDataModelingStack extends JSONObject {
       LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
       MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
       UpsertUsersScheduleExpression: pipeline.dataModeling?.upsertUsers.scheduleExpression,
+      DataProcessingCronOrRateExpression: pipeline.dataProcessing?.scheduleExpression,
 
       EMRServerlessApplicationId: getValueFromStackOutputSuffix(
         pipeline,

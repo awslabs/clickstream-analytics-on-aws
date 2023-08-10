@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter, StackStatus, Tag } from '@aws-sdk/client-cloudformation';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
@@ -52,9 +52,8 @@ export class StackManager {
     }
   }
 
-  public setExecWorkflow(workflow: WorkflowTemplate): undefined {
+  public setExecWorkflow(workflow: WorkflowTemplate) {
     this.execWorkflow = JSON.parse(JSON.stringify(workflow));
-    return ;
   }
 
   public getExecWorkflow(): WorkflowTemplate | undefined {
@@ -146,7 +145,7 @@ export class StackManager {
     const executionDetail = await this.getExecutionDetail(this.pipeline.executionArn);
     const stackNames = this.getWorkflowStacks(this.workflow?.Workflow);
     const stackStatusDetails: PipelineStatusDetail[] = [];
-    for (let stackName of stackNames as string[]) {
+    for (let stackName of stackNames) {
       const stack = await describeStack(this.pipeline.region, stackName);
       stackStatusDetails.push({
         stackName: stackName,
@@ -285,7 +284,7 @@ export class StackManager {
         state.Data.Input.Action = 'Upgrade';
       }
       state.Data.Input.Tags = stackTags;
-      state.Data!.Callback = {
+      state.Data.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
         BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
       };
@@ -307,7 +306,7 @@ export class StackManager {
       } else if (status?.endsWith('_IN_PROGRESS') || status?.endsWith('_COMPLETE')) {
         state.Type = WorkflowStateType.PASS;
       }
-      state.Data!.Callback = {
+      state.Data.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
         BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
       };
@@ -335,7 +334,7 @@ export class StackManager {
           state.Type = WorkflowStateType.PASS;
         }
       }
-      state.Data!.Callback = {
+      state.Data.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
         BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
       };
@@ -411,7 +410,7 @@ export class StackManager {
     } else if (state.Data?.Input.StackName === stackName) {
       state.Type = WorkflowStateType.STACK;
       state.Data.Input.Action = action;
-      for (let p of state.Data?.Input.Parameters as Parameter[]) {
+      for (let p of state.Data?.Input.Parameters) {
         if (p.ParameterKey === parameterKey) {
           p.ParameterValue = parameterValue;
           break;
