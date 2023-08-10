@@ -120,7 +120,7 @@ export class ReportingServ {
         ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
         DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
       };
-      
+
       const params = new BatchExecuteStatementCommand(input);
       await redshiftDataClient.send(params);
 
