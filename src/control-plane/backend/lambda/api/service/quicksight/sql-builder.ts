@@ -327,6 +327,67 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
     )`,
   );
 
+  return sql;
+};
+
+export function buildFunnelDataSql(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+
+  let eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+
+  let sql = _buildFunnelBaseSql(eventNames, sqlParameters);
+
+  let prefix = 'event_id';
+  if (sqlParameters.computeMethod === 'USER_CNT') {
+    prefix = 'user_pseudo_id';
+  }
+  let resultCntSQL ='';
+
+  const maxIndex = eventNames.length - 1;
+  for (const [index, _item] of eventNames.entries()) {
+    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_${index})  as ${eventNames[index]} \n`);
+    if (index === 0) {
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  count(distinct ${prefix}_0)):: decimal(20, 4)  as rate \n`);
+    } else {
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  count(distinct ${prefix}_${index-1})):: decimal(20, 4)  as ${eventNames[index]}_rate \n`);
+    }
+  }
+
+  sql = sql.concat(`
+    select 
+      ${sqlParameters.groupColumn}
+      ${resultCntSQL}
+    from final_table
+    group by 
+      ${sqlParameters.groupColumn}
+  `);
+
+  sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+   ${sql}
+   with no schema binding
+   `;
+
+  return format(sql, {
+    language: 'postgresql',
+  });
+};
+
+export function buildFunnelView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+
+  let resultSql = '';
+  let eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+  let index = 0;
+  let prefix = 'e';
+  if (sqlParameters.computeMethod === 'USER_CNT') {
+    prefix = 'u';
+  }
+
+  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters);
   let finalTableColumnsSQL = `
      week
     ,day
@@ -339,17 +400,17 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
     ,hour
   `;
 
-  for (const [index, _item] of eventNames.entries()) {
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_id_${index} as e_id_${index} \n`);
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_name_${index} as e_name_${index} \n`);
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, user_pseudo_id_${index} as u_id_${index} \n`);
+  for (const [ind, _item] of eventNames.entries()) {
+    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_id_${ind} as e_id_${ind} \n`);
+    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_name_${ind} as e_name_${ind} \n`);
+    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, user_pseudo_id_${ind} as u_id_${ind} \n`);
 
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${index} \n`);
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_name_${index} \n`);
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${index} \n`);
+    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${ind} \n`);
+    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_name_${ind} \n`);
+    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${ind} \n`);
   }
 
-  sql = sql.concat(`,
+  baseSQL = baseSQL.concat(`,
     final_table as (
       select 
       ${finalTableColumnsSQL}
@@ -358,52 +419,6 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
       ${finalTableGroupBySQL}
     )
   `);
-
-  return sql;
-};
-
-export function buildFunnelDataSql(sqlParameters: FunnelSQLParameters) : string {
-
-  let eventNames: string[] = [];
-  for (const e of sqlParameters.eventAndConditions) {
-    eventNames.push(e.eventName);
-  }
-
-  let sql = _buildFunnelBaseSql(eventNames, sqlParameters);
-
-  let prefix = 'e';
-  if (sqlParameters.computeMethod === 'USER_CNT') {
-    prefix = 'u';
-  }
-  let resultCntSQL ='';
-
-  for (const [index, _item] of eventNames.entries()) {
-    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_id_${index})  as ${eventNames[index]} \n`);
-  }
-
-  sql = sql.concat(`
-    select 
-      ${sqlParameters.groupColumn}
-      ${resultCntSQL}
-    from final_table
-    group by 
-      ${sqlParameters.groupColumn}
-  `);
-
-  return format(sql, {
-    language: 'postgresql',
-  });
-};
-
-export function buildFunnelView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
-
-  let resultSql = '';
-  let eventNames: string[] = [];
-  let index = 0;
-  let prefix = 'e';
-  if (sqlParameters.computeMethod === 'USER_CNT') {
-    prefix = 'u';
-  }
 
   for (const e of sqlParameters.eventAndConditions) {
     eventNames.push(e.eventName);
@@ -419,7 +434,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
   }
 
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
-   ${_buildFunnelBaseSql(eventNames, sqlParameters)}
+   ${baseSQL}
    ${resultSql}
    with no schema binding
    `;

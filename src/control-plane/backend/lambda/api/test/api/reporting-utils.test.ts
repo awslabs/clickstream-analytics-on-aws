@@ -236,7 +236,7 @@ describe('QuickSight visual management test', () => {
               },
             },
             Status: 'ENABLED',
-            CrossDataset: 'SINGLE_DATASET',
+            CrossDataset: 'ALL_DATASETS',
           },
           eventCount: 5,
         },
@@ -458,7 +458,7 @@ describe('QuickSight visual management test', () => {
             },
           },
           Status: 'ENABLED',
-          CrossDataset: 'SINGLE_DATASET',
+          CrossDataset: 'ALL_DATASETS',
         },
       ],
       AnalysisDefaults: {

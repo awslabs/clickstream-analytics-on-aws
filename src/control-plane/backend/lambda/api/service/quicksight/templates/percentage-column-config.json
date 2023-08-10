@@ -1,0 +1,25 @@
+{
+  "Column": {
+      "DataSetIdentifier": "",
+      "ColumnName": ""
+  },
+  "FormatConfiguration": {
+      "NumberFormatConfiguration": {
+          "FormatConfiguration": {
+              "PercentageDisplayFormatConfiguration": {
+                  "Suffix": "%",
+                  "SeparatorConfiguration": {
+                      "DecimalSeparator": "DOT",
+                      "ThousandsSeparator": {
+                          "Symbol": "COMMA",
+                          "Visibility": "VISIBLE"
+                      }
+                  },
+                  "NegativeValueConfiguration": {
+                      "DisplayMode": "NEGATIVE"
+                  }
+              }
+          }
+      }
+  }
+}

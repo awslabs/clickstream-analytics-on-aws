@@ -19,6 +19,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
+import { logger } from '../../common/powertools';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -131,7 +132,7 @@ describe('reporting test', () => {
         }],
         timeScopeType: 'RELATIVE',
         lastN: 4,
-        timeUnit: 'wk',
+        timeUnit: 'WK',
         groupColumn: 'week',
         dashboardCreateParameters: {
           redshiftRegion: 'us-east-1',
@@ -152,7 +153,9 @@ describe('reporting test', () => {
     expect(res.body.data.analysisName).toEqual('analysis-testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
-    expect(res.body.data.visualId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+
   });
 
   it('funnel visual - publish', async () => {
@@ -227,6 +230,8 @@ describe('reporting test', () => {
         },
       });
 
+    logger.info(`response data: ${JSON.stringify(res.body.data)}`);
+
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
@@ -234,9 +239,9 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardName).toEqual('dashboard-testview0003');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
     expect(res.body.data.analysisName).toEqual('analysis-testview0004');
-    expect(res.body.data.visualId).toBeDefined();
     expect(res.body.data.analysisId).toBeDefined();
-    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
   });
 
   afterAll((done) => {

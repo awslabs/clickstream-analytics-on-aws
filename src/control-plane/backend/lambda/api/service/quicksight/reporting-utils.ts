@@ -19,7 +19,7 @@ import {
   TransformOperation,
   ColumnTag,
   InputColumn,
-  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration,
+  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration, ColumnConfiguration,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,10 +32,11 @@ export interface VisualProps {
   readonly sheetId: string;
   readonly visual: Visual;
   readonly dataSetIdentifierDeclaration: DataSetIdentifierDeclaration;
-  readonly filterControl: FilterControl;
-  readonly parameterDeclarations: ParameterDeclaration[];
-  readonly filterGroup: FilterGroup;
-  readonly eventCount: number;
+  readonly filterControl?: FilterControl;
+  readonly parameterDeclarations?: ParameterDeclaration[];
+  readonly filterGroup?: FilterGroup;
+  readonly eventCount?: number;
+  readonly ColumnConfigurations?: ColumnConfiguration[];
 }
 
 export interface DashboardAction {
@@ -73,7 +74,7 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
-  readonly visualId: string;
+  readonly visualIds: string[];
 }
 
 export const funnelVisualColumns: InputColumn[] = [
@@ -232,19 +233,34 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
 
       //add filter
       const controls = sheet.FilterControls!;
-      controls.push(visual.filterControl);
+      if (visual.filterControl) {
+        controls.push(visual.filterControl);
+      }
 
       //add parameters
       const parameters = dashboardDef.ParameterDeclarations!;
-      parameters.push(...visual.parameterDeclarations);
+      if (visual.parameterDeclarations) {
+        parameters.push(...visual.parameterDeclarations);
+      }
 
       //add dataset configuration
       const filterGroups = dashboardDef.FilterGroups!;
-      filterGroups.push(visual.filterGroup);
+      if (visual.filterGroup) {
+        filterGroups.push(visual.filterGroup);
+      }
+
+      if (visual.ColumnConfigurations) {
+        if (dashboardDef.ColumnConfigurations) {
+          dashboardDef.ColumnConfigurations?.push(...visual.ColumnConfigurations);
+        } else {
+          dashboardDef.ColumnConfigurations = visual.ColumnConfigurations;
+        }
+      }
 
       // visual layout
       const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
       const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
+
       const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json')).toString());
       const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json')).toString());
 
@@ -253,12 +269,17 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
         layoutControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan;
         visualControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan + layoutControl.RowSpan;
       }
-      const firstObj = findFirstChild(visual.filterControl);
-      layoutControl.ElementId = firstObj.FilterControlId;
-      visualControl.RowSpan = visual.eventCount * 2;
 
+      if (visual.filterControl) {
+        const firstObj = findFirstChild(visual.filterControl);
+        layoutControl.ElementId = firstObj.FilterControlId;
+        elements.push(layoutControl);
+      }
+
+      if (visual.eventCount) {
+        visualControl.RowSpan = visual.eventCount * 2;
+      }
       visualControl.ElementId = findFirstChild(visual.visual).VisualId;
-      elements.push(layoutControl);
       elements.push(visualControl);
 
     }
@@ -284,7 +305,7 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getVisualDef(visualId: string, viewName: string) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-chart.json')).toString()) as Visual;
   const eventNameFiledId = uuidv4();
@@ -308,10 +329,95 @@ export function getVisualDef(visualId: string, viewName: string) : Visual {
   return visualDef;
 }
 
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], dateField: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json')).toString()) as Visual;
+  visualDef.TableVisual!.VisualId = visualId;
+
+  const groupBy = visualDef.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells?.GroupBy!;
+  const sortConfiguration = visualDef.TableVisual!.ChartConfiguration!.SortConfiguration!;
+  const fieldOptions = visualDef.TableVisual?.ChartConfiguration?.FieldOptions?.SelectedFieldOptions!;
+  const sortFieldId = uuidv4();
+
+  groupBy.push({
+    CategoricalDimensionField: {
+      FieldId: sortFieldId,
+      Column: {
+        DataSetIdentifier: viewName,
+        ColumnName: dateField,
+      },
+    },
+  });
+  fieldOptions.push({
+    FieldId: sortFieldId,
+    Width: '60px',
+  });
+
+  for (const [index, eventName] of eventNames.entries()) {
+
+    const fieldId = uuidv4();
+    groupBy.push({
+      NumericalDimensionField: {
+        FieldId: fieldId,
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: eventName,
+        },
+      },
+    });
+
+    fieldOptions.push({
+      FieldId: fieldId,
+      Width: '100px',
+    });
+
+    const fieldIdRate = uuidv4();
+    if (index === 0) {
+      groupBy.push({
+        NumericalDimensionField: {
+          FieldId: fieldIdRate,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'rate',
+          },
+        },
+      });
+    } else {
+      groupBy.push({
+        NumericalDimensionField: {
+          FieldId: fieldIdRate,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: `${eventName}_rate`,
+          },
+        },
+      });
+    }
+
+    fieldOptions.push({
+      FieldId: fieldIdRate,
+      Width: '50px',
+    });
+  }
+
+  sortConfiguration.RowSort = [
+    {
+      FieldSort: {
+        FieldId: sortFieldId,
+        Direction: 'DESC',
+      },
+    },
+  ];
+
+
+  return visualDef;
+}
+
 export interface VisualRelatedDefParams {
-  readonly filterControl: FilterControl;
-  readonly parameterDeclarations: ParameterDeclaration[];
-  readonly filterGroup: FilterGroup;
+  readonly filterControl?: FilterControl;
+  readonly parameterDeclarations?: ParameterDeclaration[];
+  readonly filterGroup?: FilterGroup;
+  readonly columnConfigurations?: FilterGroup;
 }
 
 export interface VisualRelatedDefProps {
@@ -325,7 +431,7 @@ export interface VisualRelatedDefProps {
   readonly timeEnd?: string;
 }
 
-export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
+export function getFunnelVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
 
   const filterControlId = uuidv4();
   const sourceFilterId = uuidv4();
@@ -400,6 +506,19 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterControl,
     filterGroup,
   };
+}
+
+export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: string[]) : ColumnConfiguration[] {
+
+  const columnConfigurations: ColumnConfiguration[] = [];
+  for (const col of colNames) {
+    const config = JSON.parse(readFileSync(join(__dirname, './templates/percentage-column-config.json')).toString()) as ColumnConfiguration;
+    config.Column!.ColumnName = col;
+    config.Column!.DataSetIdentifier = viewName;
+    columnConfigurations.push(config);
+  }
+
+  return columnConfigurations;
 }
 
 function findElementByPath(jsonData: any, path: string): any {

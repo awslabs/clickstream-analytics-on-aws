@@ -13,23 +13,25 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, QuickSight } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, InputColumn, QuickSight } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createDataSet,
   funnelVisualColumns,
-  getVisualDef,
-  getVisualRelatedDefs,
   applyChangeToDashboard,
   getDashboardDefinitionFromArn,
   CreateDashboardResult,
   sleep,
   DashboardCreateParameters,
   getCredentialsFromRole,
+  getFunnelVisualDef,
+  getFunnelVisualRelatedDefs,
+  getFunnelTableVisualRelatedDefs,
+  getFunnelTableVisualDef,
 } from './quicksight/reporting-utils';
-import { buildFunnelView } from './quicksight/sql-builder';
+import { buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId, awsRegion } from '../common/constants';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -48,7 +50,7 @@ export class ReportingServ {
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
-      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.dataApiRole!);
+      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.dataApiRole);
       const redshiftDataClient = new RedshiftDataClient({
         region: dashboardCreateParameters.redshiftRegion,
         credentials: {
@@ -75,14 +77,32 @@ export class ReportingServ {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
       });
+      console.log(`funnel sql: ${sql}`);
 
-      console.log(`sql: ${sql}`);
+      const tableVisualViewName = viewName + '_tab';
+      const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
+        schemaName: query.appId,
+        computeMethod: query.computeMethod,
+        specifyJoinColumn: query.specifyJoinColumn,
+        joinColumn: query.joinColumn,
+        conversionIntervalType: query.conversionIntervalType,
+        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+        eventAndConditions: query.eventAndConditions,
+        timeScopeType: query.timeScopeType,
+        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        groupColumn: query.groupColumn,
+      });
+
+      console.log(`funnel table sql: ${sqlTable}`);
 
       logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
 
       //create view in redshift
       const input = {
-        Sqls: [sql],
+        Sqls: [sql, sqlTable],
         WorkgroupName: dashboardCreateParameters.workgroupName,
         Database: query.projectId,
         WithEvent: false,
@@ -90,14 +110,13 @@ export class ReportingServ {
         DbUser: dashboardCreateParameters.dbUser,
       };
       const params = new BatchExecuteStatementCommand(input);
-
       await redshiftDataClient.send(params);
 
       //create quicksight dataset
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSightPrincipal!,
-        dashboardCreateParameters.dataSourceArn!, {
+        dashboardCreateParameters.quickSightPrincipal,
+        dashboardCreateParameters.dataSourceArn, {
           name: '',
           tableName: viewName,
           columns: funnelVisualColumns,
@@ -109,6 +128,49 @@ export class ReportingServ {
             'x_id',
           ],
         });
+
+      logger.info(`funnel chart dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
+
+      const projectedColumns: string[] = [query.groupColumn];
+      const tableViewCols: InputColumn[] = [{
+        Name: query.groupColumn,
+        Type: 'STRING',
+      }];
+
+      for (const [index, item] of query.eventAndConditions.entries()) {
+        projectedColumns.push(`${item.eventName}`);
+        tableViewCols.push({
+          Name: item.eventName,
+          Type: 'DECIMAL',
+        });
+
+        if (index === 0) {
+          projectedColumns.push('rate');
+          tableViewCols.push({
+            Name: 'rate',
+            Type: 'DECIMAL',
+          });
+        } else {
+          projectedColumns.push(`${item.eventName}_rate`);
+          tableViewCols.push({
+            Name: `${item.eventName}_rate`,
+            Type: 'DECIMAL',
+          });
+        }
+      }
+      const datasetOutputForTableChart = await createDataSet(
+        quickSight, awsAccountId!,
+        dashboardCreateParameters.quickSightPrincipal,
+        dashboardCreateParameters.dataSourceArn, {
+          name: '',
+          tableName: tableVisualViewName,
+          columns: tableViewCols,
+          importMode: 'DIRECT_QUERY',
+          customSql: `select * from ${query.appId}.${tableVisualViewName}`,
+          projectedColumns: ['event_date'].concat(projectedColumns),
+        });
+
+      logger.info(`table chart dataset status: ${JSON.stringify(datasetOutputForTableChart?.Arn)}`);
 
       // generate dashboard definition
       let dashboardDef;
@@ -132,8 +194,8 @@ export class ReportingServ {
       };
 
       const visualId = uuidv4();
-      const visualDef = getVisualDef(visualId, viewName);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualDef = getFunnelVisualDef(visualId, viewName);
+      const visualRelatedParams = getFunnelVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -155,9 +217,36 @@ export class ReportingServ {
         eventCount: query.eventAndConditions.length,
       };
 
+      const dataSetIdentifierDeclarationForTableVisual = {
+        Identifier: tableVisualViewName,
+        DataSetArn: datasetOutputForTableChart?.Arn,
+      };
+
+      const tableVisualId = uuidv4();
+      const eventNames = [];
+      const percentageCols = ['rate'];
+      for (const [index, e] of query.eventAndConditions.entries()) {
+        eventNames.push(e.eventName);
+        if (index > 0) {
+          percentageCols.push(e.eventName + '_rate');
+        }
+      }
+      const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
+      const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
+
+      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
+
+      const tableVisualProps = {
+        name: `visual-${tableVisualViewName}}`,
+        sheetId: sheetId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: dataSetIdentifierDeclarationForTableVisual,
+        ColumnConfigurations: columnConfigurations,
+      };
+
       const dashboard = applyChangeToDashboard({
         action: 'ADD',
-        visuals: [visualProps],
+        visuals: [visualProps, tableVisualProps],
         dashboardDef: dashboardDef as DashboardVersionDefinition,
       });
 
@@ -218,7 +307,7 @@ export class ReportingServ {
           analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisName: `analysis-${viewName}`,
-          visualId,
+          visualIds: [visualId, tableVisualId],
         };
       } else {
         //crate QuickSight analysis
@@ -262,7 +351,7 @@ export class ReportingServ {
           analysisId: query.analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisName: query.analysisName,
-          visualId,
+          visualIds: [visualId, tableVisualId],
         };
 
         logger.info('funnel chart successfully updated');

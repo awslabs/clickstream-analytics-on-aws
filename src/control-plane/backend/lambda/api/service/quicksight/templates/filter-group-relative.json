@@ -33,5 +33,5 @@
       }
   },
   "Status": "ENABLED",
-  "CrossDataset": "SINGLE_DATASET"
+  "CrossDataset": "ALL_DATASETS"
 }
