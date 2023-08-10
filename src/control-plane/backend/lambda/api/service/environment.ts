@@ -425,7 +425,7 @@ export class EnvironmentServ {
         }
         const pipeline = new CPipeline(latestPipeline);
         if (type === FetchType.PIPELINE_ENDPOINT) {
-          const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
+          const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
             PipelineStackType.INGESTION,
             [
               OUTPUT_INGESTION_SERVER_URL_SUFFIX,
@@ -433,7 +433,7 @@ export class EnvironmentServ {
           );
           url = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX) ?? '';
         } else if (type === FetchType.PIPELINE_DNS) {
-          const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
+          const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
             PipelineStackType.INGESTION,
             [
               OUTPUT_INGESTION_SERVER_DNS_SUFFIX,

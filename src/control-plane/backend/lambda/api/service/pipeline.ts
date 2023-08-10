@@ -13,9 +13,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { paginateData } from '../common/utils';
+import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData } from '../common/utils';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -72,26 +72,17 @@ export class PipelineServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { id } = req.params;
       const { pid, cache } = req.query;
-      const latestPipeline = await store.getPipeline(pid, id);
-      if (!latestPipeline) {
+      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
+      const latestPipeline = latestPipelines[0];
       if (!cache || cache === 'false') {
         const pipeline = new CPipeline(latestPipeline);
         const stackManager: StackManager = new StackManager(latestPipeline);
         latestPipeline.status = await stackManager.getPipelineStatus();
         await store.updatePipelineAtCurrentVersion(latestPipeline);
-        const ingestionOutputs = await pipeline.getStackOutputBySuffixs(
-          PipelineStackType.INGESTION,
-          [
-            OUTPUT_INGESTION_SERVER_URL_SUFFIX,
-            OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
-          ],
-        );
-        const dashboards = await pipeline.getReportingDashboardsUrl();
-        const metricsDashboardName = await pipeline.getMetricsDashboardName();
         const pluginsInfo = await pipeline.getPluginsInfo();
         const templateInfo = await pipeline.getTemplateInfo();
         return res.json(new ApiSuccess({
@@ -101,10 +92,11 @@ export class PipelineServ {
             transformPlugin: pluginsInfo.transformPlugin,
             enrichPlugin: pluginsInfo.enrichPlugin,
           },
-          endpoint: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
-          dns: ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
-          dashboards,
-          metricsDashboardName,
+          endpoint: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+          dns: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+          dashboards: getReportingDashboardsUrl(latestPipeline.status, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),
+          metricsDashboardName: getStackOutputFromPipelineStatus(
+            latestPipeline.status, PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
           templateInfo,
         }));
       }

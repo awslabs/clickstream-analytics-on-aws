@@ -742,8 +742,6 @@ describe('SQL Builder test', () => {
       groupColumn: 'day',
     });
 
-    console.log(sql);
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`with
     base_data as (
       select

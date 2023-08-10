@@ -15,7 +15,7 @@ import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGro
 import { ipv4 as ip } from 'cidr-block';
 import { ALBLogServiceAccountMapping, EMAIL_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, RPURange, RPURegionMappingObject, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 
 function isEmpty(a: any): boolean {
@@ -367,6 +367,44 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
+function getStackOutputFromPipelineStatus(status: PipelineStatus, stackType: PipelineStackType, key: string): string {
+  if (isEmpty(status)) {
+    return '';
+  }
+  const stackTypes = status.stackDetails.map(s => s.stackType);
+  if (!stackTypes.includes(stackType)) {
+    return '';
+  }
+  for (let stackDetail of status.stackDetails) {
+    if (stackDetail.stackType === stackType) {
+      const outputs = stackDetail.outputs;
+      for (let output of outputs) {
+        if (output.OutputKey?.endsWith(key)) {
+          return output.OutputValue ?? '';
+        }
+      }
+    }
+  }
+  return '';
+}
+
+function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
+  let dashboards: ReportingDashboardOutput[] = [];
+  const dashboardsOutputs = getStackOutputFromPipelineStatus(
+    status,
+    stackType,
+    key,
+  );
+  if (dashboardsOutputs) {
+    try {
+      dashboards = JSON.parse(dashboardsOutputs);
+    } catch (error) {
+      logger.warn('Reporting Outputs error.', { dashboardsOutputs });
+    }
+  }
+  return dashboards;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -388,4 +426,6 @@ export {
   paginateData,
   replaceTemplateVersion,
   getValueFromStackOutputSuffix,
+  getStackOutputFromPipelineStatus,
+  getReportingDashboardsUrl,
 };

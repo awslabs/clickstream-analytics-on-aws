@@ -82,7 +82,7 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
       const pipeline = new CPipeline(latestPipelines[0]);
-      const outputs = await pipeline.getStackOutputBySuffixs(
+      const outputs = await pipeline.getStackOutputBySuffixes(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_URL_SUFFIX,

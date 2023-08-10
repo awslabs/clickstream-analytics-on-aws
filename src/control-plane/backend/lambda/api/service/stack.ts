@@ -148,16 +148,12 @@ export class StackManager {
     const stackStatusDetails: PipelineStatusDetail[] = [];
     for (let stackName of stackNames as string[]) {
       const stack = await describeStack(this.pipeline.region, stackName);
-      let consoleDomain = 'console.aws.amazon.com';
-      if (this.pipeline.region.startsWith('cn')) {
-        consoleDomain = 'console.amazonaws.cn';
-      }
       stackStatusDetails.push({
         stackName: stackName,
         stackType: stackName.split('-')[1] as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
-        url: `https://${this.pipeline.region}.${consoleDomain}/cloudformation/home?region=${this.pipeline.region}#/stacks/stackinfo?stackId=${stack?.StackId}`,
+        outputs: stack?.Outputs ?? [],
       });
     }
     if (!isEmpty(stackStatusDetails)) {

@@ -40,7 +40,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import {
@@ -982,8 +982,8 @@ describe('Pipeline test', () => {
   });
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1123,8 +1123,8 @@ describe('Pipeline test', () => {
   });
   it('Get pipeline with cache status in ddb', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}&cache=true`);
@@ -1145,8 +1145,8 @@ describe('Pipeline test', () => {
   });
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1260,14 +1260,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID with mock error', async () => {
     projectExistedMock(ddbMock, true);
     // Mock DynamoDB error
-    const detailInput: GetCommandInput = {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_PROJECT_ID,
-        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
-      },
-    };
-    ddbMock.on(GetCommand, detailInput).rejects(new Error('Mock DynamoDB error'));
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1280,32 +1273,25 @@ describe('Pipeline test', () => {
   });
   it('Get pipeline by with ingestion server endpoint', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
-      Item: S3_INGESTION_PIPELINE,
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: new Map<string, any>([
+        [':d', false],
+        [':prefix', 'PIPELINE'],
+        [':vt', 'latest'],
+        [':p', MOCK_PROJECT_ID],
+      ]),
+      FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
+      IndexName: undefined,
+      KeyConditionExpression: '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: undefined,
+    }).resolves({
+      Items: [S3_INGESTION_PIPELINE],
     });
-    cloudFormationMock
-      .on(DescribeStacksCommand, {
-        StackName: 'Clickstream-Ingestion-s3-6666-6666',
-      })
-      .resolves({
-        Stacks: [
-          {
-            StackName: 'Clickstream-Ingestion-s3-6666-6666',
-            Outputs: [
-              {
-                OutputKey: 'IngestionServerC000IngestionServerURL',
-                OutputValue: 'http://xxx/xxx',
-              },
-              {
-                OutputKey: 'IngestionServerC000IngestionServerDNS',
-                OutputValue: 'http://yyy/yyy',
-              },
-            ],
-            StackStatus: StackStatus.CREATE_COMPLETE,
-            CreationTime: new Date(),
-          },
-        ],
-      });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
       ExclusiveStartKey: undefined,
@@ -1329,7 +1315,8 @@ describe('Pipeline test', () => {
     });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 0);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1342,9 +1329,10 @@ describe('Pipeline test', () => {
           enrichPlugin: [],
           transformPlugin: null,
         },
-        dns: 'http://yyy/yyy',
-        endpoint: 'http://xxx/xxx',
+        dns: '',
+        endpoint: '',
         dashboards: [],
+        metricsDashboardName: '',
         templateInfo: {
           isLatest: false,
           solutionVersion: 'v1.0.0',
@@ -1393,7 +1381,25 @@ describe('Pipeline test', () => {
   });
   it('Get non-existent pipeline', async () => {
     projectExistedMock(ddbMock, true);
-    pipelineExistedMock(ddbMock, false);
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: new Map<string, any>([
+        [':d', false],
+        [':prefix', 'PIPELINE'],
+        [':vt', 'latest'],
+        [':p', MOCK_PROJECT_ID],
+      ]),
+      FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
+      IndexName: undefined,
+      KeyConditionExpression: '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: undefined,
+    }).resolves({
+      Items: [],
+    });
     const res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1682,42 +1688,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Failed',
@@ -1769,42 +1775,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Creating',
@@ -1856,42 +1862,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Updating',
@@ -1949,42 +1955,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
           stackType: 'Metrics',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Updating',
@@ -2031,41 +2037,41 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         }, {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
           stackType: 'Metrics',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Updating',
@@ -2117,42 +2123,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'DELETE_IN_PROGRESS',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Deleting',
@@ -2196,42 +2202,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Active',
@@ -2275,42 +2281,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Active',
@@ -2354,42 +2360,42 @@ describe('Pipeline test', () => {
           stackName: 'Clickstream-KafkaConnector-6666-6666',
           stackType: 'KafkaConnector',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       status: 'Failed',
@@ -2438,42 +2444,42 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Ingestion-kafka-6666-6666',
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataProcessing-6666-6666',
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Reporting-6666-6666',
           stackType: 'Reporting',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-DataModelingRedshift-6666-6666',
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackType: 'Metrics',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
-          url: 'https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/stackinfo?stackId=undefined',
+          outputs: [],
         },
       ],
       executionDetail: {

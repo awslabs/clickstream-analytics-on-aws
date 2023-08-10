@@ -53,7 +53,6 @@ export class MetadataEventServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      console.log(results);
       const event = results[0] as IMetadataEvent;
 
       for (let index = 1; index < results.length; index++) {
