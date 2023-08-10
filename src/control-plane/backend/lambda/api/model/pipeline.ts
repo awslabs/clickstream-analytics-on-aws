@@ -340,7 +340,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -365,7 +365,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
@@ -377,7 +377,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
 
     // bind plugin
@@ -400,7 +400,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 

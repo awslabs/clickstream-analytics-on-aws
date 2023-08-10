@@ -107,7 +107,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -245,7 +245,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -253,7 +253,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async deleteEventAttribute(projectId: string, appId: string, eventAttributeId: string, operator: string): Promise<void> {
-    // TODO: if attribute binded with any event, should not delete
+    // TODO: if attribute bind with any event, should not delete
     const input: ScanCommandInput = {
       TableName: analyticsMetadataTable,
       FilterExpression: 'id = :p AND deleted = :d',
@@ -382,7 +382,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
