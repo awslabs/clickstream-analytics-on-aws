@@ -349,11 +349,10 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_2)::decimal / count(distinct user_pseudo_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
@@ -689,11 +688,10 @@ describe('SQL Builder test', () => {
       count(distinct event_id_2)::decimal / count(distinct event_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
@@ -1037,11 +1035,10 @@ describe('SQL Builder test', () => {
       count(distinct event_id_2)::decimal / count(distinct event_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
@@ -1386,11 +1383,10 @@ describe('SQL Builder test', () => {
       count(distinct event_id_2)::decimal / count(distinct event_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
@@ -1764,11 +1760,10 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_2)::decimal / count(distinct user_pseudo_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
@@ -2192,15 +2187,13 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_2)::decimal / count(distinct user_pseudo_id_1)
     )::decimal(20, 4) as note_export_rate
   from
-    final_table
+    join_table
   group by
     day
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });
-
 
   test('funnel view - first event extra conditions', () => {
 
@@ -2662,8 +2655,7 @@ describe('SQL Builder test', () => {
     final_table
   where
     u_id_2 is not null
-  with
-    no schema binding`.trim().replace(/ /g, ''),
+  `.trim().replace(/ /g, ''),
     );
 
   });

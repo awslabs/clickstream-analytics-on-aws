@@ -34,8 +34,8 @@ import {
 import { buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
-import { ApiFail, ApiSuccess } from '../common/types';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
+import { ApiFail, ApiSuccess } from '../common/types';
 
 export class ReportingServ {
 
@@ -47,13 +47,13 @@ export class ReportingServ {
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
       const redshiftRegion = dashboardCreateParameters.region;
 
-      const stsClient = new STSClient({ 
-        region: redshiftRegion, 
-        ...aws_sdk_client_common_config 
+      const stsClient = new STSClient({
+        region: redshiftRegion,
+        ...aws_sdk_client_common_config,
       });
       const quickSight = new QuickSight({
         region: redshiftRegion,
-        ...aws_sdk_client_common_config
+        ...aws_sdk_client_common_config,
       });
 
       const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.redshift.dataApiRole);
@@ -106,15 +106,21 @@ export class ReportingServ {
 
       logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
 
+      const sqls = [sql, sqlTable];
+      const grantSql: string[] = [];
+      for ( const viewNm of [viewName, tableVisualViewName]) {
+        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+      }
       //create view in redshift
       const input = {
-        Sqls: [sql, sqlTable],
+        Sqls: sqls.concat(grantSql),
         WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
         Database: query.projectId,
         WithEvent: false,
         ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
         DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
       };
+      
       const params = new BatchExecuteStatementCommand(input);
       await redshiftDataClient.send(params);
 

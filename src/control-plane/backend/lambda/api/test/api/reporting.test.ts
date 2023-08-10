@@ -139,6 +139,7 @@ describe('reporting test', () => {
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
           },
           redshift: {
             dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
@@ -230,6 +231,7 @@ describe('reporting test', () => {
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
           },
           redshift: {
             dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',

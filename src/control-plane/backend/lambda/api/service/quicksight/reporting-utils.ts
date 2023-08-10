@@ -59,6 +59,7 @@ export interface DashboardCreateParameters {
   readonly quickSight: {
     readonly principal: string;
     readonly dataSourceArn: string;
+    readonly redshiftUser: string;
   };
 }
 
@@ -354,7 +355,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
   });
   fieldOptions.push({
     FieldId: sortFieldId,
-    Width: '60px',
+    Width: '120px',
   });
 
   for (const [index, eventName] of eventNames.entries()) {
@@ -372,7 +373,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
 
     fieldOptions.push({
       FieldId: fieldId,
-      Width: '100px',
+      Width: '120px',
     });
 
     const fieldIdRate = uuidv4();
@@ -400,7 +401,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
 
     fieldOptions.push({
       FieldId: fieldIdRate,
-      Width: '50px',
+      Width: '120px',
     });
   }
 

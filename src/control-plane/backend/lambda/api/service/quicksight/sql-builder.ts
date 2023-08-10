@@ -359,14 +359,13 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
     select 
       ${sqlParameters.groupColumn}
       ${resultCntSQL}
-    from final_table
+    from join_table
     group by 
       ${sqlParameters.groupColumn}
   `);
 
   sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
    ${sql}
-   with no schema binding
    `;
 
   return format(sql, {
@@ -436,7 +435,6 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
    ${baseSQL}
    ${resultSql}
-   with no schema binding
    `;
   return format(sql, {
     language: 'postgresql',
