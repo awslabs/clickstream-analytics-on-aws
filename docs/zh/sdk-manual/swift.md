@@ -22,7 +22,10 @@ Clickstream 需要 Xcode 13.4 或更高版本才能构建。
 
 ![](../images/sdk-manual/swift_add_package.png)
 
-将 Swift SDK 的 GitHub 仓库 URL（`https://github.com/awslabs/clickstream-swift`）输入搜索栏中，您将看到 Swift Package Manager 安装版本的规则。选择 **Up to Next Major Version**，然后单击 **Add Package**，将 Clickstream 选中为默认值，然后再次单击 **Add Package**。
+1. 将 Swift SDK 的 GitHub 仓库 URL（`https://github.com/awslabs/clickstream-swift`）输入到搜索栏中。
+2. 检查您希望 Swift Package Manager 安装 SDK 版本的规则。推荐选择 **Up to Next Major Version**，然后点击 **Add Package** 按钮。
+3. 默认选中 Clickstream 库。
+4. 再次单击 **Add Package** 按钮完成安装。
 
 ![](../images/sdk-manual/swift_add_package_url.png)
 
@@ -52,8 +55,8 @@ Clickstream 需要 Xcode 13.4 或更高版本才能构建。
 
 其中，您的 `appId` 和 `endpoint` 已经设置好了。下面是每个属性的说明：
 
-- **appId**：您在控制面板中的app id。
-- **endpoint**：您将事件上传到 AWS 服务器的端点 URL。
+- **appId（必需的）**：您在控制面板中的app id。
+- **endpoint（必需的）**：您将事件上传到 AWS 服务器的端点 URL。
 - **isCompressEvents**：上传事件时是否压缩事件内容，默认为 `true`。
 - **autoFlushEventsInterval**：事件发送间隔， 默认为 `10s`。
 - **isTrackAppExceptionEvents**：是否自动跟踪应用程序异常事件，默认为 `false`。
@@ -117,7 +120,7 @@ ClickstreamAnalytics.recordEvent(eventName: "testEvent", attributes: attributes)
 ClickstreamAnalytics.recordEvent(eventName: "button_click")
 ```
 
-更多用法请参考 [Github 开始使用](https://github.com/awslabs/clickstream-swift#start-using)
+更多用法请参考 [GitHub 开始使用](https://github.com/awslabs/clickstream-swift#start-using)
 
 对于 **Objective-c** 项目，请参考 [ClickstreamObjc API 参考](https://awslabs.github.io/clickstream-swift/Classes/ClickstreamObjc.html)
 
@@ -133,7 +136,7 @@ Clickstream Swift SDK 支持以下数据类型：
 | Int64   | -9,223,372,036,854,775,808～ 9,223,372,036,854,775,807 | 26854775808   |
 | Double  | -2.22E-308~1.79E+308                                  | 3.14          |
 | Boolean | true 或 false                                          | true          |
-| String  | 最大支持 1024 个字符                                         | "clickstream" |
+| String  | 最大支持 1024 个字符                                         | "clickstream" |
 
 ### 命名规则
 
@@ -160,7 +163,7 @@ Clickstream Swift SDK 支持以下数据类型：
 **限制说明**
 
 - 字符限制适用于单宽字符语言（如英语）和双宽字符语言（如中文）。
-- 事件属性每个事件中包括常用属性和预设属性。
+- 事件属性数包括事件中的公共属性和预设属性。
 - 如果多次添加相同名称的属性或用户属性，则值将被最后一个值覆盖。
 
 ## 预设事件和属性
@@ -186,13 +189,13 @@ Clickstream Swift SDK 支持以下数据类型：
 
 用程序下次进入和上次退出之间的时间在允许的超时期限内，我们就认为当前会话是连续的。
 
-- **_session_start**：当应用程序首次启动，或应用程序被切换到前台且距离上次退出的时间超过 `session_time_out` 期限时触发。
+- **_session_start（会话开始）**：当应用程序首次启动，或应用程序被切换到前台且距离上次退出的时间超过 `session_time_out` 期限时触发。
 
-- **_session_duration**：通过当前事件的创建时间戳减去会话的 `_session_start_timestamp` 来计算 `_session_duration`，此属性将在会话期间的每个事件中添加。
+- **_session_duration（会话时长）**：通过当前事件的创建时间戳减去会话的 `_session_start_timestamp` 来计算 `_session_duration`，此属性将在会话期间的每个事件中添加。
 
-- **session_time_out**：默认为 30 分钟，可以通过配置 API 进行自定义。
+- **session_time_out（会话超时）**：默认为 30 分钟，可以通过配置 API 进行自定义。
 
-- **_session_number**：由会话 ID 区分的会话总数，`_session_number` 将出现在每个事件的属性对象中。
+- **_session_number（会话数）**：由会话 ID 区分的会话总数，`_session_number` 将出现在每个事件的属性对象中。
 
 #### 用户参与定义
 
@@ -305,16 +308,16 @@ Clickstream Swift SDK 支持以下数据类型：
 
 **事件属性**
 
-| 属性名称                     | 描述                                                |
-| ------------------------ |---------------------------------------------------|
-| _traffic_source_medium   | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介                       |
-| _traffic_source_name     | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动                     |
-| _traffic_source_source   | 保留给流量来源，事件报告时获取的网络来源的名称                           |
-| _channel                 | 下载应用的渠道                                           |
-| _device_vendor_id        | 设备供应商ID                                           |
-| _device_advertising_id   | 设备广告ID                                            |
-| _entrances               | 添加在 `_screen_view` 事件中，会话中第一个 `_screen_view` 事件的值为 1，其他为 0 |
-| _session_id              | 添加在所有事件中                                          |
-| _session_start_timestamp | 添加在所有事件中                                          |
-| _session_duration        | 添加在所有事件中                                          |
-| _session_number          | 添加在所有事件中，初始值为 1，由用户设备自动增加                         |
+| 属性名称                       | 描述                                                              |
+|----------------------------|-----------------------------------------------------------------|
+| _traffic_source_medium     | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎                   |
+| _traffic_source_name       | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                           |
+| _traffic_source_source     | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu        |
+| _channel                   | 下载应用的渠道                                                         |
+| _device_vendor_id          | 设备供应商ID                                                         |
+| _device_advertising_id     | 设备广告ID                                                          |
+| _entrances                 | 添加在 `_screen_view` 事件中，会话中第一个 `_screen_view` 事件的值为 1，其他为 0      |
+| _session_id                | 添加在所有事件中                                                        |
+| _session_start_timestamp   | 添加在所有事件中                                                        |
+| _session_duration          | 添加在所有事件中                                                        |
+| _session_number            | 添加在所有事件中，初始值为 1，由用户设备自动增加                                       |

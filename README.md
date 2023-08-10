@@ -27,7 +27,7 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 
 - [Android][android-sdk]
 - [Swift][swift-sdk]
-- JavaScript (coming soon)
+- [Web][web-sdk]
 
 ## Deployment
 
@@ -155,6 +155,7 @@ Upon successfully cloning the repository into your local development environment
 
 [android-sdk]: https://github.com/awslabs/clickstream-android
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
+[web-sdk]: https://github.com/awslabs/clickstream-web
 [configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
 [aws-cdk]: https://aws.amazon.com/cdk/
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
