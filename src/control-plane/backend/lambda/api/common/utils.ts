@@ -367,7 +367,7 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
-function getInfoFromPipelineStatus(status: PipelineStatus, stackType: PipelineStackType, key: string): string {
+function getStackOutputFromPipelineStatus(status: PipelineStatus, stackType: PipelineStackType, key: string): string {
   if (isEmpty(status)) {
     return '';
   }
@@ -390,7 +390,7 @@ function getInfoFromPipelineStatus(status: PipelineStatus, stackType: PipelineSt
 
 function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
   let dashboards: ReportingDashboardOutput[] = [];
-  const dashboardsOutputs = getInfoFromPipelineStatus(
+  const dashboardsOutputs = getStackOutputFromPipelineStatus(
     status,
     stackType,
     key,
@@ -426,6 +426,6 @@ export {
   paginateData,
   replaceTemplateVersion,
   getValueFromStackOutputSuffix,
-  getInfoFromPipelineStatus,
+  getStackOutputFromPipelineStatus,
   getReportingDashboardsUrl,
 };
