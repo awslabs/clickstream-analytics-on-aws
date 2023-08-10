@@ -359,6 +359,34 @@ export const S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE: IPipeline = {
   },
 };
 
+export const MSK_DATA_PROCESSING_ATHENA_PIPELINE: IPipeline = {
+  ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'rate(6 minutes)',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: undefined,
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    athena: true,
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+};
+
 export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
   ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   dataProcessing: {
