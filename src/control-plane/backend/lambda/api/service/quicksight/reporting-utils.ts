@@ -27,10 +27,9 @@ import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
-  readonly name: string;
   readonly sheetId: string;
   readonly visual: Visual;
-  readonly dataSetIdentifierDeclaration: DataSetIdentifierDeclaration;
+  readonly dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[];
   readonly filterControl?: FilterControl;
   readonly parameterDeclarations?: ParameterDeclaration[];
   readonly filterGroup?: FilterGroup;
@@ -70,6 +69,11 @@ export interface DashboardCreateInputParameters {
   readonly pipelineId: string;
 }
 
+export interface VisualMapProps {
+  name: 'CHART' | 'TABLE' ;
+  id: string;
+}
+
 export interface CreateDashboardResult {
   readonly dashboardId: string;
   readonly dashboardName: string;
@@ -78,8 +82,25 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
+  readonly visualIds: VisualMapProps[];
+}
+
+export interface VisualRelatedDefParams {
+  readonly filterControl?: FilterControl;
+  readonly parameterDeclarations?: ParameterDeclaration[];
+  readonly filterGroup?: FilterGroup;
+  readonly columnConfigurations?: FilterGroup;
+}
+
+export interface VisualRelatedDefProps {
+  readonly timeScopeType: 'FIXED' | 'RELATIVE';
   readonly sheetId: string;
-  readonly visualIds: string[];
+  readonly visualId: string;
+  readonly viewName: string;
+  readonly lastN?: number;
+  readonly timeUnit?: string;
+  readonly timeStart?: string;
+  readonly timeEnd?: string;
 }
 
 export const funnelVisualColumns: InputColumn[] = [
@@ -233,7 +254,9 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
 
       //add dataset configuration
       const configs = dashboardDef.DataSetIdentifierDeclarations!;
-      configs.push(visual.dataSetIdentifierDeclaration);
+      if (visual.dataSetIdentifierDeclaration) {
+        configs.push(...visual.dataSetIdentifierDeclaration);
+      }
 
       //add filter
       const controls = sheet.FilterControls!;
@@ -413,29 +436,10 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     },
   ];
 
-
   return visualDef;
 }
 
-export interface VisualRelatedDefParams {
-  readonly filterControl?: FilterControl;
-  readonly parameterDeclarations?: ParameterDeclaration[];
-  readonly filterGroup?: FilterGroup;
-  readonly columnConfigurations?: FilterGroup;
-}
-
-export interface VisualRelatedDefProps {
-  readonly timeScopeType: 'FIXED' | 'RELATIVE';
-  readonly sheetId: string;
-  readonly visualId: string;
-  readonly viewName: string;
-  readonly lastN?: number;
-  readonly timeUnit?: string;
-  readonly timeStart?: string;
-  readonly timeEnd?: string;
-}
-
-export function getFunnelVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
+export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
 
   const filterControlId = uuidv4();
   const sourceFilterId = uuidv4();
@@ -481,15 +485,6 @@ export function getFunnelVisualRelatedDefs(props: VisualRelatedDefProps) : Visua
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationEnd);
 
-    let unit = 'DAY';
-    if (props.timeUnit == 'WK') {
-      unit = 'WEEK';
-    } else if (props.timeUnit == 'MM') {
-      unit = 'MONTH';
-    } else if (props.timeUnit == 'Q') {
-      unit = 'QUARTER';
-    }
-
     filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group-relative.json')).toString()) as FilterGroup;
 
     filterGroup.FilterGroupId = uuidv4();
@@ -498,7 +493,7 @@ export function getFunnelVisualRelatedDefs(props: VisualRelatedDefProps) : Visua
     filterGroup.Filters![0].RelativeDatesFilter!.Column!.DataSetIdentifier = props.viewName;
 
     filterGroup.Filters![0].RelativeDatesFilter!.RelativeDateValue = props.lastN;
-    filterGroup.Filters![0].RelativeDatesFilter!.TimeGranularity = unit;
+    filterGroup.Filters![0].RelativeDatesFilter!.TimeGranularity = getQuickSightUnitFromTimeUnit(props.timeUnit!);
 
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
@@ -523,6 +518,77 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   }
 
   return columnConfigurations;
+}
+
+export function getEventLineChartVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-line-chart.json')).toString()) as Visual;
+  const filedId1 = uuidv4();
+  const filedId2 = uuidv4();
+  const filedId3 = uuidv4();
+  const hierarchyId = uuidv4();
+  visualDef.LineChartVisual!.VisualId = visualId;
+
+  const fieldWell = visualDef.LineChartVisual!.ChartConfiguration!.FieldWells!.LineChartAggregatedFieldWells!;
+  const sortConfiguration = visualDef.LineChartVisual!.ChartConfiguration!.SortConfiguration!;
+  const tooltipFields = visualDef.LineChartVisual?.ChartConfiguration?.Tooltip!.FieldBasedTooltip!.TooltipFields!;
+
+  fieldWell.Category![0].DateDimensionField!.FieldId = filedId1;
+  fieldWell.Category![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Category![0].DateDimensionField!.HierarchyId = hierarchyId;
+  fieldWell.Category![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromTimeUnit(timeUnit);
+
+  fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId2;
+  fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Values![0].CategoricalMeasureField!.AggregationFunction = 'DISTINCT_COUNT';
+
+  fieldWell.Colors![0].CategoricalDimensionField!.FieldId = filedId3;
+  fieldWell.Colors![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  sortConfiguration.CategorySort![0].FieldSort!.FieldId = filedId1;
+
+  tooltipFields[0].FieldTooltipItem!.FieldId = filedId1;
+  tooltipFields[1].FieldTooltipItem!.FieldId = filedId2;
+  tooltipFields[2].FieldTooltipItem!.FieldId = filedId3;
+
+  visualDef.LineChartVisual!.ColumnHierarchies![0].DateTimeHierarchy!.HierarchyId = hierarchyId;
+
+  return visualDef;
+}
+
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-pivot-table-chart.json')).toString()) as Visual;
+  const filedId1 = uuidv4();
+  const filedId2 = uuidv4();
+  const filedId3 = uuidv4();
+  visualDef.PivotTableVisual!.VisualId = visualId;
+
+  const fieldWell = visualDef.PivotTableVisual!.ChartConfiguration!.FieldWells!.PivotTableAggregatedFieldWells!;
+  const sortConfiguration = visualDef.PivotTableVisual!.ChartConfiguration!.SortConfiguration!;
+  const fieldOptions = visualDef.PivotTableVisual?.ChartConfiguration?.FieldOptions!.SelectedFieldOptions!;
+
+  fieldWell.Rows![0].CategoricalDimensionField!.FieldId = filedId1;
+  fieldWell.Rows![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  fieldWell.Columns![0].DateDimensionField!.FieldId = filedId2;
+  fieldWell.Columns![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Columns![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromTimeUnit(timeUnit);
+
+  fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId3;
+  fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Values![0].CategoricalMeasureField!.AggregationFunction = 'DISTINCT_COUNT';
+
+  sortConfiguration.FieldSortOptions![0].FieldId = filedId2;
+  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.FieldId = filedId2;
+  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.Direction = 'ASC';
+
+  fieldOptions[0].FieldId = filedId1;
+  fieldOptions[1].FieldId = filedId2;
+  fieldOptions[2].FieldId = filedId3;
+
+  return visualDef;
+
 }
 
 function findElementByPath(jsonData: any, path: string): any {
@@ -590,4 +656,17 @@ function findElementWithPropertyValue(root: any, path: string, property: string,
 export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 };
+
+export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
+
+  let unit = 'DAY';
+  if (timeUnit == 'WK') {
+    unit = 'WEEK';
+  } else if (timeUnit == 'MM') {
+    unit = 'MONTH';
+  } else if (timeUnit == 'Q') {
+    unit = 'QUARTER';
+  }
+  return unit;
+}
 
