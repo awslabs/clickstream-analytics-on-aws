@@ -51,27 +51,6 @@ export class ReportingServ {
 
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-      const redshiftRegion = dashboardCreateParameters.region;
-
-      const stsClient = new STSClient({
-        region: redshiftRegion,
-        ...aws_sdk_client_common_config,
-      });
-      const quickSight = new QuickSight({
-        region: redshiftRegion,
-        ...aws_sdk_client_common_config,
-      });
-      const principals = await getClickstreamUserArn();
-
-      const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.redshift.dataApiRole);
-      const redshiftDataClient = new RedshiftDataClient({
-        region: redshiftRegion,
-        credentials: {
-          accessKeyId: credentials?.AccessKeyId!,
-          secretAccessKey: credentials?.SecretAccessKey!,
-          sessionToken: credentials?.SessionToken,
-        },
-      });
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -108,44 +87,27 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
+      console.log(`funnel table sql: ${sqlTable}`);
 
       const sqls = [sql, sqlTable];
-      const grantSql: string[] = [];
       for ( const viewNm of [viewName, tableVisualViewName]) {
-        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.redshift.user};`);
+        sqls.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.redshift.user}`);
       }
-      //create view in redshift
-      const input = {
-        Sqls: sqls.concat(grantSql),
-        WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
-        Database: query.projectId,
-        WithEvent: false,
-        ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
-        DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
-      };
-
-      const params = new BatchExecuteStatementCommand(input);
-      await redshiftDataClient.send(params);
 
       //create quicksight dataset
-      const datasetOutput = await createDataSet(
-        quickSight, awsAccountId!,
-        principals.dashboardOwner,
-        dashboardCreateParameters.quickSight.dataSourceArn, {
-          name: '',
-          tableName: viewName,
-          columns: funnelVisualColumns,
-          importMode: 'DIRECT_QUERY',
-          customSql: `select * from ${query.appId}.${viewName}`,
-          projectedColumns: [
-            'event_date',
-            'event_name',
-            'x_id',
-          ],
-        });
-
-      logger.info(`funnel chart dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
+      const datasetPropsArray: DataSetProps[] = []
+      datasetPropsArray.push({
+        name: '',
+        tableName: viewName,
+        columns: funnelVisualColumns,
+        importMode: 'DIRECT_QUERY',
+        customSql: `select * from ${query.appId}.${viewName}`,
+        projectedColumns: [
+          'event_date',
+          'event_name',
+          'x_id',
+        ],
+      });
 
       const projectedColumns: string[] = [query.groupColumn];
       const tableViewCols: InputColumn[] = [{
@@ -174,40 +136,24 @@ export class ReportingServ {
           });
         }
       }
-      const datasetOutputForTableChart = await createDataSet(
-        quickSight, awsAccountId!,
-        principals.dashboardOwner,
-        dashboardCreateParameters.quickSight.dataSourceArn, {
-          name: '',
-          tableName: tableVisualViewName,
-          columns: tableViewCols,
-          importMode: 'DIRECT_QUERY',
-          customSql: `select * from ${query.appId}.${tableVisualViewName}`,
-          projectedColumns: ['event_date'].concat(projectedColumns),
-        });
+      datasetPropsArray.push({
+        name: '',
+        tableName: tableVisualViewName,
+        columns: tableViewCols,
+        importMode: 'DIRECT_QUERY',
+        customSql: `select * from ${query.appId}.${tableVisualViewName}`,
+        projectedColumns: ['event_date'].concat(projectedColumns),
+      });
 
-      logger.info(`table chart dataset status: ${JSON.stringify(datasetOutputForTableChart?.Arn)}`);
-
-      // generate dashboard definition
-      let dashboardDef;
       let sheetId;
       if (!query.dashboardId) {
-        dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
         sheetId = uuidv4();
-        dashboardDef.Sheets![0].SheetId = sheetId;
-        dashboardDef.Sheets![0].Name = query.sheetName;
       } else {
         if (!query.sheetId) {
           return res.status(400).send(new ApiFail('missing required parameter sheetId'));
         }
         sheetId = query.sheetId;
-        dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
       }
-
-      const dataSetIdentifierDeclaration = {
-        Identifier: viewName,
-        DataSetArn: datasetOutput?.Arn,
-      };
 
       const visualId = uuidv4();
       const visualDef = getFunnelVisualDef(visualId, viewName);
@@ -225,16 +171,11 @@ export class ReportingServ {
       const visualProps = {
         sheetId: sheetId,
         visual: visualDef,
-        dataSetIdentifierDeclaration: [dataSetIdentifierDeclaration],
+        dataSetIdentifierDeclaration: [],
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
         eventCount: query.eventAndConditions.length,
-      };
-
-      const dataSetIdentifierDeclarationForTableVisual = {
-        Identifier: tableVisualViewName,
-        DataSetArn: datasetOutputForTableChart?.Arn,
       };
 
       const tableVisualId = uuidv4();
@@ -254,147 +195,22 @@ export class ReportingServ {
       const tableVisualProps = {
         sheetId: sheetId,
         visual: tableVisualDef,
-        dataSetIdentifierDeclaration: [dataSetIdentifierDeclarationForTableVisual],
+        dataSetIdentifierDeclaration: [],
         ColumnConfigurations: columnConfigurations,
       };
 
-      const dashboard = applyChangeToDashboard({
-        action: 'ADD',
-        visuals: [visualProps, tableVisualProps],
-        dashboardDef: dashboardDef as DashboardVersionDefinition,
-      });
-
-      logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
-
-      let result: CreateDashboardResult;
-      if (!query.dashboardId) {
-
-        //crate QuickSight analysis
-        const analysisId = `clickstream-ext-${uuidv4()}`;
-        const newAnalysis = await quickSight.createAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: analysisId,
-          Name: `analysis-${viewName}`,
-          Permissions: [{
-            Principal: principals.dashboardOwner,
-            Actions: [
-              'quicksight:DescribeAnalysis',
-              'quicksight:QueryAnalysis',
-              'quicksight:UpdateAnalysis',
-              'quicksight:RestoreAnalysis',
-              'quicksight:DeleteAnalysis',
-              'quicksight:UpdateAnalysisPermissions',
-              'quicksight:DescribeAnalysisPermissions',
-            ],
-          }],
-          Definition: dashboard as AnalysisDefinition,
-        });
-
-        //crate QuickSight dashboard
-        const dashboardId = `clickstream-ext-${uuidv4()}`;
-        const newDashboard = await quickSight.createDashboard({
-          AwsAccountId: awsAccountId,
-          DashboardId: dashboardId,
-          Name: `dashboard-${viewName}`,
-          Permissions: [{
-            Principal: principals.dashboardOwner,
-            Actions: [
-              'quicksight:DescribeDashboard',
-              'quicksight:ListDashboardVersions',
-              'quicksight:QueryDashboard',
-              'quicksight:UpdateDashboard',
-              'quicksight:DeleteDashboard',
-              'quicksight:UpdateDashboardPermissions',
-              'quicksight:DescribeDashboardPermissions',
-              'quicksight:UpdateDashboardPublishedVersion',
-            ],
-          },
-          {
-            Principal: principals.embedOwner,
-            Actions: [
-              'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
-            ],
-          }],
-          Definition: dashboard,
-        });
-        logger.info('funnel chart successfully created');
-
-        result = {
-          dashboardId,
-          dashboardArn: newDashboard.Arn!,
-          dashboardName: `dashboard-${viewName}`,
-          dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
-          analysisId,
-          analysisArn: newAnalysis.Arn!,
-          analysisName: `analysis-${viewName}`,
-          visualIds: [{
-            name: 'CHART',
-            id: visualId,
-          },
-          {
-            name: 'CHART',
-            id: tableVisualId,
-          }],
-        };
-      } else {
-        //crate QuickSight analysis
-        let newAnalysis;
-        if (query.analysisId) {
-          newAnalysis = await quickSight.updateAnalysis({
-            AwsAccountId: awsAccountId,
-            AnalysisId: query.analysisId,
-            Name: query.analysisName,
-            Definition: dashboard as AnalysisDefinition,
-          });
-        }
-
-        //crate QuickSight dashboard
-        const newDashboard = await quickSight.updateDashboard({
-          AwsAccountId: awsAccountId,
-          DashboardId: query.dashboardId,
-          Name: query.dashboardName,
-          Definition: dashboard,
-        });
-        const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
-
-        for (const _i of Array(60).keys()) {
-          try {
-            await quickSight.updateDashboardPublishedVersion({
-              AwsAccountId: awsAccountId,
-              DashboardId: query.dashboardId,
-              VersionNumber: Number.parseInt(versionNumber!),
-            });
-
-          } catch (err: any) {
-            if (err instanceof ConflictException ) {
-              logger.warn('sleep 100ms to wait updateDashboard finish');
-              await sleep(100);
-            }
-          }
-        }
-
-        result = {
-          dashboardId: query.dashboardId,
-          dashboardArn: newDashboard.Arn!,
-          dashboardName: query.dashboardName,
-          dashboardVersion: Number.parseInt(versionNumber!),
-          analysisId: query.analysisId,
-          analysisArn: newAnalysis?.Arn!,
-          analysisName: query.analysisName,
-          visualIds: [{
-            name: 'CHART',
-            id: visualId,
-          },
-          {
-            name: 'CHART',
-            id: tableVisualId,
-          }],
-        };
-
-        logger.info('funnel chart successfully updated');
-      }
+      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      result.visualIds.push({
+        name: 'CHART',
+        id: visualId
+      })
+      result.visualIds.push({
+        name: 'TABLE',
+        id: tableVisualId
+      })
 
       return res.status(201).json(new ApiSuccess(result));
+
     } catch (error) {
       next(error);
     }
@@ -406,7 +222,7 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters;
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;;
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -428,7 +244,7 @@ export class ReportingServ {
       console.log(`funnel sql: ${sql}`);
 
       const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
