@@ -41,7 +41,7 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 
 - Make sure you have an AWS account
 - Configure [credential of aws cli][configure-aws-cli]
-- Install Node.js LTS version 18.17.0 or later
+- Install Node.js LTS version 18.16.1 or later
 - Install Docker Engine
 - Install the dependencies of the solution by executing the command `yarn install --check-files && npx projen`
 - Initialize the CDK toolkit stack into AWS environment (only for deploying via [AWS CDK][aws-cdk] for the first time), and run `npx cdk bootstrap`
