@@ -60,12 +60,7 @@ const AnalyticsRealtime: React.FC = () => {
         ) : (
           <div
             id={'qs-container'}
-            style={{
-              height: '100%',
-              width: '100%',
-              border: 0,
-              overflow: 'hidden',
-            }}
+            className='iframe-dashboard'
           ></div>
         )
       }

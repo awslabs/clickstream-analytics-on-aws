@@ -269,7 +269,7 @@ const MetadataParameters: React.FC = () => {
             emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
             headerTitle: t('analytics:metadata.eventParameter.title'),
             headerRefreshButtonText: t(
-              'analytics:metadata.eventParameter.refreshButton'
+              'common:button.refreshMetadata'
             ),
             filteringAriaLabel: t(
               'analytics:metadata.eventParameter.filteringAriaLabel'
@@ -284,6 +284,9 @@ const MetadataParameters: React.FC = () => {
             clearFiltersText: t(
               'analytics:metadata.eventParameter.clearFiltersText'
             ),
+            useText: t('common:table.useText'),
+            matchText: t('common:table.matchText'),
+            matchesText: t('common:table.matchesText'),
           }}
           loadHelpPanelContent={() => {
             console.log(1);

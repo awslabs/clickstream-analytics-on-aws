@@ -24,7 +24,7 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { MetadataTableHeader } from './MetadataTableHeader';
-import '../styles/table-select.scss';
+import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataTableProps {
@@ -42,6 +42,9 @@ interface MetadataTableProps {
     groupPropertiesText: string;
     operatorsText: string;
     clearFiltersText: string;
+    useText: string;
+    matchText: string;
+    matchesText: string;
   };
   selectionType?: 'multi' | 'single';
   loadHelpPanelContent: () => void;
@@ -72,6 +75,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
+  
   const [loadingData, setLoadingData] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -248,11 +252,11 @@ const MetadataTable: React.FC<MetadataTableProps> = (
               operatorsText: tableI18nStrings.operatorsText,
               clearFiltersText: tableI18nStrings.clearFiltersText,
               enteredTextLabel: (value) => {
-                return `Use: ${value}`;
+                return `${tableI18nStrings.useText}: ${value}`;
               },
             }}
             countText={`${filteredItemsCount} ${
-              filteredItemsCount === 1 ? 'match' : 'matches'
+              filteredItemsCount === 1 ? tableI18nStrings.matchText : tableI18nStrings.matchesText
             }`}
             expandToViewport={true}
           />

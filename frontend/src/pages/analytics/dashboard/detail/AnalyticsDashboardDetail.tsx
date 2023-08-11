@@ -56,25 +56,9 @@ const AnalyticsDashboardDetail: React.FC = () => {
         loadingData ? (
           <Loading />
         ) : (
-          // <iframe
-          //   title="iframe"
-          //   src={embeddingUrl}
-          //   // src="https://toladata.io/dashboards/public/b30c3fa6-32a9-4d5e-841d-8cf85d906897/15v6-057ba175c7601f60bfbb"
-          //   style={{
-          //     height: '100%',
-          //     width: '100%',
-          //     border: 0,
-          //     overflow: 'hidden',
-          //   }}
-          // ></iframe>
           <div
             id={'qs-container'}
-            style={{
-              height: '100%',
-              width: '100%',
-              border: 0,
-              overflow: 'hidden',
-            }}
+            className='iframe-dashboard'
           ></div>
         )
       }

@@ -19,12 +19,13 @@ import Navigation from 'components/layouts/Navigation';
 import HeaderSwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
+import { ANALYTICS_INFO_KEY } from 'ts/const';
 
 const AnalyticsHome: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
-  const [swichProjectVisible, setSwichProjectVisible] = useState(false);
+  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
-    'Analytics-ProjectId-AppId',
+    ANALYTICS_INFO_KEY,
     {
       pid: '',
       pname: '',
@@ -49,9 +50,8 @@ const AnalyticsHome: React.FC = () => {
         window.location.href = `/analytics/${project.id}/app/${app.appId}/dashboards`;
         return;
       }
-      setSwichProjectVisible(true);
     }
-    setSwichProjectVisible(true);
+    setSwitchProjectVisible(true);
   };
 
   const listProjects = async () => {
@@ -108,9 +108,9 @@ const AnalyticsHome: React.FC = () => {
             <Loading />
           ) : (
             <HeaderSwitchSpaceModal
-              visible={swichProjectVisible}
+              visible={switchProjectVisible}
               disableClose={true}
-              setSwichProjectVisible={setSwichProjectVisible}
+              setSwitchProjectVisible={setSwitchProjectVisible}
               setAnalyticsInfo={setAnalyticsInfo}
             />
           )}

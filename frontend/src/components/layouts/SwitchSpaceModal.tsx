@@ -29,14 +29,14 @@ import { useLocation } from 'react-router-dom';
 interface IHeaderSwitchSpaceModalProps {
   visible: boolean;
   disableClose: boolean;
-  setSwichProjectVisible: (v: boolean) => void;
+  setSwitchProjectVisible: (v: boolean) => void;
   setAnalyticsInfo: (newValue: any) => void;
 }
 
 const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
   props: IHeaderSwitchSpaceModalProps
 ) => {
-  const { visible, disableClose, setSwichProjectVisible, setAnalyticsInfo } =
+  const { visible, disableClose, setSwitchProjectVisible, setAnalyticsInfo } =
     props;
   const { t } = useTranslation();
   const location = useLocation();
@@ -113,7 +113,7 @@ const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
       <Modal
         onDismiss={() => {
           if (!disableClose) {
-            setSwichProjectVisible(false);
+            setSwitchProjectVisible(false);
           }
         }}
         visible={visible}
@@ -125,7 +125,7 @@ const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
                 <Button
                   onClick={() => {
                     if (!disableClose) {
-                      setSwichProjectVisible(false);
+                      setSwitchProjectVisible(false);
                     }
                   }}
                   variant="link"
@@ -149,7 +149,7 @@ const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
                     setAppRequiredError(false);
                   }
                   saveAnalyticsIds();
-                  setSwichProjectVisible(false);
+                  setSwitchProjectVisible(false);
                   window.location.href = `/analytics/${selectedProject?.value}/app/${selectedApp?.value}/dashboards`;
                 }}
               >

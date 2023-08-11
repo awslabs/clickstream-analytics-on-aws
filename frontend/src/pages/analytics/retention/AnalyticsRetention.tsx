@@ -149,12 +149,7 @@ const AnalyticsRetention: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  style={{
-                    height: '400px',
-                    width: '100%',
-                    border: 0,
-                    overflow: 'hidden',
-                  }}
+                  className='iframe-explore'
                 ></div>
               )}
             </Container>

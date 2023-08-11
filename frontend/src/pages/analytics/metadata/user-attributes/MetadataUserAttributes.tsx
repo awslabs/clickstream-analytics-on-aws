@@ -255,9 +255,7 @@ const MetadataUserAttributes: React.FC = () => {
               t('analytics:metadata.userAttribute.tableLoading') || 'Loading',
             emptyText: t('analytics:metadata.userAttribute.tableEmpty'),
             headerTitle: t('analytics:metadata.userAttribute.title'),
-            headerRefreshButtonText: t(
-              'analytics:metadata.userAttribute.refreshButton'
-            ),
+            headerRefreshButtonText: t('common:button.refreshMetadata'),
             filteringAriaLabel: t(
               'analytics:metadata.userAttribute.filteringAriaLabel'
             ),
@@ -271,6 +269,9 @@ const MetadataUserAttributes: React.FC = () => {
             clearFiltersText: t(
               'analytics:metadata.userAttribute.clearFiltersText'
             ),
+            useText: t('common:table.useText'),
+            matchText: t('common:table.matchText'),
+            matchesText: t('common:table.matchesText'),
           }}
           loadHelpPanelContent={() => {
             console.log(1);

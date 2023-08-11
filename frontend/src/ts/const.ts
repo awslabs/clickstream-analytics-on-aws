@@ -411,3 +411,5 @@ export enum MetadataValueType {
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
 }
+
+export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';

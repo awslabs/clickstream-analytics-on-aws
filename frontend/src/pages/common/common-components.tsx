@@ -11,36 +11,31 @@
  *  and limitations under the License.
  */
 
-import { Box, Button, SpaceBetween } from '@cloudscape-design/components';
+import { Box, SpaceBetween } from '@cloudscape-design/components';
+import { useTranslation } from 'react-i18next';
 
 export const TableNoMatchState = ({
   onClearFilter,
 }: {
   onClearFilter: () => void;
-}) => (
-  <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-    <SpaceBetween size="xxs">
-      <div>
-        <b>No matches</b>
-        <Box variant="p" color="inherit">
-          We can't find a match.
-        </Box>
-      </div>
-      <Button onClick={onClearFilter}>Clear filter</Button>
-    </SpaceBetween>
-  </Box>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+      <SpaceBetween size="xxs">
+        <b>{t('common:table.noMatches')}</b>
+      </SpaceBetween>
+    </Box>
+  );
+};
 
-export const TableEmptyState = ({ resourceName }: { resourceName: string }) => (
-  <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-    <SpaceBetween size="xxs">
-      <div>
-        <b>No {resourceName.toLowerCase()}s</b>
-        <Box variant="p" color="inherit">
-          No {resourceName.toLowerCase()}s associated with this resource.
-        </Box>
-      </div>
-      <Button>Create {resourceName.toLowerCase()}</Button>
-    </SpaceBetween>
-  </Box>
-);
+export const TableEmptyState = ({ resourceName }: { resourceName: string }) => {
+  const { t } = useTranslation();
+  return (
+    <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+      <SpaceBetween size="xxs">
+        <b>{t('common:table.empty')}</b>
+      </SpaceBetween>
+    </Box>
+  );
+};

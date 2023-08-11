@@ -16,7 +16,11 @@ import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from 'ts/const';
+import {
+  ANALYTICS_INFO_KEY,
+  PROJECT_CONFIG_JSON,
+  ZH_LANGUAGE_LIST,
+} from 'ts/const';
 import HeaderSwitchSpaceModal from './SwitchSpaceModal';
 
 interface IHeaderProps {
@@ -37,9 +41,9 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
-  const [swichProjectVisible, setSwichProjectVisible] = useState(false);
+  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
-    'Analytics-ProjectId-AppId',
+    ANALYTICS_INFO_KEY,
     {
       pid: '',
       pname: '',
@@ -108,7 +112,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                   variant: 'primary-button',
                   text: t('header.switchSpace') ?? '',
                   onClick: () => {
-                    setSwichProjectVisible(true);
+                    setSwitchProjectVisible(true);
                   },
                 },
                 {
@@ -195,9 +199,9 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         }}
       />
       <HeaderSwitchSpaceModal
-        visible={swichProjectVisible}
+        visible={switchProjectVisible}
         disableClose={false}
-        setSwichProjectVisible={setSwichProjectVisible}
+        setSwitchProjectVisible={setSwitchProjectVisible}
         setAnalyticsInfo={setAnalyticsInfo}
       />
     </header>

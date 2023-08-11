@@ -1,10 +1,122 @@
 {
-  "analytics": "Analytics",
+  "analytics": "分析",
   "dashboard": {
-    "title": "Dashboards",
-    "description": "This page lists all the dashboards."
+    "title": "看板",
+    "description": "此页面列出所有看板。"
   },
   "list": {
-    "loading": "Loading dashboards."
+    "loading": "正在加载看板。",
+    "noDashboard": "您还没有任何点击流分析看板。",
+    "id": "ID",
+    "description": "描述",
+    "createAt": "创建时间"
+  },
+  "header": {
+    "modalTitle": "切换项目空间",
+    "selectProjectTitle": "请选择一个项目",
+    "selectAppTitle": "请选择一个应用程序",
+    "configurations": "配置"
+  },
+  "metadata": {
+    "event": {
+      "title": "原始事件",
+      "description": "原始事件的描述",
+      "tableLoading": "加载中",
+      "tableColumnID": "ID",
+      "tableColumnName": "事件名称",
+      "tableColumnDisplayName": "显示名称",
+      "tableColumnDescription": "描述",
+      "tableColumnMetadataSource": "来源",
+      "tableColumnHasData": "有数据",
+      "tableColumnPlatform": "平台",
+      "tableColumnDataVolumeLastDay": "最近一天的数据量",
+      "tableEmpty": "没有事件",
+      "filteringAriaLabel": "查找事件",
+      "filteringPlaceholder": "查找事件",
+      "groupPropertiesText": "属性",
+      "operatorsText": "操作符",
+      "clearFiltersText": "清除过滤器",
+      "split": {
+        "title": "事件详细信息",
+        "associatedPresetParameters": "关联的预设参数",
+        "associatedCustomParameters": "关联的自定义参数",
+        "parameterName": "参数名称",
+        "displayName": "显示名称",
+        "description": "描述",
+        "dataType": "数据类型",
+        "tableLoading": "加载中",
+        "tableEmpty": "没有资源"
+      },
+      "options": {
+        "eventNumber": "事件数量",
+        "userNumber": "用户数量"
+      }
+    },
+    "eventParameter": {
+      "title": "事件参数",
+      "description": "事件参数的描述",
+      "tableLoading": "加载中",
+      "tableColumnID": "ID",
+      "tableColumnName": "参数名称",
+      "tableColumnDisplayName": "显示名称",
+      "tableColumnDescription": "描述",
+      "tableColumnMetadataSource": "来源",
+      "tableColumnParameterType": "参数类型",
+      "tableColumnHasData": "有数据",
+      "tableColumnPlatform": "平台",
+      "tableColumnDataType": "数据类型",
+      "tableEmpty": "没有事件参数",
+      "filteringAriaLabel": "查找参数",
+      "filteringPlaceholder": "查找参数",
+      "groupPropertiesText": "属性",
+      "operatorsText": "操作符",
+      "clearFiltersText": "清除过滤器",
+      "split": {
+        "title": "事件参数详细信息",
+        "associatedEvents": "关联的事件",
+        "tableLoading": "加载中",
+        "tableEmpty": "没有资源"
+      }
+    },
+    "userAttribute": {
+      "title": "用户属性",
+      "description": "用户属性的描述",
+      "tableLoading": "加载中",
+      "tableColumnID": "ID",
+      "tableColumnName": "属性名称",
+      "tableColumnDisplayName": "显示名称",
+      "tableColumnDescription": "描述",
+      "tableColumnMetadataSource": "来源",
+      "tableColumnHasData": "有数据",
+      "tableColumnPlatform": "平台",
+      "tableColumnDataType": "数据类型",
+      "tableEmpty": "没有用户属性",
+      "filteringAriaLabel": "查找属性",
+      "filteringPlaceholder": "查找属性",
+      "groupPropertiesText": "属性",
+      "operatorsText": "操作符",
+      "clearFiltersText": "清除过滤器",
+      "split": {
+        "title": "用户属性详细信息",
+        "tableLoading": "加载中",
+        "tableEmpty": "没有资源"
+      }
+    }
+  },
+  "funnel": {
+    "labels": {
+      "reset": "重置",
+      "save": "保存到看板",
+      "metrics": "指标",
+      "associateParameter": "关联参数",
+      "window": "漏斗窗口",
+      "funnelSteps": "漏斗步骤",
+      "conversionWindowPeriod": "转化窗口期",
+      "filters": "过滤器"
+    }
+  },
+  "valid": {
+    "projectSelectError": "必须选择一个项目",
+    "appSelectError": "必须选择一个应用程序"
   }
 }

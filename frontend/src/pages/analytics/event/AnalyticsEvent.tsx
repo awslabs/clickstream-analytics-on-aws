@@ -38,14 +38,17 @@ const AnalyticsEvent: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
 
   const metricOptions = [
-    { value: 'event', label: 'Event number' },
-    { value: 'user', label: 'User number' },
+    {
+      value: 'event',
+      label: t('analytics:metadata.event.options.eventNumber'),
+    },
+    { value: 'user', label: t('analytics:metadata.event.options.userNumber') },
   ];
 
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',
-      label: 'Event number',
+      label: t('analytics:metadata.event.options.userNumber') ?? '',
     });
 
   const [associateParameterChecked, setAssociateParameterChecked] =
@@ -150,12 +153,7 @@ const AnalyticsEvent: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  style={{
-                    height: '400px',
-                    width: '100%',
-                    border: 0,
-                    overflow: 'hidden',
-                  }}
+                  className='iframe-explore'
                 ></div>
               )}
             </Container>

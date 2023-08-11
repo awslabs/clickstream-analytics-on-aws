@@ -27,7 +27,7 @@ import { save } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { ANALYTICS_INFO_KEY, TIME_FORMAT } from 'ts/const';
 import DashboardHeader from '../comps/DashboardHeader';
 
 const AnalyticsDashboardCard: React.FC<any> = () => {
@@ -101,7 +101,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       const appsFilter = apps.filter((a) => a.appId === appid);
       if (appsFilter && appsFilter.length > 0) {
         const app = appsFilter[0];
-        save('Analytics-ProjectId-AppId', {
+        save(ANALYTICS_INFO_KEY, {
           pid: project.id,
           pname: project.name,
           appid: app.appId,

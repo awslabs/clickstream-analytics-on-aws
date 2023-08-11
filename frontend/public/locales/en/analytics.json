@@ -20,8 +20,6 @@
   "metadata": {
     "event": {
       "title": "Origin Events",
-      "detailsButton": "View details",
-      "refreshButton": "Refresh Metadata",
       "description": "Description of the Origin Events",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
@@ -48,12 +46,15 @@
         "dataType": "Data type",
         "tableLoading": "Loading",
         "tableEmpty": "No resources"
+      },
+      "options": {
+        "eventNumber": "Event number",
+        "userNumber": "User number"
       }
     },
     "eventParameter": {
       "title": "Event Parameters",
       "description": "Description of the Event Parameter",
-      "refreshButton": "Refresh Metadata",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Parameter name",
@@ -80,7 +81,6 @@
     "userAttribute": {
       "title": "User Attribute",
       "description": "Description of the User Attribute",
-      "refreshButton": "Refresh Metadata",
       "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Attribute name",

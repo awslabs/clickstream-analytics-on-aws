@@ -105,11 +105,6 @@ const AnalyticsFunnel: React.FC = () => {
     useState<boolean>(true);
   const [windowChecked, setWindowChecked] = useState<boolean>(true);
 
-  // const [useMobileView, ref] = useContainerQuery((entry) => {
-  //   return entry.contentBoxWidth < 688;
-  // });
-  // console.log(useMobileView);
-
   return (
     <AppLayout
       toolsHide
@@ -243,12 +238,7 @@ const AnalyticsFunnel: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  style={{
-                    height: '400px',
-                    width: '100%',
-                    border: 0,
-                    overflow: 'hidden',
-                  }}
+                  className='iframe-explore'
                 ></div>
               )}
             </Container>

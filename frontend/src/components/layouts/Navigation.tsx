@@ -77,17 +77,17 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       items: [
         {
           type: 'link',
-          text: t('nav.analytics.explore-event'),
+          text: t('nav.analytics.exploreEvent'),
           href: `/analytics/${pid}/app/${appid}/event`,
         },
         {
           type: 'link',
-          text: t('nav.analytics.explore-retention'),
+          text: t('nav.analytics.exploreRetention'),
           href: `/analytics/${pid}/app/${appid}/retention`,
         },
         {
           type: 'link',
-          text: t('nav.analytics.explore-funnel'),
+          text: t('nav.analytics.exploreFunnel'),
           href: `/analytics/${pid}/app/${appid}/funnel`,
         },
       ],

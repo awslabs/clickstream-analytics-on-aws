@@ -20,7 +20,19 @@
     "projects": "项目",
     "pipelines": "数据管道",
     "plugins": "插件",
-    "analytics": "分析",
+    "explore": "探索分析",
+    "analytics": {
+      "realtime": "实时",
+      "dashboards": "看板",
+      "explore": "探索",
+      "metadata": "元数据",
+      "exploreEvent": "事件分析",
+      "exploreRetention": "留存分析",
+      "exploreFunnel": "转化分析",
+      "metadata-events": "原始事件",
+      "metadata-event-parameters": "事件属性",
+      "metadata-user-attributes": "用户属性"
+    },
     "operation": "运维",
     "dashboard": "显示器仪表板",
     "monitorAlerts": "告警",
@@ -46,7 +58,8 @@
     "more": "更多",
     "all": "全部",
     "back": "返回",
-    "closeMenu": "关闭菜单"
+    "closeMenu": "关闭菜单",
+    "switchSpace": "切换项目"
   },
   "tag": {
     "name": "标签",
@@ -147,7 +160,9 @@
     "addPlugin": "添加插件",
     "enableAll": "全部启用",
     "disableAll": "全部禁用",
-    "viewAlarms": "查看告警"
+    "viewAlarms": "查看告警",
+    "refreshMetadata": "刷新元数据",
+    "clearFilters": "清理筛选"
   },
   "item": "项目",
   "items": "项目",
@@ -225,11 +240,18 @@
     "noAlarmInPipeline": "此项目中没有告警配置",
     "projectNoPipeline": "此项目未配置数据管道"
   },
+  "table": {
+    "noMatches": "没有匹配项",
+    "empty": "没有数据",
+    "useText": "使用",
+    "matchText": "匹配",
+    "matchesText": "匹配"
+  },
   "nextPage": "下一页",
   "prePage": "上一页",
   "page": "页面",
   "allPages": " 所有页面的",
-  "addtionalSettings": "其他设置",
+  "additionalSettings": "其他设置",
   "step": "步骤",
   "steps": "步骤",
   "of": "的",
