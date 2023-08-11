@@ -48,7 +48,7 @@ export class DynamoDbStore implements ClickStreamStore {
         region: project.region,
         environment: project.environment,
         pipelineId: '',
-        status: {},
+        status: 'ACTIVATED',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: project.operator?? '',
