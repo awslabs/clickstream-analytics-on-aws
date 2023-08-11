@@ -1,0 +1,92 @@
+{
+  "PivotTableVisual": {
+      "VisualId": "",
+      "Title": {
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "PivotTableAggregatedFieldWells": {
+                  "Rows": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "event_name"
+                              }
+                          }
+                      }
+                  ],
+                  "Columns": [
+                      {
+                          "DateDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "event_date"
+                              },
+                              "DateGranularity": ""
+                          }
+                      }
+                  ],
+                  "Values": [
+                      {
+                          "CategoricalMeasureField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "x_id"
+                              },
+                              "AggregationFunction": "DISTINCT_COUNT"
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "FieldSortOptions": [
+                  {
+                      "FieldId": "",
+                      "SortBy": {
+                          "Field": {
+                              "FieldId": "",
+                              "Direction": "ASC"
+                          }
+                      }
+                  }
+              ]
+          },
+          "TableOptions": {
+              "MetricPlacement": "COLUMN",
+              "ColumnHeaderStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CellStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CollapsedRowDimensionsVisibility": "HIDDEN"
+          },
+          "FieldOptions": {
+              "SelectedFieldOptions": [
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  }
+              ]
+          }
+      },
+      "Actions": []
+  }
+}

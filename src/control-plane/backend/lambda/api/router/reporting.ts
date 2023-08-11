@@ -19,11 +19,19 @@ const reporting_project = express.Router();
 const reportingServ: ReportingServ = new ReportingServ();
 
 reporting_project.post(
-  '',
+  '/funnel',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-    logger.info('start to create quicksight report');
+    logger.info('start to create quicksight funnel report');
     return reportingServ.createFunnelVisual(req, res, next);
+  });
+
+reporting_project.post(
+  '/event',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+    logger.info('start to create quicksight event report');
+    return reportingServ.createEventVisual(req, res, next);
   });
 
 export {

@@ -310,7 +310,7 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
   }
 };
 
-interface QuickSightUserArns {
+export interface QuickSightUserArns {
   dashboardOwner: string;
   embedOwner: string;
 }
