@@ -29,7 +29,7 @@
                                   "DataSetIdentifier":"",
                                   "ColumnName":"x_id"
                               },
-                              "AggregationFunction":"COUNT"
+                              "AggregationFunction":"DISTINCT_COUNT"
                           }
                       }
                   ]
