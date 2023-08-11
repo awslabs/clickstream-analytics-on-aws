@@ -39,6 +39,7 @@ const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
+const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
 
 const getIdentityRegionFromMessage = (message: string) => {
   const regexp = new RegExp(REGION_PATTERN, 'g');
@@ -165,7 +166,7 @@ export const registerEmbeddingUserByRegion = async (region: string) => {
     const command: RegisterUserCommand = new RegisterUserCommand({
       IdentityType: IdentityType.IAM,
       AwsAccountId: awsAccountId,
-      Email: 'quicksight-embedding-no-reply@amazon.com',
+      Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
       IamArn: QuickSightEmbedRoleArn,
       Namespace: QUICKSIGHT_NAMESPACE,
       UserRole: UserRole.READER,
