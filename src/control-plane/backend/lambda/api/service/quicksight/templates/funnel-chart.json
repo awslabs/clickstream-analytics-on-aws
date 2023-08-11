@@ -16,7 +16,7 @@
                               "FieldId":"",
                               "Column":{
                                   "DataSetIdentifier":"",
-                                  "ColumnName":""
+                                  "ColumnName":"event_name"
                               }
                           }
                       }
@@ -27,7 +27,7 @@
                               "FieldId":"",
                               "Column":{
                                   "DataSetIdentifier":"",
-                                  "ColumnName":""
+                                  "ColumnName":"x_id"
                               },
                               "AggregationFunction":"COUNT"
                           }

@@ -11,60 +11,59 @@
  *  and limitations under the License.
  */
 
-import { applyChangeToDashboard } from '../../service/quicksight/quicksight-visual-utils';
+import { applyChangeToDashboard } from '../../service/quicksight/reporting-utils';
 
 describe('QuickSight visual management test', () => {
 
   beforeEach(() => {
   });
 
-  const dashboardDef = `
+  const dashboardDef =
   {
-    "DataSetConfigurations": [],
-    "Sheets": [
-        {
-            "SheetId": "f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64",
-            "Name": "",
-            "FilterControls": [],
-            "Visuals": [],
-            "Layouts": [
-                {
-                    "Configuration": {
-                        "GridLayout": {
-                            "Elements": [],
-                            "CanvasSizeOptions": {
-                                "ScreenCanvasSizeOptions": {
-                                    "ResizeOption": "FIXED",
-                                    "OptimizedViewPortWidth": "1600px"
-                                }
-                            }
-                        }
-                    }
-                }
-            ],
-            "ContentType": "INTERACTIVE"
-        }
-    ],
-    "CalculatedFields": [],
-    "ParameterDeclarations": [],
-    "FilterGroups": [],
-    "AnalysisDefaults": {
-        "DefaultNewSheetConfiguration": {
-            "InteractiveLayoutConfiguration": {
-                "Grid": {
-                    "CanvasSizeOptions": {
-                        "ScreenCanvasSizeOptions": {
-                            "ResizeOption": "FIXED",
-                            "OptimizedViewPortWidth": "1600px"
-                        }
-                    }
-                }
+    DataSetIdentifierDeclarations: [],
+    Sheets: [
+      {
+        SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
+        Name: 'sheet1',
+        FilterControls: [],
+        Visuals: [],
+        Layouts: [
+          {
+            Configuration: {
+              GridLayout: {
+                Elements: [],
+                CanvasSizeOptions: {
+                  ScreenCanvasSizeOptions: {
+                    ResizeOption: 'FIXED',
+                    OptimizedViewPortWidth: '1600px',
+                  },
+                },
+              },
             },
-            "SheetContentType": "INTERACTIVE"
-        }
-    }
-  }
-  `;
+          },
+        ],
+        ContentType: 'INTERACTIVE',
+      },
+    ],
+    CalculatedFields: [],
+    ParameterDeclarations: [],
+    FilterGroups: [],
+    AnalysisDefaults: {
+      DefaultNewSheetConfiguration: {
+        InteractiveLayoutConfiguration: {
+          Grid: {
+            CanvasSizeOptions: {
+              ScreenCanvasSizeOptions: {
+                ResizeOption: 'FIXED',
+                OptimizedViewPortWidth: '1600px',
+              },
+            },
+          },
+        },
+        SheetContentType: 'INTERACTIVE',
+      },
+    },
+  };
 
   const visualContent =
   {
@@ -82,10 +81,10 @@ describe('QuickSight visual management test', () => {
             Category: [
               {
                 CategoricalDimensionField: {
-                  FieldId: '',
+                  FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                   Column: {
-                    DataSetIdentifier: '',
-                    ColumnName: '',
+                    DataSetIdentifier: 'testview0001',
+                    ColumnName: 'event_name',
                   },
                 },
               },
@@ -93,10 +92,10 @@ describe('QuickSight visual management test', () => {
             Values: [
               {
                 CategoricalMeasureField: {
-                  FieldId: '',
+                  FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                   Column: {
-                    DataSetIdentifier: '',
-                    ColumnName: '',
+                    DataSetIdentifier: 'testview0001',
+                    ColumnName: 'x_id',
                   },
                   AggregationFunction: 'COUNT',
                 },
@@ -108,13 +107,13 @@ describe('QuickSight visual management test', () => {
           CategorySort: [
             {
               FieldSort: {
-                FieldId: '',
+                FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                 Direction: 'DESC',
               },
             },
             {
               FieldSort: {
-                FieldId: '',
+                FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                 Direction: 'DESC',
               },
             },
@@ -132,13 +131,13 @@ describe('QuickSight visual management test', () => {
             TooltipFields: [
               {
                 FieldTooltipItem: {
-                  FieldId: '',
+                  FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                   Visibility: 'VISIBLE',
                 },
               },
               {
                 FieldTooltipItem: {
-                  FieldId: '',
+                  FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                   Visibility: 'VISIBLE',
                 },
               },
@@ -163,38 +162,22 @@ describe('QuickSight visual management test', () => {
 
   test('add visual to dashboard', () => {
 
-    const dashbaord = applyChangeToDashboard({
+    const dashboard = applyChangeToDashboard({
       action: 'ADD',
       visuals: [
         {
           name: 'funnel chart',
           sheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
-          visualContent: visualContent,
-          dataSetConfiguration: {
-            Placeholder: 'clickstream_funnel_chart_view',
-            DataSetSchema: {
-              ColumnSchemaList: [
-                {
-                  Name: 'event_name',
-                  DataType: 'STRING',
-                },
-                {
-                  Name: 'event_date',
-                  DataType: 'DATETIME',
-                },
-                {
-                  Name: 'event_cnt',
-                  DataType: 'STRING',
-                },
-              ],
-            },
-            ColumnGroupSchemaList: [],
+          visual: visualContent,
+          dataSetIdentifierDeclaration: {
+            Identifier: 'clickstream_funnel_chart_view',
+            DataSetArn: 'fakearn',
           },
           filterControl: {
             DateTimePicker: {
               FilterControlId: 'ec48601c-4fa5-4219-a31b-ceaedfd9ad80',
               Title: 'event_date between',
-              SourceFilterId: 'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
+              SourceFilterId: 'a4366267-b733-473a-962f-73acc694c2f7',
               Type: 'DATE_RANGE',
             },
           },
@@ -246,14 +229,14 @@ describe('QuickSight visual management test', () => {
                     SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
                     Scope: 'SELECTED_VISUALS',
                     VisualIds: [
-                      'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
+                      'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
                     ],
                   },
                 ],
               },
             },
             Status: 'ENABLED',
-            CrossDataset: 'SINGLE_DATASET',
+            CrossDataset: 'ALL_DATASETS',
           },
           eventCount: 5,
         },
@@ -262,41 +245,23 @@ describe('QuickSight visual management test', () => {
 
     });
 
-    expect(JSON.stringify(dashbaord)).toEqual(JSON.stringify({
-      DataSetConfigurations: [
+    expect(JSON.stringify(dashboard)).toEqual(JSON.stringify({
+      DataSetIdentifierDeclarations: [
         {
-          Placeholder: 'clickstream_funnel_chart_view',
-          DataSetSchema: {
-            ColumnSchemaList: [
-              {
-                Name: 'event_name',
-                DataType: 'STRING',
-              },
-              {
-                Name: 'event_date',
-                DataType: 'DATETIME',
-              },
-              {
-                Name: 'event_cnt',
-                DataType: 'STRING',
-              },
-            ],
-          },
-          ColumnGroupSchemaList: [
-
-          ],
+          Identifier: 'clickstream_funnel_chart_view',
+          DataSetArn: 'fakearn',
         },
       ],
       Sheets: [
         {
           SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
-          Name: '',
+          Name: 'sheet1',
           FilterControls: [
             {
               DateTimePicker: {
                 FilterControlId: 'ec48601c-4fa5-4219-a31b-ceaedfd9ad80',
                 Title: 'event_date between',
-                SourceFilterId: 'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
+                SourceFilterId: 'a4366267-b733-473a-962f-73acc694c2f7',
                 Type: 'DATE_RANGE',
               },
             },
@@ -317,10 +282,10 @@ describe('QuickSight visual management test', () => {
                       Category: [
                         {
                           CategoricalDimensionField: {
-                            FieldId: '',
+                            FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                             Column: {
-                              DataSetIdentifier: '',
-                              ColumnName: '',
+                              DataSetIdentifier: 'testview0001',
+                              ColumnName: 'event_name',
                             },
                           },
                         },
@@ -328,10 +293,10 @@ describe('QuickSight visual management test', () => {
                       Values: [
                         {
                           CategoricalMeasureField: {
-                            FieldId: '',
+                            FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                             Column: {
-                              DataSetIdentifier: '',
-                              ColumnName: '',
+                              DataSetIdentifier: 'testview0001',
+                              ColumnName: 'x_id',
                             },
                             AggregationFunction: 'COUNT',
                           },
@@ -343,13 +308,13 @@ describe('QuickSight visual management test', () => {
                     CategorySort: [
                       {
                         FieldSort: {
-                          FieldId: '',
+                          FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                           Direction: 'DESC',
                         },
                       },
                       {
                         FieldSort: {
-                          FieldId: '',
+                          FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                           Direction: 'DESC',
                         },
                       },
@@ -367,13 +332,13 @@ describe('QuickSight visual management test', () => {
                       TooltipFields: [
                         {
                           FieldTooltipItem: {
-                            FieldId: '',
+                            FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
                             Visibility: 'VISIBLE',
                           },
                         },
                         {
                           FieldTooltipItem: {
-                            FieldId: '',
+                            FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
                             Visibility: 'VISIBLE',
                           },
                         },
@@ -434,36 +399,34 @@ describe('QuickSight visual management test', () => {
 
       ],
       ParameterDeclarations: [
-        [
-          {
-            DateTimeParameterDeclaration: {
-              Name: 'dateStart',
-              DefaultValues: {
-                StaticValues: [
+        {
+          DateTimeParameterDeclaration: {
+            Name: 'dateStart',
+            DefaultValues: {
+              StaticValues: [
 
-                ],
-                RollingDate: {
-                  Expression: "truncDate('DD', now())",
-                },
+              ],
+              RollingDate: {
+                Expression: "truncDate('DD', now())",
               },
-              TimeGranularity: 'DAY',
             },
+            TimeGranularity: 'DAY',
           },
-          {
-            DateTimeParameterDeclaration: {
-              Name: 'dateEnd',
-              DefaultValues: {
-                StaticValues: [
+        },
+        {
+          DateTimeParameterDeclaration: {
+            Name: 'dateEnd',
+            DefaultValues: {
+              StaticValues: [
 
-                ],
-                RollingDate: {
-                  Expression: "addDateTime(-1, 'DD', truncDate('DD', now()))",
-                },
+              ],
+              RollingDate: {
+                Expression: "addDateTime(-1, 'DD', truncDate('DD', now()))",
               },
-              TimeGranularity: 'DAY',
             },
+            TimeGranularity: 'DAY',
           },
-        ],
+        },
       ],
       FilterGroups: [
         {
@@ -488,14 +451,14 @@ describe('QuickSight visual management test', () => {
                   SheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
                   Scope: 'SELECTED_VISUALS',
                   VisualIds: [
-                    'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
+                    'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
                   ],
                 },
               ],
             },
           },
           Status: 'ENABLED',
-          CrossDataset: 'SINGLE_DATASET',
+          CrossDataset: 'ALL_DATASETS',
         },
       ],
       AnalysisDefaults: {

@@ -2,22 +2,20 @@
   "FilterGroupId": "",
   "Filters": [
       {
-          "TimeRangeFilter": {
+          "RelativeDatesFilter": {
               "FilterId": "",
               "Column": {
                   "DataSetIdentifier": "",
                   "ColumnName": ""
               },
-              "IncludeMinimum": true,
-              "IncludeMaximum": true,
-              "RangeMinimumValue": {
-                  "StaticValue": ""
+              "AnchorDateConfiguration": {
+                  "AnchorOption": "NOW"
               },
-              "RangeMaximumValue": {
-                  "StaticValue": ""
-              },
-              "NullOption": "NON_NULLS_ONLY",
-              "TimeGranularity": "DAY"
+              "MinimumGranularity": "DAY",
+              "TimeGranularity": "DAY",
+              "RelativeDateType": "LAST",
+              "RelativeDateValue": 30,
+              "NullOption": "NON_NULLS_ONLY"
           }
       }
   ],
