@@ -48,7 +48,7 @@ export class DynamoDbStore implements ClickStreamStore {
         region: project.region,
         environment: project.environment,
         pipelineId: '',
-        status: 'ACTIVED',
+        status: 'ACTIVATED',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: project.operator?? '',
@@ -144,7 +144,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -276,7 +276,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });
@@ -729,7 +729,6 @@ export class DynamoDbStore implements ClickStreamStore {
         prefix: 'PLUGIN',
         name: plugin.name,
         description: plugin.description,
-        status: 'Disabled',
         jarFile: plugin.jarFile,
         dependencyFiles: plugin.dependencyFiles,
         mainFunction: plugin.mainFunction,
@@ -812,7 +811,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ConditionExpression: 'bindCount = :bindCount',
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+      ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     });

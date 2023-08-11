@@ -15,8 +15,6 @@ import {
   S3Client,
   ListBucketsCommand,
   GetBucketLocationCommand,
-  GetBucketLocationCommandOutput,
-  Bucket,
   GetObjectCommand,
   GetBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
@@ -36,7 +34,7 @@ export const listBuckets = async (region: string) => {
   const buckets: ClickStreamBucket[] = [];
   if (result.Buckets) {
     const input = [];
-    for (let bucket of result.Buckets as Bucket[]) {
+    for (let bucket of result.Buckets) {
       const bucketName = bucket.Name;
       if (bucketName) {
         input.push(promisePool(() => {
@@ -45,7 +43,7 @@ export const listBuckets = async (region: string) => {
           })).then(res => {
             buckets.push({
               name: bucketName,
-              location: (res as GetBucketLocationCommandOutput).LocationConstraint ?? 'us-east-1',
+              location: res.LocationConstraint ?? 'us-east-1',
             });
           }).catch(_ => {
             return;

@@ -144,7 +144,7 @@ export class JWTAuthorizer {
         const ddbCache = await this.getOpenidConfigurationFromDDB();
         if (ddbCache) {
           nodeCache.set(this.openidConfigurationKey, ddbCache, this.cacheTtl);
-          return ddbCache as OpenidConfiguration;
+          return ddbCache;
         } else {
           let jwksUriSuffix = '.well-known/openid-configuration';
           if (!this.issuer?.endsWith('/')) {

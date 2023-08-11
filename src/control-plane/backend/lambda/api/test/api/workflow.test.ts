@@ -2586,7 +2586,7 @@ describe('Workflow test', () => {
           Input: {
             Action: 'Create',
             Region: 'ap-southeast-1',
-            StackName: 'clickstream-sigle-test2',
+            StackName: 'clickstream-single-test2',
             Tags: Tags,
             TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
             Parameters: [
@@ -2620,7 +2620,7 @@ describe('Workflow test', () => {
               ParameterValue: 'test1',
             },
           ],
-          StackName: 'clickstream-sigle-test2',
+          StackName: 'clickstream-single-test2',
           Tags: Tags,
           TemplateURL: 'https://s3-us-west-2.amazonaws.com/cloudformation-templates-us-west-2/SQSWithQueueName.template',
         },

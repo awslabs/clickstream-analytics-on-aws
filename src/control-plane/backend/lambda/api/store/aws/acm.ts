@@ -45,7 +45,7 @@ export const ListCertificates = async (region: string) => {
   })) {
     records.push(...page.CertificateSummaryList as CertificateSummary[]);
   }
-  for (let cert of records as CertificateSummary[]) {
+  for (let cert of records) {
     if (cert.CertificateArn) {
       certificates.push({
         arn: cert.CertificateArn,

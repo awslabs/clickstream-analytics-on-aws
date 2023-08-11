@@ -32,6 +32,8 @@ export interface CdkCallCustomResourceProps {
 
 export class BatchInsertDDBCustomResource extends Construct {
 
+  readonly batchInsertCustomResource: CustomResource;
+
   constructor(scope: Construct, id: string, props: CdkCallCustomResourceProps) {
     super(scope, id);
 
@@ -68,7 +70,7 @@ export class BatchInsertDDBCustomResource extends Construct {
       },
     );
 
-    new CustomResource(
+    this.batchInsertCustomResource = new CustomResource(
       this,
       'DicInitCustomResource',
       {

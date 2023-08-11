@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Output, Tag } from '@aws-sdk/client-cloudformation';
+import { Tag } from '@aws-sdk/client-cloudformation';
 import { getDiff } from 'json-difference';
 import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack } from './stacks';
+import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack, getStackParameters } from './stacks';
 import { awsUrlSuffix, stackWorkflowS3Bucket } from '../common/constants';
 import {
   MUTIL_APP_ID_PATTERN,
@@ -73,7 +73,7 @@ interface IngestionServerSinkKafkaProps {
   readonly topic: string;
   readonly brokers: string[];
   readonly securityGroupId: string;
-  readonly mskCluster?: mskClusterProps;
+  readonly mskCluster?: MSKClusterProps;
   readonly kafkaConnector: KafkaS3Connector;
 }
 
@@ -183,7 +183,7 @@ interface S3Bucket {
   readonly prefix: string;
 }
 
-interface mskClusterProps {
+interface MSKClusterProps {
   readonly name: string;
   readonly arn: string;
 }
@@ -340,7 +340,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -365,7 +365,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
@@ -377,7 +377,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
 
     // bind plugin
@@ -400,7 +400,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    // update pipline metadata
+    // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
@@ -541,9 +541,9 @@ export class CPipeline {
         BuiltInTagKeys.CLICKSTREAM_PROJECT,
       ];
       const keys = this.pipeline.tags.map(tag => tag.key);
-      for (let i = 0; i < builtInTagKeys.length; i++) {
-        if (keys.indexOf(builtInTagKeys[i]) > -1) {
-          const index = keys.indexOf(builtInTagKeys[i]);
+      for (let builtInTagKey of builtInTagKeys) {
+        if (keys.includes(builtInTagKey)) {
+          const index = keys.indexOf(builtInTagKey);
           this.pipeline.tags.splice(index, 1);
           keys.splice(index, 1);
         }
@@ -614,7 +614,7 @@ export class CPipeline {
         throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
       }
       const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
-      const ingestionStackParameters = ingestionStack.parameters();
+      const ingestionStackParameters = getStackParameters(ingestionStack);
       const ingestionStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
       const ingestionState: WorkflowState = {
         Type: WorkflowStateType.STACK,
@@ -640,7 +640,7 @@ export class CPipeline {
           throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
         }
         const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
-        const kafkaConnectorStackParameters = kafkaConnectorStack.parameters();
+        const kafkaConnectorStackParameters = getStackParameters(kafkaConnectorStack);
         const kafkaConnectorStackName = getStackName(
           this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType);
         const kafkaConnectorState: WorkflowState = {
@@ -687,18 +687,19 @@ export class CPipeline {
         throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
       }
 
-      const pipelineStack = new CDataProcessingStack(this.pipeline, this.resources!);
-      const pipelineStackParameters = pipelineStack.parameters();
-      const pipelineStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
+      const dataProcessingStack = new CDataProcessingStack(this.pipeline, this.resources!);
+      const dataProcessingStackParameters = getStackParameters(dataProcessingStack);
+      const dataProcessingStackName = getStackName(
+        this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
       const dataProcessingState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
           Input: {
             Action: 'Create',
             Region: this.pipeline.region,
-            StackName: pipelineStackName,
+            StackName: dataProcessingStackName,
             TemplateURL: dataPipelineTemplateURL,
-            Parameters: pipelineStackParameters,
+            Parameters: dataProcessingStackParameters,
             Tags: this.stackTags,
           },
           Callback: {
@@ -747,7 +748,7 @@ export class CPipeline {
       }
 
       const metricsStack = new CMetricsStack(this.pipeline, this.resources!);
-      const metricsStackParameters = metricsStack.parameters();
+      const metricsStackParameters = getStackParameters(metricsStack);
       const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
       const metricsState: WorkflowState = {
         Type: WorkflowStateType.STACK,
@@ -790,7 +791,7 @@ export class CPipeline {
     }
 
     const dataModelingStack = new CDataModelingStack(this.pipeline, this.resources!);
-    const dataModelingStackParameters = dataModelingStack.parameters();
+    const dataModelingStackParameters = getStackParameters(dataModelingStack);
     const dataModelingStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType);
     const dataModelingState: WorkflowState = {
@@ -823,7 +824,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
     }
     const reportStack = new CReportingStack(this.pipeline, this.resources!);
-    const reportStackParameters = reportStack.parameters();
+    const reportStackParameters = getStackParameters(reportStack);
     const reportStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType);
     const reportState: WorkflowState = {
       Type: WorkflowStateType.STACK,
@@ -856,7 +857,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Template: Athena not found in dictionary.');
     }
     const athenaStack = new CAthenaStack(this.pipeline);
-    const athenaStackParameters = athenaStack.parameters();
+    const athenaStackParameters = getStackParameters(athenaStack);
     const athenaStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.ATHENA, this.pipeline.ingestionServer.sinkType);
     const athenaState: WorkflowState = {
       Type: WorkflowStateType.STACK,
@@ -891,7 +892,7 @@ export class CPipeline {
     }
     for (let suffix of outputKeySuffixes) {
       if (stack.Outputs) {
-        for (let out of stack.Outputs as Output[]) {
+        for (let out of stack.Outputs) {
           if (out.OutputKey?.endsWith(suffix)) {
             res.set(suffix, out.OutputValue ?? '');
             break;

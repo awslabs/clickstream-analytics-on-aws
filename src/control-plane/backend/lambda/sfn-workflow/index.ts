@@ -127,7 +127,7 @@ export const describe = async (region: string, stackName: string) => {
     });
     const result = await cloudFormationClient.send(params);
     if (result.Stacks) {
-      return result.Stacks[0] as Stack;
+      return result.Stacks[0];
     }
     return undefined;
   } catch (err) {

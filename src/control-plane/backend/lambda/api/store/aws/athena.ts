@@ -25,7 +25,7 @@ export const listWorkGroups = async (region: string) => {
     records.push(...page.WorkGroups as WorkGroupSummary[]);
   }
   const workGroups: WorkGroup[] = [];
-  for (let record of records as WorkGroupSummary[]) {
+  for (let record of records) {
     workGroups.push({
       name: record.Name ?? '',
       description: record.Description ?? '',

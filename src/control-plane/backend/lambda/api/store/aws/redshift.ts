@@ -42,7 +42,7 @@ export const describeRedshiftClusters = async (region: string, vpcId?: string, c
   }
 
   const clusters: RedshiftCluster[] = [];
-  for (let cluster of records as Cluster[]) {
+  for (let cluster of records) {
     if (!vpcId || cluster.VpcId === vpcId) {
       clusters.push({
         name: cluster.ClusterIdentifier ?? '',
@@ -143,7 +143,7 @@ export const listRedshiftServerlessWorkgroups = async (region: string) => {
     records.push(...page.workgroups as Workgroup[]);
   }
   const workgroups: RedshiftWorkgroup[] = [];
-  for (let workgroup of records as Workgroup[]) {
+  for (let workgroup of records) {
     workgroups.push({
       id: workgroup.workgroupId ?? '',
       arn: workgroup.workgroupArn ?? '',

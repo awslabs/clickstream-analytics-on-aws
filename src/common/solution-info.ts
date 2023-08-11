@@ -27,7 +27,8 @@ function versionDetail(version: string): string {
   const match = version.match(versionPattern);
 
   if (match) {
-    return `(Version ${match[1]})${match[2] ? `(Build ${match[2]})` : ''}`;
+    const buildId = match[2] ? `(Build ${match[2]})` : '';
+    return `(Version ${match[1]})${buildId}`;
   }
 
   throw new Error(`Illegal version string '${version}'.`);

@@ -87,6 +87,7 @@ export interface ClickStreamApiProps {
 export class ClickStreamApiConstruct extends Construct {
   public readonly clickStreamApiFunction: Function;
   public readonly lambdaRestApi?: RestApi;
+  public readonly batchInsertDDBCustomResource: BatchInsertDDBCustomResource;
 
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
@@ -170,7 +171,7 @@ export class ClickStreamApiConstruct extends Construct {
     });
 
     // Dictionary data init
-    new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
+    this.batchInsertDDBCustomResource = new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
       table: dictionaryTable,
       items: dictionary,
       targetToCNRegions: props.targetToCNRegions ?? false,

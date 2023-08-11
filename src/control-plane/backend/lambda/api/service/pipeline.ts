@@ -28,7 +28,7 @@ export class PipelineServ {
     try {
       const { pid, version, order, pageNumber, pageSize } = req.query;
       const result = await store.listPipeline(pid, version, order);
-      for (let item of result as IPipeline[] ) {
+      for (let item of result) {
         const pipeline = new CPipeline(item);
         await pipeline.refreshStatus();
       }
@@ -170,7 +170,6 @@ export class PipelineServ {
       }
       const pipeline = new CPipeline(ddbPipeline);
       await pipeline.delete();
-      // TODO: Asynchronize
       const operator = res.get('X-Click-Stream-Operator');
       await store.deletePipeline(pid, id, operator);
       return res.status(200).send(new ApiSuccess(null, 'Pipeline deleted.'));

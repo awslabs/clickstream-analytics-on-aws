@@ -50,7 +50,7 @@ function tryToJson(s: string): any {
 
 function getValueFromTags(tag: string, tags: Tag[]): string {
   if (!isEmpty(tags)) {
-    for (let index in tags as Tag[]) {
+    for (let index in tags) {
       if (tags[index].Key === tag) {
         return tags[index].Value ?? '';
       }
@@ -73,7 +73,7 @@ function getServerlessRedshiftRPU(region: string): RPURange {
   const RPUMapping = ServerlessRedshiftRPUByRegionMapping as RPURegionMappingObject;
   for (let key in RPUMapping) {
     if (key === region) {
-      return RPUMapping[key] as RPURange;
+      return RPUMapping[key];
     }
   }
   return { min: 0, max: 0 } as RPURange;
@@ -154,7 +154,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   let s3PathPluginFiles: string[] = [];
   // Transformer
   if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
-    const transformer = resources!.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
+    const transformer = resources.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
     if (transformer?.mainFunction) {
       transformerAndEnrichClassNames.push(transformer?.mainFunction);
     }
@@ -214,7 +214,7 @@ function getSubnetType(routeTable: RouteTable) {
 function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
   let mainRouteTable: RouteTable = {};
   let subnetRouteTable: RouteTable = {};
-  for (let routeTable of routeTables as RouteTable[]) {
+  for (let routeTable of routeTables) {
     for (let association of routeTable.Associations as RouteTableAssociation[]) {
       if (association.Main) {
         mainRouteTable = routeTable;
@@ -260,7 +260,7 @@ function checkVpcEndpoint(
           });
         }
         const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
-        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds!.includes(rule.GroupId!));
+        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds.includes(rule.GroupId!));
         const vpcEndpointRule: SecurityGroupRule = {
           IsEgress: false,
           IpProtocol: 'tcp',
@@ -290,7 +290,7 @@ function checkInterfaceVPCEndpointSubnets(allSubnets: ClickStreamSubnet[], isola
   return true;
 }
 
-function checkRoutesGatewayId(routes: Route[], gatewayId: String) {
+function checkRoutesGatewayId(routes: Route[], gatewayId: string) {
   let result = false;
   for (let route of routes) {
     if (route.GatewayId === gatewayId) {
