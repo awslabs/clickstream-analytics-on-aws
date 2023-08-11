@@ -350,9 +350,9 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
   for (const [index, _item] of eventNames.entries()) {
     resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_${index})  as ${eventNames[index]} \n`);
     if (index === 0) {
-      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  count(distinct ${prefix}_0)):: decimal(20, 4)  as rate \n`);
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  NULLIF(count(distinct ${prefix}_0), 0) ):: decimal(20, 4)  as rate \n`);
     } else {
-      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  count(distinct ${prefix}_${index-1})):: decimal(20, 4)  as ${eventNames[index]}_rate \n`);
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  NULLIF(count(distinct ${prefix}_${index-1}), 0) ):: decimal(20, 4)  as ${eventNames[index]}_rate \n`);
     }
   }
 
