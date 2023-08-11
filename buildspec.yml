@@ -12,7 +12,7 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 16
+      nodejs: 18.x
   pre_build:
     commands:
       - |-

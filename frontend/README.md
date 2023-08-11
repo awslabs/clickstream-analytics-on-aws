@@ -1,16 +1,16 @@
-# Getting Started with Clickstream Analytics on AWS
+# Getting Started with the web console frontend of Clickstream Analytics on AWS
 
 ## Prerequisites
 
-This project requires NodeJS (version 16 or later) and NPM (version 8 or later).
-[Node](http://nodejs.org/) and [NPM](https://npmjs.org/) are really easy to install.
+This project requires Node.js LTS (version 18 or later) and NPM (version 9 or later).
+[Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/) are really easy to install.
 To make sure you have them available on your machine,
 try running the following command.
 
 ```sh
 $ npm -v && node -v
-8.11.0
-v16.16.0
+9.6.7
+v18.17.0
 ```
 
 ## Available Scripts

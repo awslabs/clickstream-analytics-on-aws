@@ -14,6 +14,7 @@
 const { awscdk, gitlab, javascript, typescript } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.81.0';
+const minNodeVersion = '18.17.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
@@ -164,7 +165,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDevDeps,
     '@types/jsonpath-plus@^5.0.2',
   ],
-  minNodeVersion: '16.18.0',
+  minNodeVersion,
   jestOptions: {
     jestConfig: {
       setupFiles: ['./test/jestEnv.js'],
@@ -249,7 +250,7 @@ const apiProject = new typescript.TypeScriptProject({
   srcdir: './',
   testdir: 'test/',
   eslint: false,
-  minNodeVersion: '16.18.0',
+  minNodeVersion,
   tsconfig: {
     exclude: ['dist'],
     compilerOptions: {
