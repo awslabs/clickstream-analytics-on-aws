@@ -19,6 +19,16 @@ import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
+import AnalyticsHome from 'pages/analytics/AnalyticsHome';
+import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
+import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
+import AnalyticsEvent from 'pages/analytics/event/AnalyticsEvent';
+import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
+import MetadataParameters from 'pages/analytics/metadata/event-parameters/MetadataParameters';
+import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
+import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
+import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
+import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -113,6 +123,43 @@ const SignedInPage: React.FC = () => {
                 <Route
                   path="/project/:pid/application/detail/:id"
                   element={<ApplicationDetail />}
+                />
+                <Route path="/analytics" element={<AnalyticsHome />} />
+                <Route
+                  path="/analytics/:pid/app/:appid/realtime"
+                  element={<AnalyticsRealtime />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/dashboards"
+                  element={<AnalyticsDashboard />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/dashboard/:did"
+                  element={<AnalyticsDashboardDetail />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/event"
+                  element={<AnalyticsEvent />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/retention"
+                  element={<AnalyticsRetention />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/funnel"
+                  element={<AnalyticsFunnel />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/events"
+                  element={<MetadataEvents />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/event-parameters"
+                  element={<MetadataParameters />}
+                />
+                <Route
+                  path="/analytics/:pid/app/:appid/metadata/user-attributes"
+                  element={<MetadataUserAttributes />}
                 />
               </Routes>
             </div>

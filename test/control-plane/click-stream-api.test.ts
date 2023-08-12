@@ -325,7 +325,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'apifunclogs9F7B9244',
         'apifunceni59253B5A',
       ]);
-
     // StateMachineActionFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -540,6 +539,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:ListUsers',
               'quicksight:DescribeAccountSubscription',
               'quicksight:RegisterUser',
+              'quicksight:GenerateEmbedUrlForRegisteredUser',
+              'quicksight:UpdateDashboardPermissions',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',

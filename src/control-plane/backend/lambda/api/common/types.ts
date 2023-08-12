@@ -408,15 +408,27 @@ export enum FetchType {
   PIPELINE_DNS= 'PipelineDNS',
 }
 
-export enum MetadataEventType {
+export enum MetadataSource {
   PRESET = 'Preset',
   CUSTOM = 'Custom',
+  TEMPLATE = 'Template',
 }
 
-export enum MetadataEventPlatform {
+export enum MetadataPlatform {
   ANDROID = 'Android',
   IOS = 'iOS',
   WEB = 'Web',
-  MINIPROGRAM = 'MiniProgram',
+  WECHAT_MINIPROGRAM = 'Wechat MiniProgram',
+}
+
+export enum MetadataValueType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOLEAN = 'Boolean',
+}
+
+export enum MetadataParameterType {
+  PUBLIC = 'Public',
+  PRIVATE = 'Private',
 }
 

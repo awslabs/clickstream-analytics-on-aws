@@ -20,7 +20,19 @@
     "projects": "Projects",
     "pipelines": "Pipelines",
     "plugins": "Plugins",
-    "analytics": "Analytics",
+    "explore": "Explore",
+    "analytics": {
+      "realtime": "Realtime",
+      "dashboards": "Dashboards",
+      "explore": "Explore",
+      "metadata": "Metadata",
+      "exploreEvent": "Event Analysis",
+      "exploreRetention": "Retention Analysis",
+      "exploreFunnel": "Funnel Analysis",
+      "metadata-events": "Origin Events",
+      "metadata-event-parameters": "Event Parameters",
+      "metadata-user-attributes": "User Attributes"
+    },
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
     "monitorAlerts": "Alarms",
@@ -33,6 +45,7 @@
   "header": {
     "solution": "AWS Solutions",
     "solutionLibrary": "Solution Library",
+    "analytics": "Clickstream Analytics",
     "notifications": "Notifications",
     "settings": "Settings",
     "projectSettings": "Project settings",
@@ -46,7 +59,8 @@
     "more": "More",
     "all": "All",
     "back": "Back",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "switchSpace": "Switch Project"
   },
   "tag": {
     "name": "Tags",
@@ -147,7 +161,9 @@
     "addPlugin": "Add Plugin",
     "enableAll": "Enable All",
     "disableAll": "Disable All",
-    "viewAlarms": "View Alarms"
+    "viewAlarms": "View Alarms",
+    "refreshMetadata": "Refresh Metadata",
+    "clearFilters": "Clear filters"
   },
   "item": "item",
   "items": "items",
@@ -225,11 +241,18 @@
     "noAlarmInPipeline": "No Alarm configuration in this project",
     "projectNoPipeline": "This project did not configure pipeline"
   },
+  "table": {
+    "noMatches": "No matches",
+    "empty": "No resources",
+    "useText": "Use",
+    "matchText": "match",
+    "matchesText": "matches"
+  },
   "nextPage": "Next page",
   "prePage": "Previous page",
   "page": "Page",
   "allPages": " of all pages",
-  "addtionalSettings": "Addtional Settings",
+  "additionalSettings": "Additional Settings",
   "step": "Step",
   "steps": "Steps",
   "of": "of",

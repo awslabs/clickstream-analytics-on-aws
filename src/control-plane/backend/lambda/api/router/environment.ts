@@ -165,6 +165,12 @@ router_env.get(
   });
 
 router_env.get(
+  '/quicksight/embedUrl',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.embedUrl(req, res, next);
+  });
+
+router_env.get(
   '/athena/workgroups',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {

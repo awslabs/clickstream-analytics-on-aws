@@ -12,9 +12,16 @@
  */
 
 import { TopNavigation } from '@cloudscape-design/components';
+import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from 'ts/const';
+import { useLocation } from 'react-router-dom';
+import {
+  ANALYTICS_INFO_KEY,
+  PROJECT_CONFIG_JSON,
+  ZH_LANGUAGE_LIST,
+} from 'ts/const';
+import HeaderSwitchSpaceModal from './SwitchSpaceModal';
 
 interface IHeaderProps {
   user: any;
@@ -30,9 +37,21 @@ const LANGUAGE_ITEMS = [
 
 const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
+  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
+  const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
+    ANALYTICS_INFO_KEY,
+    {
+      pid: '',
+      pname: '',
+      appid: '',
+      appname: '',
+    }
+  );
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
@@ -78,46 +97,98 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/',
-          title: t('header.solution') || '',
+          title: t('header.solution') ?? '',
         }}
-        utilities={[
-          {
-            type: 'button',
-            text: t('header.solutionLibrary') || '',
-            href: 'https://aws.amazon.com/solutions/',
-            external: true,
-          },
-          {
-            type: 'menu-dropdown',
-            text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
-            title: 'Language',
-            ariaLabel: 'settings',
-            onItemClick: (item) => {
-              changeLanguage(item.detail.id);
-            },
-            items:
-              i18n.language === 'zh'
-                ? LANGUAGE_ITEMS.reverse()
-                : LANGUAGE_ITEMS,
-          },
-          {
-            type: 'menu-dropdown',
-            text: displayName,
-            description: displayName,
-            iconName: 'user-profile',
-            onItemClick: (item) => {
-              if (item.detail.id === 'signout') {
-                if (fullLogoutUrl) {
-                  signOut && signOut();
-                  window.location.href = fullLogoutUrl;
-                } else {
-                  signOut && signOut();
-                }
-              }
-            },
-            items: [{ id: 'signout', text: t('header.signOut') || '' }],
-          },
-        ]}
+        utilities={
+          location.pathname.startsWith('/analytics')
+            ? [
+                {
+                  type: 'button',
+                  variant: 'link',
+                  text: `${analyticsInfo?.pname} / ${analyticsInfo.appname}`,
+                },
+                {
+                  type: 'button',
+                  variant: 'primary-button',
+                  text: t('header.switchSpace') ?? '',
+                  onClick: () => {
+                    setSwitchProjectVisible(true);
+                  },
+                },
+                {
+                  type: 'menu-dropdown',
+                  text: ZH_LANGUAGE_LIST.includes(i18n.language)
+                    ? ZH_TEXT
+                    : EN_TEXT,
+                  title: 'Language',
+                  ariaLabel: 'settings',
+                  onItemClick: (item) => {
+                    changeLanguage(item.detail.id);
+                  },
+                  items:
+                    i18n.language === 'zh'
+                      ? LANGUAGE_ITEMS.reverse()
+                      : LANGUAGE_ITEMS,
+                },
+                {
+                  type: 'menu-dropdown',
+                  text: displayName,
+                  description: displayName,
+                  iconName: 'user-profile',
+                  onItemClick: (item) => {
+                    if (item.detail.id === 'signout') {
+                      if (fullLogoutUrl) {
+                        signOut && signOut();
+                        window.location.href = fullLogoutUrl;
+                      } else {
+                        signOut && signOut();
+                      }
+                    }
+                  },
+                  items: [{ id: 'signout', text: t('header.signOut') || '' }],
+                },
+              ]
+            : [
+                {
+                  type: 'button',
+                  text: t('header.solutionLibrary') || '',
+                  href: 'https://aws.amazon.com/solutions/',
+                  external: true,
+                },
+                {
+                  type: 'menu-dropdown',
+                  text: ZH_LANGUAGE_LIST.includes(i18n.language)
+                    ? ZH_TEXT
+                    : EN_TEXT,
+                  title: 'Language',
+                  ariaLabel: 'settings',
+                  onItemClick: (item) => {
+                    changeLanguage(item.detail.id);
+                  },
+                  items:
+                    i18n.language === 'zh'
+                      ? LANGUAGE_ITEMS.reverse()
+                      : LANGUAGE_ITEMS,
+                },
+                {
+                  type: 'menu-dropdown',
+                  text: displayName,
+                  description: displayName,
+                  iconName: 'user-profile',
+                  onItemClick: (item) => {
+                    if (item.detail.id === 'signout') {
+                      if (fullLogoutUrl) {
+                        signOut && signOut();
+                        window.location.href = fullLogoutUrl;
+                      } else {
+                        signOut && signOut();
+                      }
+                    }
+                  },
+                  items: [{ id: 'signout', text: t('header.signOut') || '' }],
+                },
+              ]
+        }
         i18nStrings={{
           searchIconAriaLabel: t('header.search') || '',
           searchDismissIconAriaLabel: t('header.closeSearch') || '',
@@ -126,6 +197,12 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuBackIconAriaLabel: t('header.back') || '',
           overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
         }}
+      />
+      <HeaderSwitchSpaceModal
+        visible={switchProjectVisible}
+        disableClose={false}
+        setSwitchProjectVisible={setSwitchProjectVisible}
+        setAnalyticsInfo={setAnalyticsInfo}
       />
     </header>
   );

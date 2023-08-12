@@ -14,11 +14,11 @@
 import express from 'express';
 import { body, header, query } from 'express-validator';
 import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { MetadataEventAttributeServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
+import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
 const metadataEventServ: MetadataEventServ = new MetadataEventServ();
-const metadataEventAttributeServ: MetadataEventAttributeServ = new MetadataEventAttributeServ();
+const metadataEventParameterServ: MetadataEventParameterServ = new MetadataEventParameterServ();
 const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
 
 router_metadata.get(
@@ -80,7 +80,7 @@ router_metadata.delete(
   });
 
 router_metadata.get(
-  '/event_attributes',
+  '/event_parameters',
   validate([
     query()
       .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
@@ -90,11 +90,11 @@ router_metadata.get(
       })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventAttributeServ.list(req, res, next);
+    return metadataEventParameterServ.list(req, res, next);
   });
 
 router_metadata.post(
-  '/event_attribute',
+  '/event_parameter',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isValidEmpty),
@@ -102,32 +102,32 @@ router_metadata.post(
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventAttributeServ.add(req, res, next);
+    return metadataEventParameterServ.add(req, res, next);
   });
 
-router_metadata.get('/event_attribute/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  return metadataEventAttributeServ.details(req, res, next);
+router_metadata.get('/event_parameter/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventParameterServ.details(req, res, next);
 });
 
 router_metadata.put(
-  '/event_attribute',
+  '/event_parameter',
   validate([
     body().custom(isValidEmpty),
     body('projectId').custom(isValidEmpty),
     body('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventAttributeServ.update(req, res, next);
+    return metadataEventParameterServ.update(req, res, next);
   });
 
 router_metadata.delete(
-  '/event_attribute/:id',
+  '/event_parameter/:id',
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventAttributeServ.delete(req, res, next);
+    return metadataEventParameterServ.delete(req, res, next);
   });
 
 router_metadata.get(

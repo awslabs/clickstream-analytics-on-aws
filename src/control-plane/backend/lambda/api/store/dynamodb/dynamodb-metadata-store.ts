@@ -19,10 +19,10 @@ import {
   ScanCommandInput,
   QueryCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, prefixTimeGSIName } from '../../common/constants';
+import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, query, scan } from '../../common/dynamodb-client';
-import { KeyVal } from '../../common/types';
-import { IMetadataEvent, IMetadataEventAttribute, IMetadataUserAttribute } from '../../model/metadata';
+import { KeyVal, MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/types';
+import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
 export class DynamoDbMetadataStore implements MetadataStore {
@@ -50,9 +50,15 @@ export class DynamoDbMetadataStore implements MetadataStore {
         id: `EVENT#${event.projectId}#${event.appId}#${event.name}`,
         type: `#METADATA#${event.projectId}#${event.appId}#${event.name}`,
         prefix: `EVENT#${event.projectId}#${event.appId}`,
+        projectId: event.projectId,
+        appId: event.appId,
         name: event.name,
         displayName: event.displayName ?? '',
         description: event.description ?? '',
+        metadataSource: event.metadataSource ?? MetadataSource.PRESET,
+        hasData: event.hasData ?? false,
+        platform: event.platform ?? [],
+        dataVolumeLastDay: event.dataVolumeLastDay ?? 0,
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: event.operator?? '',
@@ -66,7 +72,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   public async getEvent(projectId: string, appId: string, eventName: string): Promise<any> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      KeyConditionExpression: 'id = :id AND #type BETWEEN :metadata AND :attribute',
+      KeyConditionExpression: 'id = :id AND begins_with(#type, :metadata)',
       FilterExpression: 'deleted = :d',
       ExpressionAttributeNames: {
         '#type': 'type',
@@ -74,45 +80,107 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ExpressionAttributeValues: {
         ':d': false,
         ':id': `EVENT#${projectId}#${appId}#${eventName}`,
-        ':metadata': `#METADATA#${projectId}#${appId}#${eventName}`,
-        ':attribute': 'EVENT_ATTRIBUTE$',
+        ':metadata': `#METADATA#${projectId}#${appId}`,
       },
     };
     const records = await query(input);
+    const presetParameters = await this.listEventParameters(projectId, appId, 'asc', MetadataSource.PRESET);
+    // transform IMetadataEventParameter to IMetadataRelation
+    for (let index in presetParameters) {
+      const parameter = presetParameters[index] as IMetadataEventParameter;
+      const relation = {
+        projectId: parameter.projectId,
+        appId: parameter.appId,
+        parameterId: parameter.parameterId,
+        parameterName: parameter.name,
+        parameterDisplayName: parameter.displayName,
+        parameterDescription: parameter.description,
+        parameterMetadataSource: parameter.metadataSource,
+        parameterValueType: parameter.valueType,
+      };
+      records.push(relation);
+    };
     return records;
   };
 
   public async updateEvent(event: IMetadataEvent): Promise<void> {
+    const input: ScanCommandInput = {
+      TableName: analyticsMetadataTable,
+      FilterExpression: 'id = :p AND deleted = :d',
+      ExpressionAttributeValues: {
+        ':p': `EVENT#${event.projectId}#${event.appId}#${event.name}`,
+        ':d': false,
+      },
+    };
+    const records = await scan(input);
+    for (let index in records) {
+      if (records[index].prefix === `EVENT#${event.projectId}#${event.appId}`) {
+        const { updateExpression, expressionAttributeValues, expressionAttributeNames }
+        = this.getUpdateExpression('METADATA', event.displayName, event.description, event.operator);
+        const params: UpdateCommand = new UpdateCommand({
+          TableName: analyticsMetadataTable,
+          Key: {
+            id: records[index].id,
+            type: records[index].type,
+          },
+          // Define expressions for the new or updated attributes
+          UpdateExpression: updateExpression,
+          ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: 'ALL_NEW',
+        });
+        await docClient.send(params);
+      } else if (records[index].prefix === `RELATION#${event.projectId}#${event.appId}`) {
+        const { updateExpression, expressionAttributeValues, expressionAttributeNames }
+        = this.getUpdateExpression('EVENT', event.displayName, event.description, event.operator);
+        const params: UpdateCommand = new UpdateCommand({
+          TableName: analyticsMetadataTable,
+          Key: {
+            id: records[index].id,
+            type: records[index].type,
+          },
+          // Define expressions for the new or updated attributes
+          UpdateExpression: updateExpression,
+          ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: 'ALL_NEW',
+        });
+        await docClient.send(params);
+      }
+    }
+  };
+
+  private getUpdateExpression(type: string, displayName: string | undefined, description: string | undefined, operator: string | undefined) {
+    let displayNameColumn = 'displayName';
+    let descriptionColumn = 'description';
+    if (type === 'EVENT') {
+      displayNameColumn = 'eventDisplayName';
+      descriptionColumn = 'eventDescription';
+    } else if (type === 'PARAMETER') {
+      displayNameColumn = 'parameterDisplayName';
+      descriptionColumn = 'parameterDescription';
+    }
     let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
-    expressionAttributeValues.set(':operator', event.operator);
+    expressionAttributeValues.set(':operator', operator ?? '');
     expressionAttributeNames['#updateAt'] = 'updateAt';
     expressionAttributeNames['#operator'] = 'operator';
-    if (event.displayName) {
-      updateExpression = `${updateExpression}, #displayName= :n`;
-      expressionAttributeValues.set(':n', event.displayName);
-      expressionAttributeNames['#displayName'] = 'displayName';
+    if (displayName) {
+      updateExpression = `${updateExpression}, #displayName= :disp`;
+      expressionAttributeValues.set(':disp', displayName);
+      expressionAttributeNames['#displayName'] = displayNameColumn;
     }
-    if (event.description) {
-      updateExpression = `${updateExpression}, description= :d`;
-      expressionAttributeValues.set(':d', event.description);
+    if (description) {
+      updateExpression = `${updateExpression}, #description= :desc`;
+      expressionAttributeValues.set(':desc', description);
+      expressionAttributeNames['#description'] = descriptionColumn;
     }
-    const params: UpdateCommand = new UpdateCommand({
-      TableName: analyticsMetadataTable,
-      Key: {
-        id: `EVENT#${event.projectId}#${event.appId}#${event.name}`,
-        type: `#METADATA#${event.projectId}#${event.appId}#${event.name}`,
-      },
-      // Define expressions for the new or updated attributes
-      UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ReturnValues: 'ALL_NEW',
-    });
-    await docClient.send(params);
-  };
+    return {
+      updateExpression, expressionAttributeValues, expressionAttributeNames,
+    };
+  }
 
   public async deleteEvent(projectId: string, appId: string, eventName: string, operator: string): Promise<void> {
     const input: ScanCommandInput = {
@@ -166,82 +234,139 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records as IMetadataEvent[];
   };
 
-  public async isEventAttributeExisted(projectId: string, appId: string, eventAttributeId: string): Promise<boolean> {
+  public async isEventParameterExisted(projectId: string, appId: string, eventParameterId: string): Promise<boolean> {
     const params: GetCommand = new GetCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
-        type: `#METADATA#${projectId}#${appId}#${eventAttributeId}`,
+        id: `EVENT_PARAMETER#${projectId}#${appId}#${eventParameterId}`,
+        type: `#METADATA#${projectId}#${appId}#${eventParameterId}`,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
     if (!result.Item) {
       return false;
     }
-    const eventAttribute: IMetadataEventAttribute = result.Item as IMetadataEventAttribute;
-    return eventAttribute && !eventAttribute.deleted;
+    const eventParameter: IMetadataEventParameter = result.Item as IMetadataEventParameter;
+    return eventParameter && !eventParameter.deleted;
   };
 
-  public async createEventAttribute(eventAttribute: IMetadataEventAttribute): Promise<string> {
+  public async createEventParameter(eventParameter: IMetadataEventParameter): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
-        id: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
-        type: `#METADATA#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
-        prefix: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}`,
-        name: eventAttribute.name,
-        displayName: eventAttribute.displayName,
-        description: eventAttribute.description,
-        valueType: eventAttribute.valueType,
-        valueEnum: eventAttribute.valueEnum,
+        id: `EVENT_PARAMETER#${eventParameter.projectId}#${eventParameter.appId}#${eventParameter.parameterId}`,
+        type: `#METADATA#${eventParameter.projectId}#${eventParameter.appId}#${eventParameter.parameterId}`,
+        prefix: `EVENT_PARAMETER#${eventParameter.projectId}#${eventParameter.appId}`,
+        projectId: eventParameter.projectId,
+        appId: eventParameter.appId,
+        parameterId: eventParameter.parameterId,
+        name: eventParameter.name,
+        displayName: eventParameter.displayName ?? '',
+        description: eventParameter.description ?? '',
+        metadataSource: eventParameter.metadataSource ?? MetadataSource.PRESET,
+        hasData: eventParameter.hasData ?? false,
+        platform: eventParameter.platform ?? [],
+        parameterType: eventParameter.parameterType ?? MetadataParameterType.PUBLIC,
+        valueType: eventParameter.valueType ?? MetadataValueType.STRING,
+        valueEnum: eventParameter.valueEnum ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
-        operator: eventAttribute.operator?? '',
+        operator: eventParameter.operator?? '',
         deleted: false,
       },
     });
     await docClient.send(params);
-    return eventAttribute.id;
+    return eventParameter.parameterId;
   };
 
-  public async getEventAttribute(projectId: string, appId: string, eventAttributeId: string): Promise<IMetadataEventAttribute | undefined> {
-    const params: GetCommand = new GetCommand({
+  public async getEventParameter(projectId: string, appId: string, eventParameterId: string): Promise<any> {
+    const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      Key: {
-        id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
-        type: `#METADATA#${projectId}#${appId}#${eventAttributeId}`,
+      IndexName: invertedGSIName,
+      KeyConditionExpression: '#type = :type',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#type': 'type',
       },
-    });
-    const result: GetCommandOutput = await docClient.send(params);
-    if (!result.Item) {
-      return undefined;
-    }
-    const eventAttribute: IMetadataEventAttribute = result.Item as IMetadataEventAttribute;
-    return !eventAttribute.deleted ? eventAttribute : undefined;
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':type': `#METADATA#${projectId}#${appId}#${eventParameterId}`,
+      },
+    };
+    return query(input);
   };
 
-  public async updateEventAttribute(eventAttribute: IMetadataEventAttribute): Promise<void> {
+  public async updateEventParameter(eventParameter: IMetadataEventParameter): Promise<void> {
+    const input: QueryCommandInput = {
+      TableName: analyticsMetadataTable,
+      IndexName: invertedGSIName,
+      KeyConditionExpression: '#type = :type',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#type': 'type',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':type': `#METADATA#${eventParameter.projectId}#${eventParameter.appId}#${eventParameter.parameterId}`,
+      },
+    };
+    const records = await query(input);
+    for (let index in records) {
+      if (records[index].prefix === `EVENT_PARAMETER#${eventParameter.projectId}#${eventParameter.appId}`) {
+        const { updateExpression, expressionAttributeValues, expressionAttributeNames }
+        = this.getUpdateExpression('METADATA', eventParameter.displayName, eventParameter.description, eventParameter.operator);
+        const params: UpdateCommand = new UpdateCommand({
+          TableName: analyticsMetadataTable,
+          Key: {
+            id: records[index].id,
+            type: records[index].type,
+          },
+          // Define expressions for the new or updated attributes
+          UpdateExpression: updateExpression,
+          ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: 'ALL_NEW',
+        });
+        await docClient.send(params);
+      } else if (records[index].prefix === `RELATION#${eventParameter.projectId}#${eventParameter.appId}`) {
+        const { updateExpression, expressionAttributeValues, expressionAttributeNames }
+        = this.getUpdateExpression('PARAMETER', eventParameter.displayName, eventParameter.description, eventParameter.operator);
+        const params: UpdateCommand = new UpdateCommand({
+          TableName: analyticsMetadataTable,
+          Key: {
+            id: records[index].id,
+            type: records[index].type,
+          },
+          // Define expressions for the new or updated attributes
+          UpdateExpression: updateExpression,
+          ExpressionAttributeNames: expressionAttributeNames as KeyVal<string>,
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: 'ALL_NEW',
+        });
+        await docClient.send(params);
+      }
+    }
     let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
-    expressionAttributeValues.set(':operator', eventAttribute.operator);
+    expressionAttributeValues.set(':operator', eventParameter.operator);
     expressionAttributeNames['#updateAt'] = 'updateAt';
     expressionAttributeNames['#operator'] = 'operator';
-    if (eventAttribute.displayName) {
+    if (eventParameter.displayName) {
       updateExpression = `${updateExpression}, #displayName= :n`;
-      expressionAttributeValues.set(':n', eventAttribute.displayName);
+      expressionAttributeValues.set(':n', eventParameter.displayName);
       expressionAttributeNames['#displayName'] = 'displayName';
     }
-    if (eventAttribute.description) {
+    if (eventParameter.description) {
       updateExpression = `${updateExpression}, description= :d`;
-      expressionAttributeValues.set(':d', eventAttribute.description);
+      expressionAttributeValues.set(':d', eventParameter.description);
     }
     const params: UpdateCommand = new UpdateCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `EVENT_ATTRIBUTE#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
-        type: `#METADATA#${eventAttribute.projectId}#${eventAttribute.appId}#${eventAttribute.id}`,
+        id: `EVENT_PARAMETER#${eventParameter.projectId}#${eventParameter.appId}#${eventParameter.parameterId}`,
+        type: `#METADATA#${eventParameter.projectId}#${eventParameter.appId}#${eventParameter.parameterId}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -252,24 +377,24 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  public async deleteEventAttribute(projectId: string, appId: string, eventAttributeId: string, operator: string): Promise<void> {
-    // TODO: if attribute bind with any event, should not delete
+  public async deleteEventParameter(projectId: string, appId: string, eventParameterId: string, operator: string): Promise<void> {
+    // TODO: if attribute binded with any event, should not delete
     const input: ScanCommandInput = {
       TableName: analyticsMetadataTable,
       FilterExpression: 'id = :p AND deleted = :d',
       ExpressionAttributeValues: {
-        ':p': `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
+        ':p': `EVENT_PARAMETER#${projectId}#${appId}#${eventParameterId}`,
         ':d': false,
       },
     };
     const records = await scan(input);
-    const eventAttributes = records as IMetadataEventAttribute[];
-    for (let index in eventAttributes) {
+    const eventParameters = records as IMetadataEventParameter[];
+    for (let index in eventParameters) {
       const params: UpdateCommand = new UpdateCommand({
         TableName: analyticsMetadataTable,
         Key: {
-          id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${eventAttributeId}`,
-          type: eventAttributes[index].type,
+          id: `EVENT_PARAMETER#${projectId}#${appId}#${eventParameterId}`,
+          type: eventParameters[index].type,
         },
         // Define expressions for the new or updated attributes
         UpdateExpression: 'SET deleted= :d, #operator= :operator',
@@ -286,23 +411,29 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
   };
 
-  public async listEventAttributes(projectId: string, appId: string, order: string): Promise<IMetadataEventAttribute[]> {
+  public async listEventParameters(projectId: string, appId: string, order: string, source?: string): Promise<IMetadataEventParameter[]> {
+    let filterExpression = 'deleted = :d';
+    let expressionAttributeValues = new Map();
+    let expressionAttributeNames = {} as KeyVal<string>;
+    expressionAttributeValues.set(':d', false);
+    expressionAttributeValues.set(':prefix', `EVENT_PARAMETER#${projectId}#${appId}`);
+    expressionAttributeNames['#prefix'] = 'prefix';
+    if (source) {
+      filterExpression = `${filterExpression} AND #metadataSource= :metadataSource`;
+      expressionAttributeValues.set(':metadataSource', source);
+      expressionAttributeNames['#metadataSource'] = 'metadataSource';
+    }
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixTimeGSIName,
       KeyConditionExpression: '#prefix= :prefix',
-      FilterExpression: 'deleted = :d',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':d': false,
-        ':prefix': `EVENT_ATTRIBUTE#${projectId}#${appId}`,
-      },
+      FilterExpression: filterExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
-    return records as IMetadataEventAttribute[];
+    return records as IMetadataEventParameter[];
   };
 
   public async isUserAttributeExisted(projectId: string, appId: string, userAttributeId: string): Promise<boolean> {
@@ -325,12 +456,19 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
-        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
-        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
+        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.attributeId}`,
+        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.attributeId}`,
         prefix: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}`,
+        projectId: userAttribute.projectId,
+        appId: userAttribute.appId,
+        attributeId: userAttribute.attributeId,
         name: userAttribute.name,
-        displayName: userAttribute.displayName,
-        description: userAttribute.description,
+        displayName: userAttribute.displayName?? '',
+        description: userAttribute.description?? '',
+        metadataSource: userAttribute.metadataSource ?? MetadataSource.PRESET,
+        hasData: userAttribute.hasData ?? false,
+        valueType: userAttribute.valueType ?? MetadataValueType.STRING,
+        valueEnum: userAttribute.valueEnum ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: userAttribute.operator?? '',
@@ -338,7 +476,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
     });
     await docClient.send(params);
-    return userAttribute.id;
+    return userAttribute.attributeId;
   };
 
   public async getUserAttribute(projectId: string, appId: string, userAttributeId: string): Promise<IMetadataUserAttribute | undefined> {
@@ -377,8 +515,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: analyticsMetadataTable,
       Key: {
-        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
-        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.id}`,
+        id: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.attributeId}`,
+        type: `#METADATA#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.attributeId}`,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,

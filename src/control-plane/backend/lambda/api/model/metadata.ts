@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { MetadataEventType } from '../common/types';
+import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/types';
 
 export interface IMetadataEvent {
   readonly id: string;
@@ -24,11 +24,11 @@ export interface IMetadataEvent {
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: MetadataEventType;
+  readonly metadataSource: MetadataSource;
   readonly hasData: boolean;
-  readonly platform: string;
+  readonly platform: MetadataPlatform[];
   readonly dataVolumeLastDay: number;
-  attributes? : IMetadataEventAttribute[];
+  associatedParameters? : IMetadataRelation[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -41,7 +41,7 @@ export interface IMetadataAttributeValue {
   readonly displayValue: string;
 }
 
-export interface IMetadataEventAttribute {
+export interface IMetadataEventParameter {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -49,11 +49,17 @@ export interface IMetadataEventAttribute {
   readonly projectId: string;
   readonly appId: string;
 
+  readonly parameterId: string;
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly valueType: string;
+  readonly metadataSource: MetadataSource;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
+  readonly parameterType: MetadataParameterType;
+  readonly valueType: MetadataValueType;
   readonly valueEnum: IMetadataAttributeValue[];
+  associatedEvents? : IMetadataRelation[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -69,10 +75,39 @@ export interface IMetadataUserAttribute {
   readonly projectId: string;
   readonly appId: string;
 
+  readonly attributeId: string;
   readonly name: string;
   readonly displayName: string;
   readonly description: string;
-  readonly eventType: string;
+  readonly metadataSource: MetadataSource;
+  readonly hasData: boolean;
+  readonly valueType: MetadataValueType;
+  readonly valueEnum: IMetadataAttributeValue[];
+
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
+}
+
+export interface IMetadataRelation {
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
+
+  readonly eventName: string;
+  readonly eventDisplayName: string;
+  readonly eventDescription: string;
+
+  readonly parameterId: string;
+  readonly parameterName: string;
+  readonly parameterDisplayName: string;
+  readonly parameterDescription: string;
+  readonly parameterValueType: MetadataValueType;
+  readonly parameterMetadataSource: MetadataSource;
 
   readonly createAt: number;
   readonly updateAt: number;

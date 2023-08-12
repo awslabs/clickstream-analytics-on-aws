@@ -141,7 +141,8 @@ export class CloudFrontControlPlaneStack extends Stack {
     uri.startsWith('/project') || 
     uri.startsWith('/pipelines') || 
     uri.startsWith('/plugins') || 
-    uri.startsWith('/alarms') || 
+    uri.startsWith('/alarms') ||  
+    uri.startsWith('/analytics') || 
     uri.startsWith('/quicksight')) {
       request.uri = '/index.html'; 
   }
@@ -161,12 +162,16 @@ export class CloudFrontControlPlaneStack extends Stack {
       solutionBucket.bucket.bucketRegionalDomainName,
     ].join(' ');
 
+    const frameCSPUrl = [
+      `*.quicksight.${Aws.PARTITION}.${Aws.URL_SUFFIX}`,
+    ].join(' ');
+
     if (createCognitoUserPool) {
       responseHeadersPolicy = new ResponseHeadersPolicy(this, 'response_headers_policy', {
         responseHeadersPolicyName: `clickstream-response_header-policy-${getShortIdOfStack(this)}`,
         securityHeadersBehavior: {
           contentSecurityPolicy: {
-            contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}`,
+            contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}; frame-src ${frameCSPUrl};`,
             override: true,
           },
           contentTypeOptions: { override: true },

@@ -219,6 +219,25 @@ export class ClickStreamApiConstruct extends Construct {
     });
     stackActionStateMachine.stateMachine.grantStartExecution(stackWorkflowStateMachine.stackWorkflowMachine);
 
+    const quickSightEmbedRole = new iam.Role(this, 'QuickSightEmbedRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      inlinePolicies: {
+        quickSightEmbedPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              resources: [
+                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/Clickstream*`,
+              ],
+              actions: [
+                'quicksight:GenerateEmbedUrlForRegisteredUser',
+              ],
+            }),
+          ],
+        }),
+      },
+    });
+
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -265,6 +284,8 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:ListUsers',
             'quicksight:DescribeAccountSubscription',
             'quicksight:RegisterUser',
+            'quicksight:GenerateEmbedUrlForRegisteredUser',
+            'quicksight:UpdateDashboardPermissions',
             'ds:AuthorizeApplication',
             'ds:UnauthorizeApplication',
             'ds:CheckAlias',
@@ -340,6 +361,7 @@ export class ClickStreamApiConstruct extends Construct {
         AUTHORIZER_TABLE_NAME: props.authProps?.authorizerTable.tableName ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
+        QUICKSIGHT_EMBED_ROLE_ARN: quickSightEmbedRole.roleArn,
         HEALTH_CHECK_PATH: props.healthCheckPath,
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         ... POWERTOOLS_ENVS,

@@ -1,0 +1,122 @@
+{
+  "analytics": "Analytics",
+  "dashboard": {
+    "title": "Dashboards",
+    "description": "This page lists all the dashboards."
+  },
+  "list": {
+    "loading": "Loading dashboards.",
+    "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
+    "id": "ID",
+    "description": "Description",
+    "createAt": "CreateAt"
+  },
+  "header": {
+    "modalTitle": "Switch Project Space",
+    "selectProjectTitle": "Please select a project",
+    "selectAppTitle": "Please select an application",
+    "configurations": "Configurations"
+  },
+  "metadata": {
+    "event": {
+      "title": "Origin Events",
+      "description": "Description of the Origin Events",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Event name",
+      "tableColumnDisplayName": "Display name",
+      "tableColumnDescription": "Description",
+      "tableColumnMetadataSource": "Source",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnDataVolumeLastDay": "Data volume last day",
+      "tableEmpty": "No events",
+      "filteringAriaLabel": "Find events",
+      "filteringPlaceholder": "Find events",
+      "groupPropertiesText": "Properties",
+      "operatorsText": "Operators",
+      "clearFiltersText": "Clear filters",
+      "split": {
+        "title": "Event details",
+        "associatedPresetParameters": "Associated preset parameters",
+        "associatedCustomParameters": "Associated custom parameters",
+        "parameterName": "Parameter name",
+        "displayName": "Display name",
+        "description": "Description",
+        "dataType": "Data type",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
+      },
+      "options": {
+        "eventNumber": "Event number",
+        "userNumber": "User number"
+      }
+    },
+    "eventParameter": {
+      "title": "Event Parameters",
+      "description": "Description of the Event Parameter",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Parameter name",
+      "tableColumnDisplayName": "Display name",
+      "tableColumnDescription": "Description",
+      "tableColumnMetadataSource": "Source",
+      "tableColumnParameterType": "Parameter type",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnDataType": "Data type",
+      "tableEmpty": "No event parameters",
+      "filteringAriaLabel": "Find parameters",
+      "filteringPlaceholder": "Find parameters",
+      "groupPropertiesText": "Properties",
+      "operatorsText": "Operators",
+      "clearFiltersText": "Clear filters",
+      "split": {
+        "title": "Event parameter details",
+        "associatedEvents": "Associated events",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
+      }
+    },
+    "userAttribute": {
+      "title": "User Attribute",
+      "description": "Description of the User Attribute",
+      "tableLoading": "Loading",
+      "tableColumnID": "ID",
+      "tableColumnName": "Attribute name",
+      "tableColumnDisplayName": "Display name",
+      "tableColumnDescription": "Description",
+      "tableColumnMetadataSource": "Source",
+      "tableColumnHasData": "Has data",
+      "tableColumnPlatform": "Platform",
+      "tableColumnDataType": "Data type",
+      "tableEmpty": "No user attributes",
+      "filteringAriaLabel": "Find attributes",
+      "filteringPlaceholder": "Find attributes",
+      "groupPropertiesText": "Properties",
+      "operatorsText": "Operators",
+      "clearFiltersText": "Clear filters",
+      "split": {
+        "title": "User attribute details",
+        "tableLoading": "Loading",
+        "tableEmpty": "No resources"
+      }
+    }
+  },
+  "funnel": {
+    "labels": {
+      "reset": "Reset",
+      "save": "Save to Dashboard",
+      "metrics": "Metrics",
+      "associateParameter": "Associate parameter",
+      "window": "Funnel window",
+      "funnelSteps": "Funnel steps",
+      "conversionWindowPeriod": "Conversion window period",
+      "filters": "Filters"
+    }
+  },
+  "valid": {
+    "projectSelectError": "Must select a project",
+    "appSelectError": "Must select an application"
+  }
+}

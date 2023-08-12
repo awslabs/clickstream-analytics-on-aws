@@ -29,6 +29,7 @@ import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
   describeClickstreamAccountSubscription,
+  generateEmbedUrlForRegisteredUser,
   listQuickSightUsers,
   quickSightIsSubscribed, quickSightPing,
   registerQuickSightUser,
@@ -239,6 +240,18 @@ export class EnvironmentServ {
       if (!result) {
         return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
       }
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async embedUrl(req: any, res: any, next: any) {
+    try {
+      const { region, allowedDomain, dashboardId, sheetId, visualId } = req.query;
+      const result = await generateEmbedUrlForRegisteredUser(
+        region, allowedDomain, dashboardId, sheetId, visualId,
+      );
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

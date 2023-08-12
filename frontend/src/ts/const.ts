@@ -392,3 +392,24 @@ export const CLOUDFORMATION_STATUS_MAP: any = {
   UPDATE_ROLLBACK_IN_PROGRESS: 'loading',
   UPDATE_FAILED: 'error',
 };
+
+export enum MetadataSource {
+  PRESET = 'Preset',
+  CUSTOM = 'Custom',
+  TEMPLATE = 'Template',
+}
+
+export enum MetadataPlatform {
+  ANDROID = 'Android',
+  IOS = 'iOS',
+  WEB = 'Web',
+  WECHAT_MINIPROGRAM = 'Wechat MiniProgram',
+}
+
+export enum MetadataValueType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOLEAN = 'Boolean',
+}
+
+export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';

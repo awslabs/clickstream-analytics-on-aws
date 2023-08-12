@@ -13,7 +13,7 @@
 # production
 /build
 
-aws-exports.json
+aws-exports*.json
 
 # misc
 .DS_Store

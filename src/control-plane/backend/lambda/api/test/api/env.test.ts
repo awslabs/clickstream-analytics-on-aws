@@ -1108,7 +1108,7 @@ describe('Account Env test', () => {
       ],
     });
     let res = await request(app).get('/api/env/quicksight/users');
-    expect(quickSightClient).toHaveReceivedCommandTimes(ListUsersCommand, 1);
+    expect(quickSightClient).toHaveReceivedCommandTimes(ListUsersCommand, 2);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1190,12 +1190,13 @@ describe('Account Env test', () => {
   });
   it('Create QuickSight User in error region', async () => {
     tokenMock(ddbMock, false);
-    quickSightClient.on(RegisterUserCommand).rejectsOnce(
+    quickSightClient.on(ListUsersCommand).rejectsOnce(
       new AccessDeniedException({
         $metadata: { requestId: '' },
         message: 'Operation is being called from endpoint us-east-1, but your identity region is us-west-2. Please use the us-west-2 endpoint.',
       }),
-    ).resolves({
+    );
+    quickSightClient.on(RegisterUserCommand).resolves({
       UserInvitationUrl: 'http://xxx',
     });
     let res = await request(app)
@@ -1205,7 +1206,8 @@ describe('Account Env test', () => {
         email: 'fake@example.com',
         username: 'Clickstream-User-xxx',
       });
-    expect(quickSightClient).toHaveReceivedCommandTimes(RegisterUserCommand, 2);
+    expect(quickSightClient).toHaveReceivedCommandTimes(ListUsersCommand, 1);
+    expect(quickSightClient).toHaveReceivedCommandTimes(RegisterUserCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({

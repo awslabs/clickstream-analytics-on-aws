@@ -291,7 +291,7 @@ describe('Pipeline test', () => {
     expect(res.body.message).toEqual('Validation error: your S3 bucket must have a bucket policy that grants Elastic Load Balancing permission to write the access logs to the bucket.');
     expect(s3Mock).toHaveReceivedCommandTimes(GetBucketPolicyCommand, 1);
   });
-  it('Create pipeline with standard QuickSigth', async () => {
+  it('Create pipeline with standard QuickSight', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);

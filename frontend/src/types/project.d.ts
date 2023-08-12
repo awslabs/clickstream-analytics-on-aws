@@ -35,7 +35,7 @@ declare global {
     status?: string;
     pipelineId?: string;
   }
-
+ 
   interface IAlarmPromiseResult {
     status: string;
     value?: {

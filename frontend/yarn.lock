@@ -1775,6 +1775,11 @@
     tslib "^2.4.0"
     weekstart "^1.1.0"
 
+"@cloudscape-design/design-tokens@^3.0.22":
+  version "3.0.22"
+  resolved "https://registry.yarnpkg.com/@cloudscape-design/design-tokens/-/design-tokens-3.0.22.tgz#d0cc1f877d369872d404a45b4ca77e77cf842eb1"
+  integrity sha512-y32yh21fDv/jT5xpDDyM2GmsZEj8EhYbwo9vl/L7gAVMzyGg3ug8KRyBEPfMSQx95kT1hSphduFK+u2z51BYSg==
+
 "@cloudscape-design/global-styles@^1.0.7":
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/@cloudscape-design/global-styles/-/global-styles-1.0.12.tgz#964eea16d60ce0f97f64efa0633f3e4d812b406a"
@@ -3913,6 +3918,14 @@ ajv@^8.0.0, ajv@^8.6.0, ajv@^8.9.0:
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
+
+amazon-quicksight-embedding-sdk@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/amazon-quicksight-embedding-sdk/-/amazon-quicksight-embedding-sdk-2.2.2.tgz#a5e7f9c2176c3046d727e1e5385702b3f165d1d9"
+  integrity sha512-scvYzFR5Zy1NEyfYkf53CpCoUYY9f3A+H5hv+vpAXqlt1QQKXeYiFpN/1SS8bwjXdjgNRsx9M9l5/rxMiOKSQg==
+  dependencies:
+    punycode "^2.1.1"
+    uuid "^9.0.0"
 
 ansi-escapes@^4.2.1, ansi-escapes@^4.3.1:
   version "4.3.2"
@@ -11465,6 +11478,11 @@ uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-to-istanbul@^8.1.0:
   version "8.1.1"

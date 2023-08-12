@@ -45,8 +45,8 @@ const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
 const MOCK_NEW_TEMPLATE_VERSION = '1.0.0-main-sdjes12';
 const MOCK_SOLUTION_VERSION = 'v1.0.0';
 const MOCK_EVENT_NAME = 'event-mock';
-const MOCK_EVENT_ATTRIBUTE_ID = '1111-1111';
-const MOCK_EVENT_ATTRIBUTE_NAME = 'event-attribute-mock';
+const MOCK_EVENT_PARAMETER_ID = '1111-1111';
+const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
 const MOCK_USER_ATTRIBUTE_ID = '2222-2222';
 const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
 
@@ -163,14 +163,14 @@ function metadataEventAttributeExistedMock(ddbMock: any, projectId:string, appId
   const tokenInput: GetCommandInput = {
     TableName: analyticsMetadataTable,
     Key: {
-      id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${MOCK_EVENT_ATTRIBUTE_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_ATTRIBUTE_ID}`,
+      id: `EVENT_PARAMETER#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
+      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
     },
   };
   return ddbMock.on(GetCommand, tokenInput).resolves({
     Item: {
-      id: `EVENT_ATTRIBUTE#${projectId}#${appId}#${MOCK_EVENT_ATTRIBUTE_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_ATTRIBUTE_ID}`,
+      id: `EVENT_PARAMETER#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
+      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
       deleted: !existed,
     },
   });
@@ -823,8 +823,8 @@ export {
   MOCK_NEW_TEMPLATE_VERSION,
   MOCK_SOLUTION_VERSION,
   MOCK_EVENT_NAME,
-  MOCK_EVENT_ATTRIBUTE_ID,
-  MOCK_EVENT_ATTRIBUTE_NAME,
+  MOCK_EVENT_PARAMETER_ID,
+  MOCK_EVENT_PARAMETER_NAME,
   MOCK_USER_ATTRIBUTE_ID,
   MOCK_USER_ATTRIBUTE_NAME,
   tokenMock,
