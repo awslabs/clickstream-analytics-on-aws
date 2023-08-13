@@ -484,6 +484,45 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               },
             ],
           },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
         ],
         Version: '2012-10-17',
       },

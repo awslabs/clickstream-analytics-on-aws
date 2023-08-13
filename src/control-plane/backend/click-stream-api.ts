@@ -374,6 +374,7 @@ export class ClickStreamApiConstruct extends Construct {
 
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
+    analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
     if (props.authProps?.authorizerTable) {
       props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
     }
