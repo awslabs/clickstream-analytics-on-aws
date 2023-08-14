@@ -31,6 +31,7 @@ import { Construct } from 'constructs';
 import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
+  addCfnNagToStack,
 } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
@@ -292,6 +293,21 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 }
 
 function addCfnNag(stack: Stack) {
+  const cfnNagList = [
+    {
+      paths_endswith: [
+        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W76',
+          reason:
+          'This policy needs to be able to call other AWS service by design',
+        },
+      ],
+    },
+  ];
+  addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
   NagSuppressions.addStackSuppressions(stack, [
