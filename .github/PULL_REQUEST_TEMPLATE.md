@@ -16,8 +16,8 @@
 - [ ] add new test cases
 - [ ] all code changes are covered by unit tests
 - [ ] end-to-end tests
-  - [ ] deploy control plane with CloudFront + S3 + API gateway
-  - [ ] deploy control plane within VPC
+  - [ ] deploy web console with CloudFront + S3 + API gateway
+  - [ ] deploy web console within VPC
   - [ ] deploy ingestion server
     - [ ] with MSK sink
     - [ ] with KDS sink
@@ -34,3 +34,7 @@
 - [ ] add parameters without default value in stack
 - [ ] introduce new service permission in stack
 - [ ] introduce new top level stack module
+
+## Miscellaneous
+
+- [ ] introduce new symbol link source file(s) to be shared among infra code, web console frontend, and web console backend
