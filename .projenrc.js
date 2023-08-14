@@ -136,6 +136,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'deployment/open-source/',
     '.viperlightrc',
     'codescan-funcs.sh',
+    'codescan-*-default.sh',
     '*.iml',
     '*.ipr',
     '*.iws',

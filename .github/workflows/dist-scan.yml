@@ -79,6 +79,8 @@ jobs:
     name: post-build scan
     needs: build-dist
     runs-on: ubuntu-latest
+    env:
+      SOLUTION_NAME: clickstream-analytics-on-aws
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
@@ -88,15 +90,41 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - uses: actions/download-artifact@v3
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: deployment/global-s3-assets
+      - name: build package
+        run: |
+          cd deployment/
+          ./build-open-source-dist.sh $SOLUTION_NAME
+      - name: install dependencies
+        run: |
+          yarn install --check-files --frozen-lockfile
+          npx projen
+          yarn install --check-files --frozen-lockfile --cwd frontend 
       - name: Post-build scan
+        env:
+          VIPERLIGHT_SCAN_STRATEGY: Enforce
+          VIPERLIGHT_PUBCHECK_STRATEGY: Monitor
         run: |-
           curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/.viperlightrc -o .viperlightrc
-          curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/codescan-funcs.sh -o codescan-funcs.sh
           curl https://viperlight-scanner.s3.us-east-1.amazonaws.com/latest/viperlight.zip -o viperlight.zip
           unzip -q viperlight.zip -d ../viperlight && rm viperlight.zip
-          ./codescan-prebuild-custom.sh
+          cp ../viperlight/scripts/*.sh .
+          default_scan="./codescan-postbuild-default.sh"
+          if [ -f "$default_scan" ]; then
+            chmod +x $default_scan
+          else
+            default_scn="viperlight scan"
+          fi
+          custom_scancmd="./codescan-postbuild-custom.sh"
+          if [ -f "$custom_scancmd" ]; then
+            chmod +x $custom_scancmd
+            $custom_scancmd
+          else
+            $default_scan
+          fi
+          # force check notice-js
+          ../viperlight/bin/viperlight pubcheck -m notice-js
