@@ -13,6 +13,8 @@ phases:
   install:
     runtime-versions:
       nodejs: 18.x
+    commands:
+      - n 18.17.1
   pre_build:
     commands:
       - |-
