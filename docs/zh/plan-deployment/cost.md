@@ -86,8 +86,8 @@ weight: 1
 |                         | 每6小时              |     99     | 无服务器 (基于8个RPU)               |       17.2        |   116.2    |
 |                         | 每日                 |     140     | 无服务器 (基于8个RPU)               |       16.9        |    156.9   |
 | 1000RPS             | 每小时                |      1362   | 无服务器 (基于8个RPU) |       172        |  1534    |
-|              | 每6小时                |      678   | 无服务器 (基于8个RPU) |       117        | 795
-|              | 每日                |      873   | 无服务器 (基于8个RPU) |       161        | 1034 |
+|              | 每6小时                |      579   | 无服务器 (基于8个RPU) |       137        | 716
+|              | 每日                |      642   | 无服务器 (基于8个RPU) |       94        | 736 |
 
 !!! info "提示"
 
@@ -96,13 +96,19 @@ weight: 1
     ```json
     {
     "sparkConfig": [
-            "spark.emr-serverless.executor.disk=80g",
-            "spark.executor.instances=8",
+            "spark.emr-serverless.executor.disk=200g",
+            "spark.executor.instances=16",
             "spark.dynamicAllocation.initialExecutors=16",
-            "spark.executor.memory=80g",
-            "spark.executor.cores=16"
+            "spark.executor.memory=100g",
+            "spark.executor.cores=16",
+            "spark.network.timeout=10000000",
+            "spark.executor.heartbeatInterval=10000000",
+            "spark.shuffle.registration.timeout=120000",
+            "spark.shuffle.registration.maxAttempts=5",
+            "spark.shuffle.file.buffer=2m",
+            "spark.shuffle.unsafe.file.output.buffer=1m"
         ],
-        "inputRePartitions": 2000
+        "inputRePartitions": 800
     }
     ```
 
