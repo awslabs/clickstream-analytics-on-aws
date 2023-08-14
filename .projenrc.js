@@ -14,7 +14,7 @@
 const { awscdk, gitlab, javascript, typescript } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.81.0';
-const minNodeVersion = '18.16.1';
+const minNodeVersion = '18.17.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
