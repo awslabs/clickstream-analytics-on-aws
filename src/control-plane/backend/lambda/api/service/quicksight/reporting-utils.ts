@@ -34,7 +34,9 @@ export interface VisualProps {
   readonly parameterDeclarations?: ParameterDeclaration[];
   readonly filterGroup?: FilterGroup;
   readonly eventCount?: number;
-  readonly ColumnConfigurations?: ColumnConfiguration[];
+  readonly columnConfigurations?: ColumnConfiguration[];
+  readonly colSpan?: number;
+  readonly rowSpan?: number;
 }
 
 export interface DashboardAction {
@@ -119,6 +121,10 @@ export const funnelVisualColumns: InputColumn[] = [
 ];
 
 export const pathAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
   {
     Name: 'source',
     Type: 'STRING',
@@ -291,11 +297,11 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
         filterGroups.push(visual.filterGroup);
       }
 
-      if (visual.ColumnConfigurations) {
+      if (visual.columnConfigurations) {
         if (dashboardDef.ColumnConfigurations) {
-          dashboardDef.ColumnConfigurations?.push(...visual.ColumnConfigurations);
+          dashboardDef.ColumnConfigurations?.push(...visual.columnConfigurations);
         } else {
-          dashboardDef.ColumnConfigurations = visual.ColumnConfigurations;
+          dashboardDef.ColumnConfigurations = visual.columnConfigurations;
         }
       }
 
@@ -319,7 +325,8 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       if (visual.eventCount) {
-        visualControl.RowSpan = visual.eventCount * 2;
+        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 2;
+        visualControl.ColumnSpan = visual.colSpan ?? 20;
       }
       visualControl.ElementId = findFirstChild(visual.visual).VisualId;
       elements.push(visualControl);
