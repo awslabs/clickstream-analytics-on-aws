@@ -361,6 +361,7 @@ export class ReportingServ {
         importMode: 'DIRECT_QUERY',
         customSql: `select * from ${query.appId}.${viewName}`,
         projectedColumns: [
+          'event_date',
           'source',
           'target',
           'weight',
@@ -390,7 +391,7 @@ export class ReportingServ {
         timeEnd: query.timeEnd,
       });
 
-      const visualProps = {
+      const visualProps: VisualProps = {
         sheetId: sheetId,
         visual: visualDef,
         dataSetIdentifierDeclaration: [],
@@ -398,6 +399,8 @@ export class ReportingServ {
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
         eventCount: query.eventAndConditions.length,
+        colSpan: 32,
+        rowSpan: 12
       };
 
       const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps]);
@@ -448,21 +451,19 @@ export class ReportingServ {
       DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
     };
 
-    logger.info(`redshift input : ${JSON.stringify(input)}`)
-
     const params = new BatchExecuteStatementCommand(input);
     const executeResponse = await redshiftDataClient.send(params);
     const checkParams = new DescribeStatementCommand({
       Id: executeResponse.Id,
     });
     let response = await redshiftDataClient.send(checkParams);
-    logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
+    logger.info(`Get statement status: ${response.Status}`);
     let count = 0;
     while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < 60) {
       await sleep(100);
       count++;
       response = await redshiftDataClient.send(checkParams);
-      logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
+      logger.info(`Get statement status: ${response.Status}`);
     }
     if (response.Status == StatusString.FAILED) {
       logger.error('Error: '+ response.Status, JSON.stringify(response));

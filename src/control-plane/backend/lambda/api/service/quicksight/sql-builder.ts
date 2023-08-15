@@ -492,6 +492,7 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
     ${_buildBaseTableSql(eventNames, sqlParameters)}
     data as (
       select 
+        day::date as event_date,
         event_name,
         user_pseudo_id,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
@@ -500,12 +501,14 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
       ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
     )
     select 
+      a.event_date as event_date,
       a.event_name || '_' || a.step_1 as source,
       b.event_name || '_' || a.step_2 as target,
       count(1) as weight
     from data a join data b on a.user_pseudo_id = b.user_pseudo_id and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 10}
     group by 
+      a.event_date,
       a.event_name || '_' || a.step_1,
       b.event_name || '_' || a.step_2
   `;
