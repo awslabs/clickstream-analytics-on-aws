@@ -41,6 +41,7 @@ deployment/global-s3-assets/
 deployment/regional-s3-assets/
 deployment/open-source/
 codescan-funcs.sh
+codescan-*-default.sh
 *.iml
 *.ipr
 *.iws

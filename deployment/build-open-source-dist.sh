@@ -45,67 +45,23 @@ echo "mkdir -p $dist_dir"
 mkdir -p $dist_dir
 
 echo "------------------------------------------------------------------------------"
-echo "[Packing] GitHub templates"
+echo "[Packing] Clean up the built-in assets for open-source distributable"
 echo "------------------------------------------------------------------------------"
+echo $source_dir
 
-echo "cp -r $github_dir $dist_dir"
-cp -r $github_dir $dist_dir
-
-echo "------------------------------------------------------------------------------"
-echo "[Packing] Source folder"
-echo "------------------------------------------------------------------------------"
-
-echo "cp -r $source_dir $dist_dir"
-cp -r $source_dir $dist_dir
+rm -rf  $source_dir/deployment/global-s3-assets
+rm -rf  $source_dir/deployment/regional-s3-assets
+rm -rf  $source_dir/cdk.out
+rm -rf  $source_dir/codescan*.sh
+rm -rf  $source_dir/test-reports
 
 echo "------------------------------------------------------------------------------"
-echo "[Packing] Files from the root level of the project"
+echo "[Packing] all source files"
 echo "------------------------------------------------------------------------------"
 
-echo "cp $source_template_dir/../LICENSE $dist_dir"
-cp $source_template_dir/../LICENSE $dist_dir
-
-echo "cp $source_template_dir/../NOTICE.txt $dist_dir"
-cp $source_template_dir/../NOTICE.txt $dist_dir
-
-echo "cp $source_template_dir/../README.md $dist_dir"
-cp $source_template_dir/../README.md $dist_dir
-
-echo "cp $source_template_dir/../CODE_OF_CONDUCT.md $dist_dir"
-cp $source_template_dir/../CODE_OF_CONDUCT.md $dist_dir
-
-echo "cp $source_template_dir/../CONTRIBUTING.md $dist_dir"
-cp $source_template_dir/../CONTRIBUTING.md $dist_dir
-
-echo "cp $source_template_dir/../CHANGELOG.md $dist_dir"
-cp $source_template_dir/../CHANGELOG.md $dist_dir
-
-cp $source_template_dir/*.sh $dist_dir/deployment
-
-cp -r $source_template_dir/../src $dist_dir
-
-echo "------------------------------------------------------------------------------"
-echo "[Packing] Clean up the open-source distributable"
-echo "------------------------------------------------------------------------------"
-echo $dist_dir
-
-rm -rf  $dist_dir/deployment/global-s3-assets
-rm -rf  $dist_dir/deployment/regional-s3-assets
-rm -rf  $dist_dir/.gitlab
-rm -rf  $dist_dir/cdk.out
-rm -rf  $dist_dir/buid*.yml
-rm -rf  $dist_dir/codescan*.sh
-rm -rf  $dist_dir/sonar*.properties
-rm -rf  $dist_dir/test-reports
-
-# General cleanup of node_modules and package-lock.json files
-echo "find $dist_dir -iname "node_modules" -type d -exec rm -rf "{}" \; 2> /dev/null"
-find $dist_dir -iname "node_modules" -type d -exec rm -rf "{}" \; 2> /dev/null
-# echo "find $dist_dir -iname "package-lock.json" -type f -exec rm -f "{}" \; 2> /dev/null"
-# find $dist_dir -iname "package-lock.json" -type f -exec rm -f "{}" \; 2> /dev/null
-
-find $dist_dir -iname ".pytest_cache" -type d -exec rm -rf "{}" \; 2> /dev/null
-find $dist_dir -iname ".venv"  -type d -exec rm -rf "{}" \; 2> /dev/null
+echo "rsync -av --exclude='deployment' $source_dir $dist_dir"
+rsync -av --exclude='deployment/open-source' --exclude='.git' \
+--exclude='node_modules' --exclude='coverage' $source_dir $dist_dir
 
 echo "------------------------------------------------------------------------------"
 echo "[Packing] Create GitHub (open-source) zip file"
@@ -119,7 +75,7 @@ zip -q -r9 ../$1.zip .
 
 # Cleanup any temporary/unnecessary files
 echo "Clean up open-source folder"
-echo "rm -rf * .*"
+echo "rm -rf open-source/"
 rm -rf * .*
 
 # Place final zip file in $dist_dir
