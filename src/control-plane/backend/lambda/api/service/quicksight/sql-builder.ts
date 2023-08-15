@@ -45,115 +45,116 @@ export interface FunnelSQLParameters {
   readonly groupColumn: ExploreGroupColumn;
 }
 
-function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+const baseColumns = `
+,event_date
+,event_name
+,event_id
+,event_bundle_sequence_id:: bigint as event_bundle_sequence_id
+,event_previous_timestamp:: bigint as event_previous_timestamp
+,event_server_timestamp_offset:: bigint as event_server_timestamp_offset
+,event_timestamp::bigint as event_timestamp
+,ingest_timestamp
+,event_value_in_usd
+,app_info.app_id:: varchar as app_info_app_id
+,app_info.id:: varchar as app_info_package_id
+,app_info.install_source:: varchar as app_info_install_source
+,app_info.version:: varchar as app_info_version
+,device.vendor_id:: varchar as device_id
+,device.mobile_brand_name:: varchar as device_mobile_brand_name
+,device.mobile_model_name:: varchar as device_mobile_model_name
+,device.manufacturer:: varchar as device_manufacturer
+,device.screen_width:: bigint as device_screen_width
+,device.screen_height:: bigint as device_screen_height
+,device.carrier:: varchar as device_carrier
+,device.network_type:: varchar as device_network_type
+,device.operating_system:: varchar as device_operating_system
+,device.operating_system_version:: varchar as device_operating_system_version
+,device.ua_browser:: varchar as device_ua_browser
+,device.ua_browser_version:: varchar as device_ua_browser_version
+,device.ua_os:: varchar as device_ua_os
+,device.ua_os_version:: varchar as device_ua_os_version
+,device.ua_device:: varchar as device_ua_device
+,device.ua_device_category:: varchar as device_ua_device_category
+,device.system_language:: varchar as device_system_language
+,device.time_zone_offset_seconds:: bigint as device_time_zone_offset_seconds
+,device.advertising_id:: varchar as device_advertising_id
+,geo.continent:: varchar as geo_continent
+,geo.country:: varchar as geo_country
+,geo.city:: varchar as geo_city
+,geo.metro:: varchar as geo_metro
+,geo.region:: varchar as geo_region
+,geo.sub_continent:: varchar as geo_sub_continent
+,geo.locale:: varchar as geo_locale
+,platform
+,project_id
+,traffic_source.name:: varchar as traffic_source_name
+,traffic_source.medium:: varchar as traffic_source_medium
+,traffic_source.source:: varchar as traffic_source_source
+,user_first_touch_timestamp
+,user_id
+,user_pseudo_id
+,user_ltv
+,event_dimensions
+,ecommerce
+,items
+`;
 
-  const baseColumns = `
-    ,event_date
-    ,event_name
-    ,event_id
-    ,event_bundle_sequence_id:: bigint as event_bundle_sequence_id
-    ,event_previous_timestamp:: bigint as event_previous_timestamp
-    ,event_server_timestamp_offset:: bigint as event_server_timestamp_offset
-    ,event_timestamp::bigint as event_timestamp
-    ,ingest_timestamp
-    ,event_value_in_usd
-    ,app_info.app_id:: varchar as app_info_app_id
-    ,app_info.id:: varchar as app_info_package_id
-    ,app_info.install_source:: varchar as app_info_install_source
-    ,app_info.version:: varchar as app_info_version
-    ,device.vendor_id:: varchar as device_id
-    ,device.mobile_brand_name:: varchar as device_mobile_brand_name
-    ,device.mobile_model_name:: varchar as device_mobile_model_name
-    ,device.manufacturer:: varchar as device_manufacturer
-    ,device.screen_width:: bigint as device_screen_width
-    ,device.screen_height:: bigint as device_screen_height
-    ,device.carrier:: varchar as device_carrier
-    ,device.network_type:: varchar as device_network_type
-    ,device.operating_system:: varchar as device_operating_system
-    ,device.operating_system_version:: varchar as device_operating_system_version
-    ,device.ua_browser:: varchar as device_ua_browser
-    ,device.ua_browser_version:: varchar as device_ua_browser_version
-    ,device.ua_os:: varchar as device_ua_os
-    ,device.ua_os_version:: varchar as device_ua_os_version
-    ,device.ua_device:: varchar as device_ua_device
-    ,device.ua_device_category:: varchar as device_ua_device_category
-    ,device.system_language:: varchar as device_system_language
-    ,device.time_zone_offset_seconds:: bigint as device_time_zone_offset_seconds
-    ,device.advertising_id:: varchar as device_advertising_id
-    ,geo.continent:: varchar as geo_continent
-    ,geo.country:: varchar as geo_country
-    ,geo.city:: varchar as geo_city
-    ,geo.metro:: varchar as geo_metro
-    ,geo.region:: varchar as geo_region
-    ,geo.sub_continent:: varchar as geo_sub_continent
-    ,geo.locale:: varchar as geo_locale
-    ,platform
-    ,project_id
-    ,traffic_source.name:: varchar as traffic_source_name
-    ,traffic_source.medium:: varchar as traffic_source_medium
-    ,traffic_source.source:: varchar as traffic_source_source
-    ,user_first_touch_timestamp
-    ,user_id
-    ,user_pseudo_id
-    ,user_ltv
-    ,event_dimensions
-    ,ecommerce
-    ,items
-  `;
+const columnTemplate = `
+ event_date as event_date####
+,event_name as event_name####
+,event_id as event_id####
+,event_bundle_sequence_id as event_bundle_sequence_id####
+,event_previous_timestamp as event_previous_timestamp####
+,event_server_timestamp_offset as event_server_timestamp_offset####
+,event_timestamp as event_timestamp####
+,ingest_timestamp as ingest_timestamp####
+,event_value_in_usd as event_value_in_usd####
+,app_info_app_id as app_info_app_id####
+,app_info_package_id as app_info_package_id####
+,app_info_install_source as app_info_install_source####
+,app_info_version as app_info_version####
+,device_id as device_id####
+,device_mobile_brand_name as device_mobile_brand_name####
+,device_mobile_model_name as device_mobile_model_name####
+,device_manufacturer as device_manufacturer####
+,device_screen_width as device_screen_width####
+,device_screen_height as device_screen_height####
+,device_carrier as device_carrier####
+,device_network_type as device_network_type####
+,device_operating_system as device_operating_system####
+,device_operating_system_version as device_operating_system_version####
+,device_ua_browser as ua_browser####
+,device_ua_browser_version as ua_browser_version####
+,device_ua_os as ua_os####
+,device_ua_os_version as ua_os_version####
+,device_ua_device as ua_device####
+,device_ua_device_category as ua_device_category####
+,device_system_language as device_system_language####
+,device_time_zone_offset_seconds as device_time_zone_offset_seconds####
+,device_advertising_id as advertising_id####
+,geo_continent as geo_continent####
+,geo_country as geo_country####
+,geo_city as geo_city####
+,geo_metro as geo_metro####
+,geo_region as geo_region####
+,geo_sub_continent as geo_sub_continent####
+,geo_locale as geo_locale####
+,platform as platform####
+,project_id as project_id####
+,traffic_source_name as traffic_source_name####
+,traffic_source_medium as traffic_source_medium####
+,traffic_source_source as traffic_source_source####
+,user_first_touch_timestamp as user_first_touch_timestamp####
+,user_id as user_id####
+,user_pseudo_id as user_pseudo_id####
+,user_ltv as user_ltv####
+,event_dimensions as event_dimensions####
+,ecommerce as ecommerce####
+,items as items####
+`;
 
-  const columnTemplate = `
-     event_date as event_date####
-    ,event_name as event_name####
-    ,event_id as event_id####
-    ,event_bundle_sequence_id as event_bundle_sequence_id####
-    ,event_previous_timestamp as event_previous_timestamp####
-    ,event_server_timestamp_offset as event_server_timestamp_offset####
-    ,event_timestamp as event_timestamp####
-    ,ingest_timestamp as ingest_timestamp####
-    ,event_value_in_usd as event_value_in_usd####
-    ,app_info_app_id as app_info_app_id####
-    ,app_info_package_id as app_info_package_id####
-    ,app_info_install_source as app_info_install_source####
-    ,app_info_version as app_info_version####
-    ,device_id as device_id####
-    ,device_mobile_brand_name as device_mobile_brand_name####
-    ,device_mobile_model_name as device_mobile_model_name####
-    ,device_manufacturer as device_manufacturer####
-    ,device_screen_width as device_screen_width####
-    ,device_screen_height as device_screen_height####
-    ,device_carrier as device_carrier####
-    ,device_network_type as device_network_type####
-    ,device_operating_system as device_operating_system####
-    ,device_operating_system_version as device_operating_system_version####
-    ,device_ua_browser as ua_browser####
-    ,device_ua_browser_version as ua_browser_version####
-    ,device_ua_os as ua_os####
-    ,device_ua_os_version as ua_os_version####
-    ,device_ua_device as ua_device####
-    ,device_ua_device_category as ua_device_category####
-    ,device_system_language as device_system_language####
-    ,device_time_zone_offset_seconds as device_time_zone_offset_seconds####
-    ,device_advertising_id as advertising_id####
-    ,geo_continent as geo_continent####
-    ,geo_country as geo_country####
-    ,geo_city as geo_city####
-    ,geo_metro as geo_metro####
-    ,geo_region as geo_region####
-    ,geo_sub_continent as geo_sub_continent####
-    ,geo_locale as geo_locale####
-    ,platform as platform####
-    ,project_id as project_id####
-    ,traffic_source_name as traffic_source_name####
-    ,traffic_source_medium as traffic_source_medium####
-    ,traffic_source_source as traffic_source_source####
-    ,user_first_touch_timestamp as user_first_touch_timestamp####
-    ,user_id as user_id####
-    ,user_pseudo_id as user_pseudo_id####
-    ,user_ltv as user_ltv####
-    ,event_dimensions as event_dimensions####
-    ,ecommerce as ecommerce####
-    ,items as items####
-  `;
+
+function _buildBaseTableSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
 
   let eventDateSQL = '';
   if (sqlParameters.timeScopeType === 'FIXED') {
@@ -184,6 +185,13 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
       and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
     ),
   `;
+
+  return sql;
+}
+
+function _buildBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+
+  let sql = _buildBaseTableSql(eventNames, sqlParameters);
 
   for (const [index, event] of eventNames.entries()) {
 
@@ -338,7 +346,7 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
     eventNames.push(e.eventName);
   }
 
-  let sql = _buildFunnelBaseSql(eventNames, sqlParameters);
+  let sql = _buildBaseSql(eventNames, sqlParameters);
 
   let prefix = 'event_id';
   if (sqlParameters.computeMethod === 'USER_CNT') {
@@ -387,7 +395,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
     prefix = 'u';
   }
 
-  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters);
+  let baseSQL = _buildBaseSql(eventNames, sqlParameters);
   let finalTableColumnsSQL = `
      week
     ,day
@@ -437,6 +445,71 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
    ${baseSQL}
    ${resultSql}
    `;
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+export function buildPathAnalysisView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+
+  const eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+
+  let eventConditionSqlOut = '';
+  for (const [index, event] of eventNames.entries()) {
+    const eventCondition = sqlParameters.eventAndConditions[index];
+    let eventConditionSql = '';
+    if (eventCondition.conditions !== undefined) {
+      for (const [i, condition] of eventCondition.conditions.entries()) {
+        if (condition.category === 'user' || condition.category === 'event') {
+          continue;
+        }
+        let value = condition.value;
+        if (condition.dataType === MetadataValueType.STRING) {
+          value = `'${value}'`;
+        }
+
+        let category: string = `${condition.category}_`;
+        if (condition.category === 'other') {
+          category = '';
+        }
+        eventConditionSql = eventConditionSql.concat(`
+          ${i === 0 ? '' : (eventCondition.conditionOperator ?? 'and')} ${category}${condition.property} ${condition.operator} ${value}
+        `);
+      }
+    }
+    if (eventConditionSql !== '') {
+      eventConditionSqlOut = eventConditionSqlOut.concat(`
+      ${index === 0 ? ' ' : ' or ' } ( event_name = '${event}' and (${eventConditionSql}) )
+      `);
+    }
+  }
+
+  const sql = `
+  CREATE OR REPLACE VIEW ${schema}.${name} AS
+    ${_buildBaseTableSql(eventNames, sqlParameters)}
+    data as (
+      select 
+        event_name,
+        user_pseudo_id,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
+      from base_data 
+      ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
+    )
+    select 
+      a.event_name || '_' || a.step_1 as source,
+      b.event_name || '_' || a.step_2 as target,
+      count(1) as weight
+    from data a join data b on a.user_pseudo_id = b.user_pseudo_id and a.step_2 = b.step_1
+    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    group by 
+      a.event_name || '_' || a.step_1,
+      b.event_name || '_' || a.step_2
+  `;
+
   return format(sql, {
     language: 'postgresql',
   });

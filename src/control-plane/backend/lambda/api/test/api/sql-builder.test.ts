@@ -12,7 +12,7 @@
  */
 
 import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-import { buildFunnelDataSql, buildFunnelView } from '../../service/quicksight/sql-builder';
+import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -2647,6 +2647,88 @@ describe('SQL Builder test', () => {
   `.trim().replace(/ /g, ''),
     );
 
+  });
+
+
+  test('funnel view - first event extra conditions', () => {
+
+    const sql = buildPathAnalysisView('app1', 'test-view', {
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      firstEventExtraCondition: {
+        eventName: 'add_button_click',
+        conditions: [
+          {
+            category: 'event',
+            property: '_session_duration',
+            operator: '>',
+            value: '200',
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: 'user',
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: '1686532526770',
+            dataType:  MetadataValueType.INTEGER,
+          },
+        ],
+        conditionOperator: 'and',
+
+      },
+      eventAndConditions: [
+        {
+          eventName: 'add_button_click',
+          conditions: [{
+            category: 'other',
+            property: 'platform',
+            operator: '=',
+            value: 'ANDROID',
+            dataType:  MetadataValueType.STRING,
+          },
+          {
+            category: 'device',
+            property: 'screen_height',
+            operator: '<>',
+            value: '1400',
+            dataType:  MetadataValueType.INTEGER,
+          }],
+          conditionOperator: 'and',
+        },
+        {
+          eventName: 'note_share',
+          conditions: [{
+            category: 'other',
+            property: 'platform',
+            operator: '=',
+            value: 'ANDROID',
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: 'device',
+            property: 'screen_height',
+            operator: '<>',
+            value: '1400',
+            dataType: MetadataValueType.INTEGER,
+          }],
+          conditionOperator: 'or',
+
+        },
+        {
+          eventName: 'note_export',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: '2023-04-30',
+      timeEnd: '2023-06-30',
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    console.log(sql);
   });
 
 });
