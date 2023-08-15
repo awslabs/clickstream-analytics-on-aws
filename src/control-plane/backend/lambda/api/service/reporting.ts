@@ -95,7 +95,7 @@ export class ReportingServ {
       }
 
       //create quicksight dataset
-      const datasetPropsArray: DataSetProps[] = []
+      const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
@@ -202,12 +202,12 @@ export class ReportingServ {
       const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
-        id: visualId
-      })
+        id: visualId,
+      });
       result.visualIds.push({
         name: 'TABLE',
-        id: tableVisualId
-      })
+        id: tableVisualId,
+      });
 
       return res.status(201).json(new ApiSuccess(result));
 
@@ -364,7 +364,7 @@ export class ReportingServ {
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        (await getClickstreamUserArn()).dashboardOwner,
+        principals.dashboardOwner,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
       );
