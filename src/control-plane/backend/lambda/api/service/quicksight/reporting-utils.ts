@@ -47,6 +47,7 @@ export interface DashboardAction {
 export interface DashboardCreateParameters {
   readonly region: string;
   readonly redshift: {
+    readonly user: string;
     readonly dataApiRole: string;
     readonly newServerless?: {
       readonly workgroupName: string;
@@ -57,7 +58,6 @@ export interface DashboardCreateParameters {
     };
   };
   readonly quickSight: {
-    readonly user: string;
     readonly dataSourceArn: string;
   };
 }

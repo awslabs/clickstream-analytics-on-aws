@@ -152,6 +152,7 @@ const AnalyticsFunnel: React.FC = () => {
         dashboardCreateParameters: {
           region: pipeline.region,
           redshift: {
+            user: 'clickstream_bi_i7e1xmsk',
             dataApiRole:
               redshiftOutputs.get(
                 OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
@@ -164,7 +165,6 @@ const AnalyticsFunnel: React.FC = () => {
             },
           },
           quickSight: {
-            user: pipeline.reporting.quickSight?.user ?? '',
             dataSourceArn:
               reportingOutputs.get(
                 OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN
@@ -173,9 +173,9 @@ const AnalyticsFunnel: React.FC = () => {
         },
         action: 'PREVIEW',
         viewName: 'testview0002',
-        projectId: 'project_funnel_wmmz',
-        pipelineId: '6b775ecda0a645d09ef10fb58933e33b',
-        appId: 'app1',
+        projectId: pipeline.projectId,
+        pipelineId: pipeline.pipelineId,
+        appId: appid ?? '',
         sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,

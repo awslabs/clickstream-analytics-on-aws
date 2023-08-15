@@ -155,6 +155,7 @@ declare global {
   interface IDashboardCreateParameters {
     readonly region: string;
     readonly redshift: {
+      readonly user: string;
       readonly dataApiRole: string;
       readonly newServerless?: {
         readonly workgroupName: string;
@@ -165,7 +166,6 @@ declare global {
       };
     };
     readonly quickSight: {
-      readonly user: string;
       readonly dataSourceArn: string;
     };
   }

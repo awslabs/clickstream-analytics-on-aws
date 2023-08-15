@@ -25,11 +25,11 @@ import {
   CreateDashboardResult,
   sleep,
   DashboardCreateParameters,
-  getCredentialsFromRole,
   getFunnelVisualDef,
   getFunnelVisualRelatedDefs,
   getFunnelTableVisualRelatedDefs,
   getFunnelTableVisualDef,
+  getCredentialsFromRole,
 } from './quicksight/reporting-utils';
 import { buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -111,7 +111,7 @@ export class ReportingServ {
       const sqls = [sql, sqlTable];
       const grantSql: string[] = [];
       for ( const viewNm of [viewName, tableVisualViewName]) {
-        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.quickSight.user}`);
+        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.redshift.user};`);
       }
       //create view in redshift
       const input = {
