@@ -14,6 +14,7 @@
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
+import { pipeline } from 'stream';
 import { EPipelineStatus, ExecutionType } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
@@ -287,4 +288,28 @@ export const validatePublicSubnetInSameAZWithPrivateSubnets = (
     (element) => element?.description?.split(':')[0]
   );
   return isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs));
+};
+
+export const getValueFromStackOutputs = (
+  pipeline: IPipeline,
+  stackType: string,
+  keys: string[]
+) => {
+  const res: Map<string, string> = new Map<string, string>();
+  const stackDetails = pipeline.status?.stackDetails?.filter(
+    (s) => s.stackType === stackType
+  );
+  if (!stackDetails || stackDetails.length === 0) {
+    return res;
+  }
+  const stackOutputs = stackDetails[0].outputs;
+  for (const key of keys) {
+    for (const output of stackOutputs) {
+      if (output.OutputKey?.endsWith(key)) {
+        res.set(key, output.OutputValue ?? '');
+        break;
+      }
+    }
+  }
+  return res;
 };

@@ -26,9 +26,9 @@ const AnalyticsRealtime: React.FC = () => {
   const getEmbeddingUrl = async () => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'us-west-2',
+        'ap-southeast-1',
         window.location.origin,
-        '06699301-ba58-4ad3-8b74-585dac04d275'
+        'clickstream_dashboard_explore_xfrh_app1_c2580a7f'
       );
       if (success) {
         const embedDashboard = async () => {
@@ -58,10 +58,7 @@ const AnalyticsRealtime: React.FC = () => {
         loadingData ? (
           <Loading />
         ) : (
-          <div
-            id={'qs-container'}
-            className='iframe-dashboard'
-          ></div>
+          <div id={'qs-container'} className="iframe-dashboard"></div>
         )
       }
       headerSelector="#header"

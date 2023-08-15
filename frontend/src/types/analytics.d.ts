@@ -106,4 +106,67 @@ declare global {
     readonly operator: string;
     readonly deleted: boolean;
   }
+
+  interface IFunnelRequest {
+    readonly action: 'PREVIEW' | 'PUBLISH';
+    readonly projectId: string;
+    readonly appId: string;
+    readonly pipelineId: string;
+
+    readonly sheetName: string;
+    readonly viewName: string;
+
+    readonly dashboardCreateParameters: IDashboardCreateParameters;
+
+    readonly computeMethod: 'USER_CNT' | 'EVENT_CNT';
+    readonly specifyJoinColumn: boolean;
+    readonly joinColumn?: string;
+    readonly conversionIntervalType: 'CURRENT_DAY' | 'CUSTOMIZE';
+    readonly conversionIntervalInSeconds?: number;
+    readonly eventAndConditions: IEventAndCondition[];
+    readonly timeScopeType: 'FIXED' | 'RELATIVE';
+    readonly timeStart?: string;
+    readonly timeEnd?: string;
+    readonly lastN?: number;
+    readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
+    readonly groupColumn: 'week' | 'day' | 'hour';
+  }
+  interface ICondition {
+    readonly category:
+      | 'user'
+      | 'event'
+      | 'device'
+      | 'geo'
+      | 'app_info'
+      | 'traffic_source'
+      | 'other';
+    readonly property: string;
+    readonly operator: string;
+    readonly value: string;
+    readonly dataType: 'STRING' | 'INT' | 'DOUBLE' | 'FLOAT';
+  }
+
+  interface IEventAndCondition {
+    readonly eventName: string;
+    readonly conditions?: Condition[];
+    readonly conditionOperator?: 'and' | 'or';
+  }
+
+  interface IDashboardCreateParameters {
+    readonly region: string;
+    readonly redshift: {
+      readonly dataApiRole: string;
+      readonly newServerless?: {
+        readonly workgroupName: string;
+      };
+      readonly provisioned?: {
+        readonly clusterIdentifier: string;
+        readonly dbUser: string;
+      };
+    };
+    readonly quickSight: {
+      readonly user: string;
+      readonly dataSourceArn: string;
+    };
+  }
 }

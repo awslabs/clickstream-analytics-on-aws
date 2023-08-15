@@ -26,27 +26,43 @@ import {
   Toggle,
 } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
-import { fetchEmbeddingUrl } from 'apis/analytics';
+import {
+  fetchEmbeddingUrl,
+  getPipelineDetailByProjectId,
+  previewFunnel,
+} from 'apis/analytics';
 import Divider from 'components/common/Divider';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import {
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+} from 'ts/constant-ln';
+import { getValueFromStackOutputs } from 'ts/utils';
 
 const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
   const { pid, appid } = useParams();
   const [loadingData, setLoadingData] = useState(false);
+  const [pipeline, setPipeline] = useState({} as IPipeline);
 
-  const getEmbeddingUrl = async () => {
+  const getEmbeddingUrl = async (
+    dashboardId: string,
+    sheetId: string | undefined,
+    visualId: string | undefined
+  ) => {
     try {
+      console.log(pipeline);
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'ap-southeast-1',
+        pipeline.region,
         window.location.origin,
-        'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
-        'ef2f9b18-8093-47d3-a3cf-59e890cfe338',
-        '91e59887-a1c1-4b65-aca3-b1926db946eb'
+        dashboardId,
+        sheetId,
+        visualId
       );
       if (success) {
         const embedDashboard = async () => {
@@ -63,11 +79,24 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
+  const loadPieline = async (projectId: string) => {
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(projectId);
+      if (success) {
+        console.log(data);
+        setPipeline(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     setLoadingData(true);
-    getEmbeddingUrl();
+    loadPieline(pid ?? '');
     setLoadingData(false);
-  }, []);
+  }, [pid]);
 
   const metricOptions = [
     { value: 'event', label: 'Event number' },
@@ -104,6 +133,80 @@ const AnalyticsFunnel: React.FC = () => {
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
   const [windowChecked, setWindowChecked] = useState<boolean>(true);
+
+  const clickPreview = async () => {
+    setLoadingData(true);
+    try {
+      const redshiftOutputs = getValueFromStackOutputs(
+        pipeline,
+        'DataModelingRedshift',
+        [
+          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+        ]
+      );
+      const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
+        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+      ]);
+      const { success, data }: ApiResponse<any> = await previewFunnel({
+        dashboardCreateParameters: {
+          region: pipeline.region,
+          redshift: {
+            dataApiRole:
+              redshiftOutputs.get(
+                OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+              ) ?? '',
+            newServerless: {
+              workgroupName:
+                redshiftOutputs.get(
+                  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+                ) ?? '',
+            },
+          },
+          quickSight: {
+            user: pipeline.reporting.quickSight?.user ?? '',
+            dataSourceArn:
+              reportingOutputs.get(
+                OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN
+              ) ?? '',
+          },
+        },
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        projectId: 'project_funnel_wmmz',
+        pipelineId: '6b775ecda0a645d09ef10fb58933e33b',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [
+          {
+            eventName: 'add_button_click',
+          },
+          {
+            eventName: 'note_share',
+          },
+          {
+            eventName: 'note_export',
+          },
+        ],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+      });
+      if (success) {
+        console.log(data);
+        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[0]);
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
 
   return (
     <AppLayout
@@ -231,6 +334,10 @@ const AnalyticsFunnel: React.FC = () => {
                   </div>
                 </SpaceBetween>
               </ColumnLayout>
+              <br />
+              <Button variant="primary" onClick={clickPreview}>
+                {t('common:button.preview')}
+              </Button>
             </Container>
             <Container>
               {loadingData ? (
@@ -238,7 +345,7 @@ const AnalyticsFunnel: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  className='iframe-explore'
+                  className="iframe-explore"
                 ></div>
               )}
             </Container>

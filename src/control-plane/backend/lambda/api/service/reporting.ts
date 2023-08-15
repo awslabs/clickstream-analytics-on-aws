@@ -36,6 +36,7 @@ import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { getClickstreamUserArn } from '../store/aws/quicksight';
 
 export class ReportingServ {
 
@@ -55,6 +56,7 @@ export class ReportingServ {
         region: redshiftRegion,
         ...aws_sdk_client_common_config,
       });
+      const principals = await getClickstreamUserArn();
 
       const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.redshift.dataApiRole);
       const redshiftDataClient = new RedshiftDataClient({
@@ -83,7 +85,7 @@ export class ReportingServ {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
       });
-      console.log(`funnel sql: ${sql}`);
+      // console.log(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
       const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
@@ -102,14 +104,14 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      console.log(`funnel table sql: ${sqlTable}`);
+      // console.log(`funnel table sql: ${sqlTable}`);
 
       logger.info(`dashboardCreateParameters: ${JSON.stringify(dashboardCreateParameters)}`);
 
       const sqls = [sql, sqlTable];
       const grantSql: string[] = [];
       for ( const viewNm of [viewName, tableVisualViewName]) {
-        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+        grantSql.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.quickSight.user}`);
       }
       //create view in redshift
       const input = {
@@ -127,7 +129,7 @@ export class ReportingServ {
       //create quicksight dataset
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSight.principal,
+        principals[0],
         dashboardCreateParameters.quickSight.dataSourceArn, {
           name: '',
           tableName: viewName,
@@ -172,7 +174,7 @@ export class ReportingServ {
       }
       const datasetOutputForTableChart = await createDataSet(
         quickSight, awsAccountId!,
-        dashboardCreateParameters.quickSight.principal,
+        principals[0],
         dashboardCreateParameters.quickSight.dataSourceArn, {
           name: '',
           tableName: tableVisualViewName,
@@ -274,7 +276,7 @@ export class ReportingServ {
           AnalysisId: analysisId,
           Name: `analysis-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSight.principal,
+            Principal: principals[0],
             Actions: [
               'quicksight:DescribeAnalysis',
               'quicksight:QueryAnalysis',
@@ -295,7 +297,7 @@ export class ReportingServ {
           DashboardId: dashboardId,
           Name: `dashboard-${viewName}`,
           Permissions: [{
-            Principal: dashboardCreateParameters.quickSight.principal,
+            Principal: principals[0],
             Actions: [
               'quicksight:DescribeDashboard',
               'quicksight:ListDashboardVersions',
@@ -305,6 +307,12 @@ export class ReportingServ {
               'quicksight:UpdateDashboardPermissions',
               'quicksight:DescribeDashboardPermissions',
               'quicksight:UpdateDashboardPublishedVersion',
+            ],
+          },
+          {
+            Principal: principals[1],
+            Actions: [
+              'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
             ],
           }],
           Definition: dashboard,
@@ -319,6 +327,7 @@ export class ReportingServ {
           analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisName: `analysis-${viewName}`,
+          sheetId: sheetId,
           visualIds: [visualId, tableVisualId],
         };
       } else {
@@ -363,6 +372,7 @@ export class ReportingServ {
           analysisId: query.analysisId,
           analysisArn: newAnalysis.Arn!,
           analysisName: query.analysisName,
+          sheetId: sheetId,
           visualIds: [visualId, tableVisualId],
         };
 

@@ -15,12 +15,18 @@ import { SelectProps } from '@cloudscape-design/components';
 
 export {};
 declare global {
+  interface IStackOutput {
+    OutputKey?: string;
+    OutputValue?: string;
+    Description?: string;
+    ExportName?: string;
+  }
   interface IStackStatus {
     stackName: string;
     stackType: string;
     stackStatus: string;
     stackStatusReason: string;
-    url: string;
+    outputs: IStackOutput[];
   }
 
   interface IDashboard {

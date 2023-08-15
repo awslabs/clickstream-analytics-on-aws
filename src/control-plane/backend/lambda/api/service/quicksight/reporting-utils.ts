@@ -57,9 +57,8 @@ export interface DashboardCreateParameters {
     };
   };
   readonly quickSight: {
-    readonly principal: string;
+    readonly user: string;
     readonly dataSourceArn: string;
-    readonly redshiftUser: string;
   };
 }
 
@@ -79,6 +78,7 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
+  readonly sheetId: string;
   readonly visualIds: string[];
 }
 

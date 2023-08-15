@@ -149,3 +149,13 @@ export const fetchEmbeddingUrl = async (
   );
   return result;
 };
+
+export const previewFunnel = async (data: IFunnelRequest) => {
+  const result: any = await apiRequest('post', `/reporting`, data);
+  return result;
+};
+
+export const getPipelineDetailByProjectId = async (pid: string) => {
+  const result: any = await apiRequest('get', `/pipeline/${pid}?pid=${pid}`);
+  return result;
+};

@@ -550,7 +550,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
       PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
     });
-
     // ApiAWSSdkPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -580,6 +579,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:RegisterUser',
               'quicksight:GenerateEmbedUrlForRegisteredUser',
               'quicksight:UpdateDashboardPermissions',
+              'quicksight:CreateDataSet',
+              'quicksight:PassDataSet',
+              'quicksight:PassDataSource',
+              'quicksight:CreateDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:DescribeDashboard',
+              'quicksight:UpdateDashboardPublishedVersion',
+              'quicksight:CreateAnalysis',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',
@@ -608,6 +615,26 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             ],
             Effect: 'Allow',
             Resource: '*',
+          },
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':iam::',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':role/Clickstream*',
+                ],
+              ],
+            },
           },
         ],
         Version: '2012-10-17',
