@@ -118,6 +118,21 @@ export const funnelVisualColumns: InputColumn[] = [
   },
 ];
 
+export const pathAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'source',
+    Type: 'STRING',
+  },
+  {
+    Name: 'target',
+    Type: 'STRING',
+  },
+  {
+    Name: 'weight',
+    Type: 'DECIMAL',
+  },
+];
+
 export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
   props: DataSetProps)
@@ -552,6 +567,31 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, t
   tooltipFields[2].FieldTooltipItem!.FieldId = filedId3;
 
   visualDef.LineChartVisual!.ColumnHierarchies![0].DateTimeHierarchy!.HierarchyId = hierarchyId;
+
+  return visualDef;
+}
+
+export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/path-analysis-chart.json')).toString()) as Visual;
+  const filedId1 = uuidv4();
+  const filedId2 = uuidv4();
+  const filedId3 = uuidv4();
+  visualDef.SankeyDiagramVisual!.VisualId = visualId;
+
+  const fieldWell = visualDef.SankeyDiagramVisual!.ChartConfiguration!.FieldWells!.SankeyDiagramAggregatedFieldWells!;
+  const sortConfiguration = visualDef.SankeyDiagramVisual!.ChartConfiguration!.SortConfiguration!;
+
+  fieldWell.Source![0].CategoricalDimensionField!.FieldId = filedId1;
+  fieldWell.Source![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  fieldWell.Destination![0].CategoricalDimensionField!.FieldId = filedId2;
+  fieldWell.Destination![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  fieldWell.Weight![0].NumericalMeasureField!.FieldId = filedId3;
+  fieldWell.Weight![0].NumericalMeasureField!.Column!.DataSetIdentifier = viewName;
+
+  sortConfiguration.WeightSort![0].FieldSort!.FieldId = filedId3;
 
   return visualDef;
 }

@@ -1,0 +1,68 @@
+{
+  "SankeyDiagramVisual": {
+      "VisualId": "",
+      "Title": {
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "SankeyDiagramAggregatedFieldWells": {
+                  "Source": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "source"
+                              }
+                          }
+                      }
+                  ],
+                  "Destination": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "target"
+                              }
+                          }
+                      }
+                  ],
+                  "Weight": [
+                      {
+                          "NumericalMeasureField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "weight"
+                              },
+                              "AggregationFunction": {
+                                  "SimpleNumericalAggregation": "SUM"
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "WeightSort": [
+                  {
+                      "FieldSort": {
+                          "FieldId": "",
+                          "Direction": "DESC"
+                      }
+                  }
+              ]
+          },
+          "DataLabels": {
+              "Visibility": "VISIBLE",
+              "Overlap": "DISABLE_OVERLAP"
+          }
+      },
+      "Actions": []
+  }
+}
