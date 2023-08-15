@@ -38,13 +38,16 @@ const AnalyticsRetention: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
 
   const metricOptions = [
-    { value: 'event', label: 'Event number' },
-    { value: 'user', label: 'User number' },
+    {
+      value: 'event',
+      label: t('analytics:options.eventNumber'),
+    },
+    { value: 'user', label: t('analytics:options.userNumber') },
   ];
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',
-      label: 'Event number',
+      label: t('analytics:options.userNumber') ?? '',
     });
 
   const [associateParameterChecked, setAssociateParameterChecked] =
@@ -87,7 +90,9 @@ const AnalyticsRetention: React.FC = () => {
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1">Retention Analytics</Header>
+              <Header variant="h1">
+                {t('nav.analytics.exploreRetention')}
+              </Header>
             </SpaceBetween>
           }
         >
@@ -149,7 +154,7 @@ const AnalyticsRetention: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  className='iframe-explore'
+                  className="iframe-explore"
                 ></div>
               )}
             </Container>

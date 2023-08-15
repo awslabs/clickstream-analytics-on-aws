@@ -53,10 +53,10 @@ const AnalyticsFunnel: React.FC = () => {
   const getEmbeddingUrl = async (
     dashboardId: string,
     sheetId: string | undefined,
-    visualId: string | undefined
+    visualId: string | undefined,
+    containerId: string,
   ) => {
     try {
-      console.log(pipeline);
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
         pipeline.region,
         window.location.origin,
@@ -69,7 +69,7 @@ const AnalyticsFunnel: React.FC = () => {
           const embeddingContext = await createEmbeddingContext();
           await embeddingContext.embedVisual({
             url: data.EmbedUrl,
-            container: '#qs-funnel-container',
+            container: containerId,
           });
         };
         embedDashboard();
@@ -84,7 +84,6 @@ const AnalyticsFunnel: React.FC = () => {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(projectId);
       if (success) {
-        console.log(data);
         setPipeline(data);
       }
     } catch (error) {
@@ -99,35 +98,38 @@ const AnalyticsFunnel: React.FC = () => {
   }, [pid]);
 
   const metricOptions = [
-    { value: 'event', label: 'Event number' },
-    { value: 'user', label: 'User number' },
+    {
+      value: 'event',
+      label: t('analytics:options.eventNumber'),
+    },
+    { value: 'user', label: t('analytics:options.userNumber') },
   ];
 
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',
-      label: 'Event number',
+      label: t('analytics:options.userNumber') ?? '',
     });
 
-  const customWindowType = { value: 'custom', label: 'Custom' };
+  const customWindowType = { value: 'custom', label: t('analytics:options.customWindow') };
   const windowTypeOptions = [
     customWindowType,
-    { value: 'theDay', label: 'The Day' },
+    { value: 'theDay', label: t('analytics:options.theDayWindow') },
   ];
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
 
   const windowUnitOptions = [
-    { value: 'second', label: 'Second(s)' },
-    { value: 'minute', label: 'Minute(s)' },
-    { value: 'hour', label: 'Hour(s)' },
-    { value: 'day', label: 'Day(s)' },
+    { value: 'second', label: t('analytics:options.secondWindowUnit') },
+    { value: 'minute', label: t('analytics:options.minuteWindowUnit') },
+    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
+    { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
   const [selectedWindowUnit, setSelectedWindowUnit] =
     useState<SelectProps.Option | null>({
       value: 'minute',
-      label: 'Minute(s)',
+      label: t('analytics:options.minuteWindowUnit') ?? '',
     });
 
   const [associateParameterChecked, setAssociateParameterChecked] =
@@ -137,6 +139,7 @@ const AnalyticsFunnel: React.FC = () => {
   const clickPreview = async () => {
     setLoadingData(true);
     try {
+      console.log(pipeline);
       const redshiftOutputs = getValueFromStackOutputs(
         pipeline,
         'DataModelingRedshift',
@@ -199,8 +202,8 @@ const AnalyticsFunnel: React.FC = () => {
         groupColumn: 'week',
       });
       if (success) {
-        console.log(data);
-        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[0]);
+        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[0], '#qs-funnel-container');
+        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[1], '#qs-funnel-table-container');
       }
       setLoadingData(false);
     } catch (error) {
@@ -215,7 +218,7 @@ const AnalyticsFunnel: React.FC = () => {
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1">Funnel Analytics</Header>
+              <Header variant="h1">{t('nav.analytics.exploreFunnel')}</Header>
             </SpaceBetween>
           }
         >
@@ -335,7 +338,11 @@ const AnalyticsFunnel: React.FC = () => {
                 </SpaceBetween>
               </ColumnLayout>
               <br />
-              <Button variant="primary" onClick={clickPreview}>
+              <Button
+                variant="primary"
+                onClick={clickPreview}
+                loading={loadingData}
+              >
                 {t('common:button.preview')}
               </Button>
             </Container>
@@ -343,10 +350,16 @@ const AnalyticsFunnel: React.FC = () => {
               {loadingData ? (
                 <Loading />
               ) : (
-                <div
-                  id={'qs-funnel-container'}
-                  className="iframe-explore"
-                ></div>
+                <div id={'qs-funnel-container'} className="iframe-explore">
+                </div>
+              )}
+            </Container>
+            <Container>
+              {loadingData ? (
+                <Loading />
+              ) : (
+                <div id={'qs-funnel-table-container'} className="iframe-explore">
+                </div>
               )}
             </Container>
           </SpaceBetween>

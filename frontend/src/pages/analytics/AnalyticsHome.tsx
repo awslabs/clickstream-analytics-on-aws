@@ -12,8 +12,6 @@
  */
 
 import { AppLayout } from '@cloudscape-design/components';
-import { getApplicationListByPipeline } from 'apis/application';
-import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import HeaderSwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
@@ -34,67 +32,12 @@ const AnalyticsHome: React.FC = () => {
     }
   );
 
-  const getDefaultProjectAndApp = async () => {
-    const projects = await listProjects();
-    if (projects && projects.length > 0) {
-      const project = projects[0];
-      const apps = await listApplicationByProject(project.id);
-      if (apps && apps.length > 0) {
-        const app = apps[0];
-        setAnalyticsInfo({
-          pid: project.id,
-          pname: project.name,
-          appid: app.appId,
-          appname: app.name,
-        });
-        window.location.href = `/analytics/${project.id}/app/${app.appId}/dashboards`;
-        return;
-      }
-    }
-    setSwitchProjectVisible(true);
-  };
-
-  const listProjects = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
-        await getProjectList({
-          pageNumber: 1,
-          pageSize: 9999,
-        });
-      if (success) {
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
-  const listApplicationByProject = async (pid: string) => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IApplication>> =
-        await getApplicationListByPipeline({
-          pid: pid,
-          pageNumber: 1,
-          pageSize: 9999,
-        });
-      if (success) {
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
   useEffect(() => {
     setLoadingData(true);
     if (analyticsInfo.pid && analyticsInfo.appid) {
       window.location.href = `/analytics/${analyticsInfo.pid}/app/${analyticsInfo.appid}/dashboards`;
     } else {
-      getDefaultProjectAndApp();
+      setSwitchProjectVisible(true);
     }
     setLoadingData(false);
   }, []);
