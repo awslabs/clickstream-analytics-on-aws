@@ -39,6 +39,7 @@ export class ApplicationSchemas extends Construct {
 
   readonly crForCreateSchemas: CustomResource;
   readonly redshiftBIUserParameter: string;
+  readonly redshiftBIUserName: string;
 
   constructor(scope: Construct, id: string, props: ApplicationSchemasProps) {
     super(scope, id);
@@ -48,6 +49,7 @@ export class ApplicationSchemas extends Construct {
      * Create database(projectId) and schemas(appIds) in Redshift using Redshift-Data API.
      */
     this.crForCreateSchemas = this.createRedshiftSchemasCustomResource(props);
+    this.redshiftBIUserName = this.crForCreateSchemas.getAttString('RedshiftBIUserName');
   }
 
   private createRedshiftSchemasCustomResource(props: ApplicationSchemasProps): CustomResource {
