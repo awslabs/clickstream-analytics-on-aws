@@ -49,6 +49,7 @@ const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
   const { pid, appid } = useParams();
   const [loadingData, setLoadingData] = useState(false);
+  const [emptyData, setEmptyData] = useState(true);
   const [pipeline, setPipeline] = useState({} as IPipeline);
 
   const getEmbeddingUrl = async (
@@ -142,6 +143,7 @@ const AnalyticsFunnel: React.FC = () => {
 
   const clickPreview = async () => {
     setLoadingData(true);
+    setEmptyData(false);
     try {
       console.log(pipeline);
       const redshiftOutputs = getValueFromStackOutputs(
@@ -159,9 +161,10 @@ const AnalyticsFunnel: React.FC = () => {
         dashboardCreateParameters: {
           region: pipeline.region,
           redshift: {
-            user: redshiftOutputs.get(
-              OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-            ) ?? '',
+            user:
+              redshiftOutputs.get(
+                OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
+              ) ?? '',
             dataApiRole:
               redshiftOutputs.get(
                 OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
@@ -366,10 +369,19 @@ const AnalyticsFunnel: React.FC = () => {
               {loadingData ? (
                 <Loading />
               ) : (
-                <div
-                  id={'qs-funnel-container'}
-                  className="iframe-explore"
-                ></div>
+                <div id={'qs-funnel-container'} className="iframe-explore">
+                  {emptyData ? (
+                    <Box
+                      margin={{ vertical: 'xs' }}
+                      textAlign="center"
+                      color="inherit"
+                    >
+                      <SpaceBetween size="m">
+                        <b>{t('analytics:emptyData')}</b>
+                      </SpaceBetween>
+                    </Box>
+                  ) : null}
+                </div>
               )}
             </Container>
             <Container>
@@ -379,7 +391,19 @@ const AnalyticsFunnel: React.FC = () => {
                 <div
                   id={'qs-funnel-table-container'}
                   className="iframe-explore"
-                ></div>
+                >
+                  {emptyData ? (
+                    <Box
+                      margin={{ vertical: 'xs' }}
+                      textAlign="center"
+                      color="inherit"
+                    >
+                      <SpaceBetween size="m">
+                        <b>{t('analytics:emptyData')}</b>
+                      </SpaceBetween>
+                    </Box>
+                  ) : null}
+                </div>
               )}
             </Container>
           </SpaceBetween>
