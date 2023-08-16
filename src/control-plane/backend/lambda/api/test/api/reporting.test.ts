@@ -108,7 +108,7 @@ describe('reporting test', () => {
     });
 
     const res = await request(app)
-      .post('/api/reporting')
+      .post('/api/reporting/funnel')
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -195,7 +195,7 @@ describe('reporting test', () => {
     });
 
     const res = await request(app)
-      .post('/api/reporting')
+      .post('/api/reporting/funnel')
       .send({
         action: 'PUBLISH',
         viewName: 'testview00022',
@@ -239,8 +239,6 @@ describe('reporting test', () => {
           },
         },
       });
-
-    logger.info(`response data: ${JSON.stringify(res.body.data)}`);
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
