@@ -54,7 +54,7 @@ const AnalyticsFunnel: React.FC = () => {
     dashboardId: string,
     sheetId: string | undefined,
     visualId: string | undefined,
-    containerId: string,
+    containerId: string
   ) => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
@@ -112,7 +112,10 @@ const AnalyticsFunnel: React.FC = () => {
       label: t('analytics:options.userNumber') ?? '',
     });
 
-  const customWindowType = { value: 'custom', label: t('analytics:options.customWindow') };
+  const customWindowType = {
+    value: 'custom',
+    label: t('analytics:options.customWindow'),
+  };
   const windowTypeOptions = [
     customWindowType,
     { value: 'theDay', label: t('analytics:options.theDayWindow') },
@@ -202,8 +205,18 @@ const AnalyticsFunnel: React.FC = () => {
         groupColumn: 'week',
       });
       if (success) {
-        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[0], '#qs-funnel-container');
-        getEmbeddingUrl(data.dashboardId, data.sheetId, data.visualIds[1], '#qs-funnel-table-container');
+        getEmbeddingUrl(
+          data.dashboardId,
+          data.sheetId,
+          data.visualIds[0],
+          '#qs-funnel-container'
+        );
+        getEmbeddingUrl(
+          data.dashboardId,
+          data.sheetId,
+          data.visualIds[1],
+          '#qs-funnel-table-container'
+        );
       }
       setLoadingData(false);
     } catch (error) {
@@ -350,16 +363,20 @@ const AnalyticsFunnel: React.FC = () => {
               {loadingData ? (
                 <Loading />
               ) : (
-                <div id={'qs-funnel-container'} className="iframe-explore">
-                </div>
+                <div
+                  id={'qs-funnel-container'}
+                  className="iframe-explore"
+                ></div>
               )}
             </Container>
             <Container>
               {loadingData ? (
                 <Loading />
               ) : (
-                <div id={'qs-funnel-table-container'} className="iframe-explore">
-                </div>
+                <div
+                  id={'qs-funnel-table-container'}
+                  className="iframe-explore"
+                ></div>
               )}
             </Container>
           </SpaceBetween>
