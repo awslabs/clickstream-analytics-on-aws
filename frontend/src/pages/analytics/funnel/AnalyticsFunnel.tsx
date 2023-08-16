@@ -43,7 +43,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
-import { getValueFromStackOutputs } from 'ts/utils';
+import { generateStr, getValueFromStackOutputs } from 'ts/utils';
 
 const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
@@ -81,7 +81,7 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const loadPieline = async (projectId: string) => {
+  const loadPipeline = async (projectId: string) => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(projectId);
@@ -95,7 +95,7 @@ const AnalyticsFunnel: React.FC = () => {
 
   useEffect(() => {
     setLoadingData(true);
-    loadPieline(pid ?? '');
+    loadPipeline(pid ?? '');
     setLoadingData(false);
   }, [pid]);
 
@@ -145,6 +145,7 @@ const AnalyticsFunnel: React.FC = () => {
     setLoadingData(true);
     setEmptyData(false);
     try {
+      const funnelId = generateStr(6);
       console.log(pipeline);
       const redshiftOutputs = getValueFromStackOutputs(
         pipeline,
@@ -184,11 +185,11 @@ const AnalyticsFunnel: React.FC = () => {
           },
         },
         action: 'PREVIEW',
-        viewName: 'testview0002',
+        viewName: `funnel-view-${funnelId}`,
         projectId: pipeline.projectId,
         pipelineId: pipeline.pipelineId,
         appId: appid ?? '',
-        sheetName: 'sheet99',
+        sheetName: `funnel-sheet-${funnelId}`,
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',

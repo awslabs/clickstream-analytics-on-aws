@@ -14,7 +14,6 @@
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
-import { pipeline } from 'stream';
 import { EPipelineStatus, ExecutionType } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
