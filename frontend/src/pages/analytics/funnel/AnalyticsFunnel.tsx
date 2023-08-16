@@ -38,6 +38,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
@@ -158,7 +159,9 @@ const AnalyticsFunnel: React.FC = () => {
         dashboardCreateParameters: {
           region: pipeline.region,
           redshift: {
-            user: 'clickstream_bi_i7e1xmsk',
+            user: redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
+            ) ?? '',
             dataApiRole:
               redshiftOutputs.get(
                 OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
