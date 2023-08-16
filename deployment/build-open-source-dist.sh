@@ -45,23 +45,11 @@ echo "mkdir -p $dist_dir"
 mkdir -p $dist_dir
 
 echo "------------------------------------------------------------------------------"
-echo "[Packing] Clean up the built-in assets for open-source distributable"
-echo "------------------------------------------------------------------------------"
-echo $source_dir
-
-rm -rf  $source_dir/deployment/global-s3-assets
-rm -rf  $source_dir/deployment/regional-s3-assets
-rm -rf  $source_dir/cdk.out
-rm -rf  $source_dir/codescan*.sh
-rm -rf  $source_dir/test-reports
-
-echo "------------------------------------------------------------------------------"
 echo "[Packing] all source files"
 echo "------------------------------------------------------------------------------"
 
-echo "rsync -av --exclude='deployment' $source_dir $dist_dir"
-rsync -av --exclude='deployment/open-source' --exclude='.git' \
---exclude='node_modules' --exclude='coverage' $source_dir $dist_dir
+echo "rsync -av --exclude-from='../.gitignore' $source_dir $dist_dir"
+rsync -av --exclude-from='../.gitignore' $source_dir $dist_dir
 
 echo "------------------------------------------------------------------------------"
 echo "[Packing] Create GitHub (open-source) zip file"
