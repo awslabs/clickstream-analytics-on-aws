@@ -169,4 +169,23 @@ declare global {
       readonly dataSourceArn: string;
     };
   }
+
+  interface IAnalyticsDashboard {
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
+
+    readonly projectId: string;
+    readonly dashboardId: string;
+
+    readonly name: string;
+    readonly description: string;
+    readonly region: string;
+    readonly sheetNames: string[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
+    readonly operator: string;
+    readonly deleted: boolean;
+  }
 }

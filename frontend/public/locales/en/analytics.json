@@ -2,7 +2,13 @@
   "analytics": "Analytics",
   "dashboard": {
     "title": "Dashboards",
-    "description": "This page lists all the dashboards."
+    "description": "This page lists all the dashboards.",
+    "createTitle": "Create Dashboard",
+    "createInputName": "Please input a name for your dashboard",
+    "createInputNamePlaceholder": "e.g. my-dashboard",
+    "createDesc": "Dashboard description - optional",
+    "createDescPlaceholder": "e.g. description of dashboard",
+    "createSheets": "Dashboard sheets - optional"
   },
   "list": {
     "loading": "Loading dashboards.",
@@ -123,7 +129,9 @@
   },
   "valid": {
     "projectSelectError": "Must select a project",
-    "appSelectError": "Must select an application"
+    "appSelectError": "Must select an application",
+    "dashboardNameEmptyError": "Please input dashboard name.",
+    "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10."
   },
   "emptyData": "No Data"
 }

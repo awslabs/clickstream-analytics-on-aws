@@ -10,19 +10,20 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Header } from '@cloudscape-design/components';
+import { Button, Header, SpaceBetween } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DashboardHeaderProps {
   totalNum: number;
+  onClickCreate: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = (
   props: DashboardHeaderProps
 ) => {
   const { t } = useTranslation();
-  const { totalNum } = props;
+  const { totalNum, onClickCreate } = props;
 
   return (
     <>
@@ -30,6 +31,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         variant="h1"
         counter={`(${totalNum})`}
         description={t('analytics:dashboard.description')}
+        actions={
+          <SpaceBetween size="xs" direction="horizontal">
+            <Button
+              data-testid="header-btn-create"
+              variant="primary"
+              onClick={onClickCreate}
+            >
+              {t('common:button.createDashboard')}
+            </Button>
+          </SpaceBetween>
+        }
       >
         {t('analytics:dashboard.title')}
       </Header>

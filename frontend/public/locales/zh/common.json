@@ -163,7 +163,8 @@
     "viewAlarms": "查看告警",
     "refreshMetadata": "刷新元数据",
     "clearFilters": "清理筛选",
-    "preview": "预览"
+    "preview": "预览",
+    "createDashboard": "创建看板"
   },
   "item": "项目",
   "items": "项目",

@@ -25,6 +25,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
+import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
 const AnalyticsDashboardCard: React.FC<any> = () => {
@@ -34,6 +35,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [createDashboardVisible, setCreateDashboardVisible] = useState(false);
   const [analyticsDashboardList, setAnalyticsDashboardList] = useState<
     IAnalyticsDashboard[]
   >([]);
@@ -76,6 +78,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         data,
       }: ApiResponse<ResponseTableData<IAnalyticsDashboard>> =
         await getAnalyticsDashboardList({
+          projectId: projectId ?? '',
           pageNumber: currentPage,
           pageSize: pageSize,
         });
@@ -111,7 +114,14 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
             </Box>
           </Box>
         }
-        header={<DashboardHeader totalNum={totalCount} />}
+        header={
+          <DashboardHeader
+            totalNum={totalCount}
+            onClickCreate={() => {
+              setCreateDashboardVisible(true);
+            }}
+          />
+        }
         pagination={
           <Pagination
             currentPageIndex={currentPage}
@@ -121,6 +131,12 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
             }}
           />
         }
+      />
+      <CreateDashboard
+        projectId={projectId ?? ''}
+        appId={appId ?? ''}
+        openModel={createDashboardVisible}
+        closeModel={() => setCreateDashboardVisible(false)}
       />
     </div>
   );

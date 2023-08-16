@@ -29,10 +29,71 @@ import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
 import { IPipeline } from '../../model/pipeline';
 import { IPlugin } from '../../model/plugin';
-import { IProject } from '../../model/project';
+import { IDashboard, IProject } from '../../model/project';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
+  public async createDashboard(dashboard: IDashboard): Promise<string> {
+    const params: PutCommand = new PutCommand({
+      TableName: clickStreamTableName,
+      Item: {
+        id: dashboard.id,
+        type: `DASHBOARD#${dashboard.id}`,
+        prefix: 'DASHBOARD',
+        projectId: dashboard.projectId,
+        name: dashboard.name ?? '',
+        description: dashboard.description ?? '',
+        region: dashboard.region ?? '',
+        sheetNames: dashboard.sheetNames ?? [],
+        createAt: Date.now(),
+        updateAt: Date.now(),
+        operator: dashboard.operator?? '',
+        deleted: false,
+      },
+    });
+    await docClient.send(params);
+    return dashboard.id;
+  };
+
+  public async listDashboards(projectId: string, order: string): Promise<IDashboard[]> {
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'DASHBOARD',
+      },
+      ScanIndexForward: order === 'asc',
+    };
+    const records = await query(input) as IDashboard[];
+    return records.filter(d => d.projectId === projectId);
+  };
+
+  public async deleteDashboard(dashboardId: string, operator: string): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: dashboardId,
+        type: `DASHBOARD#${dashboardId}`,
+      },
+      // Define expressions for the new or updated attributes
+      UpdateExpression: 'SET deleted= :d, #operator= :operator',
+      ExpressionAttributeNames: {
+        '#operator': 'operator',
+      },
+      ExpressionAttributeValues: {
+        ':d': true,
+        ':operator': operator,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
 
   public async createProject(project: IProject): Promise<string> {
     const params: PutCommand = new PutCommand({

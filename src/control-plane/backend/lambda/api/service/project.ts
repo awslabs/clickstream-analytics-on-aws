@@ -11,17 +11,58 @@
  *  and limitations under the License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { isEmpty, paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
-import { IProject } from '../model/project';
+import { IDashboard, IProject } from '../model/project';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 
 export class ProjectServ {
+  public async listDashboards(req: any, res: any, next: any) {
+    try {
+      const { order, pageNumber, pageSize } = req.query;
+      const { id } = req.params;
+      const result = await store.listDashboards(id, order);
+      const items = paginateData(result, true, pageSize, pageNumber);
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: items,
+      }));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async createDashboard(req: any, res: any, next: any) {
+    try {
+      req.body.id = uuidv4().replace(/-/g, '');
+      req.body.operator = res.get('X-Click-Stream-Operator');
+      let dashboard: IDashboard = req.body;
+      // TODO: Create dashboard in QuickSight
+      // dashboard.id = xxxx
+      const id = await store.createDashboard(dashboard);
+      return res.status(201).json(new ApiSuccess({ id }, 'Dashboard created.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async deleteDashboard(req: any, res: any, next: any) {
+    try {
+      const { dashboardId } = req.params;
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deleteDashboard(dashboardId, operator);
+      return res.json(new ApiSuccess(null, 'Dashboard deleted.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { order, pageNumber, pageSize } = req.query;
