@@ -27,7 +27,7 @@ import {
   GenerateEmbedUrlForRegisteredUserCommandInput,
   ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
-import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QuickSightEmbedRoleArn } from '../../common/constants';
+import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
@@ -40,7 +40,6 @@ const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
 const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
-const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
 
 const getIdentityRegionFromMessage = (message: string) => {
   const regexp = new RegExp(REGION_PATTERN, 'g');
