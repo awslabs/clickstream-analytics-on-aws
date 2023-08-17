@@ -191,6 +191,7 @@ describe('reporting test', () => {
     });
 
     quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
     });
 
     const res = await request(app)
@@ -222,8 +223,8 @@ describe('reporting test', () => {
           eventName: 'note_export',
         }],
         timeScopeType: 'FIXED',
-        timeStart: '2023-06-30',
-        timeEnd: '2023-08-30',
+        timeStart: new Date('2023-06-30'),
+        timeEnd: new Date('2023-08-30'),
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
@@ -358,6 +359,7 @@ describe('reporting test', () => {
     });
 
     quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
     });
 
     const res = await request(app)
@@ -389,8 +391,8 @@ describe('reporting test', () => {
           eventName: 'note_export',
         }],
         timeScopeType: 'FIXED',
-        timeStart: '2023-06-30',
-        timeEnd: '2023-08-30',
+        timeStart: new Date('2023-06-30'),
+        timeEnd: new Date('2023-08-30'),
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
