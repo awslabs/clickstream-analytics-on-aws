@@ -664,6 +664,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:AddRoleToInstanceProfile',
               'iam:ListPolicies',
               'iam:ListRoles',
+              'iam:UpdateRoleDescription',
             ],
             Effect: 'Allow',
             Resource: [
