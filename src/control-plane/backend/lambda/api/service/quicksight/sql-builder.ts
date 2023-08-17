@@ -714,7 +714,7 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
 
     for (let n = 1; n<=lastN; n++) {
       dateList.push(`
-      SELECT CURRENT_DATE - INTERVAL '${n} day' as event_date
+       (CURRENT_DATE - INTERVAL '${n} day') 
       `);
     }
   }
