@@ -54,7 +54,7 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
     PhysicalResourceId: physicalId,
     Data: {
       DatabaseName: event.ResourceProperties.databaseName,
-      RedshiftBIUsername: biUsername,
+      RedshiftBIUserName: biUsername,
     },
     Status: 'SUCCESS',
   };
