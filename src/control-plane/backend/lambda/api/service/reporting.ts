@@ -347,6 +347,10 @@ export class ReportingServ {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
+        pathAnalysis: {
+          type: query.pathAnalysis.type,
+          lagSeconds: query.pathAnalysis.lagSeconds,
+        },
       });
       console.log(`path analysis sql: ${sql}`);
 

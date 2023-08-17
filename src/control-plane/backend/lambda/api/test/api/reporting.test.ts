@@ -504,6 +504,10 @@ describe('reporting test', () => {
             },
           },
         },
+        pathAnalysis: {
+          type: 'SESSION',
+          lagSeconds: 3600,
+        },
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -585,6 +589,10 @@ describe('reporting test', () => {
               workgroupName: 'clickstream-project01-wvzh',
             },
           },
+        },
+        pathAnalysis: {
+          type: 'SESSION',
+          lagSeconds: 3600,
         },
       });
 
