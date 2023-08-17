@@ -70,8 +70,8 @@ export interface DashboardCreateInputParameters {
 }
 
 export interface VisualMapProps {
-  name: 'CHART' | 'TABLE' ;
-  id: string;
+  readonly name: 'CHART' | 'TABLE' ;
+  readonly id: string;
 }
 
 export interface CreateDashboardResult {
@@ -98,9 +98,9 @@ export interface VisualRelatedDefProps {
   readonly visualId: string;
   readonly viewName: string;
   readonly lastN?: number;
-  readonly timeUnit?: string;
-  readonly timeStart?: string;
-  readonly timeEnd?: string;
+  readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
+  readonly timeStart?: Date;
+  readonly timeEnd?: Date;
 }
 
 export const funnelVisualColumns: InputColumn[] = [
@@ -460,8 +460,8 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId;
     filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date';
     filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = props.viewName;
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!);
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = props.timeStart!;
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = props.timeEnd!;
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 

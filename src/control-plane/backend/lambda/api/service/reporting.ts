@@ -403,7 +403,7 @@ export class ReportingServ {
     let result: CreateDashboardResult;
     if (!query.dashboardId) {
 
-      //crate QuickSight analysis
+      //create QuickSight analysis
       const analysisId = `clickstream-ext-${uuidv4()}`;
       const newAnalysis = await quickSight.createAnalysis({
         AwsAccountId: awsAccountId,
@@ -424,7 +424,7 @@ export class ReportingServ {
         Definition: dashboard as AnalysisDefinition,
       });
 
-      //crate QuickSight dashboard
+      //create QuickSight dashboard
       const dashboardId = `clickstream-ext-${uuidv4()}`;
       const newDashboard = await quickSight.createDashboard({
         AwsAccountId: awsAccountId,
@@ -463,7 +463,7 @@ export class ReportingServ {
         visualIds: [],
       };
     } else {
-      //crate QuickSight analysis
+      //update QuickSight analysis
       const newAnalysis = await quickSight.updateAnalysis({
         AwsAccountId: awsAccountId,
         AnalysisId: query.analysisId,
@@ -471,7 +471,7 @@ export class ReportingServ {
         Definition: dashboard as AnalysisDefinition,
       });
 
-      //crate QuickSight dashboard
+      //update QuickSight dashboard
       const newDashboard = await quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: query.dashboardId,
@@ -480,20 +480,31 @@ export class ReportingServ {
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
+      // publish new version
+      let count = 0;
       for (const _i of Array(60).keys()) {
+        count += 1;
         try {
-          await quickSight.updateDashboardPublishedVersion({
+          const response = await quickSight.updateDashboardPublishedVersion({
             AwsAccountId: awsAccountId,
             DashboardId: query.dashboardId,
             VersionNumber: Number.parseInt(versionNumber!),
           });
 
+          if (response.DashboardId) {
+            break;
+          }
         } catch (err: any) {
           if (err instanceof ConflictException ) {
             logger.warn('sleep 100ms to wait updateDashboard finish');
             await sleep(100);
+          } else {
+            throw err;
           }
         }
+      }
+      if (count >= 60) {
+        throw new Error(`publish dashboard new version failed after try ${count} times`);
       }
 
       result = {
