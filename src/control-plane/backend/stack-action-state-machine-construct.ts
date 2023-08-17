@@ -114,6 +114,7 @@ export class StackActionStateMachine extends Construct {
             'iam:AddRoleToInstanceProfile',
             'iam:ListPolicies',
             'iam:ListRoles',
+            'iam:UpdateRoleDescription',
           ],
           resources: [
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
