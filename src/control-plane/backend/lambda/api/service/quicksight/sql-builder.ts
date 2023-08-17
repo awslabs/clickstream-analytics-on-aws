@@ -13,6 +13,7 @@
 
 import { format } from 'sql-formatter';
 import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
+import { logger } from '../../common/powertools';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
@@ -26,6 +27,11 @@ export interface EventAndCondition {
   readonly eventName: string;
   readonly conditions?: Condition[];
   readonly conditionOperator?: 'and' | 'or' ;
+}
+
+export interface PathAnalysisParameter {
+  readonly type: 'SESSION' | 'CUSTOMIZE';
+  readonly lagSeconds?: number;
 }
 
 export interface FunnelSQLParameters {
@@ -43,6 +49,8 @@ export interface FunnelSQLParameters {
   readonly lastN?: number;
   readonly timeUnit?: ExploreRelativeTimeUnit;
   readonly groupColumn: ExploreGroupColumn;
+  readonly maxStep?: number;
+  readonly pathAnalysis?: PathAnalysisParameter;
 }
 
 const baseColumns = `
@@ -487,30 +495,160 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
     }
   }
 
-  const sql = `
-  CREATE OR REPLACE VIEW ${schema}.${name} AS
-    ${_buildBaseTableSql(eventNames, sqlParameters)}
-    data as (
-      select 
+  let midTableSql = '';
+  let dataTableSql = '';
+  let partitionBy = '';
+  let joinSql = '';
+  logger.error(`path type: ${sqlParameters.pathAnalysis?.type}`);
+  if (sqlParameters.pathAnalysis?.type === 'SESSION' ) {
+    partitionBy = ', session_id';
+    joinSql = `
+    and a.session_id = b.session_id 
+    `;
+    midTableSql = `
+      mid_table as (
+        select 
         day::date as event_date,
         event_name,
         user_pseudo_id,
-        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
-        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
-      from base_data 
+        event_id,
+        event_timestamp,
+        (
+          select
+              ep.value.string_value
+            from
+              base_data e,
+              e.event_params ep
+            where
+              ep.key = '_session_id'
+              and e.event_id = base.event_id
+            limit
+              1
+        ) as session_id
+      from base_data base
       ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
+      ),
+    `;
+    dataTableSql = `data as (
+      select 
+        *,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) + 1 as step_2
+      from mid_table 
     )
     select 
       a.event_date as event_date,
       a.event_name || '_' || a.step_1 as source,
-      b.event_name || '_' || a.step_2 as target,
-      count(1) as weight
-    from data a join data b on a.user_pseudo_id = b.user_pseudo_id and a.step_2 = b.step_1
+      CASE 
+        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
+        ELSE 'other_' || a.step_2
+      END as target,
+      ${sqlParameters.computeMethod === 'USER_CNT' ? 'count(distinct a.user_pseudo_id)' : 'count(1)' } as weight
+    from data a left join data b 
+      on a.user_pseudo_id = b.user_pseudo_id 
+      ${joinSql}
+      and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 10}
     group by 
       a.event_date,
       a.event_name || '_' || a.step_1,
-      b.event_name || '_' || a.step_2
+      CASE 
+        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
+        ELSE 'other_' || a.step_2
+      END
+    `;
+
+  } else {
+    midTableSql = `
+      mid_table as (
+        select 
+        day::date as event_date,
+        event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp
+      from base_data base
+      ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
+      ),
+    `;
+
+    dataTableSql = `data_1 as (
+      select 
+        *,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
+      from mid_table 
+    ),
+    data_2 as (
+      select 
+        a.event_date as a_event_date,
+        a.event_name as a_event_name,
+        a.user_pseudo_id as a_user_pseudo_id,
+        a.event_id as a_event_id,
+        b.event_date as b_event_date,
+        b.event_name as b_event_name,
+        b.user_pseudo_id as b_user_pseudo_id,
+        b.event_id as b_event_id,
+        b.event_timestamp as b_event_timestamp,
+        a.event_timestamp as a_event_timestamp,
+        a.step_1,
+        a.step_2
+      from data_1 a left join data_1 b 
+      on a.user_pseudo_id = b.user_pseudo_id 
+      and a.step_2 = b.step_1
+    )
+    ,timestamp_diff AS (
+      SELECT *
+      , case when (b_event_timestamp - a_event_timestamp < ${sqlParameters.pathAnalysis!.lagSeconds! * 1000} and b_event_timestamp - a_event_timestamp >0) then 0 else 1 end as group_start
+      FROM
+          data_2
+     )
+     ,grouped_data AS (
+      SELECT
+          *,
+          SUM(group_start) over(order by a_event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS group_id
+      FROM
+          timestamp_diff
+      )
+    ,data as (
+      select 
+        a_event_date,
+        a_event_name,
+        a_user_pseudo_id,
+        a_event_id,
+        b_event_date,
+        b_event_name,
+        b_user_pseudo_id,
+        b_event_id,
+        ROW_NUMBER() OVER (PARTITION BY group_id, a_user_pseudo_id ORDER BY step_1,step_2 asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY group_id, a_user_pseudo_id ORDER BY step_1,step_2 asc) + 1 as step_2
+      from grouped_data
+    )
+    select 
+      a_event_date as event_date,
+      a_event_name || '_' || step_1 as source,
+      CASE 
+        WHEN b_event_name is not null THEN b_event_name || '_' || step_2
+        ELSE 'other_' || step_2
+      END as target,
+      ${sqlParameters.computeMethod === 'USER_CNT' ? 'count(distinct a_user_pseudo_id)' : 'count(1)' } as weight
+    from data
+    where step_2 <= ${sqlParameters.maxStep ?? 10}
+    group by 
+      a_event_date,
+      a_event_name || '_' || step_1,
+      CASE 
+        WHEN b_event_name is not null THEN b_event_name || '_' || step_2
+        ELSE 'other_' || step_2
+      END
+    `;
+  }
+
+  const sql = `
+  CREATE OR REPLACE VIEW ${schema}.${name} AS
+    ${_buildBaseTableSql(eventNames, sqlParameters)}
+    ${midTableSql}
+    ${dataTableSql}
   `;
 
   return format(sql, {
