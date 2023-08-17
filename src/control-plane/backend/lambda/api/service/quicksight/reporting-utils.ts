@@ -139,6 +139,25 @@ export const pathAnalysisVisualColumns: InputColumn[] = [
   },
 ];
 
+export const eventAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'grouping',
+    Type: 'STRING',
+  },
+  {
+    Name: 'start_event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'retention',
+    Type: 'DECIMAL',
+  },
+];
+
 export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
   props: DataSetProps)
@@ -325,9 +344,17 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       if (visual.eventCount) {
-        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 2;
+        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
         visualControl.ColumnSpan = visual.colSpan ?? 20;
       }
+
+      visualControl.RowSpan = visual.rowSpan ?? 12;
+      visualControl.ColumnSpan = visual.colSpan ?? 20;
+
+      if (visual.eventCount) {
+        visualControl.RowSpan = visual.eventCount * 3;
+      }
+
       visualControl.ElementId = findFirstChild(visual.visual).VisualId;
       elements.push(visualControl);
 
@@ -578,6 +605,41 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, t
   return visualDef;
 }
 
+export function getRetentionLineChartVisualDef(visualId: string, viewName: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/retention-line-chart.json')).toString()) as Visual;
+  const filedId1 = uuidv4();
+  const filedId2 = uuidv4();
+  const filedId3 = uuidv4();
+  const hierarchyId = uuidv4();
+  visualDef.LineChartVisual!.VisualId = visualId;
+
+  const fieldWell = visualDef.LineChartVisual!.ChartConfiguration!.FieldWells!.LineChartAggregatedFieldWells!;
+  const sortConfiguration = visualDef.LineChartVisual!.ChartConfiguration!.SortConfiguration!;
+  const tooltipFields = visualDef.LineChartVisual!.ChartConfiguration?.Tooltip!.FieldBasedTooltip!.TooltipFields!;
+
+  fieldWell.Category![0].DateDimensionField!.FieldId = filedId1;
+  fieldWell.Category![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Category![0].DateDimensionField!.HierarchyId = hierarchyId;
+
+  fieldWell.Values![0].NumericalMeasureField!.FieldId = filedId2;
+  fieldWell.Values![0].NumericalMeasureField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Values![0].NumericalMeasureField!.AggregationFunction!.SimpleNumericalAggregation = 'AVERAGE';
+
+  fieldWell.Colors![0].CategoricalDimensionField!.FieldId = filedId3;
+  fieldWell.Colors![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  sortConfiguration.CategorySort![0].FieldSort!.FieldId = filedId1;
+
+  tooltipFields[0].FieldTooltipItem!.FieldId = filedId1;
+  tooltipFields[1].FieldTooltipItem!.FieldId = filedId2;
+  tooltipFields[2].FieldTooltipItem!.FieldId = filedId3;
+
+  visualDef.LineChartVisual!.ColumnHierarchies![0].DateTimeHierarchy!.HierarchyId = hierarchyId;
+
+  return visualDef;
+}
+
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/path-analysis-chart.json')).toString()) as Visual;
@@ -637,6 +699,41 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
   return visualDef;
 
 }
+
+export function getRetentionPivotTableVisualDef(visualId: string, viewName: string) : Visual {
+
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/retention-pivot-table-chart.json')).toString()) as Visual;
+  const filedId1 = uuidv4();
+  const filedId2 = uuidv4();
+  const filedId3 = uuidv4();
+  visualDef.PivotTableVisual!.VisualId = visualId;
+
+  const fieldWell = visualDef.PivotTableVisual!.ChartConfiguration!.FieldWells!.PivotTableAggregatedFieldWells!;
+  const sortConfiguration = visualDef.PivotTableVisual!.ChartConfiguration!.SortConfiguration!;
+  const fieldOptions = visualDef.PivotTableVisual?.ChartConfiguration?.FieldOptions!.SelectedFieldOptions!;
+
+  fieldWell.Rows![0].CategoricalDimensionField!.FieldId = filedId1;
+  fieldWell.Rows![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  fieldWell.Columns![0].DateDimensionField!.FieldId = filedId2;
+  fieldWell.Columns![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
+
+  fieldWell.Values![0].NumericalMeasureField!.FieldId = filedId3;
+  fieldWell.Values![0].NumericalMeasureField!.Column!.DataSetIdentifier = viewName;
+  fieldWell.Values![0].NumericalMeasureField!.AggregationFunction!.SimpleNumericalAggregation = 'AVERAGE';
+
+  sortConfiguration.FieldSortOptions![0].FieldId = filedId2;
+  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.FieldId = filedId2;
+  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.Direction = 'ASC';
+
+  fieldOptions[0].FieldId = filedId1;
+  fieldOptions[1].FieldId = filedId2;
+  fieldOptions[2].FieldId = filedId3;
+
+  return visualDef;
+
+}
+
 
 function findElementByPath(jsonData: any, path: string): any {
   const pathKeys = path.split('.');

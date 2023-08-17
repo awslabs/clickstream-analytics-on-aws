@@ -1,0 +1,109 @@
+{
+  "PivotTableVisual": {
+      "VisualId": "",
+      "Title": {
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "PivotTableAggregatedFieldWells": {
+                  "Rows": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "grouping"
+                              }
+                          }
+                      }
+                  ],
+                  "Columns": [
+                      {
+                          "DateDimensionField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "event_date"
+                              }
+                          }
+                      }
+                  ],
+                  "Values": [
+                      {
+                          "NumericalMeasureField": {
+                              "FieldId": "",
+                              "Column": {
+                                  "DataSetIdentifier": "",
+                                  "ColumnName": "retention"
+                              },
+                              "AggregationFunction": {
+                                  "SimpleNumericalAggregation": "AVERAGE"
+                              },
+                              "FormatConfiguration": {
+                                  "FormatConfiguration": {
+                                      "PercentageDisplayFormatConfiguration": {
+                                          "Suffix": "%",
+                                          "SeparatorConfiguration": {
+                                              "DecimalSeparator": "DOT",
+                                              "ThousandsSeparator": {
+                                                  "Symbol": "COMMA",
+                                                  "Visibility": "VISIBLE"
+                                              }
+                                          },
+                                          "NegativeValueConfiguration": {
+                                              "DisplayMode": "NEGATIVE"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "FieldSortOptions": [
+                  {
+                      "FieldId": "",
+                      "SortBy": {
+                          "Field": {
+                              "FieldId": "",
+                              "Direction": "ASC"
+                          }
+                      }
+                  }
+              ]
+          },
+          "TableOptions": {
+              "ColumnHeaderStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CellStyle": {
+                  "TextWrap": "NONE",
+                  "Height": 25
+              }
+          },
+          "FieldOptions": {
+              "SelectedFieldOptions": [
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "",
+                      "Visibility": "VISIBLE"
+                  }
+              ]
+          }
+      },
+      "Actions": []
+  }
+}

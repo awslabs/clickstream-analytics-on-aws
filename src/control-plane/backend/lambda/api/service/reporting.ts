@@ -36,8 +36,11 @@ import {
   getEventPivotTableVisualDef,
   pathAnalysisVisualColumns,
   getPathAnalysisChartVisualDef,
+  eventAnalysisVisualColumns,
+  getRetentionLineChartVisualDef,
+  getRetentionPivotTableVisualDef,
 } from './quicksight/reporting-utils';
-import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView } from './quicksight/sql-builder';
+import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
@@ -411,6 +414,112 @@ export class ReportingServ {
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
+      });
+
+      return res.status(201).json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  async createRetentionVisual(req: any, res: any, next: any) {
+    try {
+      logger.info('start to create retention analysis visuals');
+      logger.info(`request: ${JSON.stringify(req.body)}`);
+
+      const query = req.body;
+      const dashboardCreateParameters = query.dashboardCreateParameters;
+
+      //construct parameters to build sql
+      const viewName = query.viewName;
+      const sql = buildRetentionAnalysisView(query.appId, viewName, {
+        schemaName: query.appId,
+        computeMethod: query.computeMethod,
+        specifyJoinColumn: query.specifyJoinColumn,
+        joinColumn: query.joinColumn,
+        conversionIntervalType: query.conversionIntervalType,
+        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+        eventAndConditions: query.eventAndConditions,
+        timeScopeType: query.timeScopeType,
+        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        groupColumn: query.groupColumn,
+        pairEventAndConditions: query.pairEventAndConditions,
+      });
+      console.log(`retention analysis sql: ${sql}`);
+
+      const sqls = [sql];
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+
+      const datasetPropsArray: DataSetProps[] = [];
+      datasetPropsArray.push({
+        name: '',
+        tableName: viewName,
+        columns: eventAnalysisVisualColumns,
+        importMode: 'DIRECT_QUERY',
+        customSql: `select * from ${query.appId}.${viewName}`,
+        projectedColumns: [
+          'grouping',
+          'start_event_date',
+          'event_date',
+          'retention',
+        ],
+      });
+
+      let sheetId;
+      if (!query.dashboardId) {
+        sheetId = uuidv4();
+      } else {
+        if (!query.sheetId) {
+          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
+        }
+        sheetId = query.sheetId;
+      }
+
+      const visualId = uuidv4();
+      const visualDef = getRetentionLineChartVisualDef(visualId, viewName);
+      const visualRelatedParams = getVisualRelatedDefs({
+        timeScopeType: query.timeScopeType,
+        sheetId,
+        visualId,
+        viewName,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        timeStart: query.timeStart,
+        timeEnd: query.timeEnd,
+      });
+
+      const visualProps = {
+        sheetId: sheetId,
+        visual: visualDef,
+        dataSetIdentifierDeclaration: [],
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+        eventCount: query.eventAndConditions.length,
+      };
+
+      const tableVisualId = uuidv4();
+      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName);
+
+      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+
+      const tableVisualProps = {
+        sheetId: sheetId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: [],
+      };
+
+      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      result.visualIds.push({
+        name: 'CHART',
+        id: visualId,
+      });
+      result.visualIds.push({
+        name: 'TABLE',
+        id: tableVisualId,
       });
 
       return res.status(201).json(new ApiSuccess(result));
