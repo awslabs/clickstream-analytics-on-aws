@@ -330,7 +330,7 @@ export class ReportingServ {
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters;
 
-      
+
       //construct parameters to build sql
       const viewName = query.viewName;
       const sql = buildPathAnalysisView(query.appId, viewName, {
@@ -400,7 +400,7 @@ export class ReportingServ {
         filterGroup: visualRelatedParams.filterGroup,
         eventCount: query.eventAndConditions.length,
         colSpan: 32,
-        rowSpan: 12
+        rowSpan: 12,
       };
 
       const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps]);
