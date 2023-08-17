@@ -324,7 +324,7 @@ export class ClickStreamApiConstruct extends Construct {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: [
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
+            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream-DataModeling*`,
           ],
           actions: [
             'sts:AssumeRole',
