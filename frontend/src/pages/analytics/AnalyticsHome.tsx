@@ -25,17 +25,17 @@ const AnalyticsHome: React.FC = () => {
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
-      pid: '',
-      pname: '',
-      appid: '',
-      appname: '',
+      projectId: '',
+      projectName: '',
+      appId: '',
+      appName: '',
     }
   );
 
   useEffect(() => {
     setLoadingData(true);
-    if (analyticsInfo.pid && analyticsInfo.appid) {
-      window.location.href = `/analytics/${analyticsInfo.pid}/app/${analyticsInfo.appid}/dashboards`;
+    if (analyticsInfo.projectId && analyticsInfo.appId) {
+      window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
     } else {
       setSwitchProjectVisible(true);
     }

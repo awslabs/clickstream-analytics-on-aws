@@ -32,7 +32,7 @@ import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
 const MetadataParameters: React.FC = () => {
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const { t } = useTranslation();
 
   const [showSplit, setShowSplit] = useState(false);
@@ -226,11 +226,11 @@ const MetadataParameters: React.FC = () => {
 
   const listMetadataEventParameters = async () => {
     try {
-      if (!pid || !appid) {
+      if (!projectId || !appId) {
         return [];
       }
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataParametersList({ pid: pid, appId: appid });
+        await getMetadataParametersList({ projectId, appId });
       if (success) {
         return data.items;
       }
@@ -268,9 +268,7 @@ const MetadataParameters: React.FC = () => {
               t('analytics:metadata.eventParameter.tableLoading') || 'Loading',
             emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
             headerTitle: t('analytics:metadata.eventParameter.title'),
-            headerRefreshButtonText: t(
-              'common:button.refreshMetadata'
-            ),
+            headerRefreshButtonText: t('common:button.refreshMetadata'),
             filteringAriaLabel: t(
               'analytics:metadata.eventParameter.filteringAriaLabel'
             ),
@@ -310,7 +308,7 @@ const MetadataParameters: React.FC = () => {
       headerSelector="#header"
       navigation={
         <Navigation
-          activeHref={`/analytics/${pid}/app/${appid}/metadata/event-parameters`}
+          activeHref={`/analytics/${projectId}/app/${appId}/metadata/event-parameters`}
         />
       }
       splitPanelOpen={showSplit}

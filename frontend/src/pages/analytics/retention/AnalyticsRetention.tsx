@@ -34,7 +34,7 @@ import { useParams } from 'react-router-dom';
 
 const AnalyticsRetention: React.FC = () => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const metricOptions = [
@@ -163,7 +163,7 @@ const AnalyticsRetention: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/retention`} />
+        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/retention`} />
       }
     />
   );

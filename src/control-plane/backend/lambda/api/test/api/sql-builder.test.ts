@@ -47,8 +47,6 @@ describe('SQL Builder test', () => {
       groupColumn: 'day',
     });
 
-    // console.log(sql);
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS
   with
@@ -385,8 +383,6 @@ describe('SQL Builder test', () => {
       timeEnd: '2023-06-30',
       groupColumn: 'day',
     });
-
-    // console.log(sql)
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS
@@ -1071,8 +1067,6 @@ describe('SQL Builder test', () => {
       groupColumn: 'day',
     });
 
-    // console.log(sql)
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS
   with
@@ -1447,8 +1441,6 @@ describe('SQL Builder test', () => {
       timeEnd: '2023-06-30',
       groupColumn: 'day',
     });
-
-    // console.log(sql)
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS
@@ -1845,8 +1837,6 @@ describe('SQL Builder test', () => {
       timeEnd: '2023-06-30',
       groupColumn: 'day',
     });
-
-    // console.log(sql)
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS
@@ -2272,8 +2262,6 @@ describe('SQL Builder test', () => {
       timeEnd: '2023-06-30',
       groupColumn: 'day',
     });
-
-    console.log(sql);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.test - view AS

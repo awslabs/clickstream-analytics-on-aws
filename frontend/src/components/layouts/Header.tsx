@@ -45,10 +45,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
-      pid: '',
-      pname: '',
-      appid: '',
-      appname: '',
+      projectId: '',
+      projectName: '',
+      appId: '',
+      appName: '',
     }
   );
 
@@ -105,7 +105,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 {
                   type: 'button',
                   variant: 'link',
-                  text: `${analyticsInfo?.pname} / ${analyticsInfo.appname}`,
+                  text: `${analyticsInfo?.projectName} / ${analyticsInfo.appName}`,
                 },
                 {
                   type: 'button',

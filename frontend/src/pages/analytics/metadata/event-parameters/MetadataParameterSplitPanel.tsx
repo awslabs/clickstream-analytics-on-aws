@@ -43,7 +43,7 @@ const MetadataParameterSplitPanel: React.FC<
   MetadataParameterSplitPanelProps
 > = (props: MetadataParameterSplitPanelProps) => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const { parameter } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
@@ -141,8 +141,8 @@ const MetadataParameterSplitPanel: React.FC<
     try {
       const { success, data }: ApiResponse<IMetadataEventParameter> =
         await getMetadataParametersDetails({
-          pid: pid ?? '',
-          appId: appid ?? '',
+          projectId: projectId ?? '',
+          appId: appId ?? '',
           parameterId: parameter.parameterId,
         });
       if (success) {

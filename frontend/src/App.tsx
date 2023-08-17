@@ -126,39 +126,39 @@ const SignedInPage: React.FC = () => {
                 />
                 <Route path="/analytics" element={<AnalyticsHome />} />
                 <Route
-                  path="/analytics/:pid/app/:appid/realtime"
+                  path="/analytics/:projectId/app/:appId/realtime"
                   element={<AnalyticsRealtime />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/dashboards"
+                  path="/analytics/:projectId/app/:appId/dashboards"
                   element={<AnalyticsDashboard />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/dashboard/:did"
+                  path="/analytics/:projectId/app/:appId/dashboard/:dashboardId"
                   element={<AnalyticsDashboardDetail />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/event"
+                  path="/analytics/:projectId/app/:appId/event"
                   element={<AnalyticsEvent />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/retention"
+                  path="/analytics/:projectId/app/:appId/retention"
                   element={<AnalyticsRetention />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/funnel"
+                  path="/analytics/:projectId/app/:appId/funnel"
                   element={<AnalyticsFunnel />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/metadata/events"
+                  path="/analytics/:projectId/app/:appId/metadata/events"
                   element={<MetadataEvents />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/metadata/event-parameters"
+                  path="/analytics/:projectId/app/:appId/metadata/event-parameters"
                   element={<MetadataParameters />}
                 />
                 <Route
-                  path="/analytics/:pid/app/:appid/metadata/user-attributes"
+                  path="/analytics/:projectId/app/:appId/metadata/user-attributes"
                   element={<MetadataUserAttributes />}
                 />
               </Routes>

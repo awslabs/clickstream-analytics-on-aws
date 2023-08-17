@@ -47,7 +47,7 @@ import { generateStr, getValueFromStackOutputs } from 'ts/utils';
 
 const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [emptyData, setEmptyData] = useState(true);
   const [pipeline, setPipeline] = useState({} as IPipeline);
@@ -82,22 +82,23 @@ const AnalyticsFunnel: React.FC = () => {
   };
 
   const loadPipeline = async (projectId: string) => {
+    setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(projectId);
       if (success) {
         setPipeline(data);
+        setLoadingData(false);
       }
     } catch (error) {
       console.log(error);
+      setLoadingData(false);
     }
   };
 
   useEffect(() => {
-    setLoadingData(true);
-    loadPipeline(pid ?? '');
-    setLoadingData(false);
-  }, [pid]);
+    loadPipeline(projectId ?? '');
+  }, [projectId]);
 
   const metricOptions = [
     {
@@ -146,7 +147,6 @@ const AnalyticsFunnel: React.FC = () => {
     setEmptyData(false);
     try {
       const funnelId = generateStr(6);
-      console.log(pipeline);
       const redshiftOutputs = getValueFromStackOutputs(
         pipeline,
         'DataModelingRedshift',
@@ -188,7 +188,7 @@ const AnalyticsFunnel: React.FC = () => {
         viewName: `funnel-view-${funnelId}`,
         projectId: pipeline.projectId,
         pipelineId: pipeline.pipelineId,
-        appId: appid ?? '',
+        appId: appId ?? '',
         sheetName: `funnel-sheet-${funnelId}`,
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
@@ -412,7 +412,9 @@ const AnalyticsFunnel: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/funnel`} />
+        <Navigation
+          activeHref={`/analytics/${projectId}/app/${appId}/funnel`}
+        />
       }
     />
   );

@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const AnalyticsRealtime: React.FC = () => {
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const getEmbeddingUrl = async () => {
@@ -63,7 +63,7 @@ const AnalyticsRealtime: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/realtime`} />
+        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/realtime`} />
       }
     />
   );

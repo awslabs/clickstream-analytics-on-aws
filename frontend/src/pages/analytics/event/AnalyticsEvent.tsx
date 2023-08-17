@@ -47,7 +47,7 @@ import { MetadataValueType } from 'ts/const';
 
 const AnalyticsEvent: React.FC = () => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const metricOptions = [
@@ -376,7 +376,7 @@ const AnalyticsEvent: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/event`} />
+        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/event`} />
       }
     />
   );
