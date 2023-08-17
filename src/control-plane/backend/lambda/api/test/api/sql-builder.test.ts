@@ -21,7 +21,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - user_cnt', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -49,35 +49,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -128,13 +103,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -358,7 +377,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - event_cnt', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -386,35 +405,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -465,13 +459,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -695,7 +733,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - conversionIntervalType', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -723,35 +761,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -802,13 +815,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -1042,7 +1099,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - specifyJoinColumn', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
@@ -1069,35 +1126,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -1148,13 +1180,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -1388,7 +1464,7 @@ describe('SQL Builder test', () => {
 
   test('funnel visual sql - conditions', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -1398,39 +1474,43 @@ describe('SQL Builder test', () => {
       eventAndConditions: [
         {
           eventName: 'add_button_click',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType:  MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'and',
         },
         {
           eventName: 'note_share',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType:  MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'or',
 
         },
         {
@@ -1444,35 +1524,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -1523,13 +1578,69 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (
+            event_name = 'add_button_click'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (
+            event_name = 'note_share'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -1591,11 +1702,6 @@ describe('SQL Builder test', () => {
         base_data base
       where
         event_name = 'add_button_click'
-        and (
-          1 = 1
-          and platform = 'ANDROID'
-          and device_screen_height <> 1400
-        )
     ),
     table_1 as (
       select
@@ -1654,11 +1760,6 @@ describe('SQL Builder test', () => {
         base_data base
       where
         event_name = 'note_share'
-        and (
-          1 = 1
-          or platform = 'ANDROID'
-          or device_screen_height <> 1400
-        )
     ),
     table_2 as (
       select
@@ -1763,70 +1864,53 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - first event extra conditions', () => {
 
-    const sql = buildFunnelDataSql('app1', 'test-view', {
+    const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      firstEventExtraCondition: {
-        eventName: 'add_button_click',
-        conditions: [
-          {
-            category: 'event',
-            property: '_session_duration',
-            operator: '>',
-            value: '200',
-            dataType: MetadataValueType.INTEGER,
-          },
-          {
-            category: 'user',
-            property: '_user_first_touch_timestamp',
-            operator: '>',
-            value: '1686532526770',
-            dataType: MetadataValueType.INTEGER,
-          },
-        ],
-        conditionOperator: 'and',
-
-      },
       eventAndConditions: [
         {
           eventName: 'add_button_click',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType: MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'and',
         },
         {
           eventName: 'note_share',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType:  MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'or',
 
         },
         {
@@ -1840,35 +1924,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -1919,13 +1978,69 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (
+            event_name = 'add_button_click'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (
+            event_name = 'note_share'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -1982,45 +2097,11 @@ describe('SQL Builder test', () => {
         user_ltv as user_ltv_0,
         event_dimensions as event_dimensions_0,
         ecommerce as ecommerce_0,
-        items as items_0,
-        (
-          select
-            ep.value.int_value
-          from
-            base_data e,
-            e.event_params ep
-          where
-            ep.key = '_session_duration'
-            and e.event_id = base.event_id
-          limit
-            1
-        ) as event__session_duration,
-        (
-          select
-            up.value.int_value
-          from
-            base_data e,
-            e.user_properties up
-          where
-            up.key = '_user_first_touch_timestamp'
-            and e.event_id = base.event_id
-          limit
-            1
-        ) as user__user_first_touch_timestamp
+        items as items_0
       from
         base_data base
       where
         event_name = 'add_button_click'
-        and (
-          1 = 1
-          and platform = 'ANDROID'
-          and device_screen_height <> 1400
-        )
-        and (
-          1 = 1
-          and event__session_duration > 200
-          and user__user_first_touch_timestamp > 1686532526770
-        )
     ),
     table_1 as (
       select
@@ -2079,11 +2160,6 @@ describe('SQL Builder test', () => {
         base_data base
       where
         event_name = 'note_share'
-        and (
-          1 = 1
-          or platform = 'ANDROID'
-          or device_screen_height <> 1400
-        )
     ),
     table_2 as (
       select
@@ -2188,70 +2264,53 @@ describe('SQL Builder test', () => {
 
   test('funnel view - first event extra conditions', () => {
 
-    const sql = buildFunnelView('app1', 'test-view', {
+    const sql = buildFunnelView('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      firstEventExtraCondition: {
-        eventName: 'add_button_click',
-        conditions: [
-          {
-            category: 'event',
-            property: '_session_duration',
-            operator: '>',
-            value: '200',
-            dataType: MetadataValueType.INTEGER,
-          },
-          {
-            category: 'user',
-            property: '_user_first_touch_timestamp',
-            operator: '>',
-            value: '1686532526770',
-            dataType: MetadataValueType.INTEGER,
-          },
-        ],
-        conditionOperator: 'and',
-
-      },
       eventAndConditions: [
         {
           eventName: 'add_button_click',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType: MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'and',
         },
         {
           eventName: 'note_share',
-          conditions: [{
-            category: 'other',
-            property: 'platform',
-            operator: '=',
-            value: 'ANDROID',
-            dataType: MetadataValueType.STRING,
+          sqlCondition: {
+            conditions: [{
+              category: 'other',
+              property: 'platform',
+              operator: '=',
+              value: 'ANDROID',
+              dataType:  MetadataValueType.STRING,
+            },
+            {
+              category: 'device',
+              property: 'screen_height',
+              operator: '<>',
+              value: '1400',
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
           },
-          {
-            category: 'device',
-            property: 'screen_height',
-            operator: '<>',
-            value: '1400',
-            dataType: MetadataValueType.INTEGER,
-          }],
-          conditionOperator: 'or',
 
         },
         {
@@ -2265,35 +2324,10 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.test - view AS
+    app1.testview AS
   with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -2344,13 +2378,69 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date >= 'SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_date <= 'FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (
+            event_name = 'add_button_click'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (
+            event_name = 'note_share'
+            and (
+              platform = 'ANDROID'
+              and device_screen_height <> 1400
+            )
+          )
+          or (event_name = 'note_export')
+        )
     ),
     table_0 as (
       select
@@ -2407,45 +2497,11 @@ describe('SQL Builder test', () => {
         user_ltv as user_ltv_0,
         event_dimensions as event_dimensions_0,
         ecommerce as ecommerce_0,
-        items as items_0,
-        (
-          select
-            ep.value.int_value
-          from
-            base_data e,
-            e.event_params ep
-          where
-            ep.key = '_session_duration'
-            and e.event_id = base.event_id
-          limit
-            1
-        ) as event__session_duration,
-        (
-          select
-            up.value.int_value
-          from
-            base_data e,
-            e.user_properties up
-          where
-            up.key = '_user_first_touch_timestamp'
-            and e.event_id = base.event_id
-          limit
-            1
-        ) as user__user_first_touch_timestamp
+        items as items_0
       from
         base_data base
       where
         event_name = 'add_button_click'
-        and (
-          1 = 1
-          and platform = 'ANDROID'
-          and device_screen_height <> 1400
-        )
-        and (
-          1 = 1
-          and event__session_duration > 200
-          and user__user_first_touch_timestamp > 1686532526770
-        )
     ),
     table_1 as (
       select
@@ -2504,11 +2560,6 @@ describe('SQL Builder test', () => {
         base_data base
       where
         event_name = 'note_share'
-        and (
-          1 = 1
-          or platform = 'ANDROID'
-          or device_screen_height <> 1400
-        )
     ),
     table_2 as (
       select
@@ -2694,38 +2745,11 @@ describe('SQL Builder test', () => {
 
     });
 
-    // console.log(sql);
-
     const expectResult = `CREATE OR REPLACE VIEW
     app1.testview AS
     with
-    base_data as (
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -2776,13 +2800,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
         event_date>='MonJun19202300:00:00GMT+0000(CoordinatedUniversalTime)'
         andevent_date<='ThuJun22202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     data as (
       select
@@ -2930,38 +2998,11 @@ describe('SQL Builder test', () => {
       },
     });
 
-    // console.log(sql)
-
     const expectResult = `CREATE OR REPLACE VIEW
-    app1.testview AS
-  with
-    base_data as (
+    app1.testview AS 
+    with
+    tmp_data as (
       select
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -3012,13 +3053,57 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
-        event_date>='MonJun19202300:00:00GMT+0000(CoordinatedUniversalTime)'
-        and event_date<='ThuJun22202300:00:00GMT+0000(CoordinatedUniversalTime)'
+        event_date >= 'Mon Jun 19 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+        and event_date <= 'Thu Jun 22 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
+    ),
+    tmp_base_data as (
+      select
+        *
+      from
+        tmp_data base
+    ),
+    base_data as (
+      select
+        *
+      from
+        tmp_base_data
+      where
+        1 = 1
+        and (
+          (event_name = 'add_button_click')
+          or (event_name = 'note_share')
+          or (event_name = 'note_export')
+        )
     ),
     mid_table as (
       select
