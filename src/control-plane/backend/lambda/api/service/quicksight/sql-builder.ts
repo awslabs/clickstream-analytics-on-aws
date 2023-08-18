@@ -34,7 +34,12 @@ export interface PathAnalysisParameter {
   readonly lagSeconds?: number;
 }
 
-export interface FunnelSQLParameters {
+export interface PairEventAndCondition {
+  readonly startEvent: EventAndCondition;
+  readonly backEvent: EventAndCondition;
+}
+
+export interface SQLParameters {
   readonly schemaName: string;
   readonly computeMethod: ExploreComputeMethod;
   readonly specifyJoinColumn: boolean;
@@ -51,6 +56,7 @@ export interface FunnelSQLParameters {
   readonly groupColumn: ExploreGroupColumn;
   readonly maxStep?: number;
   readonly pathAnalysis?: PathAnalysisParameter;
+  readonly pairEventAndConditions?: PairEventAndCondition[];
 }
 
 const baseColumns = `
@@ -162,7 +168,7 @@ const columnTemplate = `
 `;
 
 
-function _buildBaseTableSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let eventDateSQL = '';
   if (sqlParameters.timeScopeType === 'FIXED') {
@@ -197,7 +203,7 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: FunnelSQLParame
   return sql;
 }
 
-function _buildBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildBaseTableSql(eventNames, sqlParameters);
 
@@ -347,7 +353,7 @@ function _buildBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters)
   return sql;
 };
 
-export function buildFunnelDataSql(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+export function buildFunnelDataSql(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   let eventNames: string[] = [];
   for (const e of sqlParameters.eventAndConditions) {
@@ -390,7 +396,7 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
   });
 };
 
-export function buildFunnelView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+export function buildFunnelView(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   let resultSql = '';
   let eventNames: string[] = [];
@@ -458,7 +464,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
   });
 }
 
-export function buildPathAnalysisView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+export function buildPathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   const eventNames: string[] = [];
   for (const e of sqlParameters.eventAndConditions) {
@@ -656,3 +662,172 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
   });
 }
 
+export function buildRetentionAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+
+  const eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+
+  let eventConditionSqlOut = '';
+  for (const [index, event] of eventNames.entries()) {
+    const eventCondition = sqlParameters.eventAndConditions[index];
+    let eventConditionSql = '';
+    if (eventCondition.conditions !== undefined) {
+      for (const [i, condition] of eventCondition.conditions.entries()) {
+        if (condition.category === 'user' || condition.category === 'event') {
+          continue;
+        }
+        let value = condition.value;
+        if (condition.dataType === 'STRING') {
+          value = `'${value}'`;
+        }
+
+        let category: string = `${condition.category}_`;
+        if (condition.category === 'other') {
+          category = '';
+        }
+        eventConditionSql = eventConditionSql.concat(`
+          ${i === 0 ? '' : (eventCondition.conditionOperator ?? 'and')} ${category}${condition.property} ${condition.operator} ${value}
+        `);
+      }
+    }
+    if (eventConditionSql !== '') {
+      eventConditionSqlOut = eventConditionSqlOut.concat(`
+      ${index === 0 ? ' ' : ' or ' } ( event_name = '${event}' and (${eventConditionSql}) )
+      `);
+    }
+  }
+
+  let dateList: string[] = [];
+  if (sqlParameters.timeScopeType === 'FIXED') {
+    dateList.push(...generateDateListWithoutStartData(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
+  } else {
+    let lastN = sqlParameters.lastN!;
+    if (sqlParameters.timeUnit === 'WK') {
+      lastN = lastN * 7;
+    } else if (sqlParameters.timeUnit === 'MM') {
+      lastN = lastN * 31;
+    } else if (sqlParameters.timeUnit === 'Q') {
+      lastN = lastN * 31 * 3;
+    }
+
+    for (let n = 1; n<=lastN; n++) {
+      dateList.push(`
+      SELECT CURRENT_DATE - INTERVAL '${n} day' as event_date
+      `);
+    }
+  }
+
+  let dateListSql = 'date_list as (';
+  for (const [index, dt] of dateList.entries()) {
+    if (index > 0 ) {
+      dateListSql = dateListSql.concat(`
+      union all
+      `);
+    }
+    dateListSql = dateListSql.concat(`select ${dt}::date as event_date`);
+  }
+  dateListSql = dateListSql.concat(`
+  ),
+  `);
+
+  let tableSql = '';
+  let resultSql = 'result_table as (';
+
+  for (const [index, pair] of sqlParameters.pairEventAndConditions!.entries()) {
+    tableSql = tableSql.concat(
+      `
+      first_table_${index} as (
+        select 
+          event_date,
+          event_name,
+          user_pseudo_id
+        from data join first_date on data.event_date = first_date.first_date
+        where data.event_name = '${pair.startEvent.eventName}'
+      ),
+      second_table_${index} as (
+        select 
+          event_date,
+          event_name,
+          user_pseudo_id
+        from data join first_date on data.event_date > first_date.first_date
+        where data.event_name = '${pair.backEvent.eventName}'
+      ),
+      `,
+    );
+
+    if (index > 0 ) {
+      resultSql = resultSql.concat(`
+      union all
+      `);
+    }
+    resultSql = resultSql.concat(`
+    select 
+      first_table_${index}.event_name || '_' || ${index} as grouping,
+      first_table_${index}.event_date as start_event_date,
+      first_table_${index}.user_pseudo_id as start_user_pseudo_id,
+      date_list.event_date as event_date,
+      second_table_${index}.user_pseudo_id as end_user_pseudo_id,
+      second_table_${index}.event_date as end_event_date
+    from first_table_${index} 
+    join date_list on 1=1
+    left join second_table_${index} on date_list.event_date = second_table_${index}.event_date and first_table_${index}.user_pseudo_id = second_table_${index}.user_pseudo_id
+    `);
+  }
+
+  resultSql = resultSql.concat(`
+  )`);
+
+  const sql = `
+  CREATE OR REPLACE VIEW ${schema}.${name} AS
+    ${_buildBaseTableSql(eventNames, sqlParameters)}
+    data as (
+      select 
+        event_date,
+        event_name,
+        user_pseudo_id
+      from base_data 
+      ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
+    ),
+    first_date as (
+      select min(event_date) as first_date from data
+    ), 
+    ${dateListSql}
+    ${tableSql}
+    ${resultSql}
+    select 
+      grouping, 
+      start_event_date, 
+      event_date, 
+      (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
+    from result_table 
+    group by grouping, start_event_date, event_date
+    order by grouping, event_date
+  `;
+
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+function generateDateListWithoutStartData(startDate: Date, endDate: Date): string[] {
+  const dateList: string[] = [];
+  let currentDate = new Date(startDate);
+  currentDate.setDate(currentDate.getDate() + 1);
+
+  while (currentDate <= endDate) {
+    dateList.push(formatDateToYYYYMMDD(new Date(currentDate)) );
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dateList;
+}
+
+function formatDateToYYYYMMDD(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `'${year.toString().trim()}-${month.trim()}-${day.trim()}'`;
+}
