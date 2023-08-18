@@ -460,17 +460,17 @@ export class ReportingServ {
     const checkParams = new DescribeStatementCommand({
       Id: executeResponse.Id,
     });
-    let response = await redshiftDataClient.send(checkParams);
-    logger.info(`Get statement status: ${response.Status}`);
+    let res = await redshiftDataClient.send(checkParams);
+    logger.info(`Get statement status: ${res.Status}`);
     let count = 0;
-    while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < 60) {
+    while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
       await sleep(100);
       count++;
-      response = await redshiftDataClient.send(checkParams);
-      logger.info(`Get statement status: ${response.Status}`);
+      res = await redshiftDataClient.send(checkParams);
+      logger.info(`Get statement status: ${res.Status}`);
     }
-    if (response.Status == StatusString.FAILED) {
-      logger.error('Error: '+ response.Status, JSON.stringify(response));
+    if (res.Status == StatusString.FAILED) {
+      logger.error('Error: '+ res.Status, JSON.stringify(res));
       throw new Error('failed to run sql of create redshift view');
     }
 
@@ -596,9 +596,9 @@ export class ReportingServ {
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      let count = 0;
+      let cnt = 0;
       for (const _i of Array(60).keys()) {
-        count += 1;
+        cnt += 1;
         try {
           const response = await quickSight.updateDashboardPublishedVersion({
             AwsAccountId: awsAccountId,
@@ -618,8 +618,8 @@ export class ReportingServ {
           }
         }
       }
-      if (count >= 60) {
-        throw new Error(`publish dashboard new version failed after try ${count} times`);
+      if (cnt >= 60) {
+        throw new Error(`publish dashboard new version failed after try ${cnt} times`);
       }
 
       result = {
