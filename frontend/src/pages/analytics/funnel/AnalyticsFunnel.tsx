@@ -97,7 +97,9 @@ const AnalyticsFunnel: React.FC = () => {
   };
 
   useEffect(() => {
-    loadPipeline(projectId ?? '');
+    if (projectId) {
+      loadPipeline(projectId);
+    }
   }, [projectId]);
 
   const metricOptions = [

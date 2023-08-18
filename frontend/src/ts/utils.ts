@@ -295,13 +295,13 @@ export const getValueFromStackOutputs = (
   keys: string[]
 ) => {
   const res: Map<string, string> = new Map<string, string>();
-  const stackDetails = pipeline.status?.stackDetails?.filter(
+  const stackDetail = pipeline.status?.stackDetails?.find(
     (s) => s.stackType === stackType
   );
-  if (!stackDetails || stackDetails.length === 0) {
+  if (!stackDetail) {
     return res;
   }
-  const stackOutputs = stackDetails[0].outputs;
+  const stackOutputs = stackDetail.outputs;
   for (const key of keys) {
     for (const output of stackOutputs) {
       if (output.OutputKey?.endsWith(key)) {
