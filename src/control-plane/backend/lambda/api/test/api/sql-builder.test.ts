@@ -2650,7 +2650,7 @@ describe('SQL Builder test', () => {
   });
 
 
-  test('funnel view - first event extra conditions', () => {
+  test('path analysis view - first event extra conditions', () => {
 
     const sql = buildPathAnalysisView('app1', 'test-view', {
       schemaName: 'app1',
@@ -2723,9 +2723,9 @@ describe('SQL Builder test', () => {
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
-      timeStart: '2023-04-30',
-      timeEnd: '2023-06-30',
       groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-04-30'),
+      timeEnd: new Date('2023-06-30'),
       pathAnalysis: {
         type: 'SESSION',
         lagSeconds: 3600,
@@ -2818,8 +2818,8 @@ describe('SQL Builder test', () => {
       from
         app1.ods_events ods
       where
-        event_date >= '2023-04-30'
-        and event_date <= '2023-06-30'
+        event_date>='SunApr30202300:00:00GMT+0000(CoordinatedUniversalTime)'
+        and event_date<='FriJun30202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
     ),
     mid_table as (
