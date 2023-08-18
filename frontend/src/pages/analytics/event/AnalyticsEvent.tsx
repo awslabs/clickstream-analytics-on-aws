@@ -153,7 +153,7 @@ const AnalyticsEvent: React.FC = () => {
               ) : (
                 <div
                   id={'qs-funnel-container'}
-                  className='iframe-explore'
+                  className="iframe-explore"
                 ></div>
               )}
             </Container>
