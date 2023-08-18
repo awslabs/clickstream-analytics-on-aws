@@ -27,10 +27,23 @@ import {
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import { fetchEmbeddingUrl } from 'apis/analytics';
 import Loading from 'components/common/Loading';
+import {
+  DEFAULT_CONDITION_DATA,
+  DEFAULT_EVENT_ITEM,
+  IEventAnalyticsItem,
+  INIT_EVENT_LIST,
+  INIT_SEGMENTATION_DATA,
+  MOCK_EVENT_OPTION_LIST,
+  SegmetationFilterDataType,
+} from 'components/eventselect/AnalyticsType';
+import EventsSelect from 'components/eventselect/EventSelect';
+import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import Navigation from 'components/layouts/Navigation';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { MetadataValueType } from 'ts/const';
 
 const AnalyticsEvent: React.FC = () => {
   const { t } = useTranslation();
@@ -53,6 +66,11 @@ const AnalyticsEvent: React.FC = () => {
 
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
+  const [eventOptionData, setEventOptionData] =
+    useState<IEventAnalyticsItem[]>(INIT_EVENT_LIST);
+
+  const [segmentationOptionData, setSegmentationOptionData] =
+    useState<SegmetationFilterDataType>(INIT_SEGMENTATION_DATA);
 
   const getEmbeddingUrl = async () => {
     try {
@@ -83,6 +101,10 @@ const AnalyticsEvent: React.FC = () => {
     getEmbeddingUrl();
     setLoadingData(false);
   }, []);
+
+  useEffect(() => {
+    console.info('eventOptionData:', eventOptionData);
+  }, [eventOptionData]);
 
   return (
     <AppLayout
@@ -146,6 +168,198 @@ const AnalyticsEvent: React.FC = () => {
                   </div>
                 </SpaceBetween>
               </ColumnLayout>
+              <ColumnLayout columns={2} variant="text-grid">
+                <SpaceBetween direction="vertical" size="l">
+                  <div>
+                    <Box variant="awsui-key-label">Define Metrics</Box>
+                    <EventsSelect
+                      data={eventOptionData}
+                      eventOptionList={MOCK_EVENT_OPTION_LIST}
+                      addNewEventAnalyticsItem={() => {
+                        setEventOptionData((prev) => {
+                          const preEventList = cloneDeep(prev);
+                          return [...preEventList, DEFAULT_EVENT_ITEM];
+                        });
+                      }}
+                      removeEventItem={(index) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          return dataObj.filter(
+                            (item, eIndex) => eIndex !== index
+                          );
+                        });
+                      }}
+                      addNewConditionItem={(index: number) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].conditionList.push(
+                            DEFAULT_CONDITION_DATA
+                          );
+                          return dataObj;
+                        });
+                      }}
+                      removeEventCondition={(eventIndex, conditionIndex) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          const newCondition = dataObj[
+                            eventIndex
+                          ].conditionList.filter(
+                            (item, i) => i !== conditionIndex
+                          );
+                          dataObj[eventIndex].conditionList = newCondition;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionCategoryOption={(
+                        eventIndex,
+                        conditionIndex,
+                        category
+                      ) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionOption = category;
+                          if (
+                            category?.valueType === MetadataValueType.STRING
+                          ) {
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionValue = [];
+                          }
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionOperator={(
+                        eventIndex,
+                        conditionIndex,
+                        operator
+                      ) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionOperator = operator;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionValue={(
+                        eventIndex,
+                        conditionIndex,
+                        value
+                      ) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionValue = value;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurCalcMethodOption={(eventIndex, method) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].calculateMethodOption = method;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurCategoryOption={(eventIndex, category) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].selectedEventOption = category;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurRelationShip={(eventIndex, relation) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionRelationShip = relation;
+                          return dataObj;
+                        });
+                      }}
+                    />
+                  </div>
+                  {/* Temporary Display Data */}
+                  <div>
+                    <pre>
+                      <code>{JSON.stringify(eventOptionData, null, 2)}</code>
+                    </pre>
+                  </div>
+                  {/* Temporary Display Data */}
+                </SpaceBetween>
+
+                <SpaceBetween direction="vertical" size="l">
+                  <div>
+                    <Box variant="awsui-key-label">Segmentation filter</Box>
+                    <SegmentationFilter
+                      segmentationData={segmentationOptionData}
+                      addNewConditionItem={() => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data.push(DEFAULT_CONDITION_DATA);
+                          return dataObj;
+                        });
+                      }}
+                      removeEventCondition={(index) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          const newCondition = dataObj.data.filter(
+                            (item, i) => i !== index
+                          );
+                          dataObj.data = newCondition;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionCategoryOption={(index, category) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionOption = category;
+                          if (
+                            category?.valueType === MetadataValueType.STRING
+                          ) {
+                            dataObj.data[index].conditionValue = [];
+                          }
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionOperator={(index, operator) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionOperator = operator;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionValue={(index, value) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionValue = value;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurRelationShip={(relation) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.conditionRelationShip = relation;
+                          return dataObj;
+                        });
+                      }}
+                    />
+                  </div>
+                  {/* Temporary Display Data */}
+                  <div>
+                    <pre>
+                      <code>
+                        {JSON.stringify(segmentationOptionData, null, 2)}
+                      </code>
+                    </pre>
+                  </div>
+                  {/* Temporary Display Data */}
+                </SpaceBetween>
+              </ColumnLayout>
+              <div className="line"></div>
+              <div>
+                <Button iconName="search">Show</Button>
+              </div>
             </Container>
             <Container>
               {loadingData ? (
