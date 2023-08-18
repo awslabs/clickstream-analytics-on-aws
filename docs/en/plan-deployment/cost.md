@@ -42,24 +42,35 @@ Key assumptions include:
 - KDS configuration (on-demand, provision - shard 2)
 - 10/100/1000RPS
 
-| Request Per Second | ALB | EC2  | NAT(1) | Buffer type      | Buffer cost | S3   |  Total (USD/Month) |
-| ------------------ | --- | ---  | ---    | --------------   | ----------- | ---  |  --------- |
-| 10RPS              |  7  |  122 | 32  | Kinesis (On-Demand) |    36       |   3  |     200  |
-|                    |  7  |  122 | 32  | Kinesis (Provisioned 2 shard)   |      22       |  3   |   186  |
-|                    |  7  |  122 | 32  | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     581   |
-|                         | 7    |  122 | 32  | None              |             |  3    |      164   |
-|100RPS           |   43  |  122  | 32    | Kinesis(On-demand)              |      86       |  3   |     286 |
-|                         | 43    |   122 | 32 | Kinesis (Provisioned 2 shard)   |      26       | 3    |     226  |
-|           |   43  |  122  |  32   | MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     617
-|           |   43  |  122 | 32 |     None              |             |  3    |     200
-|1000RPS           |   396  |   122 | 32|     Kinesis(On-demand)              |      576       |  14   |    1140 |
-|                         |  396   |  122  | 32. | Kinesis (Provisioned 10 shard)   |    146         |   14  |     710  |
-|           |  396   | 122  | 32 |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1094
-|           |  396   | 122   | 32|     None              |            |  14   |     564
+| Request Per Second | ALB | EC2  |  Buffer type      | Buffer cost | S3   |  Total (USD/Month) |
+| ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
+| 10RPS              |  7  |  122 |  Kinesis (On-Demand) |    36       |   3  |     168  |
+|                    |  7  |  122 |  Kinesis (Provisioned 2 shard)   |      22       |  3   |   154  |
+|                    |  7  |  122 |  MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     549   |
+|                         | 7    |  122 |  None              |             |  3    |      132   |
+|100RPS           |   43  |  122  |  Kinesis(On-demand)              |      86       |  3   |     254 |
+|                         | 43    |   122 |  Kinesis (Provisioned 2 shard)   |      26       | 3    |     194  |
+|           |   43  |  122  |   MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     585
+|           |   43  |  122 |      None              |             |  3    |     168
+|1000RPS           |   396  |   122 |      Kinesis(On-demand)              |      576       |  14   |    1108 |
+|                         |  396   |  122  |  Kinesis (Provisioned 10 shard)   |    146         |   14  |     678  |
+|           |  396   | 122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1062
+|           |  396   | 122   |      None              |            |  14   |     532
 
-!!! info "Note"
-    To save NAT fees, please configure the [VPC endpoint][vpce] to connect to S3/KDS/MSK.
+## Data transfer
+When data is transferred from EC2 to the downstream data sink, there are associated costs. Below is the example of data transfer costs based on 1000 RPS and 1KB payload of a request.
 
+1. EC2 Network In: This does not incur any costs.
+2. EC2 Network Out: There are three data sink options:
+    - S3: Recommended to use VPC endpoint, which does not incur any costs.
+    - MSK: There will be costs for "$0.010 per GB in/out/between EC2 AZs", about $105/month.
+    - KDS: There are two ways to sink data from EC2 to KDS, through NAT or VPC endpoint.
+        - NAT: If there is one NAT, the toal cost is about $633/month, the cost consists of the following items:
+            1. "$0.045 per NAT Gateway Hour", $32/month.
+            2. "$0.045 per GB Data Processed by NAT Gateways", $601/month.
+        - VPC Endpoint: $147/month.
+
+        We suggest using VPC endpoint for KDS data sink. For more information on using VPC endpoint, please refer [VPC endpoint][vpce] documentation.
 
 ## Data processing & data modeling modules
 
@@ -71,7 +82,7 @@ Data processing & modeling module include the following cost components if you c
 
 Key assumptions include:
 
-- 10/100/1000/10000 RPS
+- 10/100/1000 RPS
 - Data processing interval: hourly/6-hourly/daily
 - EMR running three built-in plugins to process data
 
@@ -80,12 +91,12 @@ Key assumptions include:
 | 10RPS             | Hourly                |     28     | Serverless (8 based RPU) |     68          |   96    |
 |                         | 6-hourly              |     10.8     | Serverless(8 based RPU)               |       11        |   21.8    |
 |                         | Daily                 |      9.6    | Serverless(8 based RPU)               |     3          |   12.6    |
-| 100RPS             | Hourly                |      105   | Serverless (8 based RPU) |       72        |  177    |
-|                         | 6-hourly              |     99     | Serverless(8 based RPU)               |       17.2        |   116.2    |
-|                         | Daily                 |     140     | Serverless(8 based RPU)               |       16.9        |    156.9   |
-| 1000RPS             | Hourly                |      1362   | Serverless (8 based RPU) |       172        |  1534    |
+| 100RPS             | Hourly                |      72   | Serverless (8 based RPU) |       70        |  142    |
+|                         | 6-hourly              |     61.2     | Serverless(8 based RPU)               |       17.2        |   78.4    |
+|                         | Daily                 |     43.7     | Serverless(8 based RPU)               |       12.4        |    56.1   |
+| 1000RPS             | Hourly                |      842   | Serverless (8 based RPU) |       172        |  1014    |
 |              | 6-Hourly                |      579   | Serverless (8 based RPU) |       137        |  716    |
-|              | Daily                |     642   | Serverless (8 based RPU) |        94       |   736   |
+| <span style="background-color: lightgray">The EMR for this case is configured as below.</span>              | Daily               |     642   | Serverless (8 based RPU) |        94       |   736   |
 
 !!! info "Note"
     For the cost of 1000 PRS Daily, we used below EMR configuration.
