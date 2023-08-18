@@ -460,8 +460,8 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId;
     filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date';
     filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = props.viewName;
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = props.timeStart!;
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = props.timeEnd!;
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!);
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
     filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 
