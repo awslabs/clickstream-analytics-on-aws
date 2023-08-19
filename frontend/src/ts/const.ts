@@ -24,6 +24,9 @@ export const COMMON_ALERT_TYPE = {
   Info: 'info',
 };
 
+export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
+  String.fromCharCode(65 + index)
+);
 export const MAX_USER_INPUT_LENGTH = 1024;
 export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN', 'zh-CN'];
 
@@ -410,6 +413,7 @@ export enum MetadataValueType {
   STRING = 'String',
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
+  DATETIME = 'DateTime',
 }
 
 export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';
