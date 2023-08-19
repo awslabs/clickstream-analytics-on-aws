@@ -35,6 +35,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedItems, setSelectedItems] = useState<IAnalyticsDashboard[]>([]);
   const [createDashboardVisible, setCreateDashboardVisible] = useState(false);
   const [analyticsDashboardList, setAnalyticsDashboardList] = useState<
     IAnalyticsDashboard[]
@@ -102,11 +103,16 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     <div className="pb-30">
       <Cards
         loading={loadingData}
+        selectedItems={selectedItems}
+        onSelectionChange={(event) => {
+          setSelectedItems(event.detail.selectedItems);
+        }}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
         loadingText={t('analytics:list.loading') ?? ''}
         items={analyticsDashboardList}
         variant="full-page"
+        selectionType="single"
         empty={
           <Box textAlign="center" color="inherit">
             <Box padding={{ bottom: 's' }} variant="p" color="inherit">
@@ -117,8 +123,16 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         header={
           <DashboardHeader
             totalNum={totalCount}
+            dashboard={selectedItems?.[0]}
+            setSelectItemEmpty={() => {
+              setSelectedItems([]);
+            }}
             onClickCreate={() => {
               setCreateDashboardVisible(true);
+            }}
+            refreshPage={() => {
+              setSelectedItems([]);
+              listAnalyticsDashboards();
             }}
           />
         }
@@ -137,6 +151,10 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         appId={appId ?? ''}
         openModel={createDashboardVisible}
         closeModel={() => setCreateDashboardVisible(false)}
+        refreshPage={() => {
+          setSelectedItems([]);
+          listAnalyticsDashboards();
+        }}
       />
     </div>
   );

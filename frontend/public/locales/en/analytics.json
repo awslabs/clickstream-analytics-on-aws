@@ -8,7 +8,9 @@
     "createInputNamePlaceholder": "e.g. my-dashboard",
     "createDesc": "Dashboard description - optional",
     "createDescPlaceholder": "e.g. description of dashboard",
-    "createSheets": "Dashboard sheets - optional"
+    "createSheets": "Dashboard sheets - optional",
+    "deleteTip1": "Are you sure you want to delete the dashboard ",
+    "deleteTip2": " delete dashboard will delete all data in QuickSight."
   },
   "list": {
     "loading": "Loading dashboards.",

@@ -37,6 +37,12 @@ router_project.get(
     return projectServ.listDashboards(req, res, next);
   });
 
+router_project.get(
+  '/dashboard/:dashboardId',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return projectServ.getDashboard(req, res, next);
+  });
+
 router_project.post(
   '/:id/dashboard',
   validate([

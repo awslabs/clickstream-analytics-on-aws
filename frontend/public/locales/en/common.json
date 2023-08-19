@@ -165,7 +165,8 @@
     "refreshMetadata": "Refresh Metadata",
     "clearFilters": "Clear filters",
     "preview": "Preview",
-    "createDashboard": "Create Dashboard"
+    "createDashboard": "Create Dashboard",
+    "deleteDashboard": "Delete Dashboard"
   },
   "item": "item",
   "items": "items",

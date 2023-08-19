@@ -124,6 +124,19 @@ export class ProjectServ {
     }
   };
 
+  public async getDashboard(req: any, res: any, next: any) {
+    try {
+      const { dashboardId } = req.params;
+      const dashboard = await store.getDashboard(dashboardId);
+      if (!dashboard) {
+        return res.status(404).json(new ApiFail('Dashboard not found'));
+      }
+      return res.json(new ApiSuccess(dashboard));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async deleteDashboard(req: any, res: any, next: any) {
     try {
       const { dashboardId } = req.params;

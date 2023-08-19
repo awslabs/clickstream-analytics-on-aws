@@ -37,6 +37,22 @@ export const createAnalyticsDashboard = async (
   return result;
 };
 
+export const deleteAnalyticsDashboard = async (dashboardId: string) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/project/dashboard/${dashboardId}`
+  );
+  return result;
+};
+
+export const getAnalyticsDashboard = async (dashboardId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/project/dashboard/${dashboardId}`
+  );
+  return result;
+};
+
 export const getMetadataEventsList = async (params: {
   projectId: string;
   appId: string;

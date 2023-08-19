@@ -10,29 +10,103 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Button, Header, SpaceBetween } from '@cloudscape-design/components';
-import React from 'react';
+import {
+  Box,
+  Button,
+  Header,
+  Modal,
+  SpaceBetween,
+} from '@cloudscape-design/components';
+import { deleteAnalyticsDashboard } from 'apis/analytics';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DashboardHeaderProps {
   totalNum: number;
+  dashboard?: IAnalyticsDashboard;
   onClickCreate: () => void;
+  setSelectItemEmpty: () => void;
+  refreshPage: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = (
   props: DashboardHeaderProps
 ) => {
   const { t } = useTranslation();
-  const { totalNum, onClickCreate } = props;
+  const {
+    totalNum,
+    dashboard,
+    onClickCreate,
+    setSelectItemEmpty,
+    refreshPage,
+  } = props;
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const confirmDeleteDashboard = async () => {
+    setLoadingDelete(true);
+    try {
+      const resData: ApiResponse<null> = await deleteAnalyticsDashboard(
+        dashboard?.id || ''
+      );
+      if (resData.success) {
+        refreshPage();
+        setLoadingDelete(false);
+        setShowDeleteModal(false);
+        setSelectItemEmpty();
+      }
+    } catch (error) {
+      setLoadingDelete(false);
+    }
+  };
 
   return (
     <>
+      <Modal
+        onDismiss={() => setShowDeleteModal(false)}
+        visible={showDeleteModal}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                }}
+                variant="link"
+              >
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  confirmDeleteDashboard();
+                }}
+                loading={loadingDelete}
+              >
+                {t('button.confirm')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('common:button.deleteDashboard')}
+      >
+        {t('analytics:dashboard.deleteTip1')} <b>{dashboard?.name}</b>,
+        {t('analytics:dashboard.deleteTip2')}
+      </Modal>
       <Header
         variant="h1"
         counter={`(${totalNum})`}
         description={t('analytics:dashboard.description')}
         actions={
           <SpaceBetween size="xs" direction="horizontal">
+            <Button
+              disabled={!dashboard?.id}
+              onClick={() => {
+                setShowDeleteModal(true);
+              }}
+            >
+              {t('button.delete')}
+            </Button>
             <Button
               data-testid="header-btn-create"
               variant="primary"

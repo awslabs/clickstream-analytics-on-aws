@@ -13,20 +13,22 @@
 
 import { AppLayout } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
-import { fetchEmbeddingUrl } from 'apis/analytics';
+import { fetchEmbeddingUrl, getAnalyticsDashboard } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 const AnalyticsDashboardDetail: React.FC = () => {
+  const { did } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
-  const getEmbeddingUrl = async () => {
+  const getEmbeddingUrl = async (dashboard: IAnalyticsDashboard) => {
     try {
       const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'ap-southeast-1',
+        dashboard.region,
         window.location.origin,
-        'clickstream_dashboard_explore_xfrh_app1_c2580a7f'
+        dashboard.id
       );
       if (success) {
         const embedDashboard = async () => {
@@ -43,11 +45,25 @@ const AnalyticsDashboardDetail: React.FC = () => {
     }
   };
 
-  useEffect(() => {
+  const getAnalyticsDashboardDetails = async () => {
     setLoadingData(true);
-    getEmbeddingUrl();
-    setLoadingData(false);
-  }, []);
+    try {
+      const { success, data }: ApiResponse<IAnalyticsDashboard> =
+        await getAnalyticsDashboard(did ?? '');
+      if (success) {
+        getEmbeddingUrl(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (did) {
+      getAnalyticsDashboardDetails();
+    }
+  }, [did]);
 
   return (
     <AppLayout

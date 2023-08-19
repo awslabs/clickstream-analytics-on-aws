@@ -14,6 +14,7 @@
 import {
   Box,
   Button,
+  ColumnLayout,
   FormField,
   Input,
   Modal,
@@ -21,25 +22,35 @@ import {
   Textarea,
   TokenGroup,
 } from '@cloudscape-design/components';
-import { createAnalyticsDashboard } from 'apis/analytics';
+import {
+  createAnalyticsDashboard,
+  getPipelineDetailByProjectId,
+} from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
+import {
+  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+  XSS_PATTERN,
+} from 'ts/constant-ln';
+import { getValueFromStackOutputs } from 'ts/utils';
 
 interface CreateDashboardProps {
   projectId: string;
   appId: string;
   openModel: boolean;
   closeModel: () => void;
+  refreshPage: () => void;
 }
 
 const CreateDashboard: React.FC<CreateDashboardProps> = (
   props: CreateDashboardProps
 ) => {
   const { t } = useTranslation();
-  const { projectId, appId, openModel, closeModel } = props;
+  const { projectId, appId, openModel, closeModel, refreshPage } = props;
+  const [loadingData, setLoadingData] = useState(false);
+  const [pipeline, setPipeline] = useState({} as IPipeline);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [visible, setVisible] = useState(openModel);
   const [curDashboard, setCurDashboard] = useState<IAnalyticsDashboard>({
@@ -54,7 +65,6 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
   const [sheetName, setSheetName] = React.useState('');
   const [sheetNames, setSheetNames] = React.useState([{ label: 'Sheet 1' }]);
 
-  const navigate = useNavigate();
   useEffect(() => {
     setDashboardNameRequiredError(false);
     setVisible(openModel);
@@ -63,23 +73,58 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
   const confirmCreateDashboard = async () => {
     setLoadingCreate(true);
     try {
-      const params = {
+      const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
+        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+      ]);
+      const params: IAnalyticsDashboard = {
         ...curDashboard,
         projectId: projectId,
         appId: appId,
-        sheets: sheetNames.map((item) => item.label),
-        
-      } as IAnalyticsDashboard;
+        region: pipeline.region,
+        ownerPrincipal: pipeline.reporting?.quickSight?.arn,
+        defaultDataSourceArn:
+          reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ||
+          '',
+        sheetNames: sheetNames.map((item) => item.label),
+      };
       const { success, data }: ApiResponse<ResponseCreate> =
         await createAnalyticsDashboard(params);
       if (success && data.id) {
-        navigate(`analytics/${projectId}/app/${appId}/dashboards`);
+        setCurDashboard({
+          ...curDashboard,
+          name: '',
+          description: '',
+          sheetNames: [],
+        } as IAnalyticsDashboard);
+        closeModel();
+        refreshPage();
       }
       setLoadingCreate(false);
     } catch (error) {
       setLoadingCreate(false);
     }
   };
+
+  const loadPipeline = async (projectId: string) => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(projectId);
+      if (success) {
+        setPipeline(data);
+        setLoadingData(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (projectId) {
+      loadPipeline(projectId);
+    }
+  }, [projectId]);
 
   return (
     <div>
@@ -118,94 +163,98 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
         }
         header={t('analytics:dashboard.createTitle')}
       >
-        <>
-          <FormField
-            label={t('analytics:dashboard.createInputName')}
-            errorText={
-              dashboardNameRequiredError
-                ? t('analytics:valid.dashboardNameEmptyError')
-                : ''
-            }
-          >
-            <SpaceBetween direction="vertical" size="s">
-              <Input
-                placeholder={
-                  t('analytics:dashboard.createInputNamePlaceholder') || ''
-                }
-                value={curDashboard.name ?? ''}
-                onChange={(e) => {
-                  setDashboardNameRequiredError(false);
-                  setCurDashboard((prev) => {
-                    return {
-                      ...prev,
-                      name: e.detail.value,
-                    };
-                  });
-                }}
-              />
-            </SpaceBetween>
-          </FormField>
-          <div className="mt-10">
-            <FormField label={t('analytics:dashboard.createDesc')}>
-              <Textarea
-                placeholder={
-                  t('analytics:dashboard.createDescPlaceholder') || ''
-                }
-                rows={3}
-                value={curDashboard.description}
-                onChange={(e) => {
-                  if (
-                    new RegExp(XSS_PATTERN).test(e.detail.value) ||
-                    e.detail.value.length > MAX_USER_INPUT_LENGTH
-                  ) {
-                    return false;
+        {loadingData ? (
+          <Loading />
+        ) : (
+          <>
+            <FormField
+              label={t('analytics:dashboard.createInputName')}
+              errorText={
+                dashboardNameRequiredError
+                  ? t('analytics:valid.dashboardNameEmptyError')
+                  : ''
+              }
+            >
+              <SpaceBetween direction="vertical" size="s">
+                <Input
+                  placeholder={
+                    t('analytics:dashboard.createInputNamePlaceholder') || ''
                   }
-                  setCurDashboard((prev) => {
-                    return { ...prev, description: e.detail.value };
-                  });
-                }}
-              />
+                  value={curDashboard.name ?? ''}
+                  onChange={(e) => {
+                    setDashboardNameRequiredError(false);
+                    setCurDashboard((prev) => {
+                      return {
+                        ...prev,
+                        name: e.detail.value,
+                      };
+                    });
+                  }}
+                />
+              </SpaceBetween>
             </FormField>
-          </div>
+            <div className="mt-10">
+              <FormField label={t('analytics:dashboard.createDesc')}>
+                <Textarea
+                  placeholder={
+                    t('analytics:dashboard.createDescPlaceholder') || ''
+                  }
+                  rows={3}
+                  value={curDashboard.description}
+                  onChange={(e) => {
+                    if (
+                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                      e.detail.value.length > MAX_USER_INPUT_LENGTH
+                    ) {
+                      return false;
+                    }
+                    setCurDashboard((prev) => {
+                      return { ...prev, description: e.detail.value };
+                    });
+                  }}
+                />
+              </FormField>
+            </div>
 
-          <FormField
-            label={t('analytics:dashboard.createSheets')}
-            errorText={
-              dashboardSheetTooMuchError
-                ? t('analytics:valid.dashboardSheetTooMuchError')
-                : ''
-            }
-            secondaryControl={
-              <Button
-                iconName="add-plus"
-                onClick={() => {
-                  if (!sheetName.trim()) {
-                    return false;
-                  }
-                  if (sheetNames.length >= 10) {
-                    setDashboardSheetTooMuchError(true);
-                    return false;
-                  }
-                  setSheetNames(sheetNames.concat({ label: sheetName }));
-                }}
-              />
-            }
-          >
-            <Input
-              onChange={({ detail }) => setSheetName(detail.value)}
-              value={sheetName}
+            <FormField
+              label={t('analytics:dashboard.createSheets')}
+              errorText={
+                dashboardSheetTooMuchError
+                  ? t('analytics:valid.dashboardSheetTooMuchError')
+                  : ''
+              }
+            >
+              <ColumnLayout columns={2} variant="text-grid">
+                <Input
+                  onChange={({ detail }) => setSheetName(detail.value)}
+                  value={sheetName}
+                />
+                <Button
+                  iconName="add-plus"
+                  onClick={() => {
+                    if (!sheetName.trim()) {
+                      return false;
+                    }
+                    if (sheetNames.length >= 10) {
+                      setDashboardSheetTooMuchError(true);
+                      return false;
+                    }
+                    setSheetNames(sheetNames.concat({ label: sheetName }));
+                  }}
+                />
+              </ColumnLayout>
+            </FormField>
+            <TokenGroup
+              onDismiss={({ detail: { itemIndex } }) => {
+                setSheetNames([
+                  ...sheetNames.slice(0, itemIndex),
+                  ...sheetNames.slice(itemIndex + 1),
+                ]);
+              }}
+              items={sheetNames}
             />
-          </FormField>
-          <TokenGroup
-            onDismiss={({ detail: { itemIndex } }) => {
-              setSheetNames([
-                ...sheetNames.slice(0, itemIndex),
-                ...sheetNames.slice(itemIndex + 1),
-              ]);
-            }}
-            items={sheetNames}
-          />
-        </>
+          </>
+        )}
       </Modal>
     </div>
   );
