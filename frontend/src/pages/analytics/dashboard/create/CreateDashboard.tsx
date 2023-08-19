@@ -66,6 +66,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
       const params = {
         ...curDashboard,
         projectId: projectId,
+        appId: appId,
+        sheets: sheetNames.map((item) => item.label),
+        
       } as IAnalyticsDashboard;
       const { success, data }: ApiResponse<ResponseCreate> =
         await createAnalyticsDashboard(params);

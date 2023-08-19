@@ -26,6 +26,9 @@ import {
   UpdateDashboardPermissionsCommand,
   GenerateEmbedUrlForRegisteredUserCommandInput,
   ResourceExistsException,
+  CreateDashboardCommand,
+  CreateDashboardCommandOutput,
+  CreateDashboardCommandInput,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
@@ -319,4 +322,25 @@ export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
   const embedArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
   return { dashboardOwner: ownerArn, embedOwner: embedArn };
+};
+
+export const createDashboard = async (
+  region: string,
+  input: CreateDashboardCommandInput,
+): Promise<CreateDashboardCommandOutput> => {
+  try {
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: region,
+    });
+    const command: CreateDashboardCommand = new CreateDashboardCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Dashboard Error.', { err });
+    throw err;
+  }
+};
+
+export const Sleep = (ms: number) => {
+  return new Promise(resolve=>setTimeout(resolve, ms));
 };

@@ -41,10 +41,13 @@ export class DynamoDbStore implements ClickStreamStore {
         type: `DASHBOARD#${dashboard.id}`,
         prefix: 'DASHBOARD',
         projectId: dashboard.projectId,
+        appId: dashboard.appId,
         name: dashboard.name ?? '',
         description: dashboard.description ?? '',
         region: dashboard.region ?? '',
         sheetNames: dashboard.sheetNames ?? [],
+        ownerPrincipal: dashboard.ownerPrincipal ?? '',
+        defaultDataSourceArn: dashboard.defaultDataSourceArn ?? '',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: dashboard.operator?? '',
@@ -53,6 +56,22 @@ export class DynamoDbStore implements ClickStreamStore {
     });
     await docClient.send(params);
     return dashboard.id;
+  };
+
+  public async getDashboard(dashboardId: string): Promise<IDashboard | undefined> {
+    const params: GetCommand = new GetCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: dashboardId,
+        type: `DASHBOARD#${dashboardId}`,
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    if (!result.Item) {
+      return undefined;
+    }
+    const dashboard: IDashboard = result.Item as IDashboard;
+    return !dashboard.deleted ? dashboard : undefined;
   };
 
   public async listDashboards(projectId: string, order: string): Promise<IDashboard[]> {

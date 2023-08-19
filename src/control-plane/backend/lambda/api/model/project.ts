@@ -43,12 +43,15 @@ export interface IDashboard {
   readonly prefix: string;
 
   readonly projectId: string;
+  readonly appId: string;
   readonly dashboardId: string;
 
   readonly name: string;
   readonly description: string;
   readonly region: string;
   readonly sheetNames: string[];
+  readonly ownerPrincipal: string;
+  readonly defaultDataSourceArn: string;
 
   readonly createAt: number;
   readonly updateAt: number;

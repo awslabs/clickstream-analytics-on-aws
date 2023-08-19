@@ -13,13 +13,6 @@
 
 export {};
 declare global {
-  interface IAnalyticsDashboard {
-    readonly id: string;
-    readonly name: string;
-    readonly description: string;
-    readonly createAt: number;
-  }
-
   interface IMetadataEvent {
     readonly id: string;
     readonly type: string;
@@ -176,12 +169,15 @@ declare global {
     readonly prefix: string;
 
     readonly projectId: string;
+    readonly appId: string;
     readonly dashboardId: string;
 
     readonly name: string;
     readonly description: string;
     readonly region: string;
     readonly sheetNames: string[];
+    readonly ownerPrincipal: string;
+    readonly defaultDataSourceArn: string;
 
     readonly createAt: number;
     readonly updateAt: number;
