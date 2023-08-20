@@ -21,17 +21,18 @@ import ItemsList from './comps/ItemsList';
 interface DropDownContainerProps {
   hasTab?: boolean;
   categories: CategoryItemType[];
+  selectedItem: IAnalyticsItem | null;
   changeSelectItem: (item: IAnalyticsItem) => void;
 }
 
 const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
-  const { hasTab, categories, changeSelectItem } = props;
-  // const categories: string[] = ['预置事件', '自定义事件'];
+  const { hasTab, categories, selectedItem, changeSelectItem } = props;
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [curPreviewOption, setCurPreviewOption] = useState<IAnalyticsItem>();
   const [isScroll, setIsScroll] = useState(false);
+  const [filterText, setFilterText] = useState('');
 
   const handleCategoryClick = (index: number) => {
     setSelectedCategory(index);
@@ -62,7 +63,14 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                   </div>
                 )}
                 <div className="csdc-header-search">
-                  <Input placeholder="Search" type="search" value="" />
+                  <Input
+                    placeholder="Search"
+                    type="search"
+                    value={filterText}
+                    onChange={(e) => {
+                      setFilterText(e.detail.value);
+                    }}
+                  />
                 </div>
               </div>
               <div className="csdc-container">
@@ -77,6 +85,8 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                 </div>
                 <div className="csdc-container-event-option-list">
                   <ItemsList
+                    selectedItem={selectedItem}
+                    filterText={filterText}
                     isScroll={isScroll}
                     categories={categories}
                     selectedCategory={selectedCategory}

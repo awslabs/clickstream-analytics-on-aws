@@ -727,8 +727,14 @@ ul.menu-list li.checkbox-item {
                 .event-item {
                   cursor: pointer;
                   padding: 6px 15px;
+                  border: 1px solid transparent;
                   &:hover {
                     background-color: #efefef;
+                  }
+                  &.item-selected {
+                    color: #0972d3;
+                    background-color: #f3f8fc;
+                    border: 1px solid #0972d3;
                   }
                 }
                 .item-group {

@@ -16,6 +16,7 @@ import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CategoryItemType,
+  IAnalyticsItem,
   MOCK_CACLULATION_OPTION_LIST,
 } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
@@ -23,7 +24,7 @@ import DropDownContainer from './DropDownContainer';
 interface EventItemProps {
   isMultiSelect?: boolean;
   hasTab?: boolean;
-  categoryOption: SelectProps.Option | null;
+  categoryOption: IAnalyticsItem | null;
   calcMethodOption?: SelectProps.Option | null;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
@@ -105,6 +106,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       </div>
       {showDropdown && (
         <DropDownContainer
+          selectedItem={categoryOption}
           changeSelectItem={(item) => {
             // setCurrentOption(item);
             changeCurCategoryOption(item);
