@@ -296,6 +296,9 @@ export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
 export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 
+export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
+  'RedshiftBIUsername';
+
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
 export const ALARM_NAME_PREFIX = 'Clickstream';
