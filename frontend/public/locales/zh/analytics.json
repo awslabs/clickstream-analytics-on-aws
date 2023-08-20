@@ -17,6 +17,16 @@
     "selectAppTitle": "请选择一个应用程序",
     "configurations": "配置"
   },
+  "options": {
+    "eventNumber": "事件数量",
+    "userNumber": "用户数量",
+    "customWindow": "自定义",
+    "theDayWindow": "当天",
+    "secondWindowUnit": "秒",
+    "minuteWindowUnit": "分钟",
+    "hourWindowUnit": "小时",
+    "dayWindowUnit": "天"
+  },
   "metadata": {
     "event": {
       "title": "原始事件",
@@ -46,10 +56,6 @@
         "dataType": "数据类型",
         "tableLoading": "加载中",
         "tableEmpty": "没有资源"
-      },
-      "options": {
-        "eventNumber": "事件数量",
-        "userNumber": "用户数量"
       }
     },
     "eventParameter": {

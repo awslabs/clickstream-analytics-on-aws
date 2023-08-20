@@ -47,21 +47,21 @@ import { MetadataValueType } from 'ts/const';
 
 const AnalyticsEvent: React.FC = () => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const metricOptions = [
     {
       value: 'event',
-      label: t('analytics:metadata.event.options.eventNumber'),
+      label: t('analytics:options.eventNumber'),
     },
-    { value: 'user', label: t('analytics:metadata.event.options.userNumber') },
+    { value: 'user', label: t('analytics:options.userNumber') },
   ];
 
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
       value: 'event',
-      label: t('analytics:metadata.event.options.userNumber') ?? '',
+      label: t('analytics:options.userNumber') ?? '',
     });
 
   const [associateParameterChecked, setAssociateParameterChecked] =
@@ -113,7 +113,7 @@ const AnalyticsEvent: React.FC = () => {
         <ContentLayout
           header={
             <SpaceBetween size="m">
-              <Header variant="h1">Event Analytics</Header>
+              <Header variant="h1">{t('nav.analytics.exploreEvent')}</Header>
             </SpaceBetween>
           }
         >
@@ -376,7 +376,7 @@ const AnalyticsEvent: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/event`} />
+        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/event`} />
       }
     />
   );

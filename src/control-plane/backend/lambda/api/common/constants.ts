@@ -62,6 +62,8 @@ const PIPELINE_SUPPORTED_REGIONS = [
   'cn-northwest-1',
 ];
 
+const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -84,4 +86,5 @@ export {
   SDK_MAVEN_VERSION_API_LINK,
   PIPELINE_SUPPORTED_REGIONS,
   ALLOW_UPLOADED_FILE_TYPES,
+  QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
 };

@@ -19,20 +19,17 @@ import {
   Pagination,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
-import { getApplicationListByPipeline } from 'apis/application';
-import { getProjectList } from 'apis/project';
 import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
-import { save } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { ANALYTICS_INFO_KEY, TIME_FORMAT } from 'ts/const';
+import { TIME_FORMAT } from 'ts/const';
 import DashboardHeader from '../comps/DashboardHeader';
 
 const AnalyticsDashboardCard: React.FC<any> = () => {
   const { t } = useTranslation();
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
   const [pageSize] = useState(12);
   const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,7 +42,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       <div>
         <Link
           fontSize="heading-m"
-          href={`/analytics/${pid}/app/${appid}/dashboard/${item.id}`}
+          href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
         >
           {item.name}
         </Link>
@@ -92,63 +89,8 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     }
   };
 
-  const getDefaultProjectAndApp = async () => {
-    const projects = await listProjects();
-    const projectFilter = projects.filter((p) => p.id === pid);
-    if (projectFilter && projectFilter.length > 0) {
-      const project = projectFilter[0];
-      const apps = await listApplicationByProject(project.id);
-      const appsFilter = apps.filter((a) => a.appId === appid);
-      if (appsFilter && appsFilter.length > 0) {
-        const app = appsFilter[0];
-        save(ANALYTICS_INFO_KEY, {
-          pid: project.id,
-          pname: project.name,
-          appid: app.appId,
-          appname: app.name,
-        });
-      }
-    }
-  };
-
-  const listProjects = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
-        await getProjectList({
-          pageNumber: 1,
-          pageSize: 9999,
-        });
-      if (success) {
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
-  const listApplicationByProject = async (pid: string) => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IApplication>> =
-        await getApplicationListByPipeline({
-          pid: pid,
-          pageNumber: 1,
-          pageSize: 9999,
-        });
-      if (success) {
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
   useEffect(() => {
-    if (pid && appid) {
-      getDefaultProjectAndApp();
+    if (projectId && appId) {
       listAnalyticsDashboards();
     }
   }, [currentPage]);
@@ -159,7 +101,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         loading={loadingData}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
-        loadingText={t('analytics:list.loading') || ''}
+        loadingText={t('analytics:list.loading') ?? ''}
         items={analyticsDashboardList}
         variant="full-page"
         empty={
@@ -185,7 +127,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 };
 
 const AnalyticsDashboard: React.FC = () => {
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
 
   return (
     <AppLayout
@@ -193,7 +135,9 @@ const AnalyticsDashboard: React.FC = () => {
       content={<AnalyticsDashboardCard />}
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${pid}/app/${appid}/dashboards`} />
+        <Navigation
+          activeHref={`/analytics/${projectId}/app/${appId}/dashboards`}
+        />
       }
     />
   );

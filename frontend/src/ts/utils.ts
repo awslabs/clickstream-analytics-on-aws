@@ -288,3 +288,27 @@ export const validatePublicSubnetInSameAZWithPrivateSubnets = (
   );
   return isEqual(new Set(publicSubnetsAZs), new Set(privateSubnetsAZs));
 };
+
+export const getValueFromStackOutputs = (
+  pipeline: IPipeline,
+  stackType: string,
+  keys: string[]
+) => {
+  const res: Map<string, string> = new Map<string, string>();
+  const stackDetail = pipeline.status?.stackDetails?.find(
+    (s) => s.stackType === stackType
+  );
+  if (!stackDetail) {
+    return res;
+  }
+  const stackOutputs = stackDetail.outputs;
+  for (const key of keys) {
+    for (const output of stackOutputs) {
+      if (output.OutputKey?.endsWith(key)) {
+        res.set(key, output.OutputValue ?? '');
+        break;
+      }
+    }
+  }
+  return res;
+};

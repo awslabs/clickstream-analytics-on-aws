@@ -163,7 +163,8 @@
     "disableAll": "Disable All",
     "viewAlarms": "View Alarms",
     "refreshMetadata": "Refresh Metadata",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "preview": "Preview"
   },
   "item": "item",
   "items": "items",

@@ -46,6 +46,7 @@ import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
+import { registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -329,6 +330,10 @@ export class CPipeline {
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
+    // check quicksight user
+    if (this.pipeline.reporting) {
+      await registerClickstreamUser();
+    }
     // update pipeline tags
     if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
       this.setTags();
@@ -487,6 +492,10 @@ export class CPipeline {
       }
       await validateSecretModel(this.pipeline.region, 'AuthenticationSecretArn',
         this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn, SECRETS_MANAGER_ARN_PATTERN);
+    }
+
+    if (this.pipeline.reporting) {
+      await registerClickstreamUser();
     }
   }
 

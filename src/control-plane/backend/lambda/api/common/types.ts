@@ -425,6 +425,7 @@ export enum MetadataValueType {
   STRING = 'String',
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
+  DATETIME = 'Datetime',
 }
 
 export enum MetadataParameterType {

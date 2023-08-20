@@ -47,6 +47,7 @@ export interface DashboardAction {
 export interface DashboardCreateParameters {
   readonly region: string;
   readonly redshift: {
+    readonly user: string;
     readonly dataApiRole: string;
     readonly newServerless?: {
       readonly workgroupName: string;
@@ -57,9 +58,7 @@ export interface DashboardCreateParameters {
     };
   };
   readonly quickSight: {
-    readonly principal: string;
     readonly dataSourceArn: string;
-    readonly redshiftUser: string;
   };
 }
 
@@ -79,6 +78,7 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
+  readonly sheetId: string;
   readonly visualIds: string[];
 }
 
@@ -102,7 +102,6 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
   props: DataSetProps)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
-  console.log(`props: ${JSON.stringify(props)}`);
   try {
     const datasetId = uuidv4();
     let colGroups: ColumnGroup[] = [];

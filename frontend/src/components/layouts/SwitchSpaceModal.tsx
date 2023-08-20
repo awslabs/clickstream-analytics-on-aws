@@ -95,10 +95,10 @@ const HeaderSwitchSpaceModal: React.FC<IHeaderSwitchSpaceModalProps> = (
 
   const saveAnalyticsIds = () => {
     setAnalyticsInfo({
-      pid: selectedProject?.value,
-      pname: selectedProject?.label,
-      appid: selectedApp?.value,
-      appname: selectedApp?.label,
+      projectId: selectedProject?.value,
+      projectName: selectedProject?.label,
+      appId: selectedApp?.value,
+      appName: selectedApp?.label,
     });
   };
 

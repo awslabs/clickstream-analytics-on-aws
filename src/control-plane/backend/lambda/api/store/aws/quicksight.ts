@@ -27,7 +27,7 @@ import {
   GenerateEmbedUrlForRegisteredUserCommandInput,
   ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
-import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QuickSightEmbedRoleArn } from '../../common/constants';
+import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
@@ -38,8 +38,8 @@ import { generateRandomStr } from '../../common/utils';
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
+const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
-const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
 
 const getIdentityRegionFromMessage = (message: string) => {
   const regexp = new RegExp(REGION_PATTERN, 'g');
@@ -69,37 +69,6 @@ export const getIdentityRegion = async () => {
 export const listQuickSightUsers = async () => {
   const identityRegion = await getIdentityRegion();
   return listQuickSightUsersByRegion(identityRegion);
-};
-
-export const getQuickSightSubscribeRegion = async () => {
-  try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
-      region: QUICKSIGHT_CONTROL_PLANE_REGION,
-    });
-
-    const params: ListUsersCommand = new ListUsersCommand({
-      AwsAccountId: awsAccountId,
-      Namespace: 'default',
-    });
-    await quickSightClient.send(params);
-
-    console.log(`quicksightRegion: ${QUICKSIGHT_CONTROL_PLANE_REGION}` );
-
-    return QUICKSIGHT_CONTROL_PLANE_REGION;
-  } catch (err) {
-    if (err instanceof AccessDeniedException) {
-      const message = (err as AccessDeniedException).message;
-      console.log(`quicksight error message: ${message}` );
-      const identityRegion = getIdentityRegionFromMessage(message);
-      if (identityRegion) {
-        return identityRegion;
-      }
-    }
-
-    console.log(`quicksight error message: ${(err as Error).message}`);
-  }
-  return '';
 };
 
 export const listQuickSightUsersByRegion = async (region: string) => {
@@ -140,21 +109,34 @@ export const registerQuickSightUser = async (email: string, username?: string) =
   return registerQuickSightUserByRegion(identityRegion, email, username);
 };
 
+export const registerClickstreamUser = async () => {
+  const identityRegion = await getIdentityRegion();
+  await registerEmbeddingUserByRegion(identityRegion);
+  await registerQuickSightUserByRegion(identityRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QUICKSIGHT_DASHBOARD_USER_NAME);
+};
+
 export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
-    region: region,
-  });
-  const command: RegisterUserCommand = new RegisterUserCommand({
-    IdentityType: IdentityType.QUICKSIGHT,
-    AwsAccountId: awsAccountId,
-    Email: email,
-    UserName: username ?? QUICKSIGHT_DEFAULT_USER,
-    UserRole: UserRole.AUTHOR,
-    Namespace: QUICKSIGHT_NAMESPACE,
-  });
-  const response = await quickSightClient.send(command);
-  return response.UserInvitationUrl;
+  try {
+    const quickSightClient = new QuickSightClient({
+      ...aws_sdk_client_common_config,
+      region: region,
+    });
+    const command: RegisterUserCommand = new RegisterUserCommand({
+      IdentityType: IdentityType.QUICKSIGHT,
+      AwsAccountId: awsAccountId,
+      Email: email,
+      UserName: username ?? QUICKSIGHT_DEFAULT_USER,
+      UserRole: UserRole.ADMIN,
+      Namespace: QUICKSIGHT_NAMESPACE,
+    });
+    const response = await quickSightClient.send(command);
+    return response.UserInvitationUrl;
+  } catch (err) {
+    if (err instanceof ResourceExistsException) {
+      return '';
+    }
+    throw err;
+  }
 };
 
 export const registerEmbeddingUserByRegion = async (region: string) => {
@@ -194,15 +176,10 @@ export const generateEmbedUrlForRegisteredUser = async (
     ...aws_sdk_client_common_config,
     region: region,
   });
-  const identityRegion = await getIdentityRegion();
-  const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
-  const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const quickSightUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
-  await registerEmbeddingUserByRegion(identityRegion);
-  await updateDashboardPermissionsCommand(region, dashboardId, quickSightUserArn);
+  const arns = await getClickstreamUserArn();
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
     AwsAccountId: awsAccountId,
-    UserArn: quickSightUserArn,
+    UserArn: arns.embedOwner,
     AllowedDomains: [allowedDomain],
     ExperienceConfiguration: {},
   };
@@ -330,6 +307,16 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
   }
 };
 
-export const Sleep = (ms: number) => {
-  return new Promise(resolve=>setTimeout(resolve, ms));
+interface QuickSightUserArns {
+  dashboardOwner: string;
+  embedOwner: string;
+}
+
+export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
+  const identityRegion = await getIdentityRegion();
+  const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
+  const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
+  const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
+  const embedArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
+  return { dashboardOwner: ownerArn, embedOwner: embedArn };
 };

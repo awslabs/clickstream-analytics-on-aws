@@ -46,24 +46,24 @@ export const getAnalyticsDashboardList = async (params: {
 };
 
 export const getMetadataEventsList = async (params: {
-  pid: string;
+  projectId: string;
   appId: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/events?projectId=${params.pid}&appId=${params.appId}`
+    `/metadata/events?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
 
 export const getMetadataEventDetails = async (params: {
-  pid: string;
+  projectId: string;
   appId: string;
   eventName: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event/${params.eventName}?projectId=${params.pid}&appId=${params.appId}`
+    `/metadata/event/${params.eventName}?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
@@ -74,24 +74,24 @@ export const updateMetadataEvent = async (event: IMetadataEvent) => {
 };
 
 export const getMetadataParametersList = async (params: {
-  pid: string;
+  projectId: string;
   appId: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameters?projectId=${params.pid}&appId=${params.appId}`
+    `/metadata/event_parameters?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
 
 export const getMetadataParametersDetails = async (params: {
-  pid: string;
+  projectId: string;
   appId: string;
   parameterId: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameter/${params.parameterId}?projectId=${params.pid}&appId=${params.appId}`
+    `/metadata/event_parameter/${params.parameterId}?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
@@ -108,12 +108,12 @@ export const updateMetadataParameter = async (
 };
 
 export const getMetadataUserAttributesList = async (params: {
-  pid: string;
+  projectId: string;
   appId: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/user_attributes?projectId=${params.pid}&appId=${params.appId}`
+    `/metadata/user_attributes?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
@@ -146,6 +146,19 @@ export const fetchEmbeddingUrl = async (
   const result: any = await apiRequest(
     'get',
     `/env/quicksight/embedUrl?${reqParams}`
+  );
+  return result;
+};
+
+export const previewFunnel = async (data: IFunnelRequest) => {
+  const result: any = await apiRequest('post', `/reporting`, data);
+  return result;
+};
+
+export const getPipelineDetailByProjectId = async (projectId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/pipeline/${projectId}?pid=${projectId}`
   );
   return result;
 };

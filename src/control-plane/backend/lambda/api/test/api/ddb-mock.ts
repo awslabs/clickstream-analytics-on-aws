@@ -21,7 +21,7 @@ import {
 } from '@aws-sdk/client-ec2';
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
-import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
+import { DescribeAccountSubscriptionCommand, Edition, ListUsersCommand, RegisterUserCommand } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
@@ -803,6 +803,13 @@ function createPipelineMock(
       AccountName: 'ck',
       Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
     },
+  });
+  quickSightMock.on(ListUsersCommand).resolves({
+    UserList: [],
+  });
+  quickSightMock.on(RegisterUserCommand).resolves({
+    User: {},
+    UserInvitationUrl: '',
   });
   s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService

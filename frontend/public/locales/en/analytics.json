@@ -17,6 +17,16 @@
     "selectAppTitle": "Please select an application",
     "configurations": "Configurations"
   },
+  "options": {
+    "eventNumber": "Event number",
+    "userNumber": "User number",
+    "customWindow": "Custom",
+    "theDayWindow": "The Day",
+    "secondWindowUnit": "Second(s)",
+    "minuteWindowUnit": "Minute(s)",
+    "hourWindowUnit": "Hour(s)",
+    "dayWindowUnit": "Day(s)"
+  },
   "metadata": {
     "event": {
       "title": "Origin Events",
@@ -46,10 +56,6 @@
         "dataType": "Data type",
         "tableLoading": "Loading",
         "tableEmpty": "No resources"
-      },
-      "options": {
-        "eventNumber": "Event number",
-        "userNumber": "User number"
       }
     },
     "eventParameter": {
@@ -118,5 +124,6 @@
   "valid": {
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application"
-  }
+  },
+  "emptyData": "No Data"
 }

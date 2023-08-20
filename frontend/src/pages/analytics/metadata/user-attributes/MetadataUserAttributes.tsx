@@ -31,7 +31,7 @@ import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
 const MetadataUserAttributes: React.FC = () => {
-  const { pid, appid } = useParams();
+  const { projectId, appId } = useParams();
 
   const [showSplit, setShowSplit] = useState(false);
   const [curUserAttribute, setCurUserAttribute] =
@@ -210,14 +210,14 @@ const MetadataUserAttributes: React.FC = () => {
 
   const listMetadataUserAttributes = async () => {
     try {
-      if (!pid || !appid) {
+      if (!projectId || !appId) {
         return [];
       }
       const {
         success,
         data,
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({ pid: pid, appId: appid });
+        await getMetadataUserAttributesList({ projectId, appId });
       if (success) {
         return data.items;
       }
@@ -295,7 +295,7 @@ const MetadataUserAttributes: React.FC = () => {
       headerSelector="#header"
       navigation={
         <Navigation
-          activeHref={`/analytics/${pid}/app/${appid}/metadata/user-attributes`}
+          activeHref={`/analytics/${projectId}/app/${appId}/metadata/user-attributes`}
         />
       }
       splitPanelOpen={showSplit}

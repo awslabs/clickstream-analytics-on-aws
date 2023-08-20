@@ -162,7 +162,8 @@
     "disableAll": "全部禁用",
     "viewAlarms": "查看告警",
     "refreshMetadata": "刷新元数据",
-    "clearFilters": "清理筛选"
+    "clearFilters": "清理筛选",
+    "preview": "预览"
   },
   "item": "项目",
   "items": "项目",
