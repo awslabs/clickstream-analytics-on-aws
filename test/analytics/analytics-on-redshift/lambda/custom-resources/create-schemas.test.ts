@@ -482,7 +482,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent2, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(resp.Data?.RedshiftBIUserName).toEqual(`${biUserNamePrefix}abcde`);
+    expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
     expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
@@ -517,7 +517,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
-    expect(resp.Data?.RedshiftBIUserName).toEqual(`${biUserNamePrefix}abcde`);
+    expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
     expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
