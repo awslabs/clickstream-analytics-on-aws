@@ -11,26 +11,31 @@
  *  and limitations under the License.
  */
 
+import classNames from 'classnames';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { CategoryItemType, IAnalyticsItem } from '../AnalyticsType';
 
 interface ItemsListProps {
+  filterText: string;
   isScroll: boolean;
   categories: CategoryItemType[];
   selectedCategory: number;
   onGroupScroll: (index: number) => void;
   showOptionDetails: (item: IAnalyticsItem) => void;
+  selectedItem: IAnalyticsItem | null;
   changeSelectItem: (item: IAnalyticsItem) => void;
 }
 
 const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
   const {
+    filterText,
     isScroll,
     categories,
     selectedCategory,
     onGroupScroll,
     showOptionDetails,
+    selectedItem,
     changeSelectItem,
   } = props;
   const itemContainerRef: any = useRef(null);
@@ -71,6 +76,19 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
     onGroupScroll(getCategoryFromScroll());
   }, 200);
 
+  const filteredItemList = (itemList: IAnalyticsItem[]) => {
+    return itemList.filter((item: IAnalyticsItem) => {
+      return (
+        item?.label
+          ?.toLocaleLowerCase()
+          .includes(filterText.toLocaleLowerCase()) ||
+        item?.value
+          ?.toLocaleLowerCase()
+          .includes(filterText.toLocaleLowerCase())
+      );
+    });
+  };
+
   useEffect(() => {
     if (selectedCategory >= 0) {
       handleGroupScroll(selectedCategory);
@@ -87,12 +105,19 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
         <div key={index} className="item-group">
           <div className="item-group-header">
             {category.categoryName}{' '}
-            <span className="count">{category.itemList.length}</span>
+            <span className="count">
+              {filteredItemList(category.itemList).length}
+            </span>
           </div>
-          {category.itemList.map((element, index) => {
+          {filteredItemList(category.itemList).map((element, index) => {
             return (
               <div
-                className="event-item"
+                className={classNames({
+                  'event-item': true,
+                  'item-selected':
+                    element.value === selectedItem?.value &&
+                    element.label === selectedItem?.label,
+                })}
                 key={index}
                 onMouseOver={() => {
                   showOptionDetails(element);

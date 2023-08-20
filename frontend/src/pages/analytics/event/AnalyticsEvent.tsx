@@ -226,6 +226,10 @@ const AnalyticsEvent: React.FC = () => {
                             dataObj[eventIndex].conditionList[
                               conditionIndex
                             ].conditionValue = [];
+                          } else {
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionValue = '';
                           }
                           return dataObj;
                         });
@@ -318,6 +322,8 @@ const AnalyticsEvent: React.FC = () => {
                             category?.valueType === MetadataValueType.STRING
                           ) {
                             dataObj.data[index].conditionValue = [];
+                          } else {
+                            dataObj.data[index].conditionValue = '';
                           }
                           return dataObj;
                         });
