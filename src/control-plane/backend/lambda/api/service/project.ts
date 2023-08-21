@@ -20,7 +20,7 @@ import { ApiFail, ApiSuccess } from '../common/types';
 import { isEmpty, paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createDashboard } from '../store/aws/quicksight';
+import { createDashboard, getClickstreamUserArn } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -89,6 +89,7 @@ export class ProjectServ {
         };
         sheets.push(sheetDefinition);
       }
+      const principals = await getClickstreamUserArn();
       const dashboardInput: CreateDashboardCommandInput = {
         AwsAccountId: process.env.AWS_ACCOUNT_ID,
         DashboardId: dashboardId,
@@ -103,7 +104,7 @@ export class ProjectServ {
           Sheets: sheets,
         },
         Permissions: [{
-          Principal: dashboard.ownerPrincipal,
+          Principal: principals.dashboardOwner,
           Actions: [
             'quicksight:DescribeDashboard',
             'quicksight:ListDashboardVersions',
@@ -113,6 +114,12 @@ export class ProjectServ {
             'quicksight:UpdateDashboardPermissions',
             'quicksight:DescribeDashboardPermissions',
             'quicksight:UpdateDashboardPublishedVersion',
+          ],
+        },
+        {
+          Principal: principals.embedOwner,
+          Actions: [
+            'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
           ],
         }],
       };
