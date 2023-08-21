@@ -21,6 +21,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, CreateDatabaseAndSchemas } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
+import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -49,7 +50,7 @@ export class ApplicationSchemas extends Construct {
      * Create database(projectId) and schemas(appIds) in Redshift using Redshift-Data API.
      */
     this.crForCreateSchemas = this.createRedshiftSchemasCustomResource(props);
-    this.redshiftBIUserName = this.crForCreateSchemas.getAttString('RedshiftBIUserName');
+    this.redshiftBIUserName = this.crForCreateSchemas.getAttString(CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME);
   }
 
   private createRedshiftSchemasCustomResource(props: ApplicationSchemasProps): CustomResource {
