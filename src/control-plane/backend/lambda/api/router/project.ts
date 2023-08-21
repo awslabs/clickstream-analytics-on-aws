@@ -47,6 +47,8 @@ router_project.post(
   '/:id/dashboard',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
+    body('ownerPrincipal').custom(isValidEmpty),
+    body('defaultDataSourceArn').custom(isValidEmpty),
     param('id').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
