@@ -58,19 +58,21 @@ Key assumptions include:
 |           |  396   | 122   |      None              |            |  14   |     532
 
 ## Data transfer
-When data is transferred from EC2 to the downstream data sink, there are associated costs. Below is the example of data transfer costs based on 1000 RPS and 1KB payload of a request.
+There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 1KB request payload.
 
 1. EC2 Network In: This does not incur any costs.
 2. EC2 Network Out: There are three data sink options:
-    - S3: Recommended to use VPC endpoint, which does not incur any costs.
-    - MSK: There will be costs for "$0.010 per GB in/out/between EC2 AZs", about $105/month.
-    - KDS: There are two ways to sink data from EC2 to KDS, through NAT or VPC endpoint.
-        - NAT: If there is one NAT, the toal cost is about $633/month, the cost consists of the following items:
-            1. "$0.045 per NAT Gateway Hour", $32/month.
-            2. "$0.045 per GB Data Processed by NAT Gateways", $601/month.
-        - VPC Endpoint: $147/month.
+    - S3: It is recommended to use S3 Gateway endpoints, which does not incur any costs.
+    - MSK: It will cost `$0.010 per GB in/out/between EC2 AZs`, about $105/month.
+    - KDS: There are two ways to sink data from EC2 to KDS: NAT or VPC endpoint.
+        - NAT: Suppose there is one NAT, the total cost is about $633/month. The price consists of the following items:
+            1. `$0.045 per NAT Gateway Hour`, $32/month.
+            2. `$0.045 per GB Data Processed by NAT Gateways`, $601/month.
+        - VPC Endpoint: Suppose deploying interface endpoint in two availability zones, the total cost is about $148.1/month. The price consists of the following items:
+            1. `$0.01 per AZ Hour`, $14.6/month.
+            2. `$0.01 per GB Data Processed by Interface endpoints`, $133.5/month.            
 
-        We suggest using VPC endpoint for KDS data sink. For more information on using VPC endpoint, please refer [VPC endpoint][vpce] documentation.
+        We suggest using a [VPC endpoint](https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html) for the KDS data sink. For more information on using the VPC endpoint, please refer to the VPC endpoint documentation.        
 
 ## Data processing & data modeling modules
 
