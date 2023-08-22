@@ -175,7 +175,7 @@ declare global {
     readonly name: string;
     readonly description: string;
     readonly region: string;
-    readonly sheetNames: string[];
+    readonly sheets: IAnalyticsDashboardSheet[];
     readonly ownerPrincipal: string;
     readonly defaultDataSourceArn: string;
 
@@ -183,5 +183,10 @@ declare global {
     readonly updateAt: number;
     readonly operator: string;
     readonly deleted: boolean;
+  }
+
+  export interface IAnalyticsDashboardSheet {
+    readonly id: string;
+    readonly name: string;
   }
 }

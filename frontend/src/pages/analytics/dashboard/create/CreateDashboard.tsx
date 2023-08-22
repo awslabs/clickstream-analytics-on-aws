@@ -35,6 +35,7 @@ import {
   XSS_PATTERN,
 } from 'ts/constant-ln';
 import { getValueFromStackOutputs } from 'ts/utils';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CreateDashboardProps {
   projectId: string;
@@ -85,7 +86,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
         defaultDataSourceArn:
           reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ||
           '',
-        sheetNames: sheetNames.map((item) => item.label),
+        sheets: sheetNames.map((item) => {
+          return { id: uuidv4().replace(/-/g, ''), name: item.label };
+        }),
       };
       const { success, data }: ApiResponse<ResponseCreate> =
         await createAnalyticsDashboard(params);
@@ -94,7 +97,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
           ...curDashboard,
           name: '',
           description: '',
-          sheetNames: [],
+          sheets: [],
         } as IAnalyticsDashboard);
         closeModel();
         refreshPage();
@@ -133,7 +136,6 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
           closeModel();
         }}
         visible={visible}
-        closeAriaLabel="Close modal"
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
@@ -247,8 +249,8 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
             <TokenGroup
               onDismiss={({ detail: { itemIndex } }) => {
                 setSheetNames([
-                  ...sheetNames.slice(0, itemIndex),
-                  ...sheetNames.slice(itemIndex + 1),
+                  ...sheetNames.slice(0, 0),
+                  ...sheetNames.slice(0 + 1),
                 ]);
               }}
               items={sheetNames}

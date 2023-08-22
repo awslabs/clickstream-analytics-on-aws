@@ -82,10 +82,10 @@ export class ProjectServ {
         });
       // Create dashboard in QuickSight
       const sheets: SheetDefinition[] = [];
-      for (let sheetName of dashboard.sheetNames) {
+      for (let sheet of dashboard.sheets) {
         const sheetDefinition: SheetDefinition = {
-          SheetId: uuidv4().replace(/-/g, ''),
-          Name: sheetName,
+          SheetId: sheet.id,
+          Name: sheet.name,
         };
         sheets.push(sheetDefinition);
       }

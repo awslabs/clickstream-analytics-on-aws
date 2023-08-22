@@ -2,7 +2,15 @@
   "analytics": "分析",
   "dashboard": {
     "title": "看板",
-    "description": "此页面列出所有看板。"
+    "description": "此页面列出所有看板。",
+    "createTitle": "创建看板",
+    "createInputName": "请输入看板名称",
+    "createInputNamePlaceholder": "例如，my-dashboard",
+    "createDesc": "看板描述-可选",
+    "createDescPlaceholder": "例如，description of dashboard",
+    "createSheets": "看板Sheet-可选",
+    "deleteTip1": "您确定要删除该看板吗 ",
+    "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
   },
   "list": {
     "loading": "正在加载看板。",

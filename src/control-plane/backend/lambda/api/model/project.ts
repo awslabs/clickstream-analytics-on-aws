@@ -49,7 +49,7 @@ export interface IDashboard {
   readonly name: string;
   readonly description: string;
   readonly region: string;
-  readonly sheetNames: string[];
+  readonly sheets: IDashboardSheet[];
   readonly ownerPrincipal: string;
   readonly defaultDataSourceArn: string;
 
@@ -58,3 +58,9 @@ export interface IDashboard {
   readonly operator: string;
   readonly deleted: boolean;
 }
+
+export interface IDashboardSheet {
+  readonly id: string;
+  readonly name: string;
+}
+

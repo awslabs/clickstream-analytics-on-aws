@@ -45,7 +45,7 @@ export class DynamoDbStore implements ClickStreamStore {
         name: dashboard.name ?? '',
         description: dashboard.description ?? '',
         region: dashboard.region ?? '',
-        sheetNames: dashboard.sheetNames ?? [],
+        sheetNames: dashboard.sheets ?? [],
         ownerPrincipal: dashboard.ownerPrincipal ?? '',
         defaultDataSourceArn: dashboard.defaultDataSourceArn ?? '',
         createAt: Date.now(),
