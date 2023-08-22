@@ -48,7 +48,10 @@ describe('Analytics dashboard test', () => {
         appId: 'app1',
         description: 'Description of dd-01',
         region: 'ap-southeast-1',
-        sheetNames: ['s1', 's2'],
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
         ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
         defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
       });
@@ -76,7 +79,10 @@ describe('Analytics dashboard test', () => {
         appId: 'app1',
         description: 'Description of dd-01',
         region: 'ap-southeast-1',
-        sheetNames: ['s1', 's2'],
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -111,7 +117,10 @@ describe('Analytics dashboard test', () => {
           projectId: MOCK_PROJECT_ID,
           description: 'Description of dashboard-1',
           region: 'ap-southeast-1',
-          sheetNames: ['s1', 's2'],
+          sheets: [
+            { id: 's1', name: 'sheet1' },
+            { id: 's2', name: 'sheet2' },
+          ],
           ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
           defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
           deleted: false,
@@ -122,7 +131,10 @@ describe('Analytics dashboard test', () => {
           projectId: 'project-1',
           description: 'Description of dashboard-2',
           region: 'ap-southeast-1',
-          sheetNames: ['s1', 's2'],
+          sheets: [
+            { id: 's1', name: 'sheet1' },
+            { id: 's2', name: 'sheet2' },
+          ],
           ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
           defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
           deleted: false,
@@ -134,7 +146,27 @@ describe('Analytics dashboard test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
-      { data: { items: [{ dashboardId: 'dashboard-1', defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1', deleted: false, description: 'Description of dashboard-1', name: 'dashboard-1', ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user', projectId: 'project_8888_8888', region: 'ap-southeast-1', sheetNames: ['s1', 's2'] }], totalCount: 1 }, message: '', success: true },
+      {
+        data: {
+          items: [{
+            dashboardId: 'dashboard-1',
+            defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
+            deleted: false,
+            description: 'Description of dashboard-1',
+            name: 'dashboard-1',
+            ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
+            projectId: 'project_8888_8888',
+            region: 'ap-southeast-1',
+            sheets: [
+              { id: 's1', name: 'sheet1' },
+              { id: 's2', name: 'sheet2' },
+            ],
+          }],
+          totalCount: 1,
+        },
+        message: '',
+        success: true,
+      },
     );
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
   });
@@ -147,7 +179,10 @@ describe('Analytics dashboard test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Description of dashboard-1',
         region: 'ap-southeast-1',
-        sheetNames: ['s1', 's2'],
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
         ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
         defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
         deleted: false,
@@ -158,7 +193,24 @@ describe('Analytics dashboard test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
-      { data: { dashboardId: MOCK_DASHBOARD_ID, defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1', deleted: false, description: 'Description of dashboard-1', name: 'dashboard-1', ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user', projectId: 'project_8888_8888', region: 'ap-southeast-1', sheetNames: ['s1', 's2'] }, message: '', success: true },
+      {
+        data: {
+          dashboardId: MOCK_DASHBOARD_ID,
+          defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
+          deleted: false,
+          description: 'Description of dashboard-1',
+          name: 'dashboard-1',
+          ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
+          projectId: 'project_8888_8888',
+          region: 'ap-southeast-1',
+          sheets: [
+            { id: 's1', name: 'sheet1' },
+            { id: 's2', name: 'sheet2' },
+          ],
+        },
+        message: '',
+        success: true,
+      },
     );
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
@@ -171,7 +223,10 @@ describe('Analytics dashboard test', () => {
         projectId: MOCK_PROJECT_ID,
         description: 'Description of dashboard-1',
         region: 'ap-southeast-1',
-        sheetNames: ['s1', 's2'],
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
         ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
         defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
         deleted: false,

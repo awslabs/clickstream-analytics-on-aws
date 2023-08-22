@@ -164,7 +164,8 @@
     "refreshMetadata": "刷新元数据",
     "clearFilters": "清理筛选",
     "preview": "预览",
-    "createDashboard": "创建看板"
+    "createDashboard": "创建看板",
+    "deleteDashboard": "删除看板"
   },
   "item": "项目",
   "items": "项目",
