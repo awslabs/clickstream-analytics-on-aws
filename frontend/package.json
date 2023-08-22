@@ -83,7 +83,8 @@
     "webpack": "^5.85.0",
     "webpack-dev-server": "^4.15.0",
     "webpack-manifest-plugin": "^4.0.2",
-    "workbox-webpack-plugin": "^6.4.1"
+    "workbox-webpack-plugin": "^6.4.1",
+    "uuid": "^9.0.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -113,6 +114,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.191",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "esbuild": "^0.17.12",
     "esbuild-plugin-inline-image": "^0.0.9",
