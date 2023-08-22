@@ -19,7 +19,7 @@ import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aw
 import { setAlarmsAction } from './set-alarms-action';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgetsProps, RenderingProperties, TextWidgetElement } from '../../metrics-widgets-custom-resource';
+import { AlarmsWidgetElement, MetricExpression, MetricWidgetElement, MetricsWidgetsProps, RenderingProperties, TextWidgetElement } from '../../metrics-widgets-custom-resource';
 import { DESCRIPTION_HEIGHT } from '../../settings';
 import { getParameterStoreName, getPosition, listParameters } from '../../util';
 import { IndexMetricsWidgetsProps } from '../set-metrics-widgets';
@@ -125,45 +125,9 @@ async function _handler(
     logger.info('ignore requestType ' + requestType);
     return;
   }
-  const paramPath = getParameterStoreName(projectId);
-
-  if (parameterName && !(parameterName.startsWith(paramPath) && parameterName.endsWith('/1'))) {
-    logger.info('ignore update on ' + parameterName);
+  const widgetsAll = await getAllWidgetsFromParameterStore(parameterName);
+  if (!widgetsAll) {
     return;
-  }
-
-  const path = getParameterStoreName(projectId);
-
-  const parameters: Parameter[] = (await listParameters(ssmClient, path)).sort((p1, p2) => {
-    const pw1 = JSON.parse(p1.Value!) as IndexMetricsWidgetsProps;
-    const pw2 = JSON.parse(p2.Value!) as IndexMetricsWidgetsProps;
-    const oderDiff = parseInt(pw1.order + '') - parseInt(pw2.order + '');
-    if (oderDiff != 0) {
-      return oderDiff;
-    }
-    return pw1.index - pw2.index;
-  });
-
-  logger.info('sorted parameters', { parameters });
-
-
-  const widgetsAll: IndexMetricsWidgetsProps[] = [];
-  for (const param of parameters) {
-    const widgetsProps = JSON.parse(param.Value!) as IndexMetricsWidgetsProps;
-
-    // merge splitted widgets which have the same `name`
-    const existingWidgetsProps = widgetsAll.find(wp => wp.name == widgetsProps.name);
-    if (existingWidgetsProps) {
-      if (existingWidgetsProps.total == widgetsProps.total) {
-        existingWidgetsProps.widgets.push(...widgetsProps.widgets);
-        logger.info('add to existing name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
-      } else {
-        logger.info('ignore name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' new total=' + widgetsProps.total);
-      }
-    } else {
-      widgetsAll.push(widgetsProps);
-      logger.info('add new name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
-    }
   }
 
   const dashboardWidgetsAll: DashboardWidgetElement[] = [];
@@ -209,6 +173,51 @@ async function _handler(
       dashboardName,
     },
   };
+}
+
+async function getAllWidgetsFromParameterStore(parameterName: string): Promise<IndexMetricsWidgetsProps[]| undefined> {
+
+  const paramPath = getParameterStoreName(projectId);
+
+  if (parameterName && !(parameterName.startsWith(paramPath) && parameterName.endsWith('/1'))) {
+    logger.info('ignore update on ' + parameterName);
+    return;
+  }
+
+  const path = getParameterStoreName(projectId);
+
+  const parameters: Parameter[] = (await listParameters(ssmClient, path)).sort((p1, p2) => {
+    const pw1 = JSON.parse(p1.Value!) as IndexMetricsWidgetsProps;
+    const pw2 = JSON.parse(p2.Value!) as IndexMetricsWidgetsProps;
+    const oderDiff = parseInt(pw1.order + '') - parseInt(pw2.order + '');
+    if (oderDiff != 0) {
+      return oderDiff;
+    }
+    return pw1.index - pw2.index;
+  });
+
+  logger.info('sorted parameters', { parameters });
+
+
+  const widgetsAll: IndexMetricsWidgetsProps[] = [];
+  for (const param of parameters) {
+    const widgetsProps = JSON.parse(param.Value!) as IndexMetricsWidgetsProps;
+
+    // merge splitted widgets which have the same `name`
+    const existingWidgetsProps = widgetsAll.find(wp => wp.name == widgetsProps.name);
+    if (existingWidgetsProps) {
+      if (existingWidgetsProps.total == widgetsProps.total) {
+        existingWidgetsProps.widgets.push(...widgetsProps.widgets);
+        logger.info('add to existing name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
+      } else {
+        logger.info('ignore name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' new total=' + widgetsProps.total);
+      }
+    } else {
+      widgetsAll.push(widgetsProps);
+      logger.info('add new name=' + widgetsProps.name + ', index=' + widgetsProps.index + ' total=' + widgetsProps.total);
+    }
+  }
+  return widgetsAll;
 }
 
 function convertMetricsWidgetsToDashboardWidgets(startY: number, w: MetricsWidgetsProps): DashboardWidgetElement[] {
@@ -311,19 +320,23 @@ function updateMetricsWidget(metricsWidget: MetricWidgetElement) {
   const properties_metrics = metricsWidget.properties.metrics;
 
   for (const pm of properties_metrics) {
-    const lastItem = pm[pm.length - 1];
-    if (typeof lastItem == 'object') {
-      const renderItem = lastItem as RenderingProperties;
-      if (renderItem.period) {
-        renderItem.period = parseInt(renderItem.period + '');
-      }
-      if (renderItem.visible + '' == 'false') {
-        renderItem.visible = false;
-      } else if (renderItem.visible + '' == 'true') {
-        renderItem.visible = true;
-      }
-    }
+    updateRenderType(pm);
   }
   return metricsWidget;
+}
+
+function updateRenderType(pm: (string | RenderingProperties | MetricExpression)[]) {
+  const lastItem = pm[pm.length - 1];
+  if (typeof lastItem == 'object') {
+    const renderItem = lastItem as RenderingProperties;
+    if (renderItem.period) {
+      renderItem.period = parseInt(renderItem.period + '');
+    }
+    if (renderItem.visible + '' == 'false') {
+      renderItem.visible = false;
+    } else if (renderItem.visible + '' == 'true') {
+      renderItem.visible = true;
+    }
+  }
 }
 
