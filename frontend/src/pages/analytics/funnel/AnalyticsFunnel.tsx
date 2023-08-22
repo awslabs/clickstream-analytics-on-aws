@@ -37,7 +37,6 @@ import {
   getPipelineDetailByProjectId,
   previewFunnel,
 } from 'apis/analytics';
-import Divider from 'components/common/Divider';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
