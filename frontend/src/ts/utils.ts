@@ -13,7 +13,12 @@
 
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { CategoryItemType } from 'components/eventselect/AnalyticsType';
+import {
+  ANALYTICS_OPERATORS,
+  CategoryItemType,
+  IConditionItemType,
+  IEventAnalyticsItem,
+} from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import {
@@ -359,8 +364,9 @@ export const metadataEventsConvertToCategoryItemType = (
 };
 
 export const parametersConvertToCategoryItemType = (
-  eventDataItems: IMetadataRelation[],
-  userDataItems: IMetadataUserAttribute[]
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems?: IMetadataEventParameter[],
+  relationItems?: IMetadataRelation[]
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryEventItems: CategoryItemType = {
@@ -373,17 +379,30 @@ export const parametersConvertToCategoryItemType = (
     categoryType: 'attribute',
     itemList: [],
   };
-  eventDataItems.forEach((item) => {
-    categoryEventItems.itemList.push({
-      label: item.parameterDisplayName,
-      value: item.parameterName,
-      description: item.parameterDescription,
-      metadataSource: item.parameterMetadataSource,
-      valueType: item.parameterValueType,
-      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+  if (parameterItems) {
+    parameterItems.forEach((item) => {
+      categoryEventItems.itemList.push({
+        label: item.displayName,
+        value: item.name,
+        description: item.description,
+        metadataSource: item.metadataSource,
+        valueType: item.valueType,
+        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+      });
     });
-  });
-  userDataItems.forEach((item) => {
+  } else if (relationItems) {
+    relationItems.forEach((item) => {
+      categoryEventItems.itemList.push({
+        label: item.parameterDisplayName,
+        value: item.parameterName,
+        description: item.parameterDescription,
+        metadataSource: item.parameterMetadataSource,
+        valueType: item.parameterValueType,
+        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+      });
+    });
+  }
+  userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
       label: item.displayName,
       value: item.name,
@@ -396,4 +415,31 @@ export const parametersConvertToCategoryItemType = (
   categoryItems.push(categoryEventItems);
   categoryItems.push(categoryUserItems);
   return categoryItems;
+};
+
+export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
+  return (
+    item.selectedEventOption !== null &&
+    item.selectedEventOption.value?.trim() !== ''
+  );
+};
+
+export const validConditionItemType = (condition: IConditionItemType) => {
+  if (
+    condition.conditionOption !== null &&
+    condition.conditionOption.value?.trim() !== '' &&
+    condition.conditionOperator !== null &&
+    condition.conditionOperator.value?.trim() !== ''
+  ) {
+    if (
+      condition.conditionOperator.value === ANALYTICS_OPERATORS.is_null.value ||
+      condition.conditionOperator.value ===
+        ANALYTICS_OPERATORS.is_not_null.value
+    ) {
+      return true;
+    } else {
+      return condition.conditionValue.trim() !== '';
+    }
+  }
+  return false;
 };

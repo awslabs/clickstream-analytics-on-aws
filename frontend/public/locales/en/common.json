@@ -166,7 +166,9 @@
     "clearFilters": "Clear filters",
     "preview": "Preview",
     "createDashboard": "Create Dashboard",
-    "deleteDashboard": "Delete Dashboard"
+    "deleteDashboard": "Delete Dashboard",
+    "addEvent": "Add Event",
+    "addFilter": "Add Filter"
   },
   "item": "item",
   "items": "items",

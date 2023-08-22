@@ -68,7 +68,7 @@ export const DEFAULT_EVENT_ITEM = {
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
   isMultiSelect: true,
-  enableChangeRelation: true,
+  enableChangeRelation: false,
 };
 
 export const INIT_EVENT_LIST: IEventAnalyticsItem[] = [DEFAULT_EVENT_ITEM];
@@ -78,6 +78,45 @@ export const DEFAULT_CONDITION_DATA: IConditionItemType = {
   conditionOption: null,
   conditionOperator: null,
   conditionValue: '',
+};
+
+export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
+  eventType: 'event',
+  conditionOption: null,
+  conditionOperator: null,
+  conditionValue: '',
+};
+
+export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
+  enableChangeRelation: true,
+  conditionOptions: [],
+  conditionRelationShip: ERelationShip.AND,
+  data: [DEFAULT_SEGMENTATION_DATA],
+};
+
+export const ANALYTICS_OPERATORS = {
+  is_null: { value: 'is_null', label: 'null' },
+  is_not_null: { value: 'is_not_null', label: '非null' },
+  equal: { value: '=', label: '=' },
+  not_equal: { value: '<>', label: '!=' },
+  not_equal_contain_null: {
+    value: 'not_equal_contain_null',
+    label: '!=(含null)',
+  },
+  not_equal_not_contain_null: {
+    value: 'not_equal_not_contain_null',
+    label: '!=(不含null)',
+  },
+  greater_than: { value: '>', label: '>' },
+  greater_than_or_equal: { value: '>=', label: '>=' },
+  less_than: { value: '<', label: '<' },
+  less_than_or_equal: { value: '<=', label: '<=' },
+  contain: { value: 'contain', label: '包含' },
+  not_contain: { value: 'not_contain', label: '不含' },
+  not_contain_not_contain_null: {
+    value: 'not_contain_not_contain_null',
+    label: '不含(不含null)',
+  },
 };
 
 // MOCK DATA
@@ -105,116 +144,6 @@ export const MOCK_EVENT_OPTION_LIST: CategoryItemType[] = [
         modifyTime: '2023-11-11 11:11:11',
       },
     ],
-  },
-];
-
-export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
-  eventType: 'event',
-  conditionOption: null,
-  conditionOperator: null,
-  conditionValue: '',
-};
-
-export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
-  enableChangeRelation: true,
-  conditionOptions: [],
-  conditionRelationShip: ERelationShip.AND,
-  data: [DEFAULT_SEGMENTATION_DATA],
-};
-
-export const ANALYTICS_OPERATORS = {
-  is_null: { value: 'is_null', label: 'null' },
-  is_not_null: { value: 'is_not_null', label: '非null' },
-  equal: { value: 'equal', label: '=' },
-  not_equal: { value: 'not_equal', label: '!=' },
-  not_equal_contain_null: {
-    value: 'not_equal_contain_null',
-    label: '!=(含null)',
-  },
-  not_equal_not_contain_null: {
-    value: 'not_equal_not_contain_null',
-    label: '!=(不含null)',
-  },
-  greater_than: { value: 'greater_than', label: '>' },
-  greater_than_or_equal: { value: 'greater_than_or_equal', label: '>=' },
-  less_than: { value: 'less_than', label: '<' },
-  less_than_or_equal: { value: 'less_than_or_equal', label: '<=' },
-  contain: { value: 'contain', label: '包含' },
-  not_contain: { value: 'not_contain', label: '不含' },
-  not_contain_not_contain_null: {
-    value: 'not_contain_not_contain_null',
-    label: '不含(不含null)',
-  },
-};
-
-export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
-  {
-    categoryName: '用户属性',
-    categoryType: 'attribute',
-    itemList: [
-      {
-        label: 'Country',
-        value: '',
-        description: 'user attribute 1 desc',
-        valueType: MetadataValueType.STRING,
-      },
-      {
-        label: 'Aage',
-        value: '',
-        description: 'user attribute 2 desc',
-        valueType: MetadataValueType.INTEGER,
-      },
-      {
-        label: 'Birthday',
-        value: '',
-        description: 'user attribute 3 desc',
-        valueType: MetadataValueType.DOUBLE,
-      },
-    ],
-  },
-  {
-    categoryName: '事件属性',
-    categoryType: 'attribute',
-    itemList: [
-      {
-        label: 'First Login',
-        value: '111',
-        description: 'event attribute 1 desc',
-        valueType: MetadataValueType.FLOAT,
-      },
-    ],
-  },
-];
-
-export const MOCK_STRING_TYPE_OPTION_LIST = [
-  {
-    label: 'Option 1',
-    value: '1',
-  },
-  {
-    label: 'Option 2',
-    value: '2',
-  },
-  {
-    label: 'Option 3',
-    value: '3',
-    disabled: true,
-  },
-  {
-    label: 'Option 4',
-    value: '4',
-  },
-  { label: 'Option 5', value: '5' },
-];
-
-export const MOCK_BOOLEAN_OPTION_LIST = [
-  {
-    label: 'True',
-    value: 'true',
-  },
-  {
-    label: 'False',
-    value: 'false',
   },
 ];
 

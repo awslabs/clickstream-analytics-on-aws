@@ -110,12 +110,17 @@ declare global {
   }
 
   interface IFunnelRequest {
-    readonly action: 'PREVIEW' | 'PUBLISH';
+    readonly action: FunnelRequestAction;
     readonly projectId: string;
     readonly appId: string;
     readonly pipelineId: string;
 
-    readonly sheetName: string;
+    readonly dashboardId?: string;
+    readonly dashboardName?: string;
+    readonly analysisId?: string;
+    readonly analysisName?: string;
+    readonly sheetId?: string;
+    readonly sheetName?: string;
     readonly viewName: string;
 
     readonly dashboardCreateParameters: IDashboardCreateParameters;
@@ -125,13 +130,14 @@ declare global {
     readonly joinColumn?: string;
     readonly conversionIntervalType: ExploreConversionIntervalType;
     readonly conversionIntervalInSeconds?: number;
+    readonly firstEventExtraCondition?: EventAndCondition;
     readonly eventAndConditions: IEventAndCondition[];
-    readonly timeScopeType: 'FIXED' | 'RELATIVE';
+    readonly timeScopeType: ExploreTimeScopeType;
     readonly timeStart?: string;
     readonly timeEnd?: string;
     readonly lastN?: number;
-    readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
-    readonly groupColumn: 'week' | 'day' | 'hour';
+    readonly timeUnit?: ExploreRelativeTimeUnit;
+    readonly groupColumn: ExploreGroupColumn;
   }
   interface ICondition {
     readonly category:

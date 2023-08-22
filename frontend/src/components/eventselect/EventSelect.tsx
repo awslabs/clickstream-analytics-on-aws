@@ -13,6 +13,7 @@
 
 import { Button, SelectProps } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
@@ -60,6 +61,7 @@ interface EventsSelectProps {
 const EventsSelect: React.FC<EventsSelectProps> = (
   props: EventsSelectProps
 ) => {
+  const { t } = useTranslation();
   const {
     data,
     eventOptionList,
@@ -183,7 +185,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
       })}
       <div className="mt-10">
         <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
-          事件指标
+          {t('common:button.addEvent')}
         </Button>
       </div>
     </div>

@@ -125,10 +125,29 @@
       "metrics": "Metrics",
       "associateParameter": "Associate parameter",
       "window": "Funnel window",
+      "funnelDateRange": "Date range",
       "funnelSteps": "Funnel steps",
       "conversionWindowPeriod": "Conversion window period",
       "filters": "Filters"
     }
+  },
+  "dateRange": {
+    "relativeModeTitle": "Relative",
+    "absoluteModeTitle": "Absolute",
+    "relativeRangeSelectionHeading": "Choose a range",
+    "cancelButtonLabel": "Cancel",
+    "applyButtonLabel": "Apply",
+    "clearButtonLabel": "Clear",
+    "customRelativeRangeOptionLabel": "Custom range",
+    "formatRelativeRangeLabel": "Last",
+    "timeUnitSecond": "second",
+    "timeUnitMinute": "minute",
+    "timeUnitHour": "hour",
+    "timeUnitDay": "day",
+    "timeUnitDays": "days",
+    "timeUnitMonth": "month",
+    "timeUnitMonths": "months",
+    "timeUnitYear": "year"
   },
   "valid": {
     "projectSelectError": "Must select a project",

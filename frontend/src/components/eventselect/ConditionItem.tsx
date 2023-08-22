@@ -96,8 +96,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         />
       </div>
       <div className="flex-1">
-        {item.conditionOperator !== ANALYTICS_OPERATORS.is_null &&
-          item.conditionOperator !== ANALYTICS_OPERATORS.is_not_null && (
+        {item.conditionOperator?.value !== ANALYTICS_OPERATORS.is_null.value &&
+          item.conditionOperator?.value !==
+            ANALYTICS_OPERATORS.is_not_null.value && (
             <Input
               disabled={!item.conditionOperator}
               placeholder="Input value"

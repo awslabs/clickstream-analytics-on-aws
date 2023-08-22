@@ -13,6 +13,7 @@
 
 import { Button, SelectProps } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ERelationShip,
   IAnalyticsItem,
@@ -40,6 +41,7 @@ interface SegmentationFilterProps {
 const SegmentationFilter: React.FC<SegmentationFilterProps> = (
   props: SegmentationFilterProps
 ) => {
+  const { t } = useTranslation();
   const {
     segmentationData,
     addNewConditionItem,
@@ -103,7 +105,7 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
         </div>
         <div className="mt-10">
           <Button iconName="add-plus" onClick={addNewConditionItem}>
-            条件组
+            {t('common:button.addFilter')}
           </Button>
         </div>
       </div>

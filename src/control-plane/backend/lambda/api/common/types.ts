@@ -433,3 +433,31 @@ export enum MetadataParameterType {
   PRIVATE = 'Private',
 }
 
+export enum ExploreComputeMethod {
+  USER_CNT = 'USER_CNT',
+  EVENT_CNT = 'EVENT_CNT',
+}
+
+export enum ExploreConversionIntervalType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+}
+
+export enum ExploreTimeScopeType {
+  FIXED = 'FIXED',
+  RELATIVE = 'RELATIVE',
+}
+
+export enum ExploreRelativeTimeUnit {
+  DD = 'DD',
+  WK = 'WK',
+  MM = 'MM',
+  Q = 'Q',
+}
+
+export enum ExploreGroupColumn {
+  WEEK = 'week',
+  DAY = 'day',
+  HOUR = 'hour',
+}
+

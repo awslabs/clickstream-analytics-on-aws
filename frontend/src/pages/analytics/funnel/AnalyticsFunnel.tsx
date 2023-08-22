@@ -18,6 +18,7 @@ import {
   ColumnLayout,
   Container,
   ContentLayout,
+  DateRangePicker,
   Header,
   Input,
   Select,
@@ -25,11 +26,13 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
+import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
   fetchEmbeddingUrl,
   getMetadataEventDetails,
   getMetadataEventsList,
+  getMetadataParametersList,
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewFunnel,
@@ -55,6 +58,11 @@ import {
   COMMON_ALERT_TYPE,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRelativeTimeUnit,
+  ExploreTimeScopeType,
+  FunnelRequestAction,
+  MetadataSource,
   MetadataValueType,
 } from 'ts/const';
 import {
@@ -69,6 +77,8 @@ import {
   getValueFromStackOutputs,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
+  validConditionItemType,
+  validEventAnalyticsItem,
 } from 'ts/utils';
 
 const AnalyticsFunnel: React.FC = () => {
@@ -129,6 +139,25 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
+  const getAllParameters = async () => {
+    if (!projectId || !appId) {
+      return [];
+    }
+    try {
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
+        await getMetadataParametersList({ projectId, appId });
+      if (success) {
+        return data.items;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return [];
+  };
+
   const getEventParameters = async (eventName: string | undefined) => {
     if (!projectId || !appId || !eventName) {
       return [];
@@ -150,10 +179,10 @@ const AnalyticsFunnel: React.FC = () => {
   };
 
   const listMetadataEvents = async () => {
+    if (!projectId || !appId) {
+      return;
+    }
     try {
-      if (!projectId || !appId) {
-        return;
-      }
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({ projectId, appId });
       if (success) {
@@ -166,7 +195,10 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const loadPipeline = async (projectId: string) => {
+  const loadPipeline = async () => {
+    if (!projectId) {
+      return;
+    }
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
@@ -181,11 +213,35 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (projectId) {
-      loadPipeline(projectId);
-      listMetadataEvents();
+  const listAllAttributes = async () => {
+    try {
+      const parameters = await getAllParameters();
+      const presetParameters = parameters.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const userAttributes = await getUserAttributes();
+      const presetUserAttributes = userAttributes.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const conditionOptions = parametersConvertToCategoryItemType(
+        presetUserAttributes,
+        presetParameters,
+        []
+      );
+      setSegmentationOptionData((prev) => {
+        const dataObj = cloneDeep(prev);
+        dataObj.conditionOptions = conditionOptions;
+        return dataObj;
+      });
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  useEffect(() => {
+    loadPipeline();
+    listMetadataEvents();
+    listAllAttributes();
   }, [projectId]);
 
   const metricOptions = [
@@ -198,6 +254,12 @@ const AnalyticsFunnel: React.FC = () => {
       label: t('analytics:options.userNumber'),
     },
   ];
+  const [dateRangeValue, setDateRangeValue] =
+    React.useState<DateRangePickerProps.Value>({
+      type: 'relative',
+      amount: 7,
+      unit: 'day',
+    });
 
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
@@ -250,8 +312,45 @@ const AnalyticsFunnel: React.FC = () => {
   const getEventAndConditions = () => {
     const eventAndConditions: IEventAndCondition[] = [];
     eventOptionData.forEach((item) => {
-      const conditions: ICondition[] = [];
-      item.conditionList.forEach((condition) => {
+      if (validEventAnalyticsItem(item)) {
+        const conditions: ICondition[] = [];
+        item.conditionList.forEach((condition) => {
+          if (validConditionItemType(condition)) {
+            const conditionObj: ICondition = {
+              category: 'other',
+              property: condition.conditionOption?.value ?? '',
+              operator: condition.conditionOperator?.value ?? '',
+              value: condition.conditionValue,
+              dataType:
+                condition.conditionOption?.valueType ??
+                MetadataValueType.STRING,
+            };
+            conditions.push(conditionObj);
+          }
+        });
+
+        const eventAndCondition: IEventAndCondition = {
+          eventName: item.selectedEventOption?.value ?? '',
+          conditions: conditions,
+          conditionOperator: 'and',
+        };
+        eventAndConditions.push(eventAndCondition);
+      }
+    });
+    return eventAndConditions;
+  };
+
+  const getFirstEventAndConditions = () => {
+    if (
+      eventOptionData.length === 0 ||
+      !validEventAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    const firstEventName = eventOptionData[0].selectedEventOption?.value ?? '';
+    const conditions: ICondition[] = [];
+    segmentationOptionData.data.forEach((condition) => {
+      if (validConditionItemType(condition)) {
         const conditionObj: ICondition = {
           category: 'other',
           property: condition.conditionOption?.value ?? '',
@@ -261,100 +360,158 @@ const AnalyticsFunnel: React.FC = () => {
             condition.conditionOption?.valueType ?? MetadataValueType.STRING,
         };
         conditions.push(conditionObj);
-      });
-
-      const eventAndCondition: IEventAndCondition = {
-        eventName: item.selectedEventOption?.value ?? '',
-        conditions: conditions,
-        conditionOperator: 'and',
-      };
-      eventAndConditions.push(eventAndCondition);
+      }
     });
-    return eventAndConditions;
+    const firstEventAndCondition: IEventAndCondition = {
+      eventName: firstEventName,
+      conditions: conditions,
+      conditionOperator: segmentationOptionData.conditionRelationShip,
+    };
+    return firstEventAndCondition;
+  };
+
+  const getConversionIntervalInSeconds = () => {
+    if (selectedWindowType?.value === ExploreConversionIntervalType.CUSTOMIZE) {
+      if (selectedWindowUnit?.value === 'second') {
+        return Number(windowValue);
+      } else if (selectedWindowUnit?.value === 'minute') {
+        return Number(windowValue) * 60;
+      } else if (selectedWindowUnit?.value === 'hour') {
+        return Number(windowValue) * 60 * 60;
+      } else if (selectedWindowUnit?.value === 'day') {
+        return Number(windowValue) * 60 * 60 * 24;
+      }
+    } else {
+      return 0;
+    }
+  };
+
+  const getDateRange = () => {
+    let groupColumn = ExploreGroupColumn.DAY;
+    if (dateRangeValue?.type === 'relative') {
+      let unit = ExploreRelativeTimeUnit.DD;
+      if (dateRangeValue.unit === 'day') {
+        unit = ExploreRelativeTimeUnit.DD;
+        groupColumn = ExploreGroupColumn.DAY;
+      } else if (dateRangeValue.unit === 'week') {
+        unit = ExploreRelativeTimeUnit.WK;
+        groupColumn = ExploreGroupColumn.WEEK;
+      } else if (dateRangeValue.unit === 'month') {
+        unit = ExploreRelativeTimeUnit.MM;
+      } else if (dateRangeValue.unit === 'year') {
+        unit = ExploreRelativeTimeUnit.Q;
+      }
+
+      return {
+        timeScopeType: ExploreTimeScopeType.RELATIVE,
+        lastN: dateRangeValue.amount,
+        timeUnit: unit,
+        groupColumn: groupColumn,
+      };
+    } else if (dateRangeValue?.type === 'absolute') {
+      return {
+        timeScopeType: ExploreTimeScopeType.FIXED,
+        timeStart: dateRangeValue.startDate,
+        timeEnd: dateRangeValue.endDate,
+        groupColumn: groupColumn,
+      };
+    }
+  };
+
+  const getFunnelRequest = (action: FunnelRequestAction) => {
+    const funnelId = generateStr(6);
+    const redshiftOutputs = getValueFromStackOutputs(
+      pipeline,
+      'DataModelingRedshift',
+      [
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+        OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+      ]
+    );
+    const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
+      OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+    ]);
+    if (
+      !redshiftOutputs.get(
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+      ) ||
+      !redshiftOutputs.get(
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+      ) ||
+      !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX) ||
+      !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
+    ) {
+      return undefined;
+    }
+    const dateRangeParams = getDateRange();
+    const body: IFunnelRequest = {
+      action: action,
+      projectId: pipeline.projectId,
+      pipelineId: pipeline.pipelineId,
+      appId: appId ?? '',
+      sheetName: `funnel_sheet_${funnelId}`,
+      viewName: `funnel_view_${funnelId}`,
+      dashboardCreateParameters: {
+        region: pipeline.region,
+        redshift: {
+          user:
+            redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
+            ) ?? '',
+          dataApiRole:
+            redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+            ) ?? '',
+          newServerless: {
+            workgroupName:
+              redshiftOutputs.get(
+                OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+              ) ?? '',
+          },
+        },
+        quickSight: {
+          dataSourceArn:
+            reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
+            '',
+        },
+      },
+      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: associateParameterChecked,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType:
+        selectedWindowType?.value ?? ExploreConversionIntervalType.CURRENT_DAY,
+      conversionIntervalInSeconds: getConversionIntervalInSeconds(),
+      eventAndConditions: getEventAndConditions(),
+      firstEventExtraCondition: getFirstEventAndConditions(),
+      timeScopeType: dateRangeParams?.timeScopeType,
+      groupColumn: dateRangeParams?.groupColumn,
+      ...dateRangeParams,
+    };
+    return body;
   };
 
   const clickPreview = async () => {
+    if (
+      eventOptionData.length === 0 ||
+      !validEventAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
     setLoadingData(true);
     setEmptyData(false);
     try {
-      const funnelId = generateStr(6);
-      const redshiftOutputs = getValueFromStackOutputs(
-        pipeline,
-        'DataModelingRedshift',
-        [
-          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-        ]
-      );
-      const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
-        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-      ]);
-      if (
-        !redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-        ) ||
-        !redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-        ) ||
-        !redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-        ) ||
-        !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
-      ) {
+      const body = getFunnelRequest(FunnelRequestAction.PREVIEW);
+      if (!body) {
+        setLoadingData(false);
         alertMsg(
           t('analytics:valid.funnelPipelineVersionError'),
           COMMON_ALERT_TYPE.Error as AlertType
         );
-        setLoadingData(false);
         return;
       }
-
-      const { success, data }: ApiResponse<any> = await previewFunnel({
-        action: 'PREVIEW',
-        projectId: pipeline.projectId,
-        pipelineId: pipeline.pipelineId,
-        appId: appId ?? '',
-        sheetName: `funnel_sheet_${funnelId}`,
-        viewName: `funnel_view_${funnelId}`,
-        dashboardCreateParameters: {
-          region: pipeline.region,
-          redshift: {
-            user:
-              redshiftOutputs.get(
-                OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-              ) ?? '',
-            dataApiRole:
-              redshiftOutputs.get(
-                OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-              ) ?? '',
-            newServerless: {
-              workgroupName:
-                redshiftOutputs.get(
-                  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-                ) ?? '',
-            },
-          },
-          quickSight: {
-            dataSourceArn:
-              reportingOutputs.get(
-                OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN
-              ) ?? '',
-          },
-        },
-        computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
-        specifyJoinColumn: associateParameterChecked,
-        joinColumn: 'user_pseudo_id',
-        conversionIntervalType:
-          selectedWindowType?.value ??
-          ExploreConversionIntervalType.CURRENT_DAY,
-        conversionIntervalInSeconds: 7200,
-        eventAndConditions: getEventAndConditions(),
-        timeScopeType: 'RELATIVE',
-        lastN: 4,
-        timeUnit: 'WK',
-        groupColumn: 'week',
-      });
+      console.log(body);
+      const { success, data }: ApiResponse<any> = await previewFunnel(body);
       if (success) {
         getEmbeddingUrl(
           data.dashboardId,
@@ -375,7 +532,8 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const resetConfig = () => {
+  const resetConfig = async () => {
+    setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_CNT,
       label: t('analytics:options.userNumber') ?? '',
@@ -393,6 +551,14 @@ const AnalyticsFunnel: React.FC = () => {
       },
     ]);
     setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+    setDateRangeValue({
+      type: 'relative',
+      amount: 7,
+      unit: 'day',
+    });
+    await listMetadataEvents();
+    await listAllAttributes();
+    setLoadingData(false);
   };
 
   return (
@@ -413,10 +579,14 @@ const AnalyticsFunnel: React.FC = () => {
                   variant="h2"
                   actions={
                     <SpaceBetween direction="horizontal" size="xs">
-                      <Button iconName="refresh" onClick={resetConfig}>
+                      <Button
+                        iconName="refresh"
+                        onClick={resetConfig}
+                        loading={loadingData}
+                      >
                         {t('analytics:funnel.labels.reset')}
                       </Button>
-                      <Button variant="primary">
+                      <Button variant="primary" loading={loadingData}>
                         {t('analytics:funnel.labels.save')}
                       </Button>
                     </SpaceBetween>
@@ -426,7 +596,7 @@ const AnalyticsFunnel: React.FC = () => {
                 </Header>
               }
             >
-              <ColumnLayout columns={3} variant="text-grid">
+              <div className="cs-analytics-config">
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
                     {t('analytics:funnel.labels.metrics')}
@@ -445,7 +615,7 @@ const AnalyticsFunnel: React.FC = () => {
                   <Box variant="awsui-key-label">
                     {t('analytics:funnel.labels.window')}
                   </Box>
-                  <div className="cs-analytics-config">
+                  <div className="cs-analytics-window">
                     <div className="cs-analytics-window-type">
                       <Select
                         selectedOption={selectedWindowType}
@@ -497,9 +667,123 @@ const AnalyticsFunnel: React.FC = () => {
                     </Toggle>
                   </div>
                 </SpaceBetween>
-              </ColumnLayout>
+              </div>
               <br />
-              <Divider height={1} />
+              <SpaceBetween direction="vertical" size="xs">
+                <Box variant="awsui-key-label">
+                  {t('analytics:funnel.labels.funnelDateRange')}
+                </Box>
+                <div>
+                  <DateRangePicker
+                    onChange={({ detail }) => {
+                      setDateRangeValue(
+                        detail.value as DateRangePickerProps.Value
+                      );
+                    }}
+                    value={dateRangeValue ?? null}
+                    dateOnly
+                    relativeOptions={[
+                      {
+                        key: 'previous-1-day',
+                        amount: 1,
+                        unit: 'day',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-7-days',
+                        amount: 7,
+                        unit: 'day',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-14-days',
+                        amount: 14,
+                        unit: 'day',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-1-month',
+                        amount: 1,
+                        unit: 'month',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-3-months',
+                        amount: 3,
+                        unit: 'month',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-6-months',
+                        amount: 6,
+                        unit: 'month',
+                        type: 'relative',
+                      },
+                      {
+                        key: 'previous-1-year',
+                        amount: 1,
+                        unit: 'year',
+                        type: 'relative',
+                      },
+                    ]}
+                    isValidRange={(
+                      range: DateRangePickerProps.Value | null
+                    ) => {
+                      if (range?.type === 'absolute') {
+                        const [startDateWithoutTime] =
+                          range.startDate.split('T');
+                        const [endDateWithoutTime] = range.endDate.split('T');
+                        if (!startDateWithoutTime || !endDateWithoutTime) {
+                          return {
+                            valid: false,
+                            errorMessage:
+                              'The selected date range is incomplete. Select a start and end date for the date range.',
+                          };
+                        }
+                        if (
+                          new Date(range.startDate).getTime() -
+                            new Date(range.endDate).getTime() >
+                          0
+                        ) {
+                          return {
+                            valid: false,
+                            errorMessage:
+                              'The selected date range is invalid. The start date must be before the end date.',
+                          };
+                        }
+                      }
+                      return { valid: true };
+                    }}
+                    i18nStrings={{
+                      relativeModeTitle:
+                        t('analytics:dateRange.relativeModeTitle') ?? '',
+                      absoluteModeTitle:
+                        t('analytics:dateRange.absoluteModeTitle') ?? '',
+                      relativeRangeSelectionHeading:
+                        t(
+                          'analytics:dateRange.relativeRangeSelectionHeading'
+                        ) ?? '',
+                      cancelButtonLabel:
+                        t('analytics:dateRange.cancelButtonLabel') ?? '',
+                      applyButtonLabel:
+                        t('analytics:dateRange.applyButtonLabel') ?? '',
+                      clearButtonLabel:
+                        t('analytics:dateRange.clearButtonLabel') ?? '',
+                      customRelativeRangeOptionLabel:
+                        t(
+                          'analytics:dateRange.customRelativeRangeOptionLabel'
+                        ) ?? '',
+                      formatRelativeRange: (
+                        value: DateRangePickerProps.RelativeValue
+                      ) => {
+                        return `${t(
+                          'analytics:dateRange.formatRelativeRangeLabel'
+                        )} ${value.amount} ${value.unit}`;
+                      },
+                    }}
+                  />
+                </div>
+              </SpaceBetween>
               <br />
               <ColumnLayout columns={2} variant="text-grid">
                 <SpaceBetween direction="vertical" size="xs">
@@ -616,8 +900,9 @@ const AnalyticsFunnel: React.FC = () => {
                         const userAttributes = await getUserAttributes();
                         const parameterOption =
                           parametersConvertToCategoryItemType(
-                            eventParameters,
-                            userAttributes
+                            userAttributes,
+                            [],
+                            eventParameters
                           );
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
@@ -636,13 +921,6 @@ const AnalyticsFunnel: React.FC = () => {
                       }}
                     />
                   </div>
-                  {/* Temporary Display Data */}
-                  <div>
-                    <pre>
-                      <code>{JSON.stringify(eventOptionData, null, 2)}</code>
-                    </pre>
-                  </div>
-                  {/* Temporary Display Data */}
                 </SpaceBetween>
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
@@ -705,15 +983,6 @@ const AnalyticsFunnel: React.FC = () => {
                       }}
                     />
                   </div>
-                  {/* Temporary Display Data */}
-                  <div>
-                    <pre>
-                      <code>
-                        {JSON.stringify(segmentationOptionData, null, 2)}
-                      </code>
-                    </pre>
-                  </div>
-                  {/* Temporary Display Data */}
                 </SpaceBetween>
               </ColumnLayout>
               <br />

@@ -125,10 +125,29 @@
       "metrics": "指标",
       "associateParameter": "关联参数",
       "window": "漏斗窗口",
+      "funnelDateRange": "日期范围",
       "funnelSteps": "漏斗步骤",
       "conversionWindowPeriod": "转化窗口期",
       "filters": "过滤器"
     }
+  },
+  "dateRange": {
+    "relativeModeTitle": "相对时间",
+    "absoluteModeTitle": "绝对时间",
+    "relativeRangeSelectionHeading": "选择范围",
+    "cancelButtonLabel": "取消",
+    "applyButtonLabel": "确定",
+    "clearButtonLabel": "清除",
+    "customRelativeRangeOptionLabel": "自定义范围",
+    "formatRelativeRangeLabel": "过去",
+    "timeUnitSecond": "秒",
+    "timeUnitMinute": "分钟",
+    "timeUnitHour": "小时",
+    "timeUnitDay": "天",
+    "timeUnitDays": "天",
+    "timeUnitMonth": "个月",
+    "timeUnitMonths": "个月",
+    "timeUnitYear": "年"
   },
   "valid": {
     "projectSelectError": "必须选择一个项目",
@@ -136,5 +155,6 @@
     "dashboardNameEmptyError": "请输入看板名称",
     "dashboardSheetTooMuchError": "工作表不能超过10个",
     "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的管道"
-  }
+  },
+  "emptyData": "无数据"
 }
