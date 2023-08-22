@@ -12,8 +12,9 @@
  */
 
 import { Input } from '@cloudscape-design/components';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
+import AttributePreview from './comps/AttributePreview';
 import CategoryList from './comps/CategoryList';
 import EventPreview from './comps/EventPreview';
 import ItemsList from './comps/ItemsList';
@@ -29,6 +30,7 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
   const { hasTab, categories, selectedItem, changeSelectItem } = props;
+  const [categoryType, setCategoryType] = useState<string>('event');
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [curPreviewOption, setCurPreviewOption] = useState<IAnalyticsItem>();
   const [isScroll, setIsScroll] = useState(false);
@@ -40,7 +42,6 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   };
 
   const handleGroupScroll = (index: number) => {
-    console.info('index:', index);
     setSelectedCategory(index);
     setIsScroll(true);
   };
@@ -48,6 +49,12 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   const showOptionDetails = (item: IAnalyticsItem) => {
     setCurPreviewOption(item);
   };
+
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setCategoryType(categories[0].categoryType);
+    }
+  }, [categories, selectedItem]);
 
   return (
     <div className="cs-dropdown-pop">
@@ -97,8 +104,11 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                 </div>
               </div>
             </div>
-            {curPreviewOption && (
+            {curPreviewOption && categoryType === 'event' && (
               <EventPreview previewItem={curPreviewOption} />
+            )}
+            {curPreviewOption && categoryType === 'attribute' && (
+              <AttributePreview previewItem={curPreviewOption} />
             )}
           </div>
         </div>

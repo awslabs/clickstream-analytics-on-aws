@@ -28,22 +28,49 @@ import {
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
   fetchEmbeddingUrl,
+  getMetadataEventDetails,
+  getMetadataEventsList,
+  getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewFunnel,
 } from 'apis/analytics';
 import Divider from 'components/common/Divider';
 import Loading from 'components/common/Loading';
+import {
+  CategoryItemType,
+  DEFAULT_CONDITION_DATA,
+  DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
+  IEventAnalyticsItem,
+  INIT_EVENT_LIST,
+  INIT_SEGMENTATION_DATA,
+  MOCK_EVENT_OPTION_LIST,
+  SegmetationFilterDataType,
+} from 'components/eventselect/AnalyticsType';
+import EventsSelect from 'components/eventselect/EventSelect';
+import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import Navigation from 'components/layouts/Navigation';
+import { cloneDeep, get } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import {
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  MetadataValueType,
+} from 'ts/const';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
-import { generateStr, getValueFromStackOutputs } from 'ts/utils';
+import {
+  generateStr,
+  getValueFromStackOutputs,
+  metadataEventsConvertToCategoryItemType,
+  parametersConvertToCategoryItemType,
+} from 'ts/utils';
 
 const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
@@ -51,6 +78,9 @@ const AnalyticsFunnel: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [emptyData, setEmptyData] = useState(true);
   const [pipeline, setPipeline] = useState({} as IPipeline);
+  const [metadataEvents, setMetadataEvents] = useState(
+    [] as CategoryItemType[]
+  );
 
   const getEmbeddingUrl = async (
     dashboardId: string,
@@ -81,6 +111,62 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
+  const getUserAttributes = async () => {
+    try {
+      if (!projectId || !appId) {
+        return [];
+      }
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
+        await getMetadataUserAttributesList({ projectId, appId });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const getEventParameters = async (eventName: string | undefined) => {
+    if (!projectId || !appId || !eventName) {
+      return [];
+    }
+    try {
+      const { success, data }: ApiResponse<IMetadataEvent> =
+        await getMetadataEventDetails({
+          projectId: projectId,
+          appId: appId,
+          eventName: eventName,
+        });
+      if (success) {
+        return data.associatedParameters ?? [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return [];
+  };
+
+  const listMetadataEvents = async () => {
+    try {
+      if (!projectId || !appId) {
+        return;
+      }
+      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+        await getMetadataEventsList({ projectId, appId });
+      if (success) {
+        const events = metadataEventsConvertToCategoryItemType(data.items);
+        setMetadataEvents(events);
+      }
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
+
   const loadPipeline = async (projectId: string) => {
     setLoadingData(true);
     try {
@@ -99,31 +185,38 @@ const AnalyticsFunnel: React.FC = () => {
   useEffect(() => {
     if (projectId) {
       loadPipeline(projectId);
+      listMetadataEvents();
     }
   }, [projectId]);
 
   const metricOptions = [
     {
-      value: 'event',
+      value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber'),
     },
-    { value: 'user', label: t('analytics:options.userNumber') },
+    {
+      value: ExploreComputeMethod.USER_CNT,
+      label: t('analytics:options.userNumber'),
+    },
   ];
 
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>({
-      value: 'event',
+      value: ExploreComputeMethod.USER_CNT,
       label: t('analytics:options.userNumber') ?? '',
     });
 
   const customWindowType = {
-    value: 'custom',
+    value: ExploreConversionIntervalType.CUSTOMIZE,
     label: t('analytics:options.customWindow'),
   };
   const windowTypeOptions = [
     customWindowType,
-    { value: 'theDay', label: t('analytics:options.theDayWindow') },
+    {
+      value: ExploreConversionIntervalType.CURRENT_DAY,
+      label: t('analytics:options.theDayWindow'),
+    },
   ];
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
@@ -142,7 +235,44 @@ const AnalyticsFunnel: React.FC = () => {
 
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
-  const [windowChecked, setWindowChecked] = useState<boolean>(true);
+
+  const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
+    [
+      {
+        ...DEFAULT_EVENT_ITEM,
+        isMultiSelect: false,
+      },
+    ]
+  );
+
+  const [segmentationOptionData, setSegmentationOptionData] =
+    useState<SegmetationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const getEventAndConditions = () => {
+    const eventAndConditions: IEventAndCondition[] = [];
+    eventOptionData.forEach((item) => {
+      const conditions: ICondition[] = [];
+      item.conditionList.forEach((condition) => {
+        const conditionObj: ICondition = {
+          category: 'other',
+          property: condition.conditionOption?.value ?? '',
+          operator: condition.conditionOperator?.value ?? '',
+          value: condition.conditionValue,
+          dataType:
+            condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+        };
+        conditions.push(conditionObj);
+      });
+
+      const eventAndCondition: IEventAndCondition = {
+        eventName: item.selectedEventOption?.value ?? '',
+        conditions: conditions,
+        conditionOperator: 'and',
+      };
+      eventAndConditions.push(eventAndCondition);
+    });
+    return eventAndConditions;
+  };
 
   const clickPreview = async () => {
     setLoadingData(true);
@@ -160,7 +290,14 @@ const AnalyticsFunnel: React.FC = () => {
       const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
         OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
       ]);
+
       const { success, data }: ApiResponse<any> = await previewFunnel({
+        action: 'PREVIEW',
+        projectId: pipeline.projectId,
+        pipelineId: pipeline.pipelineId,
+        appId: appId ?? '',
+        sheetName: `funnel_sheet_${funnelId}`,
+        viewName: `funnel_view_${funnelId}`,
         dashboardCreateParameters: {
           region: pipeline.region,
           redshift: {
@@ -186,28 +323,14 @@ const AnalyticsFunnel: React.FC = () => {
               ) ?? '',
           },
         },
-        action: 'PREVIEW',
-        viewName: `funnel_view_${funnelId}`,
-        projectId: pipeline.projectId,
-        pipelineId: pipeline.pipelineId,
-        appId: appId ?? '',
-        sheetName: `funnel_sheet_${funnelId}`,
-        computeMethod: 'USER_CNT',
-        specifyJoinColumn: true,
+        computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+        specifyJoinColumn: associateParameterChecked,
         joinColumn: 'user_pseudo_id',
-        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalType:
+          selectedWindowType?.value ??
+          ExploreConversionIntervalType.CURRENT_DAY,
         conversionIntervalInSeconds: 7200,
-        eventAndConditions: [
-          {
-            eventName: 'add_button_click',
-          },
-          {
-            eventName: 'note_share',
-          },
-          {
-            eventName: 'note_export',
-          },
-        ],
+        eventAndConditions: getEventAndConditions(),
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
@@ -265,11 +388,11 @@ const AnalyticsFunnel: React.FC = () => {
               }
             >
               <ColumnLayout columns={3} variant="text-grid">
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.metrics')}
-                    </Box>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:funnel.labels.metrics')}
+                  </Box>
+                  <div className="cs-analytics-config">
                     <Select
                       selectedOption={selectedMetric}
                       options={metricOptions}
@@ -279,11 +402,53 @@ const AnalyticsFunnel: React.FC = () => {
                     />
                   </div>
                 </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.associateParameter')}
-                    </Box>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:funnel.labels.window')}
+                  </Box>
+                  <div className="cs-analytics-config">
+                    <div className="cs-analytics-window-type">
+                      <Select
+                        selectedOption={selectedWindowType}
+                        options={windowTypeOptions}
+                        onChange={(event) => {
+                          console.log(selectedWindowType, customWindowType);
+                          setSelectedWindowType(event.detail.selectedOption);
+                        }}
+                      />
+                    </div>
+                    {selectedWindowType?.value === customWindowType?.value ? (
+                      <>
+                        <div className="cs-analytics-window-value">
+                          <Input
+                            type="number"
+                            placeholder="5"
+                            value={windowValue}
+                            onChange={(event) => {
+                              setWindowValue(event.detail.value);
+                            }}
+                          />
+                        </div>
+                        <div className="cs-analytics-window-unit">
+                          <Select
+                            selectedOption={selectedWindowUnit}
+                            options={windowUnitOptions}
+                            onChange={(event) => {
+                              setSelectedWindowUnit(
+                                event.detail.selectedOption
+                              );
+                            }}
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:funnel.labels.associateParameter')}
+                  </Box>
+                  <div className="cs-analytics-config">
                     <Toggle
                       onChange={({ detail }) =>
                         setAssociateParameterChecked(detail.checked)
@@ -294,69 +459,233 @@ const AnalyticsFunnel: React.FC = () => {
                     </Toggle>
                   </div>
                 </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.window')}
-                    </Box>
-                    <Toggle
-                      onChange={({ detail }) =>
-                        setWindowChecked(detail.checked)
-                      }
-                      checked={windowChecked}
-                    >
-                      {windowChecked ? 'On' : 'Off'}
-                    </Toggle>
-                  </div>
-                </SpaceBetween>
               </ColumnLayout>
               <br />
               <Divider height={1} />
               <br />
               <ColumnLayout columns={2} variant="text-grid">
-                <SpaceBetween direction="vertical" size="l">
+                <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
                     {t('analytics:funnel.labels.funnelSteps')}
                   </Box>
-                  <Box variant="awsui-key-label">
-                    {t('analytics:funnel.labels.conversionWindowPeriod')}
-                  </Box>
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Select
-                      selectedOption={selectedWindowType}
-                      options={windowTypeOptions}
-                      onChange={(event) => {
-                        console.log(selectedWindowType, customWindowType);
-                        setSelectedWindowType(event.detail.selectedOption);
+                  <div>
+                    <EventsSelect
+                      data={eventOptionData}
+                      eventOptionList={metadataEvents}
+                      addNewEventAnalyticsItem={() => {
+                        console.log('addNewEventAnalyticsItem');
+                        setEventOptionData((prev) => {
+                          const preEventList = cloneDeep(prev);
+                          return [
+                            ...preEventList,
+                            {
+                              ...DEFAULT_EVENT_ITEM,
+                              isMultiSelect: false,
+                            },
+                          ];
+                        });
+                      }}
+                      removeEventItem={(index) => {
+                        console.log('removeEventItem');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          return dataObj.filter(
+                            (item, eIndex) => eIndex !== index
+                          );
+                        });
+                      }}
+                      addNewConditionItem={(index: number) => {
+                        console.log('addNewConditionItem');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].conditionList.push(
+                            DEFAULT_CONDITION_DATA
+                          );
+                          return dataObj;
+                        });
+                      }}
+                      removeEventCondition={(eventIndex, conditionIndex) => {
+                        console.log('removeEventCondition');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          const newCondition = dataObj[
+                            eventIndex
+                          ].conditionList.filter(
+                            (item, i) => i !== conditionIndex
+                          );
+                          dataObj[eventIndex].conditionList = newCondition;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionCategoryOption={(
+                        eventIndex,
+                        conditionIndex,
+                        category
+                      ) => {
+                        console.log('changeConditionCategoryOption');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionOption = category;
+                          if (
+                            category?.valueType === MetadataValueType.STRING
+                          ) {
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionValue = [];
+                          } else {
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionValue = '';
+                          }
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionOperator={(
+                        eventIndex,
+                        conditionIndex,
+                        operator
+                      ) => {
+                        console.log('changeConditionOperator');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionOperator = operator;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionValue={(
+                        eventIndex,
+                        conditionIndex,
+                        value
+                      ) => {
+                        console.log('changeConditionOperator');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionList[
+                            conditionIndex
+                          ].conditionValue = value;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurCalcMethodOption={(eventIndex, method) => {
+                        console.log('changeCurCalcMethodOption');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].calculateMethodOption = method;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurCategoryOption={async (eventIndex, category) => {
+                        console.log('changeCurCategoryOption');
+                        const eventName = category?.value;
+                        const eventParameters = await getEventParameters(
+                          eventName
+                        );
+                        const userAttributes = await getUserAttributes();
+                        const parameterOption =
+                          parametersConvertToCategoryItemType(
+                            eventParameters,
+                            userAttributes
+                          );
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].selectedEventOption = category;
+                          dataObj[eventIndex].conditionOptions =
+                            parameterOption;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurRelationShip={(eventIndex, relation) => {
+                        console.log('changeCurRelationShip');
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[eventIndex].conditionRelationShip = relation;
+                          return dataObj;
+                        });
                       }}
                     />
-                    {selectedWindowType?.value === customWindowType?.value ? (
-                      <>
-                        <Input
-                          type="number"
-                          placeholder="5"
-                          value={windowValue}
-                          onChange={(event) => {
-                            setWindowValue(event.detail.value);
-                          }}
-                        />
-                        <Select
-                          selectedOption={selectedWindowUnit}
-                          options={windowUnitOptions}
-                          onChange={(event) => {
-                            setSelectedWindowUnit(event.detail.selectedOption);
-                          }}
-                        />
-                      </>
-                    ) : null}
-                  </SpaceBetween>
-                </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.filters')}
-                    </Box>
                   </div>
+                  {/* Temporary Display Data */}
+                  <div>
+                    <pre>
+                      <code>{JSON.stringify(eventOptionData, null, 2)}</code>
+                    </pre>
+                  </div>
+                  {/* Temporary Display Data */}
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:funnel.labels.filters')}
+                  </Box>
+                  <div>
+                    <SegmentationFilter
+                      segmentationData={segmentationOptionData}
+                      addNewConditionItem={() => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data.push(DEFAULT_CONDITION_DATA);
+                          return dataObj;
+                        });
+                      }}
+                      removeEventCondition={(index) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          const newCondition = dataObj.data.filter(
+                            (item, i) => i !== index
+                          );
+                          dataObj.data = newCondition;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionCategoryOption={(index, category) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionOption = category;
+                          if (
+                            category?.valueType === MetadataValueType.STRING
+                          ) {
+                            dataObj.data[index].conditionValue = [];
+                          } else {
+                            dataObj.data[index].conditionValue = '';
+                          }
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionOperator={(index, operator) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionOperator = operator;
+                          return dataObj;
+                        });
+                      }}
+                      changeConditionValue={(index, value) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.data[index].conditionValue = value;
+                          return dataObj;
+                        });
+                      }}
+                      changeCurRelationShip={(relation) => {
+                        setSegmentationOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj.conditionRelationShip = relation;
+                          return dataObj;
+                        });
+                      }}
+                    />
+                  </div>
+                  {/* Temporary Display Data */}
+                  <div>
+                    <pre>
+                      <code>
+                        {JSON.stringify(segmentationOptionData, null, 2)}
+                      </code>
+                    </pre>
+                  </div>
+                  {/* Temporary Display Data */}
                 </SpaceBetween>
               </ColumnLayout>
               <br />

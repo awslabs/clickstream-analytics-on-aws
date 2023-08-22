@@ -30,6 +30,7 @@
     "userNumber": "用户数量",
     "customWindow": "自定义",
     "theDayWindow": "当天",
+    "noWindow": "无",
     "secondWindowUnit": "秒",
     "minuteWindowUnit": "分钟",
     "hourWindowUnit": "小时",

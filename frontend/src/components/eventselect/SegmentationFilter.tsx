@@ -82,6 +82,7 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
                 return (
                   <ConditionItem
                     item={element}
+                    conditionOptions={segmentationData.conditionOptions}
                     key={index}
                     removeConditionItem={() => {
                       removeEventCondition(index);

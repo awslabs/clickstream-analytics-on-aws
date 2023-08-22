@@ -151,10 +151,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                 )}
               <div className="cs-analytics-param-events">
                 {element.conditionList.length > 0 &&
-                  element.conditionList.map((element, cIndex) => {
+                  element.conditionList.map((cElement, cIndex) => {
                     return (
                       <ConditionItem
-                        item={element}
+                        item={cElement}
+                        conditionOptions={element.conditionOptions}
                         key={cIndex}
                         removeConditionItem={() => {
                           removeEventCondition(index, cIndex);

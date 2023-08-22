@@ -13,8 +13,15 @@
 
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { CategoryItemType } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
-import { EPipelineStatus, ExecutionType } from './const';
+import moment from 'moment';
+import {
+  EPipelineStatus,
+  ExecutionType,
+  MetadataSource,
+  TIME_FORMAT,
+} from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
 export const generateStr = (length: number) => {
@@ -311,4 +318,82 @@ export const getValueFromStackOutputs = (
     }
   }
   return res;
+};
+
+export const metadataEventsConvertToCategoryItemType = (
+  apiDataItems: IMetadataEvent[]
+) => {
+  const categoryItems: CategoryItemType[] = [];
+  const categoryPresetItems: CategoryItemType = {
+    categoryName: '预置事件',
+    categoryType: 'event',
+    itemList: [],
+  };
+  const categoryCustomItems: CategoryItemType = {
+    categoryName: '自定义事件',
+    categoryType: 'event',
+    itemList: [],
+  };
+  apiDataItems.forEach((item) => {
+    if (item.metadataSource === MetadataSource.PRESET) {
+      categoryPresetItems.itemList.push({
+        label: item.displayName,
+        value: item.name,
+        description: item.description,
+        metadataSource: item.metadataSource,
+        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+      });
+    } else if (item.metadataSource === MetadataSource.CUSTOM) {
+      categoryCustomItems.itemList.push({
+        label: item.displayName,
+        value: item.name,
+        description: item.description,
+        metadataSource: item.metadataSource,
+        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+      });
+    }
+  });
+  categoryItems.push(categoryPresetItems);
+  categoryItems.push(categoryCustomItems);
+  return categoryItems;
+};
+
+export const parametersConvertToCategoryItemType = (
+  eventDataItems: IMetadataRelation[],
+  userDataItems: IMetadataUserAttribute[]
+) => {
+  const categoryItems: CategoryItemType[] = [];
+  const categoryEventItems: CategoryItemType = {
+    categoryName: '事件属性',
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  const categoryUserItems: CategoryItemType = {
+    categoryName: '用户属性',
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  eventDataItems.forEach((item) => {
+    categoryEventItems.itemList.push({
+      label: item.parameterDisplayName,
+      value: item.parameterName,
+      description: item.parameterDescription,
+      metadataSource: item.parameterMetadataSource,
+      valueType: item.parameterValueType,
+      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+    });
+  });
+  userDataItems.forEach((item) => {
+    categoryUserItems.itemList.push({
+      label: item.displayName,
+      value: item.name,
+      description: item.description,
+      metadataSource: item.metadataSource,
+      valueType: item.valueType,
+      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+    });
+  });
+  categoryItems.push(categoryEventItems);
+  categoryItems.push(categoryUserItems);
+  return categoryItems;
 };

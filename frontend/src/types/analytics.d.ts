@@ -29,6 +29,9 @@ declare global {
     readonly platform: MetadataPlatform[];
     readonly dataVolumeLastDay: number;
     readonly associatedParameters?: IMetadataRelation[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataEventParameter {
@@ -50,6 +53,9 @@ declare global {
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataRelation[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataUserAttribute {
@@ -68,6 +74,9 @@ declare global {
     readonly hasData: boolean;
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataAttributeValue {
@@ -111,10 +120,10 @@ declare global {
 
     readonly dashboardCreateParameters: IDashboardCreateParameters;
 
-    readonly computeMethod: 'USER_CNT' | 'EVENT_CNT';
+    readonly computeMethod: ExploreComputeMethod;
     readonly specifyJoinColumn: boolean;
     readonly joinColumn?: string;
-    readonly conversionIntervalType: 'CURRENT_DAY' | 'CUSTOMIZE';
+    readonly conversionIntervalType: ExploreConversionIntervalType;
     readonly conversionIntervalInSeconds?: number;
     readonly eventAndConditions: IEventAndCondition[];
     readonly timeScopeType: 'FIXED' | 'RELATIVE';
@@ -136,7 +145,7 @@ declare global {
     readonly property: string;
     readonly operator: string;
     readonly value: string;
-    readonly dataType: 'STRING' | 'INT' | 'DOUBLE' | 'FLOAT';
+    readonly dataType: MetadataValueType;
   }
 
   interface IEventAndCondition {

@@ -111,10 +111,9 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             // setCurrentOption(item);
             changeCurCategoryOption(item);
             setShowDropdown(false);
-          }}
+          } }
           hasTab={hasTab}
-          categories={categories}
-        />
+          categories={categories} />
       )}
     </div>
   );

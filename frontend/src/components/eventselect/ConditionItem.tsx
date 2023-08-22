@@ -13,25 +13,22 @@
 
 import {
   Button,
-  DatePicker,
   Input,
-  Multiselect,
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
 import React from 'react';
 import { MetadataValueType } from 'ts/const';
 import {
+  ANALYTICS_OPERATORS,
+  CategoryItemType,
   IConditionItemType,
-  MOCK_ATTRIBUTE_OPTION_LIST,
-  MOCK_BOOLEAN_OPTION_LIST,
-  MOCK_CONDITION_OPERATOR_LIST,
-  MOCK_STRING_TYPE_OPTION_LIST,
 } from './AnalyticsType';
 import EventItem from './EventItem';
 
 interface ConditionItemProps {
   item: IConditionItemType;
+  conditionOptions: CategoryItemType[];
   removeConditionItem: () => void;
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
@@ -43,11 +40,35 @@ const ConditionItem: React.FC<ConditionItemProps> = (
 ) => {
   const {
     item,
+    conditionOptions,
     removeConditionItem,
     changeCurCategoryOption,
     changeConditionOperator,
     changeConditionValue,
   } = props;
+
+  const CONDITION_STRING_OPERATORS: SelectProps.Options = [
+    ANALYTICS_OPERATORS.is_null,
+    ANALYTICS_OPERATORS.is_not_null,
+    ANALYTICS_OPERATORS.equal,
+    ANALYTICS_OPERATORS.not_equal,
+    ANALYTICS_OPERATORS.not_equal_not_contain_null,
+    ANALYTICS_OPERATORS.contain,
+    ANALYTICS_OPERATORS.not_contain,
+    ANALYTICS_OPERATORS.not_contain_not_contain_null,
+  ];
+  const CONDITION_NUMBER_OPERATORS: SelectProps.Options = [
+    ANALYTICS_OPERATORS.is_null,
+    ANALYTICS_OPERATORS.is_not_null,
+    ANALYTICS_OPERATORS.equal,
+    ANALYTICS_OPERATORS.not_equal,
+    ANALYTICS_OPERATORS.not_equal_not_contain_null,
+    ANALYTICS_OPERATORS.greater_than,
+    ANALYTICS_OPERATORS.greater_than_or_equal,
+    ANALYTICS_OPERATORS.less_than,
+    ANALYTICS_OPERATORS.less_than_or_equal,
+  ];
+  console.log('item', item);
 
   return (
     <div className="cs-analytics-condition-item">
@@ -57,7 +78,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
           changeCurCategoryOption={(item) => {
             changeCurCategoryOption(item);
           }}
-          categories={MOCK_ATTRIBUTE_OPTION_LIST}
+          categories={conditionOptions}
         />
       </div>
       <div className="condition-select">
@@ -68,53 +89,25 @@ const ConditionItem: React.FC<ConditionItemProps> = (
           onChange={(e) => {
             changeConditionOperator(e.detail.selectedOption);
           }}
-          options={MOCK_CONDITION_OPERATOR_LIST}
+          options={
+            item.conditionOption?.valueType === MetadataValueType.STRING
+              ? CONDITION_STRING_OPERATORS
+              : CONDITION_NUMBER_OPERATORS
+          }
         />
       </div>
       <div className="flex-1">
-        {item.conditionOption?.valueType === MetadataValueType.STRING && (
-          <Multiselect
-            disabled={!item.conditionOperator}
-            selectedOptions={item.conditionValue}
-            onChange={({ detail }) =>
-              changeConditionValue(detail.selectedOptions)
-            }
-            options={MOCK_STRING_TYPE_OPTION_LIST}
-            placeholder="Choose options"
-          />
-        )}
-        {item.conditionOption?.valueType === MetadataValueType.NUMBER && (
-          <Input
-            disabled={!item.conditionOperator}
-            placeholder="Input value"
-            type="number"
-            value={item.conditionValue}
-            onChange={(e) => {
-              changeConditionValue(e.detail.value);
-            }}
-          />
-        )}
-        {item.conditionOption?.valueType === MetadataValueType.DATETIME && (
-          <DatePicker
-            disabled={!item.conditionOperator}
-            onChange={({ detail }) => {
-              changeConditionValue(detail.value);
-            }}
-            value={item.conditionValue}
-            placeholder="YYYY/MM/DD"
-          />
-        )}
-        {item.conditionOption?.valueType === MetadataValueType.BOOLEAN && (
-          <Select
-            disabled={!item.conditionOperator}
-            placeholder="Select value"
-            selectedOption={item.conditionValue}
-            onChange={({ detail }) => {
-              changeConditionValue(detail.selectedOption);
-            }}
-            options={MOCK_BOOLEAN_OPTION_LIST}
-          />
-        )}
+        {item.conditionOperator !== ANALYTICS_OPERATORS.is_null &&
+          item.conditionOperator !== ANALYTICS_OPERATORS.is_not_null && (
+            <Input
+              disabled={!item.conditionOperator}
+              placeholder="Input value"
+              value={item.conditionValue}
+              onChange={(e) => {
+                changeConditionValue(e.detail.value);
+              }}
+            />
+          )}
       </div>
       <div className="remove-item">
         <div className="remove-item-icon">

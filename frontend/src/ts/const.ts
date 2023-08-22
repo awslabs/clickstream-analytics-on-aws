@@ -411,9 +411,19 @@ export enum MetadataPlatform {
 
 export enum MetadataValueType {
   STRING = 'String',
-  NUMBER = 'Number',
-  BOOLEAN = 'Boolean',
-  DATETIME = 'DateTime',
+  INTEGER = 'Integer',
+  DOUBLE = 'Double',
+  FLOAT = 'Float',
+}
+
+export enum ExploreComputeMethod {
+  USER_CNT = 'USER_CNT',
+  EVENT_CNT = 'EVENT_CNT',
+}
+
+export enum ExploreConversionIntervalType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
 }
 
 export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';

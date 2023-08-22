@@ -423,9 +423,9 @@ export enum MetadataPlatform {
 
 export enum MetadataValueType {
   STRING = 'String',
-  NUMBER = 'Number',
-  BOOLEAN = 'Boolean',
-  DATETIME = 'Datetime',
+  INTEGER = 'Integer',
+  DOUBLE = 'Double',
+  FLOAT = 'Float',
 }
 
 export enum MetadataParameterType {

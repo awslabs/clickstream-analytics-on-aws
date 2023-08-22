@@ -30,6 +30,7 @@
     "userNumber": "User number",
     "customWindow": "Custom",
     "theDayWindow": "The Day",
+    "noWindow": "Off",
     "secondWindowUnit": "Second(s)",
     "minuteWindowUnit": "Minute(s)",
     "hourWindowUnit": "Hour(s)",

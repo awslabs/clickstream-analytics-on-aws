@@ -12,7 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { MetadataValueType } from 'ts/const';
+import { MetadataSource, MetadataValueType } from 'ts/const';
 
 export interface IConditionItemType {
   eventType: string;
@@ -24,11 +24,13 @@ export interface IConditionItemType {
 export interface SegmetationFilterDataType {
   enableChangeRelation?: boolean;
   conditionRelationShip: ERelationShip;
+  conditionOptions: CategoryItemType[];
   data: IConditionItemType[];
 }
 
 export interface IAnalyticsItem extends SelectProps.Option {
   modifyTime?: string;
+  metadataSource?: MetadataSource;
   valueType?: MetadataValueType;
 }
 
@@ -47,7 +49,9 @@ export interface IEventAnalyticsItem {
   listOrderType?: 'number' | 'alpahbet';
   customOrderName?: string;
   selectedEventOption: IAnalyticsItem | null;
+  selectedEventAttributeOption: CategoryItemType[];
   calculateMethodOption?: SelectProps.Option | null;
+  conditionOptions: CategoryItemType[];
   conditionList: IConditionItemType[];
   conditionRelationShip: ERelationShip;
   hasTab?: boolean;
@@ -58,6 +62,8 @@ export interface IEventAnalyticsItem {
 export const DEFAULT_EVENT_ITEM = {
   selectedEventOption: null,
   calculateMethodOption: null,
+  selectedEventAttributeOption: [],
+  conditionOptions: [],
   conditionList: [],
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
@@ -111,29 +117,35 @@ export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
 
 export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
   enableChangeRelation: true,
+  conditionOptions: [],
   conditionRelationShip: ERelationShip.AND,
   data: [DEFAULT_SEGMENTATION_DATA],
 };
 
-export const MOCK_CONDITION_OPERATOR_LIST: SelectProps.Options = [
-  { value: 'is_null', label: 'null' },
-  { value: 'is_not_null', label: '非null' },
-  { value: '=', label: '=' },
-  { value: '!=', label: '!=' },
-  { value: 'not_equal_contain_null', label: '!=(含null)' },
-  { value: '>', label: '>' },
-  { value: '>=', label: '>=' },
-  { value: '<', label: '<' },
-  { value: '<=', label: '<=' },
-  { value: 'between', label: '在...之间' },
-  { value: 'not_equal_not_contain_null', label: '!=(不含null)' },
-  { value: 'contain', label: '包含' },
-  { value: 'not_contain', label: '不含' },
-  { value: 'not_contain_not_contain_null', label: '不含(不含null)' },
-  { value: 'custom_contain', label: '自定义包含' },
-  { value: 'match', label: '匹配正则' },
-  { value: 'not_match', label: '不匹配正则' },
-];
+export const ANALYTICS_OPERATORS = {
+  is_null: { value: 'is_null', label: 'null' },
+  is_not_null: { value: 'is_not_null', label: '非null' },
+  equal: { value: 'equal', label: '=' },
+  not_equal: { value: 'not_equal', label: '!=' },
+  not_equal_contain_null: {
+    value: 'not_equal_contain_null',
+    label: '!=(含null)',
+  },
+  not_equal_not_contain_null: {
+    value: 'not_equal_not_contain_null',
+    label: '!=(不含null)',
+  },
+  greater_than: { value: 'greater_than', label: '>' },
+  greater_than_or_equal: { value: 'greater_than_or_equal', label: '>=' },
+  less_than: { value: 'less_than', label: '<' },
+  less_than_or_equal: { value: 'less_than_or_equal', label: '<=' },
+  contain: { value: 'contain', label: '包含' },
+  not_contain: { value: 'not_contain', label: '不含' },
+  not_contain_not_contain_null: {
+    value: 'not_contain_not_contain_null',
+    label: '不含(不含null)',
+  },
+};
 
 export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
   {
@@ -150,13 +162,13 @@ export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
         label: 'Aage',
         value: '',
         description: 'user attribute 2 desc',
-        valueType: MetadataValueType.NUMBER,
+        valueType: MetadataValueType.INTEGER,
       },
       {
         label: 'Birthday',
         value: '',
         description: 'user attribute 3 desc',
-        valueType: MetadataValueType.DATETIME,
+        valueType: MetadataValueType.DOUBLE,
       },
     ],
   },
@@ -168,7 +180,7 @@ export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
         label: 'First Login',
         value: '111',
         description: 'event attribute 1 desc',
-        valueType: MetadataValueType.BOOLEAN,
+        valueType: MetadataValueType.FLOAT,
       },
     ],
   },

@@ -15,12 +15,12 @@ import React from 'react';
 import { MetadataSource } from 'ts/const';
 import { IAnalyticsItem } from '../AnalyticsType';
 
-interface EventPreviewProps {
+interface AttributePreviewProps {
   previewItem: IAnalyticsItem;
 }
 
-const EventPreview: React.FC<EventPreviewProps> = (
-  props: EventPreviewProps
+const AttributePreview: React.FC<AttributePreviewProps> = (
+  props: AttributePreviewProps
 ) => {
   const { previewItem } = props;
   return (
@@ -30,25 +30,29 @@ const EventPreview: React.FC<EventPreviewProps> = (
           <div>
             {previewItem.metadataSource === MetadataSource.PRESET ? (
               <>
-                <div className="event-type">自定义事件</div>
-                <div className="event-type system">预置事件</div>
+                <div className="event-type">自定义属性</div>
+                <div className="event-type system">预置属性</div>
               </>
             ) : (
               <>
-                <div className="event-type system">自定义事件</div>
-                <div className="event-type">预置事件</div>
+                <div className="event-type system">自定义属性</div>
+                <div className="event-type">预置属性</div>
               </>
             )}
           </div>
           <div className="event-info">
             <div className="header-name">{previewItem?.label}</div>
             <div className="info-tem">
-              <div className="info-key">事件名称</div>
+              <div className="info-key">属性名称</div>
               <div className="info-value">{previewItem?.value}</div>
             </div>
             <div className="info-tem">
-              <div className="info-key">事件描述</div>
+              <div className="info-key">属性描述</div>
               <div className="info-value">{previewItem.description}</div>
+            </div>
+            <div className="info-tem">
+              <div className="info-key">属性类型</div>
+              <div className="info-value">{previewItem.valueType}</div>
             </div>
             <div className="info-tem">
               <div className="info-key">修改时间</div>
@@ -61,4 +65,4 @@ const EventPreview: React.FC<EventPreviewProps> = (
   );
 };
 
-export default EventPreview;
+export default AttributePreview;
