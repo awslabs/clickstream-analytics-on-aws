@@ -134,7 +134,8 @@
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
-    "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10."
+    "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10.",
+    "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project."
   },
   "emptyData": "No Data"
 }

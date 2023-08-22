@@ -40,21 +40,19 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
-  IAnalyticsItem,
   IEventAnalyticsItem,
-  INIT_EVENT_LIST,
   INIT_SEGMENTATION_DATA,
-  MOCK_EVENT_OPTION_LIST,
   SegmetationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import Navigation from 'components/layouts/Navigation';
-import { cloneDeep, get } from 'lodash';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
+  COMMON_ALERT_TYPE,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
   MetadataValueType,
@@ -66,6 +64,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
+  alertMsg,
   generateStr,
   getValueFromStackOutputs,
   metadataEventsConvertToCategoryItemType,
@@ -285,11 +284,31 @@ const AnalyticsFunnel: React.FC = () => {
         [
           OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
           OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
         ]
       );
       const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
         OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
       ]);
+      if (
+        !redshiftOutputs.get(
+          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+        ) ||
+        !redshiftOutputs.get(
+          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+        ) ||
+        !redshiftOutputs.get(
+          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
+        ) ||
+        !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
+      ) {
+        alertMsg(
+          t('analytics:valid.funnelPipelineVersionError'),
+          COMMON_ALERT_TYPE.Error as AlertType
+        );
+        setLoadingData(false);
+        return;
+      }
 
       const { success, data }: ApiResponse<any> = await previewFunnel({
         action: 'PREVIEW',
@@ -356,6 +375,26 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
+  const resetConfig = () => {
+    setSelectedMetric({
+      value: ExploreComputeMethod.USER_CNT,
+      label: t('analytics:options.userNumber') ?? '',
+    });
+    setSelectedWindowType(customWindowType);
+    setSelectedWindowUnit({
+      value: 'minute',
+      label: t('analytics:options.minuteWindowUnit') ?? '',
+    });
+    setAssociateParameterChecked(true);
+    setEventOptionData([
+      {
+        ...DEFAULT_EVENT_ITEM,
+        isMultiSelect: false,
+      },
+    ]);
+    setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+  };
+
   return (
     <AppLayout
       toolsHide
@@ -374,7 +413,7 @@ const AnalyticsFunnel: React.FC = () => {
                   variant="h2"
                   actions={
                     <SpaceBetween direction="horizontal" size="xs">
-                      <Button iconName="refresh">
+                      <Button iconName="refresh" onClick={resetConfig}>
                         {t('analytics:funnel.labels.reset')}
                       </Button>
                       <Button variant="primary">
@@ -412,7 +451,6 @@ const AnalyticsFunnel: React.FC = () => {
                         selectedOption={selectedWindowType}
                         options={windowTypeOptions}
                         onChange={(event) => {
-                          console.log(selectedWindowType, customWindowType);
                           setSelectedWindowType(event.detail.selectedOption);
                         }}
                       />
@@ -473,7 +511,6 @@ const AnalyticsFunnel: React.FC = () => {
                       data={eventOptionData}
                       eventOptionList={metadataEvents}
                       addNewEventAnalyticsItem={() => {
-                        console.log('addNewEventAnalyticsItem');
                         setEventOptionData((prev) => {
                           const preEventList = cloneDeep(prev);
                           return [
@@ -486,7 +523,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       removeEventItem={(index) => {
-                        console.log('removeEventItem');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           return dataObj.filter(
@@ -495,7 +531,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       addNewConditionItem={(index: number) => {
-                        console.log('addNewConditionItem');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[index].conditionList.push(
@@ -505,7 +540,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       removeEventCondition={(eventIndex, conditionIndex) => {
-                        console.log('removeEventCondition');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           const newCondition = dataObj[
@@ -522,7 +556,6 @@ const AnalyticsFunnel: React.FC = () => {
                         conditionIndex,
                         category
                       ) => {
-                        console.log('changeConditionCategoryOption');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[eventIndex].conditionList[
@@ -547,7 +580,6 @@ const AnalyticsFunnel: React.FC = () => {
                         conditionIndex,
                         operator
                       ) => {
-                        console.log('changeConditionOperator');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[eventIndex].conditionList[
@@ -561,7 +593,6 @@ const AnalyticsFunnel: React.FC = () => {
                         conditionIndex,
                         value
                       ) => {
-                        console.log('changeConditionOperator');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[eventIndex].conditionList[
@@ -571,7 +602,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       changeCurCalcMethodOption={(eventIndex, method) => {
-                        console.log('changeCurCalcMethodOption');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[eventIndex].calculateMethodOption = method;
@@ -579,7 +609,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       changeCurCategoryOption={async (eventIndex, category) => {
-                        console.log('changeCurCategoryOption');
                         const eventName = category?.value;
                         const eventParameters = await getEventParameters(
                           eventName
@@ -599,7 +628,6 @@ const AnalyticsFunnel: React.FC = () => {
                         });
                       }}
                       changeCurRelationShip={(eventIndex, relation) => {
-                        console.log('changeCurRelationShip');
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
                           dataObj[eventIndex].conditionRelationShip = relation;

@@ -68,7 +68,6 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.less_than,
     ANALYTICS_OPERATORS.less_than_or_equal,
   ];
-  console.log('item', item);
 
   return (
     <div className="cs-analytics-condition-item">
