@@ -301,6 +301,7 @@ describe('Utils test', () => {
       'http:/example.com:100000',
       'a',
       'abc1.test.com; abc2.test.com',
+      '*,abc.com',
     ];
     invalidValues.forEach(v => expect(() => validatePattern('CORS origin', CORS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
