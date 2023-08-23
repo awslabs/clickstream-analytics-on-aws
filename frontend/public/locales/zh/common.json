@@ -167,6 +167,7 @@
     "createDashboard": "创建看板",
     "deleteDashboard": "删除看板",
     "addEvent": "添加事件",
+    "addFunnelStep": "添加步骤",
     "addFilter": "添加条件"
   },
   "item": "项目",

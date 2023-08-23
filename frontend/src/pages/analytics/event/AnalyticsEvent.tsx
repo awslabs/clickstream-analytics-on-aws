@@ -175,6 +175,7 @@ const AnalyticsEvent: React.FC = () => {
                     <EventsSelect
                       data={eventOptionData}
                       eventOptionList={MOCK_EVENT_OPTION_LIST}
+                      addEventButtonLabel={t('common:button.addEvent')}
                       addNewEventAnalyticsItem={() => {
                         setEventOptionData((prev) => {
                           const preEventList = cloneDeep(prev);

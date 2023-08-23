@@ -793,6 +793,7 @@ const AnalyticsFunnel: React.FC = () => {
                     <EventsSelect
                       data={eventOptionData}
                       eventOptionList={metadataEvents}
+                      addEventButtonLabel={t('common:button.addFunnelStep')}
                       addNewEventAnalyticsItem={() => {
                         setEventOptionData((prev) => {
                           const preEventList = cloneDeep(prev);

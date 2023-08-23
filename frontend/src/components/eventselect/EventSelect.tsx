@@ -13,7 +13,6 @@
 
 import { Button, SelectProps } from '@cloudscape-design/components';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
@@ -29,6 +28,7 @@ import RelationOr from './comps/RelationOr';
 interface EventsSelectProps {
   data: IEventAnalyticsItem[];
   eventOptionList: CategoryItemType[];
+  addEventButtonLabel: string;
   addNewEventAnalyticsItem: () => void;
   removeEventItem: (index: number) => void;
   addNewConditionItem: (index: number) => void;
@@ -61,10 +61,10 @@ interface EventsSelectProps {
 const EventsSelect: React.FC<EventsSelectProps> = (
   props: EventsSelectProps
 ) => {
-  const { t } = useTranslation();
   const {
     data,
     eventOptionList,
+    addEventButtonLabel,
     addNewEventAnalyticsItem,
     removeEventItem,
     addNewConditionItem,
@@ -185,7 +185,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
       })}
       <div className="mt-10">
         <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
-          {t('common:button.addEvent')}
+          {addEventButtonLabel}
         </Button>
       </div>
     </div>

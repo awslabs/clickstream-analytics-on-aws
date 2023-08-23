@@ -168,6 +168,7 @@
     "createDashboard": "Create Dashboard",
     "deleteDashboard": "Delete Dashboard",
     "addEvent": "Add Event",
+    "addFunnelStep": "Add Step",
     "addFilter": "Add Filter"
   },
   "item": "item",
