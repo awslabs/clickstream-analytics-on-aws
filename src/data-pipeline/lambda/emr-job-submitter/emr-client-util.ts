@@ -84,6 +84,45 @@ export class EMRServerlessUtil {
     }
 
     logger.info('funcTags', { funcTags });
+
+    const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
+      event,
+      config,
+    );
+
+    const { startJobRunCommandInput } = await this.getJobRunCommandInput(event, config, startTimestamp, endTimestamp, funcTags);
+
+    const startJobRunCommand = new StartJobRunCommand(startJobRunCommandInput);
+    let jobInfo = await emrClient.send(startJobRunCommand);
+
+    await this.recordJobInfo({
+      event,
+      config,
+      jobRunId: jobInfo.jobRunId!,
+      startTimestamp,
+      endTimestamp,
+      state: 'LAMBDA-SUBMITTED',
+      startRunTime: new Date().toISOString(),
+    });
+
+    await this.recordJobInfo({
+      event,
+      config,
+      jobRunId: 'latest',
+      startTimestamp,
+      endTimestamp,
+      state: 'LAMBDA-SUBMITTED',
+      startRunTime: new Date().toISOString(),
+    });
+
+    logger.info('jobInfo', { jobInfo });
+
+    return jobInfo.jobRunId!;
+  }
+
+  private static async getJobRunCommandInput(event: any, config: any, startTimestamp: number, endTimestamp: number,
+    funcTags: Record<string, string> | undefined) {
+
     let sparkConfigEvent: string[] = event.sparkConfig || [];
     let sparkConfigS3: string[] = [];
     let s3OutputPartitions = undefined;
@@ -101,11 +140,6 @@ export class EMRServerlessUtil {
       s3OutputPartitions = sparkConfigS3Obj.outputPartitions;
       s3InputRePartitions = sparkConfigS3Obj.inputRePartitions;
     }
-
-    const { startTimestamp, endTimestamp } = await this.getJobTimestamps(
-      event,
-      config,
-    );
 
     const outputPartitions = (event.outputPartitions || s3OutputPartitions || config.outputPartitions) + '';
     const rePartitions = (event.inputRePartitions || s3InputRePartitions || config.rePartitions) + '';
@@ -198,34 +232,8 @@ export class EMRServerlessUtil {
       tags: funcTags, // propagate the tags of function itself to EMR job runs
     };
 
-    logger.info('startJobRunCommandInput', { startJobRunCommandInput });
-
-    const startJobRunCommand = new StartJobRunCommand(startJobRunCommandInput);
-    let jobInfo = await emrClient.send(startJobRunCommand);
-
-    await this.recordJobInfo({
-      event,
-      config,
-      jobRunId: jobInfo.jobRunId!,
-      startTimestamp,
-      endTimestamp,
-      state: 'LAMBDA-SUBMITTED',
-      startRunTime: new Date().toISOString(),
-    });
-
-    await this.recordJobInfo({
-      event,
-      config,
-      jobRunId: 'latest',
-      startTimestamp,
-      endTimestamp,
-      state: 'LAMBDA-SUBMITTED',
-      startRunTime: new Date().toISOString(),
-    });
-
-    logger.info('jobInfo', { jobInfo });
-
-    return jobInfo.jobRunId!;
+    logger.info('getJobRunCommandInput return', { startJobRunCommandInput, startTimestamp, endTimestamp });
+    return { startJobRunCommandInput, startTimestamp, endTimestamp };
   }
 
   private static async recordJobInfo(jobInfoObj: {
