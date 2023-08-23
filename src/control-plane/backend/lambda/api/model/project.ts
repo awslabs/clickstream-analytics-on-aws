@@ -36,3 +36,31 @@ export interface IProjectList {
   totalCount: number | undefined;
   items: IProject[];
 }
+
+export interface IDashboard {
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
+  readonly dashboardId: string;
+
+  readonly name: string;
+  readonly description: string;
+  readonly region: string;
+  readonly sheets: IDashboardSheet[];
+  readonly ownerPrincipal: string;
+  readonly defaultDataSourceArn: string;
+
+  readonly createAt: number;
+  readonly updateAt: number;
+  readonly operator: string;
+  readonly deleted: boolean;
+}
+
+export interface IDashboardSheet {
+  readonly id: string;
+  readonly name: string;
+}
+

@@ -14,34 +14,42 @@
 import { apiRequest } from 'ts/request';
 
 export const getAnalyticsDashboardList = async (params: {
+  projectId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
   await new Promise((r) => setTimeout(r, 3000));
-  const result: any = await new Promise((resolve, reject) => {
-    resolve({
-      success: true,
-      message: 'OK',
-      data: {
-        totalCount: 2,
-        items: [
-          {
-            id: 'asdsdsadsad',
-            name: 'Dashboard Name 1',
-            description: 'Dashboard description 1',
-            createAt: 1690251290,
-          },
-          {
-            id: 'asdsdsadsadasd',
-            name: 'Dashboard Name 2',
-            description: 'Dashboard description 2',
-            createAt: 1690251290,
-          },
-        ],
-      },
-      error: '',
-    });
-  });
+  const result: any = await apiRequest(
+    'get',
+    `/project/${params.projectId}/dashboards?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
+  );
+  return result;
+};
+
+export const createAnalyticsDashboard = async (
+  dashboard: IAnalyticsDashboard
+) => {
+  const result: any = await apiRequest(
+    'post',
+    `/project/${dashboard.projectId}/dashboard`,
+    dashboard
+  );
+  return result;
+};
+
+export const deleteAnalyticsDashboard = async (dashboardId: string) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/project/dashboard/${dashboardId}`
+  );
+  return result;
+};
+
+export const getAnalyticsDashboard = async (dashboardId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/project/dashboard/${dashboardId}`
+  );
   return result;
 };
 

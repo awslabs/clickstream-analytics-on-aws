@@ -13,13 +13,6 @@
 
 export {};
 declare global {
-  interface IAnalyticsDashboard {
-    readonly id: string;
-    readonly name: string;
-    readonly description: string;
-    readonly createAt: number;
-  }
-
   interface IMetadataEvent {
     readonly id: string;
     readonly type: string;
@@ -168,5 +161,32 @@ declare global {
     readonly quickSight: {
       readonly dataSourceArn: string;
     };
+  }
+
+  interface IAnalyticsDashboard {
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
+
+    readonly projectId: string;
+    readonly appId: string;
+    readonly dashboardId: string;
+
+    readonly name: string;
+    readonly description: string;
+    readonly region: string;
+    readonly sheets: IAnalyticsDashboardSheet[];
+    readonly ownerPrincipal: string;
+    readonly defaultDataSourceArn: string;
+
+    readonly createAt: number;
+    readonly updateAt: number;
+    readonly operator: string;
+    readonly deleted: boolean;
+  }
+
+  export interface IAnalyticsDashboardSheet {
+    readonly id: string;
+    readonly name: string;
   }
 }

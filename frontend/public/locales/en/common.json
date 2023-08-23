@@ -164,7 +164,9 @@
     "viewAlarms": "View Alarms",
     "refreshMetadata": "Refresh Metadata",
     "clearFilters": "Clear filters",
-    "preview": "Preview"
+    "preview": "Preview",
+    "createDashboard": "Create Dashboard",
+    "deleteDashboard": "Delete Dashboard"
   },
   "item": "item",
   "items": "items",
