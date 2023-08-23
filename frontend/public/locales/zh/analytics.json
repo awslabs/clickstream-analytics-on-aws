@@ -131,6 +131,8 @@
   },
   "valid": {
     "projectSelectError": "必须选择一个项目",
-    "appSelectError": "必须选择一个应用程序"
+    "appSelectError": "必须选择一个应用程序",
+    "dashboardNameEmptyError": "请输入看板名称",
+    "dashboardSheetTooMuchError": "工作表不能超过10个"
   }
 }
