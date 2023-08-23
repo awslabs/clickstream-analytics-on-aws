@@ -29,6 +29,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
+import static software.aws.solution.clickstream.ContextUtil.*;
 
 class ETLRunnerTest extends BaseSparkTest {
 
@@ -49,14 +50,27 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPartitions = "-1";
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                "true",
-                database,
-                sourceTable,
-                sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "true",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        Integer.valueOf(outputPartitions), -1
+                ));
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(false);
@@ -79,15 +93,29 @@ class ETLRunnerTest extends BaseSparkTest {
         String dataFreshnessInHour = "72";
         String outputPartitions = "-1";
 
-      ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                "true",
-                database, 
-                sourceTable,
-                sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "true",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        Integer.valueOf(outputPartitions), -1
+                ));
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(true);
@@ -99,11 +127,17 @@ class ETLRunnerTest extends BaseSparkTest {
 
     @Test
     public void should_read_corrupt_dataset() {
+        List<String> transformers = Lists.newArrayList();
+
+        transformers.add("software.aws.solution.clickstream.Transformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
         String database = "default";
         String sourceTable = "fakeSourceTable";
         String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
         String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",");
+        String transformerClassNames = String.join(",", transformers);
         String outputPath = "/tmp/test-output";
         String projectId = "projectId1";
         String validAppIds = "id1,id2,uba-app";
@@ -114,14 +148,27 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPartitions = "-1";
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                "true",
-                database,
-                sourceTable,
-                sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "true",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        Integer.valueOf(outputPartitions), -1
+                ));
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(true);
@@ -132,10 +179,10 @@ class ETLRunnerTest extends BaseSparkTest {
 
     @Test
     public void should_executeTransformers() throws IOException {
-        System.setProperty("debug.local", "true");
-        System.setProperty("app.ids", "id1,id2,uba-app");
-        System.setProperty("project.id", "projectId1");
-        System.setProperty("save.info.to.warehouse", "true");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(APP_IDS_PROP, "id1,id2,uba-app");
+        System.setProperty(PROJECT_ID_PROP, "projectId1");
+        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "true");
 
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
@@ -149,7 +196,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String sourceTable = "fakeSourceTable";
         String sourcePath = getClass().getResource("/original_data.json").getPath();
         String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",");
+        String transformerClassNames = String.join(",", transformers);
         String outputPath = "/tmp/test-output";
         String projectId = "projectId1";
         String validAppIds = "id1,id2,uba-app";
@@ -160,14 +207,27 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPartitions = "-1";
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                "false",
-                database,
-                sourceTable,
-                sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), Integer.valueOf(outputPartitions), -1);
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "false",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        Integer.valueOf(outputPartitions), -1
+                ));
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
 
@@ -241,7 +301,6 @@ class ETLRunnerTest extends BaseSparkTest {
         }));
     }
 
-
     @Test
     public void should_executeTransformers_with_error() {
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
@@ -256,7 +315,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String sourcePath = getClass().getResource("/original_data.json").getPath();
 
         String jobDataDir = "/tmp/etl-debug/";
-        String transformerClassNames = String.join(",");
+        String transformerClassNames = String.join(",", transformers);
         String outputPath = "/tmp/test-output";
         String projectId = "projectId1";
         String validAppIds = "id1,id2,uba-app";
@@ -266,14 +325,28 @@ class ETLRunnerTest extends BaseSparkTest {
         String dataFreshnessInHour = "72";
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                "false",
-                database,
-                sourceTable,
-                sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour), -1, -1);
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "false",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        -1, -1
+                ));
+
 
         ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> sourceDataset =

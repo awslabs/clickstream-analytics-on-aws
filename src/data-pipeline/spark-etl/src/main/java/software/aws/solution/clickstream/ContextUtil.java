@@ -19,8 +19,23 @@ import org.apache.spark.storage.StorageLevel;
 
 import java.util.Arrays;
 
-public class ContextUtil {
+public final class ContextUtil {
+    public static final String JOB_NAME_PROP= "job.name";
+    public static final String WAREHOUSE_DIR_PROP = "warehouse.dir";
+    public static final String SAVE_INFO_TO_WAREHOUSE_PROP = "save.info.to.warehouse";
+    public static final String DEBUG_LOCAL_PROP = "debug.local";
+    public static final String OUTPUT_COALESCE_PARTITIONS_PROP = "output.coalesce.partitions";
+    public static final String DATA_FRESHNESS_HOUR_PROP = "data.freshness.hour";
+    public static final String OUTPUT_PATH_PROP = "output.path";
+    public static final String SOURCE_PATH_PROP = "source.path";
+    public static final String APP_IDS_PROP = "app.ids";
+    public static final String PROJECT_ID_PROP = "project.id";
+    public static final String JOB_DATA_DIR_PROP = "job.data.dir";
+    public static final String DATABASE_PROP = "database";
     private static Dataset<Row> datasetCached;
+
+    private ContextUtil() {
+    }
 
     public static void cacheDataset(final Dataset<Row> dataset) {
         if (datasetCached == null) {
@@ -30,21 +45,23 @@ public class ContextUtil {
             datasetCached = dataset.persist(StorageLevel.MEMORY_AND_DISK());
             try {
                 oldDatasetCached.unpersist();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                //print and ignore error
+                e.printStackTrace();
             }
         }
     }
 
     public static void setContextProperties(final ETLRunnerConfig config) {
-        System.setProperty("database", config.getDatabase());
-        System.setProperty("job.data.dir", config.getJobDataDir());
-        System.setProperty("project.id", config.getProjectId());
-        System.setProperty("app.ids", config.getValidAppIds());
-        System.setProperty("source.path", config.getSourcePath());
-        System.setProperty("output.path", config.getOutputPath());
-        System.setProperty("data.freshness.hour", String.valueOf(config.getDataFreshnessInHour()));
-        System.setProperty("output.coalesce.partitions", String.valueOf(config.getOutPartitions()));
-        System.setProperty("save.info.to.warehouse", String.valueOf(config.isSaveInfoToWarehouse()));
+        System.setProperty(DATABASE_PROP, config.getDatabase());
+        System.setProperty(JOB_DATA_DIR_PROP, config.getJobDataDir());
+        System.setProperty(PROJECT_ID_PROP, config.getProjectId());
+        System.setProperty(APP_IDS_PROP, config.getValidAppIds());
+        System.setProperty(SOURCE_PATH_PROP, config.getSourcePath());
+        System.setProperty(OUTPUT_PATH_PROP, config.getOutputPath());
+        System.setProperty(DATA_FRESHNESS_HOUR_PROP, String.valueOf(config.getDataFreshnessInHour()));
+        System.setProperty(OUTPUT_COALESCE_PARTITIONS_PROP, String.valueOf(config.getOutPartitions()));
+        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, String.valueOf(config.isSaveInfoToWarehouse()));
     }
 
     public static void setJobAndWarehouseInfo(final String jobDataDir) {
@@ -52,24 +69,24 @@ public class ContextUtil {
         String jobName = dirParts[dirParts.length - 1];
         String warehouseDir = String.join("/", Arrays.copyOf(dirParts, dirParts.length - 1));
 
-        System.setProperty("job.name", jobName);
-        System.setProperty("warehouse.dir", warehouseDir);
+        System.setProperty(JOB_NAME_PROP, jobName);
+        System.setProperty(WAREHOUSE_DIR_PROP, warehouseDir);
     }
 
     public static boolean isDebugLocal() {
-        return Boolean.parseBoolean(System.getProperty("debug.local"));
+        return Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
     }
 
     public static boolean isSaveToWarehouse() {
-        return Boolean.parseBoolean(System.getProperty("save.info.to.warehouse", "false"));
+        return Boolean.parseBoolean(System.getProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "false"));
     }
 
     public static String getJobName() {
-        return System.getProperty("job.name");
+        return System.getProperty(JOB_NAME_PROP);
     }
 
     public static String getWarehouseDir() {
-        return System.getProperty("warehouse.dir");
+        return System.getProperty(WAREHOUSE_DIR_PROP);
     }
 
 }

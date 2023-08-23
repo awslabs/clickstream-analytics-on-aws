@@ -14,9 +14,12 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
 
 
 public class ETLRunnerConfig {
@@ -50,37 +53,27 @@ public class ETLRunnerConfig {
     private final int outPartitions;
     @NotNull
     private final int rePartitions;
-
-    public ETLRunnerConfig(@NotEmpty final String saveInfoToWarehouse,
-                           @NotEmpty final String database,
-                           @NotEmpty final String sourceTable,
-                           @NotEmpty final String sourcePath,
-                           @NotEmpty final String jobDataUri,
-                           @NotEmpty final List<String> transformerClassNames,
-                           @NotEmpty final String outputPath,
-                           @NotEmpty final String projectId,
-                           @NotEmpty final String validAppIds,
-                           @NotNull final String outPutFormat,
-                           @NotNull final Long startTimestamp,
-                           @NotNull final Long endTimestamp,
-                           @NotNull final Long dataFreshnessInHour,
-                           @NotNull final int outPartitions,
-                           @NotNull final int rePartitions) {
-        this.saveInfoToWarehouse = Boolean.valueOf(saveInfoToWarehouse);
-        this.database = database;
-        this.sourceTable = sourceTable;
-        this.jobDataDir = jobDataUri;
-        this.transformerClassNames = transformerClassNames;
-        this.outputPath = outputPath;
-        this.projectId = projectId;
-        this.validAppIds = validAppIds;
-        this.outPutFormat = outPutFormat;
-        this.startTimestamp = startTimestamp;
-        this.endTimestamp = endTimestamp;
-        this.dataFreshnessInHour = dataFreshnessInHour;
-        this.outPartitions = outPartitions;
-        this.rePartitions = rePartitions;
-        this.sourcePath = sourcePath;
+    public ETLRunnerConfig(
+            @NotNull final TransformationConfig transformationConfig,
+            @NotNull final InputOutputConfig inputOutputConfig,
+            @NotNull final TimestampConfig timestampConfig,
+            @NotNull final PartitionConfig partitionConfig
+    ) {
+        this.saveInfoToWarehouse = Boolean.valueOf(inputOutputConfig.getSaveInfoToWarehouse());
+        this.database = inputOutputConfig.getDatabase();
+        this.sourceTable = inputOutputConfig.getSourceTable();
+        this.jobDataDir = inputOutputConfig.getJobDataUri();
+        this.transformerClassNames = transformationConfig.getTransformerClassNames();
+        this.outputPath = inputOutputConfig.getOutputPath();
+        this.projectId = transformationConfig.getProjectId();
+        this.validAppIds = transformationConfig.getValidAppIds();
+        this.outPutFormat = inputOutputConfig.getOutPutFormat();
+        this.startTimestamp = timestampConfig.getStartTimestamp();
+        this.endTimestamp = timestampConfig.getEndTimestamp();
+        this.dataFreshnessInHour = transformationConfig.getDataFreshnessInHour();
+        this.outPartitions = partitionConfig.getOutPartitions();
+        this.rePartitions = partitionConfig.getRePartitions();
+        this.sourcePath = inputOutputConfig.getSourcePath();
     }
 
     public boolean isSaveInfoToWarehouse() {
@@ -141,6 +134,56 @@ public class ETLRunnerConfig {
 
     public int getRePartitions() {
         return rePartitions;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class PartitionConfig {
+        @NotNull
+        private final int outPartitions;
+        @NotNull
+        private final int rePartitions;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class TimestampConfig {
+        @NotNull
+        private final long startTimestamp;
+        @NotNull
+        private final long endTimestamp;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class InputOutputConfig {
+        @NotNull
+        private final String saveInfoToWarehouse;
+        @NotNull
+        private final String database;
+        @NotNull
+        private final String sourceTable;
+        @NotNull
+        private final String sourcePath;
+        @NotNull
+        private final String jobDataUri;
+        @NotNull
+        private final String outputPath;
+        @NotNull
+        private final String outPutFormat;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class TransformationConfig {
+        @NotEmpty
+        final List<String> transformerClassNames;
+        @NotEmpty
+        final String projectId;
+        @NotEmpty
+        final String validAppIds;
+        @NotNull
+        final Long dataFreshnessInHour;
     }
 }
 

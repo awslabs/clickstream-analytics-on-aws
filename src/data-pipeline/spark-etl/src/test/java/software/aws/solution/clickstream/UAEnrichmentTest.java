@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
 
 class UAEnrichmentTest extends BaseSparkTest {
 
@@ -26,8 +28,8 @@ class UAEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_enrich_ua() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
 
@@ -57,8 +59,8 @@ class UAEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_return_empty_when_enrich_invalid_ua_value() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_ua_error.json")).getPath());

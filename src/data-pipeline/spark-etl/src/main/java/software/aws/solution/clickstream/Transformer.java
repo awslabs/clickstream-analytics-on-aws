@@ -24,12 +24,44 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.to_date;
+import static org.apache.spark.sql.functions.timestamp_seconds;
+import static org.apache.spark.sql.functions.struct;
+import static org.apache.spark.sql.functions.array;
+import static org.apache.spark.sql.functions.regexp_extract;
+import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.get_json_object;
+
+import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.ETLRunner.getDistFields;
 
 @Slf4j
 public final class Transformer {
+
+    public static final String GEO_FOR_ENRICH = "geo_for_enrich";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String PLATFORM = "platform";
+    public static final String LOCALE = "locale";
+    public static final String ATTRIBUTES = "attributes";
+    public static final String DOUBLE_VALUE = "double_value";
+    public static final String FLOAT_VALUE = "float_value";
+    public static final String INT_VALUE = "int_value";
+    public static final String STRING_VALUE = "string_value";
+
+    public static final String UA_BROWSER = "ua_browser";
+    public static final String UA_BROWSER_VERSION = "ua_browser_version";
+    public static final String UA_OS = "ua_os";
+    public static final String UA_OS_VERSION = "ua_os_version";
+    public static final String UA_DEVICE = "ua_device";
+    public static final String UA_DEVICE_CATEGORY = "ua_device_category";
+    public static final String UA_ENRICH = "ua_enrich";
+
+    public static final String CORRUPT_RECORD = "_corrupt_record";
+    public static final String JOB_NAME_COL = "jobName";
+
 
     private final Cleaner cleaner = new Cleaner();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -59,7 +91,7 @@ public final class Transformer {
         List<Column> transformOutFields = Stream.of(distCol).collect(Collectors.toList());
 
         transformOutFields.add(col("ua"));
-        transformOutFields.add(col("geo_for_enrich"));
+        transformOutFields.add(col(GEO_FOR_ENRICH));
         Dataset<Row> dataset11= dataset10.select(
                 transformOutFields.toArray(new Column[]{})
         );
@@ -87,19 +119,19 @@ public final class Transformer {
 
     private Dataset<Row> convertDateProperties(final Dataset<Row> dataset) {
         return dataset
-                .withColumn("event_date", to_date(timestamp_seconds(col("data").getItem("timestamp").$div(1000))))
+                .withColumn("event_date", to_date(timestamp_seconds(col("data").getItem(TIMESTAMP).$div(1000))))
                 .withColumn("ingest_timestamp", col("ingest_time").cast(DataTypes.LongType))
-                .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem("timestamp"))).cast(DataTypes.LongType))
+                .withColumn("event_server_timestamp_offset", (col("ingest_time").$minus(col("data").getItem(TIMESTAMP))).cast(DataTypes.LongType))
 
                 .withColumn("event_previous_timestamp", lit(0).cast(DataTypes.LongType))
-                .withColumn("platform", col("data").getItem("platform"));
+                .withColumn(PLATFORM, col("data").getItem(PLATFORM));
     }
 
     private Dataset<Row> convertEventProperties(final Dataset<Row> dataset) {
-        String projectId = System.getProperty("project.id");
+        String projectId = System.getProperty(PROJECT_ID_PROP);
         Dataset<Row> dataset1 = dataset.withColumn("event_id", col("data").getItem(("event_id")))
                 .withColumn("event_name", col("data").getItem("event_type"))
-                .withColumn("event_timestamp", col("data").getItem("timestamp"))
+                .withColumn("event_timestamp", col("data").getItem(TIMESTAMP))
                 .withColumn("ecommerce", col("data").getField("ecommerce"))
                 .withColumn("items", col("data").getField("items"))
                 .withColumn("project_id", lit(projectId))
@@ -114,40 +146,40 @@ public final class Transformer {
                                 lit(null).cast(DataTypes.StringType).alias("country"),
                                 lit(null).cast(DataTypes.StringType).alias("continent"),
                                 lit(null).cast(DataTypes.StringType).alias("sub_continent"),
-                                col("data").getItem("locale").alias("locale"),
+                                col("data").getItem(LOCALE).alias(LOCALE),
                                 lit(null).cast(DataTypes.StringType).alias("region"),
                                 lit(null).cast(DataTypes.StringType).alias("metro"),
                                 lit(null).cast(DataTypes.StringType).alias("city")))
-                .withColumn("geo_for_enrich", struct(col("ip"), col("data").getItem("locale").alias("locale")));
+                .withColumn(GEO_FOR_ENRICH, struct(col("ip"), col("data").getItem(LOCALE).alias(LOCALE)));
     }
 
     private Dataset<Row> convertPrivacyInfo(final Dataset<Row> dataset) {
-        Column attributesCol = col("data").getField("attributes");
+        Column attributesCol = col("data").getField(ATTRIBUTES);
 
         return dataset.withColumn("privacy_info",
                 array(
                         struct(
                                 lit("ads_storage").alias("key"),
-                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
-                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
-                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
-                                        get_json_object(attributesCol, "$._privacy_info_ads_storage").cast(DataTypes.StringType).alias("string_value")
+                                struct(lit(null).cast(DataTypes.DoubleType).alias(DOUBLE_VALUE),
+                                        lit(null).cast(DataTypes.FloatType).alias(FLOAT_VALUE),
+                                        lit(null).cast(DataTypes.LongType).alias(INT_VALUE),
+                                        get_json_object(attributesCol, "$._privacy_info_ads_storage").cast(DataTypes.StringType).alias(STRING_VALUE)
                                 ).alias("value")),
 
                         struct(
                                 lit("analytics_storage").alias("key"),
-                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
-                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
-                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
-                                        get_json_object(attributesCol, "$._privacy_info_analytics_storage").cast(DataTypes.StringType).alias("string_value")
+                                struct(lit(null).cast(DataTypes.DoubleType).alias(DOUBLE_VALUE),
+                                        lit(null).cast(DataTypes.FloatType).alias(FLOAT_VALUE),
+                                        lit(null).cast(DataTypes.LongType).alias(INT_VALUE),
+                                        get_json_object(attributesCol, "$._privacy_info_analytics_storage").cast(DataTypes.StringType).alias(STRING_VALUE)
                                 ).alias("value")),
 
                         struct(
                                 lit("uses_transient_token").alias("key"),
-                                struct(lit(null).cast(DataTypes.DoubleType).alias("double_value"),
-                                        lit(null).cast(DataTypes.FloatType).alias("float_value"),
-                                        lit(null).cast(DataTypes.LongType).alias("int_value"),
-                                        get_json_object(attributesCol, "$._privacy_info_uses_transient_token").cast(DataTypes.StringType).alias("string_value")
+                                struct(lit(null).cast(DataTypes.DoubleType).alias(DOUBLE_VALUE),
+                                        lit(null).cast(DataTypes.FloatType).alias(FLOAT_VALUE),
+                                        lit(null).cast(DataTypes.LongType).alias(INT_VALUE),
+                                        get_json_object(attributesCol, "$._privacy_info_uses_transient_token").cast(DataTypes.StringType).alias(STRING_VALUE)
                                 ).alias("value"))
 
                 )
@@ -156,7 +188,7 @@ public final class Transformer {
 
 
     private Dataset<Row> convertTrafficSource(final Dataset<Row> dataset) {
-        Column attributesCol = col("data").getField("attributes");
+        Column attributesCol = col("data").getField(ATTRIBUTES);
         return dataset.withColumn("traffic_source",
                 struct(
                         get_json_object(attributesCol, "$._traffic_source_medium").alias("medium"),
@@ -171,7 +203,7 @@ public final class Transformer {
     }
 
     private Dataset<Row> convertAppInfo(final Dataset<Row> dataset) {
-        Column attributesCol = col("data").getField("attributes");
+        Column attributesCol = col("data").getField(ATTRIBUTES);
 
         return dataset.withColumn("app_info",
                 struct(
@@ -192,15 +224,15 @@ public final class Transformer {
                         (col("data").getItem("carrier")).alias("carrier"),
                         (col("data").getItem("network_type")).alias("network_type"),
                         (col("data").getItem("os_version")).alias("operating_system_version"),
-                        (col("data").getItem("platform")).alias("operating_system"),
+                        (col("data").getItem(PLATFORM)).alias("operating_system"),
 
                         // placeholder for ua enrich fields
-                        lit(null).cast(DataTypes.StringType).alias("ua_browser"),
-                        lit(null).cast(DataTypes.StringType).alias("ua_browser_version"),
-                        lit(null).cast(DataTypes.StringType).alias("ua_os"),
-                        lit(null).cast(DataTypes.StringType).alias("ua_os_version"),
-                        lit(null).cast(DataTypes.StringType).alias("ua_device"),
-                        lit(null).cast(DataTypes.StringType).alias("ua_device_category"),
+                        lit(null).cast(DataTypes.StringType).alias(UA_BROWSER),
+                        lit(null).cast(DataTypes.StringType).alias(UA_BROWSER_VERSION),
+                        lit(null).cast(DataTypes.StringType).alias(UA_OS),
+                        lit(null).cast(DataTypes.StringType).alias(UA_OS_VERSION),
+                        lit(null).cast(DataTypes.StringType).alias(UA_DEVICE),
+                        lit(null).cast(DataTypes.StringType).alias(UA_DEVICE_CATEGORY),
 
                         (col("data").getItem("system_language")).alias("system_language"),
                         (col("data").getItem("zone_offset").$div(1000)).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),

@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
 
 class IPEnrichmentTest extends BaseSparkTest {
 
@@ -26,8 +28,8 @@ class IPEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_enrich_ip() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
@@ -43,8 +45,8 @@ class IPEnrichmentTest extends BaseSparkTest {
 
     @Test
     public void should_return_empty_when_enrich_ip_with_no_db_file() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);

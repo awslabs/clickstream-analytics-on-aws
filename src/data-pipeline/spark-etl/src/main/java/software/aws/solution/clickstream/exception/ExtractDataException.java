@@ -11,28 +11,10 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream;
+package software.aws.solution.clickstream.exception;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-
-public class ETLMetric {
-    private final Long count;
-    private final String info;
-
-    ETLMetric(final Dataset<Row> dataset, final String info) {
-        this.info = info;
-        this.count  = dataset.count();
-    }
-
-    ETLMetric(final long count, final String info) {
-        this.count = count;
-        this.info = info;
-    }
-
-
-    @Override
-    public String toString() {
-        return "[ETLMetric]" + this.info + " dataset count:" + this.count;
+public class ExtractDataException extends RuntimeException{
+    public ExtractDataException(final Exception e) {
+        super(e);
     }
 }

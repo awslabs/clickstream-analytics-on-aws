@@ -28,10 +28,15 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
-import org.apache.spark.sql.types.*;
+import org.apache.spark.sql.types.ArrayType;
+import org.apache.spark.sql.types.DataType;
 import org.jetbrains.annotations.NotNull;
+import software.aws.solution.clickstream.exception.ExtractDataException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -39,13 +44,24 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.udf;
+import static org.apache.spark.sql.functions.from_json;
+import static org.apache.spark.sql.functions.explode;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.not;
 import static org.apache.spark.sql.types.DataTypes.StringType;
+import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.ContextUtil.DATA_FRESHNESS_HOUR_PROP;
+import static software.aws.solution.clickstream.ContextUtil.DATABASE_PROP;
+import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.CORRUPT_RECORD;
+import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
 
 @Slf4j
 public class Cleaner {
-
     private static Dataset<Row> decodeDataColumn(final Dataset<Row> dataset) {
         UserDefinedFunction udfExtractData = udf(extractData(), StringType);
         return dataset.withColumn("data", udfExtractData.apply(col("data")));
@@ -89,7 +105,7 @@ public class Cleaner {
             return outStr.toString();
         } catch (IOException e) {
             log.error("decompress error:" + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExtractDataException(e);
         }
     }
 
@@ -133,13 +149,13 @@ public class Cleaner {
         try {
             schemaString = Resources.toString(requireNonNull(getClass().getResource("/data_schema.json")), Charsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ExtractDataException(e);
         }
         DataType dataType = DataType.fromJson(schemaString);
 
         Map<String, String> options = Maps.newHashMap();
         options.put("mode", "PERMISSIVE");
-        options.put("columnNameOfCorruptRecord", "_corrupt_record");
+        options.put("columnNameOfCorruptRecord", CORRUPT_RECORD);
         Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
         log.info(new ETLMetric(rowDataset, "after load data schema").toString());
         if (ContextUtil.isDebugLocal()) {
@@ -153,7 +169,7 @@ public class Cleaner {
     }
 
     private Dataset<Row> processCorruptRecords(final Dataset<Row> dataset) {
-        Column corruptCondition = col("data").getItem("_corrupt_record").isNotNull()
+        Column corruptCondition = col("data").getItem(CORRUPT_RECORD).isNotNull()
                 .or(col("data").getItem("event_id").isNull())
                 .or(col("data").getItem("app_id").isNull())
                 .or(col("data").getItem("timestamp").isNull());
@@ -163,22 +179,22 @@ public class Cleaner {
         long corruptedDatasetCount = corruptedDataset.count();
         log.info(new ETLMetric(corruptedDatasetCount, "corrupted").toString());
         if (corruptedDatasetCount > 0) {
-            String database = System.getProperty("database", "default");
-            String jobName = System.getProperty("job.name");
-            corruptedDataset = corruptedDataset.withColumn("jobName", lit(jobName));
+            String database = System.getProperty(DATABASE_PROP, "default");
+            String jobName = System.getProperty(JOB_NAME_PROP);
+            corruptedDataset = corruptedDataset.withColumn(JOB_NAME_COL, lit(jobName));
 
             corruptedDataset = corruptedDataset.coalesce((int) (1 + corruptedDatasetCount/10000));
 
             if (ContextUtil.isSaveToWarehouse()) {
-                String tablePath = System.getProperty("warehouse.dir") + "/etl_corrupted_data";
+                String tablePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_corrupted_data";
                 log.info("save corruptedDataset to table " + database + ".etl_corrupted_data");
-                corruptedDataset.write().partitionBy("jobName")
+                corruptedDataset.write().partitionBy(JOB_NAME_COL)
                         .option("path", tablePath)
                         .mode(SaveMode.Append).saveAsTable(database + ".etl_corrupted_data");
             } else {
-                String s3FilePath = System.getProperty("warehouse.dir") + "/etl_corrupted_json_data";
+                String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_corrupted_json_data";
                 log.info("save corruptedDataset to " + s3FilePath);
-                corruptedDataset.write().partitionBy("jobName")
+                corruptedDataset.write().partitionBy(JOB_NAME_COL)
                         .option("compression", "gzip")
                         .mode(SaveMode.Append).json(s3FilePath);
             }
@@ -189,7 +205,7 @@ public class Cleaner {
             }
         }
         return dataset.filter(not(corruptCondition))
-                .drop(col("data").getItem("_corrupt_record"));
+                .drop(col("data").getItem(CORRUPT_RECORD));
     }
 
     private Dataset<Row> filter(final Dataset<Row> dataset) {
@@ -202,7 +218,7 @@ public class Cleaner {
     }
 
     private Dataset<Row> filterByDataFreshness(final Dataset<Row> dataset) {
-        long dataFreshnessInHour = Long.parseLong(System.getProperty("data.freshness.hour", "72"));
+        long dataFreshnessInHour = Long.parseLong(System.getProperty(DATA_FRESHNESS_HOUR_PROP, "72"));
         log.info("dataFreshnessInHour:" + dataFreshnessInHour);
         Dataset<Row> filteredDataset = dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
@@ -213,7 +229,7 @@ public class Cleaner {
     }
 
     private Dataset<Row> filterByAppIds(final Dataset<Row> dataset) {
-        String appIds = System.getProperty("app.ids");
+        String appIds = System.getProperty(APP_IDS_PROP);
         log.info("filterByAppIds[" + appIds + "]");
         Asserts.check(!Strings.isBlank(appIds), "valid appIds [app.ids] should not be blank");
         List<String> appIdList = Lists.newArrayList(appIds.split(","));
