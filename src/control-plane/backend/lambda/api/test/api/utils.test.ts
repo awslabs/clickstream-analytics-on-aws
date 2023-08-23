@@ -268,9 +268,10 @@ describe('Utils test', () => {
     invalidValues.forEach(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
-  it('CORS origin valid', async () => {
+  it('Mutil CORS origin valid', async () => {
     const validValues = [
       '*',
+      '*.example.com',
       'localhost',
       'example.com',
       'example.com:80',
@@ -282,17 +283,24 @@ describe('Utils test', () => {
       'https://example.com:80',
       'http://localhost:8080',
       'https://localhost:8080',
+      'localhost,example.com',
+      'localhost, example.com',
+      'localhost:8080,example.com:80',
+      'http://localhost,https://example.com',
+      'abc1.test.com, abc2.test.com, abc3.test.com',
+      'abc1.test.com,abc2.test.com',
     ];
     validValues.forEach(v => expect(validatePattern('CORS origin', CORS_PATTERN, v)).toEqual(true));
     const invalidValues = [
       ' ',
-      '*.example.com',
       ' example.com',
       '&example.com',
       'localhost1',
       'http:/localhost',
       'http:/localhost:9',
       'http:/example.com:100000',
+      'a',
+      'abc1.test.com; abc2.test.com',
     ];
     invalidValues.forEach(v => expect(() => validatePattern('CORS origin', CORS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });

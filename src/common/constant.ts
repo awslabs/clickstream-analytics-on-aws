@@ -232,7 +232,8 @@ export const SECRETS_MANAGER_ARN_PATTERN =
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
-export const CORS_PATTERN = '^$|^\\*$|^(https?:\\/\\/){0,1}(localhost|[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?)(:[0-9]{2,5})?$';
+export const CORS_ORIGIN = '(https?:\\/\\/){0,1}(localhost|(?:\\*\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?)(:[0-9]{2,5})?';
+export const CORS_PATTERN = `^$|^\\*$|^(${CORS_ORIGIN}(,\\s*${CORS_ORIGIN})*)$`;
 export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
 export const REGION_PATTERN = '[a-z]{2}-[a-z0-9]{1,10}-[0-9]{1}';
 export const EMR_VERSION_PATTERN='^emr-[0-9]+\\.[0-9]+\\.[0-9]+$';
