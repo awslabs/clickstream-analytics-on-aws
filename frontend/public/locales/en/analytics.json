@@ -23,7 +23,10 @@
     "modalTitle": "Switch Project Space",
     "selectProjectTitle": "Please select a project",
     "selectAppTitle": "Please select an application",
-    "configurations": "Configurations"
+    "configurations": "Configurations",
+    "saveToDashboardModalTitle": "Save to Dashboard",
+    "selectDashboardTitle": "Please select a dashboard",
+    "selectSheetTitle": "Please select a sheet"
   },
   "options": {
     "eventNumber": "Event number",
@@ -154,7 +157,9 @@
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
     "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10.",
-    "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project."
+    "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project.",
+    "dashboardSelectError": "Must select a dashboard",
+    "sheetSelectError": "Must select a sheet"
   },
   "emptyData": "No Data"
 }

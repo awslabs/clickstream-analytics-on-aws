@@ -8,7 +8,7 @@
     "createInputNamePlaceholder": "例如，my-dashboard",
     "createDesc": "看板描述-可选",
     "createDescPlaceholder": "例如，description of dashboard",
-    "createSheets": "看板Sheet-可选",
+    "createSheets": "工作表-可选",
     "deleteTip1": "您确定要删除该看板吗 ",
     "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
   },
@@ -23,7 +23,10 @@
     "modalTitle": "切换项目空间",
     "selectProjectTitle": "请选择一个项目",
     "selectAppTitle": "请选择一个应用程序",
-    "configurations": "配置"
+    "configurations": "配置",
+    "saveToDashboardModalTitle": "保存到看板",
+    "selectDashboardTitle": "请选择一个看板",
+    "selectSheetTitle": "请选择一个工作表"
   },
   "options": {
     "eventNumber": "事件数量",
@@ -154,7 +157,9 @@
     "appSelectError": "必须选择一个应用程序",
     "dashboardNameEmptyError": "请输入看板名称",
     "dashboardSheetTooMuchError": "工作表不能超过10个",
-    "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的管道"
+    "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的管道",
+    "dashboardSelectError": "必须选择一个看板",
+    "sheetSelectError": "必须选择一个工作表"
   },
   "emptyData": "无数据"
 }
