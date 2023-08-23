@@ -429,112 +429,64 @@ export class GlueUtil {
         },
         {
           name: 'items',
-          type: Schema.struct([
-            {
-              name: 'item_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_brand',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_variant',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_category',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_category2',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_category3',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_category4',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_category5',
-              type: Schema.STRING,
-            },
-            {
-              name: 'price_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'price',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'quantity',
-              type: Schema.BIG_INT,
-            },
-            {
-              name: 'item_revenue_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'item_revenue',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'item_refund_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'item_refund',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'coupon',
-              type: Schema.STRING,
-            },
-            {
-              name: 'affiliation',
-              type: Schema.STRING,
-            },
-            {
-              name: 'location_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_list_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_list_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'item_list_index',
-              type: Schema.STRING,
-            },
-            {
-              name: 'promotion_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'promotion_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'creative_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'creative_slot',
-              type: Schema.STRING,
-            },
-          ]),
+          type: Schema.array(
+            Schema.struct([
+              {
+                name: 'brand',
+                type: Schema.STRING,
+              },
+              {
+                name: 'category',
+                type: Schema.STRING,
+              },
+              {
+                name: 'category2',
+                type: Schema.STRING,
+              },
+              {
+                name: 'category3',
+                type: Schema.STRING,
+              },
+              {
+                name: 'category4',
+                type: Schema.STRING,
+              },
+              {
+                name: 'category5',
+                type: Schema.STRING,
+              },
+              {
+                name: 'creative_name',
+                type: Schema.STRING,
+              },
+              {
+                name: 'creative_slot',
+                type: Schema.STRING,
+              },
+              {
+                name: 'id',
+                type: Schema.STRING,
+              },
+              {
+                name: 'location_id',
+                type: Schema.STRING,
+              },
+              {
+                name: 'name',
+                type: Schema.STRING,
+              },
+              {
+                name: 'price',
+                type: Schema.DOUBLE,
+              },
+
+              {
+                name: 'quantity',
+                type: Schema.INTEGER,
+              },
+            ]),
+          ),
+
         },
         {
           name: 'platform',
