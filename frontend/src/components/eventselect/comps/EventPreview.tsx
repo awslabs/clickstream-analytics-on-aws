@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { MetadataSource } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types-ln';
 import { IAnalyticsItem } from '../AnalyticsType';
 
 interface EventPreviewProps {

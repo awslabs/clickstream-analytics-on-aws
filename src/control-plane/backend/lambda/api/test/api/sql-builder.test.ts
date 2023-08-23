@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/types';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 import { buildFunnelDataSql, buildFunnelView } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {

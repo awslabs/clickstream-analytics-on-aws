@@ -53,23 +53,23 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  COMMON_ALERT_TYPE,
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExploreGroupColumn,
-  ExploreRelativeTimeUnit,
-  ExploreTimeScopeType,
-  FunnelRequestAction,
-  MetadataSource,
-  MetadataValueType,
-} from 'ts/const';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
+import {
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRelativeTimeUnit,
+  ExploreTimeScopeType,
+  ExploreFunnelRequestAction,
+  MetadataSource,
+  MetadataValueType,
+} from 'ts/explore-types-ln';
 import {
   alertMsg,
   generateStr,
@@ -417,7 +417,7 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const getFunnelRequest = (action: FunnelRequestAction) => {
+  const getFunnelRequest = (action: ExploreFunnelRequestAction) => {
     const funnelId = generateStr(6);
     const redshiftOutputs = getValueFromStackOutputs(
       pipeline,
@@ -500,7 +500,7 @@ const AnalyticsFunnel: React.FC = () => {
     setLoadingData(true);
     setEmptyData(false);
     try {
-      const body = getFunnelRequest(FunnelRequestAction.PREVIEW);
+      const body = getFunnelRequest(ExploreFunnelRequestAction.PREVIEW);
       if (!body) {
         setLoadingData(false);
         alertMsg(

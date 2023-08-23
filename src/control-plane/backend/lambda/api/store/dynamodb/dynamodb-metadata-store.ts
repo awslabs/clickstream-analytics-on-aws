@@ -21,7 +21,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, query, scan } from '../../common/dynamodb-client';
-import { KeyVal, MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/types';
+import { MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/explore-types';
+import { KeyVal } from '../../common/types';
 import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 

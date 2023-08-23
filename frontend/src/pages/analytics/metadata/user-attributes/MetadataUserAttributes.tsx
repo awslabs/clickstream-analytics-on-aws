@@ -24,7 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import { t } from 'i18next';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MetadataSource } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types-ln';
 import MetadataUserAttributeSplitPanel from './MetadataUserAttributeSplitPanel';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';

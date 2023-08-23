@@ -12,7 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { MetadataSource, MetadataValueType } from 'ts/const';
+import { MetadataSource, MetadataValueType } from 'ts/explore-types-ln';
 
 export interface IConditionItemType {
   eventType: string;

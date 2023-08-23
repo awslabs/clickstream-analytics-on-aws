@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/types';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
