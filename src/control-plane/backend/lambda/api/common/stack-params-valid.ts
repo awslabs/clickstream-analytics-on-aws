@@ -31,6 +31,7 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
   const regexp = new RegExp(pattern);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
+    console.log(`Validation error:${value}`);
     throw new ClickStreamBadRequestError(`Validation error: ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
   }
   return true;

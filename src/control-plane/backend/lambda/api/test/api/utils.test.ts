@@ -26,6 +26,7 @@ import {
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
+  CORS_PATTERN,
 } from '../../common/constants-ln';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
@@ -265,6 +266,35 @@ describe('Utils test', () => {
       '',
     ];
     invalidValues.forEach(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('CORS origin valid', async () => {
+    const validValues = [
+      '*',
+      'localhost',
+      'example.com',
+      'example.com:80',
+      'http://localhost',
+      'https://localhost',
+      'http://example.com',
+      'https://example.com',
+      'http://example.com:80',
+      'https://example.com:80',
+      'http://localhost:8080',
+      'https://localhost:8080',
+    ];
+    validValues.forEach(v => expect(validatePattern('CORS origin', CORS_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      ' ',
+      '*.example.com',
+      ' example.com',
+      '&example.com',
+      'localhost1',
+      'http:/localhost',
+      'http:/localhost:9',
+      'http:/example.com:100000',
+    ];
+    invalidValues.forEach(v => expect(() => validatePattern('CORS origin', CORS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Sink batch valid', async () => {
