@@ -69,7 +69,7 @@ import {
   ExploreFunnelRequestAction,
   MetadataSource,
   MetadataValueType,
-} from 'ts/explore-types-ln';
+} from 'ts/explore-types';
 import {
   alertMsg,
   generateStr,

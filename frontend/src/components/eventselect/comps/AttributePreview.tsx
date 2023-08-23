@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { MetadataSource } from 'ts/explore-types-ln';
+import { MetadataSource } from 'ts/explore-types';
 import { IAnalyticsItem } from '../AnalyticsType';
 
 interface AttributePreviewProps {

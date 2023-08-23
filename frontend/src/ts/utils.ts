@@ -21,13 +21,9 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
-import {
-  EPipelineStatus,
-  ExecutionType,
-  MetadataSource,
-  TIME_FORMAT,
-} from './const';
+import { EPipelineStatus, ExecutionType, TIME_FORMAT } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
+import { MetadataSource } from './explore-types';
 
 export const generateStr = (length: number) => {
   let randomString = '';

@@ -18,7 +18,7 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import React from 'react';
-import { MetadataValueType } from 'ts/explore-types-ln';
+import { MetadataValueType } from 'ts/explore-types';
 import {
   ANALYTICS_OPERATORS,
   CategoryItemType,

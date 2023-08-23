@@ -12,7 +12,7 @@
  */
 
 import { Box } from '@cloudscape-design/components';
-import { MetadataPlatform } from 'ts/explore-types-ln';
+import { MetadataPlatform } from 'ts/explore-types';
 
 interface MetadataPlatformFCProps {
   platform: MetadataPlatform[];

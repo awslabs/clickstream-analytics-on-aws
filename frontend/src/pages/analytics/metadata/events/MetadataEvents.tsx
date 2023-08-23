@@ -21,7 +21,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataPlatform, MetadataSource } from 'ts/explore-types-ln';
+import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
 import MetadataEventSplitPanel from './MetadataEventSplitPanel';
 import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
