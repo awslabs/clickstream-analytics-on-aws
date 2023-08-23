@@ -64,9 +64,9 @@ There are associated costs when data is transferred from EC2 to the downstream d
 2. EC2 Network Out: There are three data sink options:
     - S3: It is recommended to use S3 Gateway endpoints, which does not incur any costs.
     - MSK: It will cost `$0.010 per GB in/out/between EC2 AZs`, about $105/month.
-    - KDS: There are two ways to sink data from EC2 to KDS: NAT or VPC endpoint.
-        - NAT: Suppose there is one NAT, the total cost is about $633/month. The price consists of the following items:
-            1. `$0.045 per NAT Gateway Hour`, $32/month.
+    - KDS: There are two ways to access the KDS endpoint from EC2 instances in private subnets: NAT or VPC endpoint.
+        - NAT: Suppose two availability zones, and with one NAT in each availability zone, the total cost is about $665/month. The price consists of the following items:
+            1. `$0.045 per NAT Gateway Hour`, $64/month.
             2. `$0.045 per GB Data Processed by NAT Gateways`, $601/month.
         - VPC Endpoint: Suppose deploying interface endpoint in two availability zones, the total cost is about $148.1/month. The price consists of the following items:
             1. `$0.01 per AZ Hour`, $14.6/month.

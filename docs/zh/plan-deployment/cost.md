@@ -68,15 +68,15 @@ weight: 1
 2. EC2 网络输出，有如下三种数据宿的情况：
     - S3：推荐使用 S3 Gateway endpoints，不会产生数据传输费用。
     - MSK：会产生 `$0.010 per GB in/out/between EC2 AZs` 的费用，大约为 $105/每月。
-    - KDS: 可以有两种选项将数据通过 EC2 发送到 KDS，NAT 或 VPC endpoint。
-        - NAT: 假设只创建一个NAT，总的费用约为 $633/每月, 费用包括如下部分：
-            1. `$0.045 per NAT Gateway Hour`, 费用约为 $32/每月。
-            2. `$0.045 per GB Data Processed by NAT Gateways`, 费用约为 $601/每月。
-        - VPC Endpoint: 假设在两个可用区部署vpc interface endpoints, 总费用约为$148.1/每月。 费用包括如下部分：
-            1. `$0.01 per AZ Hour`, $14.6/month.
-            2. `$0.01 per GB Data Processed by Interface endpoints`, $133.5/month. 
+    - KDS：私有子网里的 EC2 实例有两种方法访问 KDS 端点：NAT 或 VPC endpoint。
+        - NAT：假设有两个可用区，每个可用区创建一个NAT，总的费用约为 $665/每月，费用包括如下部分：
+            1. `$0.045 per NAT Gateway Hour`，费用约为 $64/每月。
+            2. `$0.045 per GB Data Processed by NAT Gateways`，费用约为 $601/每月。
+        - VPC Endpoint：假设在两个可用区部署vpc interface endpoints，总费用约为$148.1/每月。 费用包括如下部分：
+            1. `$0.01 per AZ Hour`，$14.6/month。
+            2. `$0.01 per GB Data Processed by Interface endpoints`，$133.5/month。
 
-        我们建议通过VPC endpoint传输数据到KDS. 请参考[VPC endpoint][vpce]获取更多信息.
+        我们建议通过VPC endpoint传输数据到KDS。请参考[VPC endpoint][vpce]获取更多信息。
 
 ## 数据处理与建模模块
 
