@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 import { buildFunnelDataSql, buildFunnelView } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
@@ -22,10 +23,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'USER_CNT',
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
@@ -41,10 +42,10 @@ describe('SQL Builder test', () => {
 
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -359,10 +360,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'EVENT_CNT',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
@@ -378,10 +379,10 @@ describe('SQL Builder test', () => {
 
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -696,10 +697,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'EVENT_CNT',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CURRENT_DAY',
+      conversionIntervalType: ExploreConversionIntervalType.CURRENT_DAY,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
@@ -715,10 +716,10 @@ describe('SQL Builder test', () => {
 
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -1043,9 +1044,9 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'EVENT_CNT',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
-      conversionIntervalType: 'CURRENT_DAY',
+      conversionIntervalType: ExploreConversionIntervalType.CURRENT_DAY,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
@@ -1061,10 +1062,10 @@ describe('SQL Builder test', () => {
 
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -1389,10 +1390,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'USER_CNT',
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
@@ -1402,14 +1403,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'and',
         },
@@ -1420,14 +1421,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'or',
 
@@ -1436,10 +1437,10 @@ describe('SQL Builder test', () => {
           eventName: 'note_export',
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -1764,10 +1765,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelDataSql('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'USER_CNT',
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       firstEventExtraCondition: {
         eventName: 'add_button_click',
@@ -1777,14 +1778,14 @@ describe('SQL Builder test', () => {
             property: '_session_duration',
             operator: '>',
             value: '200',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           },
           {
             category: 'user',
             property: '_user_first_touch_timestamp',
             operator: '>',
             value: '1686532526770',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           },
         ],
         conditionOperator: 'and',
@@ -1798,14 +1799,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'and',
         },
@@ -1816,14 +1817,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'or',
 
@@ -1832,10 +1833,10 @@ describe('SQL Builder test', () => {
           eventName: 'note_export',
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
@@ -2189,10 +2190,10 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView('app1', 'test-view', {
       schemaName: 'app1',
-      computeMethod: 'USER_CNT',
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
-      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       firstEventExtraCondition: {
         eventName: 'add_button_click',
@@ -2202,14 +2203,14 @@ describe('SQL Builder test', () => {
             property: '_session_duration',
             operator: '>',
             value: '200',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           },
           {
             category: 'user',
             property: '_user_first_touch_timestamp',
             operator: '>',
             value: '1686532526770',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           },
         ],
         conditionOperator: 'and',
@@ -2223,14 +2224,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'and',
         },
@@ -2241,14 +2242,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType: 'STRING',
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType: 'INT',
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'or',
 
@@ -2257,10 +2258,10 @@ describe('SQL Builder test', () => {
           eventName: 'note_export',
         },
       ],
-      timeScopeType: 'FIXED',
+      timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: '2023-04-30',
       timeEnd: '2023-06-30',
-      groupColumn: 'day',
+      groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW

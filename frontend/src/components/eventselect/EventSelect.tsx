@@ -28,6 +28,7 @@ import RelationOr from './comps/RelationOr';
 interface EventsSelectProps {
   data: IEventAnalyticsItem[];
   eventOptionList: CategoryItemType[];
+  addEventButtonLabel: string;
   addNewEventAnalyticsItem: () => void;
   removeEventItem: (index: number) => void;
   addNewConditionItem: (index: number) => void;
@@ -63,6 +64,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
   const {
     data,
     eventOptionList,
+    addEventButtonLabel,
     addNewEventAnalyticsItem,
     removeEventItem,
     addNewConditionItem,
@@ -151,10 +153,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                 )}
               <div className="cs-analytics-param-events">
                 {element.conditionList.length > 0 &&
-                  element.conditionList.map((element, cIndex) => {
+                  element.conditionList.map((cElement, cIndex) => {
                     return (
                       <ConditionItem
-                        item={element}
+                        item={cElement}
+                        conditionOptions={element.conditionOptions}
                         key={cIndex}
                         removeConditionItem={() => {
                           removeEventCondition(index, cIndex);
@@ -182,7 +185,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
       })}
       <div className="mt-10">
         <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
-          事件指标
+          {addEventButtonLabel}
         </Button>
       </div>
     </div>

@@ -329,12 +329,15 @@ export class ReportingServ {
         };
       } else {
         //crate QuickSight analysis
-        const newAnalysis = await quickSight.updateAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: query.analysisId,
-          Name: query.analysisName,
-          Definition: dashboard as AnalysisDefinition,
-        });
+        let newAnalysis;
+        if (query.analysisId) {
+          newAnalysis = await quickSight.updateAnalysis({
+            AwsAccountId: awsAccountId,
+            AnalysisId: query.analysisId,
+            Name: query.analysisName,
+            Definition: dashboard as AnalysisDefinition,
+          });
+        }
 
         //crate QuickSight dashboard
         const newDashboard = await quickSight.updateDashboard({
@@ -367,7 +370,7 @@ export class ReportingServ {
           dashboardName: query.dashboardName,
           dashboardVersion: Number.parseInt(versionNumber!),
           analysisId: query.analysisId,
-          analysisArn: newAnalysis.Arn!,
+          analysisArn: newAnalysis?.Arn!,
           analysisName: query.analysisName,
           sheetId: sheetId,
           visualIds: [visualId, tableVisualId],

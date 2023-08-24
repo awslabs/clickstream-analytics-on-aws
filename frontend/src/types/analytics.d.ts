@@ -29,6 +29,9 @@ declare global {
     readonly platform: MetadataPlatform[];
     readonly dataVolumeLastDay: number;
     readonly associatedParameters?: IMetadataRelation[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataEventParameter {
@@ -50,6 +53,9 @@ declare global {
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataRelation[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataUserAttribute {
@@ -68,6 +74,9 @@ declare global {
     readonly hasData: boolean;
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
+
+    readonly createAt: number;
+    readonly updateAt: number;
   }
 
   interface IMetadataAttributeValue {
@@ -101,28 +110,34 @@ declare global {
   }
 
   interface IFunnelRequest {
-    readonly action: 'PREVIEW' | 'PUBLISH';
+    readonly action: FunnelRequestAction;
     readonly projectId: string;
     readonly appId: string;
     readonly pipelineId: string;
 
-    readonly sheetName: string;
+    readonly dashboardId?: string;
+    readonly dashboardName?: string;
+    readonly analysisId?: string;
+    readonly analysisName?: string;
+    readonly sheetId?: string;
+    readonly sheetName?: string;
     readonly viewName: string;
 
     readonly dashboardCreateParameters: IDashboardCreateParameters;
 
-    readonly computeMethod: 'USER_CNT' | 'EVENT_CNT';
+    readonly computeMethod: ExploreComputeMethod;
     readonly specifyJoinColumn: boolean;
     readonly joinColumn?: string;
-    readonly conversionIntervalType: 'CURRENT_DAY' | 'CUSTOMIZE';
+    readonly conversionIntervalType: ExploreConversionIntervalType;
     readonly conversionIntervalInSeconds?: number;
+    readonly firstEventExtraCondition?: EventAndCondition;
     readonly eventAndConditions: IEventAndCondition[];
-    readonly timeScopeType: 'FIXED' | 'RELATIVE';
+    readonly timeScopeType: ExploreTimeScopeType;
     readonly timeStart?: string;
     readonly timeEnd?: string;
     readonly lastN?: number;
-    readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
-    readonly groupColumn: 'week' | 'day' | 'hour';
+    readonly timeUnit?: ExploreRelativeTimeUnit;
+    readonly groupColumn: ExploreGroupColumn;
   }
   interface ICondition {
     readonly category:
@@ -136,7 +151,7 @@ declare global {
     readonly property: string;
     readonly operator: string;
     readonly value: string;
-    readonly dataType: 'STRING' | 'INT' | 'DOUBLE' | 'FLOAT';
+    readonly dataType: MetadataValueType;
   }
 
   interface IEventAndCondition {

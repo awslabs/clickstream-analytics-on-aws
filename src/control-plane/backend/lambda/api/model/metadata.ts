@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/types';
+import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
 
 export interface IMetadataEvent {
   readonly id: string;

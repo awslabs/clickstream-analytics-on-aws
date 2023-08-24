@@ -12,7 +12,7 @@
  */
 
 import { Badge } from '@cloudscape-design/components';
-import { MetadataSource } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types';
 
 interface MetadataSourceFCProps {
   source: MetadataSource;

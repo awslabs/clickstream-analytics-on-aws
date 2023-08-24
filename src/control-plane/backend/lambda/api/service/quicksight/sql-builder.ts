@@ -12,13 +12,14 @@
  */
 
 import { format } from 'sql-formatter';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
   readonly property: string;
   readonly operator: string;
   readonly value: string;
-  readonly dataType: 'STRING' | 'INT' | 'DOUBLE' | 'FLOAT';
+  readonly dataType: MetadataValueType;
 }
 
 export interface EventAndCondition {
@@ -29,19 +30,19 @@ export interface EventAndCondition {
 
 export interface FunnelSQLParameters {
   readonly schemaName: string;
-  readonly computeMethod: 'USER_CNT' | 'EVENT_CNT';
+  readonly computeMethod: ExploreComputeMethod;
   readonly specifyJoinColumn: boolean;
   readonly joinColumn?: string;
-  readonly conversionIntervalType: 'CURRENT_DAY' | 'CUSTOMIZE';
+  readonly conversionIntervalType: ExploreConversionIntervalType;
   readonly conversionIntervalInSeconds?: number;
   readonly firstEventExtraCondition?: EventAndCondition;
   readonly eventAndConditions: EventAndCondition[];
-  readonly timeScopeType: 'FIXED' | 'RELATIVE';
+  readonly timeScopeType: ExploreTimeScopeType;
   readonly timeStart?: string;
   readonly timeEnd?: string;
   readonly lastN?: number;
-  readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
-  readonly groupColumn: 'week' | 'day' | 'hour';
+  readonly timeUnit?: ExploreRelativeTimeUnit;
+  readonly groupColumn: ExploreGroupColumn;
 }
 
 function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
@@ -194,7 +195,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
           continue;
         }
         let value = condition.value;
-        if (condition.dataType === 'STRING') {
+        if (condition.dataType === MetadataValueType.STRING) {
           value = `'${value}'`;
         }
 
@@ -225,7 +226,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
 
       for (const condition of sqlParameters.firstEventExtraCondition.conditions) {
         let value = condition.value;
-        if (condition.dataType === 'STRING') {
+        if (condition.dataType === MetadataValueType.STRING) {
           value = `'${value}'`;
         }
         let prefix = 'event';
@@ -237,13 +238,13 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
         `);
 
         let valueType = '';
-        if (condition.dataType === 'STRING') {
+        if (condition.dataType === MetadataValueType.STRING) {
           valueType = 'string_value';
-        } else if (condition.dataType === 'INT') {
+        } else if (condition.dataType === MetadataValueType.INTEGER) {
           valueType = 'int_value';
-        } else if (condition.dataType === 'FLOAT') {
+        } else if (condition.dataType === MetadataValueType.FLOAT) {
           valueType = 'float_value';
-        } else if (condition.dataType === 'DOUBLE') {
+        } else if (condition.dataType === MetadataValueType.DOUBLE) {
           valueType = 'double_value';
         }
 

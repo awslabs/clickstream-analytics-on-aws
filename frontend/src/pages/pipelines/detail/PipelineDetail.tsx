@@ -98,7 +98,6 @@ const PipelineDetail: React.FC = () => {
   ];
 
   useEffect(() => {
-    console.log(id, pid);
     getProjectPipelineDetail();
     getProjectDetailById();
   }, []);

@@ -8,7 +8,7 @@
     "createInputNamePlaceholder": "例如，my-dashboard",
     "createDesc": "看板描述-可选",
     "createDescPlaceholder": "例如，description of dashboard",
-    "createSheets": "看板Sheet-可选",
+    "createSheets": "工作表-可选",
     "deleteTip1": "您确定要删除该看板吗 ",
     "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
   },
@@ -23,13 +23,17 @@
     "modalTitle": "切换项目空间",
     "selectProjectTitle": "请选择一个项目",
     "selectAppTitle": "请选择一个应用程序",
-    "configurations": "配置"
+    "configurations": "配置",
+    "saveToDashboardModalTitle": "保存到看板",
+    "selectDashboardTitle": "请选择一个看板",
+    "selectSheetTitle": "请选择一个工作表"
   },
   "options": {
     "eventNumber": "事件数量",
     "userNumber": "用户数量",
     "customWindow": "自定义",
     "theDayWindow": "当天",
+    "noWindow": "无",
     "secondWindowUnit": "秒",
     "minuteWindowUnit": "分钟",
     "hourWindowUnit": "小时",
@@ -124,15 +128,66 @@
       "metrics": "指标",
       "associateParameter": "关联参数",
       "window": "漏斗窗口",
+      "funnelDateRange": "日期范围",
       "funnelSteps": "漏斗步骤",
       "conversionWindowPeriod": "转化窗口期",
       "filters": "过滤器"
-    }
+    },
+    "conditionValueInputPlaceholder": "输入值"
+  },
+  "dateRange": {
+    "relativeModeTitle": "相对时间",
+    "absoluteModeTitle": "绝对时间",
+    "relativeRangeSelectionHeading": "选择范围",
+    "cancelButtonLabel": "取消",
+    "applyButtonLabel": "确定",
+    "clearButtonLabel": "清除",
+    "customRelativeRangeOptionLabel": "自定义范围",
+    "formatRelativeRangeLabel": "过去",
+    "second": "秒",
+    "minute": "分钟",
+    "hour": "小时",
+    "day": "天",
+    "week": "周",
+    "month": "个月",
+    "year": "年"
   },
   "valid": {
     "projectSelectError": "必须选择一个项目",
     "appSelectError": "必须选择一个应用程序",
     "dashboardNameEmptyError": "请输入看板名称",
-    "dashboardSheetTooMuchError": "工作表不能超过10个"
-  }
+    "dashboardSheetTooMuchError": "工作表不能超过10个",
+    "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的管道",
+    "dashboardSelectError": "必须选择一个看板",
+    "sheetSelectError": "必须选择一个工作表",
+    "dateRangeIncomplete": "所选日期范围不完整。为日期范围选择开始和结束日期。",
+    "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。"
+  },
+  "operators": {
+    "null": "空",
+    "notNull": "非空",
+    "equal": "=",
+    "notEqual": "!=",
+    "greaterThan": ">",
+    "greaterThanOrEqual": ">=",
+    "lessThan": "<",
+    "lessThanOrEqual": "<=",
+    "in": "在其中",
+    "notIn": "不在其中"
+  },
+  "labels": {
+    "eventTitle": "事件",
+    "attributeTitle": "属性",
+    "eventAttribute": "事件属性",
+    "userAttribute": "用户属性",
+    "customAttribute": "自定义属性",
+    "presetAttribute": "预置属性",
+    "customEvent": "自定义事件",
+    "presetEvent": "预置事件",
+    "previewName": "名称",
+    "previewDescription": "描述",
+    "previewDataType": "数据类型",
+    "previewUpdateTime": "更新时间"
+  },
+  "emptyData": "无数据"
 }

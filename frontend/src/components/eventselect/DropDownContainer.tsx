@@ -12,8 +12,10 @@
  */
 
 import { Input } from '@cloudscape-design/components';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
+import AttributePreview from './comps/AttributePreview';
 import CategoryList from './comps/CategoryList';
 import EventPreview from './comps/EventPreview';
 import ItemsList from './comps/ItemsList';
@@ -28,7 +30,9 @@ interface DropDownContainerProps {
 const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
+  const { t } = useTranslation();
   const { hasTab, categories, selectedItem, changeSelectItem } = props;
+  const [categoryType, setCategoryType] = useState<string>('event');
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [curPreviewOption, setCurPreviewOption] = useState<IAnalyticsItem>();
   const [isScroll, setIsScroll] = useState(false);
@@ -40,7 +44,6 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   };
 
   const handleGroupScroll = (index: number) => {
-    console.info('index:', index);
     setSelectedCategory(index);
     setIsScroll(true);
   };
@@ -48,6 +51,12 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   const showOptionDetails = (item: IAnalyticsItem) => {
     setCurPreviewOption(item);
   };
+
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setCategoryType(categories[0].categoryType);
+    }
+  }, [categories, selectedItem]);
 
   return (
     <div className="cs-dropdown-pop">
@@ -58,8 +67,16 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
               <div className="csdc-header">
                 {hasTab && (
                   <div className="csdc-header-tab flex">
-                    <div className="tab-item active">事件</div>
-                    {/* <div className="tab-item">指标</div> */}
+                    {curPreviewOption && categoryType === 'event' && (
+                      <div className="tab-item active">
+                        {t('analytics:labels.eventTitle')}
+                      </div>
+                    )}
+                    {curPreviewOption && categoryType === 'attribute' && (
+                      <div className="tab-item active">
+                        {t('analytics:labels.attributeTitle')}
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="csdc-header-search">
@@ -97,8 +114,11 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                 </div>
               </div>
             </div>
-            {curPreviewOption && (
+            {curPreviewOption && categoryType === 'event' && (
               <EventPreview previewItem={curPreviewOption} />
+            )}
+            {curPreviewOption && categoryType === 'attribute' && (
+              <AttributePreview previewItem={curPreviewOption} />
             )}
           </div>
         </div>

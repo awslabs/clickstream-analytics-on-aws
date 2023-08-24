@@ -43,7 +43,7 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataValueType } from 'ts/const';
+import { MetadataValueType } from 'ts/explore-types';
 
 const AnalyticsEvent: React.FC = () => {
   const { t } = useTranslation();
@@ -175,6 +175,7 @@ const AnalyticsEvent: React.FC = () => {
                     <EventsSelect
                       data={eventOptionData}
                       eventOptionList={MOCK_EVENT_OPTION_LIST}
+                      addEventButtonLabel={t('common:button.addEvent')}
                       addNewEventAnalyticsItem={() => {
                         setEventOptionData((prev) => {
                           const preEventList = cloneDeep(prev);

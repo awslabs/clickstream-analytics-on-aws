@@ -16,12 +16,12 @@ import { useTranslation } from 'react-i18next';
 import { MetadataSource } from 'ts/explore-types';
 import { IAnalyticsItem } from '../AnalyticsType';
 
-interface EventPreviewProps {
+interface AttributePreviewProps {
   previewItem: IAnalyticsItem;
 }
 
-const EventPreview: React.FC<EventPreviewProps> = (
-  props: EventPreviewProps
+const AttributePreview: React.FC<AttributePreviewProps> = (
+  props: AttributePreviewProps
 ) => {
   const { t } = useTranslation();
   const { previewItem } = props;
@@ -33,19 +33,19 @@ const EventPreview: React.FC<EventPreviewProps> = (
             {previewItem.metadataSource === MetadataSource.PRESET ? (
               <>
                 <div className="event-type">
-                  {t('analytics:labels.customEvent')}
+                  {t('analytics:labels.customAttribute')}
                 </div>
                 <div className="event-type system">
-                  {t('analytics:labels.presetEvent')}
+                  {t('analytics:labels.presetAttribute')}
                 </div>
               </>
             ) : (
               <>
                 <div className="event-type system">
-                  {t('analytics:labels.customEvent')}
+                  {t('analytics:labels.customAttribute')}
                 </div>
                 <div className="event-type">
-                  {t('analytics:labels.presetEvent')}
+                  {t('analytics:labels.presetAttribute')}
                 </div>
               </>
             )}
@@ -53,7 +53,9 @@ const EventPreview: React.FC<EventPreviewProps> = (
           <div className="event-info">
             <div className="header-name">{previewItem?.label}</div>
             <div className="info-tem">
-              <div className="info-key">{t('analytics:labels.previewName')}</div>
+              <div className="info-key">
+                {t('analytics:labels.previewName')}
+              </div>
               <div className="info-value">{previewItem?.value}</div>
             </div>
             <div className="info-tem">
@@ -63,7 +65,15 @@ const EventPreview: React.FC<EventPreviewProps> = (
               <div className="info-value">{previewItem.description}</div>
             </div>
             <div className="info-tem">
-              <div className="info-key">{t('analytics:labels.previewUpdateTime')}</div>
+              <div className="info-key">
+                {t('analytics:labels.previewDataType')}
+              </div>
+              <div className="info-value">{previewItem.valueType}</div>
+            </div>
+            <div className="info-tem">
+              <div className="info-key">
+                {t('analytics:labels.previewUpdateTime')}
+              </div>
               <div className="info-value">{previewItem.modifyTime}</div>
             </div>
           </div>
@@ -73,4 +83,4 @@ const EventPreview: React.FC<EventPreviewProps> = (
   );
 };
 
-export default EventPreview;
+export default AttributePreview;

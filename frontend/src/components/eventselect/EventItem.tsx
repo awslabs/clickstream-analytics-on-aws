@@ -108,7 +108,6 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         <DropDownContainer
           selectedItem={categoryOption}
           changeSelectItem={(item) => {
-            // setCurrentOption(item);
             changeCurCategoryOption(item);
             setShowDropdown(false);
           }}

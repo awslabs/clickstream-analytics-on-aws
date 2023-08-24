@@ -166,7 +166,10 @@
     "clearFilters": "Clear filters",
     "preview": "Preview",
     "createDashboard": "Create Dashboard",
-    "deleteDashboard": "Delete Dashboard"
+    "deleteDashboard": "Delete Dashboard",
+    "addEvent": "Add Event",
+    "addFunnelStep": "Add Step",
+    "addFilter": "Add Filter"
   },
   "item": "item",
   "items": "items",

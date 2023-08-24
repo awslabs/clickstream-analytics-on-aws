@@ -12,7 +12,8 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { MetadataValueType } from 'ts/const';
+import i18n from 'i18n';
+import { MetadataSource, MetadataValueType } from 'ts/explore-types';
 
 export interface IConditionItemType {
   eventType: string;
@@ -24,11 +25,13 @@ export interface IConditionItemType {
 export interface SegmetationFilterDataType {
   enableChangeRelation?: boolean;
   conditionRelationShip: ERelationShip;
+  conditionOptions: CategoryItemType[];
   data: IConditionItemType[];
 }
 
 export interface IAnalyticsItem extends SelectProps.Option {
   modifyTime?: string;
+  metadataSource?: MetadataSource;
   valueType?: MetadataValueType;
 }
 
@@ -47,7 +50,9 @@ export interface IEventAnalyticsItem {
   listOrderType?: 'number' | 'alpahbet';
   customOrderName?: string;
   selectedEventOption: IAnalyticsItem | null;
+  selectedEventAttributeOption: CategoryItemType[];
   calculateMethodOption?: SelectProps.Option | null;
+  conditionOptions: CategoryItemType[];
   conditionList: IConditionItemType[];
   conditionRelationShip: ERelationShip;
   hasTab?: boolean;
@@ -58,11 +63,13 @@ export interface IEventAnalyticsItem {
 export const DEFAULT_EVENT_ITEM = {
   selectedEventOption: null,
   calculateMethodOption: null,
+  selectedEventAttributeOption: [],
+  conditionOptions: [],
   conditionList: [],
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
   isMultiSelect: true,
-  enableChangeRelation: true,
+  enableChangeRelation: false,
 };
 
 export const INIT_EVENT_LIST: IEventAnalyticsItem[] = [DEFAULT_EVENT_ITEM];
@@ -72,6 +79,45 @@ export const DEFAULT_CONDITION_DATA: IConditionItemType = {
   conditionOption: null,
   conditionOperator: null,
   conditionValue: '',
+};
+
+export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
+  eventType: 'event',
+  conditionOption: null,
+  conditionOperator: null,
+  conditionValue: '',
+};
+
+export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
+  enableChangeRelation: true,
+  conditionOptions: [],
+  conditionRelationShip: ERelationShip.AND,
+  data: [DEFAULT_SEGMENTATION_DATA],
+};
+
+export const ANALYTICS_OPERATORS = {
+  is_null: { value: 'is_null', label: i18n.t('analytics:operators.null') },
+  is_not_null: {
+    value: 'is_not_null',
+    label: i18n.t('analytics:operators.notNull'),
+  },
+  equal: { value: '=', label: i18n.t('analytics:operators.equal') },
+  not_equal: { value: '<>', label: i18n.t('analytics:operators.notEqual') },
+  greater_than: {
+    value: '>',
+    label: i18n.t('analytics:operators.greaterThan'),
+  },
+  greater_than_or_equal: {
+    value: '>=',
+    label: i18n.t('analytics:operators.greaterThanOrEqual'),
+  },
+  less_than: { value: '<', label: i18n.t('analytics:operators.lessThan') },
+  less_than_or_equal: {
+    value: '<=',
+    label: i18n.t('analytics:operators.lessThanOrEqual'),
+  },
+  in: { value: 'in', label: i18n.t('analytics:operators.in') },
+  not_in: { value: 'not_in', label: i18n.t('analytics:operators.notIn') },
 };
 
 // MOCK DATA
@@ -99,110 +145,6 @@ export const MOCK_EVENT_OPTION_LIST: CategoryItemType[] = [
         modifyTime: '2023-11-11 11:11:11',
       },
     ],
-  },
-];
-
-export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
-  eventType: 'event',
-  conditionOption: null,
-  conditionOperator: null,
-  conditionValue: '',
-};
-
-export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
-  enableChangeRelation: true,
-  conditionRelationShip: ERelationShip.AND,
-  data: [DEFAULT_SEGMENTATION_DATA],
-};
-
-export const MOCK_CONDITION_OPERATOR_LIST: SelectProps.Options = [
-  { value: 'is_null', label: 'null' },
-  { value: 'is_not_null', label: '非null' },
-  { value: '=', label: '=' },
-  { value: '!=', label: '!=' },
-  { value: 'not_equal_contain_null', label: '!=(含null)' },
-  { value: '>', label: '>' },
-  { value: '>=', label: '>=' },
-  { value: '<', label: '<' },
-  { value: '<=', label: '<=' },
-  { value: 'between', label: '在...之间' },
-  { value: 'not_equal_not_contain_null', label: '!=(不含null)' },
-  { value: 'contain', label: '包含' },
-  { value: 'not_contain', label: '不含' },
-  { value: 'not_contain_not_contain_null', label: '不含(不含null)' },
-  { value: 'custom_contain', label: '自定义包含' },
-  { value: 'match', label: '匹配正则' },
-  { value: 'not_match', label: '不匹配正则' },
-];
-
-export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
-  {
-    categoryName: '用户属性',
-    categoryType: 'attribute',
-    itemList: [
-      {
-        label: 'Country',
-        value: '',
-        description: 'user attribute 1 desc',
-        valueType: MetadataValueType.STRING,
-      },
-      {
-        label: 'Aage',
-        value: '',
-        description: 'user attribute 2 desc',
-        valueType: MetadataValueType.NUMBER,
-      },
-      {
-        label: 'Birthday',
-        value: '',
-        description: 'user attribute 3 desc',
-        valueType: MetadataValueType.DATETIME,
-      },
-    ],
-  },
-  {
-    categoryName: '事件属性',
-    categoryType: 'attribute',
-    itemList: [
-      {
-        label: 'First Login',
-        value: '111',
-        description: 'event attribute 1 desc',
-        valueType: MetadataValueType.BOOLEAN,
-      },
-    ],
-  },
-];
-
-export const MOCK_STRING_TYPE_OPTION_LIST = [
-  {
-    label: 'Option 1',
-    value: '1',
-  },
-  {
-    label: 'Option 2',
-    value: '2',
-  },
-  {
-    label: 'Option 3',
-    value: '3',
-    disabled: true,
-  },
-  {
-    label: 'Option 4',
-    value: '4',
-  },
-  { label: 'Option 5', value: '5' },
-];
-
-export const MOCK_BOOLEAN_OPTION_LIST = [
-  {
-    label: 'True',
-    value: 'true',
-  },
-  {
-    label: 'False',
-    value: 'false',
   },
 ];
 

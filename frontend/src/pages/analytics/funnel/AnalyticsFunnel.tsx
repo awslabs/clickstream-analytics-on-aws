@@ -25,32 +25,112 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
+import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
   fetchEmbeddingUrl,
+  getMetadataEventDetails,
+  getMetadataEventsList,
+  getMetadataParametersList,
+  getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewFunnel,
 } from 'apis/analytics';
-import Divider from 'components/common/Divider';
 import Loading from 'components/common/Loading';
+import {
+  CategoryItemType,
+  DEFAULT_CONDITION_DATA,
+  DEFAULT_EVENT_ITEM,
+  IEventAnalyticsItem,
+  INIT_SEGMENTATION_DATA,
+  SegmetationFilterDataType,
+} from 'components/eventselect/AnalyticsType';
+import EventsSelect from 'components/eventselect/EventSelect';
+import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import Navigation from 'components/layouts/Navigation';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
-import { generateStr, getValueFromStackOutputs } from 'ts/utils';
+import {
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRelativeTimeUnit,
+  ExploreTimeScopeType,
+  ExploreFunnelRequestAction,
+  MetadataSource,
+  MetadataValueType,
+} from 'ts/explore-types';
+import {
+  alertMsg,
+  generateStr,
+  getValueFromStackOutputs,
+  metadataEventsConvertToCategoryItemType,
+  parametersConvertToCategoryItemType,
+  validConditionItemType,
+  validEventAnalyticsItem,
+} from 'ts/utils';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 const AnalyticsFunnel: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
+  const [loadingChart, setLoadingChart] = useState(false);
+  const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
+    useState(false);
   const [emptyData, setEmptyData] = useState(true);
   const [pipeline, setPipeline] = useState({} as IPipeline);
+  const [metadataEvents, setMetadataEvents] = useState(
+    [] as CategoryItemType[]
+  );
+
+  const defaultComputeMethodOption: SelectProps.Option = {
+    value: ExploreComputeMethod.USER_CNT,
+    label: t('analytics:options.userNumber') ?? '',
+  };
+
+  const computeMethodOptions: SelectProps.Options = [
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: t('analytics:options.eventNumber') ?? '',
+    },
+    defaultComputeMethodOption,
+  ];
+
+  const customWindowType = {
+    value: ExploreConversionIntervalType.CUSTOMIZE,
+    label: t('analytics:options.customWindow'),
+  };
+
+  const windowTypeOptions = [
+    customWindowType,
+    {
+      value: ExploreConversionIntervalType.CURRENT_DAY,
+      label: t('analytics:options.theDayWindow'),
+    },
+  ];
+
+  const minuteWindowUnitOption = {
+    value: 'minute',
+    label: t('analytics:options.minuteWindowUnit'),
+  };
+
+  const windowUnitOptions = [
+    { value: 'second', label: t('analytics:options.secondWindowUnit') },
+    minuteWindowUnitOption,
+    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
+    { value: 'day', label: t('analytics:options.dayWindowUnit') },
+  ];
 
   const getEmbeddingUrl = async (
     dashboardId: string,
@@ -81,138 +161,379 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const loadPipeline = async (projectId: string) => {
+  const getUserAttributes = async () => {
+    try {
+      if (!projectId || !appId) {
+        return [];
+      }
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
+        await getMetadataUserAttributesList({ projectId, appId });
+      if (success) {
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const getAllParameters = async () => {
+    if (!projectId || !appId) {
+      return [];
+    }
+    try {
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
+        await getMetadataParametersList({ projectId, appId });
+      if (success) {
+        return data.items;
+      }
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
+  const getEventParameters = async (eventName: string | undefined) => {
+    if (!projectId || !appId || !eventName) {
+      return [];
+    }
+    try {
+      const { success, data }: ApiResponse<IMetadataEvent> =
+        await getMetadataEventDetails({
+          projectId: projectId,
+          appId: appId,
+          eventName: eventName,
+        });
+      if (success) {
+        return data.associatedParameters ?? [];
+      }
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
+  const listMetadataEvents = async () => {
+    if (!projectId || !appId) {
+      return;
+    }
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+        await getMetadataEventsList({ projectId, appId });
+      if (success) {
+        const events = metadataEventsConvertToCategoryItemType(data.items);
+        setMetadataEvents(events);
+      }
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  };
+
+  const loadPipeline = async () => {
+    if (!projectId) {
+      return;
+    }
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(projectId);
       if (success) {
         setPipeline(data);
-        setLoadingData(false);
       }
     } catch (error) {
       console.log(error);
-      setLoadingData(false);
+    }
+    setLoadingData(false);
+  };
+
+  const listAllAttributes = async () => {
+    try {
+      const parameters = await getAllParameters();
+      const presetParameters = parameters?.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const userAttributes = await getUserAttributes();
+      const presetUserAttributes = userAttributes.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const conditionOptions = parametersConvertToCategoryItemType(
+        presetUserAttributes,
+        presetParameters,
+        []
+      );
+      setSegmentationOptionData((prev) => {
+        const dataObj = cloneDeep(prev);
+        dataObj.conditionOptions = conditionOptions;
+        return dataObj;
+      });
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    if (projectId) {
-      loadPipeline(projectId);
-    }
+    loadPipeline();
+    listMetadataEvents();
+    listAllAttributes();
   }, [projectId]);
 
-  const metricOptions = [
-    {
-      value: 'event',
-      label: t('analytics:options.eventNumber'),
-    },
-    { value: 'user', label: t('analytics:options.userNumber') },
-  ];
+  const [dateRangeValue, setDateRangeValue] =
+    React.useState<DateRangePickerProps.Value>({
+      type: 'relative',
+      amount: 7,
+      unit: 'day',
+    });
 
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
-    useState<SelectProps.Option | null>({
-      value: 'event',
-      label: t('analytics:options.userNumber') ?? '',
-    });
+    useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
-  const customWindowType = {
-    value: 'custom',
-    label: t('analytics:options.customWindow'),
-  };
-  const windowTypeOptions = [
-    customWindowType,
-    { value: 'theDay', label: t('analytics:options.theDayWindow') },
-  ];
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
 
-  const windowUnitOptions = [
-    { value: 'second', label: t('analytics:options.secondWindowUnit') },
-    { value: 'minute', label: t('analytics:options.minuteWindowUnit') },
-    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
-    { value: 'day', label: t('analytics:options.dayWindowUnit') },
-  ];
   const [selectedWindowUnit, setSelectedWindowUnit] =
-    useState<SelectProps.Option | null>({
-      value: 'minute',
-      label: t('analytics:options.minuteWindowUnit') ?? '',
-    });
+    useState<SelectProps.Option | null>(minuteWindowUnitOption);
 
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
-  const [windowChecked, setWindowChecked] = useState<boolean>(true);
 
-  const clickPreview = async () => {
-    setLoadingData(true);
-    setEmptyData(false);
-    try {
-      const funnelId = generateStr(6);
-      const redshiftOutputs = getValueFromStackOutputs(
-        pipeline,
-        'DataModelingRedshift',
-        [
-          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-        ]
-      );
-      const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
-        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-      ]);
-      const { success, data }: ApiResponse<any> = await previewFunnel({
-        dashboardCreateParameters: {
-          region: pipeline.region,
-          redshift: {
-            user:
+  const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
+    [
+      {
+        ...DEFAULT_EVENT_ITEM,
+        isMultiSelect: false,
+      },
+    ]
+  );
+
+  const [segmentationOptionData, setSegmentationOptionData] =
+    useState<SegmetationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const getEventAndConditions = () => {
+    const eventAndConditions: IEventAndCondition[] = [];
+    eventOptionData.forEach((item) => {
+      if (validEventAnalyticsItem(item)) {
+        const conditions: ICondition[] = [];
+        item.conditionList.forEach((condition) => {
+          if (validConditionItemType(condition)) {
+            const conditionObj: ICondition = {
+              category: 'other',
+              property: condition.conditionOption?.value ?? '',
+              operator: condition.conditionOperator?.value ?? '',
+              value: condition.conditionValue,
+              dataType:
+                condition.conditionOption?.valueType ??
+                MetadataValueType.STRING,
+            };
+            conditions.push(conditionObj);
+          }
+        });
+
+        const eventAndCondition: IEventAndCondition = {
+          eventName: item.selectedEventOption?.value ?? '',
+          conditions: conditions,
+          conditionOperator: 'and',
+        };
+        eventAndConditions.push(eventAndCondition);
+      }
+    });
+    return eventAndConditions;
+  };
+
+  const getFirstEventAndConditions = () => {
+    if (
+      eventOptionData.length === 0 ||
+      !validEventAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    const firstEventName = eventOptionData[0].selectedEventOption?.value ?? '';
+    const conditions: ICondition[] = [];
+    segmentationOptionData.data.forEach((condition) => {
+      if (validConditionItemType(condition)) {
+        const conditionObj: ICondition = {
+          category: 'other',
+          property: condition.conditionOption?.value ?? '',
+          operator: condition.conditionOperator?.value ?? '',
+          value: condition.conditionValue,
+          dataType:
+            condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+        };
+        conditions.push(conditionObj);
+      }
+    });
+    const firstEventAndCondition: IEventAndCondition = {
+      eventName: firstEventName,
+      conditions: conditions,
+      conditionOperator: segmentationOptionData.conditionRelationShip,
+    };
+    return firstEventAndCondition;
+  };
+
+  const getConversionIntervalInSeconds = () => {
+    if (selectedWindowType?.value === ExploreConversionIntervalType.CUSTOMIZE) {
+      if (selectedWindowUnit?.value === 'second') {
+        return Number(windowValue);
+      } else if (selectedWindowUnit?.value === 'minute') {
+        return Number(windowValue) * 60;
+      } else if (selectedWindowUnit?.value === 'hour') {
+        return Number(windowValue) * 60 * 60;
+      } else if (selectedWindowUnit?.value === 'day') {
+        return Number(windowValue) * 60 * 60 * 24;
+      }
+    } else {
+      return 0;
+    }
+  };
+
+  const getDateRange = () => {
+    let groupColumn = ExploreGroupColumn.DAY;
+    if (dateRangeValue?.type === 'relative') {
+      let unit = ExploreRelativeTimeUnit.DD;
+      if (dateRangeValue.unit === 'day') {
+        unit = ExploreRelativeTimeUnit.DD;
+        groupColumn = ExploreGroupColumn.DAY;
+      } else if (dateRangeValue.unit === 'week') {
+        unit = ExploreRelativeTimeUnit.WK;
+        groupColumn = ExploreGroupColumn.WEEK;
+      } else if (dateRangeValue.unit === 'month') {
+        unit = ExploreRelativeTimeUnit.MM;
+      } else if (dateRangeValue.unit === 'year') {
+        unit = ExploreRelativeTimeUnit.Q;
+      }
+
+      return {
+        timeScopeType: ExploreTimeScopeType.RELATIVE,
+        lastN: dateRangeValue.amount,
+        timeUnit: unit,
+        groupColumn: groupColumn,
+      };
+    } else if (dateRangeValue?.type === 'absolute') {
+      return {
+        timeScopeType: ExploreTimeScopeType.FIXED,
+        timeStart: dateRangeValue.startDate,
+        timeEnd: dateRangeValue.endDate,
+        groupColumn: groupColumn,
+      };
+    }
+  };
+
+  const getFunnelRequest = (
+    action: ExploreFunnelRequestAction,
+    dashboardId?: string,
+    dashboardName?: string,
+    sheetId?: string,
+    sheetName?: string
+  ) => {
+    const funnelId = generateStr(6);
+    const redshiftOutputs = getValueFromStackOutputs(
+      pipeline,
+      'DataModelingRedshift',
+      [
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+        OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+      ]
+    );
+    const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
+      OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+    ]);
+    if (
+      !redshiftOutputs.get(
+        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+      ) ||
+      !redshiftOutputs.get(
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+      ) ||
+      !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX) ||
+      !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
+    ) {
+      return undefined;
+    }
+    const dateRangeParams = getDateRange();
+    let saveParams = {};
+    if (action === ExploreFunnelRequestAction.PUBLISH) {
+      saveParams = {
+        dashboardId: dashboardId,
+        dashboardName: dashboardName,
+        sheetId: sheetId,
+        sheetName: sheetName,
+      };
+    }
+    const body: IFunnelRequest = {
+      action: action,
+      projectId: pipeline.projectId,
+      pipelineId: pipeline.pipelineId,
+      appId: appId ?? '',
+      sheetName: `funnel_sheet_${funnelId}`,
+      viewName: `funnel_view_${funnelId}`,
+      dashboardCreateParameters: {
+        region: pipeline.region,
+        redshift: {
+          user:
+            redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
+            ) ?? '',
+          dataApiRole:
+            redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+            ) ?? '',
+          newServerless: {
+            workgroupName:
               redshiftOutputs.get(
-                OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-              ) ?? '',
-            dataApiRole:
-              redshiftOutputs.get(
-                OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-              ) ?? '',
-            newServerless: {
-              workgroupName:
-                redshiftOutputs.get(
-                  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-                ) ?? '',
-            },
-          },
-          quickSight: {
-            dataSourceArn:
-              reportingOutputs.get(
-                OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN
+                OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
               ) ?? '',
           },
         },
-        action: 'PREVIEW',
-        viewName: `funnel_view_${funnelId}`,
-        projectId: pipeline.projectId,
-        pipelineId: pipeline.pipelineId,
-        appId: appId ?? '',
-        sheetName: `funnel_sheet_${funnelId}`,
-        computeMethod: 'USER_CNT',
-        specifyJoinColumn: true,
-        joinColumn: 'user_pseudo_id',
-        conversionIntervalType: 'CUSTOMIZE',
-        conversionIntervalInSeconds: 7200,
-        eventAndConditions: [
-          {
-            eventName: 'add_button_click',
-          },
-          {
-            eventName: 'note_share',
-          },
-          {
-            eventName: 'note_export',
-          },
-        ],
-        timeScopeType: 'RELATIVE',
-        lastN: 4,
-        timeUnit: 'WK',
-        groupColumn: 'week',
-      });
+        quickSight: {
+          dataSourceArn:
+            reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
+            '',
+        },
+      },
+      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: associateParameterChecked,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType:
+        selectedWindowType?.value ?? ExploreConversionIntervalType.CURRENT_DAY,
+      conversionIntervalInSeconds: getConversionIntervalInSeconds(),
+      eventAndConditions: getEventAndConditions(),
+      firstEventExtraCondition: getFirstEventAndConditions(),
+      timeScopeType: dateRangeParams?.timeScopeType,
+      groupColumn: dateRangeParams?.groupColumn,
+      ...dateRangeParams,
+      ...saveParams,
+    };
+    return body;
+  };
+
+  const clickPreview = async () => {
+    if (
+      eventOptionData.length === 0 ||
+      !validEventAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    try {
+      const body = getFunnelRequest(ExploreFunnelRequestAction.PREVIEW);
+      if (!body) {
+        alertMsg(
+          t('analytics:valid.funnelPipelineVersionError'),
+          COMMON_ALERT_TYPE.Error as AlertType
+        );
+        return;
+      }
+      setLoadingData(true);
+      setEmptyData(false);
+      setLoadingChart(true);
+      const { success, data }: ApiResponse<any> = await previewFunnel(body);
       if (success) {
         getEmbeddingUrl(
           data.dashboardId,
@@ -227,190 +548,470 @@ const AnalyticsFunnel: React.FC = () => {
           '#qs-funnel-table-container'
         );
       }
-      setLoadingData(false);
     } catch (error) {
-      setLoadingData(false);
+      console.log(error);
     }
+    setLoadingData(false);
+    setLoadingChart(false);
+  };
+
+  const resetConfig = async () => {
+    setLoadingData(true);
+    setSelectedMetric({
+      value: ExploreComputeMethod.USER_CNT,
+      label: t('analytics:options.userNumber') ?? '',
+    });
+    setSelectedWindowType(customWindowType);
+    setSelectedWindowUnit({
+      value: 'minute',
+      label: t('analytics:options.minuteWindowUnit') ?? '',
+    });
+    setAssociateParameterChecked(true);
+    setEventOptionData([
+      {
+        ...DEFAULT_EVENT_ITEM,
+        isMultiSelect: false,
+      },
+    ]);
+    setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+    setDateRangeValue({
+      type: 'relative',
+      amount: 7,
+      unit: 'day',
+    });
+    await listMetadataEvents();
+    await listAllAttributes();
+    setLoadingData(false);
+  };
+
+  const saveToDashboard = async (
+    dashboardId: string,
+    dashboardName: string,
+    sheetId: string,
+    sheetName: string
+  ) => {
+    if (
+      eventOptionData.length === 0 ||
+      !validEventAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    try {
+      const body = getFunnelRequest(
+        ExploreFunnelRequestAction.PUBLISH,
+        dashboardId,
+        dashboardName,
+        sheetId,
+        sheetName
+      );
+      if (!body) {
+        alertMsg(
+          t('analytics:valid.funnelPipelineVersionError'),
+          COMMON_ALERT_TYPE.Error as AlertType
+        );
+        return;
+      }
+      setLoadingData(true);
+      const { success }: ApiResponse<any> = await previewFunnel(body);
+      if (success) {
+        setSelectDashboardModalVisible(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setLoadingData(false);
   };
 
   return (
     <AppLayout
       toolsHide
       content={
-        <ContentLayout
-          header={
-            <SpaceBetween size="m">
-              <Header variant="h1">{t('nav.analytics.exploreFunnel')}</Header>
-            </SpaceBetween>
-          }
-        >
-          <SpaceBetween direction="vertical" size="l">
-            <Container
-              header={
-                <Header
-                  variant="h2"
-                  actions={
-                    <SpaceBetween direction="horizontal" size="xs">
-                      <Button iconName="refresh">
-                        {t('analytics:funnel.labels.reset')}
-                      </Button>
-                      <Button variant="primary">
-                        {t('analytics:funnel.labels.save')}
-                      </Button>
-                    </SpaceBetween>
-                  }
-                >
-                  {t('analytics:header.configurations')}
-                </Header>
-              }
-            >
-              <ColumnLayout columns={3} variant="text-grid">
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
+        <>
+          <ContentLayout
+            header={
+              <SpaceBetween size="m">
+                <Header variant="h1">{t('nav.analytics.exploreFunnel')}</Header>
+              </SpaceBetween>
+            }
+          >
+            <SpaceBetween direction="vertical" size="l">
+              <Container
+                header={
+                  <Header
+                    variant="h2"
+                    actions={
+                      <SpaceBetween direction="horizontal" size="xs">
+                        <Button
+                          iconName="refresh"
+                          onClick={resetConfig}
+                          loading={loadingData}
+                        >
+                          {t('analytics:funnel.labels.reset')}
+                        </Button>
+                        <Button
+                          variant="primary"
+                          loading={loadingData}
+                          onClick={() => {
+                            setSelectDashboardModalVisible(true);
+                          }}
+                        >
+                          {t('analytics:funnel.labels.save')}
+                        </Button>
+                      </SpaceBetween>
+                    }
+                  >
+                    {t('analytics:header.configurations')}
+                  </Header>
+                }
+              >
+                <div className="cs-analytics-config">
+                  <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
                       {t('analytics:funnel.labels.metrics')}
                     </Box>
-                    <Select
-                      selectedOption={selectedMetric}
-                      options={metricOptions}
-                      onChange={(event) => {
-                        setSelectedMetric(event.detail.selectedOption);
-                      }}
-                    />
-                  </div>
-                </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.associateParameter')}
-                    </Box>
-                    <Toggle
-                      onChange={({ detail }) =>
-                        setAssociateParameterChecked(detail.checked)
-                      }
-                      checked={associateParameterChecked}
-                    >
-                      {associateParameterChecked ? 'On' : 'Off'}
-                    </Toggle>
-                  </div>
-                </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
+                    <div className="cs-analytics-config">
+                      <Select
+                        selectedOption={selectedMetric}
+                        options={computeMethodOptions}
+                        onChange={(event) => {
+                          setSelectedMetric(event.detail.selectedOption);
+                        }}
+                      />
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
                       {t('analytics:funnel.labels.window')}
                     </Box>
-                    <Toggle
-                      onChange={({ detail }) =>
-                        setWindowChecked(detail.checked)
-                      }
-                      checked={windowChecked}
-                    >
-                      {windowChecked ? 'On' : 'Off'}
-                    </Toggle>
-                  </div>
-                </SpaceBetween>
-              </ColumnLayout>
-              <br />
-              <Divider height={1} />
-              <br />
-              <ColumnLayout columns={2} variant="text-grid">
-                <SpaceBetween direction="vertical" size="l">
-                  <Box variant="awsui-key-label">
-                    {t('analytics:funnel.labels.funnelSteps')}
-                  </Box>
-                  <Box variant="awsui-key-label">
-                    {t('analytics:funnel.labels.conversionWindowPeriod')}
-                  </Box>
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Select
-                      selectedOption={selectedWindowType}
-                      options={windowTypeOptions}
-                      onChange={(event) => {
-                        console.log(selectedWindowType, customWindowType);
-                        setSelectedWindowType(event.detail.selectedOption);
-                      }}
-                    />
-                    {selectedWindowType?.value === customWindowType?.value ? (
-                      <>
-                        <Input
-                          type="number"
-                          placeholder="5"
-                          value={windowValue}
-                          onChange={(event) => {
-                            setWindowValue(event.detail.value);
-                          }}
-                        />
+                    <div className="cs-analytics-window">
+                      <div className="cs-analytics-window-type">
                         <Select
-                          selectedOption={selectedWindowUnit}
-                          options={windowUnitOptions}
+                          selectedOption={selectedWindowType}
+                          options={windowTypeOptions}
                           onChange={(event) => {
-                            setSelectedWindowUnit(event.detail.selectedOption);
+                            setSelectedWindowType(event.detail.selectedOption);
                           }}
                         />
-                      </>
-                    ) : null}
+                      </div>
+                      {selectedWindowType?.value === customWindowType?.value ? (
+                        <>
+                          <div className="cs-analytics-window-value">
+                            <Input
+                              type="number"
+                              placeholder="5"
+                              value={windowValue}
+                              onChange={(event) => {
+                                setWindowValue(event.detail.value);
+                              }}
+                            />
+                          </div>
+                          <div className="cs-analytics-window-unit">
+                            <Select
+                              selectedOption={selectedWindowUnit}
+                              options={windowUnitOptions}
+                              onChange={(event) => {
+                                setSelectedWindowUnit(
+                                  event.detail.selectedOption
+                                );
+                              }}
+                            />
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
                   </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <Box variant="awsui-key-label">
+                      {t('analytics:funnel.labels.associateParameter')}
+                    </Box>
+                    <div className="cs-analytics-config">
+                      <Toggle
+                        onChange={({ detail }) =>
+                          setAssociateParameterChecked(detail.checked)
+                        }
+                        checked={associateParameterChecked}
+                      >
+                        {associateParameterChecked ? 'On' : 'Off'}
+                      </Toggle>
+                    </div>
+                  </SpaceBetween>
+                </div>
+                <br />
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:funnel.labels.funnelDateRange')}
+                  </Box>
+                  <ExploreDateRangePicker
+                    dateRangeValue={dateRangeValue}
+                    setDateRangeValue={setDateRangeValue}
+                  />
                 </SpaceBetween>
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
+                <br />
+                <ColumnLayout columns={2} variant="text-grid">
+                  <SpaceBetween direction="vertical" size="xs">
+                    <Box variant="awsui-key-label">
+                      {t('analytics:funnel.labels.funnelSteps')}
+                    </Box>
+                    <div>
+                      <EventsSelect
+                        data={eventOptionData}
+                        eventOptionList={metadataEvents}
+                        addEventButtonLabel={t('common:button.addFunnelStep')}
+                        addNewEventAnalyticsItem={() => {
+                          setEventOptionData((prev) => {
+                            const preEventList = cloneDeep(prev);
+                            return [
+                              ...preEventList,
+                              {
+                                ...DEFAULT_EVENT_ITEM,
+                                isMultiSelect: false,
+                              },
+                            ];
+                          });
+                        }}
+                        removeEventItem={(index) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            return dataObj.filter(
+                              (item, eIndex) => eIndex !== index
+                            );
+                          });
+                        }}
+                        addNewConditionItem={(index: number) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[index].conditionList.push(
+                              DEFAULT_CONDITION_DATA
+                            );
+                            return dataObj;
+                          });
+                        }}
+                        removeEventCondition={(eventIndex, conditionIndex) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            const newCondition = dataObj[
+                              eventIndex
+                            ].conditionList.filter(
+                              (item, i) => i !== conditionIndex
+                            );
+                            dataObj[eventIndex].conditionList = newCondition;
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionCategoryOption={(
+                          eventIndex,
+                          conditionIndex,
+                          category
+                        ) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionOption = category;
+                            if (
+                              category?.valueType === MetadataValueType.STRING
+                            ) {
+                              dataObj[eventIndex].conditionList[
+                                conditionIndex
+                              ].conditionValue = [];
+                            } else {
+                              dataObj[eventIndex].conditionList[
+                                conditionIndex
+                              ].conditionValue = '';
+                            }
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionOperator={(
+                          eventIndex,
+                          conditionIndex,
+                          operator
+                        ) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionOperator = operator;
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionValue={(
+                          eventIndex,
+                          conditionIndex,
+                          value
+                        ) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].conditionList[
+                              conditionIndex
+                            ].conditionValue = value;
+                            return dataObj;
+                          });
+                        }}
+                        changeCurCalcMethodOption={(eventIndex, method) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].calculateMethodOption = method;
+                            return dataObj;
+                          });
+                        }}
+                        changeCurCategoryOption={async (
+                          eventIndex,
+                          category
+                        ) => {
+                          const eventName = category?.value;
+                          const eventParameters = await getEventParameters(
+                            eventName
+                          );
+                          const userAttributes = await getUserAttributes();
+                          const parameterOption =
+                            parametersConvertToCategoryItemType(
+                              userAttributes,
+                              [],
+                              eventParameters
+                            );
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].selectedEventOption = category;
+                            dataObj[eventIndex].conditionOptions =
+                              parameterOption;
+                            return dataObj;
+                          });
+                        }}
+                        changeCurRelationShip={(eventIndex, relation) => {
+                          setEventOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj[eventIndex].conditionRelationShip =
+                              relation;
+                            return dataObj;
+                          });
+                        }}
+                      />
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
                       {t('analytics:funnel.labels.filters')}
                     </Box>
-                  </div>
-                </SpaceBetween>
-              </ColumnLayout>
-              <br />
-              <Button
-                variant="primary"
-                onClick={clickPreview}
-                loading={loadingData}
-              >
-                {t('common:button.preview')}
-              </Button>
-            </Container>
-            <Container>
-              {loadingData ? (
-                <Loading />
-              ) : (
-                <div id={'qs-funnel-container'} className="iframe-explore">
-                  {emptyData ? (
-                    <Box
-                      margin={{ vertical: 'xs' }}
-                      textAlign="center"
-                      color="inherit"
-                    >
-                      <SpaceBetween size="m">
-                        <b>{t('analytics:emptyData')}</b>
-                      </SpaceBetween>
-                    </Box>
-                  ) : null}
-                </div>
-              )}
-            </Container>
-            <Container>
-              {loadingData ? (
-                <Loading />
-              ) : (
-                <div
-                  id={'qs-funnel-table-container'}
-                  className="iframe-explore"
+                    <div>
+                      <SegmentationFilter
+                        segmentationData={segmentationOptionData}
+                        addNewConditionItem={() => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj.data.push(DEFAULT_CONDITION_DATA);
+                            return dataObj;
+                          });
+                        }}
+                        removeEventCondition={(index) => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            const newCondition = dataObj.data.filter(
+                              (item, i) => i !== index
+                            );
+                            dataObj.data = newCondition;
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionCategoryOption={(index, category) => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj.data[index].conditionOption = category;
+                            if (
+                              category?.valueType === MetadataValueType.STRING
+                            ) {
+                              dataObj.data[index].conditionValue = [];
+                            } else {
+                              dataObj.data[index].conditionValue = '';
+                            }
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionOperator={(index, operator) => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj.data[index].conditionOperator = operator;
+                            return dataObj;
+                          });
+                        }}
+                        changeConditionValue={(index, value) => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj.data[index].conditionValue = value;
+                            return dataObj;
+                          });
+                        }}
+                        changeCurRelationShip={(relation) => {
+                          setSegmentationOptionData((prev) => {
+                            const dataObj = cloneDeep(prev);
+                            dataObj.conditionRelationShip = relation;
+                            return dataObj;
+                          });
+                        }}
+                      />
+                    </div>
+                  </SpaceBetween>
+                </ColumnLayout>
+                <br />
+                <Button
+                  variant="primary"
+                  onClick={clickPreview}
+                  loading={loadingData}
                 >
-                  {emptyData ? (
-                    <Box
-                      margin={{ vertical: 'xs' }}
-                      textAlign="center"
-                      color="inherit"
-                    >
-                      <SpaceBetween size="m">
-                        <b>{t('analytics:emptyData')}</b>
-                      </SpaceBetween>
-                    </Box>
-                  ) : null}
-                </div>
-              )}
-            </Container>
-          </SpaceBetween>
-        </ContentLayout>
+                  {t('common:button.preview')}
+                </Button>
+              </Container>
+              <Container>
+                {loadingChart ? (
+                  <Loading />
+                ) : (
+                  <div id={'qs-funnel-container'} className="iframe-explore">
+                    {emptyData ? (
+                      <Box
+                        margin={{ vertical: 'xs' }}
+                        textAlign="center"
+                        color="inherit"
+                      >
+                        <SpaceBetween size="m">
+                          <b>{t('analytics:emptyData')}</b>
+                        </SpaceBetween>
+                      </Box>
+                    ) : null}
+                  </div>
+                )}
+              </Container>
+              <Container>
+                {loadingChart ? (
+                  <Loading />
+                ) : (
+                  <div
+                    id={'qs-funnel-table-container'}
+                    className="iframe-explore"
+                  >
+                    {emptyData ? (
+                      <Box
+                        margin={{ vertical: 'xs' }}
+                        textAlign="center"
+                        color="inherit"
+                      >
+                        <SpaceBetween size="m">
+                          <b>{t('analytics:emptyData')}</b>
+                        </SpaceBetween>
+                      </Box>
+                    ) : null}
+                  </div>
+                )}
+              </Container>
+            </SpaceBetween>
+          </ContentLayout>
+          <SaveToDashboardModal
+            visible={selectDashboardModalVisible}
+            disableClose={false}
+            loading={loadingData}
+            setModalVisible={setSelectDashboardModalVisible}
+            save={saveToDashboard}
+          />
+        </>
       }
       headerSelector="#header"
       navigation={

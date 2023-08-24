@@ -64,7 +64,6 @@ const AnalyticsRetention: React.FC = () => {
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();
-          console.log(data.EmbedUrl);
           await embeddingContext.embedVisual({
             url: data.EmbedUrl,
             container: '#qs-funnel-container',
@@ -163,7 +162,9 @@ const AnalyticsRetention: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/retention`} />
+        <Navigation
+          activeHref={`/analytics/${projectId}/app/${appId}/retention`}
+        />
       }
     />
   );
