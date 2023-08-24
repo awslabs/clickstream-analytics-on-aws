@@ -14,7 +14,6 @@
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import {
-  ANALYTICS_OPERATORS,
   CategoryItemType,
   IConditionItemType,
   IEventAnalyticsItem,
@@ -24,7 +23,7 @@ import { isEqual } from 'lodash';
 import moment from 'moment';
 import { EPipelineStatus, ExecutionType, TIME_FORMAT } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
-import { MetadataSource } from './explore-types';
+import { ExploreAnalyticsOperators, MetadataSource } from './explore-types';
 
 export const generateStr = (length: number) => {
   let randomString = '';
@@ -429,9 +428,9 @@ export const validConditionItemType = (condition: IConditionItemType) => {
     condition.conditionOperator.value?.trim() !== ''
   ) {
     if (
-      condition.conditionOperator.value === ANALYTICS_OPERATORS.is_null.value ||
+      condition.conditionOperator.value === ExploreAnalyticsOperators.NULL ||
       condition.conditionOperator.value ===
-        ANALYTICS_OPERATORS.is_not_null.value
+      ExploreAnalyticsOperators.NOT_NULL
     ) {
       return true;
     } else {

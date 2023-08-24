@@ -20,7 +20,7 @@ import { ApiFail, ApiSuccess } from '../common/types';
 import { isEmpty, paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createDashboard, getClickstreamUserArn } from '../store/aws/quicksight';
+import { createDashboard, getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -44,6 +44,7 @@ export class ProjectServ {
 
   public async createDashboard(req: any, res: any, next: any) {
     try {
+      await registerClickstreamUser();
       const dashboardId = uuidv4().replace(/-/g, '');
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
