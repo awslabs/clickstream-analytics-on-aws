@@ -45,20 +45,36 @@ weight: 1
 - KDS配置（按需，预配 - 2 分片数）
 - 10/100/1000 RPS
 
-| 每日数据量/每秒请求数（RPS） | ALB  | EC2    | 缓冲类型（Buffer type） | 缓冲费用（Buffer cost） | S3   |   总计（USD） |
-| ------------------ | --- | --- | ----------------- | ----------- | ---  |  --------- |
-| 10RPS             |   7  | 122    | Kinesis（按需） |    36         |   3   |     168  |
-|                   |   7  |  122   | Kinesis (预备 2 shard)   |      22       |  3   |     154  |
-|                   |   7  |  122   | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     549   |
-|                   |   7  |  122   | 无缓冲              |             |  3    |      132   |
-|100RPS             |   43 |  122   |     Kinesis（按需）              |      86       |  3   |     254 |
-|                   | 43    |   122  | Kinesis (预备 2 shard)   |      26       | 3    |     194  |
-|           |   43  |  122  |     MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     585
-|           |   43  |  122  |     无缓冲              |             |  3    |     168
-|1000RPS           |   396  |   122 |     Kinesis（按需）              |      576       |  14   |    1108 |
-|                         |  396   |  122   | Kinesis (预备 10 shard)   |    146         |   14  |     678  |
-|           |  396   | 122   |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1062
-|           |  396   | 122   |     无缓冲              |            |  14   |     532
+| 每日数据量/每秒请求数（RPS） | ALB 费用  | EC2 费用 |  缓冲类型（Buffer type） | 缓冲费用（Buffer cost） | S3 费用   |   总计（美元/月） |
+| ------------------ | --- | ---- | ------------- | ----------- | ---  |  --------- |
+| 10RPS             |   $7  | $122   |  Kinesis（按需） |    $36         |   $3   |     $168  |
+|                   |   $7  |  $122  |  Kinesis (预备 2 shard)   |      $22       |  $3   |     $154  |
+|                   |   $7  |  $122  |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |    $549   |
+|                   |   $7  |  $122  |  无缓冲              |             |  $3    |      $132   |
+|100RPS             |   $43 |  $122  |      Kinesis（按需）              |      $86       |  $3   |     $254 |
+|                   | $43    |   $122  |  Kinesis (预备 2 shard)   |      $26       | $3    |     $194  |
+|           |   $43  |  $122  |      MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $3   |     $585
+|           |   $43  |  $122 |      无缓冲              |             |  $3    |     $168
+|1000RPS           |   $396  |   $122 |      Kinesis（按需）              |      $576       |  $14   |    $1108 |
+|                         |  $396   |  $122  |  Kinesis (预备 10 shard)   |    $146         |   $14  |     $678  |
+|           |  $396   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $530       |  $14  |     $1062
+|           |  $396   | $122 |      无缓冲              |            |  $14   |     $532
+
+
+### 数据传输
+当数据通过EC2发送到下游的数据宿，会产生数据的费用。下面是以1000RPS，每个请求的有效载荷为1KB为例的费用。
+
+1. EC2 网络输入：此部分不产生费用
+2. EC2 网络输出，有如下三种数据宿的情况：
+
+    | 数据宿 | 接入数据宿方法 |  费用说明 |   总计（美元/月）|
+    | ------------------ | --- | --- | ---  |  
+    | S3         |  S3 Gateway endpoints | The S3 Gateway endpoints 不会产生数据传输费用   | $0  |  
+    | MSK          |  |  数据传输费用（$0.010 per GB in/out/between EC2 AZs） | $105  |       
+    | KDS          |  NAT |  NAT 固定费用： $64（2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour）. <br> 数据传输费用：$601（$0.045 per GB Data Processed by NAT Gateways）.  | $665  | 
+    | KDS          |  VPC Endpoint |  VPC Endpoint 固定费用：$14.62 （Availability Zones $0.01 per AZ Hour）. <br> 数据传输费用: $133.5($0.01 per GB Data Processed by Interface endpoints).  | $148.1  | 
+
+    我们建议通过VPC endpoint传输数据到KDS。请参考[VPC endpoint][vpce]获取更多信息。       
 
 ## 数据处理与建模模块
 
@@ -74,17 +90,17 @@ weight: 1
 - 数据处理间隔：每小时/每6小时/每日
 - EMR运行三个内置插件来处理数据
 
-| 每日数据量/每秒请求数 (RPS) | EMR调度间隔 |  EMR成本 | Redshift类型 | Redshift成本 | 总计 (美元) |
+| 每日数据量/每秒请求数 (RPS) | EMR调度间隔 |  EMR 费用 | Redshift类型 | Redshift 费用 | 总计 (美元/月) |
 | ----------------------- | --------------------- | -------- | ------------------------ | ------------- | ----- |
-| 10RPS             | 每小时                |     28     | 无服务器 (基于8个RPU) |     68          |   96    |
-|                         | 每6小时              |     10.8     | 无服务器 (基于8个RPU)               |       11        |   21.8    |
-|                         | 每日                 |      9.6    | 无服务器 (基于8个RPU)               |     3          |   12.6    |
-| 100RPS             | 每小时                |      105   | 无服务器 (基于8个RPU) |       72        |  177    |
-|                         | 每6小时              |     99     | 无服务器 (基于8个RPU)               |       17.2        |   116.2    |
-|                         | 每日                 |     140     | 无服务器 (基于8个RPU)               |       16.9        |    156.9   |
-| 1000RPS             | 每小时                |      1362   | 无服务器 (基于8个RPU) |       172        |  1534    |
-|              | 每6小时                |      678   | 无服务器 (基于8个RPU) |       176        | 854
-|              | 每日                |      873   | 无服务器 (基于8个RPU) |       352        | 1225 |
+| 10RPS             | 每小时                |     $28     | 无服务器 (基于8个RPU) |     $68          |   $96    |
+|                         | 每6小时              |     $10.8     | 无服务器 (基于8个RPU)               |       $11        |   $21.8    |
+|                         | 每日                 |      $9.6    | 无服务器 (基于8个RPU)               |     $3          |   $12.6    |
+| 100RPS             | 每小时                |      $72   | 无服务器 (基于8个RPU) |       $70        |  $142    |
+|                         | 每6小时              |     $61.2     | 无服务器 (基于8个RPU)               |       $17.2        |   $78.4    |
+|                         | 每日                 |     $43.7     | 无服务器 (基于8个RPU)               |       $12.4        |    $56.1   |
+| 1000RPS             | 每小时                |      $842   | 无服务器 (基于8个RPU) |       $172        |  $1014    |
+|              | 每6小时                |      $579   | 无服务器 (基于8个RPU) |       $137        | $716
+| <span style="background-color: lightgray">本条目的EMR使用了下面的配置</span>             | 每日                |      $642   | 无服务器 (基于8个RPU) |       $94        | $736 |
 
 !!! info "提示"
 
@@ -93,13 +109,19 @@ weight: 1
     ```json
     {
     "sparkConfig": [
-            "spark.emr-serverless.executor.disk=80g",
-            "spark.executor.instances=8",
+            "spark.emr-serverless.executor.disk=200g",
+            "spark.executor.instances=16",
             "spark.dynamicAllocation.initialExecutors=16",
-            "spark.executor.memory=80g",
-            "spark.executor.cores=16"
+            "spark.executor.memory=100g",
+            "spark.executor.cores=16",
+            "spark.network.timeout=10000000",
+            "spark.executor.heartbeatInterval=10000000",
+            "spark.shuffle.registration.timeout=120000",
+            "spark.shuffle.registration.maxAttempts=5",
+            "spark.shuffle.file.buffer=2m",
+            "spark.shuffle.unsafe.file.output.buffer=1m"
         ],
-        "inputRePartitions": 2000
+        "inputRePartitions": 800
     }
     ```
 
@@ -117,9 +139,9 @@ weight: 1
 - **十个读者**，每月工作22天，其中5%为活跃读者，50%为经常读者，25%为偶尔读者，20%为不活跃读者
 - 10GB的SPICE容量
 
-| 每日数据量/每秒请求数 (RPS) | 作者 | 读者 | SPICE | 总计 |
+| 每日数据量/每秒请求数 (RPS) | 作者 | 读者 | SPICE | 总计（美元/月） |
 | --------------------- | ------- | ------- | ----- | ----- |
-| 所有大小              | 48      | 18.80      |   0    |   66.80    |
+| 所有大小              | 48      | 18.80      |   0    |   $66.80    |
 
 !!! info "提示"
     所有数据管道都适用于以上 QuickSight 费用，即使是在解决方案之外管理的可视化内容也是如此。
@@ -146,7 +168,7 @@ weight: 1
 
 - 接入部署在`us-east-1`
 
-| 每日数据量/RPS | 固定每小时费用 | 数据传输费用 | 总费用 |
+| 每日数据量/RPS | 固定每小时费用 | 数据传输费用 | 总费用（美元/月） |
 | --------------------- | ----------------- | ------------------ | ---------- |
 | 10RPS           |        $18           |          $0.3          |       $18.3     |
 | 100RPS         |          $18         |           $3         |      $21      |
@@ -156,8 +178,10 @@ weight: 1
 
 您需要为 Amazon S3 的存储费用付费，但无需为 Elastic Load Balancing 用于将日志文件发送到 Amazon S3 的带宽使用付费。有关存储费用的更多信息，请参阅 [Amazon S3 定价](https://aws.amazon.com/s3/pricing/)。
 
-| 每日数据量/RPS | 日志大小 | S3 费用 |
+| 每日数据量/RPS | 日志大小 | S3 费用（美元/月） |
 | --------------------- | -------- | ------- |
-| 10 RPS           |    16.5       |    0.38     |
-| 100 RPS         |     165     |      3.8   |
-| 1000 RPS       |     1650     |    38     |
+| 10 RPS           |    16.5       |    $0.38     |
+| 100 RPS         |     165     |      $3.8   |
+| 1000 RPS       |     1650     |    $38     |
+
+[vpce]: https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html
