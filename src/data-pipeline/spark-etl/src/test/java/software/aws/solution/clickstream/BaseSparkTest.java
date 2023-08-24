@@ -26,6 +26,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
+import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
+
 public class BaseSparkTest {
     protected SparkSession spark;
 
@@ -69,8 +72,8 @@ public class BaseSparkTest {
                 .config("spark.driver.bindAddress", "127.0.0.1")
                 .getOrCreate();
 
-        System.setProperty("job.name", "test-job");
-        System.setProperty("warehouse.dir", "/tmp/warehouse");
+        System.setProperty(JOB_NAME_PROP, "test-job");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse");
     }
 
     @AfterEach

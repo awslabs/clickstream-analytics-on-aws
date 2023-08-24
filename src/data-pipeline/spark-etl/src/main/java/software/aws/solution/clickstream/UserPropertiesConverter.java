@@ -32,11 +32,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.udf;
+import static org.apache.spark.sql.functions.get_json_object;
 
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
+import static software.aws.solution.clickstream.Transformer.INT_VALUE;
+import static software.aws.solution.clickstream.Transformer.STRING_VALUE;
 @Slf4j
 public class UserPropertiesConverter {
+
+    public static final String VALUE = "value";
+
     private static UDF1<String, Row[]> convertJsonStringToKeyValue() {
         return (String value) -> {
             try {
@@ -70,7 +79,7 @@ public class UserPropertiesConverter {
                 continue;
             }
 
-            String attrValue = attrValueNode.get("value").asText();
+            String attrValue = attrValueNode.get(VALUE).asText();
             Long setTimestamp = attrValueNode.get("set_timestamp").asLong(0L);
 
             Double doubleValue = null;
@@ -121,10 +130,10 @@ public class UserPropertiesConverter {
             }
             JsonNode attrValueNode = jsonNode.get(attrName);
             if ("_user_ltv_revenue".equals(attrName)) {
-                revenue = attrValueNode.get("value").asDouble();
+                revenue = attrValueNode.get(VALUE).asDouble();
             }
             if ("_user_ltv_currency".equals(attrName)) {
-                currency = attrValueNode.get("value").asText();
+                currency = attrValueNode.get(VALUE).asText();
             }
         }
         if (revenue != null) {
@@ -139,10 +148,10 @@ public class UserPropertiesConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField("double_value", DataTypes.DoubleType, true),
-                DataTypes.createStructField("float_value", DataTypes.FloatType, true),
-                DataTypes.createStructField("int_value", DataTypes.LongType, true),
-                DataTypes.createStructField("string_value", DataTypes.StringType, true),
+                DataTypes.createStructField(DOUBLE_VALUE, DataTypes.DoubleType, true),
+                DataTypes.createStructField(FLOAT_VALUE, DataTypes.FloatType, true),
+                DataTypes.createStructField(INT_VALUE, DataTypes.LongType, true),
+                DataTypes.createStructField(STRING_VALUE, DataTypes.StringType, true),
                 DataTypes.createStructField("set_timestamp_micros", DataTypes.LongType, true),
         });
 
@@ -151,7 +160,7 @@ public class UserPropertiesConverter {
                 DataTypes.createStructType(
                         new StructField[]{
                                 DataTypes.createStructField("key", DataTypes.StringType, true),
-                                DataTypes.createStructField("value", valueType, true),
+                                DataTypes.createStructField(VALUE, valueType, true),
                         }
                 )));
 

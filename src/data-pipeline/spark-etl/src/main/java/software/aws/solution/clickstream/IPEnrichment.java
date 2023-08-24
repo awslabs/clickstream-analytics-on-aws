@@ -14,7 +14,10 @@
 
 package software.aws.solution.clickstream;
 
-import com.maxmind.db.*;
+import com.maxmind.db.CHMCache;
+import com.maxmind.db.MaxMindDbConstructor;
+import com.maxmind.db.MaxMindDbParameter;
+import com.maxmind.db.Reader;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkFiles;
@@ -35,6 +38,7 @@ import java.util.Optional;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.GEO_FOR_ENRICH;
 
 @Slf4j
 public class IPEnrichment {
@@ -53,13 +57,13 @@ public class IPEnrichment {
         ));
         Dataset<Row> ipEnrichDataset = dataset.withColumn("geo",
                 udfEnrichIP.apply(
-                        col("geo_for_enrich").getItem("ip"),
-                        col("geo_for_enrich").getItem("locale")
+                        col(GEO_FOR_ENRICH).getItem("ip"),
+                        col(GEO_FOR_ENRICH).getItem("locale")
                 ));
         if (ContextUtil.isDebugLocal()) {
             ipEnrichDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ip-Dataset/");
         }
-        return ipEnrichDataset.drop("geo_for_enrich");
+        return ipEnrichDataset.drop(GEO_FOR_ENRICH);
     }
 
     private UDF2<String, String, Row> enrich() {

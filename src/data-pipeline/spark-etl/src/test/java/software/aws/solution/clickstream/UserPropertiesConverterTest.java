@@ -20,11 +20,12 @@ import scala.collection.Iterator;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 
 public class UserPropertiesConverterTest extends BaseSparkTest {
     @Test
     public void should_convert_user_data() {
-        System.setProperty("debug.local", "true");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
         UserPropertiesConverter transformer = new UserPropertiesConverter();
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/data_cleaned.json")).getPath());
         Dataset<Row> converteDataset = transformer.transform(dataset);
@@ -93,7 +94,7 @@ public class UserPropertiesConverterTest extends BaseSparkTest {
 
     @Test
     public void should_convert_no_user_data() {
-        System.setProperty("debug.local", "true");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
         UserPropertiesConverter transformer = new UserPropertiesConverter();
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/data_cleaned_no_user.json")).getPath());
         Dataset<Row> converteDataset = transformer.transform(dataset);

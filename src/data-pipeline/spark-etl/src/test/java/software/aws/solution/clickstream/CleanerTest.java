@@ -19,15 +19,16 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static software.aws.solution.clickstream.ContextUtil.*;
 
 class CleanerTest extends BaseSparkTest {
     private final Cleaner cleaner = new Cleaner();
 
     @Test
     public void should_clean_normal_data() {
-        System.setProperty("debug.local", "true");
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("save.info.to.warehouse", "false");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "false");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset);
@@ -60,8 +61,8 @@ class CleanerTest extends BaseSparkTest {
     @Test
     public void should_clean_when_data_has_corrupt_records() {
         String path = requireNonNull(getClass().getResource("/")).getPath();
-        System.setProperty("job.data.dir", path);
-        System.setProperty("app.ids", "uba-app");
+        System.setProperty(JOB_DATA_DIR_PROP, path);
+        System.setProperty(APP_IDS_PROP, "uba-app");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());

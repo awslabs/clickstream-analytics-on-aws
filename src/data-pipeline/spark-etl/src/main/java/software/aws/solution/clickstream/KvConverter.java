@@ -33,7 +33,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.apache.spark.sql.functions.udf;
+import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
+import static software.aws.solution.clickstream.Transformer.INT_VALUE;
+import static software.aws.solution.clickstream.Transformer.STRING_VALUE;
 
 @Slf4j
 public class KvConverter {
@@ -100,10 +105,10 @@ public class KvConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset, final String fromColName, final String toColName, final List<String> excludeAttributes) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField("double_value", DataTypes.DoubleType, true),
-                DataTypes.createStructField("float_value", DataTypes.FloatType, true),
-                DataTypes.createStructField("int_value", DataTypes.LongType, true),
-                DataTypes.createStructField("string_value", DataTypes.StringType, true),
+                DataTypes.createStructField(DOUBLE_VALUE, DataTypes.DoubleType, true),
+                DataTypes.createStructField(FLOAT_VALUE, DataTypes.FloatType, true),
+                DataTypes.createStructField(INT_VALUE, DataTypes.LongType, true),
+                DataTypes.createStructField(STRING_VALUE, DataTypes.StringType, true),
         });
 
         UserDefinedFunction convertStringToKeyValueUdf = udf(convertJsonStringToKeyValue(excludeAttributes), DataTypes.createArrayType(
@@ -116,7 +121,7 @@ public class KvConverter {
         Dataset<Row> convertedKeyValueDataset = dataset.withColumn(toColName,
                 convertStringToKeyValueUdf.apply(dataset.col("data").getField(fromColName)));
 
-        boolean debugLocal = Boolean.valueOf(System.getProperty("debug.local"));
+        boolean debugLocal = Boolean.valueOf(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
             convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/KvConverter-" + toColName + "/");
         }

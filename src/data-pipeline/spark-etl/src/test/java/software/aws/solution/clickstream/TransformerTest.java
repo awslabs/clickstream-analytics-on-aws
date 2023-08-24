@@ -23,6 +23,8 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
 
 class TransformerTest extends BaseSparkTest {
 
@@ -30,8 +32,8 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
@@ -95,8 +97,8 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_have_host_name_in_device() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_nozip.json")).getPath());
@@ -109,8 +111,8 @@ class TransformerTest extends BaseSparkTest {
     
     @Test
     public void should_transform_with_no_seq_id() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_without_seq_id.json")).getPath());
@@ -124,8 +126,8 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform_without_error_for_raw_text_data() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_raw_text_error.json")).getPath());
@@ -136,8 +138,8 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform_without_error_for_raw_json_data() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_raw_json_error.json")).getPath());
@@ -147,8 +149,8 @@ class TransformerTest extends BaseSparkTest {
 
     @Test
     public void should_transform_items() {
-        System.setProperty("app.ids", "uba-app");
-        System.setProperty("project.id", "test_project_id_01");
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());

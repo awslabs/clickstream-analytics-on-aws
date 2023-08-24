@@ -29,6 +29,13 @@ import java.util.Optional;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.UA_BROWSER;
+import static software.aws.solution.clickstream.Transformer.UA_BROWSER_VERSION;
+import static software.aws.solution.clickstream.Transformer.UA_DEVICE;
+import static software.aws.solution.clickstream.Transformer.UA_ENRICH;
+import static software.aws.solution.clickstream.Transformer.UA_OS;
+import static software.aws.solution.clickstream.Transformer.UA_OS_VERSION;
+import static software.aws.solution.clickstream.Transformer.UA_DEVICE_CATEGORY;
 
 public class UAEnrichment {
 
@@ -64,26 +71,26 @@ public class UAEnrichment {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         UserDefinedFunction udfEnrichUserAgent = udf(enrich(), DataTypes.createStructType(
                 new StructField[]{
-                        DataTypes.createStructField("ua_browser", DataTypes.StringType, true),
-                        DataTypes.createStructField("ua_browser_version", DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_BROWSER, DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_BROWSER_VERSION, DataTypes.StringType, true),
 
-                        DataTypes.createStructField("ua_os", DataTypes.StringType, true),
-                        DataTypes.createStructField("ua_os_version", DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_OS, DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_OS_VERSION, DataTypes.StringType, true),
 
-                        DataTypes.createStructField("ua_device", DataTypes.StringType, true),
-                        DataTypes.createStructField("ua_device_category", DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_DEVICE, DataTypes.StringType, true),
+                        DataTypes.createStructField(UA_DEVICE_CATEGORY, DataTypes.StringType, true),
                 }
         ));
-        Dataset<Row> datasetUa = dataset.withColumn("ua_enrich", udfEnrichUserAgent.apply(col("ua")));
+        Dataset<Row> datasetUa = dataset.withColumn(UA_ENRICH, udfEnrichUserAgent.apply(col("ua")));
 
         Dataset<Row> enrichedDataset = datasetUa.withColumn("device", datasetUa.col("device")
-                .withField("ua_browser", col("ua_enrich").getField("ua_browser"))
-                .withField("ua_browser_version", col("ua_enrich").getField("ua_browser_version"))
-                .withField("ua_os", col("ua_enrich").getField("ua_os"))
-                .withField("ua_os_version", col("ua_enrich").getField("ua_os_version"))
-                .withField("ua_device", col("ua_enrich").getField("ua_device"))
-                .withField("ua_device_category", col("ua_enrich").getField("ua_device_category"))
-        ).drop("ua_enrich");
+                .withField(UA_BROWSER, col(UA_ENRICH).getField(UA_BROWSER))
+                .withField(UA_BROWSER_VERSION, col(UA_ENRICH).getField(UA_BROWSER_VERSION))
+                .withField(UA_OS, col(UA_ENRICH).getField(UA_OS))
+                .withField(UA_OS_VERSION, col(UA_ENRICH).getField(UA_OS_VERSION))
+                .withField(UA_DEVICE, col(UA_ENRICH).getField(UA_DEVICE))
+                .withField(UA_DEVICE_CATEGORY, col(UA_ENRICH).getField(UA_DEVICE_CATEGORY))
+        ).drop(UA_ENRICH);
 
         if (ContextUtil.isDebugLocal()) {
             enrichedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ua-Dataset/");

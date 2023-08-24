@@ -52,8 +52,10 @@ public final class DataProcessor {
      * @param args input arguments
      */
     public static void main(final String[] args) {
+        runWithSpark(args, null);
+    }
+    public static void runWithSpark(final String[] args, final SparkSession sparkSession){
         Preconditions.checkArgument(args.length == 15, "This job can only accept input argument with length 15");
-
         String debug = args[0];
         String database = args[1];
         String sourceTable = args[2];
@@ -70,21 +72,43 @@ public final class DataProcessor {
         String outputPartitions = args[13];
         String rePartitions = args[14];
 
-       ETLRunnerConfig runnerConfig = new ETLRunnerConfig(debug, database, sourceTable, sourcePath,
-                jobDataDir,
-                newArrayList(transformerClassNames.split(",")),
-                outputPath, projectId, validAppIds, outPutFormat, Long.valueOf(startTimestamp),
-                Long.valueOf(endTimestamp), Long.valueOf(dataFreshnessInHour),
-                Integer.valueOf(outputPartitions), Integer.valueOf(rePartitions)
+        ETLRunnerConfig runnerConfig;
+        runnerConfig = new ETLRunnerConfig(
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId,
+                        validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        debug,
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        Integer.valueOf(outputPartitions),
+                        Integer.valueOf(rePartitions)
+                )
         );
         ContextUtil.setJobAndWarehouseInfo(jobDataDir);
-
-        SparkSession spark = SparkSession.builder()
-                .config("spark.sql.session.timeZone", "UTC")
-                .config("spark.hadoop.hive.metastore.client.factory.class",
-                        "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
-                .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
-                .enableHiveSupport().appName(APP_NAME).getOrCreate();
+        SparkSession spark = sparkSession;
+        if (sparkSession == null) {
+            spark = SparkSession.builder()
+                    .config("spark.sql.session.timeZone", "UTC")
+                    .config("spark.hadoop.hive.metastore.client.factory.class",
+                            "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
+                    .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                    .enableHiveSupport().appName(APP_NAME).getOrCreate();
+        }
 
         Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
             log.info(c._1 + " -> " + c._2);

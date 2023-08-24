@@ -17,11 +17,17 @@ package software.aws.solution.clickstream;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.spark.sql.*;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.SaveMode;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import javax.validation.constraints.NotEmpty;
 import java.lang.reflect.InvocationTargetException;
@@ -30,17 +36,30 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Comparator;
+import java.util.ArrayList;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.date_format;
+
+import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
+import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
 
 @Slf4j
 @AllArgsConstructor
 public class ETLRunner {
     public static final String DEBUG_LOCAL_PATH = "/tmp/etl-debug";
     private static final String TRANSFORM_METHOD_NAME = "transform";
+    public static final String EVENT_DATE = "event_date";
     private final SparkSession spark;
     private final ETLRunnerConfig config;
 
@@ -49,8 +68,8 @@ public class ETLRunner {
     public void run() {
         ContextUtil.setContextProperties(this.config);
 
-        log.info("job.name:"  + System.getProperty("job.name"));
-        log.info("warehouse.dir:"  + System.getProperty("warehouse.dir"));
+        log.info(JOB_NAME_PROP + ":"  + System.getProperty(JOB_NAME_PROP));
+        log.info(WAREHOUSE_DIR_PROP + ":"  + System.getProperty(WAREHOUSE_DIR_PROP));
 
         Dataset<Row> dataset = readInputDataset(true);
         int inputDataPartitions = dataset.rdd().getNumPartitions();
@@ -80,7 +99,7 @@ public class ETLRunner {
 
         String[] sourcePathsArray = sourcePaths.toArray(new String[]{});
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         ZoneId utc = ZoneId.of("UTC");
 
         ZonedDateTime modifiedAfterDatetime = Instant.ofEpochMilli(config.getStartTimestamp())
@@ -156,8 +175,8 @@ public class ETLRunner {
                     .sorted(Comparator.comparing(r -> r.getAs("modificationTime"))).forEach(r -> {
                         log.info("path: " + r.getAs("path"));
                     });
-            String path = System.getProperty("warehouse.dir") + "/etl_load_files";
-            readFileDataset.coalesce(1).write().mode(SaveMode.Append).partitionBy("jobName")
+            String path = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_load_files";
+            readFileDataset.coalesce(1).write().mode(SaveMode.Append).partitionBy(JOB_NAME_COL)
                     .option("path", path).saveAsTable(config.getDatabase() + ".etl_load_files");
         }
         return dataset;
@@ -188,7 +207,7 @@ public class ETLRunner {
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                  | IllegalAccessException | NoSuchMethodException e) {
             log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExecuteTransformerException(e);
         }
     }
 
@@ -201,7 +220,7 @@ public class ETLRunner {
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
         } else {
-            int outPartitions = Integer.parseInt(System.getProperty("output.coalesce.partitions", "-1"));
+            int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
             int numPartitions = partitionedDataset.rdd().getNumPartitions();
             log.info("outPartitions:" + outPartitions);
             log.info("partitionedDataset.NumPartitions: " + numPartitions);
@@ -217,9 +236,9 @@ public class ETLRunner {
 
     private Dataset<Row> prepareForPartition(final Dataset<Row> dataset) {
         return dataset.withColumn("partition_app", col("app_info").getItem("app_id"))
-                .withColumn("partition_year", date_format(col("event_date"), "yyyy"))
-                .withColumn("partition_month", date_format(col("event_date"), "MM"))
-                .withColumn("partition_day", date_format(col("event_date"), "dd"));
+                .withColumn("partition_year", date_format(col(EVENT_DATE), "yyyy"))
+                .withColumn("partition_month", date_format(col(EVENT_DATE), "MM"))
+                .withColumn("partition_day", date_format(col(EVENT_DATE), "dd"));
     }
 
     private List<String[]> getSourcePartition(final long milliSecStart, final long milliSecEnd) {
@@ -266,7 +285,7 @@ public class ETLRunner {
     public static Column[] getDistFields() {
        List<Column> cols = Stream.of(new String[]{
                 "app_info", "device", "ecommerce", "event_bundle_sequence_id",
-                "event_date", "event_dimensions", "event_id", "event_name",
+                EVENT_DATE, "event_dimensions", "event_id", "event_name",
                 "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
                 "event_value_in_usd", "geo", "ingest_timestamp", "items",
                 "platform", "privacy_info", "project_id", "traffic_source",
