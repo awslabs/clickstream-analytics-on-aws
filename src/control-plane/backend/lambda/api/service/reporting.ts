@@ -36,15 +36,13 @@ import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
+import { getClickstreamUserArn } from '../store/aws/quicksight';
 
 export class ReportingServ {
 
   async createFunnelVisual(req: any, res: any, next: any) {
     try {
       logger.info(`request: ${JSON.stringify(req.body)}`);
-
-      await registerClickstreamUser();
 
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;

@@ -99,6 +99,10 @@ describe('reporting test', () => {
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
 
+
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
