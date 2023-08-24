@@ -13,6 +13,7 @@
 
 import { Input } from '@cloudscape-design/components';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import AttributePreview from './comps/AttributePreview';
 import CategoryList from './comps/CategoryList';
@@ -29,6 +30,7 @@ interface DropDownContainerProps {
 const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
+  const { t } = useTranslation();
   const { hasTab, categories, selectedItem, changeSelectItem } = props;
   const [categoryType, setCategoryType] = useState<string>('event');
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
@@ -65,8 +67,16 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
               <div className="csdc-header">
                 {hasTab && (
                   <div className="csdc-header-tab flex">
-                    <div className="tab-item active">事件</div>
-                    {/* <div className="tab-item">指标</div> */}
+                    {curPreviewOption && categoryType === 'event' && (
+                      <div className="tab-item active">
+                        {t('analytics:labels.eventTitle')}
+                      </div>
+                    )}
+                    {curPreviewOption && categoryType === 'attribute' && (
+                      <div className="tab-item active">
+                        {t('analytics:labels.attributeTitle')}
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="csdc-header-search">

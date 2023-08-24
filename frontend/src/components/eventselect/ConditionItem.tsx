@@ -17,6 +17,7 @@ import {
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
+import { t } from 'i18next';
 import React from 'react';
 import { MetadataValueType } from 'ts/explore-types';
 import {
@@ -52,21 +53,20 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.is_not_null,
     ANALYTICS_OPERATORS.equal,
     ANALYTICS_OPERATORS.not_equal,
-    ANALYTICS_OPERATORS.not_equal_not_contain_null,
-    ANALYTICS_OPERATORS.contain,
-    ANALYTICS_OPERATORS.not_contain,
-    ANALYTICS_OPERATORS.not_contain_not_contain_null,
+    ANALYTICS_OPERATORS.in,
+    ANALYTICS_OPERATORS.not_in,
   ];
   const CONDITION_NUMBER_OPERATORS: SelectProps.Options = [
     ANALYTICS_OPERATORS.is_null,
     ANALYTICS_OPERATORS.is_not_null,
     ANALYTICS_OPERATORS.equal,
     ANALYTICS_OPERATORS.not_equal,
-    ANALYTICS_OPERATORS.not_equal_not_contain_null,
     ANALYTICS_OPERATORS.greater_than,
     ANALYTICS_OPERATORS.greater_than_or_equal,
     ANALYTICS_OPERATORS.less_than,
     ANALYTICS_OPERATORS.less_than_or_equal,
+    ANALYTICS_OPERATORS.in,
+    ANALYTICS_OPERATORS.not_in,
   ];
 
   return (
@@ -101,7 +101,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             ANALYTICS_OPERATORS.is_not_null.value && (
             <Input
               disabled={!item.conditionOperator}
-              placeholder="Input value"
+              placeholder={
+                t('analytics:funnel.conditionValueInputPlaceholder') ?? ''
+              }
               value={item.conditionValue}
               onChange={(e) => {
                 changeConditionValue(e.detail.value);

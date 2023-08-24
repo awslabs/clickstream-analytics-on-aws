@@ -12,6 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
+import i18n from 'i18n';
 import { MetadataSource, MetadataValueType } from 'ts/explore-types';
 
 export interface IConditionItemType {
@@ -95,28 +96,28 @@ export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
 };
 
 export const ANALYTICS_OPERATORS = {
-  is_null: { value: 'is_null', label: 'null' },
-  is_not_null: { value: 'is_not_null', label: '非null' },
-  equal: { value: '=', label: '=' },
-  not_equal: { value: '<>', label: '!=' },
-  not_equal_contain_null: {
-    value: 'not_equal_contain_null',
-    label: '!=(含null)',
+  is_null: { value: 'is_null', label: i18n.t('analytics:operators.null') },
+  is_not_null: {
+    value: 'is_not_null',
+    label: i18n.t('analytics:operators.notNull'),
   },
-  not_equal_not_contain_null: {
-    value: 'not_equal_not_contain_null',
-    label: '!=(不含null)',
+  equal: { value: '=', label: i18n.t('analytics:operators.equal') },
+  not_equal: { value: '<>', label: i18n.t('analytics:operators.notEqual') },
+  greater_than: {
+    value: '>',
+    label: i18n.t('analytics:operators.greaterThan'),
   },
-  greater_than: { value: '>', label: '>' },
-  greater_than_or_equal: { value: '>=', label: '>=' },
-  less_than: { value: '<', label: '<' },
-  less_than_or_equal: { value: '<=', label: '<=' },
-  contain: { value: 'contain', label: '包含' },
-  not_contain: { value: 'not_contain', label: '不含' },
-  not_contain_not_contain_null: {
-    value: 'not_contain_not_contain_null',
-    label: '不含(不含null)',
+  greater_than_or_equal: {
+    value: '>=',
+    label: i18n.t('analytics:operators.greaterThanOrEqual'),
   },
+  less_than: { value: '<', label: i18n.t('analytics:operators.lessThan') },
+  less_than_or_equal: {
+    value: '<=',
+    label: i18n.t('analytics:operators.lessThanOrEqual'),
+  },
+  in: { value: 'in', label: i18n.t('analytics:operators.in') },
+  not_in: { value: 'not_in', label: i18n.t('analytics:operators.notIn') },
 };
 
 // MOCK DATA

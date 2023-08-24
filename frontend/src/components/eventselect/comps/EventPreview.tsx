@@ -12,6 +12,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MetadataSource } from 'ts/explore-types';
 import { IAnalyticsItem } from '../AnalyticsType';
 
@@ -22,6 +23,7 @@ interface EventPreviewProps {
 const EventPreview: React.FC<EventPreviewProps> = (
   props: EventPreviewProps
 ) => {
+  const { t } = useTranslation();
   const { previewItem } = props;
   return (
     <div className="csdc-event-preview">
@@ -30,28 +32,38 @@ const EventPreview: React.FC<EventPreviewProps> = (
           <div>
             {previewItem.metadataSource === MetadataSource.PRESET ? (
               <>
-                <div className="event-type">自定义事件</div>
-                <div className="event-type system">预置事件</div>
+                <div className="event-type">
+                  {t('analytics:labels.customEvent')}
+                </div>
+                <div className="event-type system">
+                  {t('analytics:labels.presetEvent')}
+                </div>
               </>
             ) : (
               <>
-                <div className="event-type system">自定义事件</div>
-                <div className="event-type">预置事件</div>
+                <div className="event-type system">
+                  {t('analytics:labels.customEvent')}
+                </div>
+                <div className="event-type">
+                  {t('analytics:labels.presetEvent')}
+                </div>
               </>
             )}
           </div>
           <div className="event-info">
             <div className="header-name">{previewItem?.label}</div>
             <div className="info-tem">
-              <div className="info-key">事件名称</div>
+              <div className="info-key">{t('analytics:labels.previewName')}</div>
               <div className="info-value">{previewItem?.value}</div>
             </div>
             <div className="info-tem">
-              <div className="info-key">事件描述</div>
+              <div className="info-key">
+                {t('analytics:labels.previewDescription')}
+              </div>
               <div className="info-value">{previewItem.description}</div>
             </div>
             <div className="info-tem">
-              <div className="info-key">修改时间</div>
+              <div className="info-key">{t('analytics:labels.previewUpdateTime')}</div>
               <div className="info-value">{previewItem.modifyTime}</div>
             </div>
           </div>

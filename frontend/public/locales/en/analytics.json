@@ -132,7 +132,8 @@
       "funnelSteps": "Funnel steps",
       "conversionWindowPeriod": "Conversion window period",
       "filters": "Filters"
-    }
+    },
+    "conditionValueInputPlaceholder": "Input value"
   },
   "dateRange": {
     "relativeModeTitle": "Relative",
@@ -143,14 +144,13 @@
     "clearButtonLabel": "Clear",
     "customRelativeRangeOptionLabel": "Custom range",
     "formatRelativeRangeLabel": "Last",
-    "timeUnitSecond": "second",
-    "timeUnitMinute": "minute",
-    "timeUnitHour": "hour",
-    "timeUnitDay": "day",
-    "timeUnitDays": "days",
-    "timeUnitMonth": "month",
-    "timeUnitMonths": "months",
-    "timeUnitYear": "year"
+    "second": "second",
+    "minute": "minute",
+    "hour": "hour",
+    "day": "day",
+    "week": "week",
+    "month": "month",
+    "year": "year"
   },
   "valid": {
     "projectSelectError": "Must select a project",
@@ -159,7 +159,35 @@
     "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10.",
     "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project.",
     "dashboardSelectError": "Must select a dashboard",
-    "sheetSelectError": "Must select a sheet"
+    "sheetSelectError": "Must select a sheet",
+    "dateRangeIncomplete": "The selected date range is incomplete. Select a start and end date for the date range.",
+    "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date."
+  },
+  "operators": {
+    "null": "is null",
+    "notNull": "is not null",
+    "equal": "=",
+    "notEqual": "!=",
+    "greaterThan": ">",
+    "greaterThanOrEqual": ">=",
+    "lessThan": "<",
+    "lessThanOrEqual": "<=",
+    "in": "in",
+    "notIn": "not in"
+  },
+  "labels": {
+    "eventTitle": "Event",
+    "attributeTitle": "Attribute",
+    "eventAttribute": "Event attribute",
+    "userAttribute": "User attribute",
+    "customAttribute": "Custom attribute",
+    "presetAttribute": "Prest attribute",
+    "customEvent": "Custom event",
+    "presetEvent": "Prest event",
+    "previewName": "Name",
+    "previewDescription": "Description",
+    "previewDataType": "Data type",
+    "previewUpdateTime": "Update time"
   },
   "emptyData": "No Data"
 }

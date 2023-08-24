@@ -18,7 +18,6 @@ import {
   ColumnLayout,
   Container,
   ContentLayout,
-  DateRangePicker,
   Header,
   Input,
   Select,
@@ -79,7 +78,7 @@ import {
   validConditionItemType,
   validEventAnalyticsItem,
 } from 'ts/utils';
-import SelectDashboardModal from '../comps/SelectDashboardModal';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 const AnalyticsFunnel: React.FC = () => {
@@ -94,6 +93,44 @@ const AnalyticsFunnel: React.FC = () => {
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
   );
+
+  const defaultComputeMethodOption: SelectProps.Option = {
+    value: ExploreComputeMethod.USER_CNT,
+    label: t('analytics:options.userNumber') ?? '',
+  };
+
+  const computeMethodOptions: SelectProps.Options = [
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: t('analytics:options.eventNumber') ?? '',
+    },
+    defaultComputeMethodOption,
+  ];
+
+  const customWindowType = {
+    value: ExploreConversionIntervalType.CUSTOMIZE,
+    label: t('analytics:options.customWindow'),
+  };
+
+  const windowTypeOptions = [
+    customWindowType,
+    {
+      value: ExploreConversionIntervalType.CURRENT_DAY,
+      label: t('analytics:options.theDayWindow'),
+    },
+  ];
+
+  const minuteWindowUnitOption = {
+    value: 'minute',
+    label: t('analytics:options.minuteWindowUnit'),
+  };
+
+  const windowUnitOptions = [
+    { value: 'second', label: t('analytics:options.secondWindowUnit') },
+    minuteWindowUnitOption,
+    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
+    { value: 'day', label: t('analytics:options.dayWindowUnit') },
+  ];
 
   const getEmbeddingUrl = async (
     dashboardId: string,
@@ -158,8 +195,8 @@ const AnalyticsFunnel: React.FC = () => {
       }
     } catch (error) {
       console.log(error);
+      return [];
     }
-    return [];
   };
 
   const getEventParameters = async (eventName: string | undefined) => {
@@ -178,8 +215,8 @@ const AnalyticsFunnel: React.FC = () => {
       }
     } catch (error) {
       console.log(error);
+      return [];
     }
-    return [];
   };
 
   const listMetadataEvents = async () => {
@@ -219,7 +256,7 @@ const AnalyticsFunnel: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
-      const presetParameters = parameters.filter(
+      const presetParameters = parameters?.filter(
         (item) => item.metadataSource === MetadataSource.PRESET
       );
       const userAttributes = await getUserAttributes();
@@ -247,16 +284,6 @@ const AnalyticsFunnel: React.FC = () => {
     listAllAttributes();
   }, [projectId]);
 
-  const metricOptions = [
-    {
-      value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber'),
-    },
-    {
-      value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userNumber'),
-    },
-  ];
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
@@ -266,36 +293,13 @@ const AnalyticsFunnel: React.FC = () => {
 
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
-    useState<SelectProps.Option | null>({
-      value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userNumber') ?? '',
-    });
+    useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
-  const customWindowType = {
-    value: ExploreConversionIntervalType.CUSTOMIZE,
-    label: t('analytics:options.customWindow'),
-  };
-  const windowTypeOptions = [
-    customWindowType,
-    {
-      value: ExploreConversionIntervalType.CURRENT_DAY,
-      label: t('analytics:options.theDayWindow'),
-    },
-  ];
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
 
-  const windowUnitOptions = [
-    { value: 'second', label: t('analytics:options.secondWindowUnit') },
-    { value: 'minute', label: t('analytics:options.minuteWindowUnit') },
-    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
-    { value: 'day', label: t('analytics:options.dayWindowUnit') },
-  ];
   const [selectedWindowUnit, setSelectedWindowUnit] =
-    useState<SelectProps.Option | null>({
-      value: 'minute',
-      label: t('analytics:options.minuteWindowUnit') ?? '',
-    });
+    useState<SelectProps.Option | null>(minuteWindowUnitOption);
 
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
@@ -668,7 +672,7 @@ const AnalyticsFunnel: React.FC = () => {
                     <div className="cs-analytics-config">
                       <Select
                         selectedOption={selectedMetric}
-                        options={metricOptions}
+                        options={computeMethodOptions}
                         onChange={(event) => {
                           setSelectedMetric(event.detail.selectedOption);
                         }}
@@ -737,116 +741,10 @@ const AnalyticsFunnel: React.FC = () => {
                   <Box variant="awsui-key-label">
                     {t('analytics:funnel.labels.funnelDateRange')}
                   </Box>
-                  <div>
-                    <DateRangePicker
-                      onChange={({ detail }) => {
-                        setDateRangeValue(
-                          detail.value as DateRangePickerProps.Value
-                        );
-                      }}
-                      value={dateRangeValue ?? null}
-                      dateOnly
-                      relativeOptions={[
-                        {
-                          key: 'previous-1-day',
-                          amount: 1,
-                          unit: 'day',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-7-days',
-                          amount: 7,
-                          unit: 'day',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-14-days',
-                          amount: 14,
-                          unit: 'day',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-1-month',
-                          amount: 1,
-                          unit: 'month',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-3-months',
-                          amount: 3,
-                          unit: 'month',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-6-months',
-                          amount: 6,
-                          unit: 'month',
-                          type: 'relative',
-                        },
-                        {
-                          key: 'previous-1-year',
-                          amount: 1,
-                          unit: 'year',
-                          type: 'relative',
-                        },
-                      ]}
-                      isValidRange={(
-                        range: DateRangePickerProps.Value | null
-                      ) => {
-                        if (range?.type === 'absolute') {
-                          const [startDateWithoutTime] =
-                            range.startDate.split('T');
-                          const [endDateWithoutTime] = range.endDate.split('T');
-                          if (!startDateWithoutTime || !endDateWithoutTime) {
-                            return {
-                              valid: false,
-                              errorMessage:
-                                'The selected date range is incomplete. Select a start and end date for the date range.',
-                            };
-                          }
-                          if (
-                            new Date(range.startDate).getTime() -
-                              new Date(range.endDate).getTime() >
-                            0
-                          ) {
-                            return {
-                              valid: false,
-                              errorMessage:
-                                'The selected date range is invalid. The start date must be before the end date.',
-                            };
-                          }
-                        }
-                        return { valid: true };
-                      }}
-                      i18nStrings={{
-                        relativeModeTitle:
-                          t('analytics:dateRange.relativeModeTitle') ?? '',
-                        absoluteModeTitle:
-                          t('analytics:dateRange.absoluteModeTitle') ?? '',
-                        relativeRangeSelectionHeading:
-                          t(
-                            'analytics:dateRange.relativeRangeSelectionHeading'
-                          ) ?? '',
-                        cancelButtonLabel:
-                          t('analytics:dateRange.cancelButtonLabel') ?? '',
-                        applyButtonLabel:
-                          t('analytics:dateRange.applyButtonLabel') ?? '',
-                        clearButtonLabel:
-                          t('analytics:dateRange.clearButtonLabel') ?? '',
-                        customRelativeRangeOptionLabel:
-                          t(
-                            'analytics:dateRange.customRelativeRangeOptionLabel'
-                          ) ?? '',
-                        formatRelativeRange: (
-                          value: DateRangePickerProps.RelativeValue
-                        ) => {
-                          return `${t(
-                            'analytics:dateRange.formatRelativeRangeLabel'
-                          )} ${value.amount} ${value.unit}`;
-                        },
-                      }}
-                    />
-                  </div>
+                  <ExploreDateRangePicker
+                    dateRangeValue={dateRangeValue}
+                    setDateRangeValue={setDateRangeValue}
+                  />
                 </SpaceBetween>
                 <br />
                 <ColumnLayout columns={2} variant="text-grid">

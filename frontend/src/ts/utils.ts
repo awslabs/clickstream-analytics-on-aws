@@ -19,6 +19,7 @@ import {
   IConditionItemType,
   IEventAnalyticsItem,
 } from 'components/eventselect/AnalyticsType';
+import i18n from 'i18n';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { EPipelineStatus, ExecutionType, TIME_FORMAT } from './const';
@@ -326,12 +327,12 @@ export const metadataEventsConvertToCategoryItemType = (
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryPresetItems: CategoryItemType = {
-    categoryName: '预置事件',
+    categoryName: i18n.t('analytics:labels.presetEvent'),
     categoryType: 'event',
     itemList: [],
   };
   const categoryCustomItems: CategoryItemType = {
-    categoryName: '自定义事件',
+    categoryName: i18n.t('analytics:labels.customEvent'),
     categoryType: 'event',
     itemList: [],
   };
@@ -366,12 +367,12 @@ export const parametersConvertToCategoryItemType = (
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryEventItems: CategoryItemType = {
-    categoryName: '事件属性',
+    categoryName: i18n.t('analytics:labels.eventAttribute'),
     categoryType: 'attribute',
     itemList: [],
   };
   const categoryUserItems: CategoryItemType = {
-    categoryName: '用户属性',
+    categoryName: i18n.t('analytics:labels.userAttribute'),
     categoryType: 'attribute',
     itemList: [],
   };

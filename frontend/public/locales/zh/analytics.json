@@ -132,7 +132,8 @@
       "funnelSteps": "漏斗步骤",
       "conversionWindowPeriod": "转化窗口期",
       "filters": "过滤器"
-    }
+    },
+    "conditionValueInputPlaceholder": "输入值"
   },
   "dateRange": {
     "relativeModeTitle": "相对时间",
@@ -143,14 +144,13 @@
     "clearButtonLabel": "清除",
     "customRelativeRangeOptionLabel": "自定义范围",
     "formatRelativeRangeLabel": "过去",
-    "timeUnitSecond": "秒",
-    "timeUnitMinute": "分钟",
-    "timeUnitHour": "小时",
-    "timeUnitDay": "天",
-    "timeUnitDays": "天",
-    "timeUnitMonth": "个月",
-    "timeUnitMonths": "个月",
-    "timeUnitYear": "年"
+    "second": "秒",
+    "minute": "分钟",
+    "hour": "小时",
+    "day": "天",
+    "week": "周",
+    "month": "个月",
+    "year": "年"
   },
   "valid": {
     "projectSelectError": "必须选择一个项目",
@@ -159,7 +159,35 @@
     "dashboardSheetTooMuchError": "工作表不能超过10个",
     "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的管道",
     "dashboardSelectError": "必须选择一个看板",
-    "sheetSelectError": "必须选择一个工作表"
+    "sheetSelectError": "必须选择一个工作表",
+    "dateRangeIncomplete": "所选日期范围不完整。为日期范围选择开始和结束日期。",
+    "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。"
+  },
+  "operators": {
+    "null": "空",
+    "notNull": "非空",
+    "equal": "=",
+    "notEqual": "!=",
+    "greaterThan": ">",
+    "greaterThanOrEqual": ">=",
+    "lessThan": "<",
+    "lessThanOrEqual": "<=",
+    "in": "在其中",
+    "notIn": "不在其中"
+  },
+  "labels": {
+    "eventTitle": "事件",
+    "attributeTitle": "属性",
+    "eventAttribute": "事件属性",
+    "userAttribute": "用户属性",
+    "customAttribute": "自定义属性",
+    "presetAttribute": "预置属性",
+    "customEvent": "自定义事件",
+    "presetEvent": "预置事件",
+    "previewName": "名称",
+    "previewDescription": "描述",
+    "previewDataType": "数据类型",
+    "previewUpdateTime": "更新时间"
   },
   "emptyData": "无数据"
 }
