@@ -583,6 +583,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:PassDataSet',
               'quicksight:PassDataSource',
               'quicksight:CreateDashboard',
+              'quicksight:DeleteDashboard',
               'quicksight:UpdateDashboard',
               'quicksight:DescribeDashboard',
               'quicksight:UpdateDashboardPublishedVersion',
