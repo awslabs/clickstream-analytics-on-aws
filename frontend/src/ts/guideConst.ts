@@ -73,14 +73,7 @@ export const ANDROID_CONFIG_SDK_TEXT = `import software.aws.solution.clickstream
 // config the sdk after initialize.
 ClickstreamAnalytics.getClickStreamConfiguration()
             .withAppId("${TEMPLATE_APP_ID}")
-            .withEndpoint("${TEMPLATE_SERVER_ENDPOINT}")
-            .withAuthCookie("your authentication cookie")
-            .withSendEventsInterval(10000)
-            .withSessionTimeoutDuration(1800000)
-            .withTrackAppExceptionEvents(false)
-            .withLogEvents(true)
-            .withCustomDns(CustomOkhttpDns.getInstance())
-            .withCompressEvents(true);
+            .withEndpoint("${TEMPLATE_SERVER_ENDPOINT}");
 `;
 
 export const ANDROID_RECODE_EVENT = `import software.aws.solution.clickstream.ClickstreamAnalytics;
@@ -102,7 +95,7 @@ ClickstreamAnalytics.recordEvent("button_click");
 export const ANDROID_ADD_USER_ATTR = `import software.aws.solution.clickstream.ClickstreamAnalytcs;
 import software.aws.solution.clickstream.ClickstreamUserAttribute;
 
-// when user login usccess.
+// when user login success.
 ClickstreamAnalytics.setUserId("UserId");
 
 // when user logout
@@ -173,7 +166,7 @@ ClickstreamAnalytics.recordEvent(eventName: "button_click")
 
 export const IOS_ADD_USER_ATTR = `import Clickstream
 
-// when user login usccess.
+// when user login success.
 ClickstreamAnalytics.setUserId(userId: "UserId")
 
 // when user logout
