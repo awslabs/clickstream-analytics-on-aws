@@ -307,7 +307,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
           <>
             <div>
               <Box variant="awsui-key-label">
-                {t('pipeline:detail.dataProcesingInt')}
+                {t('pipeline:detail.dataProcessingInt')}
               </Box>
               <div>{getDataProcessingIntervalDisplay()}</div>
             </div>

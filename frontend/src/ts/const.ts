@@ -125,9 +125,9 @@ export const TRANSFORM_LIST = [
   },
 ];
 
-export enum ResourceCreateMehod {
+export enum ResourceCreateMethod {
   CREATE = 'create',
-  EXSITING = 'exsiting',
+  EXISTING = 'existing',
 }
 
 export enum YES_NO {

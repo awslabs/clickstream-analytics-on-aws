@@ -58,7 +58,7 @@ import {
   MIN_MSK_SINK_INTERVAL,
   ProtocalType,
   REDSHIFT_UNIT_LIST,
-  ResourceCreateMehod,
+  ResourceCreateMethod,
   SDK_LIST,
   SinkType,
 } from 'ts/const';
@@ -165,8 +165,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   ] = useState(false);
 
   const [
-    redshiftProvisionedCulsterEmptyError,
-    setRedshiftProvisionedCulsterEmptyError,
+    redshiftProvisionedClusterEmptyError,
+    setRedshiftProvisionedClusterEmptyError,
   ] = useState(false);
   const [
     redshiftProvisionedDBUserEmptyError,
@@ -525,7 +525,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         if (pipelineInfo.redshiftType === 'provisioned') {
           // Check redshift cluster
           if (!pipelineInfo.selectedRedshiftCluster?.value) {
-            setRedshiftProvisionedCulsterEmptyError(true);
+            setRedshiftProvisionedClusterEmptyError(true);
             return false;
           }
           // Check DB user
@@ -1701,8 +1701,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               redshiftServerlessSubnetInvalidError={
                 redshiftServerlessSubnetInvalidError
               }
-              redshiftProvisionedCulsterEmptyError={
-                redshiftProvisionedCulsterEmptyError
+              redshiftProvisionedClusterEmptyError={
+                redshiftProvisionedClusterEmptyError
               }
               redshiftProvisionedDBUserEmptyError={
                 redshiftProvisionedDBUserEmptyError
@@ -1825,7 +1825,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 }
               }}
               changeSelectedRedshift={(cluster) => {
-                setRedshiftProvisionedCulsterEmptyError(false);
+                setRedshiftProvisionedClusterEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -2248,7 +2248,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (pipelineInfo.ingestionServer.sinkType !== 'kafka') {
         return;
       }
-      pipelineInfo.mskCreateMethod = ResourceCreateMehod.EXSITING;
+      pipelineInfo.mskCreateMethod = ResourceCreateMethod.EXISTING;
       const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
         vpcId: pipelineInfo.network.vpcId,
         region: pipelineInfo.region,
@@ -2276,7 +2276,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (pipelineInfo.ingestionServer.sinkType !== 'kafka') {
         return;
       }
-      pipelineInfo.mskCreateMethod = ResourceCreateMehod.CREATE;
+      pipelineInfo.mskCreateMethod = ResourceCreateMethod.CREATE;
       pipelineInfo.kafkaBrokers =
         pipelineInfo.ingestionServer.sinkKafka.brokers.join(',');
       const { success, data }: ApiResponse<SecurityGroupResponse[]> =

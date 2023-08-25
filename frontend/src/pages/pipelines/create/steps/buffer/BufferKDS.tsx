@@ -68,7 +68,7 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
           }
           options={[
             {
-              label: t('pipeline:create.kds.ondemand') || '',
+              label: t('pipeline:create.kds.onDemand') || '',
               value: KDSProvisionType.ON_DEMAND,
             },
             {

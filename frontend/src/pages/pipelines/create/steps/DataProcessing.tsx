@@ -100,7 +100,7 @@ interface DataProcessingProps {
   redshiftServerlessSGEmptyError: boolean;
   redshiftServerlessSubnetEmptyError: boolean;
   redshiftServerlessSubnetInvalidError: boolean;
-  redshiftProvisionedCulsterEmptyError: boolean;
+  redshiftProvisionedClusterEmptyError: boolean;
   redshiftProvisionedDBUserEmptyError: boolean;
 }
 
@@ -141,7 +141,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     redshiftServerlessSGEmptyError,
     redshiftServerlessSubnetEmptyError,
     redshiftServerlessSubnetInvalidError,
-    redshiftProvisionedCulsterEmptyError,
+    redshiftProvisionedClusterEmptyError,
     redshiftProvisionedDBUserEmptyError,
   } = props;
 
@@ -604,9 +604,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             header={
               <Header
                 variant="h2"
-                description={t('pipeline:create.anlyEngineDesc')}
+                description={t('pipeline:create.analyticEngineDesc')}
               >
-                {t('pipeline:create.anlyEngine')}
+                {t('pipeline:create.analyticEngine')}
               </Header>
             }
           >
@@ -886,9 +886,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         label={t('pipeline:create.redshiftCluster')}
                         description={t('pipeline:create.redshiftClusterDesc')}
                         errorText={
-                          redshiftProvisionedCulsterEmptyError
+                          redshiftProvisionedClusterEmptyError
                             ? t(
-                                'pipeline:valid.redshiftProvisionedCulsterEmptyError'
+                                'pipeline:valid.redshiftProvisionedClusterEmptyError'
                               )
                             : ''
                         }
