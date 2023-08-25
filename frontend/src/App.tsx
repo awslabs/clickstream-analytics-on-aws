@@ -137,7 +137,7 @@ const SignedInPage: React.FC = () => {
               auth.signinRedirect();
             }}
           >
-            {t('button.signin')}
+            {t('button.signIn')}
           </Button>
         </div>
       }

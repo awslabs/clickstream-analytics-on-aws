@@ -285,7 +285,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
             <>
               {pluginType !== 'Transform' && (
                 <div className="maxmind-copyright">
-                  * {t('maxmindCopyRight')}
+                  * {t('maxMindCopyRight')}
                   <Link external href={XMIND_LINK}>
                     {XMIND_LINK}
                   </Link>

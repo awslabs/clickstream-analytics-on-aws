@@ -25,7 +25,7 @@
     "dashboard": "Monitors Dashboard",
     "monitorAlerts": "Alarms",
     "tools": "Tools",
-    "simuTest": "Simulation testing",
+    "simulationTest": "Simulation testing",
     "sdkIntegration": "SDK integration",
     "notifications": "Notifications",
     "doc": "Documentation"
@@ -130,7 +130,7 @@
     "addApplication": "Add Application",
     "complete": "Complete",
     "downloadJSON": "Download the config json file",
-    "signin": "Sign In",
+    "signIn": "Sign In",
     "chooseFile": "Choose file",
     "chooseFiles": "Choose files",
     "viewInCloudWatch": "View in CloudWatch",
@@ -229,7 +229,7 @@
   "prePage": "Previous page",
   "page": "Page",
   "allPages": " of all pages",
-  "addtionalSettings": "Addtional Settings",
+  "additionalSettings": "Additional Settings",
   "step": "Step",
   "steps": "Steps",
   "of": "of",
@@ -244,6 +244,6 @@
   "no": "No",
   "enabled": "Enabled",
   "disabled": "Disabled",
-  "maxmindCopyRight": "IP Enrichment plug-in includes GeoLite2 data created by MaxMind, available from ",
+  "maxMindCopyRight": "IP Enrichment plug-in includes GeoLite2 data created by MaxMind, available from ",
   "checkingAvailable": "Checking AWS services availability"
 }

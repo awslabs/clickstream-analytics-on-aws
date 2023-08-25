@@ -131,7 +131,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -268,7 +268,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );

@@ -25,7 +25,7 @@
     "dashboard": "显示器仪表板",
     "monitorAlerts": "告警",
     "tools": "工具",
-    "simuTest": "模拟测试",
+    "simulationTest": "模拟测试",
     "sdkIntegration": "SDK集成",
     "notifications": "通知",
     "doc": "文档"
@@ -130,7 +130,7 @@
     "addApplication": "添加应用程序",
     "complete": "完成",
     "downloadJSON": "下载配置 JSON 文件",
-    "signin": "登录",
+    "signIn": "登录",
     "chooseFile": "选择文件",
     "chooseFiles": "选择文件",
     "viewInCloudWatch": "在  CloudWatch 查看",
@@ -229,7 +229,7 @@
   "prePage": "上一页",
   "page": "页面",
   "allPages": " 所有页面的",
-  "addtionalSettings": "其他设置",
+  "additionalSettings": "其他设置",
   "step": "步骤",
   "steps": "步骤",
   "of": "的",
@@ -244,6 +244,6 @@
   "no": "没有",
   "enabled": "已启用",
   "disabled": "已禁用",
-  "maxmindCopyRight": "IP 富化插件使用 MaxMind 创建的 Geolite2 数据，可从以下网址获得 ",
+  "maxMindCopyRight": "IP 富化插件使用 MaxMind 创建的 Geolite2 数据，可从以下网址获得 ",
   "checkingAvailable": "检查亚马逊云科技服务的可用性"
 }

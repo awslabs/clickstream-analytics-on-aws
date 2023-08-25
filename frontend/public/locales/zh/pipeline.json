@@ -26,7 +26,7 @@
     "sinkSizeError": "大小值必须大于 {{min}} 且小于 {{max}}",
     "minCapacityError": "最小容量必须为整数且大于或等于 1",
     "maxCapacityError": "最大容量必须为整数且大于最小容量",
-    "warmpoolError": "Warm pool必须是整数且小于最大容量",
+    "warmPoolError": "Warm pool必须是整数且小于最大容量",
     "corsFormatError": "CORS 域名格式错误",
     "secretEmptyError": "请选择一个密钥",
     "mskEmptyError": "请选择 MSK 集群",
@@ -43,7 +43,7 @@
     "redshiftServerlessSGEmptyError": "请选择安全组",
     "redshiftServerlessSubnetEmptyError": "请选择子网",
     "redshiftServerlessSubnetInvalidError": "请选择位于至少 2 个不同可用区的至少 3 个子网",
-    "redshiftProvisionedCulsterEmptyError": "请选择群集",
+    "redshiftProvisionedClusterEmptyError": "请选择群集",
     "redshiftProvisionedDBUserEmptyError": "请输入数据库用户。",
     "quickSightUserEmptyError": "请选择 QuickSight 用户。",
     "emailInvalid": "电子邮件无效。"
@@ -86,7 +86,7 @@
       "provisionMode": "模式",
       "provisionModeDesc": "如果您想为 KDS 启用自动扩缩，请选择 “按需” 模式",
       "selectMode": "选择模式",
-      "ondemand": "按需",
+      "onDemand": "按需",
       "provisioned": "预置"
     },
     "msk": {
@@ -101,11 +101,11 @@
       "brokerLinkDesc": "输入您要连接的集群的连接 URL。",
       "brokerLindPlaceHolder": "输入连接 URL",
       "manualTopicDesc": "请指定存储数据的主题",
-      "selectMSK": "请选择 MKS 集群",
+      "selectMSK": "请选择 MSK 集群",
       "createMSK": "创建快速启动集群",
       "createMSKDesc": "该解决方案创建了一个小型 MSK 集群（2vcpu，8RAM）作为启动程序，适用于测试目的",
-      "exsitingMSK": "选择现有集群",
-      "exsitingMSKDesc": "该解决方案与同一 VPC 中的 MSK 集群建立连接"
+      "existingMSK": "选择现有集群",
+      "existingMSKDesc": "该解决方案与同一 VPC 中的 MSK 集群建立连接"
     },
     "s3": {
       "selectS3": "为数据缓冲区选择 S3 存储桶",

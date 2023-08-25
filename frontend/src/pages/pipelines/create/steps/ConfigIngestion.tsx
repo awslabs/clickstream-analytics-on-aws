@@ -402,7 +402,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               <FormField
                 stretch
                 errorText={
-                  warmPoolError ? t('pipeline:valid.warmpoolError') : ''
+                  warmPoolError ? t('pipeline:valid.warmPoolError') : ''
                 }
               >
                 <div>{t('pipeline:create.warmPool')}</div>
@@ -543,7 +543,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             </Alert>
           )}
 
-          <ExpandableSection headerText={t('addtionalSettings')}>
+          <ExpandableSection headerText={t('additionalSettings')}>
             <SpaceBetween direction="vertical" size="l">
               <FormField
                 label={t('pipeline:create.requestPath')}
@@ -856,7 +856,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           {(pipelineInfo.ingestionServer.sinkType === SinkType.MSK ||
             pipelineInfo.ingestionServer.sinkType === SinkType.KDS) && (
-            <ExpandableSection headerText={t('addtionalSettings')}>
+            <ExpandableSection headerText={t('additionalSettings')}>
               <SpaceBetween direction="vertical" size="l">
                 <FormField
                   label={t('pipeline:create.sinkMaxInterval')}

@@ -7,7 +7,7 @@
   "status": "Status",
   "creationMethod": "Creation method",
   "lastEditDate": "Last edit date",
-  "tagDesc": "Those tags will be propogated to all the resource in this pipeline",
+  "tagDesc": "Those tags will be propagated to all the resource in this pipeline",
   "valid": {
     "nameEmpty": "Please input pipeline name.",
     "regionEmpty": "Please select region.",
@@ -24,9 +24,9 @@
     "acknowledgeHTTPSecurity": "Please click acknowledge button to continue.",
     "sinkIntervalError": "The interval value must be greater than {{min}} and less than {{max}}",
     "sinkSizeError": "The size value must be greater than {{min}} and less than {{max}}",
-    "minCapacityError": "Minimum capacity must be an integer and larger or equel than 1",
+    "minCapacityError": "Minimum capacity must be an integer and larger or equal than 1",
     "maxCapacityError": "Maximum capacity must be an integer and larger than minimum capacity",
-    "warmpoolError": "Warm pool must be an integer and smaller than maximum capacity",
+    "warmPoolError": "Warm pool must be an integer and smaller than maximum capacity",
     "corsFormatError": "CORS domain format error",
     "secretEmptyError": "Please select a secret",
     "mskEmptyError": "Please select MSK Cluster",
@@ -43,7 +43,7 @@
     "redshiftServerlessSGEmptyError": "Please select security groups",
     "redshiftServerlessSubnetEmptyError": "Please select subnets",
     "redshiftServerlessSubnetInvalidError": "Please select at least 3 subnets locates in at least 2 different AZ",
-    "redshiftProvisionedCulsterEmptyError": "Please select a culster",
+    "redshiftProvisionedClusterEmptyError": "Please select a cluster",
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
     "quickSightUserEmptyError": "Please select a QuickSight user.",
     "emailInvalid": "Email invalid."
@@ -86,7 +86,7 @@
       "provisionMode": "Provision mode",
       "provisionModeDesc": "Choose On-demand if you want to enable autoscaling for the KDS",
       "selectMode": "Select provision mode",
-      "ondemand": "On-demand",
+      "onDemand": "On-demand",
       "provisioned": "Provisioned"
     },
     "msk": {
@@ -101,11 +101,11 @@
       "brokerLinkDesc": "Enter the connection URL for the cluster you wish to connect to.",
       "brokerLindPlaceHolder": "Enter the connection URL",
       "manualTopicDesc": "Please specify the topic for storing the data",
-      "selectMSK": "Please select a MKS Cluster",
+      "selectMSK": "Please select a MSK Cluster",
       "createMSK": "Create a quick-start cluster",
-      "createMSKDesc": "The solution creates a small MSK cluster (2vcpu, 8RAM) as starter, suitable for testing purpose",
-      "exsitingMSK": "Select an existing cluster",
-      "exsitingMSKDesc": "The solution establish connection with a MSK cluster within the same VPC"
+      "createMSKDesc": "The solution creates a small MSK cluster (2vCpu, 8RAM) as starter, suitable for testing purpose",
+      "existingMSK": "Select an existing cluster",
+      "existingMSKDesc": "The solution establish connection with a MSK cluster within the same VPC"
     },
     "s3": {
       "selectS3": "Select a S3 bucket for data buffer",

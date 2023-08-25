@@ -7,7 +7,7 @@
     "emailInvalid": "Notification email invalid.",
     "projectIdInvalid": "Project ID must start with a lowercase letter and can only support lowercase letter, number and _, maximum of 127 characters",
     "saveFirst": "Please click save button to save project ID first.",
-    "projectIdExisting": "Project ID already exsiting."
+    "projectIdExisting": "Project ID already existing."
   },
   "split": {
     "id": "Project ID",
