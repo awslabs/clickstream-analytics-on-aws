@@ -741,7 +741,7 @@ describe('Workflow test', () => {
   it('Generate Workflow kafka msk + DataProcessing + Athena only', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, {
         publicAZContainPrivateAZ: true,
         subnetsIsolated: true,
         subnetsCross3AZ: true,
