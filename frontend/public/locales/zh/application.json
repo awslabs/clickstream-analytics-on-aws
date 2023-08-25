@@ -47,7 +47,10 @@
     "iosDownloadJson": "3。下载您的 {{fileName}} 文件，然后将其粘贴到您的项目根文件夹。",
     "iosInitSDK": "1. 初始化 SDK",
     "iosInitSDKDesc": "配置参数后，需要在 AppDelegate 应用程序 () 方法中对其进行初始化才能使用 SDK。",
-    "iosConfigSDK": "2. 配置 SDK"
+    "iosConfigSDK": "2. 配置 SDK",
+    "webInstallSDK": "1. 安装 Clickstream SDK",
+    "webInstallSDKDesc": "请使用 npm 或 yarn 等包管理器来安装 Clickstream SDK。",
+    "webSDKSetupDesc": "将初始化代码添加到您的应用的入口文件，例如 React 中的 index.js/app.tsx 或 Vue/Angular 中的 main.ts。"
   },
   "detail": {
     "basicInfo": "基本信息",
