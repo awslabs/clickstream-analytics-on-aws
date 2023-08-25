@@ -77,6 +77,7 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
         'elasticloadbalancing:DescribeRules',
         'elasticloadbalancing:CreateRule',
         'elasticloadbalancing:DeleteRule',
+        'elasticloadbalancing:ModifyRule',
       ],
       resources: ['*'],
     }),

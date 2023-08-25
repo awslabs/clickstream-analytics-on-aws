@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, Rule } from '@aws-sdk/client-elastic-load-balancing-v2';
+import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule } from '@aws-sdk/client-elastic-load-balancing-v2';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
@@ -83,6 +83,28 @@ async function _handler(
     await modifyFallbackRule(listenerArn);
   }
 
+  if (requestType === 'Update') {
+    const allExistingRules = await getAllExistingAppIdRules(listenerArn);
+    for (const rule of allExistingRules) {
+      if (!rule.Conditions) continue;
+      const pathPatternCondition = rule.Conditions.find((condition) => condition.Field === 'path-pattern');
+      if (pathPatternCondition && pathPatternCondition.Values && pathPatternCondition.Values[0] !== endpointPath) {
+        const modifyCommand = new ModifyRuleCommand({
+          RuleArn: rule.RuleArn,
+          Actions: rule.Actions,
+          Conditions: [
+            {
+              Field: 'path-pattern',
+              Values: [endpointPath], // Update the path-pattern value
+            },
+            ...rule.Conditions.filter((condition) => condition.Field !== 'path-pattern'),
+          ],
+        });
+        await albClient.send(modifyCommand);
+      }
+    }
+  }
+
   if (clickStreamSDK === 'Yes') {
     const shouldDeleteRules = [];
     //get appId list and remove empty appId
@@ -121,6 +143,7 @@ async function _handler(
     // delete rules
     await deleteRules(shouldDeleteRules);
   }
+
   // set default rules
   if (requestType == 'Delete') {
     logger.info('Delete Listener rules');
