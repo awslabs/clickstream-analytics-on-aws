@@ -43,7 +43,7 @@ sed -i "s#%%SERVER_ENDPOINT_PATH%%#$SERVER_ENDPOINT_PATH#g; \
 s#%%NGINX_WORKER_CONNECTIONS%%#$NGINX_WORKER_CONNECTIONS#g;" /etc/nginx/nginx.conf
 
 if [ -z "$SERVER_CORS_ORIGIN" ]; then
-    sed -i "/%%SERVER_CORS_ORIGIN%%/d" /etc/nginx/nginx.conf
+    sed -i "s/%%SERVER_CORS_ORIGIN%%/''/g" /etc/nginx/nginx.conf
 else
     sed -i "s#%%SERVER_CORS_ORIGIN%%#$SERVER_CORS_ORIGIN#g;" /etc/nginx/nginx.conf
 fi
