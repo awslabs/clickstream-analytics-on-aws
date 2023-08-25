@@ -36,6 +36,7 @@ import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
+import ConfigWebSDK from './comp/ConfigWebSDK';
 
 const ApplicationDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ const ApplicationDetail: React.FC = () => {
       href: `/project/detail/${pid}`,
     },
     {
-      text: applicationInfo?.name || '',
+      text: applicationInfo?.name ?? '',
       href: '/',
     },
   ];
@@ -265,7 +266,7 @@ const ApplicationDetail: React.FC = () => {
                   tabs={[
                     {
                       label: t('application:detail.android'),
-                      id: 'endpoint',
+                      id: 'android',
                       content: (
                         <div className="pd-20">
                           <ConfigAndroidSDK appInfo={applicationInfo} />
@@ -274,10 +275,19 @@ const ApplicationDetail: React.FC = () => {
                     },
                     {
                       label: t('application:detail.ios'),
-                      id: 'enrich',
+                      id: 'ios',
                       content: (
                         <div className="pd-20">
                           <ConfigIOSSDK appInfo={applicationInfo} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('application:detail.web'),
+                      id: 'web',
+                      content: (
+                        <div className="pd-20">
+                          <ConfigWebSDK appInfo={applicationInfo} />
                         </div>
                       ),
                     },

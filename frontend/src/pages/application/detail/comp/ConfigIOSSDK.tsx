@@ -31,10 +31,10 @@ import {
   IOS_INIT_SDK_TEXT,
   IOS_RECODE_EVENT,
   DOWNLOAD_FILENAME,
-  GUIDE_LINK_IOS_SDK,
   TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
   CLICKSTREAM_IOS_REPO_LINK,
+  buildSDKDocumentLink,
 } from 'ts/guideConst';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
@@ -44,7 +44,7 @@ interface ConfigSDKProps {
 
 const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const { appInfo } = props;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const generateIOSConfigFile = () => {
     // Define config content
@@ -165,7 +165,10 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           {t('application:sdkGuide.moreInfoLink', {
             sdkType: 'iOS',
           })}
-          <Link href={GUIDE_LINK_IOS_SDK} external>
+          <Link
+            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/swift')}
+            external
+          >
             {t('application:sdkGuide.devGuide')}
           </Link>
         </p>

@@ -11,12 +11,23 @@
  *  and limitations under the License.
  */
 
+import { ZH_LANGUAGE_LIST } from './const';
+
 export const CLICKSTREAM_IOS_REPO_LINK =
   'https://github.com/awslabs/clickstream-swift';
-export const GUIDE_LINK_ANDROID_SDK =
-  'https://github.com/awslabs/clickstream-android#integrate-sdk';
-export const GUIDE_LINK_IOS_SDK =
-  'https://github.com/awslabs/clickstream-swift#integrate-sdk';
+
+export const SDK_GUIDE_LINK_EN =
+  'https://awslabs.github.io/clickstream-analytics-on-aws/en';
+export const SDK_GUIDE_LINK_ZH =
+  'https://awslabs.github.io/clickstream-analytics-on-aws/zh';
+
+export const buildSDKDocumentLink = (lang: string, url?: string) => {
+  if (ZH_LANGUAGE_LIST.includes(lang)) {
+    return SDK_GUIDE_LINK_ZH + (url ?? '');
+  }
+  return SDK_GUIDE_LINK_EN + (url ?? '');
+};
+
 export const DOWNLOAD_FILENAME = 'amplifyconfiguration.json';
 export const TEMPLATE_APP_ID = '{{APP_ID}}';
 export const TEMPLATE_SERVER_ENDPOINT = '{{SERVER_ENDPOINT}}';
@@ -141,12 +152,6 @@ do {
     var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
     configuration.appId = "${TEMPLATE_APP_ID}"
     configuration.endPoint = "${TEMPLATE_SERVER_ENDPOINT}"
-    configuration.authCookie = "your authentication cookie"
-    configuration.sessionTimeoutDuration = 1800000
-    configuration.isTrackAppExceptionEvents = false
-    configuration.isLogEvents = true
-    configuration.isCompressEvents = true    
-    configuration.isLogEvents = true
 } catch {
     print("Failed to config ClickstreamAnalytics: (error)")
 }
@@ -180,4 +185,38 @@ let clickstreamUserAttribute : ClickstreamAttribute=[
     "_user_name": "carl"
 ]
 ClickstreamAnalytics.addUserAttributes(userAttribute: clickstreamUserAttribute)
+`;
+
+export const WEB_INSTALL_GUIDE = `// npm
+npm install @aws/clickstream-web
+
+// Or yarn
+yarn install @aws/clickstream-web`;
+
+export const WEB_INIT_SDK_TEXT = `import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+ClickstreamAnalytics.init(
+  {
+    appId: "${TEMPLATE_APP_ID}", // Your application ID
+    endpoint: "${TEMPLATE_SERVER_ENDPOINT}" // Your server endpoint
+  }
+);
+`;
+
+export const WEB_RECORD_EVENT = `import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+ClickstreamAnalytics.record({ name: 'buttonClick' });
+ClickstreamAnalytics.record({
+  name: 'buttonClick',
+  attributes: { _channel: 'SMS', Successful: true }
+});
+`;
+
+export const WEB_ADD_USER_ATTR = `import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+// when user login success.
+ClickstreamAnalytics.setUserId("UserId");
+
+// when user logout
+ClickstreamAnalytics.setUserId(null);
 `;
