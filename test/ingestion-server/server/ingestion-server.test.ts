@@ -63,6 +63,7 @@ test('WarmPool is created as expected', () => {
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::AutoScaling::WarmPool', {
     MinSize: 1,
+    MaxGroupPreparedCapacity: 1,
   });
 });
 
