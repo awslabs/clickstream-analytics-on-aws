@@ -17,11 +17,10 @@ import {
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
-import { t } from 'i18next';
 import React from 'react';
-import { MetadataValueType } from 'ts/explore-types';
+import { useTranslation } from 'react-i18next';
+import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
 import {
-  ANALYTICS_OPERATORS,
   CategoryItemType,
   IConditionItemType,
 } from './AnalyticsType';
@@ -39,6 +38,7 @@ interface ConditionItemProps {
 const ConditionItem: React.FC<ConditionItemProps> = (
   props: ConditionItemProps
 ) => {
+  const { t } = useTranslation();
   const {
     item,
     conditionOptions,
@@ -47,6 +47,31 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeConditionOperator,
     changeConditionValue,
   } = props;
+
+  const ANALYTICS_OPERATORS = {
+    is_null: { value: ExploreAnalyticsOperators.NULL, label: t('analytics:operators.null') },
+    is_not_null: {
+      value: ExploreAnalyticsOperators.NOT_NULL,
+      label: t('analytics:operators.notNull'),
+    },
+    equal: { value: ExploreAnalyticsOperators.EQUAL, label: t('analytics:operators.equal') },
+    not_equal: { value: ExploreAnalyticsOperators.NOT_EQUAL, label: t('analytics:operators.notEqual') },
+    greater_than: {
+      value: ExploreAnalyticsOperators.GREATER_THAN,
+      label: t('analytics:operators.greaterThan'),
+    },
+    greater_than_or_equal: {
+      value: ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL,
+      label: t('analytics:operators.greaterThanOrEqual'),
+    },
+    less_than: { value: ExploreAnalyticsOperators.LESS_THAN, label: t('analytics:operators.lessThan') },
+    less_than_or_equal: {
+      value: ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL,
+      label: t('analytics:operators.lessThanOrEqual'),
+    },
+    in: { value: ExploreAnalyticsOperators.IN, label: t('analytics:operators.in') },
+    not_in: { value: ExploreAnalyticsOperators.NOT_IN, label: t('analytics:operators.notIn') },
+  };
 
   const CONDITION_STRING_OPERATORS: SelectProps.Options = [
     ANALYTICS_OPERATORS.is_null,

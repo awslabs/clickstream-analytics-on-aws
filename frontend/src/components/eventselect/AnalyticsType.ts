@@ -12,7 +12,6 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import i18n from 'i18n';
 import { MetadataSource, MetadataValueType } from 'ts/explore-types';
 
 export interface IConditionItemType {
@@ -93,31 +92,6 @@ export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
   conditionOptions: [],
   conditionRelationShip: ERelationShip.AND,
   data: [DEFAULT_SEGMENTATION_DATA],
-};
-
-export const ANALYTICS_OPERATORS = {
-  is_null: { value: 'is_null', label: i18n.t('analytics:operators.null') },
-  is_not_null: {
-    value: 'is_not_null',
-    label: i18n.t('analytics:operators.notNull'),
-  },
-  equal: { value: '=', label: i18n.t('analytics:operators.equal') },
-  not_equal: { value: '<>', label: i18n.t('analytics:operators.notEqual') },
-  greater_than: {
-    value: '>',
-    label: i18n.t('analytics:operators.greaterThan'),
-  },
-  greater_than_or_equal: {
-    value: '>=',
-    label: i18n.t('analytics:operators.greaterThanOrEqual'),
-  },
-  less_than: { value: '<', label: i18n.t('analytics:operators.lessThan') },
-  less_than_or_equal: {
-    value: '<=',
-    label: i18n.t('analytics:operators.lessThanOrEqual'),
-  },
-  in: { value: 'in', label: i18n.t('analytics:operators.in') },
-  not_in: { value: 'not_in', label: i18n.t('analytics:operators.notIn') },
 };
 
 // MOCK DATA
