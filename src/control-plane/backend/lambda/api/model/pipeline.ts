@@ -782,7 +782,7 @@ export class CPipeline {
   }
 
   private async getDataModelingState(): Promise<WorkflowState | undefined> {
-    if (isEmpty(this.pipeline.dataModeling)) {
+    if (isEmpty(this.pipeline.dataModeling?.redshift)) {
       return undefined;
     }
     if (this.pipeline.ingestionServer.sinkType === 'kafka' && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {

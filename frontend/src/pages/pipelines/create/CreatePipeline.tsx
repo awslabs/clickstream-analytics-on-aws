@@ -821,7 +821,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
       // set dataModeling to null when not enable Redshift
       if (!pipelineInfo.enableRedshift) {
-        createPipelineObj.dataModeling = null;
+        createPipelineObj.dataModeling.redshift = null;
       } else {
         // set serverless to null when user select provisioned
         if (pipelineInfo.redshiftType === 'provisioned') {
@@ -964,7 +964,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         cancelButton: t('button.cancel') || '',
         previousButton: t('button.previous') || '',
         nextButton: t('button.next') || '',
-        submitButton: update ? t('button.save') : t('button.create'),
+        submitButton: update
+          ? t('button.save') ?? ''
+          : t('button.create') ?? '',
         optional: t('optional') || 'optional',
       }}
       onNavigate={({ detail }) => {
@@ -2072,7 +2074,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       quickSight: {
                         ...prev.reporting.quickSight,
                         user: userObj.userName,
-                        arn: userObj.arn
+                        arn: userObj.arn,
                       },
                     },
                   };
