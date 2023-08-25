@@ -23,7 +23,6 @@
     "androidStep1": "Step 1: Add the following dependencies to your app module's build.gradle file.",
     "androidStep2": "Step 2: Initialize in the Application onCreate() method to use the SDK.",
     "androidStep3": "Step 3: Configure SDK after initialize",
-    "downloadJSONiOSDesc": "Instructions for Xcode below | Other developer tools please refer to documentation.",
     "configIOSTips": "Move the clickstream.plist file you just downloaded into the root of your Xcode project and add it to all targets.",
     "iosStep1": "Step 1: Add the following code to its initializer. If there is none, you can create a default:",
     "setupWebSDK": "Set up SDK",
