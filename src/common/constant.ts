@@ -233,7 +233,6 @@ export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
 export const CORS_ORIGIN_DOMAIN_PATTERN = '(?:\\*\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?';
-// export const CORS_ORIGIN = `(https?:\\/\\/){1}(localhost|${IP_PATTERN}|(?:\\*\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?)(:[0-9]{2,5})?`;
 export const CORS_ORIGIN = `(https?:\\/\\/){1}(localhost|${IP_PATTERN}|${CORS_ORIGIN_DOMAIN_PATTERN})(:[0-9]{2,5})?`;
 export const CORS_PATTERN = `^$|^\\*$|^(${CORS_ORIGIN}(,\\s*${CORS_ORIGIN})*)$`;
 export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
