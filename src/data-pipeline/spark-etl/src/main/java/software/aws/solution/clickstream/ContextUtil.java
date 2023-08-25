@@ -13,12 +13,14 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
 
 import java.util.Arrays;
 
+@Slf4j
 public final class ContextUtil {
     public static final String JOB_NAME_PROP= "job.name";
     public static final String WAREHOUSE_DIR_PROP = "warehouse.dir";
@@ -47,7 +49,7 @@ public final class ContextUtil {
                 oldDatasetCached.unpersist();
             } catch (Exception e) {
                 //print and ignore error
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
     }
