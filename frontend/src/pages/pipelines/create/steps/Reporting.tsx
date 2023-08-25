@@ -197,7 +197,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         </Header>
       }
     >
-      {pipelineInfo.enableDataProcessing && pipelineInfo.enableRedshift ? (
+      {pipelineInfo.enableDataProcessing ? (
         <>
           <SpaceBetween direction="vertical" size="l">
             <FormField>
