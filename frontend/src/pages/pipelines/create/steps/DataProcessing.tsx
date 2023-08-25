@@ -604,9 +604,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
             header={
               <Header
                 variant="h2"
-                description={t('pipeline:create.anlyEngineDesc')}
+                description={t('pipeline:create.analyticEngineDesc')}
               >
-                {t('pipeline:create.anlyEngine')}
+                {t('pipeline:create.analyticEngine')}
               </Header>
             }
           >
