@@ -585,7 +585,7 @@ describe('Test EMR Serverless service available', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -708,7 +708,7 @@ describe('Test EMR Serverless service available', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -833,7 +833,7 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -961,7 +961,7 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
