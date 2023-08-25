@@ -25,7 +25,6 @@
     "androidStep3": "步骤 3：初始化后配置 SDK",
     "configIOSTips": "将你刚刚下载的 clickstream.plist 文件移到 Xcode 项目的根目录中，然后将其添加到所有目标中。",
     "iosStep1": "步骤 1：将以下代码添加到其初始化器中。如果没有，你可以创建一个默认值：",
-    "setupWebSDK": "设置 SDK",
     "configWebTip1": "步骤 1：将以下代码添加到其初始化器中。如果没有，你可以创建一个默认值：",
     "webStep1": "第 1 步：如果你已经在使用 npm 和诸如 webpack 或 Rollup 之类的模块捆绑器，你可以运行以下命令来安装最新的 SDK：",
     "webStep2": "步骤 2：初始化 SDK",
