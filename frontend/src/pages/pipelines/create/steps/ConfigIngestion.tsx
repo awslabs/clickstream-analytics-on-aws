@@ -402,7 +402,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               <FormField
                 stretch
                 errorText={
-                  warmPoolError ? t('pipeline:valid.warmpoolError') : ''
+                  warmPoolError ? t('pipeline:valid.warmPoolError') : ''
                 }
               >
                 <div>{t('pipeline:create.warmPool')}</div>

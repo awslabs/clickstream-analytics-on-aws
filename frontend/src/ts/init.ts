@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ProtocalType, ResourceCreateMehod, SinkType } from './const';
+import { ProtocalType, ResourceCreateMethod, SinkType } from './const';
 
 export const INIT_PROJECT_DATA = {
   id: 'my_project_id',
@@ -154,7 +154,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   selectedPrivateSubnet: [],
   selectedCertificate: null,
   selectedSecret: null,
-  mskCreateMethod: ResourceCreateMehod.EXSITING,
+  mskCreateMethod: ResourceCreateMethod.EXISTING,
   selectedMSK: null,
   selectedSelfHostedMSKSG: null,
   seledtedKDKProvisionType: null,

@@ -27,7 +27,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MAX_USER_INPUT_LENGTH,
-  ResourceCreateMehod,
+  ResourceCreateMethod,
   SUPPORT_SELF_HOSTED_KAFKA,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
@@ -171,10 +171,10 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                     <SpaceBetween direction="vertical" size="l">
                       <MSKRequirements />
                       {pipelineInfo.mskCreateMethod ===
-                        ResourceCreateMehod.EXSITING && (
+                        ResourceCreateMethod.EXISTING && (
                         <FormField
-                          label={t('pipeline:create.msk.exsitingMSK')}
-                          description={t('pipeline:create.msk.exsitingMSKDesc')}
+                          label={t('pipeline:create.msk.existingMSK')}
+                          description={t('pipeline:create.msk.existingMSKDesc')}
                           errorText={
                             mskEmptyError
                               ? t('pipeline:valid.mskEmptyError')
@@ -362,11 +362,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
             <SpaceBetween direction="vertical" size="l">
               <MSKRequirements />
               {pipelineInfo.mskCreateMethod ===
-                ResourceCreateMehod.EXSITING && (
+                ResourceCreateMethod.EXISTING && (
                 <FormField
                   controlId="test-select-msk-id"
-                  label={t('pipeline:create.msk.exsitingMSK')}
-                  description={t('pipeline:create.msk.exsitingMSKDesc')}
+                  label={t('pipeline:create.msk.existingMSK')}
+                  description={t('pipeline:create.msk.existingMSKDesc')}
                   errorText={
                     mskEmptyError ? t('pipeline:valid.mskEmptyError') : ''
                   }

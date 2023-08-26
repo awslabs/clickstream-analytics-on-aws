@@ -98,7 +98,7 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
         <div>
           <Header
             variant="h3"
-            description={t('application:sdkGuide.downloadJSONAndoridDesc')}
+            description={t('application:sdkGuide.downloadJSONAndroidDesc')}
           >
             {t('application:sdkGuide.downloadJSON')}
           </Header>
