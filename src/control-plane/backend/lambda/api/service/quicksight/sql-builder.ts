@@ -357,7 +357,7 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
   let sql = _buildBaseSql(eventNames, sqlParameters);
 
   let prefix = 'event_id';
-  if (sqlParameters.computeMethod === 'USER_CNT') {
+  if (sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT) {
     prefix = 'user_pseudo_id';
   }
   let resultCntSQL ='';
@@ -399,7 +399,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
   }
   let index = 0;
   let prefix = 'e';
-  if (sqlParameters.computeMethod === 'USER_CNT') {
+  if (sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT) {
     prefix = 'u';
   }
 
@@ -543,7 +543,7 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'other_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod === 'USER_CNT' ? 'count(distinct a.user_pseudo_id)' : 'count(1)' } as weight
+      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
     from data a left join data b 
       on a.user_pseudo_id = b.user_pseudo_id 
       ${joinSql}
@@ -631,7 +631,7 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
         WHEN b_event_name is not null THEN b_event_name || '_' || step_2
         ELSE 'other_' || step_2
       END as target,
-      ${sqlParameters.computeMethod === 'USER_CNT' ? 'count(distinct a_user_pseudo_id)' : 'count(1)' } as weight
+      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
     from data
     where step_2 <= ${sqlParameters.maxStep ?? 10}
     group by 
