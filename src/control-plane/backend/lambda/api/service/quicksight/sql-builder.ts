@@ -679,7 +679,7 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
           continue;
         }
         let value = condition.value;
-        if (condition.dataType === 'STRING') {
+        if (condition.dataType === MetadataValueType.STRING) {
           value = `'${value}'`;
         }
 
