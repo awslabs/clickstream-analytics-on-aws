@@ -38,8 +38,8 @@ export interface FunnelSQLParameters {
   readonly firstEventExtraCondition?: EventAndCondition;
   readonly eventAndConditions: EventAndCondition[];
   readonly timeScopeType: ExploreTimeScopeType;
-  readonly timeStart?: string;
-  readonly timeEnd?: string;
+  readonly timeStart?: Date;
+  readonly timeEnd?: Date;
   readonly lastN?: number;
   readonly timeUnit?: ExploreRelativeTimeUnit;
   readonly groupColumn: ExploreGroupColumn;
