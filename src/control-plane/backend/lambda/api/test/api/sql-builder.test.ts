@@ -1480,7 +1480,7 @@ describe('SQL Builder test', () => {
               property: 'platform',
               operator: '=',
               value: 'ANDROID',
-              dataType:  MetadataValueType.STRING,
+              dataType: MetadataValueType.STRING,
             },
             {
               category: 'device',
@@ -1500,7 +1500,7 @@ describe('SQL Builder test', () => {
               property: 'platform',
               operator: '=',
               value: 'ANDROID',
-              dataType:  MetadataValueType.STRING,
+              dataType: MetadataValueType.STRING,
             },
             {
               category: 'device',
@@ -1900,7 +1900,7 @@ describe('SQL Builder test', () => {
               property: 'platform',
               operator: '=',
               value: 'ANDROID',
-              dataType:  MetadataValueType.STRING,
+              dataType: MetadataValueType.STRING,
             },
             {
               category: 'device',
@@ -2300,7 +2300,7 @@ describe('SQL Builder test', () => {
               property: 'platform',
               operator: '=',
               value: 'ANDROID',
-              dataType:  MetadataValueType.STRING,
+              dataType: MetadataValueType.STRING,
             },
             {
               category: 'device',
