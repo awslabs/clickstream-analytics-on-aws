@@ -2674,7 +2674,7 @@ describe('SQL Builder test', () => {
             property: '_user_first_touch_timestamp',
             operator: '>',
             value: '1686532526770',
-            dataType:  MetadataValueType.INTEGER,
+            dataType: MetadataValueType.INTEGER,
           },
         ],
         conditionOperator: 'and',
@@ -2688,14 +2688,14 @@ describe('SQL Builder test', () => {
             property: 'platform',
             operator: '=',
             value: 'ANDROID',
-            dataType:  MetadataValueType.STRING,
+            dataType: MetadataValueType.STRING,
           },
           {
             category: 'device',
             property: 'screen_height',
             operator: '<>',
             value: '1400',
-            dataType:  MetadataValueType.INTEGER,
+            dataType: MetadataValueType.INTEGER,
           }],
           conditionOperator: 'and',
         },
@@ -2886,7 +2886,7 @@ describe('SQL Builder test', () => {
       WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
       ELSE 'other_' || a.step_2
     END as target,
-    count(1) as weight
+    count(distinct a.user_pseudo_id) as weight
   from
     data a
     left join data b on a.user_pseudo_id = b.user_pseudo_id
