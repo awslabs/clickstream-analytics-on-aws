@@ -1,6 +1,6 @@
 {
   "header": {
-    "desc": "Build a flexible, scalable, and cost-efffecitve analytics platform on AWS to collect and analyze clickstream data from your websites and mobile apps. This empowers you to enhance your business with data-driven insights, while retaining complete ownership and control over your important data. "
+    "desc": "Build a flexible, scalable, and cost-effective analytics platform on AWS to collect and analyze clickstream data from your websites and mobile apps. This empowers you to enhance your business with data-driven insights, while retaining complete ownership and control over your important data. "
   },
   "benefits": {
     "name": "Benefits and features",
@@ -9,7 +9,7 @@
     "benefit2": "Flexible",
     "benefit2Desc": "Modularized data pipeline components with rich customization options for you to assemble a data pipeline that tailored to your needs.",
     "benefit3": "Well-architected",
-    "benefit3Desc": "The solution is designed based on AWS best practices, providing you production-level scalability and competitive cost-effitiveness.",
+    "benefit3Desc": "The solution is designed based on AWS best practices, providing you production-level scalability and competitive cost-effectiveness.",
     "benefit4": "A single pane of glass view",
     "benefit4Desc": "A single place to manage all related AWS resources, provides built-in monitoring dashboards and alarms that gives you full visibility into the underlining AWS resources within your data pipelines."
   },

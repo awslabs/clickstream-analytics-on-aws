@@ -126,7 +126,7 @@ describe('Test data processing settings', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -254,7 +254,7 @@ describe('Test redsfhit settings', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -384,7 +384,7 @@ describe('Test redsfhit settings', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -516,7 +516,7 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );
@@ -657,7 +657,7 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftServerlessSGEmptyError={false}
         redshiftServerlessSubnetEmptyError={false}
         redshiftServerlessSubnetInvalidError={false}
-        redshiftProvisionedCulsterEmptyError={false}
+        redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
       />
     );

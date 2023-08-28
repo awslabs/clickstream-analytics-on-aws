@@ -12,7 +12,7 @@
  */
 
 // @ts-nocheck
-import { ElasticLoadBalancingV2Client, CreateRuleCommand, ModifyListenerCommand, DeleteRuleCommand, DescribeRulesCommand } from '@aws-sdk/client-elastic-load-balancing-v2';
+import { ElasticLoadBalancingV2Client, CreateRuleCommand, ModifyListenerCommand, DeleteRuleCommand, DescribeRulesCommand, ModifyRuleCommand } from '@aws-sdk/client-elastic-load-balancing-v2';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 import { CloudFormationCustomResourceEvent } from 'aws-lambda';
@@ -581,6 +581,21 @@ test('Update listener rules for third party SDK', async () => {
     },
   };
 
+  albClientMock.on(DescribeRulesCommand).resolves({
+    Rules: [
+      {
+        Priority: '3',
+        RuleArn: 'ruleArn1',
+        Conditions: [
+          {
+            Field: 'path-pattern',
+            Values: ['/collect'],
+          },
+        ],
+      },
+    ],
+  });
+
   await handler(event, c);
 
   expect(albClientMock).toHaveReceivedCommandTimes(ModifyListenerCommand, 0);
@@ -682,7 +697,7 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, without appIds, 
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(3, CreateRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(4, CreateRuleCommand, {
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
     Actions: [
       {
@@ -705,7 +720,7 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, without appIds, 
     Priority: 1,
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(4, CreateRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(5, CreateRuleCommand, {
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
     Actions: [
       {
@@ -740,10 +755,10 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, without appIds, 
     Priority: 2,
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(5, DeleteRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(6, DeleteRuleCommand, {
     RuleArn: 'RuleArn4',
   });
-  expect(albClientMock).toHaveReceivedNthCommandWith(6, DeleteRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(7, DeleteRuleCommand, {
     RuleArn: 'RuleArn5',
   });
 });
@@ -804,7 +819,7 @@ test('Update Listener for ClickStream SDK, with HTTP, with appIds, and have exis
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(2, CreateRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(3, CreateRuleCommand, {
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
     Actions: [
       {
@@ -832,7 +847,7 @@ test('Update Listener for ClickStream SDK, with HTTP, with appIds, and have exis
     Priority: 6,
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(3, CreateRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(4, CreateRuleCommand, {
     ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
     Actions: [
       {
@@ -860,7 +875,7 @@ test('Update Listener for ClickStream SDK, with HTTP, with appIds, and have exis
     Priority: 7,
   });
 
-  expect(albClientMock).toHaveReceivedNthCommandWith(6, DeleteRuleCommand, {
+  expect(albClientMock).toHaveReceivedNthCommandWith(7, DeleteRuleCommand, {
     RuleArn: 'RuleArn5',
   });
 });
@@ -913,5 +928,138 @@ test('Delete all Listener rules for ClickStream SDK, with HTTPS and auth, with a
   });
   expect(albClientMock).toHaveReceivedNthCommandWith(5, DeleteRuleCommand, {
     RuleArn: 'forwardRuleArn4',
+  });
+});
+
+test('Update endpoint path for ClickStream SDK', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    ...basicEvent,
+    RequestType: 'Update',
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      appIds: 'notepad1,notepad2',
+      endpointPath: '/collectnew',
+      clickStreamSDK: 'YES',
+      authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      protocol: 'HTTP',
+    },
+  };
+
+  albClientMock.on(DescribeRulesCommand).resolves({
+    Rules: [
+      {
+        Actions: [
+          {
+            Order: 1,
+            Type: 'forward',
+            TargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:targetgroup/abc/70fd51a0147e8b66',
+          },
+        ],
+        Priority: '4',
+        RuleArn: 'ruleArn1',
+        Conditions: [
+          {
+            Field: 'path-pattern',
+            Values: ['/collect'],
+          },
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad1',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        Priority: '5',
+        RuleArn: 'ruleArn2',
+        Actions: [
+          {
+            Order: 1,
+            Type: 'forward',
+            TargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:targetgroup/abc/70fd51a0147e8b66',
+          },
+        ],
+        Conditions: [
+          {
+            Field: 'path-pattern',
+            Values: ['/collect'],
+          },
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad2',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  await handler(event, c);
+
+  expect(albClientMock).toHaveReceivedNthCommandWith(1, DescribeRulesCommand, {
+    ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
+  });
+
+  expect(albClientMock).toHaveReceivedNthCommandWith(2, ModifyRuleCommand, {
+    Actions: [
+      {
+        Order: 1,
+        Type: 'forward',
+        TargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:targetgroup/abc/70fd51a0147e8b66',
+      },
+    ],
+    RuleArn: 'ruleArn1',
+    Conditions: [
+      {
+        Field: 'path-pattern',
+        Values: ['/collectnew'],
+      },
+      {
+        Field: 'query-string',
+        QueryStringConfig: {
+          Values: [
+            {
+              Key: 'appId', Value: 'notepad1',
+            },
+          ],
+        },
+      },
+    ],
+  });
+  expect(albClientMock).toHaveReceivedNthCommandWith(3, ModifyRuleCommand, {
+    Actions: [
+      {
+        Order: 1,
+        Type: 'forward',
+        TargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:targetgroup/abc/70fd51a0147e8b66',
+      },
+    ],
+    RuleArn: 'ruleArn2',
+    Conditions: [
+      {
+        Field: 'path-pattern',
+        Values: ['/collectnew'],
+      },
+      {
+        Field: 'query-string',
+        QueryStringConfig: {
+          Values: [
+            {
+              Key: 'appId', Value: 'notepad2',
+            },
+          ],
+        },
+      },
+    ],
   });
 });
