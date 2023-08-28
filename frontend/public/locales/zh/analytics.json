@@ -121,19 +121,9 @@
       }
     }
   },
-  "funnel": {
-    "labels": {
-      "reset": "重置",
-      "save": "保存到看板",
-      "metrics": "指标",
-      "associateParameter": "关联参数",
-      "window": "漏斗窗口",
-      "funnelDateRange": "日期范围",
-      "funnelSteps": "漏斗步骤",
-      "conversionWindowPeriod": "转化窗口期",
-      "filters": "过滤器"
-    },
-    "conditionValueInputPlaceholder": "输入值"
+  "button": {
+    "reset": "重置",
+    "save": "保存到看板"
   },
   "dateRange": {
     "relativeModeTitle": "相对时间",
@@ -187,7 +177,16 @@
     "previewName": "名称",
     "previewDescription": "描述",
     "previewDataType": "数据类型",
-    "previewUpdateTime": "更新时间"
+    "previewUpdateTime": "更新时间",
+    "metrics": "指标",
+    "associateParameter": "关联参数",
+    "window": "漏斗窗口",
+    "dateRange": "日期范围",
+    "funnelSteps": "漏斗步骤",
+    "conversionWindowPeriod": "转化窗口期",
+    "filters": "过滤器",
+    "conditionValueInputPlaceholder": "输入值",
+    "eventsSelect": "选择事件"
   },
   "emptyData": "无数据"
 }

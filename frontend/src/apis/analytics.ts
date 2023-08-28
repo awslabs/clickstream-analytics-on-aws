@@ -159,7 +159,12 @@ export const fetchEmbeddingUrl = async (
 };
 
 export const previewFunnel = async (data: IFunnelRequest) => {
-  const result: any = await apiRequest('post', `/reporting`, data);
+  const result: any = await apiRequest('post', `/reporting/funnel`, data);
+  return result;
+};
+
+export const previewEvent = async (data: IFunnelRequest) => {
+  const result: any = await apiRequest('post', `/reporting/event`, data);
   return result;
 };
 

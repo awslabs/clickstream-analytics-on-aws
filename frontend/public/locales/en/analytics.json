@@ -121,19 +121,9 @@
       }
     }
   },
-  "funnel": {
-    "labels": {
-      "reset": "Reset",
-      "save": "Save to Dashboard",
-      "metrics": "Metrics",
-      "associateParameter": "Associate parameter",
-      "window": "Funnel window",
-      "funnelDateRange": "Date range",
-      "funnelSteps": "Funnel steps",
-      "conversionWindowPeriod": "Conversion window period",
-      "filters": "Filters"
-    },
-    "conditionValueInputPlaceholder": "Input value"
+  "button": {
+    "reset": "Reset",
+    "save": "Save to Dashboard"
   },
   "dateRange": {
     "relativeModeTitle": "Relative",
@@ -187,7 +177,16 @@
     "previewName": "Name",
     "previewDescription": "Description",
     "previewDataType": "Data type",
-    "previewUpdateTime": "Update time"
+    "previewUpdateTime": "Update time",
+    "metrics": "Metrics",
+    "associateParameter": "Associate parameter",
+    "window": "Funnel window",
+    "dateRange": "Date range",
+    "funnelSteps": "Funnel steps",
+    "conversionWindowPeriod": "Conversion window period",
+    "filters": "Filters",
+    "conditionValueInputPlaceholder": "Input value",
+    "eventsSelect": "Select events"
   },
   "emptyData": "No Data"
 }
