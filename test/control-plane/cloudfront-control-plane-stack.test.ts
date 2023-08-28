@@ -404,6 +404,8 @@ describe('CloudFrontS3PotalStack', () => {
       .toEqual([
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
@@ -434,6 +436,8 @@ describe('CloudFrontS3PotalStack', () => {
       .toEqual([
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
@@ -448,6 +452,7 @@ describe('CloudFrontS3PotalStack', () => {
       .toEqual([
         'certificateCertificateRequestorResourceFD86DD58',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceB9A4ABDE',
+        'ClickStreamApiAddAdminUserCustomResourceE4FEA9DF',
       ]);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
@@ -507,6 +512,8 @@ describe('CloudFrontS3PotalStack', () => {
       .toEqual([
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',

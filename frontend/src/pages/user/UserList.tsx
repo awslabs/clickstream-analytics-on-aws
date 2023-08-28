@@ -123,7 +123,6 @@ const UserList: React.FC = () => {
     { id: 'role', visible: true },
     { id: 'createAt', visible: true },
   ];
-
   const FILTERING_PROPERTIES = [
     {
       propertyLabel: t('user:labels.tableColumnEmail'),

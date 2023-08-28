@@ -113,6 +113,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserFn2E94BF2F',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEventD5E33F27',
         'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
         'testClickStreamALBApiApiFunction9890103B',
@@ -886,6 +888,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::CloudFormation::CustomResource'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResource5AE5EDD9',
+        'testClickStreamALBApiAddAdminUserCustomResource536E6C9F',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
