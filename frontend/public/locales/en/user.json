@@ -8,7 +8,10 @@
     "tableEmpty": "No users",
     "tableLoading": "Loading",
     "filteringAriaLabel": "Find users",
-    "filteringPlaceholder": "Find users"
+    "filteringPlaceholder": "Find users",
+    "groupPropertiesText": "Properties",
+    "operatorsText": "Operators",
+    "clearFiltersText": "Clear filters"
   },
   "options": {
     "admin": "Administrator",
