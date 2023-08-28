@@ -22,7 +22,10 @@ export class UserServ {
   public async list(_req: any, res: any, next: any) {
     try {
       const result = await store.listUser();
-      return res.json(new ApiSuccess(result));
+      return res.json(new ApiSuccess({
+        totalCount: result.length,
+        items: result,
+      }));
     } catch (error) {
       next(error);
     }

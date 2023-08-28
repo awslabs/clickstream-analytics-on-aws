@@ -18,7 +18,6 @@ export const getAnalyticsDashboardList = async (params: {
   pageNumber: number;
   pageSize: number;
 }) => {
-  await new Promise((r) => setTimeout(r, 3000));
   const result: any = await apiRequest(
     'get',
     `/project/${params.projectId}/dashboards?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`

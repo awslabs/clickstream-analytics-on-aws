@@ -1,0 +1,12 @@
+{
+  "labels": {
+    "tableColumnEmail": "Email",
+    "tableColumnName": "User name",
+    "tableColumnRole": "Role",
+    "tableColumnCreateAt": "Create time"
+  },
+  "split": {
+    "title": "User details"
+  },
+  "emptyData": "No Data"
+}

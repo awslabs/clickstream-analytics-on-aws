@@ -44,6 +44,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import dictionary from './config/dictionary.json';
+import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
@@ -82,12 +83,14 @@ export interface ClickStreamApiProps {
   readonly pluginPrefix: string;
   readonly authProps?: AuthProps;
   readonly healthCheckPath: string;
+  readonly adminUserEmail: string;
 }
 
 export class ClickStreamApiConstruct extends Construct {
   public readonly clickStreamApiFunction: Function;
   public readonly lambdaRestApi?: RestApi;
   public readonly batchInsertDDBCustomResource: BatchInsertDDBCustomResource;
+  public readonly addAdminUserCustomResource: AddAdminUser;
 
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
@@ -186,6 +189,12 @@ export class ClickStreamApiConstruct extends Construct {
       table: dictionaryTable,
       items: dictionary,
       targetToCNRegions: props.targetToCNRegions ?? false,
+    });
+
+    // Add admin user
+    this.addAdminUserCustomResource = new AddAdminUser(this, 'AddAdminUserCustomResource', {
+      email: props.adminUserEmail,
+      userTableName: userTable.tableName,
     });
 
     let apiFunctionProps = {};

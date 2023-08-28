@@ -271,6 +271,7 @@ export class TestEnv {
       stackWorkflowS3Bucket: s3Bucket,
       pluginPrefix,
       healthCheckPath: '/',
+      adminUserEmail: 'fake@example.com',
     });
 
     const template = Template.fromStack(stack);
@@ -308,6 +309,7 @@ export class TestEnv {
       stackWorkflowS3Bucket: s3Bucket,
       pluginPrefix,
       healthCheckPath: '/',
+      adminUserEmail: 'fake@example.com',
     });
 
     const template = Template.fromStack(stack);

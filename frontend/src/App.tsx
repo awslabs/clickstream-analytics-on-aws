@@ -37,6 +37,7 @@ import PluginList from 'pages/plugins/PluginList';
 import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
+import UserList from 'pages/user/UserList';
 import React, { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
@@ -100,6 +101,7 @@ const SignedInPage: React.FC = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/alarms" element={<AlarmsList />} />
+                <Route path="/user" element={<UserList />} />
                 <Route path="/project/detail/:id" element={<ProjectDetail />} />
                 <Route
                   path="/project/:pid/pipeline/:id"

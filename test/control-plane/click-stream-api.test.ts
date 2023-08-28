@@ -23,6 +23,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
         'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+        'testClickStreamALBApiClickstreamUser54DFA2EE',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
@@ -112,6 +113,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserFn2E94BF2F',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEventD5E33F27',
         'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
         'testClickStreamALBApiApiFunction9890103B',
@@ -306,6 +309,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserRoleDefaultPolicy868EE016',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserFnlistTagsPolicyF39C6020',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy308B7455',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
@@ -520,6 +526,34 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     '/index/*',
                   ],
                 ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamUser54DFA2EE',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
               },
             ],
           },
@@ -855,6 +889,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::CloudFormation::CustomResource'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResource5AE5EDD9',
+        'testClickStreamALBApiAddAdminUserCustomResource536E6C9F',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {

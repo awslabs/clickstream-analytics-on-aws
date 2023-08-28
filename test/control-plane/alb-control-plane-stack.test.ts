@@ -238,6 +238,8 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
         'albcontrolplaneportalfnC6B1CDAC',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'ClickStreamApiApiFunction684A4D61',

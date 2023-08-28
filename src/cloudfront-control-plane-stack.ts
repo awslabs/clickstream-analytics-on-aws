@@ -142,6 +142,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     uri.startsWith('/pipelines') || 
     uri.startsWith('/plugins') || 
     uri.startsWith('/alarms') ||  
+    uri.startsWith('/user') ||  
     uri.startsWith('/analytics') || 
     uri.startsWith('/quicksight')) {
       request.uri = '/index.html'; 
@@ -215,9 +216,9 @@ export class CloudFrontControlPlaneStack extends Stack {
     let issuer: string;
     let clientId: string;
     let oidcLogoutUrl: string = '';
+    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
     //Create Cognito user pool and client for backend api
     if (createCognitoUserPool) {
-      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
       this.addToParamLabels('Admin User Email', emailParamerter.logicalId);
       this.addToParamGroups('Authentication Information', emailParamerter.logicalId);
 
@@ -285,6 +286,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
       healthCheckPath: '/',
+      adminUserEmail: emailParamerter.valueAsString,
     });
 
     if (!clickStreamApi.lambdaRestApi) {

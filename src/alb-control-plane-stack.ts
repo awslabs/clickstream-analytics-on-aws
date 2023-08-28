@@ -166,12 +166,12 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     let issuer: string;
     let clientId: string;
     let oidcLogoutUrl: string = '';
+    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
     /**
      * Create Cognito user pool and client for backend api,
      * The client of Congito requires the redirect url using HTTPS
      */
     if (!props.useExistingOIDCProvider && props.useCustomDomain) {
-      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
       this.paramLabels[emailParamerter.logicalId] = {
         default: 'Admin User Email',
       };
@@ -237,6 +237,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
       healthCheckPath: healthCheckPath,
+      adminUserEmail: emailParamerter.valueAsString,
     });
 
     controlPlane.addRoute('api-targets', {
