@@ -415,6 +415,7 @@ function handleObjectType(conditionsProps: any, objK: any, k: any, objV: any) {
     ...conditionsProps,
     [k]: newObjV,
   };
+  return conditionsProps;
 }
 
 function createNegCondition(

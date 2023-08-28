@@ -243,7 +243,7 @@ function addCfnNag(stack: Stack) {
   ];
 
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for MSKS3SinkConnector', 'SinkConnectorCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for MSKS3SinkConnector', 'SinkConnectorCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
   addCfnNagToStack(stack, cfnNagList);

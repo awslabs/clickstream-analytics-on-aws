@@ -40,6 +40,17 @@ interface ResourcePropertiesType {
   protocol: string;
 }
 
+interface HandleClickStreamSDKInput {
+  appIds: string;
+  requestType: string;
+  listenerArn: string;
+  protocol: string;
+  endpointPath: string;
+  domainName: string;
+  authenticationSecretArn: string;
+  targetGroupArn: string;
+}
+
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
@@ -81,7 +92,7 @@ async function _handler(
   }
 
   if (clickStreamSDK === 'Yes') {
-    await handleClickStreamSDK(appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+    await handleClickStreamSDK({appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn});
   }
 
   // set default rules
@@ -137,48 +148,39 @@ async function handleUpdate(listenerArn: string, endpointPath: string) {
   }
 }
 
-async function handleClickStreamSDK(
-  appIds: string,
-  requestType: string,
-  listenerArn: string,
-  protocol: string,
-  endpointPath: string,
-  domainName: string,
-  authenticationSecretArn: string,
-  targetGroupArn: string
-) {
+async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
   const shouldDeleteRules = [];
   //get appId list and remove empty appId
-  const appIdArray = appIds.split(',').map((appId) => {
+  const appIdArray = input.appIds.split(',').map((appId) => {
     return appId.trim();
   }).filter((item) => item !== '');
 
-  if (requestType === 'Create' || requestType === 'Update') {
+  if (input.requestType === 'Create' || input.requestType === 'Update') {
     if (appIdArray.length > 0) {
-      await createAppIdRules(listenerArn, appIdArray, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+      await createAppIdRules(input.listenerArn, appIdArray, input.protocol, input.endpointPath, input.domainName, input.authenticationSecretArn, input.targetGroupArn);
     }
   }
 
-  if (requestType === 'Update') {
+  if (input.requestType === 'Update') {
     // check existing rules, and delete not need rules
-    const deleteAppIdRules = await getDeleteAppIdRules(appIdArray, listenerArn);
+    const deleteAppIdRules = await getDeleteAppIdRules(appIdArray, input.listenerArn);
     shouldDeleteRules.push(...deleteAppIdRules);
   }
 
-  const { fixedResponseRules, defaultActionRules } = await getFixedResponseAndDefaultActionRules(listenerArn);
-  if (appIds.length > 0) {
+  const { fixedResponseRules, defaultActionRules } = await getFixedResponseAndDefaultActionRules(input.listenerArn);
+  if (input.appIds.length > 0) {
     // Remove fixedRepsonseRule and defalut forward rule and action if existing
     shouldDeleteRules.push(...fixedResponseRules);
     shouldDeleteRules.push(...defaultActionRules);
   }
 
-  if (appIds.length === 0) {
+  if (input.appIds.length === 0) {
     // Create fixedRepsonseRule and defalut forward rule and action if not existing
     if (fixedResponseRules.length === 0) {
-      await createFixedResponseRule(listenerArn);
+      await createFixedResponseRule(input.listenerArn);
     }
     if (defaultActionRules.length === 0) {
-      await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+      await createDefaultForwardRule(input.listenerArn, input.protocol, input.endpointPath, input.domainName, input.authenticationSecretArn, input.targetGroupArn);
     }
   }
   // delete rules
