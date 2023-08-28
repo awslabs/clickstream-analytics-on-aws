@@ -1,9 +1,17 @@
 {
   "labels": {
+    "title": "User",
     "tableColumnEmail": "Email",
     "tableColumnName": "User name",
     "tableColumnRole": "Role",
-    "tableColumnCreateAt": "Create time"
+    "tableColumnCreateAt": "Create time",
+    "tableEmpty": "No users",
+    "tableLoading": "Loading",
+    "filteringAriaLabel": "Find users",
+    "filteringPlaceholder": "Find users",
+    "groupPropertiesText": "Properties",
+    "operatorsText": "Operators",
+    "clearFiltersText": "Clear filters"
   },
   "split": {
     "title": "User details"

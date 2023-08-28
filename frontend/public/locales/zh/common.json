@@ -36,6 +36,7 @@
     "operation": "运维",
     "dashboard": "显示器仪表板",
     "monitorAlerts": "告警",
+    "user": "用户",
     "tools": "工具",
     "sdkIntegration": "SDK集成",
     "notifications": "通知",

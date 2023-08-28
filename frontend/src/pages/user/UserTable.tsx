@@ -25,7 +25,6 @@ import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import { UserTableHeader } from './UserTableHeader';
-import '../../styles/table-select.scss';
 
 interface UserTableProps {
   tableColumnDefinitions: any[];
@@ -35,7 +34,6 @@ interface UserTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
-    headerRefreshButtonText: string;
     filteringAriaLabel: string;
     filteringPlaceholder: string;
     groupPropertiesText: string;

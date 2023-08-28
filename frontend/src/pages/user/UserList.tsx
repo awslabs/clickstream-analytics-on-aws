@@ -144,22 +144,14 @@ const UserList: React.FC = () => {
           tableContentDisplay={CONTENT_DISPLAY}
           tableFilteringProperties={FILTERING_PROPERTIES}
           tableI18nStrings={{
-            loadingText:
-              t('analytics:metadata.event.tableLoading') || 'Loading',
-            emptyText: t('analytics:metadata.event.tableEmpty'),
-            headerTitle: t('analytics:metadata.event.title'),
-            headerRefreshButtonText: t('common:button.refreshMetadata'),
-            filteringAriaLabel: t(
-              'analytics:metadata.event.filteringAriaLabel'
-            ),
-            filteringPlaceholder: t(
-              'analytics:metadata.event.filteringPlaceholder'
-            ),
-            groupPropertiesText: t(
-              'analytics:metadata.event.groupPropertiesText'
-            ),
-            operatorsText: t('analytics:metadata.event.operatorsText'),
-            clearFiltersText: t('analytics:metadata.event.clearFiltersText'),
+            loadingText: t('user:labels.tableLoading') || 'Loading',
+            emptyText: t('user:labels.tableEmpty'),
+            headerTitle: t('user:labels.title'),
+            filteringAriaLabel: t('user:labels.filteringAriaLabel'),
+            filteringPlaceholder: t('user:labels.filteringPlaceholder'),
+            groupPropertiesText: t('user:labels.groupPropertiesText'),
+            operatorsText: t('user:labels.operatorsText'),
+            clearFiltersText: t('user:labels.clearFiltersText'),
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),
@@ -178,11 +170,7 @@ const UserList: React.FC = () => {
         ></UserTable>
       }
       headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/metadata/events`}
-        />
-      }
+      navigation={<Navigation activeHref={'/user'} />}
       splitPanelOpen={showSplit}
       onSplitPanelToggle={(e) => {
         setShowSplit(e.detail.open);

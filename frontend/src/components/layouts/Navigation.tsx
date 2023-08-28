@@ -36,7 +36,8 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
-      items: [{ type: 'link', text: t('nav.monitorAlerts'), href: '/alarms' }],
+      items: [{ type: 'link', text: t('nav.monitorAlerts'), href: '/alarms' },
+      { type: 'link', text: t('nav.user'), href: '/user' }],
     },
     {
       text: t('nav.tools'),

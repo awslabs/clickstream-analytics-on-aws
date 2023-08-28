@@ -36,6 +36,7 @@
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
     "monitorAlerts": "Alarms",
+    "user": "User",
     "tools": "Tools",
     "sdkIntegration": "SDK integration",
     "notifications": "Notifications",
