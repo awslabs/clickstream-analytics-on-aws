@@ -208,17 +208,17 @@ test('ServerCorsOrigin pattern', () => {
     const validValues = [
       '',
       '*',
-      '*.test.com',
-      'abc.test.com',
-      'abc1.test.com, abc2.test.com, abc3.test.com',
-      'abc1.test.com,abc2.test.com',
+      'http://*.test.com',
+      'http://abc.test.com',
+      'http://abc1.test.com, http://abc2.test.com, http://abc3.test.com',
+      'http://abc1.test.com,http://abc2.test.com',
     ];
 
     for (const v of validValues) {
       expect(v).toMatch(regex);
     }
 
-    const invalidValues = ['a', 'abc1.test.com; abc2.test.com'];
+    const invalidValues = ['http://a', 'http://abc1.test.com; http://abc2.test.com'];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }
