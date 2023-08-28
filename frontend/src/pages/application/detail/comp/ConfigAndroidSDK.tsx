@@ -30,7 +30,6 @@ import {
   ANDROID_ADD_DEPENDENCY_TEXT,
   ANDROID_ADD_USER_ATTR,
   ANDROID_CONFIG_JSON_TEMPLATE,
-  ANDROID_CONFIG_SDK_TEXT,
   ANDROID_INIT_SDK_TEXT,
   ANDROID_RECODE_EVENT,
   DOWNLOAD_FILENAME,
@@ -162,19 +161,6 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           <FormField label={t('application:sdkGuide.androidStep2')}>
             <div className="mt-10">
               <CopyCode code={ANDROID_INIT_SDK_TEXT} />
-            </div>
-          </FormField>
-          <FormField label={t('application:sdkGuide.androidStep3')}>
-            <div className="mt-10">
-              <CopyCode
-                code={ANDROID_CONFIG_SDK_TEXT.replace(
-                  TEMPLATE_APP_ID,
-                  appInfo?.appId || ''
-                ).replace(
-                  TEMPLATE_SERVER_ENDPOINT,
-                  appInfo?.pipeline?.endpoint || ''
-                )}
-              />
             </div>
           </FormField>
         </SpaceBetween>

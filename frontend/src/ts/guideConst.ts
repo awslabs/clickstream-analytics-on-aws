@@ -68,14 +68,6 @@ public void onCreate() {
 }
 `;
 
-export const ANDROID_CONFIG_SDK_TEXT = `import software.aws.solution.clickstream.ClickstreamAnalytics
-
-// config the sdk after initialize.
-ClickstreamAnalytics.getClickStreamConfiguration()
-            .withAppId("${TEMPLATE_APP_ID}")
-            .withEndpoint("${TEMPLATE_SERVER_ENDPOINT}");
-`;
-
 export const ANDROID_RECODE_EVENT = `import software.aws.solution.clickstream.ClickstreamAnalytics;
 import software.aws.solution.clickstream.ClickstreamEvent;
 
@@ -135,18 +127,6 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
       assertionFailure("Fail to initialize ClickstreamAnalytics: (error)")
   }
   return true
-}
-`;
-
-export const IOS_CONFIG_SDK_TEXT = `import Clickstream
-
-// config the sdk after initialize.
-do {
-    var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
-    configuration.appId = "${TEMPLATE_APP_ID}"
-    configuration.endPoint = "${TEMPLATE_SERVER_ENDPOINT}"
-} catch {
-    print("Failed to config ClickstreamAnalytics: (error)")
 }
 `;
 

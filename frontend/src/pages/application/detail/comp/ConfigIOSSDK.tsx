@@ -13,7 +13,6 @@
 
 import {
   Button,
-  ExpandableSection,
   FormField,
   Grid,
   Header,
@@ -27,7 +26,6 @@ import { useTranslation } from 'react-i18next';
 import {
   IOS_ADD_USER_ATTR,
   IOS_CONFIG_JSON_TEMPLATE,
-  IOS_CONFIG_SDK_TEXT,
   IOS_INIT_SDK_TEXT,
   IOS_RECODE_EVENT,
   DOWNLOAD_FILENAME,
@@ -112,34 +110,16 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
         {t('application:sdkGuide.setupSDK')}
       </Header>
 
-      <ExpandableSection
-        defaultExpanded
-        headerText={t('application:sdkGuide.totalSteps', { step: '2' })}
-      >
-        <SpaceBetween direction="vertical" size="l">
-          <FormField
-            label={t('application:sdkGuide.iosInitSDK')}
-            description={t('application:sdkGuide.iosInitSDKDesc')}
-          >
-            <div className="mt-10">
-              <CopyCode code={IOS_INIT_SDK_TEXT} />
-            </div>
-          </FormField>
-          <FormField label={t('application:sdkGuide.iosConfigSDK')}>
-            <div className="mt-10">
-              <CopyCode
-                code={IOS_CONFIG_SDK_TEXT.replace(
-                  TEMPLATE_APP_ID,
-                  appInfo?.appId || ''
-                ).replace(
-                  TEMPLATE_SERVER_ENDPOINT,
-                  appInfo?.pipeline?.endpoint || ''
-                )}
-              />
-            </div>
-          </FormField>
-        </SpaceBetween>
-      </ExpandableSection>
+      <SpaceBetween direction="vertical" size="l">
+        <FormField
+          label={t('application:sdkGuide.iosInitSDK')}
+          description={t('application:sdkGuide.iosInitSDKDesc')}
+        >
+          <div className="mt-10">
+            <CopyCode code={IOS_INIT_SDK_TEXT} />
+          </div>
+        </FormField>
+      </SpaceBetween>
 
       <Header variant="h3" description={t('application:sdkGuide.setupSDKDesc')}>
         {t('application:sdkGuide.startUsing')}

@@ -45,9 +45,8 @@
     "iosEnterRepo1": "2. 进入 Swift 的点击流库 GitHub 存储库网址",
     "iosEnterRepo2": " 你将在搜索栏中看到 Clickstream Library for Swift 存储库规则，以及你希望 Swift 包管理器安装哪个版本的 Clickstream。选择 Up to Next 主要版本，然后单击 “添加软件包”。",
     "iosDownloadJson": "3. 下载您的 {{fileName}} 文件，然后将其粘贴到您的项目根文件夹。",
-    "iosInitSDK": "1. 初始化 SDK",
+    "iosInitSDK": "初始化 SDK",
     "iosInitSDKDesc": "配置参数后，需要在 AppDelegate 应用程序 () 方法中对其进行初始化才能使用 SDK。",
-    "iosConfigSDK": "2. 配置 SDK",
     "webInstallSDK": "1. 安装 Clickstream SDK",
     "webInstallSDKDesc": "请使用 npm 或 yarn 等包管理器来安装 Clickstream SDK。",
     "webSDKSetupDesc": "将初始化代码添加到您的应用的入口文件，例如 React 中的 index.js/app.tsx 或 Vue/Angular 中的 main.ts。"
