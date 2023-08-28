@@ -543,6 +543,30 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             </Alert>
           )}
 
+          <FormField
+            label={t('pipeline:create.cors')}
+            description={t('pipeline:create.corsDesc')}
+            errorText={
+              corsFormatError ? t('pipeline:valid.corsFormatError') : ''
+            }
+          >
+            <Input
+              placeholder={t('pipeline:create.corsPlaceholder') || ''}
+              value={
+                pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin
+              }
+              onChange={(e) => {
+                if (
+                  new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                  e.detail.value.length > MAX_USER_INPUT_LENGTH
+                ) {
+                  return false;
+                }
+                changeServerCors(e.detail.value);
+              }}
+            />
+          </FormField>
+
           <ExpandableSection headerText={t('additionalSettings')}>
             <SpaceBetween direction="vertical" size="l">
               <FormField
@@ -562,30 +586,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                       return false;
                     }
                     changeServerEdp(e.detail.value);
-                  }}
-                />
-              </FormField>
-
-              <FormField
-                label={t('pipeline:create.cors')}
-                description={t('pipeline:create.corsDesc')}
-                errorText={
-                  corsFormatError ? t('pipeline:valid.corsFormatError') : ''
-                }
-              >
-                <Input
-                  placeholder={t('pipeline:create.corsPlaceholder') || ''}
-                  value={
-                    pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin
-                  }
-                  onChange={(e) => {
-                    if (
-                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
-                      e.detail.value.length > MAX_USER_INPUT_LENGTH
-                    ) {
-                      return false;
-                    }
-                    changeServerCors(e.detail.value);
                   }}
                 />
               </FormField>
