@@ -43,9 +43,11 @@
     "iosEnterRepo1": "2. Enter the Clickstream Library for Swift GitHub repo URL",
     "iosEnterRepo2": " You'll see the Clickstream Library for Swift repository rules into the search bar, for which version of Clickstream you want Swift Package Manager to install. Choose Up to Next Major Version, then click Add Package.",
     "iosDownloadJson": "3. Download your {{fileName}} file, and paste it your project root folder.",
-    "iosInitSDK": "1. Initialize the SDK",
+    "iosInitSDK": "Initialize the SDK",
     "iosInitSDKDesc": "Once you have configured the parameters, you need to initialize it in the AppDelegate application() method to use the SDK.",
-    "iosConfigSDK": "2. Config the SDK"
+    "webInstallSDK": "1. Install Clickstream SDK",
+    "webInstallSDKDesc": "Please use npm or a module bundler to install the Clickstream SDK.",
+    "webSDKSetupDesc": "Add the initialize code to your app's root entry point, for example index.js/app.tsx in React or main.ts in Vue/Angular."
   },
   "detail": {
     "basicInfo": "Basic Information",
