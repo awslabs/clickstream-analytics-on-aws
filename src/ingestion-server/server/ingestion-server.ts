@@ -127,14 +127,14 @@ export interface IngestionServerProps {
 }
 
 interface UpdateAlbRulesInput {
-  readonly appIds: string,
-  readonly clickStreamSDK: string,
-  readonly targetGroupArn: string,
-  readonly listenerArn: string,
-  readonly serverEndpointPath: string,
-  readonly protocol: ApplicationProtocol,
-  readonly domainName?: string,
-  readonly authenticationSecretArn?: string
+  readonly appIds: string;
+  readonly clickStreamSDK: string;
+  readonly targetGroupArn: string;
+  readonly listenerArn: string;
+  readonly serverEndpointPath: string;
+  readonly protocol: ApplicationProtocol;
+  readonly domainName?: string;
+  readonly authenticationSecretArn?: string;
 }
 
 
@@ -238,7 +238,7 @@ export class IngestionServer extends Construct {
       serverEndpointPath,
       protocol,
       domainName,
-      authenticationSecretArn
+      authenticationSecretArn,
     });
 
     deleteECSCluster(this, ecsCluster.clusterArn, ecsCluster.clusterName, ecsService.serviceName);
@@ -270,7 +270,7 @@ export class IngestionServer extends Construct {
 
 function updateAlbRules(
   scope: Construct,
-  updateAlbRulesInput: UpdateAlbRulesInput
+  updateAlbRulesInput: UpdateAlbRulesInput,
 ) {
   const appIds = updateAlbRulesInput.appIds;
   const clickStreamSDK = updateAlbRulesInput.clickStreamSDK;

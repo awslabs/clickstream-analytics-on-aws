@@ -92,7 +92,7 @@ async function _handler(
   }
 
   if (clickStreamSDK === 'Yes') {
-    await handleClickStreamSDK({appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn});
+    await handleClickStreamSDK({ appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn });
   }
 
   // set default rules
@@ -114,7 +114,7 @@ async function handleCreate(
   endpointPath: string,
   domainName: string,
   authenticationSecretArn: string,
-  targetGroupArn: string
+  targetGroupArn: string,
 ) {
   // Create defalut forward rule and action
   await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
@@ -158,13 +158,13 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
   if (input.requestType === 'Create' || input.requestType === 'Update') {
     if (appIdArray.length > 0) {
       await createAppIdRules(
-        input.listenerArn, 
-        appIdArray, 
-        input.protocol, 
-        input.endpointPath, 
-        input.domainName, 
-        input.authenticationSecretArn, 
-        input.targetGroupArn
+        input.listenerArn,
+        appIdArray,
+        input.protocol,
+        input.endpointPath,
+        input.domainName,
+        input.authenticationSecretArn,
+        input.targetGroupArn,
       );
     }
   }
@@ -189,12 +189,12 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
     }
     if (defaultActionRules.length === 0) {
       await createDefaultForwardRule(
-        input.listenerArn, 
-        input.protocol, 
-        input.endpointPath, 
-        input.domainName, 
-        input.authenticationSecretArn, 
-        input.targetGroupArn
+        input.listenerArn,
+        input.protocol,
+        input.endpointPath,
+        input.domainName,
+        input.authenticationSecretArn,
+        input.targetGroupArn,
       );
     }
   }
@@ -325,7 +325,7 @@ function getAppIdsFromCondition(condition: RuleCondition, appIdSet: Set<string>)
         appIdSet.add(value.Value);
       }
     }
-  }  
+  }
 }
 
 async function getAllExistingAppIdRules(listenerArn: string) {
