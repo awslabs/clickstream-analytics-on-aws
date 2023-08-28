@@ -21,15 +21,16 @@ import {
   QueryCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName, userTableName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
-import { KeyVal, PipelineStatusType } from '../../common/types';
+import { IUserRole, KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
 import { IPipeline } from '../../model/pipeline';
 import { IPlugin } from '../../model/plugin';
 import { IDashboard, IProject } from '../../model/project';
+import { IUser } from '../../model/user';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
@@ -1001,5 +1002,99 @@ export class DynamoDbStore implements ClickStreamStore {
     }
     const plugin: IPlugin = result.Item as IPlugin;
     return plugin && !plugin.deleted;
+  };
+
+  public async addUser(user: IUser): Promise<string> {
+    const params: PutCommand = new PutCommand({
+      TableName: userTableName,
+      Item: {
+        email: user.email,
+        name: user.name ?? '',
+        role: user.role ?? IUserRole.DEVELOPER,
+        createAt: Date.now(),
+        updateAt: Date.now(),
+        operator: user.operator?? '',
+        deleted: false,
+      },
+    });
+    await docClient.send(params);
+    return user.email;
+  };
+
+  public async getUser(email: string): Promise<IUser | undefined> {
+    const params: GetCommand = new GetCommand({
+      TableName: userTableName,
+      Key: {
+        email: email,
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    if (!result.Item) {
+      return undefined;
+    }
+    const user: IUser = result.Item as IUser;
+    return !user.deleted ? user : undefined;
+  };
+
+  public async updateUser(user: IUser): Promise<void> {
+    let updateExpression = 'SET #updateAt= :u, #operator= :operator';
+    let expressionAttributeValues = new Map();
+    let expressionAttributeNames = {} as KeyVal<string>;
+    expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':operator', user.operator);
+    expressionAttributeNames['#updateAt'] = 'updateAt';
+    expressionAttributeNames['#operator'] = 'operator';
+    if (user.name) {
+      updateExpression = `${updateExpression}, name= :n`;
+      expressionAttributeValues.set(':n', user.name);
+    }
+    if (user.role) {
+      updateExpression = `${updateExpression}, role= :role`;
+      expressionAttributeValues.set(':role', user.role);
+    }
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: userTableName,
+      Key: {
+        email: user.email,
+      },
+      // Define expressions for the new or updated attributes
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
+  public async listUser(): Promise<IUser[]> {
+    const input: ScanCommandInput = {
+      TableName: userTableName,
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeValues: {
+        ':d': false,
+      },
+    };
+    const records = await scan(input);
+    return records as IUser[];
+  };
+
+  public async deleteUser(email: string, operator: string): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: userTableName,
+      Key: {
+        email: email,
+      },
+      // Define expressions for the new or updated attributes
+      UpdateExpression: 'SET deleted= :d, #operator= :operator',
+      ExpressionAttributeNames: {
+        '#operator': 'operator',
+      },
+      ExpressionAttributeValues: {
+        ':d': true,
+        ':operator': operator,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
   };
 }
