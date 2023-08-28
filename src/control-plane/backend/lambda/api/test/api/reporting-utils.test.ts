@@ -166,13 +166,12 @@ describe('QuickSight visual management test', () => {
       action: 'ADD',
       visuals: [
         {
-          name: 'funnel chart',
           sheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
           visual: visualContent,
-          dataSetIdentifierDeclaration: {
+          dataSetIdentifierDeclaration: [{
             Identifier: 'clickstream_funnel_chart_view',
             DataSetArn: 'fakearn',
-          },
+          }],
           filterControl: {
             DateTimePicker: {
               FilterControlId: 'ec48601c-4fa5-4219-a31b-ceaedfd9ad80',

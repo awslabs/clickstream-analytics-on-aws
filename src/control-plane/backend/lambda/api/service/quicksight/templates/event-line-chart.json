@@ -1,5 +1,5 @@
 {
-  "FunnelChartVisual":{
+  "LineChartVisual":{
       "VisualId":"",
       "Title":{
           "Visibility":"VISIBLE"
@@ -9,15 +9,16 @@
       },
       "ChartConfiguration":{
           "FieldWells":{
-              "FunnelChartAggregatedFieldWells":{
+              "LineChartAggregatedFieldWells":{
                   "Category":[
                       {
-                          "CategoricalDimensionField":{
+                          "DateDimensionField":{
                               "FieldId":"",
                               "Column":{
                                   "DataSetIdentifier":"",
-                                  "ColumnName":"event_name"
-                              }
+                                  "ColumnName":"event_date"
+                              },
+                              "HierarchyId":""
                           }
                       }
                   ],
@@ -32,6 +33,17 @@
                               "AggregationFunction":"DISTINCT_COUNT"
                           }
                       }
+                  ],
+                  "Colors":[
+                      {
+                          "CategoricalDimensionField":{
+                              "FieldId":"",
+                              "Column":{
+                                  "DataSetIdentifier":"",
+                                  "ColumnName":"event_name"
+                              }
+                          }
+                      }
                   ]
               }
           },
@@ -42,21 +54,26 @@
                           "FieldId":"",
                           "Direction":"DESC"
                       }
-                  },
-                  {
-                      "FieldSort":{
-                          "FieldId":"",
-                          "Direction":"DESC"
-                      }
                   }
               ],
-              "CategoryItemsLimit":{
+              "CategoryItemsLimitConfiguration":{
+                  "OtherCategories":"INCLUDE"
+              },
+              "ColorItemsLimitConfiguration":{
+                  "OtherCategories":"INCLUDE"
+              },
+              "SmallMultiplesLimitConfiguration":{
                   "OtherCategories":"INCLUDE"
               }
           },
+          "Type":"LINE",
+          "DataLabels":{
+              "Visibility":"HIDDEN",
+              "Overlap":"DISABLE_OVERLAP"
+          },
           "Tooltip":{
               "TooltipVisibility":"VISIBLE",
-              "SelectedTooltipType":"DETAILED",
+              "SelectedTooltipType":"BASIC",
               "FieldBasedTooltip":{
                   "AggregationVisibility":"HIDDEN",
                   "TooltipTitleType":"PRIMARY_VALUE",
@@ -72,21 +89,26 @@
                               "FieldId":"",
                               "Visibility":"VISIBLE"
                           }
+                      },
+                      {
+                          "FieldTooltipItem":{
+                              "FieldId":"",
+                              "Visibility":"VISIBLE"
+                          }
                       }
                   ]
               }
-          },
-          "DataLabelOptions":{
-              "Visibility":"VISIBLE",
-              "CategoryLabelVisibility":"VISIBLE",
-              "MeasureLabelVisibility":"VISIBLE"
           }
       },
       "Actions":[
 
       ],
       "ColumnHierarchies":[
-
+          {
+              "DateTimeHierarchy":{
+                  "HierarchyId":""
+              }
+          }
       ]
   }
 }
