@@ -30,14 +30,13 @@ import {
   ANDROID_ADD_DEPENDENCY_TEXT,
   ANDROID_ADD_USER_ATTR,
   ANDROID_CONFIG_JSON_TEMPLATE,
-  ANDROID_CONFIG_SDK_TEXT,
   ANDROID_INIT_SDK_TEXT,
   ANDROID_RECODE_EVENT,
   DOWNLOAD_FILENAME,
-  GUIDE_LINK_ANDROID_SDK,
   TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
   TEMPLATE_ANDROID_SDK_VERSION,
+  buildSDKDocumentLink,
 } from 'ts/guideConst';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
@@ -47,7 +46,7 @@ interface ConfigSDKProps {
 
 const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const { appInfo } = props;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [sdkLatestVersion, setSdkLatestVersion] = useState('0.4.0');
   const [loadingSdkVersion, setLoadingSdkVersion] = useState(false);
 
@@ -164,19 +163,6 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
               <CopyCode code={ANDROID_INIT_SDK_TEXT} />
             </div>
           </FormField>
-          <FormField label={t('application:sdkGuide.androidStep3')}>
-            <div className="mt-10">
-              <CopyCode
-                code={ANDROID_CONFIG_SDK_TEXT.replace(
-                  TEMPLATE_APP_ID,
-                  appInfo?.appId || ''
-                ).replace(
-                  TEMPLATE_SERVER_ENDPOINT,
-                  appInfo?.pipeline?.endpoint || ''
-                )}
-              />
-            </div>
-          </FormField>
         </SpaceBetween>
       </ExpandableSection>
 
@@ -204,7 +190,10 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           {t('application:sdkGuide.moreInfoLink', {
             sdkType: 'Android',
           })}
-          <Link href={GUIDE_LINK_ANDROID_SDK} external>
+          <Link
+            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/android')}
+            external
+          >
             {t('application:sdkGuide.devGuide')}
           </Link>
         </p>
