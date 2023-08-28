@@ -157,7 +157,15 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
 
   if (input.requestType === 'Create' || input.requestType === 'Update') {
     if (appIdArray.length > 0) {
-      await createAppIdRules(input.listenerArn, appIdArray, input.protocol, input.endpointPath, input.domainName, input.authenticationSecretArn, input.targetGroupArn);
+      await createAppIdRules(
+        input.listenerArn, 
+        appIdArray, 
+        input.protocol, 
+        input.endpointPath, 
+        input.domainName, 
+        input.authenticationSecretArn, 
+        input.targetGroupArn
+      );
     }
   }
 
@@ -180,7 +188,14 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
       await createFixedResponseRule(input.listenerArn);
     }
     if (defaultActionRules.length === 0) {
-      await createDefaultForwardRule(input.listenerArn, input.protocol, input.endpointPath, input.domainName, input.authenticationSecretArn, input.targetGroupArn);
+      await createDefaultForwardRule(
+        input.listenerArn, 
+        input.protocol, 
+        input.endpointPath, 
+        input.domainName, 
+        input.authenticationSecretArn, 
+        input.targetGroupArn
+      );
     }
   }
   // delete rules
