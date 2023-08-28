@@ -13,7 +13,7 @@
 
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
-import { ALBLogServiceAccountMapping, EMAIL_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
+import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, Policy, PolicyStatement, RPURange, RPURegionMappingObject, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
@@ -397,6 +397,34 @@ function checkPolicy(policy: Policy, principal: { key: string; value: string }, 
   }
 }
 
+function corsStackInput(cors: string) {
+  const inputs: string[] = [];
+  // replace all whitespace
+  const corsString = cors.replace(/\s/g, '');
+  // split by comma
+  const corsArray = corsString.split(',');
+  for (let c of corsArray) {
+    const regexpIP = new RegExp(IP_PATTERN);
+    const matchIP = c.match(regexpIP);
+    if (matchIP) {
+      inputs.push(c);
+    } else {
+      const regexpDomain = new RegExp(CORS_ORIGIN_DOMAIN_PATTERN);
+      const matchDomain = c.match(regexpDomain);
+      if (matchDomain || c === '*') {
+        // replace all . to \.
+        // replace all * to .*
+        const domain = c.replace(/\./g, '\\.').replace(/\*/g, '\.\*');
+        inputs.push(domain);
+      } else {
+        inputs.push(c);
+      }
+    }
+  }
+
+  return inputs.join('|');
+}
+
 export {
   isEmpty,
   isEmail,
@@ -419,4 +447,5 @@ export {
   replaceTemplateVersion,
   getValueFromStackOutputSuffix,
   checkPolicy,
+  corsStackInput,
 };

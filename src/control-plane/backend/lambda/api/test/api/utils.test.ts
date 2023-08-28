@@ -26,10 +26,11 @@ import {
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
+  CORS_PATTERN,
 } from '../../common/constants-ln';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, isEmpty } from '../../common/utils';
+import { containRule, corsStackInput, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -265,6 +266,81 @@ describe('Utils test', () => {
       '',
     ];
     invalidValues.forEach(v => expect(() => validatePattern('Emails', SECRETS_MANAGER_ARN_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Mutil CORS origin valid', async () => {
+    const validValues = [
+      '*',
+      'http://127.0.0.1',
+      'http://127.0.0.1:8081',
+      'http://192.168.120.204',
+      'http://*.example.com',
+      'http://localhost',
+      'https://localhost',
+      'http://example.com',
+      'https://example.com',
+      'http://example.com:80',
+      'https://example.com:80',
+      'http://localhost:8080',
+      'https://localhost:8080',
+      'http://localhost,http://example.com',
+      'http://localhost, http://example.com',
+      'http://localhost:8080,http://example.com:80',
+      'http://127.0.0.1:8081,http://localhost:8080',
+      'http://localhost,https://example.com',
+      'http://abc1.test.com, http://abc2.test.com, http://abc3.test.com',
+      'http://abc1.test.com,http://abc2.test.com',
+    ];
+    validValues.forEach(v => expect(validatePattern('CORS origin', CORS_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      ' ',
+      ' example.com',
+      '&example.com',
+      'localhost1',
+      '127.0.0.1',
+      '127.0.0.1:8081',
+      '192.168.120.204',
+      'http:/localhost',
+      'http:/localhost:9',
+      'http:/example.com:100000',
+      'a',
+      'abc1.test.com; abc2.test.com',
+      '*,abc.com',
+      '*.example.com',
+      'localhost',
+      'example.com',
+      'example.com:80',
+      'localhost,example.com',
+      'localhost, example.com',
+      'localhost:8080,example.com:80',
+      'abc1.test.com, abc2.test.com, abc3.test.com',
+      'http://abc1.test.com,abc2.test.com',
+      'http://*example*.com',
+      'http://example*.com',
+    ];
+    invalidValues.forEach(v => expect(() => validatePattern('CORS origin', CORS_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Mutil CORS origin cover to stack input', async () => {
+    expect(corsStackInput('*')).toEqual('.*');
+    expect(corsStackInput('http://127.0.0.1')).toEqual('http://127.0.0.1');
+    expect(corsStackInput('http://127.0.0.1:8081')).toEqual('http://127.0.0.1:8081');
+    expect(corsStackInput('http://192.168.120.204')).toEqual('http://192.168.120.204');
+    expect(corsStackInput('http://*.example.com')).toEqual('http://.*\\.example\\.com');
+    expect(corsStackInput('http://localhost')).toEqual('http://localhost');
+    expect(corsStackInput('https://localhost')).toEqual('https://localhost');
+    expect(corsStackInput('http://example.com')).toEqual('http://example\\.com');
+    expect(corsStackInput('https://example.com')).toEqual('https://example\\.com');
+    expect(corsStackInput('http://example.com:80')).toEqual('http://example\\.com:80');
+    expect(corsStackInput('http://localhost:8080')).toEqual('http://localhost:8080');
+    expect(corsStackInput('https://localhost:8080')).toEqual('https://localhost:8080');
+    expect(corsStackInput('http://localhost,http://example.com')).toEqual('http://localhost|http://example\\.com');
+    expect(corsStackInput('http://localhost, http://example.com')).toEqual('http://localhost|http://example\\.com');
+    expect(corsStackInput('http://localhost:8080,http://example.com:80')).toEqual('http://localhost:8080|http://example\\.com:80');
+    expect(corsStackInput('http://127.0.0.1:8081,http://localhost:8080')).toEqual('http://127.0.0.1:8081|http://localhost:8080');
+    expect(corsStackInput('http://localhost,https://example.com')).toEqual('http://localhost|https://example\\.com');
+    expect(corsStackInput('http://abc1.test.com, http://abc2.test.com, http://abc3.test.com')).toEqual('http://abc1\\.test\\.com|http://abc2\\.test\\.com|http://abc3\\.test\\.com');
+    expect(corsStackInput('http://abc1.test.com,http://abc2.test.com')).toEqual('http://abc1\\.test\\.com|http://abc2\\.test\\.com');
   });
 
   it('Sink batch valid', async () => {
