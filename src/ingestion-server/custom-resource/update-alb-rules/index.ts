@@ -41,14 +41,14 @@ interface ResourcePropertiesType {
 }
 
 interface HandleClickStreamSDKInput {
-  appIds: string;
-  requestType: string;
-  listenerArn: string;
-  protocol: string;
-  endpointPath: string;
-  domainName: string;
-  authenticationSecretArn: string;
-  targetGroupArn: string;
+  readonly appIds: string;
+  readonly requestType: string;
+  readonly listenerArn: string;
+  readonly protocol: string;
+  readonly endpointPath: string;
+  readonly domainName: string;
+  readonly authenticationSecretArn: string;
+  readonly targetGroupArn: string;
 }
 
 type ResourceEvent = CloudFormationCustomResourceEvent;

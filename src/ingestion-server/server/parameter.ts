@@ -241,7 +241,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
           'logS3Bucket and logS3Prefix cannot be empty when enableApplicationLoadBalancerAccessLog=Yes',
       },
     ],
-  }).overrideLogicalId('logS3BucketAndEnableLogRule');
+  });
 
   new CfnRule(scope, 'enableAuthenticationRule', {
     assertions: [
@@ -268,7 +268,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
           'AuthenticationSecretArn cannot be empty or Protocol cannot be HTTP when EnableAuthentication=Yes',
       },
     ],
-  }).overrideLogicalId('enableAuthenticationRule');
+  });
 
   let kafkaKinesisS3ParamsGroup = [];
   let kafkaKinesisS3ParamsLabels= {};
@@ -333,7 +333,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
           'kafkaTopic and kafkaBrokers cannot be empty',
         },
       ],
-    }).overrideLogicalId('sinkToKafkaAndKafkaBrokersAndKafkaTopic');
+    });
 
   }
 
@@ -419,7 +419,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
             's3DataBucket and s3DataPrefix cannot be empty when sinkToS3Param=Yes',
         },
       ],
-    }).overrideLogicalId('sinkToS3Rule');
+    });
   }
 
   // Kinesis
@@ -556,7 +556,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
           'kinesisDataS3Bucket and kinesisDataS3Prefix cannot be empty when sinkToKinesis=Yes',
         },
       ],
-    }).overrideLogicalId('sinkToKinesisRule');
+    });
   }
 
 
