@@ -287,7 +287,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kafkaTopicParam,
       mskSecurityGroupIdParam,
       mskClusterNameParam,
-    },
+    };
 
     kafkaKinesisS3ParamsGroup.push({
       Label: { default: 'Kafka Cluster' },
@@ -297,7 +297,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         mskClusterNameParam.logicalId,
         mskSecurityGroupIdParam.logicalId,
       ],
-    }),
+    });
 
     kafkaKinesisS3ParamsLabels = {
       ... kafkaKinesisS3ParamsLabels,
@@ -371,7 +371,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       s3DataPrefixParam,
       s3BatchMaxBytesParam,
       s3BatchTimeoutParam,
-    },
+    };
+
     kafkaKinesisS3ParamsGroup.push( {
       Label: { default: 'S3 Bucket' },
       Parameters: [
@@ -380,7 +381,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         s3BatchMaxBytesParam.logicalId,
         s3BatchTimeoutParam.logicalId,
       ],
-    }),
+    });
 
     kafkaKinesisS3ParamsLabels = {
       ... kafkaKinesisS3ParamsLabels,
@@ -400,7 +401,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
         default: 'Batch timeout seconds',
       },
 
-    },
+    };
 
     new CfnRule(scope, 'sinkToS3Rule', {
       assertions: [
@@ -493,20 +494,20 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kinesisDataRetentionHoursParam,
       kinesisBatchSizeParam,
       kinesisMaxBatchingWindowSecondsParam,
-    },
+    };
 
     kafkaKinesisS3ParamsGroup.push({
       Label: { default: 'Kinesis Data Stream' },
       Parameters: [
-        kinesisDataS3BucketParam.logicalId,,
-        kinesisDataS3PrefixParam.logicalId,,
-        kinesisStreamModeParam.logicalId,,
-        kinesisShardCountParam.logicalId,,
-        kinesisDataRetentionHoursParam.logicalId,,
-        kinesisBatchSizeParam.logicalId,,
+        kinesisDataS3BucketParam.logicalId,
+        kinesisDataS3PrefixParam.logicalId,
+        kinesisStreamModeParam.logicalId,
+        kinesisShardCountParam.logicalId,
+        kinesisDataRetentionHoursParam.logicalId,
+        kinesisBatchSizeParam.logicalId,
         kinesisMaxBatchingWindowSecondsParam.logicalId,
       ],
-    }),
+    });
 
     kafkaKinesisS3ParamsLabels = {
       ... kafkaKinesisS3ParamsLabels,

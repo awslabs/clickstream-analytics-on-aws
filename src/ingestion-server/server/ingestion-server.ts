@@ -126,6 +126,18 @@ export interface IngestionServerProps {
   readonly workerStopTimeout: number;
 }
 
+interface UpdateAlbRulesInput {
+  readonly appIds: string;
+  readonly clickStreamSDK: string;
+  readonly targetGroupArn: string;
+  readonly listenerArn: string;
+  readonly serverEndpointPath: string;
+  readonly protocol: ApplicationProtocol;
+  readonly domainName?: string;
+  readonly authenticationSecretArn?: string;
+}
+
+
 export class IngestionServer extends Construct {
   public albDNS: string;
   public acceleratorDNS: string;
@@ -209,15 +221,25 @@ export class IngestionServer extends Construct {
       });
     }
 
-    updateAlbRules(this,
-      props.appIds,
-      props.clickStreamSDK,
-      targetGroup.targetGroupArn,
-      listener.listenerArn,
-      props.serverEndpointPath,
-      props.protocol,
-      props.domainName,
-      props.authenticationSecretArn);
+    const appIds = props.appIds;
+    const clickStreamSDK = props.clickStreamSDK;
+    const targetGroupArn = targetGroup.targetGroupArn;
+    const listenerArn = listener.listenerArn;
+    const serverEndpointPath = props.serverEndpointPath;
+    const protocol: ApplicationProtocol = props.protocol;
+    const domainName = props.domainName;
+    const authenticationSecretArn = props.authenticationSecretArn;
+
+    updateAlbRules(this, {
+      appIds,
+      clickStreamSDK,
+      targetGroupArn,
+      listenerArn,
+      serverEndpointPath,
+      protocol,
+      domainName,
+      authenticationSecretArn,
+    });
 
     deleteECSCluster(this, ecsCluster.clusterArn, ecsCluster.clusterName, ecsService.serviceName);
 
@@ -248,15 +270,17 @@ export class IngestionServer extends Construct {
 
 function updateAlbRules(
   scope: Construct,
-  appIds: string,
-  clickStreamSDK: string,
-  targetGroupArn: string,
-  listenerArn: string,
-  endpointPath: string,
-  protocol: string,
-  domainName?: string,
-  authenticationSecretArn?: string,
+  updateAlbRulesInput: UpdateAlbRulesInput,
 ) {
+  const appIds = updateAlbRulesInput.appIds;
+  const clickStreamSDK = updateAlbRulesInput.clickStreamSDK;
+  const targetGroupArn = updateAlbRulesInput.targetGroupArn;
+  const listenerArn = updateAlbRulesInput.listenerArn;
+  const authenticationSecretArn = updateAlbRulesInput.authenticationSecretArn;
+  const endpointPath = updateAlbRulesInput.serverEndpointPath;
+  const domainName = updateAlbRulesInput.domainName;
+  const protocol = updateAlbRulesInput.protocol;
+
   updateAlbRulesCustomResource(scope, {
     appIds,
     clickStreamSDK,
