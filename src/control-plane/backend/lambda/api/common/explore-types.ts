@@ -68,3 +68,15 @@ export enum ExploreFunnelRequestAction {
   PREVIEW = 'PREVIEW',
   PUBLISH = 'PUBLISH',
 }
+
+export enum ExplorePathSessionDef {
+  SESSION = 'SESSION',
+  CUSTOMIZE = 'CUSTOMIZE',
+}
+
+export enum ExplorePathNodeType {
+  EVENT = 'EVENT',
+  TITLE_NAME = 'TITLE_NAME',
+  TITLE_CLASS = 'TITLE_CLASS',
+  PATH_CLASS = 'PATH_CLASS',
+}

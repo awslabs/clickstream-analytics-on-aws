@@ -12,8 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-import { logger } from '../../common/powertools';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
@@ -30,7 +29,8 @@ export interface EventAndCondition {
 }
 
 export interface PathAnalysisParameter {
-  readonly type: 'SESSION' | 'CUSTOMIZE';
+  readonly sessionType: ExplorePathSessionDef;
+  readonly nodeType: ExplorePathNodeType;
   readonly lagSeconds?: number;
 }
 
@@ -499,8 +499,7 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
   let dataTableSql = '';
   let partitionBy = '';
   let joinSql = '';
-  logger.error(`path type: ${sqlParameters.pathAnalysis?.type}`);
-  if (sqlParameters.pathAnalysis?.type === 'SESSION' ) {
+  if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
     partitionBy = ', session_id';
     joinSql = `
     and a.session_id = b.session_id 

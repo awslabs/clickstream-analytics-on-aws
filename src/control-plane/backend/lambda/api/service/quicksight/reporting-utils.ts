@@ -24,6 +24,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
+import { ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
@@ -63,14 +64,6 @@ export interface DashboardCreateParameters {
   };
 }
 
-export interface DashboardCreateInputParameters {
-  readonly action: 'PREVIEW' | 'PUBLISH';
-  readonly accountId: string;
-  readonly projectId: string;
-  readonly appId: string;
-  readonly pipelineId: string;
-}
-
 export interface VisualMapProps {
   readonly name: 'CHART' | 'TABLE' ;
   readonly id: string;
@@ -95,12 +88,12 @@ export interface VisualRelatedDefParams {
 }
 
 export interface VisualRelatedDefProps {
-  readonly timeScopeType: 'FIXED' | 'RELATIVE';
+  readonly timeScopeType: ExploreTimeScopeType;
   readonly sheetId: string;
   readonly visualId: string;
   readonly viewName: string;
   readonly lastN?: number;
-  readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
+  readonly timeUnit?: ExploreRelativeTimeUnit;
   readonly timeStart?: Date;
   readonly timeEnd?: Date;
 }
@@ -707,11 +700,11 @@ export function sleep(ms: number) {
 export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
 
   let unit = 'DAY';
-  if (timeUnit == 'WK') {
+  if (timeUnit == ExploreRelativeTimeUnit.WK) {
     unit = 'WEEK';
-  } else if (timeUnit == 'MM') {
+  } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
-  } else if (timeUnit == 'Q') {
+  } else if (timeUnit == ExploreRelativeTimeUnit.Q) {
     unit = 'QUARTER';
   }
   return unit;

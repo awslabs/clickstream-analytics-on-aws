@@ -39,6 +39,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
+import { ExploreTimeScopeType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -65,8 +66,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? new Date(query.timeEnd) : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -82,8 +83,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -237,8 +238,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? new Date(query.timeEnd) : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -328,8 +329,7 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters;
-
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -342,20 +342,21 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? new Date(query.timeEnd) : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pathAnalysis: {
-          type: query.pathAnalysis.type,
+          sessionType: query.pathAnalysis.sessionType,
+          nodeType: query.pathAnalysis.nodeType,
           lagSeconds: query.pathAnalysis.lagSeconds,
         },
       });
       console.log(`path analysis sql: ${sql}`);
 
       const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
@@ -2727,7 +2727,8 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-04-30'),
       timeEnd: new Date('2023-06-30'),
       pathAnalysis: {
-        type: 'SESSION',
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.EVENT,
         lagSeconds: 3600,
       },
     });
