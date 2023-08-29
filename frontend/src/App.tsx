@@ -71,6 +71,19 @@ const SignedInPage: React.FC = () => {
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<IUser>();
 
+  const getCurrentUser = async () => {
+    try {
+      const { success, data }: ApiResponse<IUser> = await getUserDetails(
+        auth.user?.profile.email ?? ''
+      );
+      if (success) {
+        setCurrentUser(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     // the `return` is important - addAccessTokenExpiring() returns a cleanup function
     return auth?.events?.addAccessTokenExpiring((event) => {
@@ -78,29 +91,11 @@ const SignedInPage: React.FC = () => {
     });
   }, [auth.events, auth.signinSilent]);
 
-  const getCurrentUser = async () => {
-    if (!auth.user?.profile.email) {
-      return;
-    }
-    try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email
-      );
-      if (success) {
-        setCurrentUser(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   useEffect(() => {
-    (async () => {
-      await getCurrentUser();
-    })();
-  }, [auth]);
+    getCurrentUser();
+  }, [auth.user]);
 
-  if (auth.isLoading || (auth.isAuthenticated && !currentUser)) {
+  if (auth.isLoading) {
     return (
       <div className="page-loading">
         <Spinner />

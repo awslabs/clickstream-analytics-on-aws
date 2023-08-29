@@ -74,7 +74,7 @@ async function _handler(event: CdkCustomResourceEvent, userTableName: string, em
 }
 
 async function onCreate(userTableName: string, email: string) {
-  logger.info('onCreate()');
+  logger.info('onCreate()', { userTableName, email });
   const item = getItem(userTableName, email);
   if (!item) {
     await putItem(userTableName, email);
@@ -96,6 +96,11 @@ async function putItem(tableName: string, email: string) {
       TableName: tableName,
       Item: {
         email: email,
+        role: 'Admin',
+        createAt: Date.now(),
+        updateAt: Date.now(),
+        operator: 'Clickstream',
+        deleted: false,
       },
     });
     await docClient.send(params);
