@@ -206,12 +206,11 @@ test('ServerCorsOrigin pattern', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
-      '',
-      '*',
-      'http://*.test.com',
-      'http://abc.test.com',
-      'http://abc1.test.com, http://abc2.test.com, http://abc3.test.com',
-      'http://abc1.test.com,http://abc2.test.com',
+      '.*',
+      'http://.*\\.test\\.com',
+      'http://abc\\.test\\.com',
+      'http://abc1\\.test\\.com|http://abc2\\.test\\.com|http://abc3\\.test\\.com',
+      'http://abc1\\.test\\.com|http://abc2\\.test\\.com',
     ];
 
     for (const v of validValues) {
