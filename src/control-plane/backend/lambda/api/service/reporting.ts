@@ -199,7 +199,7 @@ export class ReportingServ {
         ColumnConfigurations: columnConfigurations,
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -271,7 +271,7 @@ export class ReportingServ {
       }
 
       const visualId = uuidv4();
-      const visualDef = getEventLineChartVisualDef(visualId, viewName, query.timeUnit);
+      const visualDef = getEventLineChartVisualDef(visualId, viewName, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -304,7 +304,7 @@ export class ReportingServ {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -320,8 +320,8 @@ export class ReportingServ {
     }
   };
 
-  private async create(resourceName: string, query: any, sqls: string[], datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
-
+  private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
+    datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const redshiftRegion = dashboardCreateParameters.region;
 
@@ -385,8 +385,8 @@ export class ReportingServ {
     let dashboardDef;
     if (!query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
-      const sheetId = visualPropsArray[0].sheetId;
-      dashboardDef.Sheets![0].SheetId = sheetId;
+      const sid = visualPropsArray[0].sheetId;
+      dashboardDef.Sheets![0].SheetId = sid;
       dashboardDef.Sheets![0].Name = query.sheetName;
     } else {
       dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
@@ -460,6 +460,7 @@ export class ReportingServ {
         analysisId,
         analysisArn: newAnalysis.Arn!,
         analysisName: `analysis-${resourceName}`,
+        sheetId,
         visualIds: [],
       };
     } else {
@@ -515,6 +516,7 @@ export class ReportingServ {
         analysisId: query.analysisId,
         analysisArn: newAnalysis.Arn!,
         analysisName: query.analysisName,
+        sheetId,
         visualIds: [],
       };
     }

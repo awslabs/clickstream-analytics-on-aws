@@ -53,7 +53,9 @@ import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   ExploreComputeMethod,
+  ExploreConversionIntervalType,
   ExploreFunnelRequestAction,
+  ExploreGroupColumn,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -360,15 +362,17 @@ const AnalyticsEvent: React.FC = () => {
       sheetName: `event_sheet_${eventId}`,
       viewName: `event_view_${eventId}`,
       dashboardCreateParameters: parameters,
+      specifyJoinColumn: false,
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 60 * 60 * 24,
       computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
-      joinColumn: 'user_pseudo_id',
       eventAndConditions: getEventAndConditions(eventOptionData),
       firstEventExtraCondition: getFirstEventAndConditions(
         eventOptionData,
         segmentationOptionData
       ),
       timeScopeType: dateRangeParams?.timeScopeType,
-      groupColumn: dateRangeParams?.groupColumn,
+      groupColumn: ExploreGroupColumn.DAY,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -399,13 +403,13 @@ const AnalyticsEvent: React.FC = () => {
         getEmbeddingUrl(
           data.dashboardId,
           data.sheetId,
-          data.visualIds[0],
+          data.visualIds[0].id,
           '#qs-event-container'
         );
         getEmbeddingUrl(
           data.dashboardId,
           data.sheetId,
-          data.visualIds[1],
+          data.visualIds[1].id,
           '#qs-event-table-container'
         );
       }

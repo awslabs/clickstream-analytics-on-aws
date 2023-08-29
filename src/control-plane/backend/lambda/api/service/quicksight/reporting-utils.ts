@@ -24,6 +24,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
+import { ExploreGroupColumn, ExploreRelativeTimeUnit } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
@@ -82,6 +83,7 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
+  readonly sheetId: string;
   readonly visualIds: VisualMapProps[];
 }
 
@@ -520,7 +522,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+export function getEventLineChartVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-line-chart.json')).toString()) as Visual;
   const filedId1 = uuidv4();
@@ -536,7 +538,7 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, t
   fieldWell.Category![0].DateDimensionField!.FieldId = filedId1;
   fieldWell.Category![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
   fieldWell.Category![0].DateDimensionField!.HierarchyId = hierarchyId;
-  fieldWell.Category![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromTimeUnit(timeUnit);
+  fieldWell.Category![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromGroupColumn(groupColumn);
 
   fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId2;
   fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
@@ -556,7 +558,7 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, t
   return visualDef;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-pivot-table-chart.json')).toString()) as Visual;
   const filedId1 = uuidv4();
@@ -573,7 +575,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
 
   fieldWell.Columns![0].DateDimensionField!.FieldId = filedId2;
   fieldWell.Columns![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Columns![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromTimeUnit(timeUnit);
+  fieldWell.Columns![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromGroupColumn(groupColumn);
 
   fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId3;
   fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
@@ -658,14 +660,21 @@ export function sleep(ms: number) {
 };
 
 export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
-
   let unit = 'DAY';
-  if (timeUnit == 'WK') {
+  if (timeUnit == ExploreRelativeTimeUnit.WK) {
     unit = 'WEEK';
-  } else if (timeUnit == 'MM') {
+  } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
-  } else if (timeUnit == 'Q') {
-    unit = 'QUARTER';
+  }
+  return unit;
+}
+
+export function getQuickSightUnitFromGroupColumn(groupColumn: string) : string {
+  let unit = 'DAY';
+  if (groupColumn == ExploreGroupColumn.WEEK) {
+    unit = 'WEEK';
+  } else if (groupColumn == ExploreGroupColumn.MONTH) {
+    unit = 'MONTH';
   }
   return unit;
 }
