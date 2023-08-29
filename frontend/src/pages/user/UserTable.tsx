@@ -45,20 +45,17 @@ interface UserTableProps {
   };
   selectionType?: 'multi' | 'single';
   loadHelpPanelContent: () => void;
-  setShowDetails: (show: boolean, data?: IUser) => void;
   fetchDataFunc: () => Promise<IUser[]>;
   fetchUpdateFunc: (item: IUser) => Promise<void>;
 }
 
 const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
   const {
-    selectionType,
     tableColumnDefinitions,
     tableContentDisplay,
     tableFilteringProperties,
     tableI18nStrings,
     loadHelpPanelContent,
-    setShowDetails,
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
@@ -114,17 +111,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     sorting: { defaultState: { sortingColumn: columnDefinitions[0] } },
     selection: {},
   });
-
-  useEffect(() => {
-    if (
-      collectionProps.selectedItems &&
-      collectionProps.selectedItems?.length > 0
-    ) {
-      setShowDetails(true, collectionProps.selectedItems[0]);
-    } else {
-      setShowDetails(false);
-    }
-  }, [collectionProps.selectedItems]);
 
   const tablePaginationProps = {
     ...paginationProps,
@@ -188,7 +174,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
         loading={loadingData}
         items={itemsSnap.length > 0 ? itemsSnap : items}
         loadingText={tableI18nStrings.loadingText}
-        selectionType={selectionType ?? 'single'}
         onColumnWidthsChange={saveWidths}
         columnDefinitions={columnDefinitions}
         submitEdit={handleSubmit}

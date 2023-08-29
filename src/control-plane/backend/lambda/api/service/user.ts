@@ -57,8 +57,11 @@ export class UserServ {
 
   public async update(req: any, res: any, next: any) {
     try {
+      if (req.body.operator === 'Clickstream') {
+        return res.status(400).json(new ApiFail('This user not allow to be modified.'));
+      }
       req.body.operator = res.get('X-Click-Stream-Operator');
-      let user: IUser = req.body as IUser;
+      const user: IUser = req.body as IUser;
       await store.updateUser(user);
       return res.status(201).json(new ApiSuccess(null, 'User updated.'));
     } catch (error) {

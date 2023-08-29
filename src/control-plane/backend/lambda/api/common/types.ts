@@ -411,5 +411,5 @@ export enum FetchType {
 export enum IUserRole {
   ADMIN = 'Admin',
   DEVELOPER = 'Developer',
-  ANALYTICS = 'Analytics',
+  ANALYST = 'Analyst',
 }

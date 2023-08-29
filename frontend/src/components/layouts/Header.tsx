@@ -12,6 +12,7 @@
  */
 
 import { TopNavigation } from '@cloudscape-design/components';
+import UserRedirect from 'components/common/UserRedirect';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -204,6 +205,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         setSwitchProjectVisible={setSwitchProjectVisible}
         setAnalyticsInfo={setAnalyticsInfo}
       />
+      <UserRedirect />
     </header>
   );
 };

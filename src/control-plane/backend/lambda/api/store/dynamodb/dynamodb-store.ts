@@ -1045,12 +1045,14 @@ export class DynamoDbStore implements ClickStreamStore {
     expressionAttributeNames['#updateAt'] = 'updateAt';
     expressionAttributeNames['#operator'] = 'operator';
     if (user.name) {
-      updateExpression = `${updateExpression}, name= :n`;
+      updateExpression = `${updateExpression}, #name= :n`;
       expressionAttributeValues.set(':n', user.name);
+      expressionAttributeNames['#name'] = 'name';
     }
     if (user.role) {
-      updateExpression = `${updateExpression}, role= :role`;
+      updateExpression = `${updateExpression}, #role= :role`;
       expressionAttributeValues.set(':role', user.role);
+      expressionAttributeNames['#role'] = 'role';
     }
     const params: UpdateCommand = new UpdateCommand({
       TableName: userTableName,

@@ -11,20 +11,25 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Input } from '@cloudscape-design/components';
+import { AppLayout, Input, Select } from '@cloudscape-design/components';
 import { getAllUsers, updateUser } from 'apis/user';
 import Navigation from 'components/layouts/Navigation';
-import React, { useState } from 'react';
+import moment from 'moment';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { TIME_FORMAT } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import UserSplitPanel from './UserSplitPanel';
 import UserTable from './UserTable';
 
 const UserList: React.FC = () => {
   const { t } = useTranslation();
 
-  const [showSplit, setShowSplit] = useState(false);
-  const [curUser, setCurUser] = useState<IUser | null>();
+  const roleOptions = [
+    { value: 'Admin', label: 'Admin' },
+    { value: 'Developer', label: 'Developer' },
+    { value: 'Analyst', label: 'Analyst' },
+  ];
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'email',
@@ -50,18 +55,18 @@ const UserList: React.FC = () => {
             : 'Invalid input';
         },
         editingCell: (
-          item: { displayName: string },
+          item: { name: string },
           { setValue, currentValue }: any
         ) => {
           return (
             <Input
               autoFocus={true}
-              ariaLabel="Edit display name"
-              value={currentValue ?? item.displayName}
-              onChange={(event) => {
-                setValue(event.detail.value);
+              ariaLabel="Edit user name"
+              value={currentValue ?? item.name}
+              onChange={(item) => {
+                setValue(item.detail.value);
               }}
-              placeholder="Enter display name"
+              placeholder="Enter user name"
             />
           );
         },
@@ -70,6 +75,30 @@ const UserList: React.FC = () => {
     {
       id: 'role',
       header: t('user:labels.tableColumnRole'),
+      minWidth: 200,
+      editConfig: {
+        ariaLabel: 'Edit state',
+        errorIconAriaLabel: 'State Validation Error',
+        editIconAriaLabel: 'editable',
+        editingCell: (item: { role: any }, { setValue, currentValue }: any) => {
+          return (
+            <Select
+              autoFocus={true}
+              expandToViewport={true}
+              ariaLabel="Select desired state"
+              options={roleOptions}
+              onChange={(event: any) => {
+                setValue(event.detail.selectedOption.value);
+              }}
+              selectedOption={
+                roleOptions.find(
+                  (option) => option.value === (currentValue ?? item.role)
+                ) ?? roleOptions[0]
+              }
+            />
+          );
+        },
+      },
       cell: (e: { role: string }) => {
         return e.role;
       },
@@ -78,16 +107,18 @@ const UserList: React.FC = () => {
       id: 'createAt',
       header: t('user:labels.tableColumnCreateAt'),
       cell: (e: { createAt: string }) => {
-        return e.createAt;
+        return moment(e.createAt).format(TIME_FORMAT) || '-';
       },
     },
   ];
+
   const CONTENT_DISPLAY = [
     { id: 'email', visible: true },
     { id: 'name', visible: true },
     { id: 'role', visible: true },
     { id: 'createAt', visible: true },
   ];
+
   const FILTERING_PROPERTIES = [
     {
       propertyLabel: t('user:labels.tableColumnEmail'),
@@ -157,23 +188,12 @@ const UserList: React.FC = () => {
           loadHelpPanelContent={() => {
             console.log(1);
           }}
-          setShowDetails={(show: boolean, data?: IUser) => {
-            setShowSplit(show);
-            if (data) {
-              setCurUser(data as IUser);
-            }
-          }}
           fetchDataFunc={listAllUsers}
           fetchUpdateFunc={updateUserInfo}
         ></UserTable>
       }
       headerSelector="#header"
       navigation={<Navigation activeHref={'/user'} />}
-      splitPanelOpen={showSplit}
-      onSplitPanelToggle={(e) => {
-        setShowSplit(e.detail.open);
-      }}
-      splitPanel={curUser ? <UserSplitPanel user={curUser} /> : ''}
     />
   );
 };

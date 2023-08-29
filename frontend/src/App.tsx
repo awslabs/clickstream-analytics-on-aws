@@ -12,11 +12,13 @@
  */
 
 import { Button, Spinner } from '@cloudscape-design/components';
+import { getUserDetails } from 'apis/user';
 import Axios from 'axios';
 import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
 import { AppContext } from 'context/AppContext';
+import { UserContext } from 'context/UserContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
@@ -60,12 +62,31 @@ const LoginCallback: React.FC = () => {
 const SignedInPage: React.FC = () => {
   const auth = useAuth();
   const { t } = useTranslation();
+  const [currentUser, setCurrentUser] = useState<IUser>();
+
+  const getCurrentUser = async () => {
+    try {
+      const { success, data }: ApiResponse<IUser> = await getUserDetails(
+        auth.user?.profile.email ?? ''
+      );
+      if (success) {
+        setCurrentUser(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     // the `return` is important - addAccessTokenExpiring() returns a cleanup function
     return auth?.events?.addAccessTokenExpiring((event) => {
       auth.signinSilent();
     });
   }, [auth.events, auth.signinSilent]);
+
+  useEffect(() => {
+    getCurrentUser();
+  }, [auth.user]);
 
   if (auth.isLoading) {
     return (
@@ -85,91 +106,99 @@ const SignedInPage: React.FC = () => {
 
   if (auth.isAuthenticated) {
     return (
-      <Router>
-        <div id="b">
-          <Header
-            user={auth.user}
-            signOut={() => {
-              auth.removeUser();
-              localStorage.removeItem(PROJECT_CONFIG_JSON);
-            }}
-          />
-          <Suspense fallback={null}>
-            <div id="app">
-              <Routes>
-                <Route path="/signin" element={<LoginCallback />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/alarms" element={<AlarmsList />} />
-                <Route path="/user" element={<UserList />} />
-                <Route path="/project/detail/:id" element={<ProjectDetail />} />
-                <Route
-                  path="/project/:pid/pipeline/:id"
-                  element={<PipelineDetail />}
-                />
-                <Route
-                  path="/project/:pid/pipeline/:id/update"
-                  element={<CreatePipeline update />}
-                />
-                <Route
-                  path="/project/:projectId/pipelines/create"
-                  element={<CreatePipeline />}
-                />
-                <Route path="/pipelines/create" element={<CreatePipeline />} />
-                <Route
-                  path="/project/:id/application/create"
-                  element={<CreateApplication />}
-                />
-                <Route path="/plugins" element={<PluginList />} />
-                <Route path="/plugins/create" element={<CreatePlugin />} />
-                <Route
-                  path="/project/:pid/application/detail/:id"
-                  element={<ApplicationDetail />}
-                />
-                <Route path="/analytics" element={<AnalyticsHome />} />
-                <Route
-                  path="/analytics/:projectId/app/:appId/realtime"
-                  element={<AnalyticsRealtime />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/dashboards"
-                  element={<AnalyticsDashboard />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/dashboard/:dashboardId"
-                  element={<AnalyticsDashboardDetail />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/event"
-                  element={<AnalyticsEvent />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/retention"
-                  element={<AnalyticsRetention />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/funnel"
-                  element={<AnalyticsFunnel />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/metadata/events"
-                  element={<MetadataEvents />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/metadata/event-parameters"
-                  element={<MetadataParameters />}
-                />
-                <Route
-                  path="/analytics/:projectId/app/:appId/metadata/user-attributes"
-                  element={<MetadataUserAttributes />}
-                />
-              </Routes>
-            </div>
-          </Suspense>
-        </div>
-        <CommonAlert />
-        <Footer />
-      </Router>
+      <UserContext.Provider value={currentUser}>
+        <Router>
+          <div id="b">
+            <Header
+              user={auth.user}
+              signOut={() => {
+                auth.removeUser();
+                localStorage.removeItem(PROJECT_CONFIG_JSON);
+              }}
+            />
+            <Suspense fallback={null}>
+              <div id="app">
+                <Routes>
+                  <Route path="/signin" element={<LoginCallback />} />
+                  <Route path="/" element={<Home />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/alarms" element={<AlarmsList />} />
+                  <Route path="/user" element={<UserList />} />
+                  <Route
+                    path="/project/detail/:id"
+                    element={<ProjectDetail />}
+                  />
+                  <Route
+                    path="/project/:pid/pipeline/:id"
+                    element={<PipelineDetail />}
+                  />
+                  <Route
+                    path="/project/:pid/pipeline/:id/update"
+                    element={<CreatePipeline update />}
+                  />
+                  <Route
+                    path="/project/:projectId/pipelines/create"
+                    element={<CreatePipeline />}
+                  />
+                  <Route
+                    path="/pipelines/create"
+                    element={<CreatePipeline />}
+                  />
+                  <Route
+                    path="/project/:id/application/create"
+                    element={<CreateApplication />}
+                  />
+                  <Route path="/plugins" element={<PluginList />} />
+                  <Route path="/plugins/create" element={<CreatePlugin />} />
+                  <Route
+                    path="/project/:pid/application/detail/:id"
+                    element={<ApplicationDetail />}
+                  />
+                  <Route path="/analytics" element={<AnalyticsHome />} />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/realtime"
+                    element={<AnalyticsRealtime />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/dashboards"
+                    element={<AnalyticsDashboard />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/dashboard/:dashboardId"
+                    element={<AnalyticsDashboardDetail />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/event"
+                    element={<AnalyticsEvent />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/retention"
+                    element={<AnalyticsRetention />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/funnel"
+                    element={<AnalyticsFunnel />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/metadata/events"
+                    element={<MetadataEvents />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/metadata/event-parameters"
+                    element={<MetadataParameters />}
+                  />
+                  <Route
+                    path="/analytics/:projectId/app/:appId/metadata/user-attributes"
+                    element={<MetadataUserAttributes />}
+                  />
+                </Routes>
+              </div>
+            </Suspense>
+          </div>
+          <CommonAlert />
+          <Footer />
+        </Router>
+      </UserContext.Provider>
     );
   }
 

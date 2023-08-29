@@ -11,19 +11,14 @@
  *  and limitations under the License.
  */
 
-import { apiRequest } from 'ts/request';
-
-export const getAllUsers = async () => {
-  const result: any = await apiRequest('get', '/user');
-  return result;
-};
-
-export const updateUser = async (user: IUser) => {
-  const result: any = await apiRequest('put', `/user/${user.email}`, user);
-  return result;
-};
-
-export const getUserDetails = async (email: string) => {
-  const result: any = await apiRequest('get', `/user/${email}`);
-  return result;
-};
+import { createContext } from 'react';
+import { IUserRole } from 'ts/const';
+export const UserContext = createContext<IUser | undefined>({
+  email: '',
+  name: '',
+  role: IUserRole.DEVELOPER,
+  createAt: 0,
+  updateAt: 0,
+  operator: '',
+  deleted: false,
+});
