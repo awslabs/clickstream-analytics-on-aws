@@ -165,15 +165,15 @@ const columnTemplate = `
 function _buildBaseTableSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
 
   let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
   } else {
     let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
+    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
       lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
       lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.Q) {
       lastN = lastN * 31 * 3;
     }
     eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);

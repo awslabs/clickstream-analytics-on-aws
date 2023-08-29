@@ -24,7 +24,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
+import { ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
@@ -464,7 +464,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
   const parameterDeclarations = [];
   let filterGroup: FilterGroup;
 
-  if (props.timeScopeType === 'FIXED') {
+  if (props.timeScopeType === ExploreTimeScopeType.FIXED) {
     filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString()) as FilterControl;
     filterControl.DateTimePicker!.FilterControlId = filterControlId;
     filterControl.DateTimePicker!.Title = 'event_date between';
@@ -700,7 +700,7 @@ export function sleep(ms: number) {
 export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
 
   let unit = 'DAY';
-  if (timeUnit == ExploreRelativeTimeUnit.WK) {
+  if (timeUnit == ExploreGroupColumn.WEEK) {
     unit = 'WEEK';
   } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
