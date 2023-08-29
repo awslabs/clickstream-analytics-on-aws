@@ -33,7 +33,6 @@ import {
 import {
   ExploreAnalyticsOperators,
   ExploreConversionIntervalType,
-  ExploreGroupColumn,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
   MetadataSource,
@@ -245,15 +244,12 @@ export const getConversionIntervalInSeconds = (
 };
 
 export const getDateRange = (dateRangeValue: DateRangePickerProps.Value) => {
-  let groupColumn = ExploreGroupColumn.DAY;
   if (dateRangeValue?.type === 'relative') {
     let unit = ExploreRelativeTimeUnit.DD;
     if (dateRangeValue.unit === 'day') {
       unit = ExploreRelativeTimeUnit.DD;
-      groupColumn = ExploreGroupColumn.DAY;
     } else if (dateRangeValue.unit === 'week') {
       unit = ExploreRelativeTimeUnit.WK;
-      groupColumn = ExploreGroupColumn.WEEK;
     } else if (dateRangeValue.unit === 'month') {
       unit = ExploreRelativeTimeUnit.MM;
     } else if (dateRangeValue.unit === 'year') {
@@ -264,14 +260,12 @@ export const getDateRange = (dateRangeValue: DateRangePickerProps.Value) => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: dateRangeValue.amount,
       timeUnit: unit,
-      groupColumn: groupColumn,
     };
   } else if (dateRangeValue?.type === 'absolute') {
     return {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: dateRangeValue.startDate,
       timeEnd: dateRangeValue.endDate,
-      groupColumn: groupColumn,
     };
   }
 };

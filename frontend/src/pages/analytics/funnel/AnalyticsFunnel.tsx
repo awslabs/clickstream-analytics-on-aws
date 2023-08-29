@@ -57,6 +57,7 @@ import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExploreFunnelRequestAction,
+  ExploreGroupColumn,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -89,15 +90,19 @@ const AnalyticsFunnel: React.FC = () => {
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userPseudoNumber') ?? '',
   };
 
   const computeMethodOptions: SelectProps.Options = [
+    defaultComputeMethodOption,
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? '',
+    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? '',
     },
-    defaultComputeMethodOption,
   ];
 
   const customWindowType = {
@@ -284,6 +289,12 @@ const AnalyticsFunnel: React.FC = () => {
       unit: 'day',
     });
 
+  const [timeGranularity, setTimeGranularity] =
+    React.useState<SelectProps.Option>({
+      value: ExploreGroupColumn.DAY,
+      label: t('analytics:options.dayTimeGranularity') ?? '',
+    });
+
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
@@ -355,7 +366,7 @@ const AnalyticsFunnel: React.FC = () => {
         segmentationOptionData
       ),
       timeScopeType: dateRangeParams?.timeScopeType,
-      groupColumn: dateRangeParams?.groupColumn,
+      groupColumn: timeGranularity.value,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -407,7 +418,7 @@ const AnalyticsFunnel: React.FC = () => {
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userPseudoNumber') ?? '',
     });
     setSelectedWindowType(customWindowType);
     setSelectedWindowUnit({
@@ -592,6 +603,8 @@ const AnalyticsFunnel: React.FC = () => {
                   <ExploreDateRangePicker
                     dateRangeValue={dateRangeValue}
                     setDateRangeValue={setDateRangeValue}
+                    timeGranularity={timeGranularity}
+                    setTimeGranularity={setTimeGranularity}
                   />
                 </SpaceBetween>
                 <br />

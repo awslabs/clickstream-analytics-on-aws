@@ -87,15 +87,19 @@ const AnalyticsEvent: React.FC = () => {
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userPseudoNumber') ?? '',
   };
 
   const computeMethodOptions: SelectProps.Options = [
+    defaultComputeMethodOption,
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? '',
+    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? '',
     },
-    defaultComputeMethodOption,
   ];
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
@@ -271,11 +275,17 @@ const AnalyticsEvent: React.FC = () => {
       unit: 'day',
     });
 
+  const [timeGranularity, setTimeGranularity] =
+    React.useState<SelectProps.Option>({
+      value: ExploreGroupColumn.DAY,
+      label: t('analytics:options.dayTimeGranularity') ?? '',
+    });
+
   const resetConfig = async () => {
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userPseudoNumber') ?? '',
     });
     setEventOptionData([
       {
@@ -362,8 +372,7 @@ const AnalyticsEvent: React.FC = () => {
       sheetName: `event_sheet_${eventId}`,
       viewName: `event_view_${eventId}`,
       dashboardCreateParameters: parameters,
-      specifyJoinColumn: true,
-      joinColumn: 'user_pseudo_id',
+      specifyJoinColumn: false,
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 60 * 60 * 24,
       computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
@@ -373,7 +382,7 @@ const AnalyticsEvent: React.FC = () => {
         segmentationOptionData
       ),
       timeScopeType: dateRangeParams?.timeScopeType,
-      groupColumn: ExploreGroupColumn.DAY,
+      groupColumn: timeGranularity.value,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -487,6 +496,8 @@ const AnalyticsEvent: React.FC = () => {
                   <ExploreDateRangePicker
                     dateRangeValue={dateRangeValue}
                     setDateRangeValue={setDateRangeValue}
+                    timeGranularity={timeGranularity}
+                    setTimeGranularity={setTimeGranularity}
                   />
                 </SpaceBetween>
                 <br />

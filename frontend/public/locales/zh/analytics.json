@@ -29,15 +29,20 @@
     "selectSheetTitle": "请选择一个工作表"
   },
   "options": {
-    "eventNumber": "事件数量",
-    "userNumber": "用户数量",
+    "eventNumber": "事件数",
+    "userNumber": "用户数",
+    "userPseudoNumber": "伪用户数",
     "customWindow": "自定义",
     "theDayWindow": "当天",
     "noWindow": "无",
     "secondWindowUnit": "秒",
     "minuteWindowUnit": "分钟",
     "hourWindowUnit": "小时",
-    "dayWindowUnit": "天"
+    "dayWindowUnit": "天",
+    "hourTimeGranularity": "小时级",
+    "dayTimeGranularity": "天级",
+    "weekTimeGranularity": "周级",
+    "monthTimeGranularity": "月级"
   },
   "metadata": {
     "event": {

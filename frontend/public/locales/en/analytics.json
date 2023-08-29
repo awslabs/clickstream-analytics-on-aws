@@ -31,13 +31,18 @@
   "options": {
     "eventNumber": "Event number",
     "userNumber": "User number",
+    "userPseudoNumber": "Pseudo User number",
     "customWindow": "Custom",
     "theDayWindow": "The Day",
     "noWindow": "Off",
     "secondWindowUnit": "Second(s)",
     "minuteWindowUnit": "Minute(s)",
     "hourWindowUnit": "Hour(s)",
-    "dayWindowUnit": "Day(s)"
+    "dayWindowUnit": "Day(s)",
+    "hourTimeGranularity": "Hourly",
+    "dayTimeGranularity": "Daily",
+    "weekTimeGranularity": "Weekly",
+    "monthTimeGranularity": "Monthly"
   },
   "metadata": {
     "event": {
