@@ -16,13 +16,11 @@ import { getAllUsers, updateUser } from 'apis/user';
 import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import UserSplitPanel from './UserSplitPanel';
 import UserTable from './UserTable';
 
 const UserList: React.FC = () => {
-  const { projectId, appId } = useParams();
   const { t } = useTranslation();
 
   const [showSplit, setShowSplit] = useState(false);
