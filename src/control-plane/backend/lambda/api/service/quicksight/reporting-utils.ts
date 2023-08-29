@@ -24,7 +24,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreGroupColumn, ExploreRelativeTimeUnit } from '../../common/explore-types';
+import { ExploreRelativeTimeUnit } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
