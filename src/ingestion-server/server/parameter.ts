@@ -25,7 +25,7 @@ import {
 } from '../../common/constant';
 
 import { Parameters, SubnetParameterType } from '../../common/parameters';
-import { CORS_PATTERN } from '../../control-plane/backend/lambda/api/common/constants-ln';
+import { STACK_CORS_PATTERN } from '../../control-plane/backend/lambda/api/common/constants-ln';
 
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
   // CfnParameter
@@ -71,8 +71,8 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     description: 'Server CORS origin',
     type: 'String',
     default: '',
-    allowedPattern: CORS_PATTERN,
-    constraintDescription: `ServerCorsOrigin must match pattern ${CORS_PATTERN}`,
+    allowedPattern: STACK_CORS_PATTERN,
+    constraintDescription: `ServerCorsOrigin must match pattern ${STACK_CORS_PATTERN}`,
   });
 
   const protocolParam = new CfnParameter(scope, 'Protocol', {
