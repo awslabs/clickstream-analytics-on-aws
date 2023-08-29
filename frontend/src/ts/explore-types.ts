@@ -37,7 +37,8 @@ export enum MetadataParameterType {
 }
 
 export enum ExploreComputeMethod {
-  USER_CNT = 'USER_CNT',
+  USER_CNT = 'USER_CNT',// user_pseudo_id
+  USER_ID_CNT = 'USER_ID_CNT', // user_id
   EVENT_CNT = 'EVENT_CNT',
 }
 

@@ -538,7 +538,7 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, g
   fieldWell.Category![0].DateDimensionField!.FieldId = filedId1;
   fieldWell.Category![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
   fieldWell.Category![0].DateDimensionField!.HierarchyId = hierarchyId;
-  fieldWell.Category![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromGroupColumn(groupColumn);
+  fieldWell.Category![0].DateDimensionField!.DateGranularity = groupColumn;
 
   fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId2;
   fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
@@ -575,7 +575,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
 
   fieldWell.Columns![0].DateDimensionField!.FieldId = filedId2;
   fieldWell.Columns![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Columns![0].DateDimensionField!.DateGranularity = getQuickSightUnitFromGroupColumn(groupColumn);
+  fieldWell.Columns![0].DateDimensionField!.DateGranularity = groupColumn;
 
   fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId3;
   fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
@@ -668,14 +668,3 @@ export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
   }
   return unit;
 }
-
-export function getQuickSightUnitFromGroupColumn(groupColumn: string) : string {
-  let unit = 'DAY';
-  if (groupColumn == ExploreGroupColumn.WEEK) {
-    unit = 'WEEK';
-  } else if (groupColumn == ExploreGroupColumn.MONTH) {
-    unit = 'MONTH';
-  }
-  return unit;
-}
-

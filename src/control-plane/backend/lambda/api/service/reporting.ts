@@ -35,7 +35,7 @@ import {
   getEventLineChartVisualDef,
   getEventPivotTableVisualDef,
 } from './quicksight/reporting-utils';
-import { buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
+import { buildEventAnalysisView, buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
@@ -226,7 +226,7 @@ export class ReportingServ {
 
       //construct parameters to build sql
       const viewName = query.viewName;
-      const sql = buildFunnelView(query.appId, viewName, {
+      const sql = buildEventAnalysisView(query.appId, viewName, {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -290,7 +290,6 @@ export class ReportingServ {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
       };
 
       const tableVisualId = uuidv4();

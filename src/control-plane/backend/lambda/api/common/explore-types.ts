@@ -59,9 +59,10 @@ export enum ExploreRelativeTimeUnit {
 }
 
 export enum ExploreGroupColumn {
-  WEEK = 'week',
-  DAY = 'day',
-  MONTH = 'month',
+  WEEK = 'WEEK',
+  DAY = 'DAY',
+  MONTH = 'MONTH',
+  HOUR = 'HOUR',
 }
 
 export enum ExploreFunnelRequestAction {

@@ -33,7 +33,7 @@ export interface FunnelSQLParameters {
   readonly computeMethod: ExploreComputeMethod;
   readonly specifyJoinColumn: boolean;
   readonly joinColumn?: string;
-  readonly conversionIntervalType: ExploreConversionIntervalType;
+  readonly conversionIntervalType?: ExploreConversionIntervalType;
   readonly conversionIntervalInSeconds?: number;
   readonly firstEventExtraCondition?: EventAndCondition;
   readonly eventAndConditions: EventAndCondition[];
@@ -45,9 +45,7 @@ export interface FunnelSQLParameters {
   readonly groupColumn: ExploreGroupColumn;
 }
 
-function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
-
-  const baseColumns = `
+const baseColumns = `
     ,event_date
     ,event_name
     ,event_id
@@ -101,7 +99,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
     ,items
   `;
 
-  const columnTemplate = `
+const columnTemplate = `
      event_date as event_date####
     ,event_name as event_name####
     ,event_id as event_id####
@@ -155,6 +153,8 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
     ,items as items####
   `;
 
+function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+
   let eventDateSQL = '';
   if (sqlParameters.timeScopeType === 'FIXED') {
     eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
@@ -173,7 +173,8 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
   let sql = `
     with base_data as (
       select 
-        TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
+        TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month
+      , TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
@@ -216,7 +217,8 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
 
     let firstEventConditionSQL = '';
     let firstTableColumns = `
-       week
+       month
+      ,week
       ,day
       ,hour
       ,${columnTemplate.replace(/####/g, '_0')}
@@ -331,6 +333,120 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: FunnelSQLParam
   return sql;
 };
 
+function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: FunnelSQLParameters) : string {
+
+  let eventDateSQL = '';
+  if (sqlParameters.timeScopeType === 'FIXED') {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
+  } else {
+    let lastN = sqlParameters.lastN!;
+    if (sqlParameters.timeUnit === 'WK') {
+      lastN = lastN * 7;
+    } else if (sqlParameters.timeUnit === 'MM') {
+      lastN = lastN * 31;
+    } else if (sqlParameters.timeUnit === 'Q') {
+      lastN = lastN * 31 * 3;
+    }
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+  }
+
+  let sql = `
+    with base_data as (
+      select 
+        TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month
+      , TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
+      , event_params
+      , user_properties
+      ${baseColumns}
+      from ${sqlParameters.schemaName}.ods_events ods 
+      where ${eventDateSQL}
+      and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
+    ),
+  `;
+
+  for (const [index, event] of eventNames.entries()) {
+
+    const eventCondition = sqlParameters.eventAndConditions[index];
+    let eventConditionSql = '';
+    if (eventCondition.conditions !== undefined) {
+      for (const condition of eventCondition.conditions) {
+        if (condition.category === 'user' || condition.category === 'event') {
+          continue;
+        }
+        let value = condition.value;
+        if (condition.dataType === MetadataValueType.STRING) {
+          value = `'${value}'`;
+        }
+
+        let category: string = `${condition.category}_`;
+        if (condition.category === 'other') {
+          category = '';
+        }
+        eventConditionSql = eventConditionSql.concat(`
+          ${eventCondition.conditionOperator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
+        `);
+      }
+    }
+    if (eventConditionSql !== '') {
+      eventConditionSql = `
+      and ( 1=1 ${eventConditionSql} )
+      `;
+    }
+
+    let tableColumns = `
+       month
+      ,week
+      ,day
+      ,hour
+      ,${columnTemplate.replace(/####/g, `_${index}`)}
+    `;
+
+    sql = sql.concat(`
+    table_${index} as (
+      select 
+        ${ tableColumns}
+      from base_data base
+      where event_name = '${event}'
+      ${eventConditionSql}
+    ),
+    `);
+  }
+
+  let joinTableSQL = '';
+
+  for (const [index, _item] of eventNames.entries()) {
+
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
+    joinTableSQL = joinTableSQL.concat(`
+    ${unionSql}
+    select 
+      table_${index}.month
+    , table_${index}.week
+    , table_${index}.day
+    , table_${index}.hour
+    , table_${index}.event_id_${index} as event_id
+    , table_${index}.event_name_${index} as event_name
+    , table_${index}.user_pseudo_id_${index} as user_pseudo_id
+    , table_${index}.event_timestamp_${index} as event_timestamp
+    from table_${index}
+    `);
+
+  }
+
+  sql = sql.concat(`
+    join_table as (
+      ${joinTableSQL}
+    )`,
+  );
+
+  return sql;
+};
+
 export function buildFunnelDataSql(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
 
   let eventNames: string[] = [];
@@ -389,13 +505,15 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
 
   let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters);
   let finalTableColumnsSQL = `
-     week
+     month
+    ,week
     ,day
     ,hour
   `;
 
   let finalTableGroupBySQL = `
-     week
+     month
+    ,week
     ,day
     ,hour
   `;
@@ -432,6 +550,65 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: Fun
     `);
     index += 1;
   }
+
+  let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+   ${baseSQL}
+   ${resultSql}
+   `;
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+export function buildEventAnalysisView(schema: string, name: string, sqlParameters: FunnelSQLParameters) : string {
+
+  let resultSql = '';
+  let eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions) {
+    eventNames.push(e.eventName);
+  }
+  let prefix = 'e';
+  if (sqlParameters.computeMethod === 'USER_CNT') {
+    prefix = 'u';
+  }
+
+  let baseSQL = _buildEventAnalysisBaseSql(eventNames, sqlParameters);
+  let finalTableColumnsSQL = `
+     month
+    ,week
+    ,day
+    ,hour
+  `;
+
+  let finalTableGroupBySQL = `
+     month
+    ,week
+    ,day
+    ,hour
+  `;
+
+
+  finalTableColumnsSQL = finalTableColumnsSQL.concat(', event_id as e_id , event_name as e_name , user_pseudo_id as u_id ');
+
+  finalTableGroupBySQL = finalTableGroupBySQL.concat(', event_id , event_name , user_pseudo_id ');
+
+  baseSQL = baseSQL.concat(`,
+    final_table as (
+      select 
+      ${finalTableColumnsSQL}
+      from join_table 
+      group by
+      ${finalTableGroupBySQL}
+    )
+  `);
+
+  resultSql = resultSql.concat(`
+  select 
+      day::date as event_date
+    ,e_name::varchar as event_name
+    ,${prefix}_id::varchar as x_id
+  from final_table where ${prefix}_id is not null
+  `);
 
   let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
    ${baseSQL}
