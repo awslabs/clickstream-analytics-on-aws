@@ -149,6 +149,9 @@ test('domainName pattern', () => {
     const validValues = [
       'abc.com',
       'test.abc.com',
+      'example.services',
+      'test.example.graphics',
+      '123.test.clickstream.management',
       '123.test.abc.com',
       'a123#~&%.test-2.a_bc.com',
     ];
