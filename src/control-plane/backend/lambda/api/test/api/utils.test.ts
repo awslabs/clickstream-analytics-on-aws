@@ -133,6 +133,7 @@ describe('Utils test', () => {
   it('Domain Name valid', async () => {
     const validValues = [
       'fake.example.com',
+      'test.immobilien',
       'example.com',
     ];
 
