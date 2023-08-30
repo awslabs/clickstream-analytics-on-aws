@@ -19,6 +19,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
+import { ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -505,8 +506,8 @@ describe('reporting test', () => {
           },
         },
         pathAnalysis: {
-          type: 'SESSION',
-          lagSeconds: 3600,
+          sessionType: ExplorePathSessionDef.SESSION,
+          nodeType: ExplorePathNodeType.EVENT,
         },
       });
 
@@ -591,8 +592,11 @@ describe('reporting test', () => {
           },
         },
         pathAnalysis: {
-          type: 'SESSION',
+          platform: MetadataPlatform.ANDROID,
+          sessionType: ExplorePathSessionDef.SESSION,
+          nodeType: ExplorePathNodeType.SCREEN_NAME,
           lagSeconds: 3600,
+          nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
         },
       });
 

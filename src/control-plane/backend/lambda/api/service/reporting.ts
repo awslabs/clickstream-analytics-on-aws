@@ -37,9 +37,9 @@ import {
   pathAnalysisVisualColumns,
   getPathAnalysisChartVisualDef,
 } from './quicksight/reporting-utils';
-import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView } from './quicksight/sql-builder';
+import { buildEventPathAnalysisView, buildNodePathAnalysisView, buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ExploreTimeScopeType } from '../common/explore-types';
+import { ExplorePathNodeType, ExploreTimeScopeType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -333,26 +333,52 @@ export class ReportingServ {
 
       //construct parameters to build sql
       const viewName = query.viewName;
-      const sql = buildPathAnalysisView(query.appId, viewName, {
-        schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        eventAndConditions: query.eventAndConditions,
-        timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        pathAnalysis: {
-          sessionType: query.pathAnalysis.sessionType,
-          nodeType: query.pathAnalysis.nodeType,
-          lagSeconds: query.pathAnalysis.lagSeconds,
-        },
-      });
+      let sql = '';
+      if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
+        sql = buildEventPathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          eventAndConditions: query.eventAndConditions,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+          },
+        });
+      } else {
+        sql = buildNodePathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeStart) : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? new Date(query.timeEnd) : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+            nodes: query.pathAnalysis.nodes,
+          },
+        });
+      }
       console.log(`path analysis sql: ${sql}`);
 
       const sqls = [sql];

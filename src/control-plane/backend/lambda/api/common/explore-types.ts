@@ -21,7 +21,7 @@ export enum MetadataPlatform {
   ANDROID = 'Android',
   IOS = 'iOS',
   WEB = 'Web',
-  WECHAT_MINIPROGRAM = 'Wechat MiniProgram',
+  WECHAT_MINIPROGRAM = 'WeChatMP',
 }
 
 export enum MetadataValueType {
@@ -75,8 +75,9 @@ export enum ExplorePathSessionDef {
 }
 
 export enum ExplorePathNodeType {
-  EVENT = 'EVENT',
-  TITLE_NAME = 'TITLE_NAME',
-  TITLE_CLASS = 'TITLE_CLASS',
-  PATH_CLASS = 'PATH_CLASS',
+  EVENT = 'event',
+  PAGE_TITLE = '_page_title',
+  PAGE_URL = '_page_url',
+  SCREEN_NAME = '_screen_name',
+  SCREEN_ID = '_screen_id',
 }
