@@ -26,6 +26,7 @@ import {
 import { createApplication, getApplicationDetail } from 'apis/application';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
+import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -279,6 +280,15 @@ const RegisterApp: React.FC = () => {
                 content: (
                   <div className="pd-20">
                     <ConfigIOSSDK appInfo={application} />
+                  </div>
+                ),
+              },
+              {
+                label: t('application:detail.web'),
+                id: 'web',
+                content: (
+                  <div className="pd-20">
+                    <ConfigWebSDK appInfo={application} />
                   </div>
                 ),
               },
