@@ -40,6 +40,51 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   } = props;
   const { t } = useTranslation();
 
+  const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
+    {
+      key: 'previous-1-day',
+      amount: 1,
+      unit: 'day',
+      type: 'relative',
+    },
+    {
+      key: 'previous-1-week',
+      amount: 1,
+      unit: 'week',
+      type: 'relative',
+    },
+    {
+      key: 'previous-2-week',
+      amount: 2,
+      unit: 'week',
+      type: 'relative',
+    },
+    {
+      key: 'previous-1-month',
+      amount: 1,
+      unit: 'month',
+      type: 'relative',
+    },
+    {
+      key: 'previous-3-months',
+      amount: 3,
+      unit: 'month',
+      type: 'relative',
+    },
+    {
+      key: 'previous-6-months',
+      amount: 6,
+      unit: 'month',
+      type: 'relative',
+    },
+    {
+      key: 'previous-1-year',
+      amount: 1,
+      unit: 'year',
+      type: 'relative',
+    },
+  ];
+
   const defaultTimeGranularityOption: SelectProps.Option = {
     value: ExploreGroupColumn.DAY,
     label: t('analytics:options.dayTimeGranularity') ?? '',
@@ -102,50 +147,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         }}
         value={dateRangeValue ?? null}
         dateOnly
-        relativeOptions={[
-          {
-            key: 'previous-1-day',
-            amount: 1,
-            unit: 'day',
-            type: 'relative',
-          },
-          {
-            key: 'previous-1-week',
-            amount: 1,
-            unit: 'week',
-            type: 'relative',
-          },
-          {
-            key: 'previous-2-week',
-            amount: 2,
-            unit: 'week',
-            type: 'relative',
-          },
-          {
-            key: 'previous-1-month',
-            amount: 1,
-            unit: 'month',
-            type: 'relative',
-          },
-          {
-            key: 'previous-3-months',
-            amount: 3,
-            unit: 'month',
-            type: 'relative',
-          },
-          {
-            key: 'previous-6-months',
-            amount: 6,
-            unit: 'month',
-            type: 'relative',
-          },
-          {
-            key: 'previous-1-year',
-            amount: 1,
-            unit: 'year',
-            type: 'relative',
-          },
-        ]}
+        relativeOptions={relativeOptions}
         isValidRange={isValidRange}
         i18nStrings={{
           relativeModeTitle: t('analytics:dateRange.relativeModeTitle') ?? '',

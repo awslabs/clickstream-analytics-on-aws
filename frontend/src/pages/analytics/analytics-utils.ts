@@ -229,14 +229,17 @@ export const getConversionIntervalInSeconds = (
   windowValue: string
 ) => {
   if (selectedWindowType?.value === ExploreConversionIntervalType.CUSTOMIZE) {
-    if (selectedWindowUnit?.value === 'second') {
-      return Number(windowValue);
-    } else if (selectedWindowUnit?.value === 'minute') {
-      return Number(windowValue) * 60;
-    } else if (selectedWindowUnit?.value === 'hour') {
-      return Number(windowValue) * 60 * 60;
-    } else if (selectedWindowUnit?.value === 'day') {
-      return Number(windowValue) * 60 * 60 * 24;
+    switch (selectedWindowUnit?.value) {
+      case 'second':
+        return Number(windowValue);
+      case 'minute':
+        return Number(windowValue) * 60;
+      case 'hour':
+        return Number(windowValue) * 60 * 60;
+      case 'day':
+        return Number(windowValue) * 60 * 60 * 24;
+      default:
+        return Number(windowValue) * 60;
     }
   } else {
     return 0;
@@ -245,17 +248,20 @@ export const getConversionIntervalInSeconds = (
 
 export const getDateRange = (dateRangeValue: DateRangePickerProps.Value) => {
   if (dateRangeValue?.type === 'relative') {
-    let unit = ExploreRelativeTimeUnit.DD;
-    if (dateRangeValue.unit === 'day') {
-      unit = ExploreRelativeTimeUnit.DD;
-    } else if (dateRangeValue.unit === 'week') {
-      unit = ExploreRelativeTimeUnit.WK;
-    } else if (dateRangeValue.unit === 'month') {
-      unit = ExploreRelativeTimeUnit.MM;
-    } else if (dateRangeValue.unit === 'year') {
-      unit = ExploreRelativeTimeUnit.Q;
+    let unit;
+    switch (dateRangeValue.unit) {
+      case 'week':
+        unit = ExploreRelativeTimeUnit.WK;
+        break;
+      case 'month':
+        unit = ExploreRelativeTimeUnit.MM;
+        break;
+      case 'year':
+        unit = ExploreRelativeTimeUnit.YY;
+        break;
+      default:
+        unit = ExploreRelativeTimeUnit.DD;
     }
-
     return {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: dateRangeValue.amount,

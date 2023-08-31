@@ -454,7 +454,7 @@ const AnalyticsEvent: React.FC = () => {
                           onClick={resetConfig}
                           loading={loadingData}
                         >
-                          {t('analytics:button.reset')}
+                          {t('button.reset')}
                         </Button>
                         <Button
                           variant="primary"
@@ -463,7 +463,7 @@ const AnalyticsEvent: React.FC = () => {
                             setSelectDashboardModalVisible(true);
                           }}
                         >
-                          {t('analytics:button.save')}
+                          {t('button.saveToDashboard')}
                         </Button>
                       </SpaceBetween>
                     }
@@ -713,7 +713,7 @@ const AnalyticsEvent: React.FC = () => {
                   onClick={clickPreview}
                   loading={loadingData}
                 >
-                  {t('common:button.preview')}
+                  {t('button.preview')}
                 </Button>
               </Container>
               <Container>

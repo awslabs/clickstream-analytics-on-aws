@@ -126,10 +126,6 @@
       }
     }
   },
-  "button": {
-    "reset": "Reset",
-    "save": "Save to Dashboard"
-  },
   "dateRange": {
     "relativeModeTitle": "Relative",
     "absoluteModeTitle": "Absolute",

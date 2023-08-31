@@ -57,6 +57,7 @@ export enum ExploreRelativeTimeUnit {
   WK = 'WK',
   MM = 'MM',
   Q = 'Q',
+  YY = 'YY',
 }
 
 export enum ExploreGroupColumn {
