@@ -14,6 +14,7 @@
 import { Button, Spinner } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
 import Axios from 'axios';
+import RoleRoute from 'components/common/RoleRoute';
 import CommonAlert from 'components/common/alert';
 import Footer from 'components/layouts/Footer';
 import Header from 'components/layouts/Header';
@@ -33,6 +34,7 @@ import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
+import AccessDenied from 'pages/error-page/AccessDenied';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
 import PluginList from 'pages/plugins/PluginList';
@@ -44,7 +46,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
+import { CONFIG_URL, IUserRole, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
 
 const LoginCallback: React.FC = () => {
@@ -64,19 +66,6 @@ const SignedInPage: React.FC = () => {
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<IUser>();
 
-  const getCurrentUser = async () => {
-    try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email ?? ''
-      );
-      if (success) {
-        setCurrentUser(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     // the `return` is important - addAccessTokenExpiring() returns a cleanup function
     return auth?.events?.addAccessTokenExpiring((event) => {
@@ -84,11 +73,29 @@ const SignedInPage: React.FC = () => {
     });
   }, [auth.events, auth.signinSilent]);
 
-  useEffect(() => {
-    getCurrentUser();
-  }, [auth.user]);
+  const getCurrentUser = async () => {
+    if (!auth.user?.profile.email) {
+      return;
+    }
+    try {
+      const { success, data }: ApiResponse<IUser> = await getUserDetails(
+        auth.user?.profile.email
+      );
+      if (success) {
+        setCurrentUser(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-  if (auth.isLoading) {
+  useEffect(() => {
+    (async () => {
+      await getCurrentUser();
+    })();
+  }, [auth]);
+
+  if (auth.isLoading || !currentUser) {
     return (
       <div className="page-loading">
         <Spinner />
@@ -120,76 +127,190 @@ const SignedInPage: React.FC = () => {
               <div id="app">
                 <Routes>
                   <Route path="/signin" element={<LoginCallback />} />
-                  <Route path="/" element={<Home />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/alarms" element={<AlarmsList />} />
-                  <Route path="/user" element={<UserList />} />
+                  <Route path="/403" element={<AccessDenied />} />
+                  <Route
+                    path="/"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <Home />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/projects"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <Projects />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/alarms"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <AlarmsList />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/user"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <UserList />
+                      </RoleRoute>
+                    }
+                  />
                   <Route
                     path="/project/detail/:id"
-                    element={<ProjectDetail />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <ProjectDetail />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/project/:pid/pipeline/:id"
-                    element={<PipelineDetail />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <PipelineDetail />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/project/:pid/pipeline/:id/update"
-                    element={<CreatePipeline update />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <CreatePipeline update />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/project/:projectId/pipelines/create"
-                    element={<CreatePipeline />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <CreatePipeline />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/pipelines/create"
-                    element={<CreatePipeline />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <CreatePipeline />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/project/:id/application/create"
-                    element={<CreateApplication />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <CreateApplication />
+                      </RoleRoute>
+                    }
                   />
-                  <Route path="/plugins" element={<PluginList />} />
-                  <Route path="/plugins/create" element={<CreatePlugin />} />
+                  <Route
+                    path="/plugins"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <PluginList />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/plugins/create"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <CreatePlugin />
+                      </RoleRoute>
+                    }
+                  />
                   <Route
                     path="/project/:pid/application/detail/:id"
-                    element={<ApplicationDetail />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                        <ApplicationDetail />
+                      </RoleRoute>
+                    }
                   />
-                  <Route path="/analytics" element={<AnalyticsHome />} />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsHome />
+                      </RoleRoute>
+                    }
+                  />
                   <Route
                     path="/analytics/:projectId/app/:appId/realtime"
-                    element={<AnalyticsRealtime />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsRealtime />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/dashboards"
-                    element={<AnalyticsDashboard />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsDashboard />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/dashboard/:dashboardId"
-                    element={<AnalyticsDashboardDetail />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsDashboardDetail />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/event"
-                    element={<AnalyticsEvent />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsEvent />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/retention"
-                    element={<AnalyticsRetention />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsRetention />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/funnel"
-                    element={<AnalyticsFunnel />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <AnalyticsFunnel />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/metadata/events"
-                    element={<MetadataEvents />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <MetadataEvents />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/metadata/event-parameters"
-                    element={<MetadataParameters />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <MetadataParameters />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/analytics/:projectId/app/:appId/metadata/user-attributes"
-                    element={<MetadataUserAttributes />}
+                    element={
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                        <MetadataUserAttributes />
+                      </RoleRoute>
+                    }
                   />
                 </Routes>
               </div>

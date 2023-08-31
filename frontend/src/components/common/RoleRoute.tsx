@@ -12,32 +12,28 @@
  */
 
 import { UserContext } from 'context/UserContext';
-import React, { useContext, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import AccessDenied from 'pages/error-page/AccessDenied';
+import React, { useContext } from 'react';
 import { IUserRole } from 'ts/const';
 
-const UserRedirect: React.FC = () => {
-  const location = useLocation();
+const RoleRoute = ({
+  children,
+  roles,
+}: {
+  children: React.JSX.Element;
+  roles: Array<IUserRole>;
+}) => {
   const currentUser = useContext(UserContext);
 
-  const redirectUrl = () => {
-    console.log(currentUser);
-    if (location.pathname.startsWith('/analytics')) {
-      if (currentUser?.role === IUserRole.DEVELOPER) {
-        window.location.href = '/';
-      }
-    } else if (location.pathname !== '/signin') {
-      if (currentUser?.role === IUserRole.ANALYST) {
-        window.location.href = '/analytics';
-      }
-    }
-  };
+  const userHasRequiredRole = !!(
+    currentUser && roles.includes(currentUser.role)
+  );
 
-  useEffect(() => {
-    redirectUrl();
-  }, []);
+  if (!userHasRequiredRole) {
+    return <AccessDenied />;
+  }
 
-  return <div></div>;
+  return children;
 };
 
-export default UserRedirect;
+export default RoleRoute;
