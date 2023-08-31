@@ -167,7 +167,9 @@
     "deleteDashboard": "删除看板",
     "addEvent": "添加事件",
     "addFunnelStep": "添加步骤",
-    "addFilter": "添加条件"
+    "addFilter": "添加条件",
+    "reset": "重置",
+    "saveToDashboard": "保存到看板"
   },
   "item": "项目",
   "items": "项目",

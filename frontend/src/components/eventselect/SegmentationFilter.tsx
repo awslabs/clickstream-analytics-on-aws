@@ -17,14 +17,14 @@ import { useTranslation } from 'react-i18next';
 import {
   ERelationShip,
   IAnalyticsItem,
-  SegmetationFilterDataType,
+  SegmentationFilterDataType,
 } from './AnalyticsType';
 import ConditionItem from './ConditionItem';
 import RelationAnd from './comps/RelationAnd';
 import RelationOr from './comps/RelationOr';
 
 interface SegmentationFilterProps {
-  segmentationData: SegmetationFilterDataType;
+  segmentationData: SegmentationFilterDataType;
   addNewConditionItem: () => void;
   removeEventCondition: (index: number) => void;
   changeConditionOperator: (

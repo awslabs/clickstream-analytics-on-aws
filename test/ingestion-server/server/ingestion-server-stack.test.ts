@@ -149,6 +149,9 @@ test('domainName pattern', () => {
     const validValues = [
       'abc.com',
       'test.abc.com',
+      'example.services',
+      'test.example.graphics',
+      '123.test.clickstream.management',
       '123.test.abc.com',
       'a123#~&%.test-2.a_bc.com',
     ];
@@ -206,12 +209,11 @@ test('ServerCorsOrigin pattern', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
-      '',
-      '*',
-      'http://*.test.com',
-      'http://abc.test.com',
-      'http://abc1.test.com, http://abc2.test.com, http://abc3.test.com',
-      'http://abc1.test.com,http://abc2.test.com',
+      '.*',
+      'http://.*\\.test\\.com',
+      'http://abc\\.test\\.com',
+      'http://abc1\\.test\\.com|http://abc2\\.test\\.com|http://abc3\\.test\\.com',
+      'http://abc1\\.test\\.com|http://abc2\\.test\\.com',
     ];
 
     for (const v of validValues) {

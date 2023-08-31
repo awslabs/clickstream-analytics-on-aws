@@ -168,7 +168,9 @@
     "deleteDashboard": "Delete Dashboard",
     "addEvent": "Add Event",
     "addFunnelStep": "Add Step",
-    "addFilter": "Add Filter"
+    "addFilter": "Add Filter",
+    "reset": "Reset",
+    "saveToDashboard": "Save to Dashboard"
   },
   "item": "item",
   "items": "items",

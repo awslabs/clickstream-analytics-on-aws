@@ -383,33 +383,38 @@ export function getServerPropsByCondition(
         };
       }
       if (typeof objV == 'object') {
-        const existProps = conditionsProps[objK] as object;
-        let newObjV;
-        if (
-          Object.keys(conditionsProps).includes(k) &&
-          existProps == undefined
-        ) {
-          newObjV = undefined;
-        } else {
-          newObjV = { ...existProps, ...(objV as object) };
-          type ObjectVKey = keyof typeof objV;
-          for (const kk of Object.keys(objV)) {
-            const kkKey = kk as ObjectVKey;
-            const kkValue = objV[kkKey];
-            newObjV = {
-              ...newObjV,
-              [kk]: kkValue,
-            };
-          }
-        }
-
-        conditionsProps = {
-          ...conditionsProps,
-          [k]: newObjV,
-        };
+        handleObjectType(conditionsProps, objK, k, objV);
       }
     }
   }
+  return conditionsProps;
+}
+
+function handleObjectType(conditionsProps: any, objK: any, k: any, objV: any) {
+  const existProps = conditionsProps[objK] as object;
+  let newObjV;
+  if (
+    Object.keys(conditionsProps).includes(k) &&
+    existProps == undefined
+  ) {
+    newObjV = undefined;
+  } else {
+    newObjV = { ...existProps, ...(objV as object) };
+    type ObjectVKey = keyof typeof objV;
+    for (const kk of Object.keys(objV)) {
+      const kkKey = kk as ObjectVKey;
+      const kkValue = objV[kkKey];
+      newObjV = {
+        ...newObjV,
+        [kk]: kkValue,
+      };
+    }
+  }
+
+  conditionsProps = {
+    ...conditionsProps,
+    [k]: newObjV,
+  };
   return conditionsProps;
 }
 

@@ -378,7 +378,7 @@ describe('QuickSight visual management test', () => {
                       ColumnIndex: 1,
                       ColumnSpan: 20,
                       RowIndex: 2,
-                      RowSpan: 10,
+                      RowSpan: 20,
                     },
                   ],
                   CanvasSizeOptions: {

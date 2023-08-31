@@ -21,7 +21,7 @@ export interface IConditionItemType {
   conditionValue: any;
 }
 
-export interface SegmetationFilterDataType {
+export interface SegmentationFilterDataType {
   enableChangeRelation?: boolean;
   conditionRelationShip: ERelationShip;
   conditionOptions: CategoryItemType[];
@@ -46,7 +46,7 @@ export enum ERelationShip {
 }
 
 export interface IEventAnalyticsItem {
-  listOrderType?: 'number' | 'alpahbet';
+  listOrderType?: 'number' | 'alphabet';
   customOrderName?: string;
   selectedEventOption: IAnalyticsItem | null;
   selectedEventAttributeOption: CategoryItemType[];
@@ -87,7 +87,7 @@ export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
   conditionValue: '',
 };
 
-export const INIT_SEGMENTATION_DATA: SegmetationFilterDataType = {
+export const INIT_SEGMENTATION_DATA: SegmentationFilterDataType = {
   enableChangeRelation: true,
   conditionOptions: [],
   conditionRelationShip: ERelationShip.AND,
@@ -122,7 +122,7 @@ export const MOCK_EVENT_OPTION_LIST: CategoryItemType[] = [
   },
 ];
 
-export const MOCK_CACLULATION_OPTION_LIST = [
+export const MOCK_CALCULATION_OPTION_LIST = [
   { label: '总次数', value: 'totalCount' },
   { label: '总人数', value: 'totalUser' },
 ];

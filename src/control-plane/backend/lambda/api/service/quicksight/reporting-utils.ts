@@ -13,7 +13,6 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import Mustache from 'mustache';
 import {
   CreateDataSetCommandOutput, QuickSight,
   ColumnGroup,
@@ -23,9 +22,10 @@ import {
   FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration, ColumnConfiguration,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
+import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
+import { ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
@@ -78,6 +78,7 @@ export interface CreateDashboardResult {
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;
+  readonly sheetId: string;
   readonly visualIds: VisualMapProps[];
 }
 
@@ -394,13 +395,13 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 export function getFunnelVisualDef(visualId: string, viewName: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
-  const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType  = {
+  const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
     dimFieldId: uuidv4(),
     measureFieldId: uuidv4(),
-  }
-  
+  };
+
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 
 }
@@ -512,10 +513,10 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
       dataSetIdentifier: props.viewName,
       filterGroupId: uuidv4(),
       filterId: sourceFilterId,
-    }
+    };
     filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheFilterGroupType)) as FilterGroup;
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!)
-    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!)
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!);
+    filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
 
   } else {
     filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json'), 'utf8')) as FilterControl;
@@ -537,7 +538,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationEnd);
 
-    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template'), 'utf8')
+    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template'), 'utf8');
     const mustacheRelativeDateFilterGroupType: MustacheRelativeDateFilterGroupType = {
       visualIds: `"${props.visualId}"`,
       sheetId: props.sheetId,
@@ -545,8 +546,8 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
       filterGroupId: uuidv4(),
       filterId: sourceFilterId,
       lastN: props.lastN!,
-      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit!)
-    }
+      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit!),
+    };
 
     filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheRelativeDateFilterGroupType)) as FilterGroup;
   }
@@ -571,50 +572,48 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+export function getEventLineChartVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
-  const mustacheEventAnalysisType: MustacheEventAnalysisType  = {
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
     dateDimFieldId: uuidv4(),
     catDimFieldId: uuidv4(),
     catMeasureFieldId: uuidv4(),
     hierarchyId: uuidv4(),
-    dateGranularity: getQuickSightUnitFromTimeUnit(timeUnit)
-  }
-  
+    dateGranularity: groupColumn,
+  };
+
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
-  const weightFieldId = uuidv4();
-
-  const mustachePathAnalysisType: MustachePathAnalysisType  = {
+  const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
     sourceFieldId: uuidv4(),
     targetFieldId: uuidv4(),
-    weightFieldId: weightFieldId,
-  }
-  
+    weightFieldId: uuidv4(),
+  };
+
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, timeUnit: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
-  const mustacheEventAnalysisType: MustacheEventAnalysisType  = {
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
     dateDimFieldId: uuidv4(),
     catDimFieldId: uuidv4(),
     catMeasureFieldId: uuidv4(),
-    dateGranularity: getQuickSightUnitFromTimeUnit(timeUnit)
-  }
-  
+    dateGranularity: groupColumn,
+  };
+
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
 }
@@ -686,15 +685,11 @@ export function sleep(ms: number) {
 };
 
 export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
-
   let unit = 'DAY';
-  if (timeUnit == ExploreGroupColumn.WEEK) {
+  if (timeUnit == ExploreRelativeTimeUnit.WK) {
     unit = 'WEEK';
   } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
-  } else if (timeUnit == ExploreRelativeTimeUnit.Q) {
-    unit = 'QUARTER';
   }
   return unit;
 }
-

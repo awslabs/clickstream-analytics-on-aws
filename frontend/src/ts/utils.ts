@@ -13,17 +13,9 @@
 
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import {
-  CategoryItemType,
-  IConditionItemType,
-  IEventAnalyticsItem,
-} from 'components/eventselect/AnalyticsType';
-import i18n from 'i18n';
 import { isEqual } from 'lodash';
-import moment from 'moment';
-import { EPipelineStatus, ExecutionType, TIME_FORMAT } from './const';
+import { EPipelineStatus, ExecutionType } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
-import { ExploreAnalyticsOperators, MetadataSource } from './explore-types';
 
 export const generateStr = (length: number) => {
   let randomString = '';
@@ -319,123 +311,4 @@ export const getValueFromStackOutputs = (
     }
   }
   return res;
-};
-
-export const metadataEventsConvertToCategoryItemType = (
-  apiDataItems: IMetadataEvent[]
-) => {
-  const categoryItems: CategoryItemType[] = [];
-  const categoryPresetItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.presetEvent'),
-    categoryType: 'event',
-    itemList: [],
-  };
-  const categoryCustomItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.customEvent'),
-    categoryType: 'event',
-    itemList: [],
-  };
-  apiDataItems.forEach((item) => {
-    if (item.metadataSource === MetadataSource.PRESET) {
-      categoryPresetItems.itemList.push({
-        label: item.displayName,
-        value: item.name,
-        description: item.description,
-        metadataSource: item.metadataSource,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    } else if (item.metadataSource === MetadataSource.CUSTOM) {
-      categoryCustomItems.itemList.push({
-        label: item.displayName,
-        value: item.name,
-        description: item.description,
-        metadataSource: item.metadataSource,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    }
-  });
-  categoryItems.push(categoryPresetItems);
-  categoryItems.push(categoryCustomItems);
-  return categoryItems;
-};
-
-export const parametersConvertToCategoryItemType = (
-  userAttributeItems: IMetadataUserAttribute[],
-  parameterItems?: IMetadataEventParameter[],
-  relationItems?: IMetadataRelation[]
-) => {
-  const categoryItems: CategoryItemType[] = [];
-  const categoryEventItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.eventAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
-  const categoryUserItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.userAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
-  if (parameterItems) {
-    parameterItems.forEach((item) => {
-      categoryEventItems.itemList.push({
-        label: item.displayName,
-        value: item.name,
-        description: item.description,
-        metadataSource: item.metadataSource,
-        valueType: item.valueType,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    });
-  } else if (relationItems) {
-    relationItems.forEach((item) => {
-      categoryEventItems.itemList.push({
-        label: item.parameterDisplayName,
-        value: item.parameterName,
-        description: item.parameterDescription,
-        metadataSource: item.parameterMetadataSource,
-        valueType: item.parameterValueType,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    });
-  }
-  userAttributeItems.forEach((item) => {
-    categoryUserItems.itemList.push({
-      label: item.displayName,
-      value: item.name,
-      description: item.description,
-      metadataSource: item.metadataSource,
-      valueType: item.valueType,
-      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-    });
-  });
-  categoryItems.push(categoryEventItems);
-  categoryItems.push(categoryUserItems);
-  return categoryItems;
-};
-
-export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
-  return (
-    item.selectedEventOption !== null &&
-    item.selectedEventOption.value?.trim() !== ''
-  );
-};
-
-export const validConditionItemType = (condition: IConditionItemType) => {
-  if (
-    condition.conditionOption !== null &&
-    condition.conditionOption.value?.trim() !== '' &&
-    condition.conditionOperator !== null &&
-    condition.conditionOperator.value?.trim() !== ''
-  ) {
-    if (
-      condition.conditionOperator.value === ExploreAnalyticsOperators.NULL ||
-      condition.conditionOperator.value ===
-      ExploreAnalyticsOperators.NOT_NULL
-    ) {
-      return true;
-    } else {
-      return condition.conditionValue.trim() !== '';
-    }
-  }
-  return false;
 };
