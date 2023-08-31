@@ -34,7 +34,6 @@ import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
-import AccessDenied from 'pages/error-page/AccessDenied';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
 import PluginList from 'pages/plugins/PluginList';
@@ -101,7 +100,7 @@ const SignedInPage: React.FC = () => {
     })();
   }, [auth]);
 
-  if (auth.isLoading || !currentUser) {
+  if (auth.isLoading || (auth.isAuthenticated && !currentUser)) {
     return (
       <div className="page-loading">
         <Spinner />

@@ -42,7 +42,10 @@
     "hourTimeGranularity": "小时级",
     "dayTimeGranularity": "天级",
     "weekTimeGranularity": "周级",
-    "monthTimeGranularity": "月级"
+    "monthTimeGranularity": "月级",
+    "admin": "管理员",
+    "developer": "开发人员",
+    "analyst": "分析师"
   },
   "metadata": {
     "event": {

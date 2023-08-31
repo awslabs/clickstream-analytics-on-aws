@@ -42,7 +42,10 @@
     "hourTimeGranularity": "Hourly",
     "dayTimeGranularity": "Daily",
     "weekTimeGranularity": "Weekly",
-    "monthTimeGranularity": "Monthly"
+    "monthTimeGranularity": "Monthly",
+    "admin": "Administrator",
+    "developer": "Developer",
+    "analyst": "Analyst"
   },
   "metadata": {
     "event": {
