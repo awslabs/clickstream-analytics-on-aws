@@ -17,7 +17,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   CategoryItemType,
   IAnalyticsItem,
-  MOCK_CACLULATION_OPTION_LIST,
+  MOCK_CALCULATION_OPTION_LIST,
 } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
@@ -99,7 +99,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                 changeCurCalcMethodOption &&
                   changeCurCalcMethodOption(e.detail.selectedOption);
               }}
-              options={MOCK_CACLULATION_OPTION_LIST}
+              options={MOCK_CALCULATION_OPTION_LIST}
             />
           </div>
         )}

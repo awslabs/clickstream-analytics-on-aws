@@ -85,7 +85,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
             <div className="cs-analytics-parameter">
               <div className="cs-para-name">
                 {(element.customOrderName && element.customOrderName) ||
-                  (element?.listOrderType === 'alpahbet'
+                  (element?.listOrderType === 'alphabet'
                     ? ALPHABETS[index]
                     : index + 1)}
               </div>
