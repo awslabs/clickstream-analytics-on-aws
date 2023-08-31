@@ -8,13 +8,12 @@
     "tableEmpty": "No users",
     "tableLoading": "Loading",
     "filteringAriaLabel": "Find users",
-    "filteringPlaceholder": "Find users",
-    "groupPropertiesText": "Properties",
-    "operatorsText": "Operators",
-    "clearFiltersText": "Clear filters"
+    "filteringPlaceholder": "Find users"
   },
-  "split": {
-    "title": "User details"
+  "options": {
+    "admin": "Admin",
+    "developer": "Developer",
+    "analyst": "Analyst"
   },
   "emptyData": "No Data"
 }

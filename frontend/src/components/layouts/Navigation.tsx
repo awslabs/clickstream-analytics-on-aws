@@ -15,10 +15,12 @@ import {
   SideNavigation,
   SideNavigationProps,
 } from '@cloudscape-design/components';
-import React from 'react';
+import { UserContext } from 'context/UserContext';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { getDoucmentList } from 'ts/url';
+import { IUserRole } from 'ts/const';
+import { getDocumentList } from 'ts/url';
 
 interface INavigationProps {
   activeHref: string;
@@ -28,16 +30,20 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
   const { t, i18n } = useTranslation();
   const { projectId, appId } = useParams();
-  const navHeader = { text: t('name'), href: '/' };
-  const navItems: SideNavigationProps.Item[] = [
+  const currentUser = useContext(UserContext);
+
+  const navHeader = {
+    text: t('name'),
+    href: currentUser?.role === IUserRole.ANALYST ? '/analytics' : '/',
+  };
+  const pipelineNavItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
     { type: 'link', text: t('nav.projects'), href: '/projects' },
     {
       text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
-      items: [{ type: 'link', text: t('nav.monitorAlerts'), href: '/alarms' },
-      { type: 'link', text: t('nav.user'), href: '/user' }],
+      items: [{ type: 'link', text: t('nav.monitorAlerts'), href: '/alarms' }],
     },
     {
       text: t('nav.tools'),
@@ -45,6 +51,16 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       defaultExpanded: true,
       items: [{ type: 'link', text: t('nav.plugins'), href: '/plugins' }],
     },
+  ];
+  const systemNavItems: SideNavigationProps.Item[] = [
+    {
+      text: t('nav.system'),
+      type: 'section',
+      defaultExpanded: true,
+      items: [{ type: 'link', text: t('nav.user'), href: '/user' }],
+    },
+  ];
+  const exploreNavItems: SideNavigationProps.Item[] = [
     { type: 'divider' },
     {
       type: 'link',
@@ -52,15 +68,17 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       href: '/analytics',
       external: true,
     },
+  ];
+  const docNavItems: SideNavigationProps.Item[] = [
     { type: 'divider' },
     {
       type: 'link',
       text: t('nav.doc'),
-      href: getDoucmentList(i18n.language),
+      href: getDocumentList(i18n.language),
       external: true,
     },
   ];
-  const navAnalyticsItems: SideNavigationProps.Item[] = [
+  const analyticsNavItems: SideNavigationProps.Item[] = [
     // {
     //   type: 'link',
     //   text: t('nav.analytics.realtime'),
@@ -116,13 +134,29 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       ],
     },
   ];
+
+  const getNavItems = () => {
+    if (activeHref.startsWith('/analytics')) {
+      return analyticsNavItems;
+    } else if (currentUser?.role === IUserRole.ADMIN) {
+      return [
+        ...pipelineNavItems,
+        ...systemNavItems,
+        ...exploreNavItems,
+        ...docNavItems,
+      ];
+    } else if (currentUser?.role === IUserRole.ANALYST) {
+      return [...pipelineNavItems, ...exploreNavItems, ...docNavItems];
+    } else {
+      return [...pipelineNavItems, ...docNavItems];
+    }
+  };
+
   return (
     <>
       <SideNavigation
         header={navHeader}
-        items={
-          activeHref.startsWith('/analytics') ? navAnalyticsItems : navItems
-        }
+        items={getNavItems()}
         activeHref={activeHref}
         onFollow={(e) => {
           console.info(e);

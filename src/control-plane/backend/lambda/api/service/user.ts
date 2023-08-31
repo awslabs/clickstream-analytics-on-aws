@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
 import { IUser } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -45,9 +45,18 @@ export class UserServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { email } = req.params;
-      const result = await store.getUser(email);
+      let result = await store.getUser(email);
       if (!result) {
-        return res.status(404).json(new ApiFail('User not found.'));
+        const user: IUser = {
+          email: email,
+          role: IUserRole.DEVELOPER,
+          createAt: Date.now(),
+          updateAt: Date.now(),
+          operator: res.get('X-Click-Stream-Operator'),
+          deleted: false,
+        };
+        await store.addUser(user);
+        result = user;
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {

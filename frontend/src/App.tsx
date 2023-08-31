@@ -34,7 +34,6 @@ import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
-import AccessDenied from 'pages/error-page/AccessDenied';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
 import PluginList from 'pages/plugins/PluginList';
@@ -42,7 +41,7 @@ import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
 import UserList from 'pages/user/UserList';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
@@ -50,9 +49,15 @@ import { CONFIG_URL, IUserRole, PROJECT_CONFIG_JSON } from 'ts/const';
 import Home from './pages/home/Home';
 
 const LoginCallback: React.FC = () => {
+  const currentUser = useContext(UserContext);
+
   useEffect(() => {
     const baseUrl = '/';
-    window.location.href = baseUrl;
+    if (currentUser?.role === IUserRole.ANALYST) {
+      window.location.href = `${baseUrl}analytics`;
+    } else {
+      window.location.href = baseUrl;
+    }
   }, []);
   return (
     <div className="page-loading">
@@ -95,7 +100,7 @@ const SignedInPage: React.FC = () => {
     })();
   }, [auth]);
 
-  if (auth.isLoading || !currentUser) {
+  if (auth.isLoading || (auth.isAuthenticated && !currentUser)) {
     return (
       <div className="page-loading">
         <Spinner />
@@ -127,7 +132,6 @@ const SignedInPage: React.FC = () => {
               <div id="app">
                 <Routes>
                   <Route path="/signin" element={<LoginCallback />} />
-                  <Route path="/403" element={<AccessDenied />} />
                   <Route
                     path="/"
                     element={
@@ -155,7 +159,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/user"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN]}>
                         <UserList />
                       </RoleRoute>
                     }

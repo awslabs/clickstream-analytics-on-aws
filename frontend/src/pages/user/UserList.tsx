@@ -17,7 +17,7 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TIME_FORMAT } from 'ts/const';
+import { IUserRole, TIME_FORMAT } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import UserTable from './UserTable';
 
@@ -25,9 +25,9 @@ const UserList: React.FC = () => {
   const { t } = useTranslation();
 
   const roleOptions = [
-    { value: 'Admin', label: 'Admin' },
-    { value: 'Developer', label: 'Developer' },
-    { value: 'Analyst', label: 'Analyst' },
+    { value: IUserRole.ADMIN, label: t('user:options.admin') },
+    { value: IUserRole.DEVELOPER, label: t('user:options.developer') },
+    { value: IUserRole.ANALYST, label: t('user:options.analyst') },
   ];
 
   const COLUMN_DEFINITIONS = [
@@ -178,9 +178,10 @@ const UserList: React.FC = () => {
             headerTitle: t('user:labels.title'),
             filteringAriaLabel: t('user:labels.filteringAriaLabel'),
             filteringPlaceholder: t('user:labels.filteringPlaceholder'),
-            groupPropertiesText: t('user:labels.groupPropertiesText'),
-            operatorsText: t('user:labels.operatorsText'),
-            clearFiltersText: t('user:labels.clearFiltersText'),
+            groupPropertiesText: t('button.groupPropertiesText'),
+            operatorsText: t('button.operatorsText'),
+            clearFiltersText: t('button.clearFiltersText'),
+            applyActionText: t('button.applyActionText'),
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),

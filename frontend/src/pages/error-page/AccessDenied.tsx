@@ -11,18 +11,26 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
-import Navigation from 'components/layouts/Navigation';
+import { Alert, Container, ContentLayout } from '@cloudscape-design/components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AccessDenied: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <AppLayout
-      toolsHide
-      content={<div>403</div>}
-      headerSelector="#header"
-      navigation={<Navigation activeHref="/" />}
-    />
+    <ContentLayout>
+      <Container>
+        <div className="">
+          <Alert
+            statusIconAriaLabel="Error"
+            type="error"
+            header={t('header.accessDeniedTitle')}
+          >
+            {t('header.accessDeniedMessage')}
+          </Alert>
+        </div>
+      </Container>
+    </ContentLayout>
   );
 };
 

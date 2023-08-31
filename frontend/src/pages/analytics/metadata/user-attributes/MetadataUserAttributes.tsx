@@ -263,12 +263,13 @@ const MetadataUserAttributes: React.FC = () => {
               'analytics:metadata.userAttribute.filteringPlaceholder'
             ),
             groupPropertiesText: t(
-              'analytics:metadata.userAttribute.groupPropertiesText'
+              'button.groupPropertiesText'
             ),
-            operatorsText: t('analytics:metadata.userAttribute.operatorsText'),
+            operatorsText: t('button.operatorsText'),
             clearFiltersText: t(
-              'analytics:metadata.userAttribute.clearFiltersText'
+              'button.clearFiltersText'
             ),
+            applyActionText: t('button.applyActionText'),
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),

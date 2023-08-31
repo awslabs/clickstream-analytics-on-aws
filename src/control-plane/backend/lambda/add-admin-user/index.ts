@@ -12,12 +12,11 @@
  */
 
 import {
+  ConditionalCheckFailedException,
   DynamoDBClient,
 } from '@aws-sdk/client-dynamodb';
 import {
-  DeleteCommand,
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import {
@@ -66,26 +65,8 @@ async function _handler(event: CdkCustomResourceEvent, userTableName: string, em
 
   logger.info('RequestType: ' + requestType);
   if (requestType == 'Create' || requestType == 'Update') {
-    await onCreate(userTableName, email);
-  }
-  if (requestType == 'Delete') {
-    await onDelete(userTableName, email);
-  }
-}
-
-async function onCreate(userTableName: string, email: string) {
-  logger.info('onCreate()', { userTableName, email });
-  const item = getItem(userTableName, email);
-  if (!item) {
+    logger.info('putItem()', { userTableName, email });
     await putItem(userTableName, email);
-  }
-}
-
-async function onDelete(userTableName: string, email: string) {
-  logger.info('onDelete()');
-  const item = getItem(userTableName, email);
-  if (!item) {
-    await deleteItem(userTableName, email);
   }
 }
 
@@ -102,46 +83,18 @@ async function putItem(tableName: string, email: string) {
         operator: 'Clickstream',
         deleted: false,
       },
+      ConditionExpression: 'attribute_not_exists(email)',
     });
     await docClient.send(params);
   } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      logger.info('Admin user already exists');
+      return;
+    }
     logger.error('Error when inserting admin user to DynamoDB', { error });
     throw error;
   }
 }
-
-// a function to delete email from DynamoDB
-async function deleteItem(tableName: string, email: string) {
-  try {
-    const params: DeleteCommand = new DeleteCommand({
-      TableName: tableName,
-      Key: {
-        email: email,
-      },
-    });
-    await docClient.send(params);
-  } catch (error) {
-    logger.error('Error when deleting admin user from DynamoDB', { error });
-    throw error;
-  }
-}
-
-// a function to get email from DynamoDB
-async function getItem(tableName: string, email: string) {
-  try {
-    const params: GetCommand = new GetCommand({
-      TableName: tableName,
-      Key: {
-        email: email,
-      },
-    });
-    const data = await docClient.send(params);
-    return data.Item;
-  } catch (error) {
-    logger.error('Error when getting admin user from DynamoDB', { error });
-    throw error;
-  }
-};
 
 const generateRandomStr = (length: number, charSet?: string): string => {
   const charset = charSet ?? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%^&-_=+|';

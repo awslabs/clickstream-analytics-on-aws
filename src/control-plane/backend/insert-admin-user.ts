@@ -13,6 +13,7 @@
 
 import { join } from 'path';
 import { Duration, CustomResource } from 'aws-cdk-lib';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -24,7 +25,7 @@ import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface AddAdminUserProps {
   readonly email: string;
-  readonly userTableName: string;
+  readonly userTable: Table;
 }
 
 export class AddAdminUser extends Construct {
@@ -39,6 +40,7 @@ export class AddAdminUser extends Construct {
 
   private createAddAdminUserCustomResource(props: AddAdminUserProps): CustomResource {
     const fn = this.createAddAdminUserLambda();
+    props.userTable.grantReadWriteData(fn);
 
     const provider = new Provider(
       this,
@@ -53,7 +55,7 @@ export class AddAdminUser extends Construct {
       serviceToken: provider.serviceToken,
       properties: {
         Email: props.email,
-        UserTableName: props.userTableName,
+        UserTableName: props.userTable.tableName,
       },
     });
 

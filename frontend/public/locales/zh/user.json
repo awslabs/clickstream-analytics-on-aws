@@ -1,0 +1,19 @@
+{
+  "labels": {
+    "title": "用户",
+    "tableColumnEmail": "Email",
+    "tableColumnName": "用户名",
+    "tableColumnRole": "角色",
+    "tableColumnCreateAt": "创建时间",
+    "tableEmpty": "没有用户",
+    "tableLoading": "加载中",
+    "filteringAriaLabel": "查找用户",
+    "filteringPlaceholder": "查找用户"
+  },
+  "options": {
+    "admin": "管理员",
+    "developer": "研发工程师",
+    "analyst": "分析师"
+  },
+  "emptyData": "没有数据"
+}

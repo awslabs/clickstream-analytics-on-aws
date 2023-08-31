@@ -39,6 +39,7 @@ interface UserTableProps {
     groupPropertiesText: string;
     operatorsText: string;
     clearFiltersText: string;
+    applyActionText: string;
     useText: string;
     matchText: string;
     matchesText: string;
@@ -139,6 +140,9 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
   };
 
   const handleSubmit = async (currentItem: IUser, column: any, value: any) => {
+    // if (currentItem.operator === 'Clickstream') {
+    //   throw new Error('Not allowed to edit this user');
+    // }
     if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
@@ -211,6 +215,7 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
               groupPropertiesText: tableI18nStrings.groupPropertiesText,
               operatorsText: tableI18nStrings.operatorsText,
               clearFiltersText: tableI18nStrings.clearFiltersText,
+              applyActionText: tableI18nStrings.applyActionText,
               enteredTextLabel: (value) => {
                 return `${tableI18nStrings.useText}: ${value}`;
               },

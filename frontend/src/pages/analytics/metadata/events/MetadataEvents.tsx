@@ -239,10 +239,11 @@ const MetadataEvents: React.FC = () => {
               'analytics:metadata.event.filteringPlaceholder'
             ),
             groupPropertiesText: t(
-              'analytics:metadata.event.groupPropertiesText'
+              'button.groupPropertiesText'
             ),
-            operatorsText: t('analytics:metadata.event.operatorsText'),
-            clearFiltersText: t('analytics:metadata.event.clearFiltersText'),
+            operatorsText: t('button.operatorsText'),
+            clearFiltersText: t('button.clearFiltersText'),
+            applyActionText: t('button.applyActionText'),
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),

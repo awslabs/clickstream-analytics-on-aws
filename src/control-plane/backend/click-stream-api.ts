@@ -194,7 +194,7 @@ export class ClickStreamApiConstruct extends Construct {
     // Add admin user
     this.addAdminUserCustomResource = new AddAdminUser(this, 'AddAdminUserCustomResource', {
       email: props.adminUserEmail,
-      userTableName: userTable.tableName,
+      userTable: userTable,
     });
 
     let apiFunctionProps = {};

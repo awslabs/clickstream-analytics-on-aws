@@ -178,7 +178,7 @@ export const buildMSKLink = (region: string, arn: string) => {
 };
 
 // Document link
-export const getDoucmentList = (lang: string) => {
+export const getDocumentList = (lang: string) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {
     return `${SOLUTION_DOCUMENTS_DOMAIN_CN}`;
   }

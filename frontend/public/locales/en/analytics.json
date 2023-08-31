@@ -42,7 +42,10 @@
     "hourTimeGranularity": "Hourly",
     "dayTimeGranularity": "Daily",
     "weekTimeGranularity": "Weekly",
-    "monthTimeGranularity": "Monthly"
+    "monthTimeGranularity": "Monthly",
+    "admin": "Administrator",
+    "developer": "Developer",
+    "analyst": "Analyst"
   },
   "metadata": {
     "event": {
@@ -60,9 +63,6 @@
       "tableEmpty": "No events",
       "filteringAriaLabel": "Find events",
       "filteringPlaceholder": "Find events",
-      "groupPropertiesText": "Properties",
-      "operatorsText": "Operators",
-      "clearFiltersText": "Clear filters",
       "split": {
         "title": "Event details",
         "associatedPresetParameters": "Associated preset parameters",
@@ -91,9 +91,6 @@
       "tableEmpty": "No event parameters",
       "filteringAriaLabel": "Find parameters",
       "filteringPlaceholder": "Find parameters",
-      "groupPropertiesText": "Properties",
-      "operatorsText": "Operators",
-      "clearFiltersText": "Clear filters",
       "split": {
         "title": "Event parameter details",
         "associatedEvents": "Associated events",
@@ -116,9 +113,6 @@
       "tableEmpty": "No user attributes",
       "filteringAriaLabel": "Find attributes",
       "filteringPlaceholder": "Find attributes",
-      "groupPropertiesText": "Properties",
-      "operatorsText": "Operators",
-      "clearFiltersText": "Clear filters",
       "split": {
         "title": "User attribute details",
         "tableLoading": "Loading",

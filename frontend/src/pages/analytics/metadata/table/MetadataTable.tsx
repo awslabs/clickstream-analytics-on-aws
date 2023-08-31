@@ -42,6 +42,7 @@ interface MetadataTableProps {
     groupPropertiesText: string;
     operatorsText: string;
     clearFiltersText: string;
+    applyActionText: string;
     useText: string;
     matchText: string;
     matchesText: string;
@@ -75,7 +76,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
-  
+
   const [loadingData, setLoadingData] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -251,12 +252,15 @@ const MetadataTable: React.FC<MetadataTableProps> = (
               groupPropertiesText: tableI18nStrings.groupPropertiesText,
               operatorsText: tableI18nStrings.operatorsText,
               clearFiltersText: tableI18nStrings.clearFiltersText,
+              applyActionText: tableI18nStrings.applyActionText,
               enteredTextLabel: (value) => {
                 return `${tableI18nStrings.useText}: ${value}`;
               },
             }}
             countText={`${filteredItemsCount} ${
-              filteredItemsCount === 1 ? tableI18nStrings.matchText : tableI18nStrings.matchesText
+              filteredItemsCount === 1
+                ? tableI18nStrings.matchText
+                : tableI18nStrings.matchesText
             }`}
             expandToViewport={true}
           />
