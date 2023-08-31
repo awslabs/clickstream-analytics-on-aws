@@ -34,6 +34,7 @@ import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
+import AccessDenied from 'pages/error-page/AccessDenied';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
 import PluginList from 'pages/plugins/PluginList';
@@ -71,19 +72,6 @@ const SignedInPage: React.FC = () => {
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<IUser>();
 
-  const getCurrentUser = async () => {
-    try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email ?? ''
-      );
-      if (success) {
-        setCurrentUser(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     // the `return` is important - addAccessTokenExpiring() returns a cleanup function
     return auth?.events?.addAccessTokenExpiring((event) => {
@@ -91,11 +79,29 @@ const SignedInPage: React.FC = () => {
     });
   }, [auth.events, auth.signinSilent]);
 
-  useEffect(() => {
-    getCurrentUser();
-  }, [auth.user]);
+  const getCurrentUser = async () => {
+    if (!auth.user?.profile.email) {
+      return;
+    }
+    try {
+      const { success, data }: ApiResponse<IUser> = await getUserDetails(
+        auth.user?.profile.email
+      );
+      if (success) {
+        setCurrentUser(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-  if (auth.isLoading) {
+  useEffect(() => {
+    (async () => {
+      await getCurrentUser();
+    })();
+  }, [auth]);
+
+  if (auth.isLoading || !currentUser) {
     return (
       <div className="page-loading">
         <Spinner />
