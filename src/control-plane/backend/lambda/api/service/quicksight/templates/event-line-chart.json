@@ -1,6 +1,6 @@
 {
   "LineChartVisual":{
-      "VisualId":"",
+      "VisualId":"{{visualId}}",
       "Title":{
           "Visibility":"VISIBLE"
       },
@@ -13,21 +13,22 @@
                   "Category":[
                       {
                           "DateDimensionField":{
-                              "FieldId":"",
+                              "FieldId":"{{dateDimFieldId}}",
                               "Column":{
-                                  "DataSetIdentifier":"",
+                                  "DataSetIdentifier":"{{dataSetIdentifier}}",
                                   "ColumnName":"event_date"
                               },
-                              "HierarchyId":""
+                              "HierarchyId":"{{hierarchyId}}",
+                              "DateGranularity": "{{dateGranularity}}"
                           }
                       }
                   ],
                   "Values":[
                       {
                           "CategoricalMeasureField":{
-                              "FieldId":"",
+                              "FieldId":"{{catMeasureFieldId}}",
                               "Column":{
-                                  "DataSetIdentifier":"",
+                                  "DataSetIdentifier":"{{dataSetIdentifier}}",
                                   "ColumnName":"x_id"
                               },
                               "AggregationFunction":"DISTINCT_COUNT"
@@ -37,9 +38,9 @@
                   "Colors":[
                       {
                           "CategoricalDimensionField":{
-                              "FieldId":"",
+                              "FieldId":"{{catDimFieldId}}",
                               "Column":{
-                                  "DataSetIdentifier":"",
+                                  "DataSetIdentifier":"{{dataSetIdentifier}}",
                                   "ColumnName":"event_name"
                               }
                           }
@@ -51,7 +52,7 @@
               "CategorySort":[
                   {
                       "FieldSort":{
-                          "FieldId":"",
+                          "FieldId":"{{dateDimFieldId}}",
                           "Direction":"DESC"
                       }
                   }
@@ -80,19 +81,19 @@
                   "TooltipFields":[
                       {
                           "FieldTooltipItem":{
-                              "FieldId":"",
+                              "FieldId":"{{dateDimFieldId}}",
                               "Visibility":"VISIBLE"
                           }
                       },
                       {
                           "FieldTooltipItem":{
-                              "FieldId":"",
+                              "FieldId":"{{catMeasureFieldId}}",
                               "Visibility":"VISIBLE"
                           }
                       },
                       {
                           "FieldTooltipItem":{
-                              "FieldId":"",
+                              "FieldId":"{{catDimFieldId}}",
                               "Visibility":"VISIBLE"
                           }
                       }
@@ -106,7 +107,7 @@
       "ColumnHierarchies":[
           {
               "DateTimeHierarchy":{
-                  "HierarchyId":""
+                  "HierarchyId":"{{hierarchyId}}"
               }
           }
       ]
