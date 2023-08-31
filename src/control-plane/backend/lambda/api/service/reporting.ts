@@ -14,7 +14,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { STSClient } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -34,9 +34,12 @@ import {
   VisualProps,
   getEventLineChartVisualDef,
   getEventPivotTableVisualDef,
+  pathAnalysisVisualColumns,
+  getPathAnalysisChartVisualDef,
 } from './quicksight/reporting-utils';
-import { buildEventAnalysisView, buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
+import { buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildFunnelDataSql, buildFunnelView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
+import { ExplorePathNodeType, ExploreTimeScopeType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -46,7 +49,7 @@ export class ReportingServ {
 
   async createFunnelVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create funnel visuals');
+      logger.info('start to create funnel analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
@@ -63,8 +66,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? new Date(query.timeEnd) : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -80,8 +83,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -218,7 +221,7 @@ export class ReportingServ {
 
   async createEventVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create event visuals');
+      logger.info('start to create event analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
@@ -235,13 +238,13 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? new Date(query.timeStart) : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? new Date(query.timeEnd) : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
       });
-      console.log(`funnel sql: ${sql}`);
+      console.log(`event analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -319,6 +322,128 @@ export class ReportingServ {
     }
   };
 
+  async createPathAnalysisVisual(req: any, res: any, next: any) {
+    try {
+      logger.info('start to create path analysis visuals');
+      logger.info(`request: ${JSON.stringify(req.body)}`);
+
+      const query = req.body;
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
+
+      //construct parameters to build sql
+      const viewName = query.viewName;
+      let sql = '';
+      if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
+        sql = buildEventPathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          eventAndConditions: query.eventAndConditions,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+          },
+        });
+      } else {
+        sql = buildNodePathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+            nodes: query.pathAnalysis.nodes,
+          },
+        });
+      }
+      console.log(`path analysis sql: ${sql}`);
+
+      const sqls = [sql];
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
+
+      const datasetPropsArray: DataSetProps[] = [];
+      datasetPropsArray.push({
+        name: '',
+        tableName: viewName,
+        columns: pathAnalysisVisualColumns,
+        importMode: 'DIRECT_QUERY',
+        customSql: `select * from ${query.appId}.${viewName}`,
+        projectedColumns: [
+          'event_date',
+          'source',
+          'target',
+          'weight',
+        ],
+      });
+
+      let sheetId;
+      if (!query.dashboardId) {
+        sheetId = uuidv4();
+      } else {
+        if (!query.sheetId) {
+          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
+        }
+        sheetId = query.sheetId;
+      }
+
+      const visualId = uuidv4();
+      const visualDef = getPathAnalysisChartVisualDef(visualId, viewName);
+      const visualRelatedParams = getVisualRelatedDefs({
+        timeScopeType: query.timeScopeType,
+        sheetId,
+        visualId,
+        viewName,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        timeStart: query.timeStart,
+        timeEnd: query.timeEnd,
+      });
+
+      const visualProps: VisualProps = {
+        sheetId: sheetId,
+        visual: visualDef,
+        dataSetIdentifierDeclaration: [],
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+        colSpan: 32,
+        rowSpan: 12,
+      };
+
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps]);
+      result.visualIds.push({
+        name: 'CHART',
+        id: visualId,
+      });
+
+      return res.status(201).json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
@@ -356,7 +481,23 @@ export class ReportingServ {
     };
 
     const params = new BatchExecuteStatementCommand(input);
-    await redshiftDataClient.send(params);
+    const executeResponse = await redshiftDataClient.send(params);
+    const checkParams = new DescribeStatementCommand({
+      Id: executeResponse.Id,
+    });
+    let res = await redshiftDataClient.send(checkParams);
+    logger.info(`Get statement status: ${res.Status}`);
+    let count = 0;
+    while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
+      await sleep(100);
+      count++;
+      res = await redshiftDataClient.send(checkParams);
+      logger.info(`Get statement status: ${res.Status}`);
+    }
+    if (res.Status == StatusString.FAILED) {
+      logger.error('Error: '+ res.Status, JSON.stringify(res));
+      throw new Error('failed to run sql of create redshift view');
+    }
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
@@ -484,9 +625,9 @@ export class ReportingServ {
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      let count = 0;
+      let cnt = 0;
       for (const _i of Array(60).keys()) {
-        count += 1;
+        cnt += 1;
         try {
           const response = await quickSight.updateDashboardPublishedVersion({
             AwsAccountId: awsAccountId,
@@ -506,8 +647,8 @@ export class ReportingServ {
           }
         }
       }
-      if (count >= 60) {
-        throw new Error(`publish dashboard new version failed after try ${count} times`);
+      if (cnt >= 60) {
+        throw new Error(`publish dashboard new version failed after try ${cnt} times`);
       }
 
       result = {

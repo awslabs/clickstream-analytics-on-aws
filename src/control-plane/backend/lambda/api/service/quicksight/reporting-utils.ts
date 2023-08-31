@@ -22,9 +22,10 @@ import {
   FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration, ColumnConfiguration,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
+import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit } from '../../common/explore-types';
+import { ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
@@ -35,7 +36,9 @@ export interface VisualProps {
   readonly parameterDeclarations?: ParameterDeclaration[];
   readonly filterGroup?: FilterGroup;
   readonly eventCount?: number;
-  readonly ColumnConfigurations?: ColumnConfiguration[];
+  readonly columnConfigurations?: ColumnConfiguration[];
+  readonly colSpan?: number;
+  readonly rowSpan?: number;
 }
 
 export interface DashboardAction {
@@ -60,14 +63,6 @@ export interface DashboardCreateParameters {
   readonly quickSight: {
     readonly dataSourceArn: string;
   };
-}
-
-export interface DashboardCreateInputParameters {
-  readonly action: 'PREVIEW' | 'PUBLISH';
-  readonly accountId: string;
-  readonly projectId: string;
-  readonly appId: string;
-  readonly pipelineId: string;
 }
 
 export interface VisualMapProps {
@@ -95,14 +90,57 @@ export interface VisualRelatedDefParams {
 }
 
 export interface VisualRelatedDefProps {
-  readonly timeScopeType: 'FIXED' | 'RELATIVE';
+  readonly timeScopeType: ExploreTimeScopeType;
   readonly sheetId: string;
   readonly visualId: string;
   readonly viewName: string;
   readonly lastN?: number;
-  readonly timeUnit?: 'DD' | 'WK' | 'MM' | 'Q';
+  readonly timeUnit?: ExploreRelativeTimeUnit;
   readonly timeStart?: Date;
   readonly timeEnd?: Date;
+}
+
+export type MustachePathAnalysisType = {
+  visualId: string;
+  dataSetIdentifier: string;
+  sourceFieldId: string;
+  targetFieldId: string;
+  weightFieldId: string;
+}
+
+export type MustacheFunnelAnalysisType = {
+  visualId: string;
+  dataSetIdentifier: string;
+  dimFieldId: string;
+  measureFieldId: string;
+}
+
+export type MustacheEventAnalysisType = {
+  visualId: string;
+  dataSetIdentifier: string;
+  dateDimFieldId: string;
+  catDimFieldId: string;
+  catMeasureFieldId: string;
+  dateGranularity?: string;
+  hierarchyId?: string;
+}
+
+export type MustacheFilterGroupType = {
+  visualIds: string;
+  sheetId: string;
+  dataSetIdentifier: string;
+  filterGroupId: string;
+  filterId: string;
+}
+
+export type MustacheRelativeDateFilterGroupType = {
+  visualIds: string;
+  sheetId: string;
+  dataSetIdentifier: string;
+  filterGroupId: string;
+  filterId: string;
+  lastN: number;
+  dateGranularity?: string;
 }
 
 export const funnelVisualColumns: InputColumn[] = [
@@ -117,6 +155,25 @@ export const funnelVisualColumns: InputColumn[] = [
   {
     Name: 'x_id',
     Type: 'STRING',
+  },
+];
+
+export const pathAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'source',
+    Type: 'STRING',
+  },
+  {
+    Name: 'target',
+    Type: 'STRING',
+  },
+  {
+    Name: 'weight',
+    Type: 'DECIMAL',
   },
 ];
 
@@ -278,11 +335,11 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
         filterGroups.push(visual.filterGroup);
       }
 
-      if (visual.ColumnConfigurations) {
+      if (visual.columnConfigurations) {
         if (dashboardDef.ColumnConfigurations) {
-          dashboardDef.ColumnConfigurations?.push(...visual.ColumnConfigurations);
+          dashboardDef.ColumnConfigurations?.push(...visual.columnConfigurations);
         } else {
-          dashboardDef.ColumnConfigurations = visual.ColumnConfigurations;
+          dashboardDef.ColumnConfigurations = visual.columnConfigurations;
         }
       }
 
@@ -290,8 +347,8 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
       const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
 
-      const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json')).toString());
-      const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json')).toString());
+      const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json'), 'utf8'));
+      const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json'), 'utf8'));
 
       if (elements.length > 0) {
         const lastElement = elements.at(elements.length - 1);
@@ -306,7 +363,8 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       if (visual.eventCount) {
-        visualControl.RowSpan = visual.eventCount * 2;
+        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 4;
+        visualControl.ColumnSpan = visual.colSpan ?? 20;
       }
       visualControl.ElementId = findFirstChild(visual.visual).VisualId;
       elements.push(visualControl);
@@ -336,31 +394,21 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 
 export function getFunnelVisualDef(visualId: string, viewName: string) : Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-chart.json')).toString()) as Visual;
-  const eventNameFiledId = uuidv4();
-  const idFiledId = uuidv4();
-  visualDef.FunnelChartVisual!.VisualId = visualId;
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
+  const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dimFieldId: uuidv4(),
+    measureFieldId: uuidv4(),
+  };
 
-  const fieldWells = visualDef.FunnelChartVisual!.ChartConfiguration!.FieldWells!;
-  const sortConfiguration = visualDef.FunnelChartVisual!.ChartConfiguration!.SortConfiguration!;
-  const tooltipFields = visualDef.FunnelChartVisual?.ChartConfiguration?.Tooltip!.FieldBasedTooltip!.TooltipFields!;
+  return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 
-  fieldWells.FunnelChartAggregatedFieldWells!.Category![0].CategoricalDimensionField!.FieldId = eventNameFiledId;
-  fieldWells.FunnelChartAggregatedFieldWells!.Values![0].CategoricalMeasureField!.FieldId = idFiledId;
-  fieldWells.FunnelChartAggregatedFieldWells!.Category![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
-  fieldWells.FunnelChartAggregatedFieldWells!.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
-  sortConfiguration.CategorySort![0].FieldSort!.FieldId = idFiledId;
-  sortConfiguration.CategorySort![1].FieldSort!.FieldId = eventNameFiledId;
-
-  tooltipFields[0].FieldTooltipItem!.FieldId = idFiledId;
-  tooltipFields[1].FieldTooltipItem!.FieldId = eventNameFiledId;
-
-  return visualDef;
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], dateField: string) : Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json')).toString()) as Visual;
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
 
   const groupBy = visualDef.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells?.GroupBy!;
@@ -451,55 +499,57 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
   const parameterDeclarations = [];
   let filterGroup: FilterGroup;
 
-  if (props.timeScopeType === 'FIXED') {
-    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString()) as FilterControl;
+  if (props.timeScopeType === ExploreTimeScopeType.FIXED) {
+
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json'), 'utf8')) as FilterControl;
     filterControl.DateTimePicker!.FilterControlId = filterControlId;
     filterControl.DateTimePicker!.Title = 'event_date between';
     filterControl.DateTimePicker!.SourceFilterId = sourceFilterId;
 
-    filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group.json')).toString()) as FilterGroup;
-    filterGroup.FilterGroupId = uuidv4();
-    filterGroup.Filters![0].TimeRangeFilter!.FilterId = sourceFilterId;
-    filterGroup.Filters![0].TimeRangeFilter!.Column!.ColumnName = 'event_date';
-    filterGroup.Filters![0].TimeRangeFilter!.Column!.DataSetIdentifier = props.viewName;
+    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template'), 'utf8');
+    const mustacheFilterGroupType: MustacheFilterGroupType = {
+      visualIds: `"${props.visualId}"`,
+      sheetId: props.sheetId,
+      dataSetIdentifier: props.viewName,
+      filterGroupId: uuidv4(),
+      filterId: sourceFilterId,
+    };
+    filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheFilterGroupType)) as FilterGroup;
     filterGroup.Filters![0].TimeRangeFilter!.RangeMinimumValue!.StaticValue = new Date(props.timeStart!);
     filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
-    filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
-    filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
 
   } else {
-    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json')).toString()) as FilterControl;
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json'), 'utf8')) as FilterControl;
     filterControl.RelativeDateTime!.FilterControlId = filterControlId;
     filterControl.RelativeDateTime!.Title = 'event_date';
     filterControl.RelativeDateTime!.SourceFilterId = sourceFilterId;
 
-    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = `addDateTime(-${props.lastN}, '${props.timeUnit}', truncDate('${props.timeUnit}', now()))`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationStart);
 
-    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString()) as ParameterDeclaration;
+    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = 'addDateTime(1, \'DD\', truncDate(\'DD\', now()))';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationEnd);
 
-    filterGroup = JSON.parse(readFileSync(join(__dirname, './templates/filter-group-relative.json')).toString()) as FilterGroup;
+    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template'), 'utf8');
+    const mustacheRelativeDateFilterGroupType: MustacheRelativeDateFilterGroupType = {
+      visualIds: `"${props.visualId}"`,
+      sheetId: props.sheetId,
+      dataSetIdentifier: props.viewName,
+      filterGroupId: uuidv4(),
+      filterId: sourceFilterId,
+      lastN: props.lastN!,
+      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit!),
+    };
 
-    filterGroup.FilterGroupId = uuidv4();
-    filterGroup.Filters![0].RelativeDatesFilter!.FilterId = sourceFilterId;
-    filterGroup.Filters![0].RelativeDatesFilter!.Column!.ColumnName = 'event_date';
-    filterGroup.Filters![0].RelativeDatesFilter!.Column!.DataSetIdentifier = props.viewName;
-
-    filterGroup.Filters![0].RelativeDatesFilter!.RelativeDateValue = props.lastN;
-    filterGroup.Filters![0].RelativeDatesFilter!.TimeGranularity = getQuickSightUnitFromTimeUnit(props.timeUnit!);
-
-    filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].SheetId = props.sheetId;
-    filterGroup.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds = [props.visualId];
-
+    filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheRelativeDateFilterGroupType)) as FilterGroup;
   }
 
   return {
@@ -513,7 +563,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 
   const columnConfigurations: ColumnConfiguration[] = [];
   for (const col of colNames) {
-    const config = JSON.parse(readFileSync(join(__dirname, './templates/percentage-column-config.json')).toString()) as ColumnConfiguration;
+    const config = JSON.parse(readFileSync(join(__dirname, './templates/percentage-column-config.json'), 'utf8')) as ColumnConfiguration;
     config.Column!.ColumnName = col;
     config.Column!.DataSetIdentifier = viewName;
     columnConfigurations.push(config);
@@ -524,72 +574,47 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 
 export function getEventLineChartVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-line-chart.json')).toString()) as Visual;
-  const filedId1 = uuidv4();
-  const filedId2 = uuidv4();
-  const filedId3 = uuidv4();
-  const hierarchyId = uuidv4();
-  visualDef.LineChartVisual!.VisualId = visualId;
+  const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    catDimFieldId: uuidv4(),
+    catMeasureFieldId: uuidv4(),
+    hierarchyId: uuidv4(),
+    dateGranularity: groupColumn,
+  };
 
-  const fieldWell = visualDef.LineChartVisual!.ChartConfiguration!.FieldWells!.LineChartAggregatedFieldWells!;
-  const sortConfiguration = visualDef.LineChartVisual!.ChartConfiguration!.SortConfiguration!;
-  const tooltipFields = visualDef.LineChartVisual?.ChartConfiguration?.Tooltip!.FieldBasedTooltip!.TooltipFields!;
+  return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+}
 
-  fieldWell.Category![0].DateDimensionField!.FieldId = filedId1;
-  fieldWell.Category![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Category![0].DateDimensionField!.HierarchyId = hierarchyId;
-  fieldWell.Category![0].DateDimensionField!.DateGranularity = groupColumn;
+export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
 
-  fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId2;
-  fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Values![0].CategoricalMeasureField!.AggregationFunction = 'DISTINCT_COUNT';
+  const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
+  const mustachePathAnalysisType: MustachePathAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    sourceFieldId: uuidv4(),
+    targetFieldId: uuidv4(),
+    weightFieldId: uuidv4(),
+  };
 
-  fieldWell.Colors![0].CategoricalDimensionField!.FieldId = filedId3;
-  fieldWell.Colors![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
-
-  sortConfiguration.CategorySort![0].FieldSort!.FieldId = filedId1;
-
-  tooltipFields[0].FieldTooltipItem!.FieldId = filedId1;
-  tooltipFields[1].FieldTooltipItem!.FieldId = filedId2;
-  tooltipFields[2].FieldTooltipItem!.FieldId = filedId3;
-
-  visualDef.LineChartVisual!.ColumnHierarchies![0].DateTimeHierarchy!.HierarchyId = hierarchyId;
-
-  return visualDef;
+  return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
 export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/event-pivot-table-chart.json')).toString()) as Visual;
-  const filedId1 = uuidv4();
-  const filedId2 = uuidv4();
-  const filedId3 = uuidv4();
-  visualDef.PivotTableVisual!.VisualId = visualId;
+  const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    catDimFieldId: uuidv4(),
+    catMeasureFieldId: uuidv4(),
+    dateGranularity: groupColumn,
+  };
 
-  const fieldWell = visualDef.PivotTableVisual!.ChartConfiguration!.FieldWells!.PivotTableAggregatedFieldWells!;
-  const sortConfiguration = visualDef.PivotTableVisual!.ChartConfiguration!.SortConfiguration!;
-  const fieldOptions = visualDef.PivotTableVisual?.ChartConfiguration?.FieldOptions!.SelectedFieldOptions!;
-
-  fieldWell.Rows![0].CategoricalDimensionField!.FieldId = filedId1;
-  fieldWell.Rows![0].CategoricalDimensionField!.Column!.DataSetIdentifier = viewName;
-
-  fieldWell.Columns![0].DateDimensionField!.FieldId = filedId2;
-  fieldWell.Columns![0].DateDimensionField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Columns![0].DateDimensionField!.DateGranularity = groupColumn;
-
-  fieldWell.Values![0].CategoricalMeasureField!.FieldId = filedId3;
-  fieldWell.Values![0].CategoricalMeasureField!.Column!.DataSetIdentifier = viewName;
-  fieldWell.Values![0].CategoricalMeasureField!.AggregationFunction = 'DISTINCT_COUNT';
-
-  sortConfiguration.FieldSortOptions![0].FieldId = filedId2;
-  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.FieldId = filedId2;
-  sortConfiguration.FieldSortOptions![0].SortBy!.Field!.Direction = 'ASC';
-
-  fieldOptions[0].FieldId = filedId1;
-  fieldOptions[1].FieldId = filedId2;
-  fieldOptions[2].FieldId = filedId3;
-
-  return visualDef;
+  return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
 }
 

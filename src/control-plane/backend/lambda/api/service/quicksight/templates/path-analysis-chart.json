@@ -1,0 +1,68 @@
+{
+  "SankeyDiagramVisual": {
+      "VisualId": "{{visualId}}",
+      "Title": {
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "SankeyDiagramAggregatedFieldWells": {
+                  "Source": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{sourceFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "source"
+                              }
+                          }
+                      }
+                  ],
+                  "Destination": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{targetFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "target"
+                              }
+                          }
+                      }
+                  ],
+                  "Weight": [
+                      {
+                          "NumericalMeasureField": {
+                              "FieldId": "{{weightFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "weight"
+                              },
+                              "AggregationFunction": {
+                                  "SimpleNumericalAggregation": "SUM"
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "WeightSort": [
+                  {
+                      "FieldSort": {
+                          "FieldId": "{{weightFieldId}}",
+                          "Direction": "DESC"
+                      }
+                  }
+              ]
+          },
+          "DataLabels": {
+              "Visibility": "VISIBLE",
+              "Overlap": "DISABLE_OVERLAP"
+          }
+      },
+      "Actions": []
+  }
+}

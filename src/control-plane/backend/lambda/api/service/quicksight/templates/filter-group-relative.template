@@ -1,20 +1,20 @@
 {
-  "FilterGroupId": "",
+  "FilterGroupId": "{{filterGroupId}}",
   "Filters": [
       {
           "RelativeDatesFilter": {
-              "FilterId": "",
+              "FilterId": "{{filterId}}",
               "Column": {
-                  "DataSetIdentifier": "",
-                  "ColumnName": ""
+                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                  "ColumnName": "event_date"
               },
               "AnchorDateConfiguration": {
                   "AnchorOption": "NOW"
               },
               "MinimumGranularity": "DAY",
-              "TimeGranularity": "DAY",
+              "TimeGranularity": "{{dateGranularity}}",
               "RelativeDateType": "LAST",
-              "RelativeDateValue": 30,
+              "RelativeDateValue": {{lastN}},
               "NullOption": "NON_NULLS_ONLY"
           }
       }
@@ -23,11 +23,9 @@
       "SelectedSheets": {
           "SheetVisualScopingConfigurations": [
               {
-                  "SheetId": "",
+                  "SheetId": "{{sheetId}}",
                   "Scope": "SELECTED_VISUALS",
-                  "VisualIds": [
-                      ""
-                  ]
+                  "VisualIds": [{{{visualIds}}}]
               }
           ]
       }
