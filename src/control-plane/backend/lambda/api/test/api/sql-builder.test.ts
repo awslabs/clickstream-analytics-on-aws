@@ -2793,7 +2793,8 @@ describe('SQL Builder test', () => {
           'YYYY-MM-DD HH24'
         ) || '00:00' as hour,
         event_params,
-        user_properties event_date,
+        user_properties,
+        event_date,
         event_name,
         event_id,
         event_bundle_sequence_id::bigint as event_bundle_sequence_id,
@@ -3434,7 +3435,8 @@ describe('SQL Builder test', () => {
           'YYYY-MM-DD HH24'
         ) || '00:00' as hour,
         event_params,
-        user_properties event_date,
+        user_properties,
+        event_date,
         event_name,
         event_id,
         event_bundle_sequence_id::bigint as event_bundle_sequence_id,

@@ -179,7 +179,7 @@ const columnTemplate = `
 ,items as items####
 `;
 
-export function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) : string {
+function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let eventDateSQL = '';
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
@@ -301,7 +301,7 @@ function _buildBaseTableSqlForPathAnalysis(sqlParameters: SQLParameters) : strin
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
       , user_properties
-      ${baseColumns}
+      , ${baseColumns}
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
       and event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
@@ -373,18 +373,11 @@ function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : str
 function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
   } else {
-    let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
-      lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
-      lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
-      lastN = lastN * 31 * 3;
-    }
-    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+    const nDayNumber = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${nDayNumber}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
   }
 
   let sql = `
@@ -396,7 +389,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
       , user_properties
-      ${baseColumns}
+      , ${baseColumns}
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
       and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
@@ -1084,18 +1077,10 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
   }
 
   let dateList: string[] = [];
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     dateList.push(...generateDateListWithoutStartData(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
-    let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
-      lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
-      lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
-      lastN = lastN * 31 * 3;
-    }
-
+    const lastN = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
     for (let n = 1; n<=lastN; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
@@ -1310,4 +1295,17 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
     }
   }
   return [conditionSql, columnSql];
+
+}
+
+function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
+  let lastNDayNumber = lastN;
+  if (timeUnit === ExploreRelativeTimeUnit.WK) {
+    lastNDayNumber = lastN * 7;
+  } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
+    lastNDayNumber = lastN * 31;
+  } else if (timeUnit === ExploreRelativeTimeUnit.Q) {
+    lastNDayNumber = lastN * 31 * 3;
+  }
+  return lastNDayNumber;
 }
