@@ -1224,7 +1224,6 @@ function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
     }
   }
 
-  console.log(`normal sql: ${sql}`);
   return sql;
 }
 
