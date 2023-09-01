@@ -397,18 +397,11 @@ function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : str
 function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
   } else {
-    let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
-      lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
-      lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
-      lastN = lastN * 31 * 3;
-    }
-    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+    const nDayNumber = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${nDayNumber}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
   }
 
   let sql = `
@@ -1108,18 +1101,10 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
   }
 
   let dateList: string[] = [];
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     dateList.push(...generateDateListWithoutStartData(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
-    let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
-      lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
-      lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
-      lastN = lastN * 31 * 3;
-    }
-
+    const lastN = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
     for (let n = 1; n<=lastN; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
@@ -1238,4 +1223,16 @@ function formatDateToYYYYMMDD(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `'${year.toString().trim()}-${month.trim()}-${day.trim()}'`;
+}
+
+function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
+  let lastNDayNumber = lastN;
+  if (timeUnit === ExploreRelativeTimeUnit.WK) {
+    lastNDayNumber = lastN * 7;
+  } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
+    lastNDayNumber = lastN * 31;
+  } else if (timeUnit === ExploreRelativeTimeUnit.Q) {
+    lastNDayNumber = lastN * 31 * 3;
+  }
+  return lastNDayNumber;
 }
