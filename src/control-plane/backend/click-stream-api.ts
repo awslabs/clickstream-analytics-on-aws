@@ -354,6 +354,40 @@ export class ClickStreamApiConstruct extends Construct {
       ],
     });
     awsSdkPolicy.attachToRole(clickStreamApiFunctionRole);
+
+    const tableArns = [
+      dictionaryTable.tableArn,
+      clickStreamTable.tableArn,
+      `${clickStreamTable.tableArn}/index/*`,
+      analyticsMetadataTable.tableArn,
+      `${analyticsMetadataTable.tableArn}/index/*`,
+    ];
+    if (props.authProps?.authorizerTable) {
+      tableArns.push(props.authProps?.authorizerTable.tableArn);
+    }
+    const readAndWriteTablePolicy = new iam.Policy(this, 'ApiReadAndWriteTablePolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: tableArns,
+          actions: [
+            'dynamodb:BatchGetItem',
+            'dynamodb:GetRecords',
+            'dynamodb:GetShardIterator',
+            'dynamodb:Query',
+            'dynamodb:GetItem',
+            'dynamodb:Scan',
+            'dynamodb:ConditionCheckItem',
+            'dynamodb:BatchWriteItem',
+            'dynamodb:PutItem',
+            'dynamodb:UpdateItem',
+            'dynamodb:DeleteItem',
+            'dynamodb:DescribeTable',
+          ],
+        }),
+      ],
+    });
+    readAndWriteTablePolicy.attachToRole(clickStreamApiFunctionRole);
     addCfnNagSuppressRules(awsSdkPolicy.node.defaultChild as iam.CfnPolicy, [
       {
         id: 'W12',
@@ -411,13 +445,6 @@ export class ClickStreamApiConstruct extends Construct {
       ...apiFunctionProps,
     });
 
-    dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
-    clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
-    analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
-    userTable.grantReadWriteData(this.clickStreamApiFunction);
-    if (props.authProps?.authorizerTable) {
-      props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
-    }
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
 
