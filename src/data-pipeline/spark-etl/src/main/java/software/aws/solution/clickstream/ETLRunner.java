@@ -39,8 +39,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -187,9 +188,40 @@ public class ETLRunner {
                                             final @NotEmpty List<String> transformerClassNames) {
         Dataset<Row> result = dataset;
         for (String transformerClassName : transformerClassNames) {
+            log.info("executeTransformer: " + transformerClassName);
             result = executeTransformer(result, transformerClassName);
         }
-        return result.select(getDistFields());
+        return selectDistFields(result, transformerClassNames.get(0));
+    }
+
+    public static Dataset<Row> selectDistFields(final Dataset<Row> dataset, final String transformerClassName) {
+        List<String> colList = Arrays.asList(dataset.columns());
+        log.info("Columns:" + String.join(",", dataset.columns()));
+        if (colList.contains("event_params") && colList.contains("event_bundle_sequence_id")) {
+            return dataset.select(getDistFields());
+        } else {
+            return postTransform(dataset, transformerClassName);
+        }
+    }
+
+    private static Dataset<Row> postTransform(final Dataset<Row> dataset, final String transformerClassName) {
+        try {
+            Class<?> transformClass = Class.forName(transformerClassName);
+            String mName = "postTransform";
+            try {
+                Method postTransform = transformClass.getDeclaredMethod(mName, Dataset.class);
+                log.info("find method: " + postTransform.getName());
+                Object instance = transformClass.getDeclaredConstructor().newInstance();
+                Dataset<Row> transformedDataset = (Dataset<Row>) postTransform.invoke(instance, dataset);
+                return transformedDataset;
+            } catch (NoSuchMethodException ignored) {
+                log.info("did not find method: " + mName);
+            }
+            return dataset;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new ExecuteTransformerException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")

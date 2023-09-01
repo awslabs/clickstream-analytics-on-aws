@@ -355,4 +355,56 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
         assertEquals(dataset.count(), 0);
     }
+    @Test
+    public void should_executeTransformers_with_postTransformer() {
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.SimpleTransformer");
+        transformers.add("software.aws.solution.clickstream.SimpleEnrich");
+
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+
+        String jobDataDir = "/tmp/etl-debug/";
+        String transformerClassNames = String.join(",", transformers);
+        String outputPath = "/tmp/test-output";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1667963966000";
+        String endTimestamp = "1667969999000";
+        String dataFreshnessInHour = "72";
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "false",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        -1, -1
+                ));
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
+        assertEquals(sourceDataset.count(), 2);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
+        Dataset<Row> dataset1 = dataset.select("transformedBy", "postTransformedBy", "enrichBy");
+        assertEquals(dataset1.count(), 2);
+    }
+
 }
