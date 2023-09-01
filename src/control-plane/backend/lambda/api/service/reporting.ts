@@ -36,12 +36,13 @@ import {
   getEventPivotTableVisualDef,
   pathAnalysisVisualColumns,
   getPathAnalysisChartVisualDef,
-  eventAnalysisVisualColumns,
   getRetentionLineChartVisualDef,
   getRetentionPivotTableVisualDef,
+  retentionAnalysisVisualColumns,
 } from './quicksight/reporting-utils';
-import { buildFunnelDataSql, buildFunnelView, buildPathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
+import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
+import { ExplorePathNodeType, ExploreTimeScopeType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -68,8 +69,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -85,8 +86,8 @@ export class ReportingServ {
         conversionIntervalInSeconds: query.conversionIntervalInSeconds,
         eventAndConditions: query.eventAndConditions,
         timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
@@ -204,7 +205,7 @@ export class ReportingServ {
         ColumnConfigurations: columnConfigurations,
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -231,7 +232,7 @@ export class ReportingServ {
 
       //construct parameters to build sql
       const viewName = query.viewName;
-      const sql = buildFunnelView(query.appId, viewName, {
+      const sql = buildEventAnalysisView(query.appId, viewName, {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -276,7 +277,7 @@ export class ReportingServ {
       }
 
       const visualId = uuidv4();
-      const visualDef = getEventLineChartVisualDef(visualId, viewName, query.timeUnit);
+      const visualDef = getEventLineChartVisualDef(visualId, viewName, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -295,7 +296,6 @@ export class ReportingServ {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
       };
 
       const tableVisualId = uuidv4();
@@ -309,7 +309,7 @@ export class ReportingServ {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -331,34 +331,60 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters;
-
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
       const viewName = query.viewName;
-      const sql = buildPathAnalysisView(query.appId, viewName, {
-        schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        eventAndConditions: query.eventAndConditions,
-        timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === 'FIXED' ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === 'FIXED' ? query.timeEnd : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        pathAnalysis: {
-          type: query.pathAnalysis.type,
-          lagSeconds: query.pathAnalysis.lagSeconds,
-        },
-      });
+      let sql = '';
+      if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
+        sql = buildEventPathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          eventAndConditions: query.eventAndConditions,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+          },
+        });
+      } else {
+        sql = buildNodePathAnalysisView(query.appId, viewName, {
+          schemaName: query.appId,
+          computeMethod: query.computeMethod,
+          specifyJoinColumn: query.specifyJoinColumn,
+          joinColumn: query.joinColumn,
+          conversionIntervalType: query.conversionIntervalType,
+          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+          timeScopeType: query.timeScopeType,
+          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+          lastN: query.lastN,
+          timeUnit: query.timeUnit,
+          groupColumn: query.groupColumn,
+          pathAnalysis: {
+            platform: query.pathAnalysis.platform,
+            sessionType: query.pathAnalysis.sessionType,
+            nodeType: query.pathAnalysis.nodeType,
+            lagSeconds: query.pathAnalysis.lagSeconds,
+            nodes: query.pathAnalysis.nodes,
+          },
+        });
+      }
       console.log(`path analysis sql: ${sql}`);
 
       const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -405,12 +431,11 @@ export class ReportingServ {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
         colSpan: 32,
         rowSpan: 12,
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -428,7 +453,7 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters;
+      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -451,13 +476,13 @@ export class ReportingServ {
       console.log(`retention analysis sql: ${sql}`);
 
       const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.quickSight.redshiftUser}`);
+      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
-        columns: eventAnalysisVisualColumns,
+        columns: retentionAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: `select * from ${query.appId}.${viewName}`,
         projectedColumns: [
@@ -512,7 +537,7 @@ export class ReportingServ {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
       result.visualIds.push({
         name: 'CHART',
         id: visualId,
@@ -528,7 +553,8 @@ export class ReportingServ {
     }
   };
 
-  private async create(resourceName: string, query: any, sqls: string[], datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
+  private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
+    datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const redshiftRegion = dashboardCreateParameters.region;
@@ -609,8 +635,8 @@ export class ReportingServ {
     let dashboardDef;
     if (!query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
-      const sheetId = visualPropsArray[0].sheetId;
-      dashboardDef.Sheets![0].SheetId = sheetId;
+      const sid = visualPropsArray[0].sheetId;
+      dashboardDef.Sheets![0].SheetId = sid;
       dashboardDef.Sheets![0].Name = query.sheetName;
     } else {
       dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
@@ -684,16 +710,20 @@ export class ReportingServ {
         analysisId,
         analysisArn: newAnalysis.Arn!,
         analysisName: `analysis-${resourceName}`,
+        sheetId,
         visualIds: [],
       };
     } else {
       //update QuickSight analysis
-      const newAnalysis = await quickSight.updateAnalysis({
-        AwsAccountId: awsAccountId,
-        AnalysisId: query.analysisId,
-        Name: query.analysisName,
-        Definition: dashboard as AnalysisDefinition,
-      });
+      let newAnalysis;
+      if (query.analysisId) {
+        newAnalysis = await quickSight.updateAnalysis({
+          AwsAccountId: awsAccountId,
+          AnalysisId: query.analysisId,
+          Name: query.analysisName,
+          Definition: dashboard as AnalysisDefinition,
+        });
+      }
 
       //update QuickSight dashboard
       const newDashboard = await quickSight.updateDashboard({
@@ -737,8 +767,9 @@ export class ReportingServ {
         dashboardName: query.dashboardName,
         dashboardVersion: Number.parseInt(versionNumber!),
         analysisId: query.analysisId,
-        analysisArn: newAnalysis.Arn!,
+        analysisArn: newAnalysis?.Arn!,
         analysisName: query.analysisName,
+        sheetId,
         visualIds: [],
       };
     }

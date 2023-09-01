@@ -1,12 +1,12 @@
 {
-  "FilterGroupId": "",
+  "FilterGroupId": "{{filterGroupId}}",
   "Filters": [
       {
           "TimeRangeFilter": {
-              "FilterId": "",
+              "FilterId": "{{filterId}}",
               "Column": {
-                  "DataSetIdentifier": "",
-                  "ColumnName": ""
+                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                  "ColumnName": "event_date"
               },
               "IncludeMinimum": true,
               "IncludeMaximum": true,
@@ -25,11 +25,9 @@
       "SelectedSheets": {
           "SheetVisualScopingConfigurations": [
               {
-                  "SheetId": "",
+                  "SheetId": "{{sheetId}}",
                   "Scope": "SELECTED_VISUALS",
-                  "VisualIds": [
-                      ""
-                  ]
+                  "VisualIds": [{{{visualIds}}}]
               }
           ]
       }

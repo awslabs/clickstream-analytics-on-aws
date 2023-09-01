@@ -43,7 +43,7 @@ import {
   DEFAULT_EVENT_ITEM,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
-  SegmetationFilterDataType,
+  SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
@@ -54,30 +54,24 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
-  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-} from 'ts/constant-ln';
-import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,
-  ExploreGroupColumn,
-  ExploreRelativeTimeUnit,
-  ExploreTimeScopeType,
   ExploreFunnelRequestAction,
+  ExploreGroupColumn,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
+import { alertMsg, generateStr } from 'ts/utils';
 import {
-  alertMsg,
-  generateStr,
-  getValueFromStackOutputs,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
-  validConditionItemType,
   validEventAnalyticsItem,
-} from 'ts/utils';
+  getDateRange,
+  getConversionIntervalInSeconds,
+  getEventAndConditions,
+  getFirstEventAndConditions,
+  getDashboardCreateParameters,
+} from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -96,15 +90,19 @@ const AnalyticsFunnel: React.FC = () => {
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userPseudoNumber') ?? '',
   };
 
   const computeMethodOptions: SelectProps.Options = [
+    defaultComputeMethodOption,
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? '',
+    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? '',
     },
-    defaultComputeMethodOption,
   ];
 
   const customWindowType = {
@@ -291,6 +289,12 @@ const AnalyticsFunnel: React.FC = () => {
       unit: 'day',
     });
 
+  const [timeGranularity, setTimeGranularity] =
+    React.useState<SelectProps.Option>({
+      value: ExploreGroupColumn.DAY,
+      label: t('analytics:options.dayTimeGranularity') ?? '',
+    });
+
   const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
@@ -314,116 +318,7 @@ const AnalyticsFunnel: React.FC = () => {
   );
 
   const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmetationFilterDataType>(INIT_SEGMENTATION_DATA);
-
-  const getEventAndConditions = () => {
-    const eventAndConditions: IEventAndCondition[] = [];
-    eventOptionData.forEach((item) => {
-      if (validEventAnalyticsItem(item)) {
-        const conditions: ICondition[] = [];
-        item.conditionList.forEach((condition) => {
-          if (validConditionItemType(condition)) {
-            const conditionObj: ICondition = {
-              category: 'other',
-              property: condition.conditionOption?.value ?? '',
-              operator: condition.conditionOperator?.value ?? '',
-              value: condition.conditionValue,
-              dataType:
-                condition.conditionOption?.valueType ??
-                MetadataValueType.STRING,
-            };
-            conditions.push(conditionObj);
-          }
-        });
-
-        const eventAndCondition: IEventAndCondition = {
-          eventName: item.selectedEventOption?.value ?? '',
-          conditions: conditions,
-          conditionOperator: 'and',
-        };
-        eventAndConditions.push(eventAndCondition);
-      }
-    });
-    return eventAndConditions;
-  };
-
-  const getFirstEventAndConditions = () => {
-    if (
-      eventOptionData.length === 0 ||
-      !validEventAnalyticsItem(eventOptionData[0])
-    ) {
-      return;
-    }
-    const firstEventName = eventOptionData[0].selectedEventOption?.value ?? '';
-    const conditions: ICondition[] = [];
-    segmentationOptionData.data.forEach((condition) => {
-      if (validConditionItemType(condition)) {
-        const conditionObj: ICondition = {
-          category: 'other',
-          property: condition.conditionOption?.value ?? '',
-          operator: condition.conditionOperator?.value ?? '',
-          value: condition.conditionValue,
-          dataType:
-            condition.conditionOption?.valueType ?? MetadataValueType.STRING,
-        };
-        conditions.push(conditionObj);
-      }
-    });
-    const firstEventAndCondition: IEventAndCondition = {
-      eventName: firstEventName,
-      conditions: conditions,
-      conditionOperator: segmentationOptionData.conditionRelationShip,
-    };
-    return firstEventAndCondition;
-  };
-
-  const getConversionIntervalInSeconds = () => {
-    if (selectedWindowType?.value === ExploreConversionIntervalType.CUSTOMIZE) {
-      if (selectedWindowUnit?.value === 'second') {
-        return Number(windowValue);
-      } else if (selectedWindowUnit?.value === 'minute') {
-        return Number(windowValue) * 60;
-      } else if (selectedWindowUnit?.value === 'hour') {
-        return Number(windowValue) * 60 * 60;
-      } else if (selectedWindowUnit?.value === 'day') {
-        return Number(windowValue) * 60 * 60 * 24;
-      }
-    } else {
-      return 0;
-    }
-  };
-
-  const getDateRange = () => {
-    let groupColumn = ExploreGroupColumn.DAY;
-    if (dateRangeValue?.type === 'relative') {
-      let unit = ExploreRelativeTimeUnit.DD;
-      if (dateRangeValue.unit === 'day') {
-        unit = ExploreRelativeTimeUnit.DD;
-        groupColumn = ExploreGroupColumn.DAY;
-      } else if (dateRangeValue.unit === 'week') {
-        unit = ExploreRelativeTimeUnit.WK;
-        groupColumn = ExploreGroupColumn.WEEK;
-      } else if (dateRangeValue.unit === 'month') {
-        unit = ExploreRelativeTimeUnit.MM;
-      } else if (dateRangeValue.unit === 'year') {
-        unit = ExploreRelativeTimeUnit.Q;
-      }
-
-      return {
-        timeScopeType: ExploreTimeScopeType.RELATIVE,
-        lastN: dateRangeValue.amount,
-        timeUnit: unit,
-        groupColumn: groupColumn,
-      };
-    } else if (dateRangeValue?.type === 'absolute') {
-      return {
-        timeScopeType: ExploreTimeScopeType.FIXED,
-        timeStart: dateRangeValue.startDate,
-        timeEnd: dateRangeValue.endDate,
-        groupColumn: groupColumn,
-      };
-    }
-  };
+    useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
 
   const getFunnelRequest = (
     action: ExploreFunnelRequestAction,
@@ -433,31 +328,11 @@ const AnalyticsFunnel: React.FC = () => {
     sheetName?: string
   ) => {
     const funnelId = generateStr(6);
-    const redshiftOutputs = getValueFromStackOutputs(
-      pipeline,
-      'DataModelingRedshift',
-      [
-        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-        OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-      ]
-    );
-    const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
-      OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-    ]);
-    if (
-      !redshiftOutputs.get(
-        OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-      ) ||
-      !redshiftOutputs.get(
-        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-      ) ||
-      !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX) ||
-      !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
-    ) {
-      return undefined;
+    const parameters = getDashboardCreateParameters(pipeline);
+    if (!parameters) {
+      return;
     }
-    const dateRangeParams = getDateRange();
+    const dateRangeParams = getDateRange(dateRangeValue);
     let saveParams = {};
     if (action === ExploreFunnelRequestAction.PUBLISH) {
       saveParams = {
@@ -474,40 +349,24 @@ const AnalyticsFunnel: React.FC = () => {
       appId: appId ?? '',
       sheetName: `funnel_sheet_${funnelId}`,
       viewName: `funnel_view_${funnelId}`,
-      dashboardCreateParameters: {
-        region: pipeline.region,
-        redshift: {
-          user:
-            redshiftOutputs.get(
-              OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-            ) ?? '',
-          dataApiRole:
-            redshiftOutputs.get(
-              OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-            ) ?? '',
-          newServerless: {
-            workgroupName:
-              redshiftOutputs.get(
-                OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-              ) ?? '',
-          },
-        },
-        quickSight: {
-          dataSourceArn:
-            reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
-            '',
-        },
-      },
+      dashboardCreateParameters: parameters,
       computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: associateParameterChecked,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType:
         selectedWindowType?.value ?? ExploreConversionIntervalType.CURRENT_DAY,
-      conversionIntervalInSeconds: getConversionIntervalInSeconds(),
-      eventAndConditions: getEventAndConditions(),
-      firstEventExtraCondition: getFirstEventAndConditions(),
+      conversionIntervalInSeconds: getConversionIntervalInSeconds(
+        selectedWindowType,
+        selectedWindowUnit,
+        windowValue
+      ),
+      eventAndConditions: getEventAndConditions(eventOptionData),
+      firstEventExtraCondition: getFirstEventAndConditions(
+        eventOptionData,
+        segmentationOptionData
+      ),
       timeScopeType: dateRangeParams?.timeScopeType,
-      groupColumn: dateRangeParams?.groupColumn,
+      groupColumn: timeGranularity.value,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -559,7 +418,7 @@ const AnalyticsFunnel: React.FC = () => {
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userPseudoNumber') ?? '',
     });
     setSelectedWindowType(customWindowType);
     setSelectedWindowUnit({
@@ -646,7 +505,7 @@ const AnalyticsFunnel: React.FC = () => {
                           onClick={resetConfig}
                           loading={loadingData}
                         >
-                          {t('analytics:funnel.labels.reset')}
+                          {t('button.reset')}
                         </Button>
                         <Button
                           variant="primary"
@@ -655,7 +514,7 @@ const AnalyticsFunnel: React.FC = () => {
                             setSelectDashboardModalVisible(true);
                           }}
                         >
-                          {t('analytics:funnel.labels.save')}
+                          {t('button.saveToDashboard')}
                         </Button>
                       </SpaceBetween>
                     }
@@ -667,7 +526,7 @@ const AnalyticsFunnel: React.FC = () => {
                 <div className="cs-analytics-config">
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.metrics')}
+                      {t('analytics:labels.metrics')}
                     </Box>
                     <div className="cs-analytics-config">
                       <Select
@@ -681,7 +540,7 @@ const AnalyticsFunnel: React.FC = () => {
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.window')}
+                      {t('analytics:labels.window')}
                     </Box>
                     <div className="cs-analytics-window">
                       <div className="cs-analytics-window-type">
@@ -722,7 +581,7 @@ const AnalyticsFunnel: React.FC = () => {
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.associateParameter')}
+                      {t('analytics:labels.associateParameter')}
                     </Box>
                     <div className="cs-analytics-config">
                       <Toggle
@@ -739,18 +598,20 @@ const AnalyticsFunnel: React.FC = () => {
                 <br />
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
-                    {t('analytics:funnel.labels.funnelDateRange')}
+                    {t('analytics:labels.dateRange')}
                   </Box>
                   <ExploreDateRangePicker
                     dateRangeValue={dateRangeValue}
                     setDateRangeValue={setDateRangeValue}
+                    timeGranularity={timeGranularity}
+                    setTimeGranularity={setTimeGranularity}
                   />
                 </SpaceBetween>
                 <br />
                 <ColumnLayout columns={2} variant="text-grid">
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.funnelSteps')}
+                      {t('analytics:labels.funnelSteps')}
                     </Box>
                     <div>
                       <EventsSelect
@@ -891,7 +752,7 @@ const AnalyticsFunnel: React.FC = () => {
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.filters')}
+                      {t('analytics:labels.filters')}
                     </Box>
                     <div>
                       <SegmentationFilter
@@ -955,10 +816,11 @@ const AnalyticsFunnel: React.FC = () => {
                 <br />
                 <Button
                   variant="primary"
+                  iconName="search"
                   onClick={clickPreview}
                   loading={loadingData}
                 >
-                  {t('common:button.preview')}
+                  {t('button.preview')}
                 </Button>
               </Container>
               <Container>

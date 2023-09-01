@@ -49,7 +49,7 @@ import {
   PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
-import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail } from '../common/utils';
+import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
   const parameters: Parameter[] = [];
@@ -167,6 +167,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.custom( (_stack :CIngestionServerStack, key:string, value:any) => {
     if (!isEmpty(value)) {
       validatePattern(key, CORS_PATTERN, value);
+      value = corsStackInput(value);
     }
     return value;
   })

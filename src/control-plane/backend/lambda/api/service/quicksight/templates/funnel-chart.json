@@ -1,6 +1,6 @@
 {
   "FunnelChartVisual":{
-      "VisualId":"",
+      "VisualId":"{{visualId}}",
       "Title":{
           "Visibility":"VISIBLE"
       },
@@ -13,9 +13,9 @@
                   "Category":[
                       {
                           "CategoricalDimensionField":{
-                              "FieldId":"",
+                              "FieldId":"{{dimFieldId}}",
                               "Column":{
-                                  "DataSetIdentifier":"",
+                                  "DataSetIdentifier":"{{dataSetIdentifier}}",
                                   "ColumnName":"event_name"
                               }
                           }
@@ -24,9 +24,9 @@
                   "Values":[
                       {
                           "CategoricalMeasureField":{
-                              "FieldId":"",
+                              "FieldId":"{{measureFieldId}}",
                               "Column":{
-                                  "DataSetIdentifier":"",
+                                  "DataSetIdentifier":"{{dataSetIdentifier}}",
                                   "ColumnName":"x_id"
                               },
                               "AggregationFunction":"DISTINCT_COUNT"
@@ -39,13 +39,13 @@
               "CategorySort":[
                   {
                       "FieldSort":{
-                          "FieldId":"",
+                          "FieldId":"{{measureFieldId}}",
                           "Direction":"DESC"
                       }
                   },
                   {
                       "FieldSort":{
-                          "FieldId":"",
+                          "FieldId":"{{dimFieldId}}",
                           "Direction":"DESC"
                       }
                   }
@@ -63,13 +63,13 @@
                   "TooltipFields":[
                       {
                           "FieldTooltipItem":{
-                              "FieldId":"",
+                              "FieldId":"{{dimFieldId}}",
                               "Visibility":"VISIBLE"
                           }
                       },
                       {
                           "FieldTooltipItem":{
-                              "FieldId":"",
+                              "FieldId":"{{measureFieldId}}",
                               "Visibility":"VISIBLE"
                           }
                       }

@@ -1,6 +1,6 @@
 {
   "PivotTableVisual": {
-      "VisualId": "",
+      "VisualId": "{{visualId}}",
       "Title": {
           "Visibility": "VISIBLE"
       },
@@ -13,9 +13,9 @@
                   "Rows": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{catDimFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "event_name"
                               }
                           }
@@ -24,21 +24,21 @@
                   "Columns": [
                       {
                           "DateDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{dateDimFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "event_date"
                               },
-                              "DateGranularity": ""
+                              "DateGranularity": "{{dateGranularity}}"
                           }
                       }
                   ],
                   "Values": [
                       {
                           "CategoricalMeasureField": {
-                              "FieldId": "",
+                              "FieldId": "{{catMeasureFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "x_id"
                               },
                               "AggregationFunction": "DISTINCT_COUNT"
@@ -50,10 +50,10 @@
           "SortConfiguration": {
               "FieldSortOptions": [
                   {
-                      "FieldId": "",
+                      "FieldId": "{{dateDimFieldId}}",
                       "SortBy": {
                           "Field": {
-                              "FieldId": "",
+                              "FieldId": "{{dateDimFieldId}}",
                               "Direction": "ASC"
                           }
                       }
@@ -73,15 +73,15 @@
           "FieldOptions": {
               "SelectedFieldOptions": [
                   {
-                      "FieldId": "",
+                      "FieldId": "{{catDimFieldId}}",
                       "Visibility": "VISIBLE"
                   },
                   {
-                      "FieldId": "",
+                      "FieldId": "{{dateDimFieldId}}",
                       "Visibility": "VISIBLE"
                   },
                   {
-                      "FieldId": "",
+                      "FieldId": "{{catMeasureFieldId}}",
                       "Visibility": "VISIBLE"
                   }
               ]

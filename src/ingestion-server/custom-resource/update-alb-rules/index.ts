@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule } from '@aws-sdk/client-elastic-load-balancing-v2';
+import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule, RuleCondition } from '@aws-sdk/client-elastic-load-balancing-v2';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
@@ -38,6 +38,17 @@ interface ResourcePropertiesType {
   endpointPath: string;
   domainName: string;
   protocol: string;
+}
+
+interface HandleClickStreamSDKInput {
+  readonly appIds: string;
+  readonly requestType: string;
+  readonly listenerArn: string;
+  readonly protocol: string;
+  readonly endpointPath: string;
+  readonly domainName: string;
+  readonly authenticationSecretArn: string;
+  readonly targetGroupArn: string;
 }
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -73,75 +84,15 @@ async function _handler(
   const protocol = props.protocol;
 
   if (requestType === 'Create') {
-    // Create defalut forward rule and action
-    await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
-
-    if (authenticationSecretArn && authenticationSecretArn.length > 0) {
-      await createAuthLogindRule(authenticationSecretArn, listenerArn);
-    }
-
-    await modifyFallbackRule(listenerArn);
+    await handleCreate(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
   }
 
   if (requestType === 'Update') {
-    const allExistingRules = await getAllExistingAppIdRules(listenerArn);
-    for (const rule of allExistingRules) {
-      if (!rule.Conditions) continue;
-      const pathPatternCondition = rule.Conditions.find((condition) => condition.Field === 'path-pattern');
-      if (pathPatternCondition && pathPatternCondition.Values && pathPatternCondition.Values[0] !== endpointPath) {
-        const modifyCommand = new ModifyRuleCommand({
-          RuleArn: rule.RuleArn,
-          Actions: rule.Actions,
-          Conditions: [
-            {
-              Field: 'path-pattern',
-              Values: [endpointPath], // Update the path-pattern value
-            },
-            ...rule.Conditions.filter((condition) => condition.Field !== 'path-pattern'),
-          ],
-        });
-        await albClient.send(modifyCommand);
-      }
-    }
+    await handleUpdate(listenerArn, endpointPath);
   }
 
   if (clickStreamSDK === 'Yes') {
-    const shouldDeleteRules = [];
-    //get appId list and remove empty appId
-    const appIdArray = appIds.split(',').map((appId) => {
-      return appId.trim();
-    }).filter((item) => item !== '');
-
-    if (requestType === 'Create' || requestType === 'Update') {
-      if (appIdArray.length > 0) {
-        await createAppIdRules(listenerArn, appIdArray, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
-      }
-    }
-
-    if (requestType === 'Update') {
-      // check existing rules, and delete not need rules
-      const deleteAppIdRules = await getDeleteAppIdRules(appIdArray, listenerArn);
-      shouldDeleteRules.push(...deleteAppIdRules);
-    }
-
-    const { fixedResponseRules, defaultActionRules } = await getFixedResponseAndDefaultActionRules(listenerArn);
-    if (appIds.length > 0) {
-      // Remove fixedRepsonseRule and defalut forward rule and action if existing
-      shouldDeleteRules.push(...fixedResponseRules);
-      shouldDeleteRules.push(...defaultActionRules);
-    }
-
-    if (appIds.length === 0) {
-      // Create fixedRepsonseRule and defalut forward rule and action if not existing
-      if (fixedResponseRules.length === 0) {
-        await createFixedResponseRule(listenerArn);
-      }
-      if (defaultActionRules.length === 0) {
-        await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
-      }
-    }
-    // delete rules
-    await deleteRules(shouldDeleteRules);
+    await handleClickStreamSDK({ appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn });
   }
 
   // set default rules
@@ -155,6 +106,100 @@ async function _handler(
 
     await deleteRules(removeRules);
   }
+}
+
+async function handleCreate(
+  listenerArn: string,
+  protocol: string,
+  endpointPath: string,
+  domainName: string,
+  authenticationSecretArn: string,
+  targetGroupArn: string,
+) {
+  // Create defalut forward rule and action
+  await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+
+  if (authenticationSecretArn && authenticationSecretArn.length > 0) {
+    await createAuthLogindRule(authenticationSecretArn, listenerArn);
+  }
+
+  await modifyFallbackRule(listenerArn);
+}
+
+async function handleUpdate(listenerArn: string, endpointPath: string) {
+  const allExistingRules = await getAllExistingAppIdRules(listenerArn);
+  for (const rule of allExistingRules) {
+    if (!rule.Conditions) continue;
+    const pathPatternCondition = rule.Conditions.find((condition) => condition.Field === 'path-pattern');
+    if (pathPatternCondition && pathPatternCondition.Values && pathPatternCondition.Values[0] !== endpointPath) {
+      const modifyCommand = new ModifyRuleCommand({
+        RuleArn: rule.RuleArn,
+        Actions: rule.Actions,
+        Conditions: [
+          {
+            Field: 'path-pattern',
+            Values: [endpointPath], // Update the path-pattern value
+          },
+          ...rule.Conditions.filter((condition) => condition.Field !== 'path-pattern'),
+        ],
+      });
+      await albClient.send(modifyCommand);
+    }
+  }
+}
+
+async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
+  const shouldDeleteRules = [];
+  //get appId list and remove empty appId
+  const appIdArray = input.appIds.split(',').map((appId) => {
+    return appId.trim();
+  }).filter((item) => item !== '');
+
+  if (input.requestType === 'Create' || input.requestType === 'Update') {
+    if (appIdArray.length > 0) {
+      await createAppIdRules(
+        input.listenerArn,
+        appIdArray,
+        input.protocol,
+        input.endpointPath,
+        input.domainName,
+        input.authenticationSecretArn,
+        input.targetGroupArn,
+      );
+    }
+  }
+
+  if (input.requestType === 'Update') {
+    // check existing rules, and delete not need rules
+    const deleteAppIdRules = await getDeleteAppIdRules(appIdArray, input.listenerArn);
+    shouldDeleteRules.push(...deleteAppIdRules);
+  }
+
+  const { fixedResponseRules, defaultActionRules } = await getFixedResponseAndDefaultActionRules(input.listenerArn);
+  if (input.appIds.length > 0) {
+    // Remove fixedRepsonseRule and defalut forward rule and action if existing
+    shouldDeleteRules.push(...fixedResponseRules);
+    shouldDeleteRules.push(...defaultActionRules);
+  }
+
+  if (input.appIds.length === 0) {
+    // Create fixedRepsonseRule and defalut forward rule and action if not existing
+    if (fixedResponseRules.length === 0) {
+      await createFixedResponseRule(input.listenerArn);
+    }
+    if (defaultActionRules.length === 0) {
+      await createDefaultForwardRule(
+        input.listenerArn,
+        input.protocol,
+        input.endpointPath,
+        input.domainName,
+        input.authenticationSecretArn,
+        input.targetGroupArn,
+      );
+    }
+  }
+  // delete rules
+  await deleteRules(shouldDeleteRules);
 }
 
 async function deleteRules(rules: Rule[]) {
@@ -264,19 +309,23 @@ function getAllExistingAppIds(rules: Rule[]) {
     // Check if Conditions exist
     if (rule.Conditions) {
       for (const condition of rule.Conditions) {
-        // Check if Field is 'query-string' and QueryStringConfig and Values exist
-        if (condition.Field === 'query-string' && condition.QueryStringConfig && condition.QueryStringConfig.Values) {
-          for (const value of condition.QueryStringConfig.Values) {
-            // Check if Key is 'appId' and Value exists
-            if (value.Key === 'appId' && value.Value) {
-              appIdSet.add(value.Value);
-            }
-          }
-        }
+        getAppIdsFromCondition(condition, appIdSet);
       }
     }
   }
   return Array.from(appIdSet); // Convert Set to Array
+}
+
+function getAppIdsFromCondition(condition: RuleCondition, appIdSet: Set<string>) {
+  // Check if Field is 'query-string' and QueryStringConfig and Values exist
+  if (condition.Field === 'query-string' && condition.QueryStringConfig && condition.QueryStringConfig.Values) {
+    for (const value of condition.QueryStringConfig.Values) {
+      // Check if Key is 'appId' and Value exists
+      if (value.Key === 'appId' && value.Value) {
+        appIdSet.add(value.Value);
+      }
+    }
+  }
 }
 
 async function getAllExistingAppIdRules(listenerArn: string) {
@@ -446,7 +495,7 @@ async function getOidcInfo(authenticationSecretArn: string) {
   return { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret };
 }
 
-function createPriority(allPriorities: Array<Number>) {
+function createPriority(allPriorities: Array<number>) {
   let priority = 4;
   while (allPriorities.includes(priority)) {
     priority++;

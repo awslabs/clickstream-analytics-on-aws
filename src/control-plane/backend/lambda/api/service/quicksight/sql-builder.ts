@@ -12,8 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-import { logger } from '../../common/powertools';
+import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
@@ -30,8 +29,11 @@ export interface EventAndCondition {
 }
 
 export interface PathAnalysisParameter {
-  readonly type: 'SESSION' | 'CUSTOMIZE';
+  readonly platform?: MetadataPlatform;
+  readonly sessionType: ExplorePathSessionDef;
+  readonly nodeType: ExplorePathNodeType;
   readonly lagSeconds?: number;
+  readonly nodes?: string[];
 }
 
 export interface PairEventAndCondition {
@@ -44,10 +46,10 @@ export interface SQLParameters {
   readonly computeMethod: ExploreComputeMethod;
   readonly specifyJoinColumn: boolean;
   readonly joinColumn?: string;
-  readonly conversionIntervalType: ExploreConversionIntervalType;
+  readonly conversionIntervalType?: ExploreConversionIntervalType;
   readonly conversionIntervalInSeconds?: number;
   readonly firstEventExtraCondition?: EventAndCondition;
-  readonly eventAndConditions: EventAndCondition[];
+  readonly eventAndConditions?: EventAndCondition[];
   readonly timeScopeType: ExploreTimeScopeType;
   readonly timeStart?: Date;
   readonly timeEnd?: Date;
@@ -171,15 +173,15 @@ const columnTemplate = `
 function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === 'FIXED') {
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
   } else {
     let lastN = sqlParameters.lastN!;
-    if (sqlParameters.timeUnit === 'WK') {
+    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
       lastN = lastN * 7;
-    } else if (sqlParameters.timeUnit === 'MM') {
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
       lastN = lastN * 31;
-    } else if (sqlParameters.timeUnit === 'Q') {
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.Q) {
       lastN = lastN * 31 * 3;
     }
     eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
@@ -188,7 +190,8 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) 
   let sql = `
     with base_data as (
       select 
-        TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
+        TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month
+      , TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
@@ -203,13 +206,50 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) 
   return sql;
 }
 
+function _buildBaseTableSqlForPathAnalysis(sqlParameters: SQLParameters) : string {
+
+  let eventDateSQL = '';
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
+  } else {
+    let lastN = sqlParameters.lastN!;
+    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
+      lastN = lastN * 7;
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
+      lastN = lastN * 31;
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.Q) {
+      lastN = lastN * 31 * 3;
+    }
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+  }
+
+  let sql = `
+    with base_data as (
+      select 
+        TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month
+      , TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
+      , event_params
+      , user_properties
+      ${baseColumns}
+      from ${sqlParameters.schemaName}.ods_events ods 
+      where ${eventDateSQL}
+      and event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
+      ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
+    ),
+  `;
+
+  return sql;
+}
+
 function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildBaseTableSql(eventNames, sqlParameters);
 
   for (const [index, event] of eventNames.entries()) {
 
-    const eventCondition = sqlParameters.eventAndConditions[index];
+    const eventCondition = sqlParameters.eventAndConditions![index];
     let eventConditionSql = '';
     if (eventCondition.conditions !== undefined) {
       for (const condition of eventCondition.conditions) {
@@ -238,7 +278,8 @@ function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : str
 
     let firstEventConditionSQL = '';
     let firstTableColumns = `
-       week
+       month
+      ,week
       ,day
       ,hour
       ,${columnTemplate.replace(/####/g, '_0')}
@@ -353,10 +394,124 @@ function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : str
   return sql;
 };
 
+function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
+
+  let eventDateSQL = '';
+  if (sqlParameters.timeScopeType === 'FIXED') {
+    eventDateSQL = eventDateSQL.concat(`event_date >= '${sqlParameters.timeStart}'  and event_date <= '${sqlParameters.timeEnd}'`);
+  } else {
+    let lastN = sqlParameters.lastN!;
+    if (sqlParameters.timeUnit === 'WK') {
+      lastN = lastN * 7;
+    } else if (sqlParameters.timeUnit === 'MM') {
+      lastN = lastN * 31;
+    } else if (sqlParameters.timeUnit === 'Q') {
+      lastN = lastN * 31 * 3;
+    }
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${lastN}, CURRENT_DATE) and event_date <= CURRENT_DATE`);
+  }
+
+  let sql = `
+    with base_data as (
+      select 
+        TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month
+      , TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day
+      , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
+      , event_params
+      , user_properties
+      ${baseColumns}
+      from ${sqlParameters.schemaName}.ods_events ods 
+      where ${eventDateSQL}
+      and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
+    ),
+  `;
+
+  for (const [index, event] of eventNames.entries()) {
+
+    const eventCondition = sqlParameters.eventAndConditions![index];
+    let eventConditionSql = '';
+    if (eventCondition.conditions !== undefined) {
+      for (const condition of eventCondition.conditions) {
+        if (condition.category === 'user' || condition.category === 'event') {
+          continue;
+        }
+        let value = condition.value;
+        if (condition.dataType === MetadataValueType.STRING) {
+          value = `'${value}'`;
+        }
+
+        let category: string = `${condition.category}_`;
+        if (condition.category === 'other') {
+          category = '';
+        }
+        eventConditionSql = eventConditionSql.concat(`
+          ${eventCondition.conditionOperator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
+        `);
+      }
+    }
+    if (eventConditionSql !== '') {
+      eventConditionSql = `
+      and ( 1=1 ${eventConditionSql} )
+      `;
+    }
+
+    let tableColumns = `
+       month
+      ,week
+      ,day
+      ,hour
+      ,${columnTemplate.replace(/####/g, `_${index}`)}
+    `;
+
+    sql = sql.concat(`
+    table_${index} as (
+      select 
+        ${ tableColumns}
+      from base_data base
+      where event_name = '${event}'
+      ${eventConditionSql}
+    ),
+    `);
+  }
+
+  let joinTableSQL = '';
+
+  for (const [index, _item] of eventNames.entries()) {
+
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
+    joinTableSQL = joinTableSQL.concat(`
+    ${unionSql}
+    select 
+      table_${index}.month
+    , table_${index}.week
+    , table_${index}.day
+    , table_${index}.hour
+    , table_${index}.event_id_${index} as event_id
+    , table_${index}.event_name_${index} as event_name
+    , table_${index}.user_pseudo_id_${index} as user_pseudo_id
+    , table_${index}.event_timestamp_${index} as event_timestamp
+    from table_${index}
+    `);
+
+  }
+
+  sql = sql.concat(`
+    join_table as (
+      ${joinTableSQL}
+    )`,
+  );
+
+  return sql;
+};
+
 export function buildFunnelDataSql(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   let eventNames: string[] = [];
-  for (const e of sqlParameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions!) {
     eventNames.push(e.eventName);
   }
 
@@ -400,7 +555,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
 
   let resultSql = '';
   let eventNames: string[] = [];
-  for (const e of sqlParameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions!) {
     eventNames.push(e.eventName);
   }
   let index = 0;
@@ -411,13 +566,15 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
 
   let baseSQL = _buildBaseSql(eventNames, sqlParameters);
   let finalTableColumnsSQL = `
-     week
+     month
+    ,week
     ,day
     ,hour
   `;
 
   let finalTableGroupBySQL = `
-     week
+     month
+    ,week
     ,day
     ,hour
   `;
@@ -442,7 +599,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
     )
   `);
 
-  for (const e of sqlParameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions!) {
     eventNames.push(e.eventName);
     resultSql = resultSql.concat(`
     ${ index === 0 ? '' : 'union all'}
@@ -464,16 +621,74 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
   });
 }
 
-export function buildPathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildEventAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+
+  let resultSql = '';
+  let eventNames: string[] = [];
+  for (const e of sqlParameters.eventAndConditions!) {
+    eventNames.push(e.eventName);
+  }
+  let prefix = 'e';
+  if (sqlParameters.computeMethod === 'USER_CNT') {
+    prefix = 'u';
+  }
+
+  let baseSQL = _buildEventAnalysisBaseSql(eventNames, sqlParameters);
+  let finalTableColumnsSQL = `
+     month
+    ,week
+    ,day
+    ,hour
+  `;
+
+  let finalTableGroupBySQL = `
+     month
+    ,week
+    ,day
+    ,hour
+  `;
+
+  finalTableColumnsSQL = finalTableColumnsSQL.concat(', event_id as e_id , event_name as e_name , user_pseudo_id as u_id ');
+
+  finalTableGroupBySQL = finalTableGroupBySQL.concat(', event_id , event_name , user_pseudo_id ');
+
+  baseSQL = baseSQL.concat(`,
+    final_table as (
+      select 
+      ${finalTableColumnsSQL}
+      from join_table 
+      group by
+      ${finalTableGroupBySQL}
+    )
+  `);
+
+  resultSql = resultSql.concat(`
+  select 
+      day::date as event_date
+    ,e_name::varchar as event_name
+    ,${prefix}_id::varchar as x_id
+  from final_table where ${prefix}_id is not null
+  `);
+
+  let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+   ${baseSQL}
+   ${resultSql}
+   `;
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+export function buildEventPathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   const eventNames: string[] = [];
-  for (const e of sqlParameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions!) {
     eventNames.push(e.eventName);
   }
 
   let eventConditionSqlOut = '';
   for (const [index, event] of eventNames.entries()) {
-    const eventCondition = sqlParameters.eventAndConditions[index];
+    const eventCondition = sqlParameters.eventAndConditions![index];
     let eventConditionSql = '';
     if (eventCondition.conditions !== undefined) {
       for (const [i, condition] of eventCondition.conditions.entries()) {
@@ -505,8 +720,7 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
   let dataTableSql = '';
   let partitionBy = '';
   let joinSql = '';
-  logger.error(`path type: ${sqlParameters.pathAnalysis?.type}`);
-  if (sqlParameters.pathAnalysis?.type === 'SESSION' ) {
+  if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
     partitionBy = ', session_id';
     joinSql = `
     and a.session_id = b.session_id 
@@ -656,6 +870,200 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
     ${midTableSql}
     ${dataTableSql}
   `;
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+export function buildNodePathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+
+  let midTableSql = '';
+  let dataTableSql = '';
+  let partitionBy = '';
+  let joinSql = '';
+
+  if (sqlParameters.pathAnalysis!.sessionType === ExplorePathSessionDef.SESSION ) {
+    partitionBy = ', session_id';
+    joinSql = `
+    and a.session_id = b.session_id 
+    `;
+    midTableSql = `
+      mid_table as (
+        select 
+        day::date as event_date,
+        event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp,
+        (
+          select
+              ep.value.string_value
+            from
+              base_data e,
+              e.event_params ep
+            where
+              ep.key = '_session_id'
+              and e.event_id = base.event_id
+            limit
+              1
+        ) as session_id,
+        (
+          select
+              ep.value.string_value
+            from
+              base_data e,
+              e.event_params ep
+            where
+              ep.key = '${sqlParameters.pathAnalysis!.nodeType}'
+              and e.event_id = base.event_id
+            limit
+              1
+        )::varchar as node
+      from base_data base
+      where node in (${ '\'' + sqlParameters.pathAnalysis!.nodes!.join('\',\'') + '\''})
+      ),
+    `;
+    dataTableSql = `data as (
+      select 
+        *,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) + 1 as step_2
+      from (
+        select  
+          event_date,
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          replace(node, '"', '') as node
+        from mid_table
+        ) t 
+    )
+    select 
+      a.event_date as event_date,
+      a.node || '_' || a.step_1 as source,
+      CASE 
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'other_' || a.step_2
+      END as target,
+      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
+    from data a left join data b 
+      on a.user_pseudo_id = b.user_pseudo_id 
+      ${joinSql}
+      and a.step_2 = b.step_1
+    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    group by 
+      a.event_date,
+      a.node || '_' || a.step_1,
+      CASE 
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'other_' || a.step_2
+      END
+    `;
+
+  } else {
+    midTableSql = `
+      mid_table as (
+        select 
+        day::date as event_date,
+        node,
+        user_pseudo_id,
+        event_id,
+        event_timestamp
+      from base_data base
+      where node in (${ '\'' + sqlParameters.pathAnalysis!.nodes!.join('\',\'') + '\''})
+      ),
+    `;
+
+    dataTableSql = `data_1 as (
+      select 
+        *,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
+      from (
+        select  
+          event_date,
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          replace(node, '"', '') as node
+        from mid_table
+        ) t 
+    ),
+    data_2 as (
+      select 
+        a.event_date as a_event_date,
+        a.node as a_node,
+        a.user_pseudo_id as a_user_pseudo_id,
+        a.event_id as a_event_id,
+        b.event_date as b_event_date,
+        b.node as b_node,
+        b.user_pseudo_id as b_user_pseudo_id,
+        b.event_id as b_event_id,
+        b.event_timestamp as b_event_timestamp,
+        a.event_timestamp as a_event_timestamp,
+        a.step_1,
+        a.step_2
+      from data_1 a left join data_1 b 
+      on a.user_pseudo_id = b.user_pseudo_id 
+      and a.step_2 = b.step_1
+    )
+    ,timestamp_diff AS (
+      SELECT *
+      , case when (b_event_timestamp - a_event_timestamp < ${sqlParameters.pathAnalysis!.lagSeconds! * 1000} and b_event_timestamp - a_event_timestamp >0) then 0 else 1 end as group_start
+      FROM
+          data_2
+     )
+     ,grouped_data AS (
+      SELECT
+          *,
+          SUM(group_start) over(order by a_event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS group_id
+      FROM
+          timestamp_diff
+      )
+    ,data as (
+      select 
+        a_event_date,
+        a_node,
+        a_user_pseudo_id,
+        a_event_id,
+        b_event_date,
+        b_node,
+        b_user_pseudo_id,
+        b_event_id,
+        ROW_NUMBER() OVER (PARTITION BY group_id, a_user_pseudo_id ORDER BY step_1,step_2 asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY group_id, a_user_pseudo_id ORDER BY step_1,step_2 asc) + 1 as step_2
+      from grouped_data
+    )
+    select 
+      a_event_date as event_date,
+      a_node || '_' || step_1 as source,
+      CASE 
+        WHEN b_node is not null THEN b_node || '_' || step_2
+        ELSE 'other_' || step_2
+      END as target,
+      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
+    from data
+    where step_2 <= ${sqlParameters.maxStep ?? 10}
+    group by 
+      a_event_date,
+      a_node || '_' || step_1,
+      CASE 
+        WHEN b_node is not null THEN b_node || '_' || step_2
+        ELSE 'other_' || step_2
+      END
+    `;
+  }
+
+  const sql = `
+  CREATE OR REPLACE VIEW ${schema}.${name} AS
+    ${_buildBaseTableSqlForPathAnalysis(sqlParameters)}
+    ${midTableSql}
+    ${dataTableSql}
+  `;
 
   return format(sql, {
     language: 'postgresql',
@@ -665,13 +1073,13 @@ export function buildPathAnalysisView(schema: string, name: string, sqlParameter
 export function buildRetentionAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
 
   const eventNames: string[] = [];
-  for (const e of sqlParameters.eventAndConditions) {
+  for (const e of sqlParameters.eventAndConditions!) {
     eventNames.push(e.eventName);
   }
 
   let eventConditionSqlOut = '';
   for (const [index, event] of eventNames.entries()) {
-    const eventCondition = sqlParameters.eventAndConditions[index];
+    const eventCondition = sqlParameters.eventAndConditions![index];
     let eventConditionSql = '';
     if (eventCondition.conditions !== undefined) {
       for (const [i, condition] of eventCondition.conditions.entries()) {

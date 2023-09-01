@@ -128,7 +128,7 @@ declare global {
     readonly computeMethod: ExploreComputeMethod;
     readonly specifyJoinColumn: boolean;
     readonly joinColumn?: string;
-    readonly conversionIntervalType: ExploreConversionIntervalType;
+    readonly conversionIntervalType?: ExploreConversionIntervalType;
     readonly conversionIntervalInSeconds?: number;
     readonly firstEventExtraCondition?: EventAndCondition;
     readonly eventAndConditions: IEventAndCondition[];
