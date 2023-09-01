@@ -1,0 +1,132 @@
+{
+  "LineChartVisual": {
+      "VisualId": "{{visualId}}",
+      "Title": {
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "LineChartAggregatedFieldWells": {
+                  "Category": [
+                      {
+                          "DateDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              },
+                              "DateGranularity": "DAY",
+                              "HierarchyId": "{{hierarchyId}}"
+                          }
+                      }
+                  ],
+                  "Values": [
+                      {
+                          "NumericalMeasureField": {
+                              "FieldId": "{{numberMeasureFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "retention"
+                              },
+                              "AggregationFunction": {
+                                  "SimpleNumericalAggregation": "AVERAGE"
+                              },
+                              "FormatConfiguration": {
+                                  "FormatConfiguration": {
+                                      "PercentageDisplayFormatConfiguration": {
+                                          "Suffix": "%",
+                                          "SeparatorConfiguration": {
+                                              "DecimalSeparator": "DOT",
+                                              "ThousandsSeparator": {
+                                                  "Symbol": "COMMA",
+                                                  "Visibility": "VISIBLE"
+                                              }
+                                          },
+                                          "NegativeValueConfiguration": {
+                                              "DisplayMode": "NEGATIVE"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  ],
+                  "Colors": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{catDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "grouping"
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "CategorySort": [
+                  {
+                      "FieldSort": {
+                          "FieldId": "{{dateDimFieldId}}",
+                          "Direction": "ASC"
+                      }
+                  }
+              ],
+              "CategoryItemsLimitConfiguration": {
+                  "OtherCategories": "INCLUDE"
+              },
+              "ColorItemsLimitConfiguration": {
+                  "OtherCategories": "INCLUDE"
+              },
+              "SmallMultiplesLimitConfiguration": {
+                  "OtherCategories": "INCLUDE"
+              }
+          },
+          "Type": "LINE",
+          "DataLabels": {
+              "Visibility": "HIDDEN",
+              "Overlap": "DISABLE_OVERLAP"
+          },
+          "Tooltip": {
+              "TooltipVisibility": "VISIBLE",
+              "SelectedTooltipType": "DETAILED",
+              "FieldBasedTooltip": {
+                  "AggregationVisibility": "HIDDEN",
+                  "TooltipTitleType": "PRIMARY_VALUE",
+                  "TooltipFields": [
+                      {
+                          "FieldTooltipItem": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Visibility": "VISIBLE"
+                          }
+                      },
+                      {
+                          "FieldTooltipItem": {
+                              "FieldId": "{{numberMeasureFieldId}}",
+                              "Visibility": "VISIBLE"
+                          }
+                      },
+                      {
+                          "FieldTooltipItem": {
+                              "FieldId": "{{catDimFieldId}}",
+                              "Visibility": "VISIBLE"
+                          }
+                      }
+                  ]
+              }
+          }
+      },
+      "Actions": [],
+      "ColumnHierarchies": [
+          {
+              "DateTimeHierarchy": {
+                  "HierarchyId": "{{hierarchyId}}"
+              }
+          }
+      ]
+  }
+}

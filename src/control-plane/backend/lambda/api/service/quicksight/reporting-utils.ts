@@ -70,6 +70,11 @@ export interface VisualMapProps {
   readonly id: string;
 }
 
+export interface VisualMapProps {
+  readonly name: 'CHART' | 'TABLE' ;
+  readonly id: string;
+}
+
 export interface CreateDashboardResult {
   readonly dashboardId: string;
   readonly dashboardName: string;
@@ -80,6 +85,13 @@ export interface CreateDashboardResult {
   readonly analysisArn: string;
   readonly sheetId: string;
   readonly visualIds: VisualMapProps[];
+}
+
+export interface VisualRelatedDefParams {
+  readonly filterControl?: FilterControl;
+  readonly parameterDeclarations?: ParameterDeclaration[];
+  readonly filterGroup?: FilterGroup;
+  readonly columnConfigurations?: FilterGroup;
 }
 
 export interface VisualRelatedDefParams {
@@ -121,6 +133,17 @@ export type MustacheEventAnalysisType = {
   dateDimFieldId: string;
   catDimFieldId: string;
   catMeasureFieldId: string;
+  dateGranularity?: string;
+  hierarchyId?: string;
+}
+
+
+export type MustacheRetentionAnalysisType = {
+  visualId: string;
+  dataSetIdentifier: string;
+  dateDimFieldId: string;
+  catDimFieldId: string;
+  numberMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
 }
@@ -173,6 +196,25 @@ export const pathAnalysisVisualColumns: InputColumn[] = [
   },
   {
     Name: 'weight',
+    Type: 'DECIMAL',
+  },
+];
+
+export const retentionAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'grouping',
+    Type: 'STRING',
+  },
+  {
+    Name: 'start_event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'retention',
     Type: 'DECIMAL',
   },
 ];
@@ -363,9 +405,17 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       if (visual.eventCount) {
-        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 4;
+        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
         visualControl.ColumnSpan = visual.colSpan ?? 20;
       }
+
+      visualControl.RowSpan = visual.rowSpan ?? 12;
+      visualControl.ColumnSpan = visual.colSpan ?? 20;
+
+      if (visual.eventCount) {
+        visualControl.RowSpan = visual.eventCount * 3;
+      }
+
       visualControl.ElementId = findFirstChild(visual.visual).VisualId;
       elements.push(visualControl);
 
@@ -588,20 +638,6 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, g
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
-
-  const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
-  const mustachePathAnalysisType: MustachePathAnalysisType = {
-    visualId,
-    dataSetIdentifier: viewName,
-    sourceFieldId: uuidv4(),
-    targetFieldId: uuidv4(),
-    weightFieldId: uuidv4(),
-  };
-
-  return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
-}
-
 export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
@@ -615,6 +651,49 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+}
+
+export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
+  const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
+  const mustachePathAnalysisType: MustachePathAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    sourceFieldId: uuidv4(),
+    targetFieldId: uuidv4(),
+    weightFieldId: uuidv4(),
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
+}
+
+export function getRetentionLineChartVisualDef(visualId: string, viewName: string) : Visual {
+
+  const visualDef = readFileSync(join(__dirname, './templates/retention-line-chart.json'), 'utf8');
+  const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    catDimFieldId: uuidv4(),
+    dateDimFieldId: uuidv4(),
+    numberMeasureFieldId: uuidv4(),
+    hierarchyId: uuidv4(),
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+}
+
+export function getRetentionPivotTableVisualDef(visualId: string, viewName: string) : Visual {
+
+  const visualDef = readFileSync(join(__dirname, './templates/retention-pivot-table-chart.json'), 'utf8');
+  const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    catDimFieldId: uuidv4(),
+    dateDimFieldId: uuidv4(),
+    numberMeasureFieldId: uuidv4(),
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 
 }
 

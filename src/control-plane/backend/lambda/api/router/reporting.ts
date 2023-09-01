@@ -42,6 +42,14 @@ reporting_project.post(
     return reportingServ.createPathAnalysisVisual(req, res, next);
   });
 
+reporting_project.post(
+  '/retention',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+    logger.info('start to create quicksight path analysis report');
+    return reportingServ.createRetentionVisual(req, res, next);
+  });
+
 export {
   reporting_project,
 };
