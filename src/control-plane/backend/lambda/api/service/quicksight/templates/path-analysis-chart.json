@@ -1,6 +1,6 @@
 {
   "SankeyDiagramVisual": {
-      "VisualId": "",
+      "VisualId": "{{visualId}}",
       "Title": {
           "Visibility": "VISIBLE"
       },
@@ -13,9 +13,9 @@
                   "Source": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{sourceFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "source"
                               }
                           }
@@ -24,9 +24,9 @@
                   "Destination": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{targetFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "target"
                               }
                           }
@@ -35,9 +35,9 @@
                   "Weight": [
                       {
                           "NumericalMeasureField": {
-                              "FieldId": "",
+                              "FieldId": "{{weightFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "weight"
                               },
                               "AggregationFunction": {
@@ -52,7 +52,7 @@
               "WeightSort": [
                   {
                       "FieldSort": {
-                          "FieldId": "",
+                          "FieldId": "{{weightFieldId}}",
                           "Direction": "DESC"
                       }
                   }

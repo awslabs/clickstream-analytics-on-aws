@@ -20,10 +20,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
-import {
-  CategoryItemType,
-  IConditionItemType,
-} from './AnalyticsType';
+import { CategoryItemType, IConditionItemType } from './AnalyticsType';
 import EventItem from './EventItem';
 
 interface ConditionItemProps {
@@ -49,13 +46,22 @@ const ConditionItem: React.FC<ConditionItemProps> = (
   } = props;
 
   const ANALYTICS_OPERATORS = {
-    is_null: { value: ExploreAnalyticsOperators.NULL, label: t('analytics:operators.null') },
+    is_null: {
+      value: ExploreAnalyticsOperators.NULL,
+      label: t('analytics:operators.null'),
+    },
     is_not_null: {
       value: ExploreAnalyticsOperators.NOT_NULL,
       label: t('analytics:operators.notNull'),
     },
-    equal: { value: ExploreAnalyticsOperators.EQUAL, label: t('analytics:operators.equal') },
-    not_equal: { value: ExploreAnalyticsOperators.NOT_EQUAL, label: t('analytics:operators.notEqual') },
+    equal: {
+      value: ExploreAnalyticsOperators.EQUAL,
+      label: t('analytics:operators.equal'),
+    },
+    not_equal: {
+      value: ExploreAnalyticsOperators.NOT_EQUAL,
+      label: t('analytics:operators.notEqual'),
+    },
     greater_than: {
       value: ExploreAnalyticsOperators.GREATER_THAN,
       label: t('analytics:operators.greaterThan'),
@@ -64,13 +70,22 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       value: ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL,
       label: t('analytics:operators.greaterThanOrEqual'),
     },
-    less_than: { value: ExploreAnalyticsOperators.LESS_THAN, label: t('analytics:operators.lessThan') },
+    less_than: {
+      value: ExploreAnalyticsOperators.LESS_THAN,
+      label: t('analytics:operators.lessThan'),
+    },
     less_than_or_equal: {
       value: ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL,
       label: t('analytics:operators.lessThanOrEqual'),
     },
-    in: { value: ExploreAnalyticsOperators.IN, label: t('analytics:operators.in') },
-    not_in: { value: ExploreAnalyticsOperators.NOT_IN, label: t('analytics:operators.notIn') },
+    in: {
+      value: ExploreAnalyticsOperators.IN,
+      label: t('analytics:operators.in'),
+    },
+    not_in: {
+      value: ExploreAnalyticsOperators.NOT_IN,
+      label: t('analytics:operators.notIn'),
+    },
   };
 
   const CONDITION_STRING_OPERATORS: SelectProps.Options = [
@@ -127,7 +142,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             <Input
               disabled={!item.conditionOperator}
               placeholder={
-                t('analytics:funnel.conditionValueInputPlaceholder') ?? ''
+                t('analytics:labels.conditionValueInputPlaceholder') ?? ''
               }
               value={item.conditionValue}
               onChange={(e) => {

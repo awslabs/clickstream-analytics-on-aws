@@ -1,6 +1,6 @@
 {
   "LineChartVisual": {
-      "VisualId": "53352f7a-6e88-4e2f-91e5-d0f1f0cbcc8d",
+      "VisualId": "{{visualId}}",
       "Title": {
           "Visibility": "VISIBLE"
       },
@@ -13,22 +13,22 @@
                   "Category": [
                       {
                           "DateDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{dateDimFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "event_date"
                               },
                               "DateGranularity": "DAY",
-                              "HierarchyId": ""
+                              "HierarchyId": "{{hierarchyId}}"
                           }
                       }
                   ],
                   "Values": [
                       {
                           "NumericalMeasureField": {
-                              "FieldId": "",
+                              "FieldId": "{{numberMeasureFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "retention"
                               },
                               "AggregationFunction": {
@@ -57,9 +57,9 @@
                   "Colors": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "",
+                              "FieldId": "{{catDimFieldId}}",
                               "Column": {
-                                  "DataSetIdentifier": "",
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "grouping"
                               }
                           }
@@ -71,7 +71,7 @@
               "CategorySort": [
                   {
                       "FieldSort": {
-                          "FieldId": "",
+                          "FieldId": "{{dateDimFieldId}}",
                           "Direction": "ASC"
                       }
                   }
@@ -100,19 +100,19 @@
                   "TooltipFields": [
                       {
                           "FieldTooltipItem": {
-                              "FieldId": "",
+                              "FieldId": "{{dateDimFieldId}}",
                               "Visibility": "VISIBLE"
                           }
                       },
                       {
                           "FieldTooltipItem": {
-                              "FieldId": "",
+                              "FieldId": "{{numberMeasureFieldId}}",
                               "Visibility": "VISIBLE"
                           }
                       },
                       {
                           "FieldTooltipItem": {
-                              "FieldId": "",
+                              "FieldId": "{{catDimFieldId}}",
                               "Visibility": "VISIBLE"
                           }
                       }
@@ -124,7 +124,7 @@
       "ColumnHierarchies": [
           {
               "DateTimeHierarchy": {
-                  "HierarchyId": "a6a4b056-8472-4ca8-803f-8a7f440f336c.event_date.0.1692170663240"
+                  "HierarchyId": "{{hierarchyId}}"
               }
           }
       ]

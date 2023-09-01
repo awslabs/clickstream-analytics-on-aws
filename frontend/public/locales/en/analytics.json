@@ -31,13 +31,18 @@
   "options": {
     "eventNumber": "Event number",
     "userNumber": "User number",
+    "userPseudoNumber": "Pseudo User number",
     "customWindow": "Custom",
     "theDayWindow": "The Day",
     "noWindow": "Off",
     "secondWindowUnit": "Second(s)",
     "minuteWindowUnit": "Minute(s)",
     "hourWindowUnit": "Hour(s)",
-    "dayWindowUnit": "Day(s)"
+    "dayWindowUnit": "Day(s)",
+    "hourTimeGranularity": "Hourly",
+    "dayTimeGranularity": "Daily",
+    "weekTimeGranularity": "Weekly",
+    "monthTimeGranularity": "Monthly"
   },
   "metadata": {
     "event": {
@@ -121,20 +126,6 @@
       }
     }
   },
-  "funnel": {
-    "labels": {
-      "reset": "Reset",
-      "save": "Save to Dashboard",
-      "metrics": "Metrics",
-      "associateParameter": "Associate parameter",
-      "window": "Funnel window",
-      "funnelDateRange": "Date range",
-      "funnelSteps": "Funnel steps",
-      "conversionWindowPeriod": "Conversion window period",
-      "filters": "Filters"
-    },
-    "conditionValueInputPlaceholder": "Input value"
-  },
   "dateRange": {
     "relativeModeTitle": "Relative",
     "absoluteModeTitle": "Absolute",
@@ -187,7 +178,16 @@
     "previewName": "Name",
     "previewDescription": "Description",
     "previewDataType": "Data type",
-    "previewUpdateTime": "Update time"
+    "previewUpdateTime": "Update time",
+    "metrics": "Metrics",
+    "associateParameter": "Associate parameter",
+    "window": "Funnel window",
+    "dateRange": "Date range",
+    "funnelSteps": "Funnel steps",
+    "conversionWindowPeriod": "Conversion window period",
+    "filters": "Filters",
+    "conditionValueInputPlaceholder": "Input value",
+    "eventsSelect": "Select events"
   },
   "emptyData": "No Data"
 }

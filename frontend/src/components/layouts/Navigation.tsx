@@ -60,11 +60,11 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     },
   ];
   const navAnalyticsItems: SideNavigationProps.Item[] = [
-    {
-      type: 'link',
-      text: t('nav.analytics.realtime'),
-      href: `/analytics/${projectId}/app/${appId}/realtime`,
-    },
+    // {
+    //   type: 'link',
+    //   text: t('nav.analytics.realtime'),
+    //   href: `/analytics/${projectId}/app/${appId}/realtime`,
+    // },
     {
       type: 'link',
       text: t('nav.analytics.dashboards'),
@@ -80,11 +80,11 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
           text: t('nav.analytics.exploreEvent'),
           href: `/analytics/${projectId}/app/${appId}/event`,
         },
-        {
-          type: 'link',
-          text: t('nav.analytics.exploreRetention'),
-          href: `/analytics/${projectId}/app/${appId}/retention`,
-        },
+        // {
+        //   type: 'link',
+        //   text: t('nav.analytics.exploreRetention'),
+        //   href: `/analytics/${projectId}/app/${appId}/retention`,
+        // },
         {
           type: 'link',
           text: t('nav.analytics.exploreFunnel'),
