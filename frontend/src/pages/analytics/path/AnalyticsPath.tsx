@@ -20,17 +20,21 @@ import {
   ContentLayout,
   DateRangePickerProps,
   Header,
+  Input,
   Select,
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
+  fetchEmbeddingUrl,
   getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewEvent,
+  previewPath,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
@@ -54,8 +58,11 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
+  ExplorePathNodeType,
+  ExplorePathSessionDef,
   MetadataSource,
   MetadataValueType,
+  MetadataPlatform,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -68,18 +75,16 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
-import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
-const AnalyticsEvent: React.FC = () => {
+const AnalyticsPath: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
-  const [tableEmbedUrl, setTableEmbedUrl] = useState('');
+  const [emptyData, setEmptyData] = useState(true);
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
@@ -104,6 +109,89 @@ const AnalyticsEvent: React.FC = () => {
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
+  const defaultSessionDefinitionOption: SelectProps.Option = {
+    value: ExplorePathSessionDef.SESSION,
+    label: t('analytics:options.sessionId') ?? '',
+  };
+  const customSessionDefinitionOption: SelectProps.Option = {
+    value: ExplorePathSessionDef.CUSTOMIZE,
+    label: t('analytics:options.sessionCustom') ?? '',
+  };
+
+  const sessionDefinitionOptions: SelectProps.Options = [
+    defaultSessionDefinitionOption,
+    customSessionDefinitionOption,
+  ];
+  const [selectedSessionDefinition, setSelectedSessionDefinition] =
+    useState<SelectProps.Option | null>(defaultSessionDefinitionOption);
+
+  const minuteWindowUnitOption = {
+    value: 'minute',
+    label: t('analytics:options.minuteWindowUnit'),
+  };
+
+  const windowUnitOptions = [
+    { value: 'second', label: t('analytics:options.secondWindowUnit') },
+    minuteWindowUnitOption,
+    { value: 'hour', label: t('analytics:options.hourWindowUnit') },
+    { value: 'day', label: t('analytics:options.dayWindowUnit') },
+  ];
+
+  const [windowValue, setWindowValue] = useState<string>('5');
+
+  const [selectedWindowUnit, setSelectedWindowUnit] =
+    useState<SelectProps.Option | null>(minuteWindowUnitOption);
+
+  const defaultNodeTypeOption: SelectProps.Option = {
+    value: ExplorePathNodeType.EVENT,
+    label: t('analytics:options.pathNodeEventName') ?? '',
+  };
+
+  const nodeTypeOptions: SelectProps.Options = [
+    defaultNodeTypeOption,
+    {
+      value: ExplorePathNodeType.SCREEN_NAME,
+      label: t('analytics:options.pathNodeScreenName') ?? '',
+    },
+    {
+      value: ExplorePathNodeType.SCREEN_ID,
+      label: t('analytics:options.pathNodeScreenID') ?? '',
+    },
+    {
+      value: ExplorePathNodeType.PAGE_TITLE,
+      label: t('analytics:options.pathNodePageTitle') ?? '',
+    },
+    {
+      value: ExplorePathNodeType.PAGE_URL,
+      label: t('analytics:options.pathNodePageUrl') ?? '',
+    },
+  ];
+  const [selectedNodeType, setSelectedNodeType] =
+    useState<SelectProps.Option | null>(defaultNodeTypeOption);
+
+  const defaultPlatformOption: SelectProps.Option = {
+    value: MetadataPlatform.WEB,
+    label: t('analytics:options.platformWeb') ?? '',
+  };
+
+  const platformOptions: SelectProps.Options = [
+    defaultPlatformOption,
+    {
+      value: MetadataPlatform.ANDROID,
+      label: t('analytics:options.platformAndroid') ?? '',
+    },
+    {
+      value: MetadataPlatform.IOS,
+      label: t('analytics:options.platformIOS') ?? '',
+    },
+    {
+      value: MetadataPlatform.WECHAT_MINIPROGRAM,
+      label: t('analytics:options.platformWechatMinPro') ?? '',
+    },
+  ];
+  const [selectedPlatform, setSelectedPlatform] =
+    useState<SelectProps.Option | null>(defaultPlatformOption);
+
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
     [
       {
@@ -115,6 +203,35 @@ const AnalyticsEvent: React.FC = () => {
 
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const getEmbeddingUrl = async (
+    dashboardId: string,
+    sheetId: string | undefined,
+    visualId: string | undefined,
+    containerId: string
+  ) => {
+    try {
+      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
+        pipeline.region,
+        window.location.origin,
+        dashboardId,
+        sheetId,
+        visualId
+      );
+      if (success) {
+        const embedDashboard = async () => {
+          const embeddingContext = await createEmbeddingContext();
+          await embeddingContext.embedVisual({
+            url: data.EmbedUrl,
+            container: containerId,
+          });
+        };
+        embedDashboard();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getUserAttributes = async () => {
     try {
@@ -269,12 +386,19 @@ const AnalyticsEvent: React.FC = () => {
       amount: 7,
       unit: 'day',
     });
-    setChartEmbedUrl('');
-    setTableEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
+    setSelectedNodeType({
+      value: ExplorePathNodeType.EVENT,
+      label: t('analytics:options.pathNodeEventName') ?? '',
+    });
+    setSelectedSessionDefinition({
+      value: ExplorePathSessionDef.SESSION,
+      label: t('analytics:options.sessionId') ?? '',
+    });
+
     await listMetadataEvents();
     await listAllAttributes();
     setLoadingData(false);
@@ -293,7 +417,7 @@ const AnalyticsEvent: React.FC = () => {
       return;
     }
     try {
-      const body = getEventRequest(
+      const body = getPathRequest(
         ExploreRequestAction.PUBLISH,
         dashboardId,
         dashboardName,
@@ -318,7 +442,7 @@ const AnalyticsEvent: React.FC = () => {
     setLoadingData(false);
   };
 
-  const getEventRequest = (
+  const getPathRequest = (
     action: ExploreRequestAction,
     dashboardId?: string,
     dashboardName?: string,
@@ -326,10 +450,7 @@ const AnalyticsEvent: React.FC = () => {
     sheetName?: string
   ) => {
     const eventId = generateStr(6);
-    const parameters = getDashboardCreateParameters(
-      pipeline,
-      window.location.origin
-    );
+    const parameters = getDashboardCreateParameters(pipeline);
     if (!parameters) {
       return;
     }
@@ -348,8 +469,8 @@ const AnalyticsEvent: React.FC = () => {
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',
-      sheetName: `event_sheet_${eventId}`,
-      viewName: `event_view_${eventId}`,
+      sheetName: `path_sheet_${eventId}`,
+      viewName: `path_view_${eventId}`,
       dashboardCreateParameters: parameters,
       specifyJoinColumn: false,
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -376,7 +497,7 @@ const AnalyticsEvent: React.FC = () => {
       return;
     }
     try {
-      const body = getEventRequest(ExploreRequestAction.PREVIEW);
+      const body = getPathRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
         alertMsg(
           t('analytics:valid.funnelPipelineVersionError'),
@@ -385,19 +506,28 @@ const AnalyticsEvent: React.FC = () => {
         return;
       }
       setLoadingData(true);
+      setEmptyData(false);
       setLoadingChart(true);
-      const { success, data }: ApiResponse<any> = await previewEvent(body);
-      setLoadingData(false);
-      setLoadingChart(false);
+      const { success, data }: ApiResponse<any> = await previewPath(body);
       if (success) {
-        if (data.visualIds.length === 2 && data.visualIds[0].embedUrl && data.visualIds[1].embedUrl) {
-          setChartEmbedUrl(data.visualIds[0].embedUrl);
-          setTableEmbedUrl(data.visualIds[1].embedUrl);
-        }
+        getEmbeddingUrl(
+          data.dashboardId,
+          data.sheetId,
+          data.visualIds[0].id,
+          '#qs-path-container'
+        );
+        getEmbeddingUrl(
+          data.dashboardId,
+          data.sheetId,
+          data.visualIds[1].id,
+          '#qs-path-table-container'
+        );
       }
     } catch (error) {
       console.log(error);
     }
+    setLoadingData(false);
+    setLoadingChart(false);
   };
 
   return (
@@ -408,7 +538,7 @@ const AnalyticsEvent: React.FC = () => {
           <ContentLayout
             header={
               <SpaceBetween size="m">
-                <Header variant="h1">{t('nav.analytics.exploreEvent')}</Header>
+                <Header variant="h1">{t('nav.analytics.explorePath')}</Header>
               </SpaceBetween>
             }
           >
@@ -457,6 +587,78 @@ const AnalyticsEvent: React.FC = () => {
                       />
                     </div>
                   </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <Box variant="awsui-key-label">
+                      {t('analytics:labels.sessionDefinition')}
+                    </Box>
+                    <div className="cs-analytics-window">
+                      <div className="cs-analytics-window-type">
+                        <Select
+                          selectedOption={selectedSessionDefinition}
+                          options={sessionDefinitionOptions}
+                          onChange={(event) => {
+                            setSelectedSessionDefinition(
+                              event.detail.selectedOption
+                            );
+                          }}
+                        />
+                      </div>
+                      {selectedSessionDefinition?.value ===
+                      customSessionDefinitionOption?.value ? (
+                        <>
+                          <div className="cs-analytics-window-value">
+                            <Input
+                              type="number"
+                              placeholder="5"
+                              value={windowValue}
+                              onChange={(event) => {
+                                setWindowValue(event.detail.value);
+                              }}
+                            />
+                          </div>
+                          <div className="cs-analytics-window-unit">
+                            <Select
+                              selectedOption={selectedWindowUnit}
+                              options={windowUnitOptions}
+                              onChange={(event) => {
+                                setSelectedWindowUnit(
+                                  event.detail.selectedOption
+                                );
+                              }}
+                            />
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <Box variant="awsui-key-label">
+                      {t('analytics:labels.nodeType')}
+                    </Box>
+                    <div className="cs-analytics-window">
+                      <div className="cs-analytics-window-type">
+                        <Select
+                          selectedOption={selectedNodeType}
+                          options={nodeTypeOptions}
+                          onChange={(event) => {
+                            setSelectedNodeType(event.detail.selectedOption);
+                          }}
+                        />
+                      </div>
+                      {selectedNodeType?.value !==
+                      defaultNodeTypeOption?.value ? (
+                        <div className="cs-analytics-window-unit">
+                          <Select
+                            selectedOption={selectedPlatform}
+                            options={platformOptions}
+                            onChange={(event) => {
+                              setSelectedPlatform(event.detail.selectedOption);
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  </SpaceBetween>
                 </div>
                 <br />
                 <SpaceBetween direction="vertical" size="xs">
@@ -474,7 +676,7 @@ const AnalyticsEvent: React.FC = () => {
                 <ColumnLayout columns={2} variant="text-grid">
                   <SpaceBetween direction="vertical" size="xs">
                     <Box variant="awsui-key-label">
-                      {t('analytics:labels.eventsSelect')}
+                      {t('analytics:labels.nodesSelect')}
                     </Box>
                     <div>
                       <EventsSelect
@@ -689,22 +891,41 @@ const AnalyticsEvent: React.FC = () => {
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={chartEmbedUrl}
-                    embedId={`chart_${generateStr(6)}`}
-                  />
+                  <div id={'qs-path-container'} className="iframe-explore">
+                    {emptyData ? (
+                      <Box
+                        margin={{ vertical: 'xs' }}
+                        textAlign="center"
+                        color="inherit"
+                      >
+                        <SpaceBetween size="m">
+                          <b>{t('analytics:emptyData')}</b>
+                        </SpaceBetween>
+                      </Box>
+                    ) : null}
+                  </div>
                 )}
               </Container>
               <Container>
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={tableEmbedUrl}
-                    embedId={`table_${generateStr(6)}`}
-                  />
+                  <div
+                    id={'qs-path-table-container'}
+                    className="iframe-explore"
+                  >
+                    {emptyData ? (
+                      <Box
+                        margin={{ vertical: 'xs' }}
+                        textAlign="center"
+                        color="inherit"
+                      >
+                        <SpaceBetween size="m">
+                          <b>{t('analytics:emptyData')}</b>
+                        </SpaceBetween>
+                      </Box>
+                    ) : null}
+                  </div>
                 )}
               </Container>
             </SpaceBetween>
@@ -720,10 +941,10 @@ const AnalyticsEvent: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/event`} />
+        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/path`} />
       }
     />
   );
 };
 
-export default AnalyticsEvent;
+export default AnalyticsPath;

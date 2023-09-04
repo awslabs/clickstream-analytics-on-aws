@@ -21,7 +21,7 @@ export enum MetadataPlatform {
   ANDROID = 'Android',
   IOS = 'iOS',
   WEB = 'Web',
-  WECHAT_MINIPROGRAM = 'Wechat MiniProgram',
+  WECHAT_MINIPROGRAM = 'WechatMP',
 }
 
 export enum MetadataValueType {
@@ -40,6 +40,19 @@ export enum ExploreComputeMethod {
   USER_CNT = 'USER_CNT', // user_pseudo_id
   USER_ID_CNT = 'USER_ID_CNT', // user_id
   EVENT_CNT = 'EVENT_CNT',
+}
+
+export enum ExplorePathSessionDef {
+  SESSION = 'SESSION',
+  CUSTOMIZE = 'CUSTOMIZE',
+}
+
+export enum ExplorePathNodeType {
+  EVENT = 'event',
+  PAGE_TITLE = '_page_title',
+  PAGE_URL = '_page_url',
+  SCREEN_NAME = '_screen_name',
+  SCREEN_ID = '_screen_id',
 }
 
 export enum ExploreConversionIntervalType {
@@ -67,7 +80,7 @@ export enum ExploreGroupColumn {
   MONTH = 'MONTH',
 }
 
-export enum ExploreFunnelRequestAction {
+export enum ExploreRequestAction {
   PREVIEW = 'PREVIEW',
   PUBLISH = 'PUBLISH',
 }
@@ -83,4 +96,6 @@ export enum ExploreAnalyticsOperators {
   LESS_THAN_OR_EQUAL = '<=',
   IN = 'in',
   NOT_IN = 'not_in',
+  CONTAINS = 'contains',
+  NOT_CONTAINS = 'not_contains',
 }

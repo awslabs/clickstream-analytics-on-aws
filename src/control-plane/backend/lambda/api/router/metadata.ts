@@ -95,7 +95,7 @@ router_metadata.post(
     return metadataEventParameterServ.add(req, res, next);
   });
 
-router_metadata.get('/event_parameter/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/event_parameter/:parameterName', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventParameterServ.details(req, res, next);
 });
 
@@ -138,7 +138,7 @@ router_metadata.post(
     return metadataUserAttributeServ.add(req, res, next);
   });
 
-router_metadata.get('/user_attribute/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/user_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataUserAttributeServ.details(req, res, next);
 });
 

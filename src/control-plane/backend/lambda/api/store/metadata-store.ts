@@ -22,16 +22,16 @@ export interface MetadataStore {
   isEventExisted: (projectId: string, appId: string, eventName: string) => Promise<boolean>;
 
   createEventParameter: (eventParameter: IMetadataEventParameter) => Promise<string>;
-  getEventParameter: (projectId: string, appId: string, eventParameterId: string) => Promise<any>;
+  getEventParameter: (projectId: string, appId: string, parameterName: string) => Promise<any>;
   updateEventParameter: (eventParameter: IMetadataEventParameter) => Promise<void>;
   listEventParameters: (projectId: string, appId: string, order: string, source?: string) => Promise<IMetadataEventParameter[]>;
-  deleteEventParameter: (projectId: string, appId: string, eventParameterId: string, operator: string) => Promise<void>;
-  isEventParameterExisted: (projectId: string, appId: string, eventParameterId: string) => Promise<boolean>;
+  deleteEventParameter: (projectId: string, appId: string, eventParameterName: string, operator: string) => Promise<void>;
+  isEventParameterExisted: (projectId: string, appId: string, eventParameterName: string) => Promise<boolean>;
 
   createUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<string>;
-  getUserAttribute: (projectId: string, appId: string, userAttributeId: string) => Promise<IMetadataUserAttribute | undefined>;
+  getUserAttribute: (projectId: string, appId: string, userAttributeName: string) => Promise<IMetadataUserAttribute | undefined>;
   updateUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<void>;
   listUserAttributes: (projectId: string, appId: string, order: string) => Promise<IMetadataUserAttribute[]>;
-  deleteUserAttribute: (projectId: string, appId: string, userAttributeId: string, operator: string) => Promise<void>;
-  isUserAttributeExisted: (projectId: string, appId: string, userAttributeId: string) => Promise<boolean>;
+  deleteUserAttribute: (projectId: string, appId: string, userAttributeName: string, operator: string) => Promise<void>;
+  isUserAttributeExisted: (projectId: string, appId: string, userAttributeName: string) => Promise<boolean>;
 }

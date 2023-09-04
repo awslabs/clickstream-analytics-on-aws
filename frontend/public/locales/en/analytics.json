@@ -42,7 +42,18 @@
     "hourTimeGranularity": "Hourly",
     "dayTimeGranularity": "Daily",
     "weekTimeGranularity": "Weekly",
-    "monthTimeGranularity": "Monthly"
+    "monthTimeGranularity": "Monthly",
+    "sessionId": "Session ID",
+    "sessionCustom": "Custom",
+    "pathNodeEventName": "Event name",
+    "pathNodeScreenName": "Screen name",
+    "pathNodeScreenID": "Screen ID",
+    "pathNodePageTitle": "Page title",
+    "pathNodePageUrl": "Page url",
+    "platformWeb": "Web",
+    "platformAndroid": "Android",
+    "platformIOS": "iOS",
+    "platformWechatMinPro": "Wechat MiniProgram"
   },
   "metadata": {
     "event": {
@@ -178,7 +189,10 @@
     "conversionWindowPeriod": "Conversion window period",
     "filters": "Filters",
     "conditionValueInputPlaceholder": "Input value",
-    "eventsSelect": "Select events"
+    "eventsSelect": "Select events",
+    "sessionDefinition": "Session definition",
+    "nodeType": "Node type",
+    "nodesSelect": "Select nodes"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

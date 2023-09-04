@@ -100,11 +100,11 @@ export const getMetadataParametersList = async (params: {
 export const getMetadataParametersDetails = async (params: {
   projectId: string;
   appId: string;
-  parameterId: string;
+  parameterName: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameter/${params.parameterId}?projectId=${params.projectId}&appId=${params.appId}`
+    `/metadata/event_parameter/${params.parameterName}?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
@@ -163,13 +163,18 @@ export const fetchEmbeddingUrl = async (
   return result;
 };
 
-export const previewFunnel = async (data: IFunnelRequest) => {
+export const previewFunnel = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/funnel`, data);
   return result;
 };
 
-export const previewEvent = async (data: IFunnelRequest) => {
+export const previewEvent = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/event`, data);
+  return result;
+};
+
+export const previewPath = async (data: IExploreRequest) => {
+  const result: any = await apiRequest('post', `/reporting/path`, data);
   return result;
 };
 

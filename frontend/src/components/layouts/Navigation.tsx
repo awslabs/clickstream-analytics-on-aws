@@ -104,6 +104,11 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
           text: t('nav.analytics.exploreFunnel'),
           href: `/analytics/${projectId}/app/${appId}/funnel`,
         },
+        {
+          type: 'link',
+          text: t('nav.analytics.explorePath'),
+          href: `/analytics/${projectId}/app/${appId}/path`,
+        },
       ],
     },
     {

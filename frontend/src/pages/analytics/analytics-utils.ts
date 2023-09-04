@@ -81,7 +81,6 @@ export const metadataEventsConvertToCategoryItemType = (
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems?: IMetadataEventParameter[],
-  relationItems?: IMetadataRelation[]
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryEventItems: CategoryItemType = {
@@ -102,17 +101,6 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    });
-  } else if (relationItems) {
-    relationItems.forEach((item) => {
-      categoryEventItems.itemList.push({
-        label: item.parameterDisplayName,
-        value: item.parameterName,
-        description: item.parameterDescription,
-        metadataSource: item.parameterMetadataSource,
-        valueType: item.parameterValueType,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     });

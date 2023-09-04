@@ -68,7 +68,7 @@ const MetadataParameterSplitPanel: React.FC<
           {t('analytics:metadata.event.tableColumnName')}
         </Box>
       ),
-      cell: (item: { eventName: any }) => item.eventName || '-',
+      cell: (item: { name: string }) => item.name || '-',
       sortingField: 'eventName',
       isRowHeader: true,
     },
@@ -79,7 +79,7 @@ const MetadataParameterSplitPanel: React.FC<
           {t('analytics:metadata.event.tableColumnDisplayName')}
         </Box>
       ),
-      cell: (item: { eventDisplayName: any }) => item.eventDisplayName || '-',
+      cell: (item: { displayName: string }) => item.displayName || '-',
     },
     {
       id: 'eventDescription',
@@ -88,7 +88,7 @@ const MetadataParameterSplitPanel: React.FC<
           {t('analytics:metadata.event.tableColumnDescription')}
         </Box>
       ),
-      cell: (item: { eventDescription: any }) => item.eventDescription || '-',
+      cell: (item: { description: string }) => item.description || '-',
     },
   ];
 
@@ -143,7 +143,7 @@ const MetadataParameterSplitPanel: React.FC<
         await getMetadataParametersDetails({
           projectId: projectId ?? '',
           appId: appId ?? '',
-          parameterId: parameter.parameterId,
+          parameterName: parameter.name,
         });
       if (success) {
         setParameterDetails(data);

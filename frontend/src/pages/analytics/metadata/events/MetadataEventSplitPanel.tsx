@@ -65,7 +65,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
           {t('analytics:metadata.event.split.parameterName')}
         </Box>
       ),
-      cell: (item: { parameterName: any }) => item.parameterName || '-',
+      cell: (item: { name: string }) => item.name || '-',
       isRowHeader: true,
     },
     {
@@ -75,8 +75,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
           {t('analytics:metadata.event.split.displayName')}
         </Box>
       ),
-      cell: (item: { parameterDisplayName: any }) =>
-        item.parameterDisplayName || '-',
+      cell: (item: { displayName: string }) => item.displayName || '-',
     },
     {
       id: 'parameterDescription',
@@ -85,8 +84,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
           {t('analytics:metadata.event.split.description')}
         </Box>
       ),
-      cell: (item: { parameterDescription: any }) =>
-        item.parameterDescription || '-',
+      cell: (item: { description: string }) => item.description || '-',
     },
     {
       id: 'parameterValueType',
@@ -95,8 +93,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
           {t('analytics:metadata.event.split.dataType')}
         </Box>
       ),
-      cell: (item: { parameterValueType: any }) =>
-        item.parameterValueType || '-',
+      cell: (item: { valueType: string }) => item.valueType || '-',
     },
   ];
 
@@ -348,9 +345,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     data={
                       eventDetails.associatedParameters
                         ? eventDetails.associatedParameters?.filter(
-                            (p) =>
-                              p.parameterMetadataSource ===
-                              MetadataSource.PRESET
+                            (p) => p.metadataSource === MetadataSource.PRESET
                           )
                         : []
                     }
@@ -380,9 +375,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     data={
                       eventDetails.associatedParameters
                         ? eventDetails.associatedParameters?.filter(
-                            (p) =>
-                              p.parameterMetadataSource ===
-                              MetadataSource.CUSTOM
+                            (p) => p.metadataSource === MetadataSource.CUSTOM
                           )
                         : []
                     }

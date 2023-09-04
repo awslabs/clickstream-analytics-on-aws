@@ -28,7 +28,7 @@ declare global {
     readonly hasData: boolean;
     readonly platform: MetadataPlatform[];
     readonly dataVolumeLastDay: number;
-    readonly associatedParameters?: IMetadataRelation[];
+    readonly associatedParameters?: IMetadataEventParameter[];
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -42,6 +42,10 @@ declare global {
     readonly projectId: string;
     readonly appId: string;
 
+    readonly eventName: string;
+    readonly eventDisplayName: string;
+    readonly eventDescription: string;
+
     readonly parameterId: string;
     readonly name: string;
     readonly displayName: string;
@@ -52,7 +56,7 @@ declare global {
     readonly parameterType: MetadataParameterType;
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
-    readonly associatedEvents?: IMetadataRelation[];
+    readonly associatedEvents?: IMetadataEvent[];
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -84,33 +88,8 @@ declare global {
     readonly displayValue: string;
   }
 
-  interface IMetadataRelation {
-    readonly id: string;
-    readonly type: string;
-    readonly prefix: string;
-
-    readonly projectId: string;
-    readonly appId: string;
-
-    readonly eventName: string;
-    readonly eventDisplayName: string;
-    readonly eventDescription: string;
-
-    readonly parameterId: string;
-    readonly parameterName: string;
-    readonly parameterDisplayName: string;
-    readonly parameterDescription: string;
-    readonly parameterValueType: MetadataValueType;
-    readonly parameterMetadataSource: MetadataSource;
-
-    readonly createAt: number;
-    readonly updateAt: number;
-    readonly operator: string;
-    readonly deleted: boolean;
-  }
-
-  interface IFunnelRequest {
-    readonly action: FunnelRequestAction;
+  interface IExploreRequest {
+    readonly action: ExploreRequestAction;
     readonly projectId: string;
     readonly appId: string;
     readonly pipelineId: string;

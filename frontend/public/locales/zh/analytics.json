@@ -42,7 +42,18 @@
     "hourTimeGranularity": "小时级",
     "dayTimeGranularity": "天级",
     "weekTimeGranularity": "周级",
-    "monthTimeGranularity": "月级"
+    "monthTimeGranularity": "月级",
+    "sessionId": "会话ID",
+    "sessionCustom": "自定义",
+    "pathNodeEventName": "事件名称",
+    "pathNodeScreenName": "Screen name",
+    "pathNodeScreenID": "Screen ID",
+    "pathNodePageTitle": "页面标题",
+    "pathNodePageUrl": "页面路径",
+    "platformWeb": "Web",
+    "platformAndroid": "Android",
+    "platformIOS": "iOS",
+    "platformWechatMinPro": "微信小程序"
   },
   "metadata": {
     "event": {
@@ -117,10 +128,6 @@
       }
     }
   },
-  "button": {
-    "reset": "重置",
-    "save": "保存到看板"
-  },
   "dateRange": {
     "relativeModeTitle": "相对时间",
     "absoluteModeTitle": "绝对时间",
@@ -182,7 +189,9 @@
     "conversionWindowPeriod": "转化窗口期",
     "filters": "过滤器",
     "conditionValueInputPlaceholder": "输入值",
-    "eventsSelect": "选择事件"
+    "eventsSelect": "选择事件",
+    "sessionDefinition": "会话定义",
+    "nodesSelect": "选择节点"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请先配置分析指标"
