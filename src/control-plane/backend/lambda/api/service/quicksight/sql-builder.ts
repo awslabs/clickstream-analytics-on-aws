@@ -1333,11 +1333,11 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `${prefix}${condition.property} ${condition.operator} '${condition.value[0]}'`;
     case ExploreAnalyticsOperators.IN:
-      const values = '\'' + condition.value.join(',\'') + '\'';
-      return `${prefix}${condition.property} in ('${values}')`;
+      const values = '\'' + condition.value.join('\',\'') + '\'';
+      return `${prefix}${condition.property} in (${values})`;
     case ExploreAnalyticsOperators.NOT_IN:
-      const notValues = '\'' + condition.value.join(',\'') + '\'';
-      return `${prefix}${condition.property} not in ('${notValues}')`;
+      const notValues = '\'' + condition.value.join('\',\'') + '\'';
+      return `${prefix}${condition.property} not in (${notValues})`;
     case ExploreAnalyticsOperators.CONTAINS:
       return `${prefix}${condition.property} like '%${condition.value[0]}%'`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
