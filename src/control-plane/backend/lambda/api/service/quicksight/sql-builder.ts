@@ -13,12 +13,13 @@
 
 import { format } from 'sql-formatter';
 import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { logger } from '../../common/powertools';
 
 export interface Condition {
   readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
   readonly property: string;
   readonly operator: string;
-  readonly value: string;
+  readonly value: any[];
   readonly dataType: MetadataValueType;
 }
 
@@ -69,6 +70,21 @@ export interface SQLParameters {
   readonly maxStep?: number;
   readonly pathAnalysis?: PathAnalysisParameter;
   readonly pairEventAndConditions?: PairEventAndCondition[];
+}
+
+export enum ExploreAnalyticsOperators {
+  NULL = 'is_null',
+  NOT_NULL = 'is_not_null',
+  EQUAL = '=',
+  NOT_EQUAL = '<>',
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUAL = '>=',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUAL = '<=',
+  IN = 'in',
+  NOT_IN = 'not_in',
+  CONTAINS = 'contains',
+  NOT_CONTAINS = 'not_contains',
 }
 
 const baseColumns = `
@@ -405,17 +421,14 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
         if (condition.category === 'user' || condition.category === 'event') {
           continue;
         }
-        let value = condition.value;
-        if (condition.dataType === MetadataValueType.STRING) {
-          value = `'${value}'`;
-        }
 
         let category: string = `${condition.category}_`;
         if (condition.category === 'other') {
           category = '';
         }
+        const conditialSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${eventCondition.sqlCondition.conditionOperator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
+          ${eventCondition.sqlCondition.conditionOperator ?? 'and'}  ${conditialSql}
         `);
       }
     }
@@ -664,17 +677,14 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
         if (condition.category === 'user' || condition.category === 'event') {
           continue;
         }
-        let value = condition.value;
-        if (condition.dataType === MetadataValueType.STRING) {
-          value = `'${value}'`;
-        }
 
         let category: string = `${condition.category}_`;
         if (condition.category === 'other') {
           category = '';
         }
+        const conditialSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')} ${category}${condition.property} ${condition.operator} ${value}
+          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditialSql}
         `);
       }
     }
@@ -1055,17 +1065,13 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
         if (condition.category === 'user' || condition.category === 'event') {
           continue;
         }
-        let value = condition.value;
-        if (condition.dataType === MetadataValueType.STRING) {
-          value = `'${value}'`;
-        }
-
         let category: string = `${condition.category}_`;
         if (condition.category === 'other') {
           category = '';
         }
+        const conditialSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')} ${category}${condition.property} ${condition.operator} ${value}
+          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditialSql}
         `);
       }
     }
@@ -1209,17 +1215,14 @@ function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
         continue;
       }
 
-      let value = condition.value;
-      if (condition.dataType === MetadataValueType.STRING) {
-        value = `'${value}'`;
-      }
-
       let category: string = `${condition.category}_`;
       if (condition.category === 'other') {
         category = '';
       }
+
+      const conditialSql = buildSqlFromCondition(condition, category);
       sql = sql.concat(`
-        ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${category}${condition.property} ${condition.operator} ${value}
+        ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${conditialSql}
       `);
     }
   }
@@ -1235,18 +1238,14 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
       if (condition.category !== 'user' && condition.category !== 'event' ) {
         continue;
       }
-
-      let value = condition.value;
-      if (condition.dataType === MetadataValueType.STRING) {
-        value = `'${value}'`;
-      }
-      let prefix = 'event';
+      let prefix = 'event_';
       if (condition.category === 'user') {
-        prefix= 'user';
+        prefix= 'user_';
       }
 
+      const conditialSql = buildSqlFromCondition(condition, prefix);
       conditionSql = conditionSql.concat(`
-      ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${prefix}_${condition.property} ${condition.operator} ${value}
+      ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${conditialSql}
       `);
 
       let valueType = '';
@@ -1273,7 +1272,7 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
               up.key = '${condition.property}'
               and e.event_id = base.event_id
             limit 1
-          ) as ${prefix}_${condition.property},
+          ) as ${prefix}${condition.property},
           `;
 
         } else if (condition.category == 'event') {
@@ -1287,7 +1286,7 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
               ep.key = '${condition.property}'
               and e.event_id = base.event_id
             limit 1
-          ) as ${prefix}_${condition.property},
+          ) as ${prefix}${condition.property},
           `;
         }
       }
@@ -1307,4 +1306,73 @@ function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : n
     lastNDayNumber = lastN * 31 * 3;
   }
   return lastNDayNumber;
+}
+
+function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : string | void {
+
+  const prefix = propertyPrefix ?? '';
+  switch (condition.dataType) {
+    case MetadataValueType.STRING:
+      return _buildSqlFromStringCondition(condition, prefix);
+    case MetadataValueType.DOUBLE:
+    case MetadataValueType.INTEGER:
+      return _buildSqlFromNumberCondition(condition, prefix);
+    default:
+      logger.error(`unsupported condition ${JSON.stringify(condition)}`);
+      throw new Error('Unsupported condition');
+  }
+}
+
+function _buildSqlFromStringCondition(condition: Condition, prefix: string) : string | void {
+  switch (condition.operator) {
+    case ExploreAnalyticsOperators.EQUAL:
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+    case ExploreAnalyticsOperators.GREATER_THAN:
+    case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
+    case ExploreAnalyticsOperators.LESS_THAN:
+    case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
+      return `${prefix}${condition.property} ${condition.operator} '${condition.value[0]}'`;
+    case ExploreAnalyticsOperators.IN:
+      const values = '\'' + condition.value.join(',\'') + '\'';
+      return `${prefix}${condition.property} in ('${values}')`;
+    case ExploreAnalyticsOperators.NOT_IN:
+      const notValues = '\'' + condition.value.join(',\'') + '\'';
+      return `${prefix}${condition.property} not in ('${notValues}')`;
+    case ExploreAnalyticsOperators.CONTAINS:
+      return `${prefix}${condition.property} like '%${condition.value[0]}%'`;
+    case ExploreAnalyticsOperators.NOT_CONTAINS:
+      return `${prefix}${condition.property} not like '%${condition.value[0]}%'`;
+    case ExploreAnalyticsOperators.NULL:
+      return `${prefix}${condition.property} is null `;
+    case ExploreAnalyticsOperators.NOT_NULL:
+      return `${prefix}${condition.property} is not null `;
+    default:
+      throw new Error('Unsupported condition');
+  }
+
+}
+
+function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : string | void {
+  switch (condition.operator) {
+    case ExploreAnalyticsOperators.EQUAL:
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+    case ExploreAnalyticsOperators.GREATER_THAN:
+    case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
+    case ExploreAnalyticsOperators.LESS_THAN:
+    case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
+      return `${prefix}${condition.property} ${condition.operator} ${condition.value[0]}`;
+    case ExploreAnalyticsOperators.IN:
+      const values = condition.value.join(',');
+      return `${prefix}${condition.property} in (${values})`;
+    case ExploreAnalyticsOperators.NOT_IN:
+      const notValues = condition.value.join(',');
+      return `${prefix}${condition.property} not in (${notValues})`;
+    case ExploreAnalyticsOperators.NULL:
+      return `${prefix}${condition.property} is null `;
+    case ExploreAnalyticsOperators.NOT_NULL:
+      return `${prefix}${condition.property} is not null `;
+    default:
+      throw new Error('Unsupported condition');
+  }
+
 }
