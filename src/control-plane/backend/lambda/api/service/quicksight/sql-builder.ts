@@ -426,9 +426,9 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
         if (condition.category === 'other') {
           category = '';
         }
-        const conditialSql = buildSqlFromCondition(condition, category);
+        const conditionSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${eventCondition.sqlCondition.conditionOperator ?? 'and'}  ${conditialSql}
+          ${eventCondition.sqlCondition.conditionOperator ?? 'and'}  ${conditionSql}
         `);
       }
     }
@@ -682,9 +682,9 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
         if (condition.category === 'other') {
           category = '';
         }
-        const conditialSql = buildSqlFromCondition(condition, category);
+        const conditionSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditialSql}
+          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditionSql}
         `);
       }
     }
@@ -1069,9 +1069,9 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
         if (condition.category === 'other') {
           category = '';
         }
-        const conditialSql = buildSqlFromCondition(condition, category);
+        const conditionSql = buildSqlFromCondition(condition, category);
         eventConditionSql = eventConditionSql.concat(`
-          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditialSql}
+          ${i === 0 ? '' : (eventCondition.sqlCondition.conditionOperator ?? 'and')}  ${conditionSql}
         `);
       }
     }
@@ -1220,9 +1220,9 @@ function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
         category = '';
       }
 
-      const conditialSql = buildSqlFromCondition(condition, category);
+      const conditionSql = buildSqlFromCondition(condition, category);
       sql = sql.concat(`
-        ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${conditialSql}
+        ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${conditionSql}
       `);
     }
   }
@@ -1243,9 +1243,9 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
         prefix= 'user_';
       }
 
-      const conditialSql = buildSqlFromCondition(condition, prefix);
+      const singleConditionSql = buildSqlFromCondition(condition, prefix);
       conditionSql = conditionSql.concat(`
-      ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${conditialSql}
+      ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${singleConditionSql}
       `);
 
       let valueType = '';

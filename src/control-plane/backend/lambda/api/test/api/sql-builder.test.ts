@@ -3731,8 +3731,8 @@ describe('SQL Builder test', () => {
       from
         app1.ods_events ods
       where
-        event_date>='MonJun19202300:00:00GMT+0000(CoordinatedUniversalTime)'
-        andevent_date<='ThuJun22202300:00:00GMT+0000(CoordinatedUniversalTime)'
+        event_date >= 'MonJun19202300:00:00GMT+0000(CoordinatedUniversalTime)'
+        and event_date <= 'ThuJun22202300:00:00GMT+0000(CoordinatedUniversalTime)'
         and event_name in ('add_button_click', 'note_share', 'note_export')
     ),
     tmp_base_data as (
