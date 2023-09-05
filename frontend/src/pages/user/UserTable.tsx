@@ -138,9 +138,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
   };
 
   const handleSubmit = async (currentItem: IUser, column: any, value: any) => {
-    // if (currentItem.operator === 'Clickstream') {
-    //   throw new Error('Not allowed to edit this user');
-    // }
     if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
