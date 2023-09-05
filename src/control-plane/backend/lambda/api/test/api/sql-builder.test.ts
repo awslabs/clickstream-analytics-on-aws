@@ -1484,11 +1484,6 @@ describe('SQL Builder test', () => {
 
   test('funnel table visual sql - conditions', () => {
 
-
-    console.log([10, 20, 30].join(','));
-    console.log('######');
-    console.log(['10', '20', '30'].join(',\''));
-
     const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
@@ -4336,7 +4331,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('condition sql ', () => {
+  test('condition sql', () => {
 
     const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
