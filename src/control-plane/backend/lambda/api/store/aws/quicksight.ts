@@ -41,7 +41,7 @@ import { generateRandomStr } from '../../common/utils';
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
-const QUICKSIGHT_DASHBOARD_USER_NAME = 'Admin/liwmin-Isengard';
+const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
 
 const getIdentityRegionFromMessage = (message: string) => {
