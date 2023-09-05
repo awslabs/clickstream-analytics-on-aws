@@ -507,6 +507,23 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
             DataSetIdentifier: viewName,
             ColumnName: 'rate',
           },
+          FormatConfiguration: {
+            FormatConfiguration: {
+              PercentageDisplayFormatConfiguration: {
+                Suffix: '%',
+                SeparatorConfiguration: {
+                  DecimalSeparator: 'DOT',
+                  ThousandsSeparator: {
+                    Symbol: 'COMMA',
+                    Visibility: 'VISIBLE',
+                  },
+                },
+                NegativeValueConfiguration: {
+                  DisplayMode: 'NEGATIVE',
+                },
+              },
+            },
+          },
         },
       });
     } else {
@@ -516,6 +533,23 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
           Column: {
             DataSetIdentifier: viewName,
             ColumnName: `${eventName}_rate`,
+          },
+          FormatConfiguration: {
+            FormatConfiguration: {
+              PercentageDisplayFormatConfiguration: {
+                Suffix: '%',
+                SeparatorConfiguration: {
+                  DecimalSeparator: 'DOT',
+                  ThousandsSeparator: {
+                    Symbol: 'COMMA',
+                    Visibility: 'VISIBLE',
+                  },
+                },
+                NegativeValueConfiguration: {
+                  DisplayMode: 'NEGATIVE',
+                },
+              },
+            },
           },
         },
       });
