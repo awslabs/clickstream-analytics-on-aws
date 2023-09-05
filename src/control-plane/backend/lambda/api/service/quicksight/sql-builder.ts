@@ -1347,6 +1347,7 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
     case ExploreAnalyticsOperators.NOT_NULL:
       return `${prefix}${condition.property} is not null `;
     default:
+      logger.error(`unsupported condition ${JSON.stringify(condition)}`);
       throw new Error('Unsupported condition');
   }
 
@@ -1372,6 +1373,7 @@ function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : st
     case ExploreAnalyticsOperators.NOT_NULL:
       return `${prefix}${condition.property} is not null `;
     default:
+      logger.error(`unsupported condition ${JSON.stringify(condition)}`);
       throw new Error('Unsupported condition');
   }
 
