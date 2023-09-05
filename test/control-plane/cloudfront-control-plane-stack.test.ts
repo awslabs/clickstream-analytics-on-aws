@@ -448,7 +448,6 @@ describe('CloudFrontS3PotalStack', () => {
       .toEqual([
         'certificateCertificateRequestorResourceFD86DD58',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceB9A4ABDE',
-        'ClickStreamApiAddAdminUserCustomResourceE4FEA9DF',
       ]);
     template.resourceCountIs('AWS::S3::Bucket', 2);
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
