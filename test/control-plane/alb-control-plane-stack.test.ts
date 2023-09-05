@@ -238,12 +238,11 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
         'albcontrolplaneportalfnC6B1CDAC',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'ClickStreamApiApiFunction684A4D61',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',

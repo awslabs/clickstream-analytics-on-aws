@@ -402,9 +402,8 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
@@ -433,9 +432,8 @@ describe('CloudFrontS3PotalStack', () => {
 
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
@@ -508,9 +506,8 @@ describe('CloudFrontS3PotalStack', () => {
 
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEvent78F17A31',
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserFn128E1C01',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
