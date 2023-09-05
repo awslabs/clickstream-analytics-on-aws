@@ -141,13 +141,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                   onItemClick: (item) => {
                     if (item.detail.id === 'signout') {
                       if (fullLogoutUrl) {
-                        if (signOut) {
-                          signOut();
-                        }
+                        signOut?.();
                         window.location.href = fullLogoutUrl;
-                      } else if (signOut) {
-                        signOut();
                       }
+                      signOut?.();
                     }
                   },
                   items: [{ id: 'signout', text: t('header.signOut') || '' }],
@@ -183,13 +180,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                   onItemClick: (item) => {
                     if (item.detail.id === 'signout') {
                       if (fullLogoutUrl) {
-                        if (signOut) {
-                          signOut();
-                        }
+                        signOut?.();
                         window.location.href = fullLogoutUrl;
-                      } else if (signOut) {
-                        signOut();
                       }
+                      signOut?.();
                     }
                   },
                   items: [{ id: 'signout', text: t('header.signOut') || '' }],

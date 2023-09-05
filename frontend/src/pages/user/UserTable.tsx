@@ -45,7 +45,6 @@ interface UserTableProps {
     matchesText: string;
   };
   selectionType?: 'multi' | 'single';
-  loadHelpPanelContent: () => void;
   fetchDataFunc: () => Promise<IUser[]>;
   fetchUpdateFunc: (item: IUser) => Promise<void>;
 }
@@ -56,7 +55,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     tableContentDisplay,
     tableFilteringProperties,
     tableI18nStrings,
-    loadHelpPanelContent,
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
@@ -140,9 +138,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
   };
 
   const handleSubmit = async (currentItem: IUser, column: any, value: any) => {
-    // if (currentItem.operator === 'Clickstream') {
-    //   throw new Error('Not allowed to edit this user');
-    // }
     if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
@@ -200,10 +195,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
                 ? `(${collectionProps.selectedItems.length}/${data.length})`
                 : `(${data.length})`
             }
-            onInfoLinkClick={loadHelpPanelContent}
-            onRefreshButtonClick={() => {
-              console.log('refresh button clicked');
-            }}
           />
         }
         filter={

@@ -104,7 +104,8 @@
       "exceed1": "您已超过 1 个标签的限制。",
       "exceed2": "您已超出限制 ",
       "use": "使用”"
-    }
+    },
+    "invalidInput": "无效输入"
   },
   "splitPanel": {
     "preferencesTitle": "面板首选项",

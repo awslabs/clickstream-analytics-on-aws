@@ -13,14 +13,14 @@
 
 import { UserContext } from 'context/UserContext';
 import AccessDenied from 'pages/error-page/AccessDenied';
-import React, { useContext } from 'react';
+import { ReactElement, useContext } from 'react';
 import { IUserRole } from 'ts/const';
 
 const RoleRoute = ({
   children,
   roles,
 }: {
-  children: React.JSX.Element;
+  children: ReactElement;
   roles: Array<IUserRole>;
 }) => {
   const currentUser = useContext(UserContext);

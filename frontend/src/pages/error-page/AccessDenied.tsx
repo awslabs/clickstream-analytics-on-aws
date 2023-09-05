@@ -20,7 +20,7 @@ const AccessDenied: React.FC = () => {
   return (
     <ContentLayout>
       <Container>
-        <div className="">
+        <div className="mt-10">
           <Alert
             statusIconAriaLabel="Error"
             type="error"

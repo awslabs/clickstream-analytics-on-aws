@@ -13,7 +13,6 @@
 import {
   Header,
   HeaderProps,
-  Link,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import React from 'react';
@@ -22,28 +21,17 @@ interface UserTableHeaderProps extends HeaderProps {
   title?: string;
   extraActions?: React.ReactNode;
   selectedItemsCount: number;
-  onRefreshButtonClick?: () => void;
-  onInfoLinkClick?: () => void;
 }
 
 export function UserTableHeader({
   title = '',
   extraActions = null,
   selectedItemsCount,
-  onRefreshButtonClick,
-  onInfoLinkClick,
   ...props
 }: UserTableHeaderProps) {
   return (
     <Header
       variant="awsui-h1-sticky"
-      info={
-        onInfoLinkClick && (
-          <Link variant="info" onFollow={onInfoLinkClick}>
-            Info
-          </Link>
-        )
-      }
       actions={
         <SpaceBetween size="xs" direction="horizontal">
           {extraActions}

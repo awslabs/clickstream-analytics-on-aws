@@ -46,13 +46,10 @@ const UserList: React.FC = () => {
       },
       minWidth: 180,
       editConfig: {
-        ariaLabel: 'Edit display name',
-        errorIconAriaLabel: 'Display Name Validation Error',
-        editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
           return !new RegExp(XSS_PATTERN).test(value)
             ? undefined
-            : 'Invalid input';
+            : t('tag.invalidInput');
         },
         editingCell: (
           item: { name: string },
@@ -61,12 +58,11 @@ const UserList: React.FC = () => {
           return (
             <Input
               autoFocus={true}
-              ariaLabel="Edit user name"
               value={currentValue ?? item.name}
               onChange={(item) => {
                 setValue(item.detail.value);
               }}
-              placeholder="Enter user name"
+              placeholder={t('tag.valuePlaceholder') ?? ''}
             />
           );
         },
@@ -77,15 +73,11 @@ const UserList: React.FC = () => {
       header: t('user:labels.tableColumnRole'),
       minWidth: 200,
       editConfig: {
-        ariaLabel: 'Edit state',
-        errorIconAriaLabel: 'State Validation Error',
-        editIconAriaLabel: 'editable',
         editingCell: (item: { role: any }, { setValue, currentValue }: any) => {
           return (
             <Select
               autoFocus={true}
               expandToViewport={true}
-              ariaLabel="Select desired state"
               options={roleOptions}
               onChange={(event: any) => {
                 setValue(event.detail.selectedOption.value);
@@ -185,9 +177,6 @@ const UserList: React.FC = () => {
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),
-          }}
-          loadHelpPanelContent={() => {
-            console.log(1);
           }}
           fetchDataFunc={listAllUsers}
           fetchUpdateFunc={updateUserInfo}
