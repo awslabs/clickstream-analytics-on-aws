@@ -270,6 +270,7 @@ const AnalyticsPath: React.FC = () => {
       console.log(error);
       return [];
     }
+    return [];
   };
 
   const getEventParameters = (eventName: string | undefined) => {
