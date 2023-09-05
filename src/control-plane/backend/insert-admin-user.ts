@@ -36,12 +36,12 @@ export class AddAdminUser extends Construct {
       parameters: {
         TableName: props.userTable.tableName,
         Item: {
-          uid: props.uid,
-          role: 'Admin',
-          createAt: Date.now(),
-          updateAt: Date.now(),
-          operator: 'Clickstream',
-          deleted: false,
+          uid: { S: props.uid },
+          role: { S: 'Admin' },
+          createAt: { N: Date.now().toString() },
+          updateAt: { N: Date.now().toString() },
+          operator: { S: 'Clickstream' },
+          deleted: { BOOL: false },
         },
         ConditionExpression: 'attribute_not_exists(uid)',
       },
@@ -59,7 +59,7 @@ export class AddAdminUser extends Construct {
           resources: [props.userTable.tableArn],
         }),
       ]),
-      timeout: Duration.minutes(15),
+      timeout: Duration.minutes(1),
     },
     );
   }
