@@ -18,6 +18,7 @@ export interface MetadataStore {
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<any>;
   updateEvent: (event: IMetadataEvent) => Promise<void>;
   listEvents: (projectId: string, appId: string, order: string) => Promise<IMetadataEvent[]>;
+  listEventWithAttribute: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
   deleteEvent: (projectId: string, appId: string, eventName: string, operator: string) => Promise<void>;
   isEventExisted: (projectId: string, appId: string, eventName: string) => Promise<boolean>;
 

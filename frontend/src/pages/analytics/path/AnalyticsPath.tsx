@@ -28,7 +28,6 @@ import {
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
   fetchEmbeddingUrl,
-  getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
@@ -89,6 +88,10 @@ const AnalyticsPath: React.FC = () => {
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
   );
+  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
+  const [userAttributes, setUserAttributes] = useState<
+    IMetadataUserAttribute[]
+  >([]);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
@@ -189,8 +192,6 @@ const AnalyticsPath: React.FC = () => {
       label: t('analytics:options.platformWechatMinPro') ?? '',
     },
   ];
-  const [selectedPlatform, setSelectedPlatform] =
-    useState<SelectProps.Option | null>(defaultPlatformOption);
 
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
     [
@@ -203,6 +204,9 @@ const AnalyticsPath: React.FC = () => {
 
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const [selectedPlatform, setSelectedPlatform] =
+    useState<SelectProps.Option | null>(defaultPlatformOption);
 
   const getEmbeddingUrl = async (
     dashboardId: string,
@@ -244,6 +248,7 @@ const AnalyticsPath: React.FC = () => {
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({ projectId, appId });
       if (success) {
+        setUserAttributes(data.items);
         return data.items;
       }
       return [];
@@ -271,24 +276,12 @@ const AnalyticsPath: React.FC = () => {
     }
   };
 
-  const getEventParameters = async (eventName: string | undefined) => {
-    if (!projectId || !appId || !eventName) {
-      return [];
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
     }
-    try {
-      const { success, data }: ApiResponse<IMetadataEvent> =
-        await getMetadataEventDetails({
-          projectId: projectId,
-          appId: appId,
-          eventName: eventName,
-        });
-      if (success) {
-        return data.associatedParameters ?? [];
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
+    return [];
   };
 
   const listMetadataEvents = async () => {
@@ -297,9 +290,10 @@ const AnalyticsPath: React.FC = () => {
     }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId });
+        await getMetadataEventsList({ projectId, appId, attribute: true });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
+        setOriginEvents(data.items);
         setMetadataEvents(events);
       }
     } catch (error) {
@@ -786,10 +780,7 @@ const AnalyticsPath: React.FC = () => {
                           category
                         ) => {
                           const eventName = category?.value;
-                          const eventParameters = await getEventParameters(
-                            eventName
-                          );
-                          const userAttributes = await getUserAttributes();
+                          const eventParameters = getEventParameters(eventName);
                           const parameterOption =
                             parametersConvertToCategoryItemType(
                               userAttributes,

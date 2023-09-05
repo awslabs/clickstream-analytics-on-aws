@@ -28,6 +28,7 @@ import {
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import {
   getMetadataEventDetails,
+  fetchEmbeddingUrl,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
@@ -87,6 +88,10 @@ const AnalyticsFunnel: React.FC = () => {
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
   );
+  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
+  const [userAttributes, setUserAttributes] = useState<
+    IMetadataUserAttribute[]
+  >([]);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
@@ -141,6 +146,7 @@ const AnalyticsFunnel: React.FC = () => {
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({ projectId, appId });
       if (success) {
+        setUserAttributes(data.items);
         return data.items;
       }
       return [];
@@ -168,24 +174,12 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const getEventParameters = async (eventName: string | undefined) => {
-    if (!projectId || !appId || !eventName) {
-      return [];
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
     }
-    try {
-      const { success, data }: ApiResponse<IMetadataEvent> =
-        await getMetadataEventDetails({
-          projectId: projectId,
-          appId: appId,
-          eventName: eventName,
-        });
-      if (success) {
-        return data.associatedParameters ?? [];
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
+    return [];
   };
 
   const listMetadataEvents = async () => {
@@ -194,9 +188,10 @@ const AnalyticsFunnel: React.FC = () => {
     }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId });
+        await getMetadataEventsList({ projectId, appId, attribute: true });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
+        setOriginEvents(data.items);
         setMetadataEvents(events);
       }
     } catch (error) {
@@ -689,10 +684,7 @@ const AnalyticsFunnel: React.FC = () => {
                           category
                         ) => {
                           const eventName = category?.value;
-                          const eventParameters = await getEventParameters(
-                            eventName
-                          );
-                          const userAttributes = await getUserAttributes();
+                          const eventParameters = getEventParameters(eventName);
                           const parameterOption =
                             parametersConvertToCategoryItemType(
                               userAttributes,

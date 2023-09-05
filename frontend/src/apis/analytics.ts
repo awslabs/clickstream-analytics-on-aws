@@ -61,11 +61,14 @@ export const getAnalyticsDashboard = async (
 export const getMetadataEventsList = async (params: {
   projectId: string;
   appId: string;
+  attribute?: boolean;
 }) => {
-  const result: any = await apiRequest(
-    'get',
-    `/metadata/events?projectId=${params.projectId}&appId=${params.appId}`
-  );
+  const { attribute } = params;
+  let path = `/metadata/events?projectId=${params.projectId}&appId=${params.appId}`;
+  if (attribute) {
+    path = path.concat(`&attribute=${attribute}`);
+  }
+  const result: any = await apiRequest('get', path);
   return result;
 };
 

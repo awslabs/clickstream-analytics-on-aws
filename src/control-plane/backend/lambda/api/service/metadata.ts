@@ -23,11 +23,16 @@ export class MetadataEventServ {
 
   public async list(req: any, res: any, next: any) {
     try {
-      const { projectId, appId, order } = req.query;
-      const result = await metadataStore.listEvents(projectId, appId, order);
+      const { projectId, appId, order, attribute } = req.query;
+      let results: IMetadataEvent[] = [];
+      if (attribute && attribute === 'true') {
+        results = await metadataStore.listEventWithAttribute(projectId, appId);
+      } else {
+        results = await metadataStore.listEvents(projectId, appId, order);
+      }
       return res.json(new ApiSuccess({
-        totalCount: result.length,
-        items: result,
+        totalCount: results.length,
+        items: results,
       }));
     } catch (error) {
       next(error);

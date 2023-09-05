@@ -25,7 +25,6 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import {
-  getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
@@ -84,6 +83,10 @@ const AnalyticsEvent: React.FC = () => {
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
   );
+  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
+  const [userAttributes, setUserAttributes] = useState<
+    IMetadataUserAttribute[]
+  >([]);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
@@ -127,6 +130,7 @@ const AnalyticsEvent: React.FC = () => {
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({ projectId, appId });
       if (success) {
+        setUserAttributes(data.items);
         return data.items;
       }
       return [];
@@ -154,24 +158,12 @@ const AnalyticsEvent: React.FC = () => {
     }
   };
 
-  const getEventParameters = async (eventName: string | undefined) => {
-    if (!projectId || !appId || !eventName) {
-      return [];
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
     }
-    try {
-      const { success, data }: ApiResponse<IMetadataEvent> =
-        await getMetadataEventDetails({
-          projectId: projectId,
-          appId: appId,
-          eventName: eventName,
-        });
-      if (success) {
-        return data.associatedParameters ?? [];
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
+    return [];
   };
 
   const listMetadataEvents = async () => {
@@ -180,9 +172,10 @@ const AnalyticsEvent: React.FC = () => {
     }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId });
+        await getMetadataEventsList({ projectId, appId, attribute: true });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
+        setOriginEvents(data.items);
         setMetadataEvents(events);
       }
     } catch (error) {
@@ -584,10 +577,7 @@ const AnalyticsEvent: React.FC = () => {
                           category
                         ) => {
                           const eventName = category?.value;
-                          const eventParameters = await getEventParameters(
-                            eventName
-                          );
-                          const userAttributes = await getUserAttributes();
+                          const eventParameters = getEventParameters(eventName);
                           const parameterOption =
                             parametersConvertToCategoryItemType(
                               userAttributes,
