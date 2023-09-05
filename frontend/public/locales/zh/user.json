@@ -1,7 +1,7 @@
 {
   "labels": {
     "title": "用户",
-    "tableColumnEmail": "Email",
+    "tableColumnUserId": "用户ID",
     "tableColumnName": "用户名",
     "tableColumnRole": "角色",
     "tableColumnCreateAt": "创建时间",
@@ -12,7 +12,7 @@
   },
   "options": {
     "admin": "管理员",
-    "developer": "研发工程师",
+    "operator": "IT运维",
     "analyst": "分析师"
   },
   "emptyData": "没有数据"

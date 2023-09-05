@@ -14,9 +14,9 @@
 import { createContext } from 'react';
 import { IUserRole } from 'ts/const';
 export const UserContext = createContext<IUser | undefined>({
-  email: '',
+  uid: '',
   name: '',
-  role: IUserRole.DEVELOPER,
+  role: IUserRole.OPERATOR,
   createAt: 0,
   updateAt: 0,
   operator: '',

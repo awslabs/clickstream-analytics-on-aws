@@ -423,10 +423,39 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W76',
+          reason:
+          'This policy needs to be able to call other AWS service by design',
+        },
+      ],
+    },
+    {
+      paths_endswith: [
+        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W89',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
+        },
+        {
+          id: 'W92',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
+        },
+      ],
+    },
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider');
   NagSuppressions.addStackSuppressions(stack, [
     {
       id: 'AwsSolutions-IAM4',

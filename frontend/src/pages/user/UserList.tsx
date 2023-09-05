@@ -26,16 +26,29 @@ const UserList: React.FC = () => {
 
   const roleOptions = [
     { value: IUserRole.ADMIN, label: t('user:options.admin') },
-    { value: IUserRole.DEVELOPER, label: t('user:options.developer') },
+    { value: IUserRole.OPERATOR, label: t('user:options.operator') },
     { value: IUserRole.ANALYST, label: t('user:options.analyst') },
   ];
 
+  const getRoleName = (role: string) => {
+    switch (role) {
+      case IUserRole.ADMIN:
+        return t('user:options.admin');
+      case IUserRole.OPERATOR:
+        return t('user:options.operator');
+      case IUserRole.ANALYST:
+        return t('user:options.analyst');
+      default:
+        return t('user:options.operator');
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
-      id: 'email',
-      header: t('user:labels.tableColumnEmail'),
-      cell: (e: { email: string }) => {
-        return e.email;
+      id: 'uid',
+      header: t('user:labels.tableColumnUserId'),
+      cell: (e: { uid: string }) => {
+        return e.uid;
       },
     },
     {
@@ -92,7 +105,7 @@ const UserList: React.FC = () => {
         },
       },
       cell: (e: { role: string }) => {
-        return e.role;
+        return getRoleName(e.role);
       },
     },
     {

@@ -55,10 +55,10 @@ export interface ClickStreamStore {
   bindPlugins: (pluginIds: string[], count: number) => Promise<void>;
 
   addUser: (user: IUser) => Promise<string>;
-  getUser: (email: string) => Promise<IUser | undefined>;
+  getUser: (uid: string) => Promise<IUser | undefined>;
   updateUser: (user: IUser) => Promise<void>;
   listUser: () => Promise<IUser[]>;
-  deleteUser: (email: string, operator: string) => Promise<void>;
+  deleteUser: (uid: string, operator: string) => Promise<void>;
 
   getDictionary: (name: string) => Promise<IDictionary | undefined>;
   listDictionary: () => Promise<IDictionary[]>;

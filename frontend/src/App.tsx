@@ -135,7 +135,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <Home />
                       </RoleRoute>
                     }
@@ -143,7 +143,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/projects"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <Projects />
                       </RoleRoute>
                     }
@@ -151,7 +151,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/alarms"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <AlarmsList />
                       </RoleRoute>
                     }
@@ -167,7 +167,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/detail/:id"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <ProjectDetail />
                       </RoleRoute>
                     }
@@ -175,7 +175,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/:pid/pipeline/:id"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <PipelineDetail />
                       </RoleRoute>
                     }
@@ -183,7 +183,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/:pid/pipeline/:id/update"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <CreatePipeline update />
                       </RoleRoute>
                     }
@@ -191,7 +191,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/:projectId/pipelines/create"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <CreatePipeline />
                       </RoleRoute>
                     }
@@ -199,7 +199,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/pipelines/create"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <CreatePipeline />
                       </RoleRoute>
                     }
@@ -207,7 +207,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/:id/application/create"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <CreateApplication />
                       </RoleRoute>
                     }
@@ -215,7 +215,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/plugins"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <PluginList />
                       </RoleRoute>
                     }
@@ -223,7 +223,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/plugins/create"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <CreatePlugin />
                       </RoleRoute>
                     }
@@ -231,7 +231,7 @@ const SignedInPage: React.FC = () => {
                   <Route
                     path="/project/:pid/application/detail/:id"
                     element={
-                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.DEVELOPER]}>
+                      <RoleRoute roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}>
                         <ApplicationDetail />
                       </RoleRoute>
                     }

@@ -35,8 +35,8 @@ export class UserServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body;
-      const email = await store.addUser(user);
-      return res.status(201).json(new ApiSuccess({ email }, 'User created.'));
+      const uid = await store.addUser(user);
+      return res.status(201).json(new ApiSuccess({ uid }, 'User created.'));
     } catch (error) {
       next(error);
     }
@@ -44,12 +44,12 @@ export class UserServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { email } = req.params;
-      let result = await store.getUser(email);
+      const { uid } = req.params;
+      let result = await store.getUser(uid);
       if (!result) {
         const user: IUser = {
-          email: email,
-          role: IUserRole.DEVELOPER,
+          uid: uid,
+          role: IUserRole.OPERATOR,
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: res.get('X-Click-Stream-Operator'),
@@ -80,9 +80,9 @@ export class UserServ {
 
   public async delete(req: any, res: any, next: any) {
     try {
-      const { email } = req.params;
+      const { uid } = req.params;
       const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteUser(email, operator);
+      await store.deleteUser(uid, operator);
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
     } catch (error) {
       next(error);

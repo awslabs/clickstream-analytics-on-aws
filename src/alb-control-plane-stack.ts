@@ -307,6 +307,23 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+    {
+      paths_endswith: [
+        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W89',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
+        },
+        {
+          id: 'W92',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
+        },
+      ],
+    },
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);

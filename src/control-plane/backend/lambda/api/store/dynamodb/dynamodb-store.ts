@@ -1008,9 +1008,9 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: PutCommand = new PutCommand({
       TableName: userTableName,
       Item: {
-        email: user.email,
+        uid: user.uid,
         name: user.name ?? '',
-        role: user.role ?? IUserRole.DEVELOPER,
+        role: user.role ?? IUserRole.OPERATOR,
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: user.operator?? '',
@@ -1018,14 +1018,14 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     await docClient.send(params);
-    return user.email;
+    return user.uid;
   };
 
-  public async getUser(email: string): Promise<IUser | undefined> {
+  public async getUser(uid: string): Promise<IUser | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: userTableName,
       Key: {
-        email: email,
+        uid: uid,
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -1057,7 +1057,7 @@ export class DynamoDbStore implements ClickStreamStore {
     const params: UpdateCommand = new UpdateCommand({
       TableName: userTableName,
       Key: {
-        email: user.email,
+        uid: user.uid,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -1080,11 +1080,11 @@ export class DynamoDbStore implements ClickStreamStore {
     return records as IUser[];
   };
 
-  public async deleteUser(email: string, operator: string): Promise<void> {
+  public async deleteUser(uid: string, operator: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: userTableName,
       Key: {
-        email: email,
+        uid: uid,
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: 'SET deleted= :d, #operator= :operator',

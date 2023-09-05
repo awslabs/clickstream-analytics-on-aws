@@ -19,11 +19,11 @@ export const getAllUsers = async () => {
 };
 
 export const updateUser = async (user: IUser) => {
-  const result: any = await apiRequest('put', `/user/${user.email}`, user);
+  const result: any = await apiRequest('put', `/user/${user.uid}`, user);
   return result;
 };
 
-export const getUserDetails = async (email: string) => {
-  const result: any = await apiRequest('get', `/user/${email}`);
+export const getUserDetails = async (uid: string) => {
+  const result: any = await apiRequest('get', `/user/${uid}`);
   return result;
 };

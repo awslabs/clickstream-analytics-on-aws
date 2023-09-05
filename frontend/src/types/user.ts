@@ -11,16 +11,16 @@
  *  and limitations under the License.
  */
 
-import { IUserRole } from "ts/const";
+import { IUserRole } from 'ts/const';
 
 export {};
 declare global {
   interface IUser {
-    readonly email: string;
+    readonly uid: string;
 
     readonly name?: string;
     readonly role: IUserRole;
-  
+
     readonly createAt: number;
     readonly updateAt: number;
     readonly operator: string;

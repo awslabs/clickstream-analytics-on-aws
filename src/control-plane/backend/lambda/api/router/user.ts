@@ -37,24 +37,24 @@ router_user.post(
   });
 
 router_user.get(
-  '/:email',
+  '/:uid',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.details(req, res, next);
   });
 
 router_user.put(
-  '/:email',
+  '/:uid',
   validate([
-    body('email').custom(isUserValid),
+    body('uid').custom(isUserValid),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.update(req, res, next);
   });
 
 router_user.delete(
-  '/:email',
+  '/:uid',
   validate([
-    param('email').custom(isUserValid),
+    param('uid').custom(isUserValid),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.delete(req, res, next);

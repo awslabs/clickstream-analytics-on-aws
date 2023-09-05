@@ -113,12 +113,11 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
-        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserFn2E94BF2F',
-        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEventD5E33F27',
         'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
         'testClickStreamALBApiApiFunction9890103B',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -161,6 +160,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
         'apifunceni59253B5A',
+        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
         'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       ],
     });
@@ -308,18 +308,16 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
-        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserRoleDefaultPolicy868EE016',
-        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserFnlistTagsPolicyF39C6020',
-        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy308B7455',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336',
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
+        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
         'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
         'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
-        'testClickStreamALBApiApiReadAndWriteTablePolicyF6892CF9',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
         'customresourcefunclogs9B71FED3',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
@@ -418,7 +416,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       ],
     });
 
-    // ApiReadAndWriteTablePolicy
+    // ApiFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -446,6 +444,28 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 ],
               },
               {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
                 'Fn::GetAtt': [
                   'testClickStreamALBApiClickstreamMetadataA721B303',
                   'Arn',
@@ -465,6 +485,25 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   ],
                 ],
               },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
               {
                 'Fn::GetAtt': [
                   'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
@@ -487,10 +526,38 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               },
             ],
           },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamUser54DFA2EE',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiApiReadAndWriteTablePolicyF6892CF9',
+      PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
     });
 
     // ApiStepFunctionPolicy
@@ -819,7 +886,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::CloudFormation::CustomResource'))
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResource5AE5EDD9',
-        'testClickStreamALBApiAddAdminUserCustomResource536E6C9F',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
@@ -1125,12 +1191,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           DICTIONARY_TABLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
           },
-          USER_TABLE_NAME: {
-            Ref: 'testClickStreamCloudfrontApiClickstreamUser9A6DB61D',
-          },
-          ANALYTICS_METADATA_TABLE_NAME: {
-            Ref: 'testClickStreamCloudfrontApiClickstreamAnalyticsMetadata0A9F22AD',
-          },
           STACK_ACTION_SATE_MACHINE: {
             Ref: 'testClickStreamCloudfrontApiStackActionStateMachineF9686748',
           },
@@ -1141,7 +1201,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Ref: 'stackWorkflowS3BucketF67B9562',
           },
           PREFIX_TIME_GSI_NAME: 'prefix-time-index',
-          INVERTED_GSI_NAME: 'inverted-index',
           AWS_ACCOUNT_ID: {
             Ref: 'AWS::AccountId',
           },
@@ -1160,14 +1219,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           API_ROLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
           },
-          QUICKSIGHT_EMBED_ROLE_ARN: {
-            'Fn::GetAtt': [
-              'testClickStreamCloudfrontApiQuickSightEmbedRole2967B263',
-              'Arn',
-            ],
-          },
           HEALTH_CHECK_PATH: '/',
-          QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
           POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
           POWERTOOLS_LOGGER_LOG_EVENT: 'true',
@@ -1181,18 +1233,13 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         },
       ],
       MemorySize: 512,
-      Role: {
-        'Fn::GetAtt': [
-          'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
-          'Arn',
-        ],
-      },
       Runtime: 'nodejs18.x',
       Timeout: 30,
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
         'apifunceni59253B5A',
+        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
         'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
       ],
     });

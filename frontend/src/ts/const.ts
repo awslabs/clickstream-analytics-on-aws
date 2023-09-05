@@ -400,6 +400,6 @@ export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';
 
 export enum IUserRole {
   ADMIN = 'Admin',
-  DEVELOPER = 'Developer',
+  OPERATOR = 'Operator',
   ANALYST = 'Analyst',
 }

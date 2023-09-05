@@ -11,111 +11,56 @@
  *  and limitations under the License.
  */
 
-import { join } from 'path';
-import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Provider } from 'aws-cdk-lib/custom-resources';
+import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { createLambdaRole } from '../../common/lambda';
-import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 
 export interface AddAdminUserProps {
-  readonly email: string;
+  readonly uid: string;
   readonly userTable: Table;
 }
 
 export class AddAdminUser extends Construct {
 
-  readonly crForAddAdminUser: CustomResource;
+  readonly crForAddAdminUser: AwsCustomResource;
 
   constructor(scope: Construct, id: string, props: AddAdminUserProps) {
     super(scope, id);
-
-    this.crForAddAdminUser = this.createAddAdminUserCustomResource(props);
-  }
-
-  private createAddAdminUserCustomResource(props: AddAdminUserProps): CustomResource {
-    const fn = this.createAddAdminUserLambda(props);
-
-    const provider = new Provider(
-      this,
-      'AddAdminUserCustomResourceProvider',
-      {
-        onEventHandler: fn,
-        logRetention: RetentionDays.FIVE_DAYS,
+    const awsSdkCall: AwsSdkCall = {
+      service: 'DynamoDB',
+      action: 'putItem',
+      physicalResourceId: PhysicalResourceId.of('AddAdminUserAwsCustomResource-${props.userTable.tableName}'),
+      parameters: {
+        TableName: props.userTable.tableName,
+        Item: {
+          uid: props.uid,
+          role: 'Admin',
+          createAt: Date.now(),
+          updateAt: Date.now(),
+          operator: 'Clickstream',
+          deleted: false,
+        },
+        ConditionExpression: 'attribute_not_exists(uid)',
       },
-    );
+    };
 
-    const cr = new CustomResource(this, 'AddAdminUserCustomResource', {
-      serviceToken: provider.serviceToken,
-      properties: {
-        Email: props.email,
-        UserTableName: props.userTable.tableName,
-      },
-    });
-
-    return cr;
-  }
-
-  private createAddAdminUserLambda(props: AddAdminUserProps): Function {
-    const lambdaRootPath = __dirname + '/lambda/add-admin-user';
-
-    const readAndWriteTablePolicy: PolicyStatement = new PolicyStatement({
-      effect: Effect.ALLOW,
-      resources: [
-        props.userTable.tableArn,
-      ],
-      actions: [
-        'dynamodb:BatchGetItem',
-        'dynamodb:GetRecords',
-        'dynamodb:GetShardIterator',
-        'dynamodb:Query',
-        'dynamodb:GetItem',
-        'dynamodb:Scan',
-        'dynamodb:ConditionCheckItem',
-        'dynamodb:BatchWriteItem',
-        'dynamodb:PutItem',
-        'dynamodb:UpdateItem',
-        'dynamodb:DeleteItem',
-        'dynamodb:DescribeTable',
-      ],
-    });
-
-    const fn = new NodejsFunction(this, 'AddAdminUserFn', {
-      runtime: Runtime.NODEJS_18_X,
-      entry: join(
-        lambdaRootPath,
-        'index.ts',
-      ),
-      handler: 'handler',
-      memorySize: 128,
-      reservedConcurrentExecutions: 1,
-      timeout: Duration.minutes(5),
+    this.crForAddAdminUser = new AwsCustomResource(this, 'AddAdminUserAwsCustomResource', {
+      onCreate: awsSdkCall,
+      onUpdate: awsSdkCall,
       logRetention: RetentionDays.ONE_WEEK,
-      role: createLambdaRole(this, 'AddAdminUserRole', false, [readAndWriteTablePolicy]),
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
-    });
-
-    attachListTagsPolicyForFunction(this, 'AddAdminUserFn', fn);
-    addCfnNagToStack(Stack.of(this), [
-      ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'ClickStreamApi/AddAdminUserCustomResource/AddAdminUserFn/Resource',
-        'AddAdminUserFn',
-      ),
-      ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'ClickStreamApi/AddAdminUserCustomResource/AddAdminUserCustomResourceProvider/framework-onEvent/Resource',
-        'AddAdminUserFnProvider',
-      ),
-    ]);
-
-    return fn;
+      policy: AwsCustomResourcePolicy.fromStatements([
+        new PolicyStatement({
+          sid: 'DynamoWriteAccess',
+          effect: Effect.ALLOW,
+          actions: ['dynamodb:PutItem'],
+          resources: [props.userTable.tableArn],
+        }),
+      ]),
+      timeout: Duration.minutes(15),
+    },
+    );
   }
 }

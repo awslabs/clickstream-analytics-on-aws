@@ -1,7 +1,7 @@
 {
   "labels": {
     "title": "User",
-    "tableColumnEmail": "Email",
+    "tableColumnUserId": "User ID",
     "tableColumnName": "User name",
     "tableColumnRole": "Role",
     "tableColumnCreateAt": "Create time",
@@ -11,8 +11,8 @@
     "filteringPlaceholder": "Find users"
   },
   "options": {
-    "admin": "Admin",
-    "developer": "Developer",
+    "admin": "Administrator",
+    "operator": "Operator",
     "analyst": "Analyst"
   },
   "emptyData": "No Data"
