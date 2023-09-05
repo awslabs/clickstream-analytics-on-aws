@@ -4331,7 +4331,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('comput method - real user id', () => {
+  test('compute method - real user id', () => {
 
     const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
