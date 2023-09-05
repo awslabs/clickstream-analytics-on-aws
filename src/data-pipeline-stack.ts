@@ -254,7 +254,8 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
-  ]),
+  ]);
+
   NagSuppressions.addStackSuppressions(stack, [... commonCdkNagRules,
     {
       id: 'AwsSolutions-SQS3',

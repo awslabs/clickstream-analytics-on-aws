@@ -302,19 +302,7 @@ function updateMetricsWidget(metricsWidget: MetricWidgetElement) {
   }
 
   if (metricsWidget.properties.yAxis) {
-    const yAxis = metricsWidget.properties.yAxis;
-    if (yAxis.left) {
-      yAxis.left = {
-        min: yAxis.left.min ? parseFloat(yAxis.left.min + '') : undefined,
-        max: yAxis.left.max ? parseFloat(yAxis.left.max + '') : undefined,
-      };
-    }
-    if (yAxis.right) {
-      yAxis.right = {
-        min: yAxis.right.min ? parseFloat(yAxis.right.min + '') : undefined,
-        max: yAxis.right.max ? parseFloat(yAxis.right.max + '') : undefined,
-      };
-    }
+    updateYAxis(metricsWidget);
   }
 
   const properties_metrics = metricsWidget.properties.metrics;
@@ -323,6 +311,22 @@ function updateMetricsWidget(metricsWidget: MetricWidgetElement) {
     updateRenderType(pm);
   }
   return metricsWidget;
+}
+
+function updateYAxis(metricsWidget: MetricWidgetElement) {
+  const yAxis = metricsWidget.properties.yAxis!;
+  if (yAxis.left) {
+    yAxis.left = {
+      min: yAxis.left.min ? parseFloat(yAxis.left.min + '') : undefined,
+      max: yAxis.left.max ? parseFloat(yAxis.left.max + '') : undefined,
+    };
+  }
+  if (yAxis.right) {
+    yAxis.right = {
+      min: yAxis.right.min ? parseFloat(yAxis.right.min + '') : undefined,
+      max: yAxis.right.max ? parseFloat(yAxis.right.max + '') : undefined,
+    };
+  }
 }
 
 function updateRenderType(pm: (string | RenderingProperties | MetricExpression)[]) {
