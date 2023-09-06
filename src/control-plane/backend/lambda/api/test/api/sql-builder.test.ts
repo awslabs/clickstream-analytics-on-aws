@@ -4331,11 +4331,11 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('condition sql', () => {
+  test('compute method - real user id', () => {
 
     const sql = buildFunnelDataSql('app1', 'testview', {
       schemaName: 'app1',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4512,7 +4512,7 @@ describe('SQL Builder test', () => {
         traffic_source.source::varchar as traffic_source_source,
         user_first_touch_timestamp,
         user_id,
-        user_pseudo_id,
+        COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
         user_ltv,
         event_dimensions,
         ecommerce,
@@ -4670,7 +4670,7 @@ describe('SQL Builder test', () => {
         traffic_source_source as traffic_source_source_0,
         user_first_touch_timestamp as user_first_touch_timestamp_0,
         user_id as user_id_0,
-        user_pseudo_id as user_pseudo_id_0,
+        COALESCE(user_id, user_pseudo_id) as user_pseudo_id_0,
         user_ltv as user_ltv_0,
         event_dimensions as event_dimensions_0,
         ecommerce as ecommerce_0,
@@ -4728,7 +4728,7 @@ describe('SQL Builder test', () => {
         traffic_source_source as traffic_source_source_1,
         user_first_touch_timestamp as user_first_touch_timestamp_1,
         user_id as user_id_1,
-        user_pseudo_id as user_pseudo_id_1,
+        COALESCE(user_id, user_pseudo_id) as user_pseudo_id_1,
         user_ltv as user_ltv_1,
         event_dimensions as event_dimensions_1,
         ecommerce as ecommerce_1,
@@ -4786,7 +4786,7 @@ describe('SQL Builder test', () => {
         traffic_source_source as traffic_source_source_2,
         user_first_touch_timestamp as user_first_touch_timestamp_2,
         user_id as user_id_2,
-        user_pseudo_id as user_pseudo_id_2,
+        COALESCE(user_id, user_pseudo_id) as user_pseudo_id_2,
         user_ltv as user_ltv_2,
         event_dimensions as event_dimensions_2,
         ecommerce as ecommerce_2,
