@@ -45,11 +45,11 @@ export const validateRole = (roles: string[]) => {
     if (WITH_VALIDATE_ROLE === 'true') {
       const operator = res.get('X-Click-Stream-Operator');
       if (!operator) {
-        return res.status(401).json({ message: UNAUTHORIZED_MESSAGE });
+        return res.status(401).json(new ApiFail(UNAUTHORIZED_MESSAGE));
       }
       const user = await store.getUser(operator);
       if (!user || !user.role || !roles.includes(user.role)) {
-        return res.status(403).json({ message: FORBIDDEN_MESSAGE });
+        return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
       }
     }
     return next();

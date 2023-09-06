@@ -63,15 +63,15 @@ export const AllowIAMUserPutObejectPolicyWithErrorService = '{"Version":"2012-10
 export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::027434742980:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::114774131450:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 
-function userMock(ddbMock: any, role: IUserRole): any {
+function userMock(ddbMock: any, userId: string, role: IUserRole): any {
   return ddbMock.on(GetCommand, {
     TableName: userTableName,
     Key: {
-      uid: MOCK_USER_ID,
+      uid: userId,
     },
   }, true).resolvesOnce({
     Item: {
-      uid: MOCK_TOKEN,
+      uid: userId,
       role: role,
     },
   });
@@ -862,6 +862,7 @@ export {
   MOCK_USER_ATTRIBUTE_ID,
   MOCK_USER_ATTRIBUTE_NAME,
   MOCK_DASHBOARD_ID,
+  MOCK_USER_ID,
   tokenMock,
   userMock,
   projectExistedMock,
