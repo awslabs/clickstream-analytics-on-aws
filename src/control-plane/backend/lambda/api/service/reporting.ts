@@ -46,17 +46,78 @@ import { ExplorePathNodeType, ExploreTimeScopeType } from '../common/explore-typ
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getClickstreamUserArn } from '../store/aws/quicksight';
+import { QuickSightUserArns, getClickstreamUserArn } from '../store/aws/quicksight';
+
+
+interface CachedContentsObjects {
+  readonly stsClient: STSClient;
+  readonly quickSight: QuickSight;
+  readonly redshiftDataClient: RedshiftDataClient | undefined;
+  readonly principals: QuickSightUserArns | undefined;
+}
+
+class CachedContents {
+  private map: {[key: string]: CachedContentsObjects};
+  constructor() {
+    this.map = {};
+  }
+
+  async getCachedObjects(projectId: string, appId: string, region: string, dataApiRole: string) {
+
+    const key = projectId + '##' + appId + '##' + region + '##' + dataApiRole;
+
+    if (this.map.hasOwnProperty(key)) {
+      return this.map[key];
+    } else {
+      const stsClient = new STSClient({
+        region,
+        ...aws_sdk_client_common_config,
+      });
+      const quickSight = new QuickSight({
+        region,
+        ...aws_sdk_client_common_config,
+      });
+
+      const credentials = await getCredentialsFromRole(stsClient, dataApiRole);
+      const redshiftDataClient = new RedshiftDataClient({
+        region,
+        credentials: {
+          accessKeyId: credentials?.AccessKeyId!,
+          secretAccessKey: credentials?.SecretAccessKey!,
+          sessionToken: credentials?.SessionToken,
+        },
+      });
+
+      const principals = await getClickstreamUserArn();
+
+      const CachedContentsObjects = {
+        stsClient,
+        quickSight,
+        redshiftDataClient,
+        principals,
+      };
+      this.map[key] = CachedContentsObjects;
+
+      return CachedContentsObjects;
+    }
+  }
+}
+
+let cachedContents: CachedContents | undefined = undefined;
 
 export class ReportingServ {
 
   async createFunnelVisual(req: any, res: any, next: any) {
+
+    const startTime = new Date().getTime();
     try {
       logger.info('start to create funnel analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
+
+      const t1 = new Date().getTime();
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -76,6 +137,9 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
+      const t2 = new Date().getTime();
+      logger.info(`buildFunnelView: ${t2 - t1}ms`);
+
       const tableVisualViewName = viewName + '_tab';
       const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
         schemaName: query.appId,
@@ -94,6 +158,8 @@ export class ReportingServ {
       });
 
       console.log(`funnel table sql: ${sqlTable}`);
+      const t3 = new Date().getTime();
+      logger.info(`buildFunnelDataSql: ${t3 - t2}ms`);
 
       const sqls = [sql, sqlTable];
       for ( const viewNm of [viewName, tableVisualViewName]) {
@@ -194,7 +260,14 @@ export class ReportingServ {
         }
       }
       const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
+
+      const t4 = new Date().getTime();
+      logger.info(`getFunnelTableVisualDef: ${t4 - t3}ms`);
+
       const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
+
+      const t5 = new Date().getTime();
+      logger.info(`getFunnelTableVisualRelatedDefs: ${t5 - t4}ms`);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
 
@@ -214,6 +287,11 @@ export class ReportingServ {
         name: 'TABLE',
         id: tableVisualId,
       });
+
+      const t6 = new Date().getTime();
+      logger.info(`create quicksight resources: ${t6 - t5}ms`);
+
+      logger.info(`createFunnelVisual: ${t6 - startTime}ms`);
 
       return res.status(201).json(new ApiSuccess(result));
 
@@ -556,29 +634,16 @@ export class ReportingServ {
   private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
+    const startTime = new Date().getTime();
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-    const redshiftRegion = dashboardCreateParameters.region;
+    if (cachedContents === undefined) {
+      cachedContents = new CachedContents();
+    }
+    const cachedObjs = await cachedContents.getCachedObjects(query.projectId, query.appId,
+      dashboardCreateParameters.region, dashboardCreateParameters.redshift.dataApiRole);
 
-    const stsClient = new STSClient({
-      region: redshiftRegion,
-      ...aws_sdk_client_common_config,
-    });
-    const quickSight = new QuickSight({
-      region: redshiftRegion,
-      ...aws_sdk_client_common_config,
-    });
-
-    const principals = await getClickstreamUserArn();
-
-    const credentials = await getCredentialsFromRole(stsClient, dashboardCreateParameters.redshift.dataApiRole);
-    const redshiftDataClient = new RedshiftDataClient({
-      region: redshiftRegion,
-      credentials: {
-        accessKeyId: credentials?.AccessKeyId!,
-        secretAccessKey: credentials?.SecretAccessKey!,
-        sessionToken: credentials?.SessionToken,
-      },
-    });
+    const t1 = new Date().getTime();
+    logger.info(`cached contents: ${t1 - startTime}ms`);
 
     //create view in redshift
     const input = {
@@ -591,30 +656,40 @@ export class ReportingServ {
     };
 
     const params = new BatchExecuteStatementCommand(input);
-    const executeResponse = await redshiftDataClient.send(params);
-    const checkParams = new DescribeStatementCommand({
-      Id: executeResponse.Id,
+    // cachedObjs.redshiftDataClient!.send(params);
+    cachedObjs.redshiftDataClient!.send(params).then( executeResponse => {
+      const checkParams = new DescribeStatementCommand({
+        Id: executeResponse.Id,
+      });
+      cachedObjs.redshiftDataClient!.send(checkParams).then (async(res) => {
+        logger.info(`Get statement status: ${res.Status}`);
+        let count = 0;
+        while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
+          await sleep(100);
+          count++;
+          res = await cachedObjs.redshiftDataClient!.send(checkParams);
+          logger.info(`Get statement status: ${res.Status}`);
+        }
+        if (res.Status == StatusString.FAILED) {
+          logger.error('Error: '+ res.Status, JSON.stringify(res));
+          throw new Error('failed to run sql of create redshift view');
+        }
+      }).catch(error => {
+        logger.error(error);
+      });
+    }).catch(error => {
+      logger.error(error);
     });
-    let res = await redshiftDataClient.send(checkParams);
-    logger.info(`Get statement status: ${res.Status}`);
-    let count = 0;
-    while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
-      await sleep(100);
-      count++;
-      res = await redshiftDataClient.send(checkParams);
-      logger.info(`Get statement status: ${res.Status}`);
-    }
-    if (res.Status == StatusString.FAILED) {
-      logger.error('Error: '+ res.Status, JSON.stringify(res));
-      throw new Error('failed to run sql of create redshift view');
-    }
+
+    const t4 = new Date().getTime();
+    logger.info(`create redshift views: ${t4 - t1}ms`);
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
-        quickSight, awsAccountId!,
-        principals.dashboardOwner,
+        cachedObjs.quickSight, awsAccountId!,
+        cachedObjs.principals!.dashboardOwner,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
       );
@@ -626,6 +701,9 @@ export class ReportingServ {
 
       logger.info(`created dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
     }
+
+    const t4_5 = new Date().getTime();
+    logger.info(`create data set: ${t4_5 - t4}ms`);
 
     visualPropsArray[0].dataSetIdentifierDeclaration.push(...dataSetIdentifierDeclaration);
 
@@ -639,7 +717,7 @@ export class ReportingServ {
       dashboardDef.Sheets![0].SheetId = sid;
       dashboardDef.Sheets![0].Name = query.sheetName;
     } else {
-      dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      dashboardDef = await getDashboardDefinitionFromArn(cachedObjs.quickSight, awsAccountId!, query.dashboardId);
     }
 
     const dashboard = applyChangeToDashboard({
@@ -648,6 +726,9 @@ export class ReportingServ {
       dashboardDef: dashboardDef as DashboardVersionDefinition,
     });
 
+    const t5 = new Date().getTime();
+    logger.info(`create dashboard definition: ${t5 - t4_5}ms`);
+
     logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
     let result: CreateDashboardResult;
@@ -655,12 +736,12 @@ export class ReportingServ {
 
       //create QuickSight analysis
       const analysisId = `clickstream-ext-${uuidv4()}`;
-      const newAnalysis = await quickSight.createAnalysis({
+      const newAnalysis = await cachedObjs.quickSight.createAnalysis({
         AwsAccountId: awsAccountId,
         AnalysisId: analysisId,
         Name: `analysis-${resourceName}`,
         Permissions: [{
-          Principal: principals.dashboardOwner,
+          Principal: cachedObjs.principals!.dashboardOwner,
           Actions: [
             'quicksight:DescribeAnalysis',
             'quicksight:QueryAnalysis',
@@ -676,12 +757,12 @@ export class ReportingServ {
 
       //create QuickSight dashboard
       const dashboardId = `clickstream-ext-${uuidv4()}`;
-      const newDashboard = await quickSight.createDashboard({
+      const newDashboard = await cachedObjs.quickSight.createDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
         Name: `dashboard-${resourceName}`,
         Permissions: [{
-          Principal: principals.dashboardOwner,
+          Principal: cachedObjs.principals!.dashboardOwner,
           Actions: [
             'quicksight:DescribeDashboard',
             'quicksight:ListDashboardVersions',
@@ -694,7 +775,7 @@ export class ReportingServ {
           ],
         },
         {
-          Principal: principals.embedOwner,
+          Principal: cachedObjs.principals!.embedOwner,
           Actions: [
             'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
           ],
@@ -717,7 +798,7 @@ export class ReportingServ {
       //update QuickSight analysis
       let newAnalysis;
       if (query.analysisId) {
-        newAnalysis = await quickSight.updateAnalysis({
+        newAnalysis = await cachedObjs.quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
           Name: query.analysisName,
@@ -726,7 +807,7 @@ export class ReportingServ {
       }
 
       //update QuickSight dashboard
-      const newDashboard = await quickSight.updateDashboard({
+      const newDashboard = await cachedObjs.quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: query.dashboardId,
         Name: query.dashboardName,
@@ -739,7 +820,7 @@ export class ReportingServ {
       for (const _i of Array(60).keys()) {
         cnt += 1;
         try {
-          const response = await quickSight.updateDashboardPublishedVersion({
+          const response = await cachedObjs.quickSight.updateDashboardPublishedVersion({
             AwsAccountId: awsAccountId,
             DashboardId: query.dashboardId,
             VersionNumber: Number.parseInt(versionNumber!),
@@ -773,6 +854,9 @@ export class ReportingServ {
         visualIds: [],
       };
     }
+
+    const t6 = new Date().getTime();
+    logger.info(`create dashboard: ${t6 - t5}ms`);
 
     return result;
   };
