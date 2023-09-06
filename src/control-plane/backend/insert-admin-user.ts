@@ -29,10 +29,10 @@ export class AddAdminUser extends Construct {
 
   constructor(scope: Construct, id: string, props: AddAdminUserProps) {
     super(scope, id);
-    const awsSdkCall: AwsSdkCall = {
+    const putItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'putItem',
-      physicalResourceId: PhysicalResourceId.of('AddAdminUserAwsCustomResource-${props.userTable.tableName}'),
+      physicalResourceId: PhysicalResourceId.of('putItem-${props.userTable.tableName}'),
       parameters: {
         TableName: props.userTable.tableName,
         Item: {
@@ -47,15 +47,60 @@ export class AddAdminUser extends Construct {
       },
     };
 
+    const updateItemSdkCall: AwsSdkCall = {
+      service: 'DynamoDB',
+      action: 'updateItem',
+      physicalResourceId: PhysicalResourceId.of('updateItem-${props.userTable.tableName}'),
+      parameters: {
+        TableName: props.userTable.tableName,
+        Key: {
+          uid: { S: props.uid },
+        },
+        UpdateExpression: 'SET #role = :role, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted',
+        ExpressionAttributeNames: {
+          '#role': 'role',
+          '#createAt': 'createAt',
+          '#updateAt': 'updateAt',
+          '#operator': 'operator',
+          '#deleted': 'deleted',
+        },
+        ExpressionAttributeValues: {
+          ':role': { S: 'Admin' },
+          ':createAt': { N: Date.now().toString() },
+          ':updateAt': { N: Date.now().toString() },
+          ':operator': { S: 'Clickstream' },
+          ':deleted': { BOOL: false },
+        },
+      },
+    };
+
+    const deleteItemSdkCall: AwsSdkCall = {
+      service: 'DynamoDB',
+      action: 'deleteItem',
+      physicalResourceId: PhysicalResourceId.of('deleteItem-${props.userTable.tableName}'),
+      parameters: {
+        TableName: props.userTable.tableName,
+        Key: {
+          uid: { S: props.uid },
+        },
+        ConditionExpression: 'attribute_exists(uid)',
+      },
+    };
+
     this.crForAddAdminUser = new AwsCustomResource(this, 'AddAdminUserAwsCustomResource', {
-      onCreate: awsSdkCall,
-      onUpdate: awsSdkCall,
+      onCreate: putItemSdkCall,
+      onUpdate: updateItemSdkCall,
+      onDelete: deleteItemSdkCall,
       logRetention: RetentionDays.ONE_WEEK,
       policy: AwsCustomResourcePolicy.fromStatements([
         new PolicyStatement({
           sid: 'DynamoWriteAccess',
           effect: Effect.ALLOW,
-          actions: ['dynamodb:PutItem'],
+          actions: [
+            'dynamodb:PutItem',
+            'dynamodb:UpdateItem',
+            'dynamodb:DeleteItem',
+          ],
           resources: [props.userTable.tableArn],
         }),
       ]),
