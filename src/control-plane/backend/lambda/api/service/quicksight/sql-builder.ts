@@ -256,7 +256,7 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) 
   let sql = `
     with tmp_data as (
       select 
-      ${baseColumns},
+      ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)},
       TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month,
       TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week,
       TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day,
@@ -317,7 +317,7 @@ function _buildBaseTableSqlForPathAnalysis(sqlParameters: SQLParameters) : strin
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
       , user_properties
-      , ${baseColumns}
+      , ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)}
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
       and event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
@@ -337,13 +337,13 @@ function _buildBaseSql(eventNames: string[], sqlParameters: SQLParameters) : str
       ,week
       ,day
       ,hour
-      ,${columnTemplate.replace(/####/g, '_0')}
+      ,${_renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, '_0')}
     `;
 
     sql = sql.concat(`
     table_${index} as (
       select 
-        ${ index === 0 ? firstTableColumns : columnTemplate.replace(/####/g, `_${index}`)}
+        ${ index === 0 ? firstTableColumns : _renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
       from base_data base
       where event_name = '${event}'
     ),
@@ -405,7 +405,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
       , TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       , event_params
       , user_properties
-      , ${baseColumns}
+      , ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)}
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
       and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
@@ -443,7 +443,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
       ,week
       ,day
       ,hour
-      ,${columnTemplate.replace(/####/g, `_${index}`)}
+      ,${_renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
     `;
 
     sql = sql.concat(`
@@ -499,9 +499,9 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
 
   let sql = _buildBaseSql(eventNames, sqlParameters);
 
-  let prefix = 'event_id';
-  if (sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT) {
-    prefix = 'user_pseudo_id';
+  let prefix = 'user_pseudo_id';
+  if (sqlParameters.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    prefix = 'event_id';
   }
   let resultCntSQL ='';
 
@@ -541,9 +541,9 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
     eventNames.push(e.eventName);
   }
   let index = 0;
-  let prefix = 'e';
-  if (sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT) {
-    prefix = 'u';
+  let prefix = 'u';
+  if (sqlParameters.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    prefix = 'e';
   }
 
   let baseSQL = _buildBaseSql(eventNames, sqlParameters);
@@ -742,7 +742,7 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'other_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
+      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
     from data a left join data b 
       on a.user_pseudo_id = b.user_pseudo_id 
       ${joinSql}
@@ -830,7 +830,7 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
         WHEN b_event_name is not null THEN b_event_name || '_' || step_2
         ELSE 'other_' || step_2
       END as target,
-      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
+      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
     from data
     where step_2 <= ${sqlParameters.maxStep ?? 10}
     group by 
@@ -926,7 +926,7 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'other_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
+      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
     from data a left join data b 
       on a.user_pseudo_id = b.user_pseudo_id 
       ${joinSql}
@@ -1024,7 +1024,7 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
         WHEN b_node is not null THEN b_node || '_' || step_2
         ELSE 'other_' || step_2
       END as target,
-      ${sqlParameters.computeMethod === ExploreComputeMethod.USER_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
+      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'count(distinct a_user_pseudo_id)' : 'count(distinct a_event_id)' } as weight
     from data
     where step_2 <= ${sqlParameters.maxStep ?? 10}
     group by 
@@ -1377,4 +1377,17 @@ function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : st
       throw new Error('Unsupported condition');
   }
 
+}
+function _renderUserPseudoIdColumn(columns: string, computeMethod: ExploreComputeMethod, addSuffix: boolean): string {
+  if (computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+    let pattern = /,user_pseudo_id/g;
+    let suffix = '';
+    if (addSuffix) {
+      pattern = /,user_pseudo_id as user_pseudo_id####/g;
+      suffix = '####';
+    }
+    return columns.replace(pattern, `,COALESCE(user_id, user_pseudo_id) as user_pseudo_id${suffix}`);
+  }
+
+  return columns;
 }
