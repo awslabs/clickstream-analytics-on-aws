@@ -35,6 +35,9 @@ import java.util.List;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.Transformer.KEY;
+import static software.aws.solution.clickstream.Transformer.VALUE;
+import static software.aws.solution.clickstream.Transformer.DATA;
 import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
 import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
 import static software.aws.solution.clickstream.Transformer.INT_VALUE;
@@ -114,12 +117,12 @@ public class KvConverter {
         UserDefinedFunction convertStringToKeyValueUdf = udf(convertJsonStringToKeyValue(excludeAttributes), DataTypes.createArrayType(
                 DataTypes.createStructType(
                         new StructField[]{
-                                DataTypes.createStructField("key", DataTypes.StringType, true),
-                                DataTypes.createStructField("value", valueType, true),
+                                DataTypes.createStructField(KEY, DataTypes.StringType, true),
+                                DataTypes.createStructField(VALUE, valueType, true),
                         }
                 )));
         Dataset<Row> convertedKeyValueDataset = dataset.withColumn(toColName,
-                convertStringToKeyValueUdf.apply(dataset.col("data").getField(fromColName)));
+                convertStringToKeyValueUdf.apply(dataset.col(DATA).getField(fromColName)));
 
         boolean debugLocal = Boolean.valueOf(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {

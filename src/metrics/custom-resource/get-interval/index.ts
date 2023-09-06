@@ -35,7 +35,7 @@ async function _handler(event: CdkCustomResourceEvent) {
   const expression = event.ResourceProperties.expression!;
   const evaluationPeriods = parseInt(event.ResourceProperties.evaluationPeriods || '1');
 
-  let intervalSeconds = 300;
+  let intervalSeconds;
   if ((expression as string).startsWith('rate')) {
     intervalSeconds = parseRate(expression);
   } else if ((expression as string).startsWith('cron')) {

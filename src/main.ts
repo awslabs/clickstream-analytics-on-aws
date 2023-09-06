@@ -207,7 +207,7 @@ stackSuppressions([
 
 new DataModelingAthenaStack(app, app.node.tryGetContext('stackName') ?? 'data-modeling-athena-stack', {
   synthesizer: synthesizer(),
-}),
+});
 
 stackSuppressions([
   new DataReportingQuickSightStack(app, 'data-reporting-quicksight-stack', {
