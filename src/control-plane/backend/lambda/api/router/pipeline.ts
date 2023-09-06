@@ -13,7 +13,8 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isPipelineExisted, isProjectExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isPipelineExisted, isProjectExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate, validateRole } from '../common/request-valid';
+import { IUserRole } from '../common/types';
 import { PipelineServ } from '../service/pipeline';
 
 const router_pipeline = express.Router();
@@ -22,6 +23,7 @@ const pipelineServ: PipelineServ = new PipelineServ();
 
 router_pipeline.post(
   '',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isProjectExisted),
@@ -33,6 +35,7 @@ router_pipeline.post(
 
 router_pipeline.post(
   '/:id/retry',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('pid').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
@@ -43,6 +46,7 @@ router_pipeline.post(
 
 router_pipeline.post(
   '/:id/upgrade',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('pid').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
@@ -53,6 +57,7 @@ router_pipeline.post(
 
 router_pipeline.get(
   '',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -71,6 +76,7 @@ router_pipeline.get(
 
 router_pipeline.get(
   '/:id',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]),
   validate([
     query('pid').custom(isProjectExisted),
   ]),
@@ -80,6 +86,7 @@ router_pipeline.get(
 
 router_pipeline.put(
   '/:id',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body('pipelineId').custom(isValidEmpty)
       .custom((value, { req }) => validMatchParamId(value, {
@@ -97,6 +104,7 @@ router_pipeline.put(
 
 router_pipeline.delete(
   '/:id',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     param('id').custom((value, { req }) => isPipelineExisted(value, {
       req,

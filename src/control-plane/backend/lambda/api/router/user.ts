@@ -13,7 +13,8 @@
 
 import express from 'express';
 import { body, header, param } from 'express-validator';
-import { isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate, validateRole } from '../common/request-valid';
+import { IUserRole } from '../common/types';
 import { UserServ } from '../service/user';
 
 const router_user = express.Router();
@@ -21,12 +22,14 @@ const userServ: UserServ = new UserServ();
 
 router_user.get(
   '',
+  validateRole([IUserRole.ADMIN]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.list(req, res, next);
   });
 
 router_user.post(
   '',
+  validateRole([IUserRole.ADMIN]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('role').custom(isValidEmpty),
@@ -44,6 +47,7 @@ router_user.get(
 
 router_user.put(
   '/:uid',
+  validateRole([IUserRole.ADMIN]),
   validate([
     body('uid').custom(isUserValid),
   ]),
@@ -53,6 +57,7 @@ router_user.put(
 
 router_user.delete(
   '/:uid',
+  validateRole([IUserRole.ADMIN]),
   validate([
     param('uid').custom(isUserValid),
   ]),

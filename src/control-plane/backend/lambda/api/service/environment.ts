@@ -15,13 +15,12 @@ import fetch from 'node-fetch';
 import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
-import { validateEnableAccessLogsForALB } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, FetchType, PipelineStackType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
 import { agaPing } from '../store/aws/aga';
-import { athenaPing, listWorkGroups } from '../store/aws/athena';
+import { athenaPing } from '../store/aws/athena';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
 import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
 import { emrServerlessPing } from '../store/aws/emr';
@@ -122,19 +121,6 @@ export class EnvironmentServ {
     }
   }
 
-  public async checkALBLogPolicy(req: any, res: any, next: any) {
-    try {
-      const {
-        region,
-        bucket,
-      } = req.query;
-      const check = await validateEnableAccessLogsForALB(region, bucket);
-      return res.json(new ApiSuccess({ check }));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   public async listMSKCluster(req: any, res: any, next: any) {
     try {
       const {
@@ -187,16 +173,6 @@ export class EnvironmentServ {
   public async listHostedZones(_req: any, res: any, next: any) {
     try {
       const result = await listHostedZones();
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async listWorkGroups(req: any, res: any, next: any) {
-    try {
-      const { region } = req.query;
-      const result = await listWorkGroups(region);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -421,6 +397,37 @@ export class EnvironmentServ {
     }
   }
 
+  private async getUrlFromPipeline(type:FetchType, projectId:string, pipelineId:string) {
+    let url = '';
+    const latestPipeline = await store.getPipeline(projectId, pipelineId);
+    if (!latestPipeline) {
+      return url;
+    }
+    const pipeline = new CPipeline(latestPipeline);
+    if (type === FetchType.PIPELINE_ENDPOINT) {
+      const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
+        PipelineStackType.INGESTION,
+        [
+          OUTPUT_INGESTION_SERVER_URL_SUFFIX,
+        ],
+      );
+      url = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX) ?? '';
+    } else if (type === FetchType.PIPELINE_DNS) {
+      const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
+        PipelineStackType.INGESTION,
+        [
+          OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
+        ],
+      );
+      const dns = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
+      url = dns ? `http://${dns}` : '';
+    } else {
+      const domainName = latestPipeline.ingestionServer.domain?.domainName;
+      url = domainName ? `https://${domainName}` : '';
+    }
+    return url;
+  }
+
   public async fetch(req: any, res: any, _next: any) {
     try {
       const {
@@ -432,32 +439,7 @@ export class EnvironmentServ {
       if (type === FetchType.ANDROIDSDK) {
         url = SDK_MAVEN_VERSION_API_LINK;
       } else {
-        const latestPipeline = await store.getPipeline(projectId, pipelineId);
-        if (!latestPipeline) {
-          return res.status(404).send(new ApiFail('Pipeline not found'));
-        }
-        const pipeline = new CPipeline(latestPipeline);
-        if (type === FetchType.PIPELINE_ENDPOINT) {
-          const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
-            PipelineStackType.INGESTION,
-            [
-              OUTPUT_INGESTION_SERVER_URL_SUFFIX,
-            ],
-          );
-          url = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX) ?? '';
-        } else if (type === FetchType.PIPELINE_DNS) {
-          const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
-            PipelineStackType.INGESTION,
-            [
-              OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
-            ],
-          );
-          const dns = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX);
-          url = dns ? `http://${dns}` : '';
-        } else {
-          const domainName = latestPipeline.ingestionServer.domain?.domainName;
-          url = domainName ? `https://${domainName}` : '';
-        }
+        url = await this.getUrlFromPipeline(type, projectId, pipelineId);
       }
       const response = await fetch(url, {
         method: 'GET',

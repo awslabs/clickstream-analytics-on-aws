@@ -1288,37 +1288,6 @@ describe('Account Env test', () => {
       data: false,
     });
   });
-  it('Get Athena Work Groups', async () => {
-    athenaClient.on(ListWorkGroupsCommand).resolves({
-      WorkGroups: [
-        {
-          CreationTime: new Date(),
-          Description: '',
-          EngineVersion: {
-            EffectiveEngineVersion: 'Athena engine version 2',
-            SelectedEngineVersion: 'AUTO',
-          },
-          Name: 'primary',
-          State: 'ENABLED',
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/athena/workgroups');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          description: '',
-          engineVersion: 'Athena engine version 2',
-          name: 'primary',
-          state: 'ENABLED',
-        },
-      ],
-    });
-  });
   it('Get All IAM roles', async () => {
     iamClient.on(ListRolesCommand).resolves({
       Roles: [

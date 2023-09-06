@@ -11,30 +11,8 @@
  *  and limitations under the License.
  */
 
-import { AthenaClient, paginateListWorkGroups, ListWorkGroupsCommand, WorkGroupSummary } from '@aws-sdk/client-athena';
+import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { WorkGroup } from '../../common/types';
-
-export const listWorkGroups = async (region: string) => {
-  const athenaClient = new AthenaClient({
-    ...aws_sdk_client_common_config,
-    region,
-  });
-  const records: WorkGroupSummary[] = [];
-  for await (const page of paginateListWorkGroups({ client: athenaClient }, {})) {
-    records.push(...page.WorkGroups as WorkGroupSummary[]);
-  }
-  const workGroups: WorkGroup[] = [];
-  for (let record of records) {
-    workGroups.push({
-      name: record.Name ?? '',
-      description: record.Description ?? '',
-      state: record.State ?? '',
-      engineVersion: record.EngineVersion?.EffectiveEngineVersion ?? '',
-    });
-  }
-  return workGroups;
-};
 
 export const athenaPing = async (region: string): Promise<boolean> => {
   try {

@@ -402,51 +402,6 @@ describe('Metadata Event test', () => {
       message: 'Event not found',
     });
   });
-  it('Delete metadata event', async () => {
-    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-      ],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
-      .delete(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'Event deleted.',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
-  });
-  it('Delete metadata event with no existed', async () => {
-    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .delete(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Event not found',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
-  });
 
   afterAll((done) => {
     server.close();
@@ -790,51 +745,6 @@ describe('Metadata Event Attribute test', () => {
     });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
-  it('Delete metadata event attribute', async () => {
-    metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-      ],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
-      .delete(`/api/metadata/event_parameter/${MOCK_EVENT_PARAMETER_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'Event attribute deleted.',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
-  });
-  it('Delete metadata event attribute with no existed', async () => {
-    metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .delete(`/api/metadata/event_parameter/${MOCK_EVENT_PARAMETER_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Event attribute not found',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
-  });
 
   afterAll((done) => {
     server.close();
@@ -1137,51 +1047,6 @@ describe('Metadata User Attribute test', () => {
       success: false,
       message: 'User attribute not found',
     });
-  });
-  it('Delete metadata user attribute', async () => {
-    metadataUserAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-        {
-          id: 'EVENT#project1#app1#event2',
-          type: 'EVENT',
-          deleted: false,
-          updateAt: 1690788840458,
-        },
-      ],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
-      .delete(`/api/metadata/user_attribute/${MOCK_USER_ATTRIBUTE_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'User attribute deleted.',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
-  });
-  it('Delete metadata user attribute with no existed', async () => {
-    metadataUserAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    ddbMock.on(UpdateCommand).resolves({});
-    const res = await request(app)
-      .delete(`/api/metadata/user_attribute/${MOCK_USER_ATTRIBUTE_ID}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'User attribute not found',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   afterAll((done) => {

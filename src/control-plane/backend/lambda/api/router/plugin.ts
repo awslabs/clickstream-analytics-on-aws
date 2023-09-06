@@ -13,7 +13,8 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validateRole, validate } from '../common/request-valid';
+import { IUserRole } from '../common/types';
 import { PluginServ } from '../service/plugin';
 
 const router_plugin = express.Router();
@@ -21,6 +22,7 @@ const pluginServ: PluginServ = new PluginServ();
 
 router_plugin.get(
   '',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -39,6 +41,7 @@ router_plugin.get(
 
 router_plugin.post(
   '',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('jarFile').custom(isValidEmpty).custom(isAllowFilesSuffix),
@@ -48,27 +51,6 @@ router_plugin.post(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pluginServ.add(req, res, next);
-  });
-
-router_plugin.get(
-  '/:id',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return pluginServ.details(req, res, next);
-  });
-
-router_plugin.put(
-  '/:id',
-  validate([
-    body('id')
-      .custom(isPluginIdValid)
-      .custom((value, { req }) => validMatchParamId(value, {
-        req,
-        location: 'body',
-        path: '',
-      })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return pluginServ.update(req, res, next);
   });
 
 router_plugin.delete(

@@ -17,7 +17,6 @@ import { authOIDC } from './middle-ware/auth-oidc';
 import { errorHandler } from './middle-ware/error-handler';
 import { responseTime } from './middle-ware/response-time';
 import { router_app } from './router/application';
-import { router_dictionary } from './router/dictionary';
 import { router_env } from './router/environment';
 import { router_metadata } from './router/metadata';
 import { router_pipeline } from './router/pipeline';
@@ -44,7 +43,6 @@ app.get(process.env.HEALTH_CHECK_PATH ?? '/', async (_req: express.Request, res:
 
 // routers
 app.use('/api/env', router_env);
-app.use('/api/dictionary', router_dictionary);
 app.use('/api/project', router_project);
 app.use('/api/app', router_app);
 app.use('/api/pipeline', router_pipeline);

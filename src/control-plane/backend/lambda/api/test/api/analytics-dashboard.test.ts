@@ -248,3 +248,4 @@ describe('Analytics dashboard test', () => {
     done();
   });
 });
+

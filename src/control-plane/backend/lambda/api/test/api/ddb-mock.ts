@@ -28,8 +28,8 @@ import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName } from '../../common/constants';
-import { ProjectEnvironment } from '../../common/types';
+import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, userTableName } from '../../common/constants';
+import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
 
 const MOCK_TOKEN = '0000-0000';
@@ -49,6 +49,7 @@ const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
 const MOCK_USER_ATTRIBUTE_ID = '2222-2222';
 const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
+const MOCK_USER_ID = 'user-0000';
 
 
 export const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
@@ -61,6 +62,20 @@ export const AllowIAMUserPutObejectPolicyWithErrorBucketPrefix = '{"Version":"20
 export const AllowIAMUserPutObejectPolicyWithErrorService = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"errorservice.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::027434742980:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::114774131450:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
+
+function userMock(ddbMock: any, role: IUserRole): any {
+  return ddbMock.on(GetCommand, {
+    TableName: userTableName,
+    Key: {
+      uid: MOCK_USER_ID,
+    },
+  }, true).resolvesOnce({
+    Item: {
+      uid: MOCK_TOKEN,
+      role: role,
+    },
+  });
+}
 
 function tokenMock(ddbMock: any, expect: boolean): any {
   if (!expect) {
@@ -848,6 +863,7 @@ export {
   MOCK_USER_ATTRIBUTE_NAME,
   MOCK_DASHBOARD_ID,
   tokenMock,
+  userMock,
   projectExistedMock,
   appExistedMock,
   pipelineExistedMock,

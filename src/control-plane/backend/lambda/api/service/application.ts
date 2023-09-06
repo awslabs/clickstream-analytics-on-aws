@@ -110,17 +110,6 @@ export class ApplicationServ {
     }
   };
 
-  public async update(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      let app: IApplication = req.body as IApplication;
-      await store.updateApplication(app);
-      return res.status(201).json(new ApiSuccess(null, 'Application updated.'));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   public async delete(req: any, res: any, next: any) {
     try {
       const { id } = req.params;

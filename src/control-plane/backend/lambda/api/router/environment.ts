@@ -13,7 +13,8 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultAssumeRoleTypeValid, defaultPageValueValid, defaultRegionValueValid, defaultSubnetTypeValid, isRequestIdExisted, isValidEmpty, validate } from '../common/request-valid';
+import { defaultAssumeRoleTypeValid, defaultPageValueValid, defaultRegionValueValid, defaultSubnetTypeValid, isRequestIdExisted, isValidEmpty, validate, validateRole } from '../common/request-valid';
+import { IUserRole } from '../common/types';
 import { EnvironmentServ } from '../service/environment';
 
 const router_env = express.Router();
@@ -21,12 +22,14 @@ const environmentServ: EnvironmentServ = new EnvironmentServ();
 
 router_env.get(
   '/regions',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRegions(req, res, next);
   });
 
 router_env.get(
   '/vpc',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -40,6 +43,7 @@ router_env.get(
 
 router_env.get(
   '/vpc3az',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -53,6 +57,7 @@ router_env.get(
 
 router_env.get(
   '/vpc/subnet',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
@@ -72,6 +77,7 @@ router_env.get(
 
 router_env.get(
   '/vpc/securitygroups',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
@@ -86,18 +92,14 @@ router_env.get(
 
 router_env.get(
   '/s3/buckets',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listBuckets(req, res, next);
   });
 
 router_env.get(
-  '/s3/checkalblogpolicy',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.checkALBLogPolicy(req, res, next);
-  });
-
-router_env.get(
   '/msk/clusters',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
@@ -112,6 +114,7 @@ router_env.get(
 
 router_env.get(
   '/redshift/clusters',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -125,6 +128,7 @@ router_env.get(
 
 router_env.get(
   '/redshift-serverless/workgroups',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -138,12 +142,14 @@ router_env.get(
 
 router_env.get(
   '/quicksight/users',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listQuickSightUsers(req, res, next);
   });
 
 router_env.post(
   '/quicksight/user',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body('email').isEmail(),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
@@ -154,37 +160,28 @@ router_env.post(
 
 router_env.get(
   '/quicksight/ping',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.quickSightIsSubscribed(req, res, next);
   });
 
 router_env.get(
   '/quicksight/describe',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeAccountSubscription(req, res, next);
   });
 
 router_env.get(
   '/quicksight/embedUrl',
+  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.embedUrl(req, res, next);
   });
 
 router_env.get(
-  '/athena/workgroups',
-  validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.listWorkGroups(req, res, next);
-  });
-
-router_env.get(
   '/iam/roles',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultAssumeRoleTypeValid(value, {
       req,
@@ -198,12 +195,14 @@ router_env.get(
 
 router_env.get(
   '/route53/hostedzones',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listHostedZones(req, res, next);
   });
 
 router_env.get(
   '/acm/certificates',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -217,6 +216,7 @@ router_env.get(
 
 router_env.get(
   '/ssm/secrets',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -230,6 +230,7 @@ router_env.get(
 
 router_env.get(
   '/sts/assume_upload_role',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
@@ -239,6 +240,7 @@ router_env.get(
 
 router_env.get(
   '/cloudwatch/alarms',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -257,6 +259,7 @@ router_env.get(
 
 router_env.post(
   '/cloudwatch/alarms/disable',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body('region').custom(isValidEmpty),
   ]),
@@ -266,6 +269,7 @@ router_env.post(
 
 router_env.post(
   '/cloudwatch/alarms/enable',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body('region').custom(isValidEmpty),
   ]),
@@ -275,12 +279,14 @@ router_env.post(
 
 router_env.get(
   '/ping',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.servicesPing(req, res, next);
   });
 
 router_env.post(
   '/fetch',
+  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.fetch(req, res, next);
   });

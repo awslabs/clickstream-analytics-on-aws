@@ -13,6 +13,8 @@
 
 import express from 'express';
 import { logger } from '../common/powertools';
+import { validateRole } from '../common/request-valid';
+import { IUserRole } from '../common/types';
 import { ReportingServ } from '../service/reporting';
 
 const reporting_project = express.Router();
@@ -20,6 +22,7 @@ const reportingServ: ReportingServ = new ReportingServ();
 
 reporting_project.post(
   '/funnel',
+  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight funnel report');
@@ -28,6 +31,7 @@ reporting_project.post(
 
 reporting_project.post(
   '/event',
+  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight event report');
@@ -36,6 +40,7 @@ reporting_project.post(
 
 reporting_project.post(
   '/path',
+  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight path analysis report');
@@ -44,6 +49,7 @@ reporting_project.post(
 
 reporting_project.post(
   '/retention',
+  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight path analysis report');

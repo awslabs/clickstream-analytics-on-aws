@@ -18,7 +18,6 @@ import {
 } from '@aws-sdk/client-iam';
 import { S3Client, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import request from 'supertest';
 import {
   AllowIAMUserPutObejectPolicy,
   AllowLogDeliveryPutObejectPolicy,
@@ -28,7 +27,7 @@ import {
   AllowIAMUserPutObejectPolicyWithErrorBucket,
   AllowIAMUserPutObejectPolicyWithErrorBucketPrefix,
 } from './ddb-mock';
-import { app, server } from '../../index';
+import { validateEnableAccessLogsForALB } from '../../common/stack-params-valid';
 import 'aws-sdk-client-mock-jest';
 
 const s3Client = mockClient(S3Client);
@@ -52,17 +51,9 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('us-east-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(true);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
   });
   it('Log Delivery PutObeject Policy', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
@@ -76,33 +67,17 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=ap-southeast-4&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('ap-southeast-4', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(true);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
   });
   it('Log Delivery PutObeject Policy with error region', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
       Policy: AllowLogDeliveryPutObejectPolicy,
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('cn-north-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(false);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 0);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
   });
   it('IAM User PutObeject Policy in china region', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
@@ -116,33 +91,17 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=cn-north-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('cn-north-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(true);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: true,
-      },
-    });
   });
   it('IAM User PutObeject Policy with error userId', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
       Policy: AllowIAMUserPutObejectPolicyWithErrorUserId,
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('us-east-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(false);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 0);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
   });
   it('IAM User PutObeject Policy with error bucket', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
@@ -156,17 +115,9 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('us-east-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(false);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
   });
   it('IAM User PutObeject Policy with error partition', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
@@ -180,17 +131,9 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('us-east-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(false);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
   });
   it('IAM User PutObeject Policy with error bucket prefix', async () => {
     s3Client.on(GetBucketPolicyCommand).resolves({
@@ -204,20 +147,11 @@ describe('S3 bucket policy test', () => {
         },
       ],
     });
-    const res = await request(app).get('/api/env/s3/checkalblogpolicy?region=us-east-1&bucket=EXAMPLE_BUCKET');
+    const res = await validateEnableAccessLogsForALB('us-east-1', 'EXAMPLE_BUCKET');
+    expect(res).toEqual(false);
     expect(iamClient).toHaveReceivedCommandTimes(SimulateCustomPolicyCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        check: false,
-      },
-    });
   });
   afterAll((done) => {
-    server.close();
     done();
   });
 
