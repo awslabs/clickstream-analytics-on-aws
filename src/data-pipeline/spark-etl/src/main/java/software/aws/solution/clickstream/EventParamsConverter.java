@@ -14,15 +14,19 @@
 package software.aws.solution.clickstream;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import java.util.Arrays;
 
+import static org.apache.spark.sql.functions.col;
+
 @Slf4j
 public class EventParamsConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
-        return new KvConverter().transform(dataset, "attributes", "event_params",
+        Column fromColumn = col("data").getItem("attributes");
+        return new KvConverter().transform(dataset, fromColumn, "event_params",
                 Arrays.asList(
                         "_privacy_info_ads_storage",
                         "_privacy_info_analytics_storage",

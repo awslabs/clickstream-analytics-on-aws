@@ -69,6 +69,35 @@ public class UserPropertiesConverter {
     @NotNull
     private static GenericRow[] getUserPropertiesGenericRows(final String value) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+
+    /*
+        {
+          "_user_id": {
+            "value": "312121",
+            "set_timestamp": 1667877566697
+          },
+          "_user_name": {
+            "value": "name1",
+            "set_timestamp": 1667877566697
+          },
+          "_user_age": {
+            "value": 20,
+            "set_timestamp": 1667877566697
+          },
+          "_user_first_touch_timestamp": {
+            "value": 1667877267895,
+            "set_timestamp": 1667877566697
+          },
+          "_user_ltv_currency": {
+            "value": "USD",
+            "set_timestamp": 1667877566697
+          },
+          "_user_ltv_revenue": {
+            "value": 123.45,
+            "set_timestamp": 1667877566697
+          }
+        }
+     */
         JsonNode jsonNode = objectMapper.readTree(value);
         List<GenericRow> list = new ArrayList<>();
         for (Iterator<String> it = jsonNode.fieldNames(); it.hasNext();) {

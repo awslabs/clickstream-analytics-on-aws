@@ -17,11 +17,13 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.Lists;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -179,6 +181,7 @@ class ETLRunnerTest extends BaseSparkTest {
 
     @Test
     public void should_executeTransformers() throws IOException {
+        //DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(APP_IDS_PROP, "id1,id2,uba-app");
         System.setProperty(PROJECT_ID_PROP, "projectId1");
@@ -240,7 +243,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Row row = dataset.first();
         assertEquals(111L, row.getLong(row.fieldIndex("event_bundle_sequence_id")));
         String outPath = "/tmp/test-spark-etl/" + new Date().getTime();
-        runner.writeResult(outPath, dataset);
+        runner.writeResult(outPath, dataset, ETLRunner.TableName.ODS_EVENTS);
         assertTrue(Paths.get(outPath + "/partition_app=uba-app/partition_year=2023" +
                         "/partition_month=04/partition_day=24")
                 .toFile().isDirectory());
@@ -407,4 +410,135 @@ class ETLRunnerTest extends BaseSparkTest {
         assertEquals(dataset1.count(), 2);
     }
 
+    @Test
+    public void should_executeTransformers_with_TransformerV2_1() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_1
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+
+        String jobDataDir = "/tmp/etl-debug/";
+        String transformerClassNames = String.join(",", transformers);
+        String outputPath = "/tmp/test-output/TransformerV2_with_user-" + new Date().getTime() + "/";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1667963966000";
+        String endTimestamp = "1667969999000";
+        String dataFreshnessInHour = "72";
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "false",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        -1, -1
+                ));
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set.json")).getPath());
+        assertEquals(sourceDataset.count(), 2);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
+        dataset.printSchema();
+        System.out.println(dataset.first().prettyJson());
+
+        String partitionPart = "partition_app=uba-app/partition_year=2023/partition_month=04/partition_day=24";
+        String expectedJson = this.resourceFileAsString("/expected/etl_runner_event1.json");
+        Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
+        Path p1 = Paths.get(outputPath, "user", partitionPart);
+        Assertions.assertTrue(p1.toFile().isDirectory());
+        Path p2 = Paths.get(outputPath, "even_parameter", partitionPart);
+        Assertions.assertTrue(p2.toFile().isDirectory());
+        Path p3 = Paths.get(outputPath, "item", partitionPart);
+        Assertions.assertTrue(p3.toFile().isDirectory());
+    }
+
+
+    @Test
+    public void should_executeTransformers_with_TransformerV2_2() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        String database = "default";
+        String sourceTable = "fakeSourceTable";
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+
+        String jobDataDir = "/tmp/etl-debug/";
+        String transformerClassNames = String.join(",", transformers);
+        String outputPath = "/tmp/test-output/TransformerV2_with_item-" + new Date().getTime() + "/";
+        String projectId = "projectId1";
+        String validAppIds = "id1,id2,uba-app";
+        String outPutFormat = "json";
+        String startTimestamp = "1667963966000";
+        String endTimestamp = "1667969999000";
+        String dataFreshnessInHour = "72";
+
+        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
+                new ETLRunnerConfig.TransformationConfig(
+                        newArrayList(transformerClassNames.split(",")),
+                        projectId, validAppIds,
+                        Long.valueOf(dataFreshnessInHour)
+                ),
+                new ETLRunnerConfig.InputOutputConfig(
+                        "false",
+                        database,
+                        sourceTable,
+                        sourcePath,
+                        jobDataDir,
+                        outputPath,
+                        outPutFormat
+                ),
+                new ETLRunnerConfig.TimestampConfig(
+                        Long.valueOf(startTimestamp),
+                        Long.valueOf(endTimestamp)
+                ),
+                new ETLRunnerConfig.PartitionConfig(
+                        -1, -1
+                ));
+
+        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
+        assertEquals(sourceDataset.count(), 1);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
+        dataset.printSchema();
+        System.out.println(dataset.first().prettyJson());
+        String expectedJson = this.resourceFileAsString("/expected/etl_runner_event2.json");
+        Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
+    }
 }

@@ -13,19 +13,20 @@
 
 package software.aws.solution.clickstream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
+import static java.util.Objects.requireNonNull;
 import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
 
@@ -34,6 +35,9 @@ public class BaseSparkTest {
 
     @BeforeAll
     public static void downloadResources() {
+       if (!needDownloadFile()) {
+           return;
+       }
         System.out.println("download GeoLite2-City.mmdb.gz...");
         String dbFile = downloadFile("https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz");
         System.out.println("download completed, " + dbFile);
@@ -79,5 +83,19 @@ public class BaseSparkTest {
     @AfterEach
     public void clear() {
         spark.stop();
+    }
+
+    public static boolean needDownloadFile(){
+       String dfile = System.getenv("DOWNLOAD_FILE");
+       if ("false".equals(dfile) || "0".equals(dfile)) {
+           return false;
+       }
+        return true;
+    }
+
+    public String resourceFileAsString(final String fileName) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        String jsonStr = Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8).trim();
+        return om.readTree(jsonStr).toPrettyString();
     }
 }

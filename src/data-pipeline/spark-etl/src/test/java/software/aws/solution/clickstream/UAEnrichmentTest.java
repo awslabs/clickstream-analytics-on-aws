@@ -15,7 +15,10 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,5 +77,18 @@ class UAEnrichmentTest extends BaseSparkTest {
 
         assertEquals("Other", browser);
         assertEquals(null, browser_version);
+    }
+
+    @Test
+    public void ua_enrich_for_data_v2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.UAEnrichmentTest.ua_enrich_for_data_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_v2.json")).getPath());
+
+        Dataset<Row> transformedDataset = uaEnrichment.transform(dataset);
+        String expectedJson = this.resourceFileAsString("/expected/ua_enrich_data_v2.json");
+        Assertions.assertEquals(expectedJson, transformedDataset.first().prettyJson());
     }
 }

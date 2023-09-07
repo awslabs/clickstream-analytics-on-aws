@@ -1,0 +1,74 @@
+{
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "id" : "item_id1",
+  "price" : 52.99,
+  "currency" : null,
+  "creative_name" : "Creative Name",
+  "creative_slot" : "Creative Slot",
+  "properties" : [ {
+    "key" : "name",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "French Press1"
+    }
+  }, {
+    "key" : "category",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "housewares"
+    }
+  }, {
+    "key" : "brand",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Brand1"
+    }
+  }, {
+    "key" : "category2",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Category-2"
+    }
+  }, {
+    "key" : "category3",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Category-3"
+    }
+  }, {
+    "key" : "category4",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Category-4"
+    }
+  }, {
+    "key" : "category5",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Category-5"
+    }
+  }, {
+    "key" : "location_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Location#001"
+    }
+  } ]
+}

@@ -44,12 +44,14 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 import static org.apache.spark.sql.functions.from_json;
 import static org.apache.spark.sql.functions.explode;
-import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.not;
+
 import static org.apache.spark.sql.types.DataTypes.StringType;
 import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
 import static software.aws.solution.clickstream.ContextUtil.DATA_FRESHNESS_HOUR_PROP;
@@ -124,7 +126,7 @@ public class Cleaner {
 
     }
 
-    public Dataset<Row> clean(final Dataset<Row> dataset) {
+    public Dataset<Row> clean(final Dataset<Row> dataset, final String schemaFile) {
         log.info(new ETLMetric(dataset, "clean enter").toString());
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
         ContextUtil.cacheDataset(decodedDataset);
@@ -132,7 +134,7 @@ public class Cleaner {
         log.info(new ETLMetric(decodedDataset, "after decodeDataColumn").toString());
         Dataset<Row> flattedDataset = flatDataColumn(decodedDataset);
         log.info(new ETLMetric(flattedDataset, "flatted source").toString());
-        Dataset<Row> structuredDataset = processDataColumnSchema(flattedDataset);
+        Dataset<Row> structuredDataset = processDataColumnSchema(flattedDataset, schemaFile);
         log.info(new ETLMetric(structuredDataset, "after processDataColumnSchema").toString());
         Dataset<Row> filteredDataSet = filter(structuredDataset);
         log.info(new ETLMetric(filteredDataSet, "after filter").toString());
@@ -144,10 +146,10 @@ public class Cleaner {
         return filteredDataSet;
     }
 
-    private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset) {
+    private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset, final String schemaFile) {
         String schemaString;
         try {
-            schemaString = Resources.toString(requireNonNull(getClass().getResource("/data_schema.json")), Charsets.UTF_8);
+            schemaString = Resources.toString(requireNonNull(getClass().getResource(schemaFile)), Charsets.UTF_8);
         } catch (IOException e) {
             throw new ExtractDataException(e);
         }
@@ -181,7 +183,9 @@ public class Cleaner {
         if (corruptedDatasetCount > 0) {
             String database = System.getProperty(DATABASE_PROP, "default");
             String jobName = System.getProperty(JOB_NAME_PROP);
-            corruptedDataset = corruptedDataset.withColumn(JOB_NAME_COL, lit(jobName));
+            corruptedDataset = corruptedDataset
+                    .withColumn(JOB_NAME_COL, lit(jobName))
+                    .withColumn("inputFileName", input_file_name());
 
             corruptedDataset = corruptedDataset.coalesce((int) (1 + corruptedDatasetCount/10000));
 

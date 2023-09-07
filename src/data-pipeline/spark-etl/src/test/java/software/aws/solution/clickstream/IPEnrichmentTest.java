@@ -15,12 +15,14 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
-import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.ContextUtil.*;
 
 class IPEnrichmentTest extends BaseSparkTest {
 
@@ -70,5 +72,20 @@ class IPEnrichmentTest extends BaseSparkTest {
         assertEquals(geo.getString(geo.fieldIndex("country")), null);
         assertEquals(geo.getString(geo.fieldIndex("continent")), null);
         assertEquals(geo.getString(geo.fieldIndex("city")), null);
+    }
+
+    @Test
+    public void ip_enrich_for_data_v2() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.IPEnrichmentTest.ip_enrich_for_data_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_v2.json")).getPath());
+        Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
+        System.out.println(transformedDataset.first().prettyJson());
+
+        String expectedJson = this.resourceFileAsString("/expected/ip_enrich_data_v2.json");
+        Assertions.assertEquals(expectedJson, transformedDataset.first().prettyJson());
     }
 }

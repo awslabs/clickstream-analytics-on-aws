@@ -59,11 +59,12 @@ public class IPEnrichment {
                 udfEnrichIP.apply(
                         col(GEO_FOR_ENRICH).getItem("ip"),
                         col(GEO_FOR_ENRICH).getItem("locale")
-                ));
+                )).drop(GEO_FOR_ENRICH);
+
         if (ContextUtil.isDebugLocal()) {
             ipEnrichDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ip-Dataset/");
         }
-        return ipEnrichDataset.drop(GEO_FOR_ENRICH);
+        return ipEnrichDataset;
     }
 
     private UDF2<String, String, Row> enrich() {
