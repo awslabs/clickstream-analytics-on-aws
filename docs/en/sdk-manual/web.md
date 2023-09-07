@@ -325,7 +325,7 @@ We define that users leave the page in the following situations.
 
 ```json
 {
-	"hashCode": "80452b0",
+	"hash_code": "80452b0",
 	"unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
 	"event_type": "add_to_cart",
 	"event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
@@ -336,8 +336,8 @@ We define that users leave the page in the following situations.
 	"locale": "zh_CN",
 	"screen_height": 1080,
 	"screen_width": 1920,
-    "viewport_height": 980,
-    "viewport_width": 1520,
+	"viewport_height": 980,
+	"viewport_width": 1520,
 	"zone_offset": 28800000,
 	"system_language": "zh",
 	"country_code": "CN",
@@ -386,7 +386,7 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 | Attribute name  | Data type | Description                                                  | How to generate                                              | Usage and purpose                                            |
 | --------------- | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| hashCode        | string    | the event object's hash code                                 | calculated by library `@aws-crypto/sha256-js`                | distinguish different events                                 |
+| hash_code       | string    | the event object's hash code                                 | calculated by library `@aws-crypto/sha256-js`                | distinguish different events                                 |
 | app_id          | string    | clickstream app id                                           | generated when clickstream app create from solution web console. | identify the events for your apps                            |
 | unique_id       | string    | the unique id for user                                       | generated from `uuidV4()` when the sdk first initialization<br> it will be changed after user re-login to another user who never login, and when user re-login to the before user in same browser, the unique_id will reset to the before user's unique_id | the unique for identity different users and associating the behavior of logging in and not logging in |
 | device_id       | string    | the unique id for device                                     | generated from `uuidV4()` when the website is first open, then the uuid will stored in localStorage and will never change it | distinguish different devices                                |
