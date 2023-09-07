@@ -134,7 +134,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      logger.info(`funnel sql: ${sql}`);
+      logger.debug(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
       const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
@@ -153,7 +153,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      logger.info(`funnel table chart sql: ${sqlTable}`);
+      logger.debug(`funnel table chart sql: ${sqlTable}`);
 
       const sqls = [sql, sqlTable];
       for ( const viewNm of [viewName, tableVisualViewName]) {
@@ -307,7 +307,7 @@ export class ReportingServ {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
       });
-      logger.info(`event analysis sql: ${sql}`);
+      logger.debug(`event analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -441,7 +441,7 @@ export class ReportingServ {
           },
         });
       }
-      logger.info(`path analysis sql: ${sql}`);
+      logger.debug(`path analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -533,7 +533,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
       });
-      logger.info(`retention analysis sql: ${sql}`);
+      logger.debug(`retention analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -634,7 +634,6 @@ export class ReportingServ {
     };
 
     const params = new BatchExecuteStatementCommand(input);
-    // cachedObjs.redshiftDataClient!.send(params);
     cachedObjs.redshiftDataClient!.send(params).then( executeResponse => {
       const checkParams = new DescribeStatementCommand({
         Id: executeResponse.Id,
