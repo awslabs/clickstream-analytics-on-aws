@@ -105,6 +105,7 @@ export class AddAdminUser extends Construct {
         }),
       ]),
       timeout: Duration.minutes(1),
+      installLatestAwsSdk: false,
     },
     );
   }
