@@ -315,7 +315,7 @@ We define that users leave the page in the following situations.
 1. When the user navigates to another page under the current domain.
 2. When user click a link that leads away from the current domain. 
 3. When user click another browser tab or minimize the current browser window.
-4.  When user close the website tab or close the browser application.
+4. When user close the website tab or close the browser application.
 
 **engagement_time_msec**: We calculate the milliseconds from when a page is visible to when the user leave the page.
 
