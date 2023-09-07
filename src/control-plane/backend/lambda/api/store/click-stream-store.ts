@@ -16,6 +16,7 @@ import { IDictionary } from '../model/dictionary';
 import { IPipeline } from '../model/pipeline';
 import { IPlugin } from '../model/plugin';
 import { IDashboard, IProject } from '../model/project';
+import { IUser } from '../model/user';
 
 export interface ClickStreamStore {
   createProject: (project: IProject) => Promise<string>;
@@ -52,6 +53,12 @@ export interface ClickStreamStore {
   deletePlugin: (pluginId: string, operator: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
   bindPlugins: (pluginIds: string[], count: number) => Promise<void>;
+
+  addUser: (user: IUser) => Promise<string>;
+  getUser: (uid: string) => Promise<IUser | undefined>;
+  updateUser: (user: IUser) => Promise<void>;
+  listUser: () => Promise<IUser[]>;
+  deleteUser: (uid: string, operator: string) => Promise<void>;
 
   getDictionary: (name: string) => Promise<IDictionary | undefined>;
   listDictionary: () => Promise<IDictionary[]>;

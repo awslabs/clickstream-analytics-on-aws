@@ -44,6 +44,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import dictionary from './config/dictionary.json';
+import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
@@ -82,12 +83,14 @@ export interface ClickStreamApiProps {
   readonly pluginPrefix: string;
   readonly authProps?: AuthProps;
   readonly healthCheckPath: string;
+  readonly adminUserEmail: string;
 }
 
 export class ClickStreamApiConstruct extends Construct {
   public readonly clickStreamApiFunction: Function;
   public readonly lambdaRestApi?: RestApi;
   public readonly batchInsertDDBCustomResource: BatchInsertDDBCustomResource;
+  public readonly addAdminUserCustomResource: AddAdminUser;
 
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
@@ -170,11 +173,28 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
 
+    const userTable = new Table(this, 'ClickstreamUser', {
+      partitionKey: {
+        name: 'uid',
+        type: AttributeType.STRING,
+      },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+      encryption: TableEncryption.AWS_MANAGED,
+    });
+
     // Dictionary data init
     this.batchInsertDDBCustomResource = new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
       table: dictionaryTable,
       items: dictionary,
       targetToCNRegions: props.targetToCNRegions ?? false,
+    });
+
+    // Add admin user
+    this.addAdminUserCustomResource = new AddAdminUser(this, 'AddAdminUserCustomResource', {
+      uid: props.adminUserEmail,
+      userTable: userTable,
     });
 
     let apiFunctionProps = {};
@@ -366,6 +386,7 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
+        USER_TABLE_NAME: userTable.tableName,
         ANALYTICS_METADATA_TABLE_NAME: analyticsMetadataTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         STACK_WORKFLOW_SATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
@@ -393,9 +414,11 @@ export class ClickStreamApiConstruct extends Construct {
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
+    userTable.grantReadWriteData(this.clickStreamApiFunction);
     if (props.authProps?.authorizerTable) {
       props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
     }
+
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
 

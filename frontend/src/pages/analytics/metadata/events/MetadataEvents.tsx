@@ -51,11 +51,10 @@ const MetadataEvents: React.FC = () => {
       },
       minWidth: 180,
       editConfig: {
-        ariaLabel: 'Edit display name',
-        errorIconAriaLabel: 'Display Name Validation Error',
-        editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return !displayNameRegex.test(value) ? undefined : 'Invalid input';
+          return !displayNameRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
         },
         editingCell: (
           item: { displayName: string },
@@ -64,12 +63,11 @@ const MetadataEvents: React.FC = () => {
           return (
             <Input
               autoFocus={true}
-              ariaLabel="Edit display name"
               value={currentValue ?? item.displayName}
               onChange={(event) => {
                 setValue(event.detail.value);
               }}
-              placeholder="Enter display name"
+              placeholder={t('tag.valuePlaceholder') ?? ''}
             />
           );
         },
@@ -83,11 +81,10 @@ const MetadataEvents: React.FC = () => {
       },
       minWidth: 180,
       editConfig: {
-        ariaLabel: 'Edit description',
-        errorIconAriaLabel: 'Description Validation Error',
-        editIconAriaLabel: 'editable',
         validation(item: any, value: any) {
-          return !descriptionRegex.test(value) ? undefined : 'Invalid input';
+          return !descriptionRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
         },
         editingCell: (
           item: { description: string },
@@ -96,12 +93,11 @@ const MetadataEvents: React.FC = () => {
           return (
             <Input
               autoFocus={true}
-              ariaLabel="Edit description"
               value={currentValue ?? item.description}
               onChange={(event) => {
                 setValue(event.detail.value);
               }}
-              placeholder="Enter description"
+              placeholder={t('tag.valuePlaceholder') ?? ''}
             />
           );
         },
@@ -238,11 +234,10 @@ const MetadataEvents: React.FC = () => {
             filteringPlaceholder: t(
               'analytics:metadata.event.filteringPlaceholder'
             ),
-            groupPropertiesText: t(
-              'analytics:metadata.event.groupPropertiesText'
-            ),
-            operatorsText: t('analytics:metadata.event.operatorsText'),
-            clearFiltersText: t('analytics:metadata.event.clearFiltersText'),
+            groupPropertiesText: t('button.groupPropertiesText'),
+            operatorsText: t('button.operatorsText'),
+            clearFiltersText: t('button.clearFiltersText'),
+            applyActionText: t('button.applyActionText'),
             useText: t('common:table.useText'),
             matchText: t('common:table.matchText'),
             matchesText: t('common:table.matchesText'),

@@ -1,0 +1,19 @@
+{
+  "labels": {
+    "title": "User",
+    "tableColumnUserId": "User ID",
+    "tableColumnName": "User name",
+    "tableColumnRole": "Role",
+    "tableColumnCreateAt": "Create time",
+    "tableEmpty": "No users",
+    "tableLoading": "Loading",
+    "filteringAriaLabel": "Find users",
+    "filteringPlaceholder": "Find users"
+  },
+  "options": {
+    "admin": "Administrator",
+    "operator": "Operator",
+    "analyst": "Analyst"
+  },
+  "emptyData": "No Data"
+}

@@ -397,3 +397,9 @@ export const CLOUDFORMATION_STATUS_MAP: any = {
 };
 
 export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';
+
+export enum IUserRole {
+  ADMIN = 'Admin',
+  OPERATOR = 'Operator',
+  ANALYST = 'Analyst',
+}

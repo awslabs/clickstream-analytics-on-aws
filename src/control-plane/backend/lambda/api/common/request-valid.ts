@@ -213,6 +213,18 @@ export const isPluginIdValid: CustomValidator = value => {
   });
 };
 
+export const isUserValid: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  return store.getUser(value).then(existed => {
+    if (!existed) {
+      return Promise.reject('User resource does not exist.');
+    }
+    return true;
+  });
+};
+
 export const isEmails: CustomValidator = value => {
   if (isEmpty(value)) {
     return Promise.reject('Value is empty.');

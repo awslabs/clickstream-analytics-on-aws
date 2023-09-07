@@ -87,7 +87,7 @@ describe('CloudFrontS3PotalStack', () => {
 
     // Check Cloudfront Function
     commonTemplate.hasResourceProperties('AWS::CloudFront::Function', {
-      FunctionCode: "function handler(event) {\n  var request = event.request;\n  var uri = request.uri;\n  if (uri.startsWith('/signin') || \n    uri.startsWith('/projects') || \n    uri.startsWith('/project') || \n    uri.startsWith('/pipelines') || \n    uri.startsWith('/plugins') || \n    uri.startsWith('/alarms') ||  \n    uri.startsWith('/analytics') || \n    uri.startsWith('/quicksight')) {\n      request.uri = '/index.html'; \n  }\n  return request; \n}",
+      FunctionCode: "function handler(event) {\n  var request = event.request;\n  var uri = request.uri;\n  if (uri.startsWith('/signin') || \n    uri.startsWith('/projects') || \n    uri.startsWith('/project') || \n    uri.startsWith('/pipelines') || \n    uri.startsWith('/plugins') || \n    uri.startsWith('/alarms') || \n    uri.startsWith('/user') || \n    uri.startsWith('/analytics') || \n    uri.startsWith('/quicksight')) {\n      request.uri = '/index.html'; \n  }\n  return request; \n}",
       AutoPublish: true,
     });
   });
@@ -402,6 +402,7 @@ describe('CloudFrontS3PotalStack', () => {
     commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
@@ -431,6 +432,7 @@ describe('CloudFrontS3PotalStack', () => {
 
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
@@ -503,6 +505,7 @@ describe('CloudFrontS3PotalStack', () => {
 
     expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
       .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',

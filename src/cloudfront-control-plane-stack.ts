@@ -141,7 +141,8 @@ export class CloudFrontControlPlaneStack extends Stack {
     uri.startsWith('/project') || 
     uri.startsWith('/pipelines') || 
     uri.startsWith('/plugins') || 
-    uri.startsWith('/alarms') ||  
+    uri.startsWith('/alarms') || 
+    uri.startsWith('/user') || 
     uri.startsWith('/analytics') || 
     uri.startsWith('/quicksight')) {
       request.uri = '/index.html'; 
@@ -215,9 +216,9 @@ export class CloudFrontControlPlaneStack extends Stack {
     let issuer: string;
     let clientId: string;
     let oidcLogoutUrl: string = '';
+    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
     //Create Cognito user pool and client for backend api
     if (createCognitoUserPool) {
-      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
       this.addToParamLabels('Admin User Email', emailParamerter.logicalId);
       this.addToParamGroups('Authentication Information', emailParamerter.logicalId);
 
@@ -285,6 +286,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
       healthCheckPath: '/',
+      adminUserEmail: emailParamerter.valueAsString,
     });
 
     if (!clickStreamApi.lambdaRestApi) {
@@ -421,10 +423,39 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W76',
+          reason:
+          'This policy needs to be able to call other AWS service by design',
+        },
+      ],
+    },
+    {
+      paths_endswith: [
+        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W89',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
+        },
+        {
+          id: 'W92',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
+        },
+      ],
+    },
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider');
   NagSuppressions.addStackSuppressions(stack, [
     {
       id: 'AwsSolutions-IAM4',

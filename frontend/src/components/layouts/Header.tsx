@@ -12,12 +12,14 @@
  */
 
 import { TopNavigation } from '@cloudscape-design/components';
+import { UserContext } from 'context/UserContext';
 import { useLocalStorage } from 'pages/common/use-local-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   ANALYTICS_INFO_KEY,
+  IUserRole,
   PROJECT_CONFIG_JSON,
   ZH_LANGUAGE_LIST,
 } from 'ts/const';
@@ -51,6 +53,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       appName: '',
     }
   );
+  const currentUser = useContext(UserContext);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -96,7 +99,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     <header id="h">
       <TopNavigation
         identity={{
-          href: '/',
+          href: currentUser?.role === IUserRole.ANALYST ? '/analytics' : '/',
           title: t('header.solution') ?? '',
         }}
         utilities={
@@ -138,11 +141,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                   onItemClick: (item) => {
                     if (item.detail.id === 'signout') {
                       if (fullLogoutUrl) {
-                        signOut && signOut();
+                        signOut?.();
                         window.location.href = fullLogoutUrl;
-                      } else {
-                        signOut && signOut();
                       }
+                      signOut?.();
                     }
                   },
                   items: [{ id: 'signout', text: t('header.signOut') || '' }],
@@ -178,11 +180,10 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                   onItemClick: (item) => {
                     if (item.detail.id === 'signout') {
                       if (fullLogoutUrl) {
-                        signOut && signOut();
+                        signOut?.();
                         window.location.href = fullLogoutUrl;
-                      } else {
-                        signOut && signOut();
                       }
+                      signOut?.();
                     }
                   },
                   items: [{ id: 'signout', text: t('header.signOut') || '' }],

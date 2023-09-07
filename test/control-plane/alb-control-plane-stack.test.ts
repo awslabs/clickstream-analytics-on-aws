@@ -242,6 +242,7 @@ describe('ALBPotalStack - exist VPC - private - no custom domain', () => {
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
         'ClickStreamApiApiFunction684A4D61',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
       PackageType: 'Image',

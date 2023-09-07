@@ -23,6 +23,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
         'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+        'testClickStreamALBApiClickstreamUser54DFA2EE',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
@@ -116,6 +117,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
         'testClickStreamALBApiApiFunction9890103B',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -306,6 +308,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D',
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
@@ -520,6 +523,34 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     '/index/*',
                   ],
                 ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamUser54DFA2EE',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
               },
             ],
           },

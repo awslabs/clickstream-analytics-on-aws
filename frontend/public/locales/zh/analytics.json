@@ -60,9 +60,6 @@
       "tableEmpty": "没有事件",
       "filteringAriaLabel": "查找事件",
       "filteringPlaceholder": "查找事件",
-      "groupPropertiesText": "属性",
-      "operatorsText": "操作符",
-      "clearFiltersText": "清除过滤器",
       "split": {
         "title": "事件详细信息",
         "associatedPresetParameters": "关联的预设参数",
@@ -91,9 +88,6 @@
       "tableEmpty": "没有事件参数",
       "filteringAriaLabel": "查找参数",
       "filteringPlaceholder": "查找参数",
-      "groupPropertiesText": "属性",
-      "operatorsText": "操作符",
-      "clearFiltersText": "清除过滤器",
       "split": {
         "title": "事件参数详细信息",
         "associatedEvents": "关联的事件",
@@ -116,9 +110,6 @@
       "tableEmpty": "没有用户属性",
       "filteringAriaLabel": "查找属性",
       "filteringPlaceholder": "查找属性",
-      "groupPropertiesText": "属性",
-      "operatorsText": "操作符",
-      "clearFiltersText": "清除过滤器",
       "split": {
         "title": "用户属性详细信息",
         "tableLoading": "加载中",

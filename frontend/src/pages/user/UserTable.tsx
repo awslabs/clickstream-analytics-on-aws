@@ -23,12 +23,10 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
-import { MetadataTableHeader } from './MetadataTableHeader';
-import '../../styles/table-select.scss';
-import { descriptionRegex, displayNameRegex } from './table-config';
+import { XSS_PATTERN } from 'ts/constant-ln';
+import { UserTableHeader } from './UserTableHeader';
 
-interface MetadataTableProps {
-  resourceName: string;
+interface UserTableProps {
   tableColumnDefinitions: any[];
   tableContentDisplay: any[];
   tableFilteringProperties: any[];
@@ -36,7 +34,6 @@ interface MetadataTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
-    headerRefreshButtonText: string;
     filteringAriaLabel: string;
     filteringPlaceholder: string;
     groupPropertiesText: string;
@@ -48,31 +45,16 @@ interface MetadataTableProps {
     matchesText: string;
   };
   selectionType?: 'multi' | 'single';
-  loadHelpPanelContent: () => void;
-  setShowDetails: (
-    show: boolean,
-    data?: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => void;
-  fetchDataFunc: () => Promise<
-    IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]
-  >;
-  fetchUpdateFunc: (
-    item: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => Promise<void>;
+  fetchDataFunc: () => Promise<IUser[]>;
+  fetchUpdateFunc: (item: IUser) => Promise<void>;
 }
 
-const MetadataTable: React.FC<MetadataTableProps> = (
-  props: MetadataTableProps
-) => {
+const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
   const {
-    selectionType,
-    resourceName,
     tableColumnDefinitions,
     tableContentDisplay,
     tableFilteringProperties,
     tableI18nStrings,
-    loadHelpPanelContent,
-    setShowDetails,
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
@@ -82,12 +64,11 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
 
   const [columnDefinitions, saveWidths] = useColumnWidths(
-    `Metadata-${resourceName}-TableSelectFilter-Widths`,
+    `User-TableSelectFilter-Widths`,
     tableColumnDefinitions
   );
 
   const persistChanges = () => {
-    setData(data);
     setItemsSnap([]);
   };
 
@@ -116,7 +97,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   } = useCollection(data, {
     propertyFiltering: {
       filteringProperties: tableFilteringProperties,
-      empty: <TableEmptyState resourceName={resourceName} />,
+      empty: <TableEmptyState resourceName="User" />,
       noMatch: (
         <TableNoMatchState
           onClearFilter={() => {
@@ -129,17 +110,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     sorting: { defaultState: { sortingColumn: columnDefinitions[0] } },
     selection: {},
   });
-
-  useEffect(() => {
-    if (
-      collectionProps.selectedItems &&
-      collectionProps.selectedItems?.length > 0
-    ) {
-      setShowDetails(true, collectionProps.selectedItems[0]);
-    } else {
-      setShowDetails(false);
-    }
-  }, [collectionProps.selectedItems]);
 
   const tablePaginationProps = {
     ...paginationProps,
@@ -167,18 +137,8 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     },
   };
 
-  const handleSubmit = async (
-    currentItem:
-      | IMetadataEvent
-      | IMetadataEventParameter
-      | IMetadataUserAttribute,
-    column: any,
-    value: any
-  ) => {
-    if (
-      (column.id === 'displayName' && displayNameRegex.test(value)) ||
-      (column.id === 'description' && descriptionRegex.test(value))
-    ) {
+  const handleSubmit = async (currentItem: IUser, column: any, value: any) => {
+    if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
     const newItem = { ...currentItem, [column.id]: value };
@@ -213,7 +173,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
         loading={loadingData}
         items={itemsSnap.length > 0 ? itemsSnap : items}
         loadingText={tableI18nStrings.loadingText}
-        selectionType={selectionType ?? 'single'}
         onColumnWidthsChange={saveWidths}
         columnDefinitions={columnDefinitions}
         submitEdit={handleSubmit}
@@ -226,9 +185,8 @@ const MetadataTable: React.FC<MetadataTableProps> = (
           </Box>
         }
         header={
-          <MetadataTableHeader
+          <UserTableHeader
             title={tableI18nStrings.headerTitle}
-            refreshButtonText={tableI18nStrings.headerRefreshButtonText}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
               !loadingData &&
@@ -237,10 +195,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
                 ? `(${collectionProps.selectedItems.length}/${data.length})`
                 : `(${data.length})`
             }
-            onInfoLinkClick={loadHelpPanelContent}
-            onRefreshButtonClick={() => {
-              console.log('refresh button clicked');
-            }}
           />
         }
         filter={
@@ -271,4 +225,4 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   );
 };
 
-export default MetadataTable;
+export default UserTable;

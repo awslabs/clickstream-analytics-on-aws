@@ -166,12 +166,12 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     let issuer: string;
     let clientId: string;
     let oidcLogoutUrl: string = '';
+    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
     /**
      * Create Cognito user pool and client for backend api,
      * The client of Congito requires the redirect url using HTTPS
      */
     if (!props.useExistingOIDCProvider && props.useCustomDomain) {
-      const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
       this.paramLabels[emailParamerter.logicalId] = {
         default: 'Admin User Email',
       };
@@ -237,6 +237,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
       healthCheckPath: healthCheckPath,
+      adminUserEmail: emailParamerter.valueAsString,
     });
 
     controlPlane.addRoute('api-targets', {
@@ -303,6 +304,23 @@ function addCfnNag(stack: Stack) {
           id: 'W76',
           reason:
           'This policy needs to be able to call other AWS service by design',
+        },
+      ],
+    },
+    {
+      paths_endswith: [
+        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W89',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
+        },
+        {
+          id: 'W92',
+          reason:
+          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
         },
       ],
     },

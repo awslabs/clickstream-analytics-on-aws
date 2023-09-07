@@ -407,3 +407,9 @@ export enum FetchType {
   PIPELINE_DOMAIN= 'PipelineDomain',
   PIPELINE_DNS= 'PipelineDNS',
 }
+
+export enum IUserRole {
+  ADMIN = 'Admin',
+  OPERATOR = 'Operator',
+  ANALYST = 'Analyst',
+}
