@@ -40,12 +40,12 @@ test-deploy*
 deployment/global-s3-assets/
 deployment/regional-s3-assets/
 deployment/open-source/
+.viperlightrc
 codescan-funcs.sh
 codescan-*-default.sh
 *.iml
 *.ipr
 *.iws
-.viperlightrc
 src/data-pipeline/spark-etl/.gradle
 src/data-pipeline/spark-etl/build
 src/data-pipeline/spark-etl/bin

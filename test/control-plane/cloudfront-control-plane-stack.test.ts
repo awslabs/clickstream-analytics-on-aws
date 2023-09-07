@@ -759,7 +759,7 @@ describe('CloudFrontS3PotalStack', () => {
       },
       Architectures: Match.absent(),
       Handler: 'index.handler',
-      Runtime: 'nodejs16.x',
+      Runtime: 'nodejs18.x',
     },
     );
 

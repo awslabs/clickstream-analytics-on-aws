@@ -13,10 +13,13 @@
 
 import { Annotations, App, Aspects, IAspect, Stack } from 'aws-cdk-lib';
 import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
+import { IConstruct } from 'constructs';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
+import { SolutionInfo } from './common/solution-info';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
@@ -24,9 +27,6 @@ import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack'
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { IConstruct } from 'constructs';
-import { SolutionInfo } from './common/solution-info';
 import { SolutionNodejsFunction } from './private/function';
 
 const app = new App();

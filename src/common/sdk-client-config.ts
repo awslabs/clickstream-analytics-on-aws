@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { UserAgent } from '@aws-sdk/types';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 const userAgent: UserAgent = [[<string>process.env.USER_AGENT_STRING ?? '']];
 export const aws_sdk_client_common_config = {
