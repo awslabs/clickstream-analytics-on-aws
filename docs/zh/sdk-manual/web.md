@@ -2,7 +2,7 @@
 
 ## 介绍
 
-Clickstream Web SDK 可以帮助您通过此解决方案配置的数据管道轻松收集从浏览器到您的 AWS 环境的点击流数据。
+Clickstream Web SDK 可以帮助您轻松将Web网站里的点击流数据发送到您的 AWS 环境中。作为解决方案 {{ solution_name }} 的一部分，SDK将点击流数据发送到该解决方案创建的数据管道中，并由数据管道处理和导入到 AWS 的分析服务中，如 Amazon S3 和 Amazon Redshift。
 
 该 SDK 基于 amplify-js SDK核心库，按照amplify-js SDK插件规范开发。此外，该 SDK 还配备了自动收集常见用户事件和属性（例如页面浏览、首次打开）的功能，以简化用户的数据收集。
 
