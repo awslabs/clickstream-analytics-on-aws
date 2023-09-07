@@ -4459,8 +4459,6 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    console.log(sql);
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
     app1.testview AS
   with

@@ -109,15 +109,12 @@ export class ReportingServ {
 
   async createFunnelVisual(req: any, res: any, next: any) {
 
-    const startTime = new Date().getTime();
     try {
       logger.info('start to create funnel analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-
-      const t1 = new Date().getTime();
 
       //construct parameters to build sql
       const viewName = query.viewName;
@@ -137,8 +134,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      const t2 = new Date().getTime();
-      logger.info(`buildFunnelView: ${t2 - t1}ms`);
+      logger.info(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
       const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
@@ -157,9 +153,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
       });
 
-      console.log(`funnel table sql: ${sqlTable}`);
-      const t3 = new Date().getTime();
-      logger.info(`buildFunnelDataSql: ${t3 - t2}ms`);
+      logger.info(`funnel table chart sql: ${sqlTable}`);
 
       const sqls = [sql, sqlTable];
       for ( const viewNm of [viewName, tableVisualViewName]) {
@@ -260,14 +254,7 @@ export class ReportingServ {
         }
       }
       const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
-
-      const t4 = new Date().getTime();
-      logger.info(`getFunnelTableVisualDef: ${t4 - t3}ms`);
-
       const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
-
-      const t5 = new Date().getTime();
-      logger.info(`getFunnelTableVisualRelatedDefs: ${t5 - t4}ms`);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
 
@@ -287,11 +274,6 @@ export class ReportingServ {
         name: 'TABLE',
         id: tableVisualId,
       });
-
-      const t6 = new Date().getTime();
-      logger.info(`create quicksight resources: ${t6 - t5}ms`);
-
-      logger.info(`createFunnelVisual: ${t6 - startTime}ms`);
 
       return res.status(201).json(new ApiSuccess(result));
 
@@ -325,7 +307,7 @@ export class ReportingServ {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
       });
-      console.log(`event analysis sql: ${sql}`);
+      logger.info(`event analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -459,7 +441,7 @@ export class ReportingServ {
           },
         });
       }
-      console.log(`path analysis sql: ${sql}`);
+      logger.info(`path analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -551,7 +533,7 @@ export class ReportingServ {
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
       });
-      console.log(`retention analysis sql: ${sql}`);
+      logger.info(`retention analysis sql: ${sql}`);
 
       const sqls = [sql];
       sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
@@ -634,16 +616,12 @@ export class ReportingServ {
   private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
-    const startTime = new Date().getTime();
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     if (cachedContents === undefined) {
       cachedContents = new CachedContents();
     }
     const cachedObjs = await cachedContents.getCachedObjects(query.projectId, query.appId,
       dashboardCreateParameters.region, dashboardCreateParameters.redshift.dataApiRole);
-
-    const t1 = new Date().getTime();
-    logger.info(`cached contents: ${t1 - startTime}ms`);
 
     //create view in redshift
     const input = {
@@ -681,9 +659,6 @@ export class ReportingServ {
       logger.error(error);
     });
 
-    const t4 = new Date().getTime();
-    logger.info(`create redshift views: ${t4 - t1}ms`);
-
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
     for (const datasetProps of datasetPropsArray) {
@@ -701,9 +676,6 @@ export class ReportingServ {
 
       logger.info(`created dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
     }
-
-    const t4_5 = new Date().getTime();
-    logger.info(`create data set: ${t4_5 - t4}ms`);
 
     visualPropsArray[0].dataSetIdentifierDeclaration.push(...dataSetIdentifierDeclaration);
 
@@ -725,10 +697,6 @@ export class ReportingServ {
       visuals: visualPropsArray,
       dashboardDef: dashboardDef as DashboardVersionDefinition,
     });
-
-    const t5 = new Date().getTime();
-    logger.info(`create dashboard definition: ${t5 - t4_5}ms`);
-
     logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
     let result: CreateDashboardResult;
@@ -854,9 +822,6 @@ export class ReportingServ {
         visualIds: [],
       };
     }
-
-    const t6 = new Date().getTime();
-    logger.info(`create dashboard: ${t6 - t5}ms`);
 
     return result;
   };
