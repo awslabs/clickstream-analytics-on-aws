@@ -946,10 +946,21 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
       mid_table as (
         select 
         day::date as event_date,
-        node,
         user_pseudo_id,
         event_id,
-        event_timestamp
+        event_timestamp,
+        (
+          select
+              ep.value.string_value
+            from
+              base_data e,
+              e.event_params ep
+            where
+              ep.key = '${sqlParameters.pathAnalysis!.nodeType}'
+              and e.event_id = base.event_id
+            limit
+              1
+        )::varchar as node
       from base_data base
       where node in (${ '\'' + sqlParameters.pathAnalysis!.nodes!.join('\',\'') + '\''})
       ),
@@ -963,12 +974,10 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
       from (
         select  
           event_date,
-          event_name,
           user_pseudo_id,
           event_id,
           event_timestamp,
-          session_id,
-          replace(node, '"', '') as node
+          node
         from mid_table
         ) t 
     ),
