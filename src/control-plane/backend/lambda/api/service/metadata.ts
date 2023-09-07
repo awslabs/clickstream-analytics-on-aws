@@ -21,6 +21,30 @@ const metadataStore: MetadataStore = new DynamoDbMetadataStore();
 
 export class MetadataEventServ {
 
+  public async listPathNodes(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.query;
+      const pageView = await metadataStore.getEvent(projectId, appId, '_page_view');
+      const screenView = await metadataStore.getEvent(projectId, appId, '_screen_view');
+      const pageTitles: IMetadataEventParameter =
+      pageView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_page_title') as IMetadataEventParameter;
+      const pageUrls: IMetadataEventParameter =
+      pageView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_page_url') as IMetadataEventParameter;
+      const screenNames: IMetadataEventParameter =
+      screenView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_screen_name') as IMetadataEventParameter;
+      const screenIds: IMetadataEventParameter =
+      screenView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_screen_id') as IMetadataEventParameter;
+      return res.json(new ApiSuccess({
+        pageTitles: pageTitles?.valueEnum ?? [],
+        pageUrls: pageUrls?.valueEnum ?? [],
+        screenNames: screenNames?.valueEnum ?? [],
+        screenIds: screenIds?.valueEnum ?? [],
+      }));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, order, attribute } = req.query;

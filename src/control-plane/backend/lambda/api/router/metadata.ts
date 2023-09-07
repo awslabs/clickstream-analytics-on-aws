@@ -22,6 +22,16 @@ const metadataEventParameterServ: MetadataEventParameterServ = new MetadataEvent
 const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
 
 router_metadata.get(
+  '/pathNodes',
+  validate([
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataEventServ.listPathNodes(req, res, next);
+  });
+
+router_metadata.get(
   '/events',
   validate([
     query('projectId').custom(isValidEmpty),

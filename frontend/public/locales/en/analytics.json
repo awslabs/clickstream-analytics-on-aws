@@ -192,7 +192,8 @@
     "eventsSelect": "Select events",
     "sessionDefinition": "Session definition",
     "nodeType": "Node type",
-    "nodesSelect": "Select nodes"
+    "nodesSelect": "Select nodes",
+    "pathNode": "Node"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

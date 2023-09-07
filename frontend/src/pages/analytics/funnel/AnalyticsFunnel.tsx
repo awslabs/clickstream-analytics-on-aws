@@ -66,10 +66,10 @@ import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
   getDateRange,
-  getConversionIntervalInSeconds,
   getEventAndConditions,
   getFirstEventAndConditions,
   getDashboardCreateParameters,
+  getIntervalInSeconds,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -323,7 +323,7 @@ const AnalyticsFunnel: React.FC = () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType:
         selectedWindowType?.value ?? ExploreConversionIntervalType.CURRENT_DAY,
-      conversionIntervalInSeconds: getConversionIntervalInSeconds(
+      conversionIntervalInSeconds: getIntervalInSeconds(
         selectedWindowType,
         selectedWindowUnit,
         windowValue

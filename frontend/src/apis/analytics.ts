@@ -188,3 +188,11 @@ export const getPipelineDetailByProjectId = async (projectId: string) => {
   );
   return result;
 };
+
+export const getPathNodes = async (projectId: string, appId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/pathNodes?projectId=${projectId}&appId=${appId}`
+  );
+  return result;
+};

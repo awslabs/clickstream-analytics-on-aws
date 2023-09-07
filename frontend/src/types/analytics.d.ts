@@ -117,6 +117,9 @@ declare global {
     readonly lastN?: number;
     readonly timeUnit?: ExploreRelativeTimeUnit;
     readonly groupColumn: ExploreGroupColumn;
+    readonly maxStep?: number;
+    readonly pathAnalysis?: IPathAnalysisParameter;
+    readonly pairEventAndConditions?: IPairEventAndCondition[];
   }
   interface ICondition {
     readonly category:
@@ -180,8 +183,19 @@ declare global {
     readonly deleted: boolean;
   }
 
-  export interface IAnalyticsDashboardSheet {
+  interface IAnalyticsDashboardSheet {
     readonly id: string;
     readonly name: string;
+  }
+  interface IPathAnalysisParameter {
+    readonly platform?: MetadataPlatform;
+    readonly sessionType: ExplorePathSessionDef;
+    readonly nodeType: ExplorePathNodeType;
+    readonly lagSeconds?: number;
+    readonly nodes?: string[];
+  }
+  interface IPairEventAndCondition {
+    readonly startEvent: IEventAndCondition;
+    readonly backEvent: IEventAndCondition;
   }
 }

@@ -28,6 +28,7 @@ import RelationOr from './comps/RelationOr';
 interface EventsSelectProps {
   data: IEventAnalyticsItem[];
   eventOptionList: CategoryItemType[];
+  disableAddCondition?: boolean;
   addEventButtonLabel: string;
   addNewEventAnalyticsItem: () => void;
   removeEventItem: (index: number) => void;
@@ -64,6 +65,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
   const {
     data,
     eventOptionList,
+    disableAddCondition,
     addEventButtonLabel,
     addNewEventAnalyticsItem,
     removeEventItem,
@@ -105,15 +107,17 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                   categories={eventOptionList}
                 />
               </div>
-              <div className="ml-5">
-                <Button
-                  onClick={() => {
-                    addNewConditionItem(index);
-                  }}
-                  variant="link"
-                  iconName="add-plus"
-                />
-              </div>
+              {!disableAddCondition && (
+                <div className="ml-5">
+                  <Button
+                    onClick={() => {
+                      addNewConditionItem(index);
+                    }}
+                    variant="link"
+                    iconName="add-plus"
+                  />
+                </div>
+              )}
               <div className="event-delete">
                 {index > 0 && (
                   <span className="remove-icon">
