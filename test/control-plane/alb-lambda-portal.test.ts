@@ -814,7 +814,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
   test('Public method addRoute', () => {
     const stackElements = TestEnv.newAlbStackWithDefaultPortal();
     const testFn = new Function(stackElements.stack, 'testFunction', {
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: new InlineCode('test'),
     });

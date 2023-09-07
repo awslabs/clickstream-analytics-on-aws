@@ -15,7 +15,6 @@ import { join } from 'path';
 import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import {
   Choice,
@@ -38,6 +37,7 @@ import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface StackWorkflowStateMachineProps {
   readonly stateActionMachine: StateMachine;
@@ -73,7 +73,7 @@ export class StackWorkflowStateMachine extends Construct {
     });
     cfnPolicy.attachToRole(workflowFunctionRole);
 
-    const workflowFunction = new NodejsFunction(this, 'WorkflowFunction', {
+    const workflowFunction = new SolutionNodejsFunction(this, 'WorkflowFunction', {
       description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-workflow/index.ts'),
       handler: 'handler',

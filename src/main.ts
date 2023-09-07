@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { App, Aspects, Stack } from 'aws-cdk-lib';
+import { Annotations, App, Aspects, IAspect, Stack } from 'aws-cdk-lib';
+import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
@@ -23,6 +24,10 @@ import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack'
 import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { IConstruct } from 'constructs';
+import { SolutionInfo } from './common/solution-info';
+import { SolutionNodejsFunction } from './private/function';
 
 const app = new App();
 
@@ -246,6 +251,35 @@ Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {
   Aspects.of(app).add(new CompositeECRRepositoryAspect());
 }
+
+class UserAgentAspect implements IAspect {
+
+  public visit(node: IConstruct): void {
+    this.applyUserAgentAspect(node);
+  }
+
+  private applyUserAgentAspect(node: IConstruct): void {
+    if (node instanceof Function) {
+      node.addEnvironment('USER_AGENT_STRING', `AWSSOLUTION/${SolutionInfo.SOLUTION_ID}/${SolutionInfo.SOLUTION_VERSION}`);
+    }
+  }
+}
+Aspects.of(app).add(new UserAgentAspect());
+
+class NodejsFunctionSanityAspect implements IAspect {
+
+  public visit(node: IConstruct): void {
+    if (node instanceof NodejsFunction) {
+      if (!(node instanceof SolutionNodejsFunction)) {
+        Annotations.of(node).addError('Directly using NodejsFunction is not allowed in the solution. Use SolutionNodejsFunction instead.');
+      }
+      if (node.runtime != Runtime.NODEJS_18_X) {
+        Annotations.of(node).addError('You must use Nodejs 18.x runtime for Lambda with javascript in this solution.');
+      }
+    }
+  }
+}
+Aspects.of(app).add(new NodejsFunctionSanityAspect());
 
 function synthesizer() {
   return process.env.USE_BSS ? new BootstraplessStackSynthesizer(): undefined;

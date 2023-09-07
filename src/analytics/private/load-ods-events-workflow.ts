@@ -19,7 +19,6 @@ import { Rule, Match, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Role, ServicePrincipal, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map, Condition, Pass, Fail, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -34,6 +33,7 @@ import { getPutMericsPolicyStatements } from '../../common/metrics';
 import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface LoadODSEventToRedshiftWorkflowProps {
   readonly projectId: string;
@@ -169,7 +169,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private createODSEventProcessorLambda(taskTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'ODSEventProcessorLambdaSg', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'ODSEventProcessorFn', {
+    const fn = new SolutionNodejsFunction(this, 'ODSEventProcessorFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -195,7 +195,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   }
 
   private createCustomResourceAssociateIAMRole(props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): CustomResource {
-    const fn = new NodejsFunction(this, 'AssociateIAMRoleToRedshiftFn', {
+    const fn = new SolutionNodejsFunction(this, 'AssociateIAMRoleToRedshiftFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         __dirname + '/../lambdas/custom-resource',
@@ -532,7 +532,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private createLoadManifestFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'CreateLoadManifestFnSG', props.networkConfig.vpc);
     const cloudwatchPolicyStatements = getPutMericsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
-    const fn = new NodejsFunction(this, 'CreateLoadManifestFn', {
+    const fn = new SolutionNodejsFunction(this, 'CreateLoadManifestFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -569,7 +569,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private loadManifestToRedshiftFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps, copyRole: IRole): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'LoadManifestToRedshiftFnSG', props.networkConfig.vpc);
     const cloudwatchPolicyStatements = getPutMericsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
-    const fn = new NodejsFunction(this, 'LoadManifestToRedshiftFn', {
+    const fn = new SolutionNodejsFunction(this, 'LoadManifestToRedshiftFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -615,7 +615,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private createCheckLoadJobStatusFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'CheckLoadJobStatusFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'CheckLoadJobStatusFn', {
+    const fn = new SolutionNodejsFunction(this, 'CheckLoadJobStatusFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -649,7 +649,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private createHasMoreWorkFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'HasMoreWorkFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'HasMoreWorkFn', {
+    const fn = new SolutionNodejsFunction(this, 'HasMoreWorkFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -681,7 +681,7 @@ export class LoadODSEventToRedshiftWorkflow extends Construct {
   private createCheckHasRunningWorkflowFn(odsEventTable: ITable, props: LoadODSEventToRedshiftWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'HasRunningWorkflowFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'HasRunningWorkflowFn', {
+    const fn = new SolutionNodejsFunction(this, 'HasRunningWorkflowFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,

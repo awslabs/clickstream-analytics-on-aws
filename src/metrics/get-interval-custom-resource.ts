@@ -15,13 +15,13 @@
 import { join } from 'path';
 import { CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
 import { POWERTOOLS_ENVS } from '../common/powertools';
+import { SolutionNodejsFunction } from '../private/function';
 
 export interface GetIntervalProps {
   readonly expression: string;
@@ -66,9 +66,9 @@ function createGetIntervalCustomResource(
 }
 
 
-function createGetIntervalResourceLambda(scope: Construct, id: string): NodejsFunction {
+function createGetIntervalResourceLambda(scope: Construct, id: string): SolutionNodejsFunction {
   const role = createLambdaRole(scope, id + 'LambdaRole', false, []);
-  const fn = new NodejsFunction(scope, id + 'Lambda', {
+  const fn = new SolutionNodejsFunction(scope, id + 'Lambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

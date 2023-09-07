@@ -32,7 +32,6 @@ import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution'
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
 import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
@@ -51,6 +50,7 @@ import { Constant } from './control-plane/private/constant';
 import { supressWarningsForCloudFrontS3Portal } from './control-plane/private/nag';
 import { SolutionCognito } from './control-plane/private/solution-cognito';
 import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
+import { SolutionNodejsFunction } from './private/function';
 
 export interface CloudFrontControlPlaneStackProps extends StackProps {
   /**
@@ -250,8 +250,8 @@ export class CloudFrontControlPlaneStack extends Stack {
       timeToLiveAttribute: 'ttl',
     });
 
-    const authFunction = new NodejsFunction(this, 'AuthorizerFunction', {
-      runtime: props?.targetToCNRegions ? Runtime.NODEJS_16_X : Runtime.NODEJS_18_X,
+    const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
+      runtime: Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {

@@ -18,7 +18,6 @@ import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatem
 import { Vpc, IVpc, SubnetType, SecurityGroup, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -31,6 +30,7 @@ import {
   NetworkProps,
 } from '../../src/control-plane/alb-lambda-portal';
 import { ClickStreamApiConstruct, DicItem } from '../../src/control-plane/backend/click-stream-api';
+import { SolutionNodejsFunction } from '../../src/private/function';
 
 export interface VPCAttributes {
   vpcId: string;
@@ -283,8 +283,8 @@ export class TestEnv {
     const stack = new TestStack(new App(), 'apiTestStack');
     const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
-    const authFunction = new NodejsFunction(stack, 'AuthorizerFunction', {
-      runtime: Runtime.NODEJS_16_X,
+    const authFunction = new SolutionNodejsFunction(stack, 'AuthorizerFunction', {
+      runtime: Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {

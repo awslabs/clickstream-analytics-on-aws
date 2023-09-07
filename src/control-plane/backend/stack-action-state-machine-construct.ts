@@ -17,7 +17,6 @@ import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -31,6 +30,7 @@ import {
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionNodejsFunction } from '../../private/function';
 
 
 export interface StackActionStateMachineFuncProps {
@@ -49,7 +49,7 @@ export interface StackActionStateMachineProps {
 export class StackActionStateMachine extends Construct {
 
   readonly stateMachine: StateMachine;
-  readonly actionFunction: NodejsFunction;
+  readonly actionFunction: SolutionNodejsFunction;
 
   constructor(scope: Construct, id: string, props: StackActionStateMachineProps) {
     super(scope, id);
@@ -59,7 +59,7 @@ export class StackActionStateMachine extends Construct {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     });
 
-    this.actionFunction = new NodejsFunction(this, 'ActionFunction', {
+    this.actionFunction = new SolutionNodejsFunction(this, 'ActionFunction', {
       description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
