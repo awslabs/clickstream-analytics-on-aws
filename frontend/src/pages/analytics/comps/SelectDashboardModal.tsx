@@ -47,7 +47,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
 ) => {
   const { visible, disableClose, loading, setModalVisible, save } = props;
   const { t } = useTranslation();
-  const { projectId } = useParams();
+  const { projectId, appId } = useParams();
 
   const [dashboardOptions, setDashboardOptions] = useState<
     ISaveToDashboardOption[]
@@ -69,6 +69,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
       }: ApiResponse<ResponseTableData<IAnalyticsDashboard>> =
         await getAnalyticsDashboardList({
           projectId: projectId ?? '',
+          appId: appId ?? '',
           pageNumber: 1,
           pageSize: 999,
         });

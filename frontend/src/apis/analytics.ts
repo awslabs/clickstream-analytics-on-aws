@@ -15,12 +15,13 @@ import { apiRequest } from 'ts/request';
 
 export const getAnalyticsDashboardList = async (params: {
   projectId: string;
+  appId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${params.projectId}/dashboard?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
+    `/project/${params.projectId}/${params.appId}/dashboards?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
   );
   return result;
 };
@@ -38,22 +39,24 @@ export const createAnalyticsDashboard = async (
 
 export const deleteAnalyticsDashboard = async (
   projectId: string,
+  appId: string,
   dashboardId: string
 ) => {
   const result: any = await apiRequest(
     'delete',
-    `/project/${projectId}/dashboard/${dashboardId}`
+    `/project/dashboard/${projectId}/${appId}/${dashboardId}`
   );
   return result;
 };
 
 export const getAnalyticsDashboard = async (
   projectId: string,
+  appId: string,
   dashboardId: string
 ) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${projectId}/dashboard/${dashboardId}`
+    `/project/dashboard/${projectId}/${appId}/${dashboardId}`
   );
   return result;
 };
@@ -145,19 +148,23 @@ export const updateMetadataUserAttribute = async (
   return result;
 };
 
-export const fetchEmbeddingUrl = async (
-  region: string,
-  allowedDomain: string,
-  dashboardId: string,
-  sheetId?: string,
-  visualId?: string
-) => {
-  let reqParams = `region=${region}&allowedDomain=${allowedDomain}&dashboardId=${dashboardId}`;
-  if (sheetId) {
-    reqParams = reqParams.concat(`&sheetId=${sheetId}`);
+export const fetchEmbeddingUrl = async (param: {
+  permission: boolean;
+  region: string;
+  allowedDomain: string;
+  dashboardId: string;
+  sheetId?: string;
+  visualId?: string;
+}) => {
+  let reqParams = `region=${param.region}&allowedDomain=${param.allowedDomain}&dashboardId=${param.dashboardId}`;
+  if (param.sheetId) {
+    reqParams = reqParams.concat(`&sheetId=${param.sheetId}`);
   }
-  if (visualId) {
-    reqParams = reqParams.concat(`&visualId=${visualId}`);
+  if (param.visualId) {
+    reqParams = reqParams.concat(`&visualId=${param.visualId}`);
+  }
+  if (param.permission) {
+    reqParams = reqParams.concat(`&permission=${param.permission}`);
   }
   const result: any = await apiRequest(
     'get',

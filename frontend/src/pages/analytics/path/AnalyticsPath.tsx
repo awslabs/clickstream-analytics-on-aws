@@ -223,13 +223,14 @@ const AnalyticsPath: React.FC = () => {
     containerId: string
   ) => {
     try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        pipeline.region,
-        window.location.origin,
-        dashboardId,
-        sheetId,
-        visualId
-      );
+      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl({
+        permission: false,
+        region: pipeline.region,
+        allowedDomain: window.location.origin,
+        dashboardId: dashboardId,
+        sheetId: sheetId,
+        visualId: visualId,
+      });
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();

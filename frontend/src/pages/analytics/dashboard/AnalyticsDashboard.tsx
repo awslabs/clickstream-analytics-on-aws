@@ -80,6 +80,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       }: ApiResponse<ResponseTableData<IAnalyticsDashboard>> =
         await getAnalyticsDashboardList({
           projectId: projectId ?? '',
+          appId: appId ?? '',
           pageNumber: currentPage,
           pageSize: pageSize,
         });

@@ -142,6 +142,7 @@ export const registerEmbeddingUserByRegion = async (region: string) => {
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   allowedDomain: string,
+  permission: boolean,
   dashboardId: string,
   sheetId?: string,
   visualId?: string,
@@ -150,6 +151,9 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   const arns = await getClickstreamUserArn();
+  if (permission) {
+    await updateDashboardPermissionsCommand(region, dashboardId, arns.embedOwner);
+  }
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
     AwsAccountId: awsAccountId,
     UserArn: arns.embedOwner,

@@ -20,7 +20,7 @@ const router_project = express.Router();
 const projectServ: ProjectServ = new ProjectServ();
 
 router_project.get(
-  '/:id/dashboard',
+  '/:projectId/:appId/dashboards',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -38,7 +38,7 @@ router_project.get(
   });
 
 router_project.get(
-  '/:id/dashboard/:dashboardId',
+  '/dashboard/:projectId/:appId/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.getDashboard(req, res, next);
   });
@@ -57,7 +57,7 @@ router_project.post(
   });
 
 router_project.delete(
-  '/:id/dashboard/:dashboardId',
+  '/dashboard/:projectId/:appId/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.deleteDashboard(req, res, next);
   });
