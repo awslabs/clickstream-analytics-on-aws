@@ -335,6 +335,8 @@ Clickstream Web SDK 支持以下数据类型：
 	"locale": "zh_CN",
 	"screen_height": 1080,
 	"screen_width": 1920,
+    "viewport_height": 980,
+    "viewport_width": 1520,
 	"zone_offset": 28800000,
 	"system_language": "zh",
 	"country_code": "CN",
@@ -381,26 +383,28 @@ Clickstream Web SDK 支持以下数据类型：
 
 ### 公共属性
 
-| 属性              | 数据类型    | 描述                          | 如何生成                                                                                                             | 用途和目的                     |
-|-----------------|---------|-----------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
-| hashCode        | string  | 事件对象的哈希码                    | 通过 `@aws-crypto/sha256-js` 库来计算                                                                                  | 区分不同的事件                   |
-| app_id          | string  | 点击流app id                   | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
-| unique_id       | string  | 用户唯一id                      | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
-| device_id       | string  | 浏览器唯一id                     | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
-| event_type      | string  | 事件名称                        | 由开发者或SDK设置                                                                                                       | 区分不同的事件名称                 |
-| event_id        | string  | 事件的唯一id                     | 事件创建时从 `uuidV4()` 生成                                                                                             | 区分每个事件                    |
-| timestamp       | number  | 事件创建时的时间戳                   | 事件创建时从 `new Date().getTime()` 生成，单位：毫秒                                                                           | 数据分析需要                    |
-| platform        | string  | 平台名称                        | 对于浏览器一直是 `Web`                                                                                                   | 数据分析需要                    |
-| make            | string  | 浏览器制造商                      | 从`window.navigator.product`或`window.navigator.vendor` 生成                                                         | 数据分析需要                    |
-| screen_height   | number  | 屏幕高度（以像素为单位）                | 通过 `window.innerHeight` 生成                                                                                       | 数据分析需要                    |
-| screen_width    | number  | 屏幕宽度（以像素为单位）                | 通过 `window.innerWidth` 生成                                                                                        | 数据分析需要                    |
+| 属性              | 数据类型    | 描述                        | 如何生成                                                                                                             | 用途和目的                     |
+|-----------------|---------|---------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
+| hashCode        | string  | 事件对象的哈希码                  | 通过 `@aws-crypto/sha256-js` 库来计算                                                                                  | 区分不同的事件                   |
+| app_id          | string  | 点击流app id                 | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
+| unique_id       | string  | 用户唯一id                    | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
+| device_id       | string  | 浏览器唯一id                   | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
+| event_type      | string  | 事件名称                      | 由开发者或SDK设置                                                                                                       | 区分不同的事件名称                 |
+| event_id        | string  | 事件的唯一id                   | 事件创建时从 `uuidV4()` 生成                                                                                             | 区分每个事件                    |
+| timestamp       | number  | 事件创建时的时间戳                 | 事件创建时从 `new Date().getTime()` 生成，单位：毫秒                                                                           | 数据分析需要                    |
+| platform        | string  | 平台名称                      | 对于浏览器一直是 `Web`                                                                                                   | 数据分析需要                    |
+| make            | string  | 浏览器制造商                    | 从`window.navigator.product`或`window.navigator.vendor` 生成                                                         | 数据分析需要                    |
+| screen_height   | number  | 屏幕高度（以像素为单位）              | 通过 `window.screen.height` 生成                                                                                     | 数据分析需要                    |
+| screen_width    | number  | 屏幕宽度（以像素为单位）              | 通过 `window.screen.width` 生成                                                                                      | 数据分析需要                    |
+| viewport_height | number  | 视区高度（以像素为单位）              | 通过 `window.innerHeight` 生成                                                                                       | 数据分析需要                    |
+| viewport_width  | number  | 视区宽度（以像素为单位）              | 通过 `window.innerWidth` 生成                                                                                        | 数据分析需要                    |
 | zone_offset     | number  | device 与 GMT 的原始偏移量（以毫秒为单位） | 通过 `-currentDate.getTimezoneOffset()*60000` 生成                                                                   | 数据分析需要                    |
-| locale          | string  | 浏览器的默认区域设置（语言、国家/地区和变体）     | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| system_language | string  | 浏览器本地语言                     | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| country_code    | string  | 浏览器的国家/地区代码                 | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| sdk_version     | string  | 点击流SDK版本                    | 通过 `package.json` 生成                                                                                             | 数据分析需要                    |
-| sdk_name        | string  | Clickstream SDK 名称          | 一直是 `aws-solution-clickstream-sdk`                                                                               | 数据分析需要                    |
-| host_name       | string  | 网站主机名                       | 通过 `window.location.hostname` 生成                                                                                 | 数据分析需要                    |
+| locale          | string  | 浏览器的默认区域设置（语言、国家/地区和变体）   | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| system_language | string  | 浏览器本地语言                   | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| country_code    | string  | 浏览器的国家/地区代码               | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| sdk_version     | string  | 点击流SDK版本                  | 通过 `package.json` 生成                                                                                             | 数据分析需要                    |
+| sdk_name        | string  | Clickstream SDK 名称        | 一直是 `aws-solution-clickstream-sdk`                                                                               | 数据分析需要                    |
+| host_name       | string  | 网站主机名                     | 通过 `window.location.hostname` 生成                                                                                 | 数据分析需要                    |
 
 ### 用户属性
 
@@ -447,6 +451,10 @@ Clickstream Web SDK 支持以下数据类型：
 | category5     | string           | 否       | item的类别5    |
 
 Item中的所有属性只支持上表中的属性，不支持自定义，您可以使用 `category2` 到 `category5` 来表示自定义属性。
+
+## SDK更新日志
+
+参考：[GitHub 更新日志](https://github.com/awslabs/clickstream-web/releases)
 
 ## 参考链接
 
