@@ -63,7 +63,9 @@ const AnalyticsRealtime: React.FC = () => {
       }
       headerSelector="#header"
       navigation={
-        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/realtime`} />
+        <Navigation
+          activeHref={`/analytics/${projectId}/app/${appId}/realtime`}
+        />
       }
     />
   );

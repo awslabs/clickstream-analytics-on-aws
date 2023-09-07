@@ -552,9 +552,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           >
             <Input
               placeholder={t('pipeline:create.corsPlaceholder') || ''}
-              value={
-                pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin
-              }
+              value={pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin}
               onChange={(e) => {
                 if (
                   new RegExp(XSS_PATTERN).test(e.detail.value) ||

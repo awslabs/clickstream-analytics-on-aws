@@ -53,7 +53,9 @@ const EventPreview: React.FC<EventPreviewProps> = (
           <div className="event-info">
             <div className="header-name">{previewItem?.label}</div>
             <div className="info-tem">
-              <div className="info-key">{t('analytics:labels.previewName')}</div>
+              <div className="info-key">
+                {t('analytics:labels.previewName')}
+              </div>
               <div className="info-value">{previewItem?.value}</div>
             </div>
             <div className="info-tem">
@@ -63,7 +65,9 @@ const EventPreview: React.FC<EventPreviewProps> = (
               <div className="info-value">{previewItem.description}</div>
             </div>
             <div className="info-tem">
-              <div className="info-key">{t('analytics:labels.previewUpdateTime')}</div>
+              <div className="info-key">
+                {t('analytics:labels.previewUpdateTime')}
+              </div>
               <div className="info-value">{previewItem.modifyTime}</div>
             </div>
           </div>

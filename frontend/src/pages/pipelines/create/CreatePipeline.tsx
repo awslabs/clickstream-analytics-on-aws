@@ -177,7 +177,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     redshiftProvisionedDBUserFormatError,
     setRedshiftProvisionedDBUserFormatError,
   ] = useState(false);
-  
 
   const [quickSightUserEmptyError, setQuickSightUserEmptyError] =
     useState(false);
