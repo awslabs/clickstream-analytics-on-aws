@@ -50,6 +50,13 @@ reporting_project.post(
     return reportingServ.createRetentionVisual(req, res, next);
   });
 
+reporting_project.post(
+  '/warmup',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.warmup(req, res, next);
+  });
+
+
 export {
   reporting_project,
 };

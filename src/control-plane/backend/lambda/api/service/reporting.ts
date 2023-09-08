@@ -825,5 +825,64 @@ export class ReportingServ {
     return result;
   };
 
+  async warmup(req: any, res: any, next: any) {
+    try {
+      logger.info('start to warm up reporting service');
+      logger.info(`request: ${JSON.stringify(req.body)}`);
+
+      const projectId = req.body.projectId;
+      const appId = req.body.appId;
+      const region = req.body.region;
+      const dataApiRole = req.body.dataApiRole;
+      const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
+
+      if (cachedContents === undefined) {
+        cachedContents = new CachedContents();
+      }
+      const cachedObjs = await cachedContents.getCachedObjects(projectId, appId, region, dataApiRole);
+
+      //warm up redshift serverless
+      if (dashboardCreateParameters.redshift.newServerless) {
+        const input = {
+          Sqls: [`select * from ${appId}.ods_events limit 1`],
+          WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
+          Database: projectId,
+          WithEvent: false,
+          ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
+          DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
+        };
+
+        const params = new BatchExecuteStatementCommand(input);
+        const executeResponse = await cachedObjs.redshiftDataClient!.send(params);
+
+        const checkParams = new DescribeStatementCommand({
+          Id: executeResponse.Id,
+        });
+        let resp = await cachedObjs.redshiftDataClient!.send(checkParams);
+        logger.info(`Get statement status: ${resp.Status}`);
+        let count = 0;
+        while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
+          await sleep(500);
+          count++;
+          resp = await cachedObjs.redshiftDataClient!.send(checkParams);
+          logger.info(`Get statement status: ${resp.Status}`);
+        }
+        if (resp.Status == StatusString.FAILED) {
+          logger.error('Warmup redshift serverless with error: '+ resp.Status, JSON.stringify(resp));
+        }
+      }
+
+      //warm up quicksight
+      const dashBoards = await cachedObjs.quickSight.listDashboards({
+        AwsAccountId: awsAccountId,
+      });
+
+      logger.info('end of warm up reporting service');
+      return res.status(201).json(new ApiSuccess(dashBoards.DashboardSummaryList));
+    } catch (error) {
+      next(`Warmup redshift serverless with error: ${error}`);
+    }
+  };
+
 }
 
