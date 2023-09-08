@@ -10,6 +10,7 @@ This solution provides native SDKs for help you easily collect and report in-app
 
 - [Android SDK][clickstream-andriod]
 - [Swift SDK][clickstream-swift]
+- [Web SDK][clickstream-web]
 
 ### Data pipeline
 
@@ -53,4 +54,5 @@ The reporting module queries the data in Redshift with out-of-the-box Clickstrea
 
 [clickstream-swift]: https://github.com/awslabs/clickstream-swift
 [clickstream-andriod]: https://github.com/awslabs/clickstream-android
+[clickstream-web]: https://github.com/awslabs/clickstream-web
 [clickstream-javascript]: https://github.com/awslabs/clickstream-javascript
