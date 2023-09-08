@@ -226,27 +226,23 @@ export const QUICKSIGHT_USER_NAME_PATTERN =
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
 export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
 export const REDSHIFT_DB_USER_NAME_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
-export const REDSHIFT_CLUSTER_IDENTIFIER_PATTERN =
-  '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
+export const REDSHIFT_CLUSTER_IDENTIFIER_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
 export const SECRETS_MANAGER_ARN_PATTERN =
-  '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-/]+$';
+  '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
-export const CORS_ORIGIN_DOMAIN_PATTERN =
-  '(?:\\*\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?';
+export const CORS_ORIGIN_DOMAIN_PATTERN = '(?:\\*\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?';
 export const CORS_ORIGIN = `(https?:\\/\\/){1}(localhost|${IP_PATTERN}|${CORS_ORIGIN_DOMAIN_PATTERN})(:[0-9]{2,5})?`;
 export const CORS_PATTERN = `^$|^\\*$|^(${CORS_ORIGIN}(,\\s*${CORS_ORIGIN})*)$`;
 
-export const STACK_CORS_ORIGIN_DOMAIN_PATTERN =
-  '(?:\\.\\*\\\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?';
+export const STACK_CORS_ORIGIN_DOMAIN_PATTERN = '(?:\\.\\*\\\\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?';
 export const STACK_CORS_ORIGIN = `(https?:\\/\\/){1}(localhost|${IP_PATTERN}|${STACK_CORS_ORIGIN_DOMAIN_PATTERN})(:[0-9]{2,5})?`;
 export const STACK_CORS_PATTERN = `^$|^(\\.\\*)$|^(${STACK_CORS_ORIGIN}(\\|${STACK_CORS_ORIGIN})*)$`;
 
-export const XSS_PATTERN =
-  '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/s*)>';
+export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
 export const REGION_PATTERN = '[a-z]{2}-[a-z0-9]{1,10}-[0-9]{1}';
-export const EMR_VERSION_PATTERN = '^emr-[0-9]+\\.[0-9]+\\.[0-9]+$';
+export const EMR_VERSION_PATTERN='^emr-[0-9]+\\.[0-9]+\\.[0-9]+$';
 
 export const METADATA_EVENT_NAME_PATTERN = '[a-z][a-z0-9_]{0,64}';
 
@@ -292,11 +288,14 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME =
   'StackCreatedRedshiftServerlessNamespaceName';
 export const OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX =
   'BIUserCredentialParameterName';
-export const OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX = 'BIUserName';
+export const OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX =
+  'BIUserName';
 export const OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX =
   'RedshiftDataApiRoleArn';
-export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN = 'DataSourceArn';
-export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS = 'Dashboards';
+export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
+  'DataSourceArn';
+export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =
+  'Dashboards';
 
 export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
