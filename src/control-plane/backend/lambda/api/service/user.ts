@@ -49,7 +49,6 @@ export class UserServ {
       let result = await store.getUser(uid);
       if (!result) {
         const decodedToken = getTokenFromRequest(req);
-        console.log(decodedToken);
         const role = getRoleFromToken(decodedToken);
         const user: IUser = {
           uid: uid,
