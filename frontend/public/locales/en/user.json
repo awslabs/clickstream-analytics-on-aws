@@ -13,7 +13,8 @@
   "options": {
     "admin": "Administrator",
     "operator": "Operator",
-    "analyst": "Analyst"
+    "analyst": "Analyst",
+    "noIdentity": "NoIdentity"
   },
   "emptyData": "No Data"
 }

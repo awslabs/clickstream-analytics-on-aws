@@ -10,6 +10,11 @@
       "type": "build"
     },
     {
+      "name": "@types/jsonpath-plus",
+      "version": "^5.0.2",
+      "type": "build"
+    },
+    {
       "name": "@types/mock-fs",
       "version": "^4.13.1",
       "type": "build"
@@ -258,6 +263,11 @@
     {
       "name": "json-difference",
       "version": "^1.9.1",
+      "type": "runtime"
+    },
+    {
+      "name": "jsonpath-plus",
+      "version": "^7.2.0",
       "type": "runtime"
     },
     {

@@ -402,4 +402,5 @@ export enum IUserRole {
   ADMIN = 'Admin',
   OPERATOR = 'Operator',
   ANALYST = 'Analyst',
+  NO_IDENTITY = 'NoIdentity',
 }

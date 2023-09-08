@@ -13,10 +13,14 @@
 
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
+import { JSONPath } from 'jsonpath-plus';
+import jwt from 'jsonwebtoken';
+import { amznRequestContextHeader } from './constants';
 import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
+
 
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -106,6 +110,66 @@ function getEmailFromRequestContext(requestContext: string | undefined) {
   return email;
 }
 
+function getTokenFromRequestContext(requestContext: string | undefined) {
+  let token = '';
+  try {
+    if (requestContext) {
+      // Api Gateway pass the request context to the backend
+      const context = JSON.parse(requestContext);
+      token = context.authorizer.authorizationToken ?? '';
+    }
+  } catch (err) {
+    logger.warn('unknown user', {
+      requestContext,
+      err,
+    });
+  }
+  return token;
+}
+
+function getTokenFromRequest(req: any) {
+  let authorization;
+  const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
+  if (WITH_AUTH_MIDDLEWARE === 'true') {
+    authorization = req.get('authorization');
+  } else {
+    authorization = getTokenFromRequestContext(req.get(amznRequestContextHeader));
+  }
+  if (authorization) {
+    const token = authorization.split(' ')[1];
+    const decodedToken = jwt.decode(token, { complete: true });
+
+    return decodedToken;
+  }
+  return undefined;
+}
+
+function getRoleFromToken(decodedToken: any) {
+  let role = IUserRole.NO_IDENTITY;
+  if (!decodedToken) {
+    return role;
+  }
+
+  let oidcRoles: string[] = [];
+
+  const OIDC_ROLE_PATH = process.env.OIDC_ROLE_PATH ?? '$.payload.cognito:groups';
+  const values = JSONPath({ path: OIDC_ROLE_PATH, json: decodedToken });
+  if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
+    oidcRoles = values[0] as string[];
+  } else {
+    return role;
+  }
+  if (oidcRoles &&
+          oidcRoles.includes(`Clickstream${IUserRole.OPERATOR}`) &&
+          oidcRoles.includes(`Clickstream${IUserRole.ANALYST}`)) {
+    role = IUserRole.ADMIN;
+  } else if (oidcRoles && oidcRoles.includes(`Clickstream${IUserRole.OPERATOR}`)) {
+    role = IUserRole.OPERATOR;
+  } else if (oidcRoles && oidcRoles.includes(`Clickstream${IUserRole.ANALYST}`)) {
+    role = IUserRole.ANALYST;
+  }
+  return role;
+}
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
   if (isEmpty(value) || value === '/') {
@@ -442,6 +506,7 @@ export {
   getServerlessRedshiftRPU,
   generateRandomStr,
   getEmailFromRequestContext,
+  getTokenFromRequestContext,
   getBucketPrefix,
   getStackName,
   getKafkaTopic,
@@ -457,4 +522,6 @@ export {
   getStackOutputFromPipelineStatus,
   getReportingDashboardsUrl,
   corsStackInput,
+  getRoleFromToken,
+  getTokenFromRequest,
 };

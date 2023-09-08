@@ -50,11 +50,11 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
   });
   const authResult = await authorizer.auth(event.authorizationToken);
   if (!authResult.success) {
-    logger.warn(`authtication failed. Request ID: ${context.awsRequestId}`);
+    logger.warn(`authentication failed. Request ID: ${context.awsRequestId}`);
     return denyResult;
   }
 
-  logger.info('authtication success.');
+  logger.info('authentication success.');
   const principalId = !isEmpty((authResult.jwtPayload as JwtPayload).sub) ? (authResult.jwtPayload as JwtPayload).sub : '';
   const email = !isEmpty((authResult.jwtPayload as JwtPayload).email) ? (authResult.jwtPayload as JwtPayload).email.toString() : '';
   const username = !isEmpty((authResult.jwtPayload as JwtPayload).username) ? (authResult.jwtPayload as JwtPayload).username.toString() : '';
@@ -64,6 +64,7 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
     context: {
       email: email,
       username: username,
+      authorizationToken: event.authorizationToken,
     },
     policyDocument: {
       Version: '2012-10-17',
@@ -75,6 +76,6 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
         },
       ],
     },
-  };
+  } as APIGatewayAuthorizerResult;
 };
 
