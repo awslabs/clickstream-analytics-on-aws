@@ -4,7 +4,7 @@
 
 Clickstream Web SDK can help you easily collect click stream data from browser to your AWS environments through the data pipeline provisioned by this solution. This SDK is part of an AWS solution - {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as S3, Redshift.
 
-The SDK is based on the amplify-js SDK core library and developed according to the amplify-js SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, page view, and first open) to accelerate data collection for users.
+The SDK is based on the amplify-js SDK core library and developed according to the amplify-js SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, page view and first open) to accelerate data collection for users.
 
 ## Integrate the SDK
 
@@ -99,7 +99,7 @@ Current login user's attributes will be cached in localStorage, so the next time
 
 !!! info "Important"
 
-    If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstrema SDK for the first time to ensure that subsequent events contains user attributes.
+    If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstream SDK for the first time to ensure that subsequent events contains user attributes.
 
 #### Record event with items
 
@@ -439,7 +439,7 @@ All user attributes will be stored in `user` object, and all custom attributes a
 | id             | string    | False    | The id of the item            |
 | name           | string    | False    | The name of the item          |
 | brand          | string    | False    | The brand of the item         |
-| price          | string \| number | False    | The price of the item         |
+| price          | number    | False    | The price of the item         |
 | quantity       | string    | False    | The quantity of the item      |
 | creative_name  | string    | False    | The creative name of the item |
 | creative_slot  | string    | False    | The creative slot of the item |
