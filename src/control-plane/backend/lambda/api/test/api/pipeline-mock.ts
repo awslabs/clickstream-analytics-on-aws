@@ -716,7 +716,7 @@ const BASE_STATUS = {
       outputs: [],
     },
     {
-      stackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+      stackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.METRICS,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',

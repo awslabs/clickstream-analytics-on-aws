@@ -90,6 +90,8 @@ frontend/src/ts/constant-ln.ts:80
 frontend/src/ts/constant-ln.ts:83
 frontend/src/ts/constant-ln.ts:86
 frontend/src/ts/constant-ln.ts:89
+src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:52
+src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:53
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:54
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:55
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:56
@@ -97,8 +99,6 @@ src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:57
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:58
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:59
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:60
-src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:61
-src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:62
 src/control-plane/backend/lambda/api/common/constants.ts:66
 
 [node-yarnoutdated]

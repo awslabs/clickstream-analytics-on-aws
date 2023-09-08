@@ -21,10 +21,10 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
 
@@ -109,7 +109,7 @@ describe('Analytics dashboard test', () => {
   });
 
   it('List dashboards of project', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
         {
           dashboardId: 'dashboard-1',
@@ -140,9 +140,11 @@ describe('Analytics dashboard test', () => {
           deleted: false,
         },
       ],
+    }).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/dashboard`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboards`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -168,7 +170,7 @@ describe('Analytics dashboard test', () => {
         success: true,
       },
     );
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
   });
 
   it('get dashboard details', async () => {
@@ -188,8 +190,11 @@ describe('Analytics dashboard test', () => {
         deleted: false,
       },
     });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .get(`/api/project/dashboard/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -232,9 +237,12 @@ describe('Analytics dashboard test', () => {
         deleted: false,
       },
     });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
     ddbMock.on(UpdateCommand).resolves({});
     const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .delete(`/api/project/dashboard/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(

@@ -107,7 +107,6 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
     };
     const records = await query(input);
-    console.log(records);
     for (let record of records) {
       if (record.prefix.startsWith('EVENT#')) {
         const { updateExpression, expressionAttributeValues, expressionAttributeNames }
@@ -274,7 +273,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
     };
     const records = await query(input);
-    return records && records.length > 0;
+    return records && records.length > 0 && !records[0].deleted;
   };
 
   public async createEventParameter(eventParameter: IMetadataEventParameter): Promise<string> {
