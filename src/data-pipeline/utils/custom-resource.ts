@@ -17,7 +17,6 @@ import { Arn, ArnFormat, Aws, CfnResource, CustomResource, Duration, Fn, Stack }
 
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Function } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -26,6 +25,7 @@ import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurren
 import { LAMBDA_NODEJS_RUNTIME, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
+import { SolutionNodejsFunction } from '../../private/function';
 
 
 export interface CopyAssetsCustomResourceProps {
@@ -76,7 +76,7 @@ function createCopyAssetsLambda(
     pipelineS3Prefix: string;
     customPluginSourceBucketName: string;
   },
-): NodejsFunction {
+): SolutionNodejsFunction {
 
   const copySourceS3Arn = Arn.format(
     {
@@ -100,7 +100,7 @@ function createCopyAssetsLambda(
 
   props.pipelineS3Bucket.grantReadWrite(role);
 
-  const fn = new NodejsFunction(scope, 'CopyAssetsCustomResourceLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'CopyAssetsCustomResourceLambda', {
     runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,
@@ -186,7 +186,7 @@ export interface EMRServelsssApplicationProps {
 function createEMRServelsssApplicationLambda(
   scope: Construct,
   props: EMRServelsssApplicationProps,
-): NodejsFunction {
+): SolutionNodejsFunction {
 
   const ermAppArn = Arn.format(
     {
@@ -211,7 +211,7 @@ function createEMRServelsssApplicationLambda(
 
   props.pipelineS3Bucket.grantReadWrite(role);
 
-  const fn = new NodejsFunction(scope, 'CreateEMRServelsssApplicationLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'CreateEMRServelsssApplicationLambda', {
     runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,

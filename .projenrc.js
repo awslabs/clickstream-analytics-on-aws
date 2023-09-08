@@ -43,9 +43,18 @@ const commonDevDeps = [
   '@types/node-fetch@^2.6.4',
 ];
 
-const awsSDKVersion = '3.374.0';
-const awsSDKDeps = [
+const smithyPackagesVersion = '2.0.7';
+const smithyPackagesDeps = [
+  '@smithy/node-http-handler',
+  '@smithy/util-stream-node',
+].map(dep => `${dep}@^${smithyPackagesVersion}`);
+const awsSDKPackagesVersion = '3.398.0';
+const awsSDKPackagesDeps = [
+  '@aws-sdk/types',
   '@aws-sdk/credential-providers',
+].map(dep => `${dep}@^${awsSDKPackagesVersion}`);
+const awsSDKServicesVersion = '3.405.0';
+const awsSDKServicesDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-glue',
@@ -57,22 +66,23 @@ const awsSDKDeps = [
   '@aws-sdk/client-sqs',
   '@aws-sdk/client-ssm',
   '@aws-sdk/client-lambda',
-  '@aws-sdk/node-http-handler',
   '@aws-sdk/client-sns',
   '@aws-sdk/client-elastic-load-balancing-v2',
   '@aws-sdk/client-ecs',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sfn',
-].map(dep => `${dep}@^${awsSDKVersion}`);
+].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
-const awsSDKDepsForApiProject = [
+const awsSDKPackagesDepsForApiProject = [
+  '@aws-sdk/util-dynamodb',
+].map(dep => `${dep}@^${awsSDKPackagesVersion}`);
+const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-ec2',
   '@aws-sdk/client-s3',
   '@aws-sdk/client-sfn',
   '@aws-sdk/client-kafka',
   '@aws-sdk/client-redshift',
   '@aws-sdk/client-redshift-data',
-  '@aws-sdk/credential-providers',
   '@aws-sdk/client-redshift-serverless',
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-dynamodb',
@@ -85,12 +95,9 @@ const awsSDKDepsForApiProject = [
   '@aws-sdk/client-sts',
   '@aws-sdk/client-cloudwatch',
   '@aws-sdk/lib-dynamodb',
-  '@aws-sdk/util-dynamodb',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-kafkaconnect',
-  '@aws-sdk/util-stream-node',
-  '@aws-sdk/node-http-handler',
-].map(dep => `${dep}@^${awsSDKVersion}`);
+].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const depsForApiProject = [
   ...commonDeps,
@@ -103,7 +110,10 @@ const depsForApiProject = [
   'cidr-block@^1.3.2',
   'json-difference@^1.9.1',
   'sql-formatter@^13.0.0',
-  ...awsSDKDepsForApiProject,
+  ...smithyPackagesDeps,
+  ...awsSDKPackagesDeps,
+  ...awsSDKPackagesDepsForApiProject,
+  ...awsSDKServicesDepsForApiProject,
 ];
 
 const devDepsForApiProject = [
@@ -140,7 +150,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '*.iml',
     '*.ipr',
     '*.iws',
-    '.viperlightrc',
     'src/data-pipeline/spark-etl/.gradle',
     'src/data-pipeline/spark-etl/build',
     'src/data-pipeline/spark-etl/bin',
@@ -155,7 +164,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'jsonpath-plus@^7.2.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
-    ...awsSDKDeps,
+    ...awsSDKServicesDeps,
   ], /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
@@ -415,7 +424,7 @@ gitlabMain.createNestedTemplates({
           'apt update',
           'apt install -y zip',
           'zip /tmp/source-$CI_JOB_ID.zip -r9 ./',
-          `yarn add typescript @aws-sdk/client-s3@${awsSDKVersion} @aws-sdk/client-codebuild@${awsSDKVersion} @aws-sdk/client-sts@${awsSDKVersion}`,
+          `yarn add typescript @aws-sdk/client-s3@${awsSDKServicesVersion} @aws-sdk/client-codebuild@${awsSDKServicesVersion} @aws-sdk/client-sts@${awsSDKServicesVersion}`,
           'mkdir -p output/',
         ],
         script: [

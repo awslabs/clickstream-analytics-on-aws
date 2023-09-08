@@ -14,7 +14,6 @@
 import { join } from 'path';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -48,6 +47,7 @@ import {
 } from './private/dataset-col-def';
 import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import { POWERTOOLS_ENVS } from '../common/powertools';
+import { SolutionNodejsFunction } from '../private/function';
 
 export function createQuicksightCustomResource(
   scope: Construct,
@@ -436,9 +436,9 @@ export function createQuicksightCustomResource(
 function createQuicksightLambda(
   scope: Construct,
   templateArn: string,
-): NodejsFunction {
+): SolutionNodejsFunction {
   const role = createRoleForQuicksightCustomResourceLambda(scope, templateArn);
-  const fn = new NodejsFunction(scope, 'QuicksightCustomResourceLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'QuicksightCustomResourceLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

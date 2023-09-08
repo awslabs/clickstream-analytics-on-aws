@@ -11,15 +11,20 @@
  *  and limitations under the License.
  */
 
-import { UserAgent } from '@aws-sdk/types';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
+import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Construct } from 'constructs';
 
-const userAgent: UserAgent = [[<string>process.env.USER_AGENT_STRING ?? '']];
-export const aws_sdk_client_common_config = {
-  maxAttempts: 3,
-  requestHandler: new NodeHttpHandler({
-    connectionTimeout: 5000,
-    requestTimeout: 5000,
-  }),
-  customUserAgent: userAgent,
-};
+export class SolutionNodejsFunction extends NodejsFunction {
+
+  constructor(scope: Construct, id: string, props?: NodejsFunctionProps) {
+    super(scope, id, {
+      ...props,
+      bundling: props?.bundling ? {
+        ...props.bundling,
+        externalModules: props.bundling.externalModules?.filter(p => p === '@aws-sdk/*') ?? [],
+      } : {
+        externalModules: [],
+      },
+    });
+  }
+}

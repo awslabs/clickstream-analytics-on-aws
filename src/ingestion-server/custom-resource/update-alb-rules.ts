@@ -15,13 +15,13 @@ import { join } from 'path';
 import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface UpdateAlbRulesCustomResourceProps {
   appIds: string;
@@ -63,7 +63,7 @@ export function updateAlbRulesCustomResource(
   return { customResource: cr, fn };
 }
 
-function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authenticationSecretArn?: string): NodejsFunction {
+function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authenticationSecretArn?: string): SolutionNodejsFunction {
   const policyStatements = [
     new PolicyStatement({
       actions: [
@@ -94,7 +94,7 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
   }
   const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
 
-  const fn = new NodejsFunction(scope, 'updateAlbRulesLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'updateAlbRulesLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

@@ -17,7 +17,6 @@ import { Duration, Stack } from 'aws-cdk-lib';
 
 import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Runtime, Tracing, Function } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -29,6 +28,7 @@ import { addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
+import { SolutionNodejsFunction } from '../../private/function';
 
 interface Props {
   readonly vpc: IVpc;
@@ -53,7 +53,7 @@ interface Props {
 
 const functionSettings = {
   handler: 'handler',
-  runtime: Runtime.NODEJS_16_X,
+  runtime: Runtime.NODEJS_18_X,
   timeout: Duration.minutes(15),
   logRetention: RetentionDays.ONE_WEEK,
   tracing: Tracing.ACTIVE,
@@ -99,7 +99,7 @@ export class LambdaUtil {
       'Security group for Glue partition syncer lambda',
     );
 
-    const fn = new NodejsFunction(
+    const fn = new SolutionNodejsFunction(
       this.scope,
       'GlueTablePartitionSyncerFunction',
       {
@@ -159,7 +159,7 @@ export class LambdaUtil {
       'Security Group for EMR Spark Job Submitter Function',
     );
 
-    const fn = new NodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
+    const fn = new SolutionNodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
       role: lambdaRole,
       securityGroups: [lambdaSecurityGroup],
       vpc: this.props.vpc,
@@ -211,7 +211,7 @@ export class LambdaUtil {
       'EmrJobStateListenerFunctionSecurityGroup',
       'Security Group for EMR Job State Listener',
     );
-    const fn = new NodejsFunction(this.scope, 'EmrJobStateListenerFunction', {
+    const fn = new SolutionNodejsFunction(this.scope, 'EmrJobStateListenerFunction', {
       role: lambdaRole,
       securityGroups: [lambdaSecurityGroup],
       vpc: this.props.vpc,

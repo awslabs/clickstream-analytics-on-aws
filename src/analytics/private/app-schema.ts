@@ -15,7 +15,6 @@ import { join } from 'path';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Runtime, Function, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -25,6 +24,7 @@ import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/con
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface ApplicationSchemasProps {
   readonly projectId: string;
@@ -119,7 +119,7 @@ export class ApplicationSchemas extends Construct {
       description: 'SQL layer',
     });
 
-    const fn = new NodejsFunction(this, 'CreateSchemaForApplicationsFn', {
+    const fn = new SolutionNodejsFunction(this, 'CreateSchemaForApplicationsFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         lambdaRootPath,

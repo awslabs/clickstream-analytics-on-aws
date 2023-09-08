@@ -18,7 +18,6 @@ import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -29,6 +28,7 @@ import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface ClearExpiredEventsWorkflowProps {
   readonly appId: string;
@@ -157,7 +157,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
   private clearExpiredEventsFn(props: ClearExpiredEventsWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'ClearExpiredEventsFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'ClearExpiredEventsFn', {
+    const fn = new SolutionNodejsFunction(this, 'ClearExpiredEventsFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -196,7 +196,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
   private createCheckClearJobStatusFn(props: ClearExpiredEventsWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'ClearExpiredEventsJobStatusFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'CheckClearJobStatusFn', {
+    const fn = new SolutionNodejsFunction(this, 'CheckClearJobStatusFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,

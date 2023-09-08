@@ -15,13 +15,13 @@ import { join } from 'path';
 import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface DeleteECSClusterCustomResourceProps {
   ecsClusterArn: string;
@@ -52,7 +52,7 @@ export function deleteECSClusterCustomResource(
   return { customResource: cr, fn };
 }
 
-function createDeleteECSClusterLambda(scope: Construct, ecsClusterArn: string): NodejsFunction {
+function createDeleteECSClusterLambda(scope: Construct, ecsClusterArn: string): SolutionNodejsFunction {
   const policyStatements = [
     new PolicyStatement({
       actions: [
@@ -86,7 +86,7 @@ function createDeleteECSClusterLambda(scope: Construct, ecsClusterArn: string): 
   ];
   const role = createLambdaRole(scope, 'deleteECSClusterLambdaRole', false, policyStatements);
 
-  const fn = new NodejsFunction(scope, 'deleteECSClusterLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'deleteECSClusterLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

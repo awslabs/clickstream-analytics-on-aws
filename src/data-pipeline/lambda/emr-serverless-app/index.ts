@@ -12,7 +12,7 @@
  */
 
 
-import { EMRServerlessClient, CreateApplicationCommand, CreateApplicationCommandInput, DeleteApplicationCommand } from '@aws-sdk/client-emr-serverless';
+import { EMRServerlessClient, CreateApplicationCommand, Architecture, CreateApplicationCommandInput, DeleteApplicationCommand } from '@aws-sdk/client-emr-serverless';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
@@ -77,7 +77,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
     name: props.name,
     releaseLabel: props.version,
     type: 'SPARK',
-    architecture: 'X86_64',
+    architecture: Architecture.X86_64,
     networkConfiguration: {
       subnetIds: props.subnetIds.split(','),
       securityGroupIds: [props.secourityGroupId],

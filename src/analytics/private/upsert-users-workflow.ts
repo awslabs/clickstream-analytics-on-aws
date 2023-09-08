@@ -18,7 +18,6 @@ import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -29,6 +28,7 @@ import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createSGForEgressToAwsService } from '../../common/sg';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface UpsertUsersWorkflowProps {
   readonly appId: string;
@@ -157,7 +157,7 @@ export class UpsertUsersWorkflow extends Construct {
   private upsertUsersFn(props: UpsertUsersWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'UpsertUsersFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'UpsertUsersFn', {
+    const fn = new SolutionNodejsFunction(this, 'UpsertUsersFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -196,7 +196,7 @@ export class UpsertUsersWorkflow extends Construct {
   private createCheckUpsertJobStatusFn(props: UpsertUsersWorkflowProps): IFunction {
     const fnSG = createSGForEgressToAwsService(this, 'CheckUpsertJobStatusFnSG', props.networkConfig.vpc);
 
-    const fn = new NodejsFunction(this, 'CheckUpsertJobStatusFn', {
+    const fn = new SolutionNodejsFunction(this, 'CheckUpsertJobStatusFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,

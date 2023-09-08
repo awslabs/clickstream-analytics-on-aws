@@ -19,7 +19,6 @@ import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -30,6 +29,7 @@ import { ALARM_NAME_PREFIX } from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
+import { SolutionNodejsFunction } from '../private/function';
 
 
 interface MetricAndAlarmProps {
@@ -104,7 +104,7 @@ export function createPutDashboardCustomResource(
 }
 
 
-function createPutDashboardLambda(scope: Construct, props: CustomResourceProps): NodejsFunction {
+function createPutDashboardLambda(scope: Construct, props: CustomResourceProps): SolutionNodejsFunction {
   const role = createLambdaRole(scope, 'PutDashboardLambdaRole', false, [
     new PolicyStatement({
       actions: [
@@ -161,7 +161,7 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
     }),
   ]);
 
-  const fn = new NodejsFunction(scope, 'PutDashboardLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'PutDashboardLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

@@ -15,7 +15,6 @@ import path from 'path';
 import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -23,6 +22,7 @@ import { DicItem } from './click-stream-api';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface CdkCallCustomResourceProps {
   readonly table: Table;
@@ -37,7 +37,7 @@ export class BatchInsertDDBCustomResource extends Construct {
   constructor(scope: Construct, id: string, props: CdkCallCustomResourceProps) {
     super(scope, id);
 
-    const customResourceLambda = new NodejsFunction(this, 'DicInitCustomResourceFunction', {
+    const customResourceLambda = new SolutionNodejsFunction(this, 'DicInitCustomResourceFunction', {
       description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       entry: path.join(__dirname, './lambda/batch-insert-ddb/index.ts'),
       handler: 'handler',

@@ -16,7 +16,6 @@ import { CfnResource, CustomResource, Duration, Stack } from 'aws-cdk-lib';
 import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -25,6 +24,7 @@ import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
+import { SolutionNodejsFunction } from '../../private/function';
 
 export interface S3SinkConnectorCustomResourceProps {
   readonly projectId: string;
@@ -104,15 +104,15 @@ function createS3SinkConnectorLambda(
     pluginS3Bucket: IBucket;
     connectorRole: IRole;
   },
-): NodejsFunction {
+): SolutionNodejsFunction {
   const role = createRoleForS3SinkConnectorCustomResourceLambda(scope, {
     logS3BucketName: props.logS3Bucket.bucketName,
     pluginS3BucketName: props.pluginS3Bucket.bucketName,
     connectorRole: props.connectorRole,
   });
 
-  const fn = new NodejsFunction(scope, 's3SinkConnectorCustomResourceLambda', {
-    runtime: Runtime.NODEJS_16_X,
+  const fn = new SolutionNodejsFunction(scope, 's3SinkConnectorCustomResourceLambda', {
+    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',

@@ -15,7 +15,7 @@ import { Readable, PassThrough } from 'stream';
 import util from 'util';
 import zlib from 'zlib';
 import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
+import { sdkStreamMixin } from '@smithy/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
 import { copyS3Object, deleteObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
 import 'aws-sdk-client-mock-jest';

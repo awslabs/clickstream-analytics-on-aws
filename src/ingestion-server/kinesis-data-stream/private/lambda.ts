@@ -15,7 +15,6 @@ import { join } from 'path';
 import { CfnResource, Duration } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -23,6 +22,7 @@ import { createKinesisToS3LambdaRole } from './iam';
 import { createKinesisToS3LambdaSecurityGroup } from './sg';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { POWERTOOLS_ENVS } from '../../../common/powertools';
+import { SolutionNodejsFunction } from '../../../private/function';
 
 export interface KinesisToS3Lambda {
   vpc: IVpc;
@@ -39,8 +39,8 @@ export function createKinesisToS3Lambda(
   const lambdaSecurityGroup = createKinesisToS3LambdaSecurityGroup(scope, vpc);
   const role = createKinesisToS3LambdaRole(scope);
 
-  const fn = new NodejsFunction(scope, 'kinesisToS3Lambda', {
-    runtime: Runtime.NODEJS_16_X,
+  const fn = new SolutionNodejsFunction(scope, 'kinesisToS3Lambda', {
+    runtime: Runtime.NODEJS_18_X,
     entry: join(__dirname, '..', 'kinesis-to-s3-lambda', 'index.ts'),
     handler: 'handler',
     memorySize: 2048,

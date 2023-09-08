@@ -15,7 +15,6 @@ import { join } from 'path';
 import { CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -23,6 +22,7 @@ import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
 import { POWERTOOLS_ENVS } from '../common/powertools';
+import { SolutionNodejsFunction } from '../private/function';
 
 export interface AddSubscriptionCustomResourceProps {
   snsTopic: Topic;
@@ -54,7 +54,7 @@ export function addSubscriptionCustomResource(
 }
 
 
-function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): NodejsFunction {
+function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): SolutionNodejsFunction {
   const role = createLambdaRole(scope, 'addSubscriptionLambdaRole', false, [
     new PolicyStatement({
       actions: [
@@ -65,7 +65,7 @@ function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCus
 
   ]);
 
-  const fn = new NodejsFunction(scope, 'addSubscriptionLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'addSubscriptionLambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,

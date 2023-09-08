@@ -16,7 +16,6 @@ import { join } from 'path';
 import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Resource, Stack } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -25,6 +24,7 @@ import { createLambdaRole } from '../common/lambda';
 import { attachListTagsPolicyForFunction } from '../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
+import { SolutionNodejsFunction } from '../private/function';
 
 export interface MetricExpression {
   expression: string;
@@ -131,7 +131,7 @@ function createMetricsWidgetsCustomResource(
 }
 
 
-function createSetMetricsWidgetsResourceLambda(scope: Construct, id: string): NodejsFunction {
+function createSetMetricsWidgetsResourceLambda(scope: Construct, id: string): SolutionNodejsFunction {
   const role = createLambdaRole(scope, id + 'LambdaRole', false, [
     new PolicyStatement({
       actions: [
@@ -158,7 +158,7 @@ function createSetMetricsWidgetsResourceLambda(scope: Construct, id: string): No
   ]);
 
   const stackId = getShortIdOfStack(Stack.of(scope));
-  const fn = new NodejsFunction(scope, id + 'Lambda', {
+  const fn = new SolutionNodejsFunction(scope, id + 'Lambda', {
     runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
