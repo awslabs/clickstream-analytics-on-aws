@@ -14,7 +14,6 @@
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isPipelineExisted, isProjectExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
 import { PipelineServ } from '../service/pipeline';
 
 const router_pipeline = express.Router();

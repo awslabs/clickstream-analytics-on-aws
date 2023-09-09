@@ -13,7 +13,6 @@
 
 import express from 'express';
 import { logger } from '../common/powertools';
-import { IUserRole } from '../common/types';
 import { ReportingServ } from '../service/reporting';
 
 const reporting_project = express.Router();

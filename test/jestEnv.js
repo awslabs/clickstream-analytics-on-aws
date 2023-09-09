@@ -20,6 +20,8 @@ process.env.AWS_URL_SUFFIX = 'amazonaws.com'
 process.env.S3_MAIN_REGION = 'us-east-1'
 process.env.STACK_WORKFLOW_S3_BUCKET = 'TEST_EXAMPLE_BUCKET'
 process.env.API_ROLE_NAME = 'api-role-name'
+process.env.WITH_AUTH_MIDDLEWARE = 'false'
+process.env.WITH_VALIDATE_ROLE = 'false'
 
 // controlplane bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'

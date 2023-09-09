@@ -14,7 +14,6 @@
 import express from 'express';
 import { body, header, param } from 'express-validator';
 import { isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
 import { UserServ } from '../service/user';
 
 const router_user = express.Router();

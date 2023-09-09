@@ -14,7 +14,6 @@
 import express from 'express';
 import { body, header, query } from 'express-validator';
 import { defaultAssumeRoleTypeValid, defaultPageValueValid, defaultRegionValueValid, defaultSubnetTypeValid, isRequestIdExisted, isValidEmpty, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
 import { EnvironmentServ } from '../service/environment';
 
 const router_env = express.Router();

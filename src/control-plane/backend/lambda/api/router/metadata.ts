@@ -14,7 +14,6 @@
 import express from 'express';
 import { body, header, query } from 'express-validator';
 import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
 import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();

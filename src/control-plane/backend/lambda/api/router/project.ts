@@ -14,7 +14,6 @@
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
 import { ProjectServ } from '../service/project';
 
 const router_project = express.Router();

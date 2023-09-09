@@ -20,10 +20,14 @@ describe('App test', () => {
 
   process.env.HEALTH_CHECK_PATH='/';
   it('healthcheck', async () => {
+    process.env.WITH_AUTH_MIDDLEWARE = 'true';
+    process.env.WITH_VALIDATE_ROLE = 'true';
     const res = await request(app)
       .get('/');
     expect(res.statusCode).toBe(200);
     expect(res.text).toEqual('OK!');
+    process.env.WITH_AUTH_MIDDLEWARE = 'false';
+    process.env.WITH_VALIDATE_ROLE = 'false';
   });
   it('response headers contain X-Click-Stream-Response-Time', async () => {
     const res = await request(app)

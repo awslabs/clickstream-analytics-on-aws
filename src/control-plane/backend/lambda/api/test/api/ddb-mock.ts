@@ -68,10 +68,11 @@ function userMock(ddbMock: any, userId: string, role: IUserRole): any {
     Key: {
       uid: userId,
     },
-  }, true).resolvesOnce({
+  }, true).resolves({
     Item: {
       uid: userId,
       role: role,
+      deleted: false,
     },
   });
 }
