@@ -22,7 +22,9 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const store: ClickStreamStore = new DynamoDbStore();
 
 const routerRoles: Map<string, IUserRole[]> = new Map();
+routerRoles.set('GET /api/user/details', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.NO_IDENTITY]);
 routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
+routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
 routerRoles.set('GET /api/env/quicksight/embedUrl', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
 routerRoles.set('ALL /api/project/:id/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
@@ -40,7 +42,7 @@ routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
 const UNAUTHORIZED_MESSAGE = 'Unauthorized.';
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
 const HTTP_METHODS_PATTERN = '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)';
-const ROUTER_PARAMETER_PATTERN = '[A-Za-z0-9_]+';
+const ROUTER_PARAMETER_PATTERN = '([A-Za-z0-9_]+)';
 
 function matchRouter(requestKey: string): IUserRole[] | undefined {
   let accessRoles = routerRoles.get(requestKey);
@@ -74,12 +76,12 @@ export async function authRole(req: express.Request, res: express.Response, next
     }
 
     const user = await store.getUser(uid);
-    if (!user || !user.role || user.role === IUserRole.NO_IDENTITY) {
+    if (!user || !user.role) {
       logger.warn('User not found or no role.');
       return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
     }
 
-    const requestKey = `${req.method} ${req.url}`;
+    const requestKey = `${req.method} ${req.path}`;
     const accessRoles = matchRouter(requestKey);
     if (!accessRoles || !accessRoles.includes(user.role)) {
       logger.warn(FORBIDDEN_MESSAGE);

@@ -45,7 +45,7 @@ export class UserServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { uid } = req.params;
+      const { uid } = req.query;
       let result = await store.getUser(uid);
       if (!result) {
         const decodedToken = getTokenFromRequest(req);

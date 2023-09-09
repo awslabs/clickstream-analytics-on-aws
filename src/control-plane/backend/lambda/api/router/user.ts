@@ -37,7 +37,7 @@ router_user.post(
   });
 
 router_user.get(
-  '/:uid',
+  '/details',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.details(req, res, next);
   });
