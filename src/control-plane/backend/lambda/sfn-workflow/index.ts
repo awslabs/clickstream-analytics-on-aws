@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Output, CloudFormationClient, DescribeStacksCommand, Stack } from '@aws-sdk/client-cloudformation';
+import { Parameter, Output, CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';

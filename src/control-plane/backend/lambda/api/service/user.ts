@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -44,12 +45,14 @@ export class UserServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { uid } = req.params;
+      const { uid } = req.query;
       let result = await store.getUser(uid);
       if (!result) {
+        const decodedToken = getTokenFromRequest(req);
+        const role = getRoleFromToken(decodedToken);
         const user: IUser = {
           uid: uid,
-          role: IUserRole.OPERATOR,
+          role: role,
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: res.get('X-Click-Stream-Operator'),

@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const AnalyticsDashboardDetail: React.FC = () => {
-  const { dashboardId } = useParams();
+  const { projectId, dashboardId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const getEmbeddingUrl = async (dashboard: IAnalyticsDashboard) => {
@@ -49,7 +49,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IAnalyticsDashboard> =
-        await getAnalyticsDashboard(dashboardId ?? '');
+        await getAnalyticsDashboard(projectId ?? '', dashboardId ?? '');
       if (success) {
         getEmbeddingUrl(data);
         setLoadingData(false);

@@ -12,7 +12,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { paginateData } from '../common/utils';
 import { IPlugin } from '../model/plugin';
@@ -46,34 +45,6 @@ export class PluginServ {
       next(error);
     }
   };
-
-  public async details(req: any, res: any, next: any) {
-    try {
-      const { id } = req.params;
-      const result = await store.getPlugin(id);
-      if (!result) {
-        logger.warn(`No Plugin with ID ${id} found in the databases while trying to retrieve a Plugin`);
-        return res.status(404).json(new ApiFail('Plugin not found'));
-      }
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public async update(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      let plugin: IPlugin = req.body as IPlugin;
-      await store.updatePlugin(plugin);
-      return res.status(201).json(new ApiSuccess(null, 'Plugin updated.'));
-    } catch (error) {
-      if ((error as Error).name === 'ConditionalCheckFailedException') {
-        return res.status(400).json(new ApiFail('The bounded plugin does not support modification.'));
-      }
-      next(error);
-    }
-  }
 
   public async delete(req: any, res: any, next: any) {
     try {

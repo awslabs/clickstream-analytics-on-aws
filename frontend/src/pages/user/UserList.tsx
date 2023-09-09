@@ -28,6 +28,7 @@ const UserList: React.FC = () => {
     { value: IUserRole.ADMIN, label: t('user:options.admin') },
     { value: IUserRole.OPERATOR, label: t('user:options.operator') },
     { value: IUserRole.ANALYST, label: t('user:options.analyst') },
+    { value: IUserRole.NO_IDENTITY, label: t('user:options.noIdentity') },
   ];
 
   const getRoleName = (role: string) => {
@@ -39,7 +40,7 @@ const UserList: React.FC = () => {
       case IUserRole.ANALYST:
         return t('user:options.analyst');
       default:
-        return t('user:options.operator');
+        return t('user:options.noIdentity');
     }
   };
 
@@ -118,7 +119,7 @@ const UserList: React.FC = () => {
   ];
 
   const CONTENT_DISPLAY = [
-    { id: 'email', visible: true },
+    { id: 'uid', visible: true },
     { id: 'name', visible: true },
     { id: 'role', visible: true },
     { id: 'createAt', visible: true },
@@ -126,9 +127,9 @@ const UserList: React.FC = () => {
 
   const FILTERING_PROPERTIES = [
     {
-      propertyLabel: t('user:labels.tableColumnEmail'),
-      key: 'email',
-      groupValuesLabel: t('user:labels.tableColumnEmail'),
+      propertyLabel: t('user:labels.tableColumnUserId'),
+      key: 'uid',
+      groupValuesLabel: t('user:labels.tableColumnUserId'),
       operators: [':', '!:', '=', '!='],
     },
     {

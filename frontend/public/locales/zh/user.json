@@ -13,7 +13,8 @@
   "options": {
     "admin": "管理员",
     "operator": "IT运维",
-    "analyst": "分析师"
+    "analyst": "分析师",
+    "noIdentity": "无身份"
   },
   "emptyData": "没有数据"
 }

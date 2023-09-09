@@ -24,6 +24,6 @@ export const updateUser = async (user: IUser) => {
 };
 
 export const getUserDetails = async (uid: string) => {
-  const result: any = await apiRequest('get', `/user/${uid}`);
+  const result: any = await apiRequest('get', `/user/details?uid=${uid}`);
   return result;
 };

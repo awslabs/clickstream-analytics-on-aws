@@ -91,12 +91,6 @@ router_env.get(
   });
 
 router_env.get(
-  '/s3/checkalblogpolicy',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.checkALBLogPolicy(req, res, next);
-  });
-
-router_env.get(
   '/msk/clusters',
   validate([
     query('vpcId').custom(isValidEmpty),
@@ -168,19 +162,6 @@ router_env.get(
   '/quicksight/embedUrl',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.embedUrl(req, res, next);
-  });
-
-router_env.get(
-  '/athena/workgroups',
-  validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.listWorkGroups(req, res, next);
   });
 
 router_env.get(

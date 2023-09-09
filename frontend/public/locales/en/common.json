@@ -62,7 +62,7 @@
     "back": "Back",
     "closeMenu": "Close menu",
     "switchSpace": "Switch Project",
-    "accessDeniedTitle": "401 Unauthorized",
+    "accessDeniedTitle": "403 Forbidden",
     "accessDeniedMessage": "You do not have permission to access this page. Please contact the administrator."
   },
   "tag": {

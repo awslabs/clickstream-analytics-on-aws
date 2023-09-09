@@ -20,7 +20,7 @@ export const getAnalyticsDashboardList = async (params: {
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${params.projectId}/dashboards?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
+    `/project/${params.projectId}/dashboard?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
   );
   return result;
 };
@@ -36,18 +36,24 @@ export const createAnalyticsDashboard = async (
   return result;
 };
 
-export const deleteAnalyticsDashboard = async (dashboardId: string) => {
+export const deleteAnalyticsDashboard = async (
+  projectId: string,
+  dashboardId: string
+) => {
   const result: any = await apiRequest(
     'delete',
-    `/project/dashboard/${dashboardId}`
+    `/project/${projectId}/dashboard/${dashboardId}`
   );
   return result;
 };
 
-export const getAnalyticsDashboard = async (dashboardId: string) => {
+export const getAnalyticsDashboard = async (
+  projectId: string,
+  dashboardId: string
+) => {
   const result: any = await apiRequest(
     'get',
-    `/project/dashboard/${dashboardId}`
+    `/project/${projectId}/dashboard/${dashboardId}`
   );
   return result;
 };

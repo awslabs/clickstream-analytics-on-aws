@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { ApplicationServ } from '../service/application';
 
 const router_app = express.Router();
@@ -59,27 +59,6 @@ router_app.get(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.details(req, res, next);
-  });
-
-router_app.put(
-  '/:id',
-  validate([
-    body('appId')
-      .custom((value, { req }) => validMatchParamId(value, {
-        req,
-        location: 'body',
-        path: '',
-      }))
-      .custom((value, { req }) => isApplicationExisted(value, {
-        req,
-        location: 'body',
-        path: 'projectId',
-      })),
-    body('projectId')
-      .custom(isProjectExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return appServ.update(req, res, next);
   });
 
 router_app.delete(

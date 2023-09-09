@@ -584,6 +584,8 @@ export class CPipeline {
   };
 
   public async generateWorkflow(): Promise<WorkflowTemplate> {
+    await this.resourcesCheck();
+
     const workflowTemplate: WorkflowTemplate = {
       Version: WorkflowVersion.V20220315,
       Workflow: {
@@ -592,6 +594,7 @@ export class CPipeline {
         Branches: [],
       },
     };
+
     if (!isEmpty(this.pipeline.ingestionServer)) {
       const branch = await this.getWorkflowStack(PipelineStackType.INGESTION);
       if (branch) {
@@ -612,7 +615,6 @@ export class CPipeline {
   }
 
   private async getWorkflowStack(type: PipelineStackType): Promise<WorkflowParallelBranch | undefined> {
-    await this.resourcesCheck();
 
     if (!stackWorkflowS3Bucket) {
       throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');

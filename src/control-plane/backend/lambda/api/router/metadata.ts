@@ -69,16 +69,6 @@ router_metadata.put(
     return metadataEventServ.update(req, res, next);
   });
 
-router_metadata.delete(
-  '/event/:name',
-  validate([
-    query('projectId').custom(isValidEmpty),
-    query('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.delete(req, res, next);
-  });
-
 router_metadata.get(
   '/event_parameters',
   validate([
@@ -118,16 +108,6 @@ router_metadata.put(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventParameterServ.update(req, res, next);
-  });
-
-router_metadata.delete(
-  '/event_parameter/:id',
-  validate([
-    query('projectId').custom(isValidEmpty),
-    query('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventParameterServ.delete(req, res, next);
   });
 
 router_metadata.get(
@@ -171,16 +151,6 @@ router_metadata.put(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.update(req, res, next);
-  });
-
-router_metadata.delete(
-  '/user_attribute/:id',
-  validate([
-    query('projectId').custom(isValidEmpty),
-    query('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataUserAttributeServ.delete(req, res, next);
   });
 
 export {

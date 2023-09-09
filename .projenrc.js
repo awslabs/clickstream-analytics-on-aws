@@ -31,6 +31,7 @@ const commonDeps = [
   'node-fetch@^2.6.4',
   'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
+  'jsonpath-plus@^7.2.0',
 ];
 
 const commonDevDeps = [
@@ -41,6 +42,7 @@ const commonDevDeps = [
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
   '@types/node-fetch@^2.6.4',
+  '@types/jsonpath-plus@^5.0.2',
 ];
 
 const smithyPackagesVersion = '2.0.7';
@@ -161,7 +163,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDeps,
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.11',
-    'jsonpath-plus@^7.2.0',
     ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKServicesDeps,
@@ -173,7 +174,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   pullRequestTemplate: false /* Include a GitHub pull request template. */,
   devDeps: [
     ...commonDevDeps,
-    '@types/jsonpath-plus@^5.0.2',
   ],
   minNodeVersion,
   jestOptions: {

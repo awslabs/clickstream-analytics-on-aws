@@ -47,6 +47,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteAnalyticsDashboard(
+        dashboard?.projectId || '',
         dashboard?.id || ''
       );
       if (resData.success) {
