@@ -97,7 +97,6 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
   );
 
-  //for (let i=0;i < jobList.entries.length; i++) {
   for (const entry of jobList.entries) {
     await updateItem(DYNAMODB_TABLE_NAME, entry.url, JobStatus.JOB_PROCESSING);
   }

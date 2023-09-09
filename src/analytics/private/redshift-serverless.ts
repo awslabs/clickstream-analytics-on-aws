@@ -266,7 +266,7 @@ export class RedshiftServerless extends Construct {
       properties: customProps,
     });
 
-    cr.node.addDependency(policy!);
+    cr.node.addDependency(policy);
 
     return cr;
   }

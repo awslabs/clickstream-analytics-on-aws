@@ -50,7 +50,7 @@ test('should create EMR-serverless application when RequestType is Create', asyn
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
       version: 'emr-6.10.0',
-      secourityGroupId: 'sg-102392x23df',
+      securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '3',
     },
@@ -126,7 +126,7 @@ test('should delete EMR-serverless application when RequestType is Delete', asyn
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
       version: 'emr-6.10.0',
-      secourityGroupId: 'sg-102392x23df',
+      securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
     },
@@ -178,7 +178,7 @@ test('should create EMR-serverless application when RequestType is Update ', asy
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
       version: 'emr-6.10.0',
-      secourityGroupId: 'sg-102392x23df',
+      securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
     },
@@ -251,7 +251,7 @@ test('should handle delete error', async () => {
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
       version: 'emr-6.10.0',
-      secourityGroupId: 'sg-102392x23df',
+      securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
     },
@@ -282,7 +282,9 @@ test('should handle delete error', async () => {
   emrClientMock.on(DeleteApplicationCommand).resolvesOnce({}).rejectsOnce({ errorMessage: 'delete error' });
 
   const res = await handler(event, context);
-  expect(res).toBeUndefined();
+  expect(res).toEqual({
+    Data: {},
+  });
 
   expect(emrClientMock).toHaveReceivedCommandTimes(DeleteApplicationCommand, 2);
 
@@ -305,7 +307,7 @@ test('should handle create error', async () => {
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
       version: 'emr-6.10.0',
-      secourityGroupId: 'sg-102392x23df',
+      securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
     },

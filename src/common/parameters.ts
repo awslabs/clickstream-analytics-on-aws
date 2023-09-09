@@ -410,7 +410,7 @@ export class Parameters {
     props: ParameterProps = {},
   ) {
     const singleSGPattern = 'sg-[a-f0-9]+';
-    var allowedPattern = `${singleSGPattern}(,${singleSGPattern})*`;
+    let allowedPattern = `${singleSGPattern}(,${singleSGPattern})*`;
     if (allowEmpty) {
       allowedPattern = `(${allowedPattern})?`;
     }

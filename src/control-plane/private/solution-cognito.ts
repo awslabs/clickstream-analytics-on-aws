@@ -45,7 +45,7 @@ export class SolutionCognito extends Construct {
     super(scope, id);
     const stackId = getShortIdOfStack(Stack.of(scope));
 
-    new CfnRule(scope, 'CognitoUnsupportRegionRule', {
+    new CfnRule(scope, 'CognitoUnsupportedRegionRule', {
       assertions: [
         {
           assert:

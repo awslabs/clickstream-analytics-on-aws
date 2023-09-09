@@ -13,7 +13,7 @@
 
 import { join } from 'path';
 import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, RemovalPolicy, Stack, StackProps, aws_dynamodb } from 'aws-cdk-lib';
-import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
+import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   CfnDistribution,
@@ -31,9 +31,10 @@ import {
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
 import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
@@ -47,7 +48,7 @@ import { getShortIdOfStack } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, CNCloudFrontS3PortalProps, DomainProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
-import { supressWarningsForCloudFrontS3Portal } from './control-plane/private/nag';
+import { suppressWarningsForCloudFrontS3Portal as suppressWarningsForCloudFrontS3Portal } from './control-plane/private/nag';
 import { SolutionCognito } from './control-plane/private/solution-cognito';
 import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 import { SolutionNodejsFunction } from './private/function';
@@ -69,6 +70,13 @@ export interface CloudFrontControlPlaneStackProps extends StackProps {
    * user existing OIDC provider or not
    */
   useExistingOIDCProvider?: boolean;
+}
+
+interface OIDCInfo {
+  readonly issuer: string;
+  readonly clientId: string;
+  readonly oidcLogoutUrl: string;
+  readonly adminEmail: string;
 }
 
 export class CloudFrontControlPlaneStack extends Stack {
@@ -109,19 +117,19 @@ export class CloudFrontControlPlaneStack extends Stack {
 
         const domainParameters = Parameters.createDomainParameters(this, this.paramGroups, this.paramLabels);
 
-        const hostedzone = HostedZone.fromHostedZoneAttributes(this, 'hostZone', {
+        const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'hostZone', {
           hostedZoneId: domainParameters.hostedZoneId.valueAsString,
           zoneName: domainParameters.hostedZoneName.valueAsString,
         });
 
         const certificate = new DnsValidatedCertificate(this, 'certificate', {
           domainName: Fn.join('.', [domainParameters.recordName.valueAsString, domainParameters.hostedZoneName.valueAsString]),
-          hostedZone: hostedzone,
+          hostedZone: hostedZone,
           region: 'us-east-1',
         });
 
         domainProps = {
-          hostZone: hostedzone,
+          hostZone: hostedZone,
           recordName: domainParameters.recordName.valueAsString,
           certificate: certificate,
         };
@@ -212,82 +220,11 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
     });
 
-
-    let issuer: string;
-    let clientId: string;
-    let oidcLogoutUrl: string = '';
-    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
-    //Create Cognito user pool and client for backend api
-    if (createCognitoUserPool) {
-      this.addToParamLabels('Admin User Email', emailParamerter.logicalId);
-      this.addToParamGroups('Authentication Information', emailParamerter.logicalId);
-
-      const cognito = new SolutionCognito(this, 'solution-cognito', {
-        email: emailParamerter.valueAsString,
-        callbackUrls: [`${controlPlane.controlPlaneUrl}/signin`],
-        logoutUrls: [`${controlPlane.controlPlaneUrl}`],
-      });
-
-      issuer = cognito.oidcProps.issuer;
-      clientId = cognito.oidcProps.appClientId;
-      oidcLogoutUrl = cognito.oidcProps.oidcLogoutUrl;
-
-    } else {
-      const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
-      issuer = oidcParameters.oidcProvider.valueAsString;
-      clientId = oidcParameters.oidcClientId.valueAsString;
-    }
-
-    const authorizerTable = new aws_dynamodb.Table(this, 'AuthorizerCache', {
-      partitionKey: {
-        name: 'id',
-        type: aws_dynamodb.AttributeType.STRING,
-      },
-      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.DESTROY,
-      pointInTimeRecovery: true,
-      encryption: TableEncryption.AWS_MANAGED,
-      timeToLiveAttribute: 'ttl',
-    });
-
-    const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
-      runtime: Runtime.NODEJS_18_X,
-      handler: 'handler',
-      entry: './src/control-plane/auth/index.ts',
-      environment: {
-        ISSUER: issuer,
-        AUTHORIZER_TABLE: authorizerTable.tableName,
-        ... POWERTOOLS_ENVS,
-      },
-      timeout: Duration.seconds(15),
-      memorySize: 512,
-      architecture: props?.targetToCNRegions ? undefined : Architecture.ARM_64,
-      logRetention: RetentionDays.TEN_YEARS,
-    });
-    authorizerTable.grantReadWriteData(authFunction);
-    addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
-      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
-    ]);
-
-    const authorizer = new TokenAuthorizer(this, 'JWTAuthorizer', {
-      handler: authFunction,
-      validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
-      resultsCacheTtl: Duration.seconds(0),
-    });
-
+    const oidcInfo = this.oidcInfo(createCognitoUserPool ? controlPlane.controlPlaneUrl : undefined);
+    const authorizer = this.createAuthorizer(oidcInfo);
     const pluginPrefix = 'plugins/';
-    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
-      fronting: 'cloudfront',
-      apiGateway: {
-        stageName: 'api',
-        authorizer: authorizer,
-      },
-      targetToCNRegions: props?.targetToCNRegions,
-      stackWorkflowS3Bucket: solutionBucket.bucket,
-      pluginPrefix: pluginPrefix,
-      healthCheckPath: '/',
-      adminUserEmail: emailParamerter.valueAsString,
-    });
+    const clickStreamApi = this.createBackendApi(authorizer, oidcInfo, pluginPrefix,
+      solutionBucket.bucket, props?.targetToCNRegions);
 
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
@@ -321,24 +258,23 @@ export class CloudFrontControlPlaneStack extends Stack {
     // upload config to S3
     const key = SOLUTION_CONFIG_PATH.substring(1); //remove slash
     const awsExports = generateSolutionConfig({
-      issuer: issuer,
-      clientId: clientId,
+      issuer: oidcInfo.issuer,
+      clientId: oidcInfo.clientId,
       redirectUrl: controlPlane.controlPlaneUrl,
       solutionVersion: process.env.BUILD_VERSION || 'v1',
-      cotrolPlaneMode: 'CLOUDFRONT',
+      controlPlaneMode: 'CLOUDFRONT',
       solutionBucket: solutionBucket.bucket.bucketName,
       solutionPluginPrefix: pluginPrefix,
       solutionRegion: Aws.REGION,
-      oidcLogoutUrl: oidcLogoutUrl,
+      oidcLogoutUrl: oidcInfo.oidcLogoutUrl,
     });
 
-    controlPlane.buckeyDeployment.addSource(Source.jsonData(key, awsExports));
+    controlPlane.bucketDeployment.addSource(Source.jsonData(key, awsExports));
 
     if (props?.targetToCNRegions) {
       const portalDist = controlPlane.distribution.node.defaultChild as CfnDistribution;
 
-      //This is a tricky to avoid 403 error when aceess paths except /index.html
-      //TODO issue #17
+      //This is a tricky to avoid 403 error when access paths except /index.html
       portalDist.addPropertyOverride(
         'DistributionConfig.CustomErrorResponses',
         [
@@ -358,8 +294,8 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
     };
 
-    //supress nag warnings
-    supressWarningsForCloudFrontS3Portal(this);
+    //suppress nag warnings
+    suppressWarningsForCloudFrontS3Portal(this);
 
     new CfnOutput(this, OUTPUT_CONTROL_PLANE_URL, {
       description: 'The url of clickstream console',
@@ -380,6 +316,98 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     // nag
     addCfnNag(this);
+  }
+
+  private oidcInfo(controlPlaneUrl?: string): OIDCInfo {
+    let issuer: string;
+    let clientId: string;
+    let oidcLogoutUrl: string = '';
+    const emailParameter = Parameters.createCognitoUserEmailParameter(this);
+    //Create Cognito user pool and client for backend api
+    if (controlPlaneUrl) {
+      this.addToParamLabels('Admin User Email', emailParameter.logicalId);
+      this.addToParamGroups('Authentication Information', emailParameter.logicalId);
+
+      const cognito = new SolutionCognito(this, 'solution-cognito', {
+        email: emailParameter.valueAsString,
+        callbackUrls: [`${controlPlaneUrl}/signin`],
+        logoutUrls: [`${controlPlaneUrl}`],
+      });
+
+      issuer = cognito.oidcProps.issuer;
+      clientId = cognito.oidcProps.appClientId;
+      oidcLogoutUrl = cognito.oidcProps.oidcLogoutUrl;
+
+    } else {
+      const oidcParameters = Parameters.createOIDCParameters(this, this.paramGroups, this.paramLabels);
+      issuer = oidcParameters.oidcProvider.valueAsString;
+      clientId = oidcParameters.oidcClientId.valueAsString;
+    }
+
+    return {
+      issuer,
+      clientId,
+      oidcLogoutUrl,
+      adminEmail: emailParameter.valueAsString,
+    };
+  }
+
+  private createAuthorizer(oidcInfo: OIDCInfo): TokenAuthorizer {
+    const authorizerTable = new aws_dynamodb.Table(this, 'AuthorizerCache', {
+      partitionKey: {
+        name: 'id',
+        type: aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pointInTimeRecovery: true,
+      encryption: TableEncryption.AWS_MANAGED,
+      timeToLiveAttribute: 'ttl',
+    });
+
+    const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
+      runtime: Runtime.NODEJS_18_X,
+      handler: 'handler',
+      entry: './src/control-plane/auth/index.ts',
+      environment: {
+        ISSUER: oidcInfo.issuer,
+        AUTHORIZER_TABLE: authorizerTable.tableName,
+        ... POWERTOOLS_ENVS,
+      },
+      timeout: Duration.seconds(15),
+      memorySize: 512,
+      logRetention: RetentionDays.TEN_YEARS,
+    });
+    authorizerTable.grantReadWriteData(authFunction);
+    addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
+    ]);
+
+    const authorizer = new TokenAuthorizer(this, 'JWTAuthorizer', {
+      handler: authFunction,
+      validationRegex: '^(Bearer )[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)$',
+      resultsCacheTtl: Duration.seconds(0),
+    });
+
+    return authorizer;
+  }
+
+  private createBackendApi(authorizer: IAuthorizer, oidcInfo: OIDCInfo, pluginPrefix: string,
+    bucket: IBucket, targetToCNRegions?: boolean): ClickStreamApiConstruct {
+    const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
+      fronting: 'cloudfront',
+      apiGateway: {
+        stageName: 'api',
+        authorizer: authorizer,
+      },
+      targetToCNRegions: targetToCNRegions,
+      stackWorkflowS3Bucket: bucket,
+      pluginPrefix: pluginPrefix,
+      healthCheckPath: '/',
+      adminUserEmail: oidcInfo.adminEmail,
+    });
+
+    return clickStreamApi;
   }
 
   private addToParamGroups(label: string, ...param: string[]) {

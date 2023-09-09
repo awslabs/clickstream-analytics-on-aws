@@ -19,7 +19,7 @@ export interface SolutionConfigProps {
   readonly clientId: string;
   readonly redirectUrl: string;
   readonly solutionVersion: string;
-  readonly cotrolPlaneMode: 'ALB' | 'CLOUDFRONT';
+  readonly controlPlaneMode: 'ALB' | 'CLOUDFRONT';
   readonly solutionBucket: string;
   readonly solutionPluginPrefix: string;
   readonly solutionRegion: string;
@@ -32,7 +32,7 @@ export function generateSolutionConfig(props: SolutionConfigProps ) {
     oidc_client_id: props.clientId,
     oidc_redirect_url: props.redirectUrl + '/signin',
     solution_version: props.solutionVersion,
-    cotrol_plane_mode: props.cotrolPlaneMode,
+    control_plane_mode: props.controlPlaneMode,
     solution_data_bucket: props.solutionBucket,
     solution_plugin_prefix: props.solutionPluginPrefix,
     solution_region: props.solutionRegion,

@@ -338,11 +338,11 @@ function getTimestampFromEvent(inputTimestamp: string | number): number {
     return inputTimestamp;
   }
 
-  if ((inputTimestamp as string).match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z$/)) {
+  if (inputTimestamp.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z$/)) {
     return new Date(inputTimestamp).getTime();
   }
 
-  if ((inputTimestamp as string).match(/^\d+$/)) {
+  if (inputTimestamp.match(/^\d+$/)) {
     return parseInt(inputTimestamp);
   }
 

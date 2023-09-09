@@ -71,8 +71,8 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
   try {
     if (response.Status == StatusString.FINISHED) {
       logger.info('Load success and delete the job in Dynamodb.');
-      for (let index = 0; index < jobList.entries.length; index++) {
-        const url = jobList.entries[index].url;
+      for (const entry of jobList.entries) {
+        const url = entry.url;
         logger.debug(`delFinishedJobInDynamodb s3Uri:${url}`);
         try {
           const dynamodbResponse = await delFinishedJobInDynamodb(dynamodbTableName, url);
@@ -83,9 +83,9 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         };
       }
       logger.info('Load success and delete the manifest file on S3.');
-      const key = manifestFileName.substr('s3://'.length, manifestFileName.length - 's3://'.length);
+      const key = manifestFileName.slice('s3://'.length);
       const s3Bucket = key.split('/')[0];
-      const s3Object = key.substr(s3Bucket.length + '/'.length, key.length - s3Bucket.length);
+      const s3Object = key.slice(s3Bucket.length + '/'.length);
       logger.debug(`delFinishedJobInS3 s3Bucket:${s3Bucket}, s3Object:${s3Object}`);
       try {
         const s3Response = await delFinishedJobInS3(s3Bucket, s3Object);

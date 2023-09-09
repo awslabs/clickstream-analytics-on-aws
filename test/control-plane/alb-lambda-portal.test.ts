@@ -210,6 +210,15 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
             ],
           },
         },
+        {
+          Field: 'http-request-method',
+          HttpRequestMethodConfig: {
+            Values: [
+              'POST',
+              'GET',
+            ],
+          },
+        },
       ],
       Priority: 50,
     });

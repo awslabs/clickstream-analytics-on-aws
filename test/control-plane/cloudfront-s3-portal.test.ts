@@ -30,9 +30,9 @@ import { getShortIdOfStack } from '../../src/common/stack';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
 
-const commontApp = new App();
+const commonApp = new App();
 
-const commonTestStack = new Stack(commontApp, 'comTestStack');
+const commonTestStack = new Stack(commonApp, 'comTestStack');
 new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
   frontendProps: {
     assetPath: 'frontend',
@@ -124,7 +124,7 @@ describe('CloudFrontS3Portal', () => {
         },
         DefaultRootObject: 'index.html',
         Enabled: true,
-        HttpVersion: 'http2',
+        HttpVersion: 'http2and3',
         IPV6Enabled: false,
         Origins: [
           {
@@ -262,7 +262,7 @@ describe('CloudFrontS3Portal', () => {
           'Fn::Join': [
             '',
             [
-              'clicstream-controlplane-oac-',
+              'clickstream-controlplane-oac-',
               {
                 'Fn::Select': [
                   0,
@@ -371,7 +371,7 @@ describe('CloudFrontS3Portal', () => {
         },
         DefaultRootObject: 'index.html',
         Enabled: true,
-        HttpVersion: 'http2',
+        HttpVersion: 'http2and3',
         IPV6Enabled: false,
         Origins: [
           {

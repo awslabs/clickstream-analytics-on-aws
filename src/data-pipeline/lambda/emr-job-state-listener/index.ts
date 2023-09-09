@@ -92,7 +92,7 @@ async function sendMetrics(event: any) {
 
   const jobRunInfo = await emrClient.send(new GetJobRunCommand({
     jobRunId: event.detail.jobRunId!,
-    applicationId: emrApplicationId!,
+    applicationId: emrApplicationId,
   }));
 
   const createdAt = jobRunInfo.jobRun?.createdAt;

@@ -23,13 +23,13 @@ import { Construct } from 'constructs';
 import {
   InitPartitionCustomResourceProps,
   createCopyAssetsCustomResource,
-  createEMRServelsssApplicationCustomResource,
+  createEMRServerlessApplicationCustomResource,
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
+import { createMetricsWidget } from './utils/metrics';
 import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
-import { createMetricsWidget } from './utils/utils-metircs';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
@@ -249,11 +249,11 @@ export class DataPipelineConstruct extends Construct {
     });
     addCfnNagToSecurityGroup(emrSg, ['W40', 'W5']);
 
-    const emrServerlessAppCr = createEMRServelsssApplicationCustomResource(this, {
+    const emrServerlessAppCr = createEMRServerlessApplicationCustomResource(this, {
       projectId: this.props.projectId,
       name: `${DATA_PROCESSING_APPLICATION_NAME_PREFIX}-Spark-APP-${this.props.projectId}`,
       version: this.props.emrVersion,
-      secourityGroupId: emrSg.securityGroupId,
+      securityGroupId: emrSg.securityGroupId,
       idleTimeoutMinutes: this.props.emrApplicationIdleTimeoutMinutes,
       subnetIds: Fn.join(',', this.props.vpcSubnets.subnets!.map((s) => s.subnetId)),
       pipelineS3Bucket: this.props.pipelineS3Bucket,
