@@ -847,7 +847,7 @@ export class ReportingServ {
           Sqls: [`select * from ${appId}.ods_events limit 1`],
           WorkgroupName: dashboardCreateParameters.redshift.newServerless.workgroupName,
           Database: projectId,
-          WithEvent: false
+          WithEvent: false,
         };
 
         const params = new BatchExecuteStatementCommand(input);
