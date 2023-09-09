@@ -165,7 +165,7 @@ describe('User test', () => {
       },
     });
     const res = await request(app)
-      .get(`/api/user/${MOCK_USER_ID}`);
+      .get(`/api/user/details?uid=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', uid: 'user-0000' }, message: '', success: true });
@@ -176,7 +176,7 @@ describe('User test', () => {
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand).resolves({});
     const res = await request(app)
-      .get(`/api/user/${MOCK_USER_ID}`);
+      .get(`/api/user/details?uid=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
@@ -190,7 +190,7 @@ describe('User test', () => {
     const TOKEN = 'Bearer eyJraWQiOiJkVE5hTUhKTWw2d094c2ZhdHRONXBUQmJFZ2dOQTkzUDRYNVVtam1yMG1rPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiNEJyUTZGRndLVUdWcE1jSkI1RGl3USIsInN1YiI6ImY0NjhiNDQ4LWYwNDEtNzA3OS01Y2VhLTk5ODIyYjMyMzAzNiIsImNvZ25pdG86Z3JvdXBzIjpbIkNsaWNrc3RyZWFtT3BlcmF0b3IiXSwiZW1haWxfdmVyaWZpZWQiOnRydWUsImlzcyI6Imh0dHBzOi8vY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vdXMtZWFzdC0xX25vZUVSeDZBVyIsImNvZ25pdG86dXNlcm5hbWUiOiJmNDY4YjQ0OC1mMDQxLTcwNzktNWNlYS05OTgyMmIzMjMwMzYiLCJvcmlnaW5fanRpIjoiNzk3Y2FlOTktN2U4OC00YzVkLWEzMDEtNWZlNDc5NjhkMDU5IiwiYXVkIjoiNzVvajdjaDRsczNsbmhoaWdsdDBidTI3azgiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY5NDE0MDU0MywiZXhwIjoxNjk0MTQ0MTQzLCJpYXQiOjE2OTQxNDA1NDMsImp0aSI6IjM1NjFlNWI1LTQwOGYtNGRkNS04ZWQ5LTcxN2ExYmU0NWNmZCIsImVtYWlsIjoiZmFrZUBleGFtcGxlLmNvbSJ9.H-XTyDrwSGZyhP0C99zZYhEUy4FxhRaNnTW4vrlgw0DBFdjH-HuZIthgw_uVo74bYXQ4NVPDU2W4vtPS5mWPMXFdgrwsQfeV1MP8cDZZFRWG_zcy9AJaXvN2wUnncW5pJA-Bq69_wTxf0m4sFQiKVABJsMUuRPMJ1G1ceEgeEmHE5fLITvhYFF5L2aaKeirrG8ENCeIN7B-eKGZCWvoymObX2e6DDQYEt_yVFdRP3ef9nkOdgM0JdZwmmXsyAFjlRv20rPxZVUGFUl4eyuatHQSFSpaPcPU91aDiOZ3XZQehtkNtOcMYRWs7kNnFQiykbe3KnIW22xfaISxiGS_9OQ';
     const context = `{\"accountId\":\"555555555555\",\"resourceId\":\"0my3dw\",\"operationName\":null,\"stage\":\"api\",\"domainName\":\"xxx.execute-api.us-east-1.amazonaws.com\",\"domainPrefix\":\"4ui7xyvq73\",\"requestId\":\"b1633b83-991d-4ca1-a393-4cb18c1db184\",\"protocol\":\"HTTP/1.1\",\"identity\":{\"cognitoIdentityPoolId\":null,\"accountId\":null,\"cognitoIdentityId\":null,\"caller\":null,\"apiKey\":null,\"apiKeyId\":null,\"accessKey\":null,\"sourceIp\":\"0.0.0.0\",\"cognitoAuthenticationType\":null,\"cognitoAuthenticationProvider\":null,\"userArn\":null,\"userAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36\",\"user\":null},\"resourcePath\":\"/{proxy+}\",\"path\":\"/api/api/project\",\"authorizer\":{\"principalId\":\"4a05631e-cbe6-477c-915d-1704aec9f101\",\"integrationLatency\":253,\"email\":\"${MOCK_USER_ID}\",\"authorizationToken\":\"${TOKEN}\"},\"httpMethod\":\"POST\",\"requestTime\":\"01/May/2023:11:38:14 +0000\",\"requestTimeEpoch\":1682941094910,\"apiId\":\"4ui7xyvq73\"}`;
     const res = await request(app)
-      .get(`/api/user/${MOCK_USER_ID}`)
+      .get(`/api/user/details?uid=${MOCK_USER_ID}`)
       .set(amznRequestContextHeader, context);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
