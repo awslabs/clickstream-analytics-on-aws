@@ -54,6 +54,8 @@ export async function authOIDC(req: express.Request, res: express.Response, next
           operator = (authResult.jwtPayload as JwtPayload).email.toString();
         } else if (!isEmpty((authResult.jwtPayload as JwtPayload).username)) {
           operator = (authResult.jwtPayload as JwtPayload).username.toString();
+        } else {
+          operator = authResult.jwtPayload?.sub?.toString() ?? '';
         }
       } catch (err: any) {
         if (err instanceof Error && err.message == ERR_OPENID_CONFIGURATION) {

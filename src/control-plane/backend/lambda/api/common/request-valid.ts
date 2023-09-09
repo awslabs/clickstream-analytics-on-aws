@@ -37,25 +37,6 @@ export const validate = (validations: ValidationChain[]) => {
   };
 };
 
-export const validateRole = (roles: string[]) => {
-  const UNAUTHORIZED_MESSAGE = 'Unauthorized.';
-  const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
-  return async (_req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const WITH_VALIDATE_ROLE = process.env.WITH_VALIDATE_ROLE;
-    if (WITH_VALIDATE_ROLE === 'true') {
-      const operator = res.get('X-Click-Stream-Operator');
-      if (!operator) {
-        return res.status(401).json(new ApiFail(UNAUTHORIZED_MESSAGE));
-      }
-      const user = await store.getUser(operator);
-      if (!user || !user.role || !roles.includes(user.role)) {
-        return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
-      }
-    }
-    return next();
-  };
-};
-
 export const isValidEmpty: CustomValidator = value => {
   if (isEmpty(value)) {
     return Promise.reject('Value is empty.');

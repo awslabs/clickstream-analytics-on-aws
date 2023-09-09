@@ -13,8 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validateRole, validate } from '../common/request-valid';
-import { IUserRole } from '../common/types';
+import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { PluginServ } from '../service/plugin';
 
 const router_plugin = express.Router();
@@ -22,7 +21,6 @@ const pluginServ: PluginServ = new PluginServ();
 
 router_plugin.get(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -41,7 +39,6 @@ router_plugin.get(
 
 router_plugin.post(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('jarFile').custom(isValidEmpty).custom(isAllowFilesSuffix),

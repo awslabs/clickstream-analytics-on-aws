@@ -14,6 +14,7 @@
 import express from 'express';
 import { accessLog } from './middle-ware/access-log';
 import { authOIDC } from './middle-ware/auth-oidc';
+import { authRole } from './middle-ware/auth-role';
 import { errorHandler } from './middle-ware/error-handler';
 import { responseTime } from './middle-ware/response-time';
 import { router_app } from './router/application';
@@ -31,6 +32,8 @@ const port = process.env.PORT || 8080;
 app.use(express.json({ limit: '384kb' }));
 
 app.use(accessLog);
+
+app.use(authRole);
 
 app.use(authOIDC);
 

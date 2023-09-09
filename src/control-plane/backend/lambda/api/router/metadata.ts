@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate, validateRole } from '../common/request-valid';
+import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { IUserRole } from '../common/types';
 import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
@@ -24,7 +24,6 @@ const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAtt
 
 router_metadata.get(
   '/events',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
@@ -41,7 +40,6 @@ router_metadata.get(
 
 router_metadata.post(
   '/event',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isValidEmpty),
@@ -53,7 +51,6 @@ router_metadata.post(
   });
 
 router_metadata.get('/event/:name',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
@@ -64,7 +61,6 @@ router_metadata.get('/event/:name',
 
 router_metadata.put(
   '/event',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty),
     body('projectId').custom(isValidEmpty),
@@ -76,7 +72,6 @@ router_metadata.put(
 
 router_metadata.get(
   '/event_parameters',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     query()
       .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
@@ -91,7 +86,6 @@ router_metadata.get(
 
 router_metadata.post(
   '/event_parameter',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isValidEmpty),
@@ -108,7 +102,6 @@ router_metadata.get('/event_parameter/:id', async (req: express.Request, res: ex
 
 router_metadata.put(
   '/event_parameter',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty),
     body('projectId').custom(isValidEmpty),
@@ -120,7 +113,6 @@ router_metadata.put(
 
 router_metadata.get(
   '/user_attributes',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
@@ -137,7 +129,6 @@ router_metadata.get(
 
 router_metadata.post(
   '/user_attribute',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId').custom(isValidEmpty),
@@ -154,7 +145,6 @@ router_metadata.get('/user_attribute/:id', async (req: express.Request, res: exp
 
 router_metadata.put(
   '/user_attribute',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty),
     body('projectId').custom(isValidEmpty),

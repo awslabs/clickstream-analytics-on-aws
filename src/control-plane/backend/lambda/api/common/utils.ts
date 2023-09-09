@@ -14,7 +14,7 @@
 import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './constants';
 import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { logger } from './powertools';
@@ -127,6 +127,13 @@ function getTokenFromRequestContext(requestContext: string | undefined) {
   return token;
 }
 
+function getUidFromTokenPayload(payload: JwtPayload | undefined) {
+  if (!payload) {
+    return '';
+  }
+  return payload.email || payload.username || payload.preferred_username || payload.sub || '';
+}
+
 function getTokenFromRequest(req: any) {
   let authorization;
   const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
@@ -138,7 +145,6 @@ function getTokenFromRequest(req: any) {
   if (authorization) {
     const token = authorization.split(' ')[1];
     const decodedToken = jwt.decode(token, { complete: true });
-
     return decodedToken;
   }
   return undefined;
@@ -153,6 +159,9 @@ function getRoleFromToken(decodedToken: any) {
   let oidcRoles: string[] = [];
 
   const OIDC_ROLE_PATH = process.env.OIDC_ROLE_PATH ?? '$.payload.cognito:groups';
+  const OIDC_OPERATOR_ROLE_NAME = process.env.OIDC_OPERATOR_ROLE_NAME ?? `Clickstream${IUserRole.OPERATOR}`;
+  const OIDC_ANALYST_ROLE_NAME = process.env.OIDC_ANALYST_ROLE_NAME ?? `Clickstream${IUserRole.ANALYST}`;
+
   const values = JSONPath({ path: OIDC_ROLE_PATH, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
@@ -160,12 +169,12 @@ function getRoleFromToken(decodedToken: any) {
     return role;
   }
   if (oidcRoles &&
-          oidcRoles.includes(`Clickstream${IUserRole.OPERATOR}`) &&
-          oidcRoles.includes(`Clickstream${IUserRole.ANALYST}`)) {
+          oidcRoles.includes(OIDC_OPERATOR_ROLE_NAME) &&
+          oidcRoles.includes(OIDC_ANALYST_ROLE_NAME)) {
     role = IUserRole.ADMIN;
-  } else if (oidcRoles && oidcRoles.includes(`Clickstream${IUserRole.OPERATOR}`)) {
+  } else if (oidcRoles && oidcRoles.includes(OIDC_OPERATOR_ROLE_NAME)) {
     role = IUserRole.OPERATOR;
-  } else if (oidcRoles && oidcRoles.includes(`Clickstream${IUserRole.ANALYST}`)) {
+  } else if (oidcRoles && oidcRoles.includes(OIDC_ANALYST_ROLE_NAME)) {
     role = IUserRole.ANALYST;
   }
   return role;
@@ -523,5 +532,6 @@ export {
   getReportingDashboardsUrl,
   corsStackInput,
   getRoleFromToken,
+  getUidFromTokenPayload,
   getTokenFromRequest,
 };

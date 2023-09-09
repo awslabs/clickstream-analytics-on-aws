@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate, validateRole } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { IUserRole } from '../common/types';
 import { ApplicationServ } from '../service/application';
 
@@ -22,7 +22,6 @@ const appServ: ApplicationServ = new ApplicationServ();
 
 router_app.get(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('pid').custom(isProjectExisted),
     query().custom((value, { req }) => defaultPageValueValid(value, {
@@ -42,7 +41,6 @@ router_app.get(
 
 router_app.post(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId')
@@ -57,7 +55,6 @@ router_app.post(
 
 router_app.get(
   '/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     query('pid').custom(isProjectExisted),
   ]),
@@ -67,7 +64,6 @@ router_app.get(
 
 router_app.delete(
   '/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     param('id').custom((value, { req }) => isApplicationExisted(value, {
       req,

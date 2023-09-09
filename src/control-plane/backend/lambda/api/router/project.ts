@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate, validateRole } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
 import { IUserRole } from '../common/types';
 import { ProjectServ } from '../service/project';
 
@@ -21,8 +21,7 @@ const router_project = express.Router();
 const projectServ: ProjectServ = new ProjectServ();
 
 router_project.get(
-  '/:id/dashboards',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
+  '/:id/dashboard',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -40,15 +39,13 @@ router_project.get(
   });
 
 router_project.get(
-  '/dashboard/:dashboardId',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
+  '/:id/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.getDashboard(req, res, next);
   });
 
 router_project.post(
   '/:id/dashboard',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('ownerPrincipal').custom(isValidEmpty),
@@ -61,15 +58,13 @@ router_project.post(
   });
 
 router_project.delete(
-  '/dashboard/:dashboardId',
-  validateRole([IUserRole.ADMIN, IUserRole.ANALYST]),
+  '/:id/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.deleteDashboard(req, res, next);
   });
 
 router_project.get(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]),
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -88,7 +83,6 @@ router_project.get(
 
 router_project.post(
   '',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('emails').custom(isEmails),
@@ -100,14 +94,12 @@ router_project.post(
   });
 
 router_project.get('/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.details(req, res, next);
   });
 
 router_project.put(
   '/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     body().custom(isValidEmpty),
     body('id')
@@ -124,7 +116,6 @@ router_project.put(
 
 router_project.delete(
   '/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   validate([
     param('id').custom(isProjectExisted),
   ]),
@@ -134,7 +125,6 @@ router_project.delete(
 
 
 router_project.get('/verification/:id',
-  validateRole([IUserRole.ADMIN, IUserRole.OPERATOR]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.verification(req, res, next);
   });
