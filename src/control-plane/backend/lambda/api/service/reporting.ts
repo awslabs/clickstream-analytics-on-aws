@@ -845,11 +845,9 @@ export class ReportingServ {
       if (dashboardCreateParameters.redshift.newServerless) {
         const input = {
           Sqls: [`select * from ${appId}.ods_events limit 1`],
-          WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
+          WorkgroupName: dashboardCreateParameters.redshift.newServerless.workgroupName,
           Database: projectId,
-          WithEvent: false,
-          ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
-          DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
+          WithEvent: false
         };
 
         const params = new BatchExecuteStatementCommand(input);
@@ -868,7 +866,7 @@ export class ReportingServ {
           logger.info(`Get statement status: ${resp.Status}`);
         }
         if (resp.Status == StatusString.FAILED) {
-          logger.error('Warmup redshift serverless with error: '+ resp.Status, JSON.stringify(resp));
+          logger.warn('Warmup redshift serverless with error: '+ resp.Status, JSON.stringify(resp));
         }
       }
 
