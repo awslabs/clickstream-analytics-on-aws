@@ -31,6 +31,7 @@ import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import javax.validation.constraints.NotEmpty;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -105,11 +106,9 @@ public class ETLRunner {
 
         log.info(new ETLMetric(dataset, "source").toString());
         Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
-        String outPath = config.getOutputPath().replaceFirst("/$", "");
-
+        String outPath = config.getOutputPath();
         TableName tableName = TableName.ODS_EVENTS;
         if (this.multipleOutDataset) {
-            outPath = outPath + "/" + TableName.EVENT.tableName + "/";
             tableName = TableName.EVENT;
         }
         long resultCount = writeResult(outPath, dataset2, tableName);
@@ -304,14 +303,9 @@ public class ETLRunner {
         Dataset<Row> itemDataset = transformedDatasets.get(2);
         Dataset<Row> userDataset = transformedDatasets.get(3);
         String outPath = config.getOutputPath();
-
-        if (outPath.endsWith("/")) {
-            outPath = outPath.replaceFirst("/$", "");
-        }
-        long evenParamDatasetCount = writeResult(outPath + "/" + TableName.EVEN_PARAMETER.tableName + "/",
-                evenParamDataset, TableName.EVEN_PARAMETER);
-        long itemDatasetCount = writeResult(outPath + "/" + TableName.ITEM.tableName + "/", itemDataset, TableName.ITEM);
-        long userDatasetCount = writeResult(outPath + "/" + TableName.USER.tableName + "/", userDataset, TableName.USER);
+        long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
+        long itemDatasetCount = writeResult(outPath , itemDataset, TableName.ITEM);
+        long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
 
         log.info(new ETLMetric(evenParamDatasetCount, "sink " + TableName.EVEN_PARAMETER.tableName).toString());
         log.info(new ETLMetric(itemDatasetCount, "sink " + TableName.ITEM.tableName).toString());
@@ -322,11 +316,18 @@ public class ETLRunner {
     protected long writeResult(final String outputPath, final Dataset<Row> dataset, final TableName tbName) {
         Dataset<Row> partitionedDataset = prepareForPartition(dataset, tbName);
         long resultCount = partitionedDataset.count();
-        log.info(new ETLMetric(resultCount, "writeResult").toString());
+        log.info(new ETLMetric(resultCount, "writeResult for table " + tbName).toString());
         log.info("outputPath: " + outputPath);
+        String saveOutputPath = outputPath;
+        if (!(saveOutputPath.endsWith(tbName.tableName + "/")
+                || saveOutputPath.endsWith(tbName.tableName))) {
+            saveOutputPath = Paths.get(outputPath, tbName.tableName).toString();
+        }
+        log.info("saveOutputPath: " + saveOutputPath);
+
         String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
-            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
+            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
         } else {
             int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
             int numPartitions = partitionedDataset.rdd().getNumPartitions();
@@ -337,7 +338,7 @@ public class ETLRunner {
             }
             partitionedDataset.write()
                     .option("compression", "snappy")
-                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(outputPath);
+                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);
         }
         return resultCount;
     }

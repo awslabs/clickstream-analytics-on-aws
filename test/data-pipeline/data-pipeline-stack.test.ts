@@ -13,7 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../../src/common/constant';
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_ODS_EVENT, TABLE_NAME_USER } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
@@ -23,6 +23,34 @@ const c63Str = genString(63);
 const c64Str = genString(64);
 const c127Str = genString(127);
 const c128Str = genString(128);
+
+const anyGlueTable = {
+  'Fn::Join': [
+    '',
+    [
+      'arn:',
+      {
+        Ref: 'AWS::Partition',
+      },
+      ':glue:',
+      {
+        Ref: 'AWS::Region',
+      },
+      ':',
+      {
+        Ref: 'AWS::AccountId',
+      },
+      ':table/',
+      {
+        Ref: Match.anyValue(),
+      },
+      '/',
+      {
+        Ref: Match.anyValue(),
+      },
+    ],
+  ],
+};
 
 const app = new App();
 const rootStack = new DataPipelineStack(app, 'test-stack');
@@ -467,7 +495,8 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 
   test('Should has source and sink Glue catalog table', () => {
-    template.resourceCountIs('AWS::Glue::Table', 2);
+    template.resourceCountIs('AWS::Glue::Table', 6);
+
 
     template.hasResourceProperties('AWS::Glue::Table', {
       DatabaseName: {
@@ -475,6 +504,47 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
       TableInput: {
         Name: TABLE_NAME_INGESTION,
+        TableType: 'EXTERNAL_TABLE',
+      },
+    });
+
+    template.hasResourceProperties('AWS::Glue::Table', {
+      DatabaseName: {
+        Ref: Match.anyValue(),
+      },
+      TableInput: {
+        Name: TABLE_NAME_EVENT,
+        TableType: 'EXTERNAL_TABLE',
+      },
+    });
+
+    template.hasResourceProperties('AWS::Glue::Table', {
+      DatabaseName: {
+        Ref: Match.anyValue(),
+      },
+      TableInput: {
+        Name: TABLE_NAME_EVENT_PARAMETER,
+        TableType: 'EXTERNAL_TABLE',
+      },
+    });
+
+
+    template.hasResourceProperties('AWS::Glue::Table', {
+      DatabaseName: {
+        Ref: Match.anyValue(),
+      },
+      TableInput: {
+        Name: TABLE_NAME_ITEM,
+        TableType: 'EXTERNAL_TABLE',
+      },
+    });
+
+    template.hasResourceProperties('AWS::Glue::Table', {
+      DatabaseName: {
+        Ref: Match.anyValue(),
+      },
+      TableInput: {
+        Name: TABLE_NAME_USER,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -578,60 +648,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                   ],
                 ],
               },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':glue:',
-                    {
-                      Ref: 'AWS::Region',
-                    },
-                    ':',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':table/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                    '/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':glue:',
-                    {
-                      Ref: 'AWS::Region',
-                    },
-                    ':',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':table/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                    '/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                  ],
-                ],
-              },
+              ...[... Array(6)].map(_ => anyGlueTable),
             ],
           },
           {
@@ -780,9 +797,6 @@ describe('DataPipelineStack Glue catalog resources test', () => {
           SOURCE_TABLE_NAME: {
             Ref: Match.anyValue(),
           },
-          SINK_TABLE_NAME: {
-            Ref: Match.anyValue(),
-          },
           PROJECT_ID: {
             Ref: Match.anyValue(),
           },
@@ -867,7 +881,6 @@ describe('Data Processing job submitter', () => {
           GLUE_CATALOG_ID: Match.anyValue(),
           GLUE_DB: Match.anyValue(),
           SOURCE_TABLE_NAME: Match.anyValue(),
-          SINK_TABLE_NAME: Match.anyValue(),
           SOURCE_S3_BUCKET_NAME: RefAnyValue,
           SOURCE_S3_PREFIX: RefAnyValue,
           SINK_S3_BUCKET_NAME: RefAnyValue,
@@ -1083,60 +1096,8 @@ describe('Data Processing job submitter', () => {
                   ],
                 ],
               },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':glue:',
-                    {
-                      Ref: 'AWS::Region',
-                    },
-                    ':',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':table/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                    '/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':glue:',
-                    {
-                      Ref: 'AWS::Region',
-                    },
-                    ':',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':table/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                    '/',
-                    {
-                      Ref: Match.anyValue(),
-                    },
-                  ],
-                ],
-              },
+              ...[... Array(6)].map(_ => anyGlueTable),
+
             ],
           },
           {

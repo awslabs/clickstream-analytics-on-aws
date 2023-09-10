@@ -32,8 +32,16 @@ import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION, TABLE_NAME_ODS_EVENT } from '../common/constant';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
 import { getShortIdOfStack } from '../common/stack';
+
+export enum SinkTableEnum {
+  EVENT='event',
+  EVENT_PARAMETER='event_parameter',
+  USER='user',
+  ITEM='item',
+  ODS_EVENTS='ods_events'
+}
 
 export interface DataPipelineProps {
   readonly vpc: IVpc;
@@ -59,8 +67,8 @@ export interface DataPipelineProps {
 
 export class DataPipelineConstruct extends Construct {
   public readonly glueDatabase: Database;
-  public readonly glueEventTable: Table;
   public readonly glueIngestionTable: Table;
+  public readonly glueSinkTables: Table[];
 
   private readonly props: DataPipelineProps;
   private readonly roleUtil: RoleUtil;
@@ -143,20 +151,20 @@ export class DataPipelineConstruct extends Construct {
     );
 
     this.emrServerlessApplicationId = this.createEmrServerlessApplication();
-    const { glueDatabase, sourceTable, sinkTable } = this.createGlueResources(
+    const { glueDatabase, sourceTable, sinkTables } = this.createGlueResources(
       scope,
       this.props,
     );
     this.createSparkJobSubmitter(
       glueDatabase,
       sourceTable,
-      sinkTable,
+      sinkTables,
       this.emrServerlessApplicationId,
     );
 
     this.glueDatabase = glueDatabase;
     this.glueIngestionTable = sourceTable;
-    this.glueEventTable = sinkTable;
+    this.glueSinkTables = sinkTables;
 
     this.createEmrServerlessJobStateEventListener(this.emrServerlessApplicationId, dlQueue);
 
@@ -177,16 +185,16 @@ export class DataPipelineConstruct extends Construct {
       glueDatabase,
       TABLE_NAME_INGESTION,
     );
-    const sinkTable = this.glueUtil.createSinkTable(
+
+    const sinkTables = this.glueUtil.createSinkTables(
       glueDatabase,
       props.projectId,
-      TABLE_NAME_ODS_EVENT,
     );
 
     const partitionSyncerLambda = this.lambdaUtil.createPartitionSyncerLambda(
       glueDatabase.databaseName,
       sourceTable.tableName,
-      sinkTable.tableName,
+      sinkTables.map(t => t.tableName),
     );
     this.scheduleLambda(
       'partitionSyncerScheduler',
@@ -205,11 +213,10 @@ export class DataPipelineConstruct extends Construct {
       appIds: props.appIds,
       databaseName: glueDatabase.databaseName,
       sourceTableName: sourceTable.tableName,
-      sinkTableName: sinkTable.tableName,
     };
 
     createInitPartitionCustomResource(this, partitionSyncerLambda, initPartitionCustomResourceProps);
-    return { glueDatabase, sourceTable, sinkTable };
+    return { glueDatabase, sourceTable, sinkTables };
   }
 
   private scheduleLambda(
@@ -226,13 +233,13 @@ export class DataPipelineConstruct extends Construct {
   private createSparkJobSubmitter(
     glueDatabase: Database,
     sourceTable: Table,
-    sinkTable: Table,
+    sinkTables: Table[],
     emrApplicationId: string,
   ) {
     const jobSubmitterLambda = this.lambdaUtil.createEmrJobSubmitterLambda(
       glueDatabase,
       sourceTable,
-      sinkTable,
+      sinkTables,
       emrApplicationId,
     );
     new Rule(this, 'jobSubmitterScheduler', {

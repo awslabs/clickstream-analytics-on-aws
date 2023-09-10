@@ -187,6 +187,10 @@ public final class TransformerV2 {
     private Dataset<Row> extractUser(final Dataset<Row> dataset) {
 
         Dataset<Row> dataset0 = dataset.filter(col("event_name").isin("user_profile_set", "_user_profile_set"));
+        long setUserProfileEventCount = dataset0.count();
+
+        log.info("setUserProfileEventCount:" + setUserProfileEventCount);
+
         Dataset<Row> dataset1 = this.userPropertiesConverter.transform(dataset0);
         Column dataCol = col("data");
         Column attributesCol = dataCol.getField(ATTRIBUTES);

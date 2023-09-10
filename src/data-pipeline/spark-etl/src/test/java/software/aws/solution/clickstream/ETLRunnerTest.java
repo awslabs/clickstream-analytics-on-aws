@@ -244,7 +244,7 @@ class ETLRunnerTest extends BaseSparkTest {
         assertEquals(111L, row.getLong(row.fieldIndex("event_bundle_sequence_id")));
         String outPath = "/tmp/test-spark-etl/" + new Date().getTime();
         runner.writeResult(outPath, dataset, ETLRunner.TableName.ODS_EVENTS);
-        assertTrue(Paths.get(outPath + "/partition_app=uba-app/partition_year=2023" +
+        assertTrue(Paths.get(outPath, "ods_events/partition_app=uba-app/partition_year=2023" +
                         "/partition_month=04/partition_day=24")
                 .toFile().isDirectory());
     }

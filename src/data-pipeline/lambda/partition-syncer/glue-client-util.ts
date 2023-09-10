@@ -21,6 +21,7 @@ import {
 import { PARTITION_APP } from '../../../common/constant';
 import { putStringToS3 } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { SinkTableEnum } from '../../data-pipeline';
 import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 
 export class GlueClientUtil {
@@ -107,7 +108,7 @@ export class GlueClientUtil {
   }
 
   public async addDailyPartitionsForSinkTable
-  (s3Bucket: string, s3Prefix: string, databaseName: string, tableName: string, projectId: string, appIds: string, date: Date): Promise<void> {
+  (s3Bucket: string, s3Prefix: string, databaseName: string, tableName: SinkTableEnum, projectId: string, appIds: string, date: Date): Promise<void> {
     const partitions = this.generateDailyPartitionsOfDay(s3Bucket, s3Prefix, projectId, tableName, appIds, date);
     await this.addNewPartitions(databaseName, tableName, partitions);
   }

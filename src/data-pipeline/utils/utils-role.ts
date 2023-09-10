@@ -34,7 +34,7 @@ export class RoleUtil {
     roleName: string,
     databaseName: string,
     sourceTableName: string,
-    sinkTableName: string,
+    sinkTableNames: string[],
   ): Role {
     return createLambdaRole(this.scope, roleName, true, [
       new PolicyStatement({
@@ -43,7 +43,9 @@ export class RoleUtil {
           this.getGlueResourceArn('catalog'),
           this.getGlueResourceArn(`database/${databaseName}`),
           this.getGlueResourceArn(`table/${databaseName}/${sourceTableName}`),
-          this.getGlueResourceArn(`table/${databaseName}/${sinkTableName}`),
+          ... sinkTableNames.map(tbName => {
+            return this.getGlueResourceArn(`table/${databaseName}/${tbName}`);
+          }),
         ],
         actions: ['glue:BatchCreatePartition'],
       }),
@@ -63,7 +65,7 @@ export class RoleUtil {
     );
   }
 
-  public createJobSubmitterLambdaRole(glueDB: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string): Role {
+  public createJobSubmitterLambdaRole(glueDB: Database, sourceTable: Table, sinkTables: Table[], emrApplicationId: string): Role {
     const assumedBy = new CompositePrincipal(
       new ServicePrincipal('lambda.amazonaws.com'),
       new ServicePrincipal('emr-serverless.amazonaws.com'),
@@ -98,7 +100,9 @@ export class RoleUtil {
           this.getGlueResourceArn(`database/${glueDB.databaseName}`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/etl*`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sourceTable.tableName}`),
-          this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),
+          ... sinkTables.map(sinkTable =>
+            this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),
+          ),
         ],
         actions: [
           'glue:GetDatabase',

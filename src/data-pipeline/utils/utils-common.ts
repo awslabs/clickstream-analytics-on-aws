@@ -11,8 +11,12 @@
  *  and limitations under the License.
  */
 
+export function getSinkLocationPrefix(s3Prefix: string, projectId: string): string {
+  return `${s3Prefix}${projectId}/`;
+}
+
 export function getSinkTableLocationPrefix(s3Prefix: string, projectId: string, tableName: string): string {
-  return `${s3Prefix}${projectId}/${tableName}/`;
+  return getSinkLocationPrefix(s3Prefix, projectId) + tableName + '/';
 }
 
 export function getPluginS3Prefix(pipelineS3Prefix:string, stackId: string, projectId: string, type: string = 'custom-plugins') {

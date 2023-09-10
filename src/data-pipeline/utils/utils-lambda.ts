@@ -81,13 +81,13 @@ export class LambdaUtil {
   public createPartitionSyncerLambda(
     databaseName: string,
     sourceTableName: string,
-    sinkTableName: string,
+    sinkTableNames: string[],
   ): Function {
     const lambdaRole = this.roleUtil.createPartitionSyncerRole(
       'partitionSyncerLambdaRole',
       databaseName,
       sourceTableName,
-      sinkTableName,
+      sinkTableNames,
     );
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantReadWrite(lambdaRole, `${this.props.sourceS3Prefix}*`);
@@ -118,7 +118,6 @@ export class LambdaUtil {
           PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
           DATABASE_NAME: databaseName,
           SOURCE_TABLE_NAME: sourceTableName,
-          SINK_TABLE_NAME: sinkTableName,
           PROJECT_ID: this.props.projectId,
           APP_IDS: this.props.appIds,
           ...POWERTOOLS_ENVS,
@@ -145,8 +144,8 @@ export class LambdaUtil {
     return sg;
   }
 
-  public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string): Function {
-    const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTable, emrApplicationId);
+  public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTables: Table[], emrApplicationId: string): Function {
+    const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTables, emrApplicationId);
 
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
@@ -176,7 +175,6 @@ export class LambdaUtil {
         GLUE_CATALOG_ID: glueDB.catalogId,
         GLUE_DB: glueDB.databaseName,
         SOURCE_TABLE_NAME: sourceTable.tableName,
-        SINK_TABLE_NAME: sinkTable.tableName,
         SOURCE_S3_BUCKET_NAME: this.props.sourceS3Bucket.bucketName,
         SOURCE_S3_PREFIX: this.props.sourceS3Prefix,
         SINK_S3_BUCKET_NAME: this.props.sinkS3Bucket.bucketName,

@@ -61,7 +61,6 @@ process.env.ROLE_ARN = 'arn:aws::role:role1';
 process.env.GLUE_CATALOG_ID = 'cid_001';
 process.env.GLUE_DB = 'test_db';
 process.env.SOURCE_TABLE_NAME = 'source_table';
-process.env.SINK_TABLE_NAME = 'sink_table';
 process.env.SOURCE_S3_BUCKET_NAME = 'test-bucket-src';
 process.env.SOURCE_S3_PREFIX = 'src-prefix/';
 process.env.SINK_S3_BUCKET_NAME = 'test-bucket-sink';
@@ -125,7 +124,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             's3://test-bucket-src/src-prefix/',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-job-name-123456', // pipeline data path
             'com.test.ClassMain,com.test.ClassMainTest',
-            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            's3://test-bucket-sink/sink-prefix/test_proj_001/', // output path
             'test_proj_001',
             'app1,app2',
             '24',
@@ -190,7 +189,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             's3://test-bucket-src/src-prefix/',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-sparkConfig-job', // pipeline data path
             'com.test.ClassMain,com.test.ClassMainTest',
-            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            's3://test-bucket-sink/sink-prefix/test_proj_001/', // output path
             'test_proj_001',
             'app1,app2',
             '24',

@@ -21,7 +21,7 @@ import {
   addCfnNagForBucketDeployment,
   addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX } from './common/constant';
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { getExistVpc } from './common/vpc-utils';
 import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
@@ -150,9 +150,29 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithCustomPlugins.glueEventTable.tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables[0].tableName,
     }).condition = withCustomPluginsCondition;
 
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
+      description: 'Glue Event Parameter Table',
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables[1].tableName,
+    }).condition = withCustomPluginsCondition;
+
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
+      description: 'Glue User Table',
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables[2].tableName,
+    }).condition = withCustomPluginsCondition;
+
+
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
+      description: 'Glue Item Table',
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables[3].tableName,
+    }).condition = withCustomPluginsCondition;
+
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX}`, {
+      description: 'Glue ODS Events Table',
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables[4].tableName,
+    }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
@@ -189,8 +209,29 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueEventTable.tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[0].tableName,
     }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
+      description: 'Glue Event Parameter Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[1].tableName,
+    }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
+      description: 'Glue User Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[2].tableName,
+    }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
+      description: 'Glue Item Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[3].tableName,
+    }).condition = withoutCustomPluginsCondition;
+
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX}`, {
+      description: 'Glue ODS Events Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[4].tableName,
+    }).condition = withoutCustomPluginsCondition;
+
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
       description: 'EMR Serverless Application Id',
@@ -204,7 +245,7 @@ interface DataPipelineNestedStackProps extends NestedStackProps, DataPipelinePro
 
 class DataPipelineNestedStack extends NestedStack {
   public readonly glueDatabase: Database;
-  public readonly glueEventTable: Table;
+  public readonly glueSinkTables: Table[];
   public readonly glueIngestionTable: Table;
   public readonly emrServerlessApplicationId: string;
 
@@ -222,7 +263,7 @@ class DataPipelineNestedStack extends NestedStack {
     addCfnNag(this);
 
     this.glueDatabase = dataPipeline.glueDatabase;
-    this.glueEventTable = dataPipeline.glueEventTable;
+    this.glueSinkTables = dataPipeline.glueSinkTables;
     this.glueIngestionTable = dataPipeline.glueIngestionTable;
 
   }

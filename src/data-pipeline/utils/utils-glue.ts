@@ -12,11 +12,18 @@
  */
 
 import { Database, DataFormat, Table } from '@aws-cdk/aws-glue-alpha';
-import { Schema } from '@aws-cdk/aws-glue-alpha/lib/schema';
+import { Column, Schema } from '@aws-cdk/aws-glue-alpha/lib/schema';
 import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
 import { PARTITION_APP } from '../../common/constant';
+import { SinkTableEnum } from '../data-pipeline';
+import { getEventParameterTableColumns } from '../tables/event-parameter-table';
+import { getEventTableColumns } from '../tables/event-table';
+import { getIngestionEventsTableColumns } from '../tables/ingestion-events-tabe';
+import { getItemTableColumns } from '../tables/item-table';
+import { getODSEventsTableColumns } from '../tables/ods-events-table';
+import { getUserTableColumns } from '../tables/user-table';
 
 interface Props {
   readonly sourceS3Bucket: IBucket;
@@ -67,46 +74,7 @@ export class GlueUtil {
         comment: 'Partition (3)',
         type: Schema.STRING,
       }],
-      columns: [{
-        name: 'date',
-        type: Schema.STRING,
-      }, {
-        name: 'data',
-        type: Schema.STRING,
-      }, {
-        name: 'ip',
-        type: Schema.STRING,
-      }, {
-        name: 'source_type',
-        type: Schema.STRING,
-      }, {
-        name: 'rid',
-        type: Schema.STRING,
-      }, {
-        name: 'ua',
-        type: Schema.STRING,
-      }, {
-        name: 'm',
-        type: Schema.STRING,
-      }, {
-        name: 'uri',
-        type: Schema.STRING,
-      }, {
-        name: 'platform',
-        type: Schema.STRING,
-      }, {
-        name: 'path',
-        type: Schema.STRING,
-      }, {
-        name: 'appId',
-        type: Schema.STRING,
-      }, {
-        name: 'compression',
-        type: Schema.STRING,
-      }, {
-        name: 'ingest_time',
-        type: Schema.BIG_INT,
-      }],
+      columns: getIngestionEventsTableColumns(),
       compressed: false,
       dataFormat: DataFormat.JSON,
       bucket: Bucket.fromBucketName(this.scope, 'SourceBucket', this.props.sourceS3Bucket.bucketName),
@@ -114,10 +82,31 @@ export class GlueUtil {
     });
   }
 
-  public createSinkTable(glueDatabase: Database, projectId: string, tableName: string) {
-    return new Table(this.scope, 'SinkTable', {
+  public createSinkTables(glueDatabase: Database, projectId: string) {
+    const colMap = {
+      event: getEventTableColumns(),
+      event_parameter: getEventParameterTableColumns(),
+      user: getUserTableColumns(),
+      item: getItemTableColumns(),
+      ods_events: getODSEventsTableColumns(),
+    };
+
+    return [SinkTableEnum.EVENT,
+      SinkTableEnum.EVENT_PARAMETER,
+      SinkTableEnum.USER,
+      SinkTableEnum.ITEM,
+      SinkTableEnum.ODS_EVENTS].map(t => {
+      const glueTable = this.createSinkTable(glueDatabase, projectId, t, colMap[t]);
+      return glueTable;
+
+    });
+  }
+
+
+  public createSinkTable(glueDatabase: Database, projectId: string, tableName: SinkTableEnum, columns: Column[]) {
+    return new Table(this.scope, `${tableName}-SinkTable`, {
       database: glueDatabase,
-      description: 'ClickStream data pipeline sink table',
+      description: `ClickStream data pipeline ${tableName} table`,
       tableName,
       partitionKeys: [{
         name: PARTITION_APP,
@@ -136,468 +125,12 @@ export class GlueUtil {
         comment: 'Partition (3)',
         type: Schema.STRING,
       }],
-      columns: [
-        {
-          name: 'app_info',
-          type: Schema.struct([
-            {
-              name: 'app_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'install_source',
-              type: Schema.STRING,
-            },
-            {
-              name: 'version',
-              type: Schema.STRING,
-            },
-          ],
-          ),
-        },
-        {
-          name: 'device',
-          type: Schema.struct([
-            {
-              name: 'mobile_brand_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'mobile_model_name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'manufacturer',
-              type: Schema.STRING,
-            },
-            {
-              name: 'screen_width',
-              type: Schema.BIG_INT,
-            },
-            {
-              name: 'screen_height',
-              type: Schema.BIG_INT,
-            },
-            {
-              name: 'carrier',
-              type: Schema.STRING,
-            },
-            {
-              name: 'network_type',
-              type: Schema.STRING,
-            },
-            {
-              name: 'operating_system_version',
-              type: Schema.STRING,
-            },
-            {
-              name: 'operating_system',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_browser',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_browser_version',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_os',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_os_version',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_device',
-              type: Schema.STRING,
-            },
-            {
-              name: 'ua_device_category',
-              type: Schema.STRING,
-            },
-            {
-              name: 'system_language',
-              type: Schema.STRING,
-            },
-            {
-              name: 'time_zone_offset_seconds',
-              type: Schema.BIG_INT,
-            },
-            {
-              name: 'vendor_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'advertising_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'host_name',
-              type: Schema.STRING,
-            },
-          ],
-          ),
-        },
-        {
-          name: 'ecommerce',
-          type: Schema.struct([
-            {
-              name: 'total_item_quantity',
-              type: Schema.BIG_INT,
-            },
-            {
-              name: 'purchase_revenue_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'purchase_revenue',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'refund_value_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'refund_value',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'shipping_value_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'shipping_value',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'tax_value_in_usd',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'tax_value',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'transaction_id',
-              type: Schema.STRING,
-            },
-            {
-              name: 'unique_items',
-              type: Schema.BIG_INT,
-            },
-          ]),
-        },
-        {
-          name: 'event_bundle_sequence_id',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'event_date',
-          type: Schema.DATE,
-        },
-        {
-          name: 'event_dimensions',
-          type: Schema.array(
-            Schema.struct([
-              {
-                name: 'key',
-                type: Schema.STRING,
-              },
-              {
-                name: 'value',
-                type: Schema.struct([
-                  {
-                    name: 'double_value',
-                    type: Schema.DOUBLE,
-                  },
-                  {
-                    name: 'float_value',
-                    type: Schema.FLOAT,
-                  },
-                  {
-                    name: 'int_value',
-                    type: Schema.BIG_INT,
-                  },
-                  {
-                    name: 'string_value',
-                    type: Schema.STRING,
-                  },
-                ]),
-              },
-            ]),
-          ),
-        },
-        {
-          name: 'event_id',
-          type: Schema.STRING,
-        },
-        {
-          name: 'event_name',
-          type: Schema.STRING,
-        },
-        {
-          name: 'event_params',
-          type: Schema.array(
-            Schema.struct([
-              {
-                name: 'key',
-                type: Schema.STRING,
-              },
-              {
-                name: 'value',
-                type: Schema.struct([
-                  {
-                    name: 'double_value',
-                    type: Schema.DOUBLE,
-                  },
-                  {
-                    name: 'float_value',
-                    type: Schema.FLOAT,
-                  },
-                  {
-                    name: 'int_value',
-                    type: Schema.BIG_INT,
-                  },
-                  {
-                    name: 'string_value',
-                    type: Schema.STRING,
-                  },
-                ]),
-              },
-            ]),
-          ),
-        },
-        {
-          name: 'event_previous_timestamp',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'event_server_timestamp_offset',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'event_timestamp',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'event_value_in_usd',
-          type: Schema.FLOAT,
-        },
-        {
-          name: 'geo',
-          type: Schema.struct([
-            {
-              name: 'city',
-              type: Schema.STRING,
-            },
-            {
-              name: 'continent',
-              type: Schema.STRING,
-            },
-            {
-              name: 'country',
-              type: Schema.STRING,
-            },
-            {
-              name: 'metro',
-              type: Schema.STRING,
-            },
-            {
-              name: 'region',
-              type: Schema.STRING,
-            },
-            {
-              name: 'sub_continent',
-              type: Schema.STRING,
-            },
-            {
-              name: 'locale',
-              type: Schema.STRING,
-            },
-          ]),
-        },
-        {
-          name: 'ingest_timestamp',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'items',
-          type: Schema.array(
-            Schema.struct([
-              {
-                name: 'brand',
-                type: Schema.STRING,
-              },
-              {
-                name: 'category',
-                type: Schema.STRING,
-              },
-              {
-                name: 'category2',
-                type: Schema.STRING,
-              },
-              {
-                name: 'category3',
-                type: Schema.STRING,
-              },
-              {
-                name: 'category4',
-                type: Schema.STRING,
-              },
-              {
-                name: 'category5',
-                type: Schema.STRING,
-              },
-              {
-                name: 'creative_name',
-                type: Schema.STRING,
-              },
-              {
-                name: 'creative_slot',
-                type: Schema.STRING,
-              },
-              {
-                name: 'id',
-                type: Schema.STRING,
-              },
-              {
-                name: 'location_id',
-                type: Schema.STRING,
-              },
-              {
-                name: 'name',
-                type: Schema.STRING,
-              },
-              {
-                name: 'price',
-                type: Schema.DOUBLE,
-              },
-
-              {
-                name: 'quantity',
-                type: Schema.INTEGER,
-              },
-            ]),
-          ),
-
-        },
-        {
-          name: 'platform',
-          type: Schema.STRING,
-        },
-        {
-          name: 'privacy_info',
-          type: Schema.struct([
-            {
-              name: 'ads_storage',
-              type: Schema.STRING,
-            },
-            {
-              name: 'analytics_storage',
-              type: Schema.STRING,
-            },
-            {
-              name: 'uses_transient_token',
-              type: Schema.STRING,
-            },
-          ]),
-        },
-        {
-          name: 'project_id',
-          type: Schema.STRING,
-        },
-        {
-          name: 'traffic_source',
-          type: Schema.struct([
-            {
-              name: 'medium',
-              type: Schema.STRING,
-            },
-            {
-              name: 'name',
-              type: Schema.STRING,
-            },
-            {
-              name: 'source',
-              type: Schema.STRING,
-            },
-          ]),
-        },
-        {
-          name: 'user_first_touch_timestamp',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'user_id',
-          type: Schema.STRING,
-        },
-        {
-          name: 'user_ltv',
-          type: Schema.struct([
-            {
-              name: 'revenue',
-              type: Schema.DOUBLE,
-            },
-            {
-              name: 'currency',
-              type: Schema.STRING,
-            },
-          ]),
-        },
-        {
-          name: 'user_properties',
-          type: Schema.array(
-            Schema.struct([
-              {
-                name: 'key',
-                type: Schema.STRING,
-              },
-              {
-                name: 'value',
-                type: Schema.struct([
-                  {
-                    name: 'double_value',
-                    type: Schema.DOUBLE,
-                  },
-                  {
-                    name: 'float_value',
-                    type: Schema.FLOAT,
-                  },
-                  {
-                    name: 'int_value',
-                    type: Schema.BIG_INT,
-                  },
-                  {
-                    name: 'string_value',
-                    type: Schema.STRING,
-                  },
-                  {
-                    name: 'set_timestamp_micros',
-                    type: Schema.BIG_INT,
-                  },
-                ]),
-              },
-            ]),
-          ),
-        },
-        {
-          name: 'user_pseudo_id',
-          type: Schema.STRING,
-        },
-      ],
+      columns,
       compressed: false,
       dataFormat: DataFormat.PARQUET,
 
-      bucket: Bucket.fromBucketName(this.scope, 'SinkBucket', this.props.sinkS3Bucket.bucketName),
+      bucket: Bucket.fromBucketName(this.scope, `SinkBucketFor${tableName}`, this.props.sinkS3Bucket.bucketName),
       s3Prefix: getSinkTableLocationPrefix(this.props.sinkS3Prefix, projectId, tableName),
     });
   }
-
 }

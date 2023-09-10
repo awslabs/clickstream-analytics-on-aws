@@ -16,6 +16,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
+import { SinkTableEnum } from '../../../src/data-pipeline/data-pipeline';
 import { GlueClientUtil } from '../../../src/data-pipeline/lambda/partition-syncer/glue-client-util';
 
 // @ts-ignore
@@ -72,7 +73,7 @@ describe('Glue catalog add partition test', () => {
     const s3Bucket = 'bucket1';
     const s3Prefix = 'prefix1/';
     const databaseName = 'db1';
-    const tableName = 'table1';
+    const tableName = SinkTableEnum.EVENT;
 
     const projectId = 'projectId1';
     const appIds = 'appId1,appId2';
