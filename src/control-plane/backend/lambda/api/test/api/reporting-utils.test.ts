@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ExploreVisualName } from '../../common/explore-types';
 import { applyChangeToDashboard } from '../../service/quicksight/reporting-utils';
 
 describe('QuickSight visual management test', () => {
@@ -167,6 +168,8 @@ describe('QuickSight visual management test', () => {
       visuals: [
         {
           sheetId: 'f43cdc10-0f41-4ad1-bd42-deb0f6dbeb64',
+          name: ExploreVisualName.CHART,
+          visualId: 'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
           visual: visualContent,
           dataSetIdentifierDeclaration: [{
             Identifier: 'clickstream_funnel_chart_view',

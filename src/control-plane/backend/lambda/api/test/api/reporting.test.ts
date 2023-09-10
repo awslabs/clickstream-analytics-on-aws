@@ -12,7 +12,7 @@
  */
 
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
-import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, ListDashboardsCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, GenerateEmbedUrlForRegisteredUserCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
@@ -113,6 +113,9 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
 
     const res = await request(app)
       .post('/api/reporting/funnel')
@@ -143,6 +146,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -168,6 +172,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
 
   });
 
@@ -239,6 +244,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -287,6 +293,9 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
 
     const res = await request(app)
       .post('/api/reporting/event')
@@ -317,6 +326,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -342,6 +352,8 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+
 
   });
 
@@ -413,6 +425,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -463,6 +476,9 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
 
     const res = await request(app)
       .post('/api/reporting/path')
@@ -493,6 +509,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -522,6 +539,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
+    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
 
   });
 
@@ -579,6 +597,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -668,6 +687,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
+          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
