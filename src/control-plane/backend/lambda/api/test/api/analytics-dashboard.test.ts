@@ -41,7 +41,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
     const res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'd11',
@@ -72,7 +72,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
     const res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'd11',
@@ -144,7 +144,7 @@ describe('Analytics dashboard test', () => {
       Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboards`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -194,7 +194,7 @@ describe('Analytics dashboard test', () => {
       Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     const res = await request(app)
-      .get(`/api/project/dashboard/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/${MOCK_DASHBOARD_ID}`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -242,7 +242,7 @@ describe('Analytics dashboard test', () => {
     });
     ddbMock.on(UpdateCommand).resolves({});
     const res = await request(app)
-      .delete(`/api/project/dashboard/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/${MOCK_DASHBOARD_ID}`);
+      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(

@@ -27,7 +27,7 @@ routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, I
 routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
 routerRoles.set('GET /api/env/quicksight/embedUrl', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
-routerRoles.set('ALL /api/project/:id/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('ALL /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 
 routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/app/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);

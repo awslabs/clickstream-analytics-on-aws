@@ -20,7 +20,7 @@ const router_project = express.Router();
 const projectServ: ProjectServ = new ProjectServ();
 
 router_project.get(
-  '/:projectId/:appId/dashboards',
+  '/:projectId/:appId/dashboard',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -38,18 +38,18 @@ router_project.get(
   });
 
 router_project.get(
-  '/dashboard/:projectId/:appId/:dashboardId',
+  '/:projectId/:appId/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.getDashboard(req, res, next);
   });
 
 router_project.post(
-  '/:id/dashboard',
+  '/:projectId/:appId/dashboard',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('ownerPrincipal').custom(isValidEmpty),
     body('defaultDataSourceArn').custom(isValidEmpty),
-    param('id').custom(isProjectExisted),
+    param('projectId').custom(isProjectExisted),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -57,7 +57,7 @@ router_project.post(
   });
 
 router_project.delete(
-  '/dashboard/:projectId/:appId/:dashboardId',
+  '/:projectId/:appId/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.deleteDashboard(req, res, next);
   });
