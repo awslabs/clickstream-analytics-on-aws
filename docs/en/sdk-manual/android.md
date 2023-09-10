@@ -352,7 +352,7 @@ We define that users leave the screen in the following situations.
 	"zone_offset": 28800000,
 	"system_language": "zh",
 	"country_code": "CN",
-	"sdk_version": "0.2.0",
+	"sdk_version": "0.7.1",
 	"sdk_name": "aws-solution-clickstream-sdk",
 	"app_version": "1.0",
 	"app_package_name": "com.notepad.app",
