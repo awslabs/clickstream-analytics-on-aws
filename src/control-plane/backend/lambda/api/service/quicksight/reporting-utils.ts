@@ -25,11 +25,13 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit, ExploreTimeScopeType } from '../../common/explore-types';
+import { ExploreRelativeTimeUnit, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface VisualProps {
   readonly sheetId: string;
+  readonly name: ExploreVisualName;
+  readonly visualId: string;
   readonly visual: Visual;
   readonly dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[];
   readonly filterControl?: FilterControl;
@@ -49,6 +51,7 @@ export interface DashboardAction {
 
 export interface DashboardCreateParameters {
   readonly region: string;
+  readonly allowedDomain: string;
   readonly redshift: {
     readonly user: string;
     readonly dataApiRole: string;
@@ -66,14 +69,11 @@ export interface DashboardCreateParameters {
 }
 
 export interface VisualMapProps {
-  readonly name: 'CHART' | 'TABLE' ;
+  readonly name: ExploreVisualName;
   readonly id: string;
+  readonly embedUrl?: string;
 }
 
-export interface VisualMapProps {
-  readonly name: 'CHART' | 'TABLE' ;
-  readonly id: string;
-}
 
 export interface CreateDashboardResult {
   readonly dashboardId: string;
