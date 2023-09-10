@@ -12,7 +12,7 @@
  */
 
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
-import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, ListDashboardsCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
@@ -711,6 +711,52 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+
+  });
+
+  it('warmup', async () => {
+    stsClientMock.on(AssumeRoleCommand).resolves({
+      Credentials: {
+        AccessKeyId: '1111',
+        SecretAccessKey: '22222',
+        SessionToken: '33333',
+        Expiration: new Date(),
+      },
+    });
+
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      }],
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .send({
+        projectId: 'project01_wvzh',
+        appId: 'app1',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.length).toEqual(1);
+    expect(res.body.data[0].Arn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
 
   });
 
