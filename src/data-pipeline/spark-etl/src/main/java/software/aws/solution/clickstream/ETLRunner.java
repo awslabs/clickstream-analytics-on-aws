@@ -68,7 +68,7 @@ public class ETLRunner {
         ITEM("item"),
         USER("user"),
         EVENT("event"),
-        EVEN_PARAMETER("even_parameter");
+        EVEN_PARAMETER("event_parameter");
         final String tableName;
         TableName(final String name) {
             this.tableName = name;
@@ -321,7 +321,8 @@ public class ETLRunner {
         String saveOutputPath = outputPath;
         if (!(saveOutputPath.endsWith(tbName.tableName + "/")
                 || saveOutputPath.endsWith(tbName.tableName))) {
-            saveOutputPath = Paths.get(outputPath, tbName.tableName).toString();
+            saveOutputPath = Paths.get(outputPath, tbName.tableName).toString()
+                    .replace("s3:/", "s3://");
         }
         log.info("saveOutputPath: " + saveOutputPath);
 

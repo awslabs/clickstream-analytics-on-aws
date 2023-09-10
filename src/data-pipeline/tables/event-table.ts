@@ -124,7 +124,7 @@ export function getEventTableColumns(): Column[] {
       },
       {
         name: 'quantity',
-        type: Schema.INTEGER,
+        type: Schema.BIG_INT,
       },
       {
         name: 'price',
@@ -132,7 +132,7 @@ export function getEventTableColumns(): Column[] {
       },
       {
         name: 'currency',
-        type: Schema.DOUBLE,
+        type: Schema.STRING,
       },
       {
         name: 'creative_name',

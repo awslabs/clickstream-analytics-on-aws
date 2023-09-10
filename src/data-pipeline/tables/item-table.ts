@@ -17,14 +17,7 @@ import {
 } from '@aws-cdk/aws-glue-alpha';
 
 export function getItemTableColumns(): Column[] {
-  return [{
-    name: 'app_id',
-    type: Schema.DATE,
-  },
-  {
-    name: 'event_date',
-    type: Schema.DATE,
-  },
+  return [
   {
     name: 'id',
     type: Schema.STRING,
@@ -56,15 +49,15 @@ export function getItemTableColumns(): Column[] {
         name: 'value',
         type: Schema.struct([{
           name: 'double_value',
-          type: Schema.STRING,
+          type: Schema.DOUBLE,
         },
         {
           name: 'float_value',
-          type: Schema.STRING,
+          type: Schema.FLOAT,
         },
         {
           name: 'int_value',
-          type: Schema.STRING,
+          type: Schema.BIG_INT,
         },
         {
           name: 'string_value',

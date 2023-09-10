@@ -17,103 +17,96 @@ import {
 } from '@aws-cdk/aws-glue-alpha';
 
 export function getUserTableColumns(): Column[] {
-  return [{
-    name: 'app_id',
-    type: Schema.DATE,
-  },
-  {
-    name: 'event_date',
-    type: Schema.DATE,
-  },
-  {
-    name: 'user_id',
-    type: Schema.STRING,
-  },
-  {
-    name: 'user_pseudo_id',
-    type: Schema.STRING,
-  },
-  {
-    name: 'user_first_touch_timestamp',
-    type: Schema.BIG_INT,
-  },
-  {
-    name: 'user_properties',
-    type: Schema.array(
-      Schema.struct([{
-        name: 'key',
-        type: Schema.STRING,
-      },
-      {
-        name: 'value',
-        type: Schema.struct([{
-          name: 'double_value',
-          type: Schema.STRING,
-        },
-        {
-          name: 'float_value',
-          type: Schema.STRING,
-        },
-        {
-          name: 'int_value',
-          type: Schema.STRING,
-        },
-        {
-          name: 'string_value',
-          type: Schema.STRING,
-        },
-        {
-          name: 'set_timestamp_micros',
-          type: Schema.BIG_INT,
-        }]),
-      }]),
-    ),
-  },
-
-  {
-    name: 'user_ltv',
-    type: Schema.struct([{
-      name: 'revenue',
-      type: Schema.DOUBLE,
+  return [
+    {
+      name: 'user_id',
+      type: Schema.STRING,
     },
     {
-      name: 'currency',
+      name: 'user_pseudo_id',
       type: Schema.STRING,
-    }]),
-  },
+    },
+    {
+      name: 'user_first_touch_timestamp',
+      type: Schema.BIG_INT,
+    },
+    {
+      name: 'user_properties',
+      type: Schema.array(
+        Schema.struct([{
+          name: 'key',
+          type: Schema.STRING,
+        },
+        {
+          name: 'value',
+          type: Schema.struct([{
+            name: 'double_value',
+            type: Schema.DOUBLE,
+          },
+          {
+            name: 'float_value',
+            type: Schema.FLOAT,
+          },
+          {
+            name: 'int_value',
+            type: Schema.BIG_INT,
+          },
+          {
+            name: 'string_value',
+            type: Schema.STRING,
+          },
+          {
+            name: 'set_timestamp_micros',
+            type: Schema.BIG_INT,
+          }]),
+        }]),
+      ),
+    },
 
-  {
-    name: '_first_visit_date',
-    type: Schema.DATE,
-  },
+    {
+      name: 'user_ltv',
+      type: Schema.struct([{
+        name: 'revenue',
+        type: Schema.DOUBLE,
+      },
+      {
+        name: 'currency',
+        type: Schema.STRING,
+      }]),
+    },
 
-  {
-    name: '_first_referer',
-    type: Schema.STRING,
-  },
+    {
+      name: '_first_visit_date',
+      type: Schema.DATE,
+    },
 
-  {
-    name: '_first_traffic_source_type',
-    type: Schema.STRING,
-  },
+    {
+      name: '_first_referer',
+      type: Schema.STRING,
+    },
 
-  {
-    name: '_first_traffic_medium',
-    type: Schema.STRING,
-  },
+    {
+      name: '_first_traffic_source_type',
+      type: Schema.STRING,
+    },
 
-  {
-    name: '_first_traffic_source',
-    type: Schema.STRING,
-  },
+    {
+      name: '_first_traffic_medium',
+      type: Schema.STRING,
+    },
 
-  {
-    name: 'device_id_list',
-    type: Schema.STRING,
-  },
+    {
+      name: '_first_traffic_source',
+      type: Schema.STRING,
+    },
 
-  {
-    name: '_channel',
-    type: Schema.STRING,
-  }];
+    {
+      name: 'device_id_list',
+      type: Schema.array(Schema.STRING),
+    },
+
+    {
+      name: '_channel',
+      type: Schema.STRING,
+    }];
 }
