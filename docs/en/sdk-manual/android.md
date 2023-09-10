@@ -18,7 +18,7 @@ Add the following dependency to your `app` module's `build.gradle` file.
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.7.0'
+    implementation 'software.aws.solution:clickstream:0.7.1'
 }
 ```
 
@@ -30,7 +30,7 @@ Find the `res` directory under your `project/app/src/main`, and manually create 
 
 ![android_raw_folder](../images/sdk-manual/android_raw_folder.png) 
 
-Download your `amplifyconfiguration.json` file from your clickstream control plane, and paste it to the raw folder. The JSON file is like:
+Download your `amplifyconfiguration.json` file from your clickstream web console, and paste it to the raw folder. The JSON file is like:
 
 ```json
 {
@@ -85,6 +85,7 @@ Add the following code where you need to record event.
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 import software.aws.solution.clickstream.ClickstreamEvent;
 
+// for record an event with custom attributes
 ClickstreamEvent event = ClickstreamEvent.builder()
     .name("button_click")
     .add("category", "shoes")
@@ -122,7 +123,7 @@ Please add the global attribute after the SDK initialization is completed, the g
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-// when user login success.
+// when user login success
 ClickstreamAnalytics.setUserId("UserId");
 
 // when user logout
@@ -142,7 +143,7 @@ ClickstreamUserAttribute clickstreamUserAttribute = ClickstreamUserAttribute.bui
 ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
-Current login user‘s attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -180,38 +181,36 @@ ClickstreamAnalytics.getClickStreamConfiguration()
             .withCompressEvents(true);
 ```
 
-Here is an explanation of each method:
+Here is an explanation of each method.
 
-| Method name                   | Data type | Required | Default value | Description                                                  |
-| ----------------------------- | --------- | -------- | ------------- | ------------------------------------------------------------ |
-| withAppId                     | String    | true     | --            | the app id of your application in control plane              |
-| withEndpoint                  | String    | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server |
-| withAuthCookie                | String    | false    | --            | your auth cookie for AWS application load balancer auth cookie |
-| withSendEventsInterval        | long      | false    | 100000        | event sending interval millisecond                           |
-| withSessionTimeoutDuration    | long      | false    | 5000          | the duration for session timeout milliseconds                |
-| withTrackScreenViewEvents     | boolean   | false    | true          | whether auto record screen view events                       |
-| withTrackUserEngagementEvents | boolean   | false    | true          | whether auto record user engagement events in browser        |
-| withTrackAppExceptionEvents   | boolean   | false    | true          | whether auto record link click events in browser             |
-| withLogEvents                 | boolean   | false    | true          | whether auto record search result page events, [Learn more](#debug-events) |
-| withCustomDns                 | String    | false    | --            | the method for setting your custom dns, [Learn more](#configure-custom-dns) |
-| withCompressEvents            | boolean   | false    | true          | whether to compress event content by gzip when uploading events. |
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in control plane                                             |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+| withSendEventsInterval()        | long           | false    | 100000        | event sending interval millisecond                                                          |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration for session timeout milliseconds                                               |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether auto record screen view events                                                      |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether auto record user engagement events in App                                           |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether auto record app exception events                                                    |
+| withLogEvents()                 | boolean        | false    | true          | whether to automatically print event json for debugging events, [Learn more](#debug-events) |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom dns, [Learn more](#configure-custom-dns)                 |
+| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
 
 #### Debug events
 
 You can follow the steps below to view the event raw json and debug your events.
 
 1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` api and set the `withLogEvents()` method with true in debug mode, for example:
-
-```java
-import software.aws.solution.clickstream.ClickstreamAnalytics;
-
-// log the event in debug mode.
-ClickstreamAnalytics.getClickStreamConfiguration()
-            .withLogEvents(BuildConfig.DEBUG);
-```
-
-2. Integrate the SDK and launch your app by Android Stuido, then open the  **Logcat** window.
-2. Input `EventRecorder` to Filter, and you will see the json content of all events recorded by Clickstream Android SDK.
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    // log the event in debug mode.
+    ClickstreamAnalytics.getClickStreamConfiguration()
+                .withLogEvents(BuildConfig.DEBUG);
+    ```
+2. Integrate the SDK and launch your app by Android Studio, then open the  **Logcat** window.
+3. Input `EventRecorder` to the filter, and you will see the json content of all events recorded by Clickstream Android SDK.
 
 #### Configure custom DNS
 
@@ -223,7 +222,7 @@ ClickstreamAnalytics.getClickStreamConfiguration()
             .withCustomDns(CustomOkhttpDns.getInstance());
 ```
 
-If you want to use custom DNS for network request, you can create your `CustomOkhttpDns` which implementaion `okhttp3.Dns`, then config `.withCustomDns(CustomOkhttpDns.getInstance())` to make it works.
+If you want to use custom DNS for network request, you can create your `CustomOkhttpDns` which implementation `okhttp3.Dns`, then configure `.withCustomDns(CustomOkhttpDns.getInstance())` to make it works, you can refer to the [example code](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516) .
 
 ## Data format definition
 
@@ -251,20 +250,18 @@ Clickstream Android SDK supports the following data types.
 
 In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:
 
-| Name                            | Suggestion           | Hard limit           | Strategy                                                     | Error code |
-| ------------------------------- | -------------------- | -------------------- | ------------------------------------------------------------ | ---------- |
-| Event name invalid              | --                   | --                   | discard event, print log and record `_clickstream_error` event | 1001       |
-| Length of event name            | under 25 characters  | 50 characters        | discard event, print log and record `_clickstream_error` event | 1002       |
-| Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute | 2001       |
-| Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute | 2002       |
-| Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute | 2003       |
-| Event attribute per event       | under 50 attributes  | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute | 2004       |
+| Name                            | Suggestion           | Hard limit           | Strategy                                                                           | Error code |
+|---------------------------------|----------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid              | --                   | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name            | under 25 characters  | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event       | under 50 attributes  | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
 | User attribute number           | under 25 attributes  | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event | 3002       |
-| User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event | 3003       |
-| Length of User attribute value  | under 50 characters  | 256 characters       | discard the attribute, print log and record `_clickstream_error` event | 3004       |
-| Item Number in one event        | under 50 items       | 100 items            | discard the item that exceed, print log and record error in event attribute | 4001       |
-| Length of item attribute value  | under 100 characters | 256 characters       | discard the item attribute, print log and record error in event attribute | 4002       |
+| Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value  | under 50 characters  | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
 
 !!! info "Important"
 
@@ -277,19 +274,19 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 
 ### Automatically collected events
 
-| Event name         | Triggered                                                    | Event Attributes                                             |
-| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| _first_open        | when the user launches an app the first time after installation |                                                              |
-| _session_start     | when a user first open the app or a user returns to the app after 30 minutes of inactivity period, [Learn more](#session-definition) | 1. _session_id <br>2. _session_start_timestamp               |
-| _screen_view       | when new screen is opens, [Learn more](#screen-view-definition) | 1. _screen_name <br>2. _screen_id <br>3. _screen_unique_id <br>4. _previous_screen_name<br>5. _previous_screen_id<br>6. _previous_screen_unique_id<br/>7. _entrances<br>8. _previous_timestamp<br>9. _engagement_time_msec |
-| _user_engagement   | when user navigates away from current screen and the screen is in focus for at least one second, [Learn more](#user-engagement-definition) | 1. _engagement_time_msec<br>                                 |
-| _app_start         | every time the app goes to visible                           | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`) |
-| _app_end           | every time the app goes to invisible                         |                                                              |
-| _profile_set       | when the `addUserAttributes()` or `setUserId()` API is called |                                                              |
-| _app_exception     | when the app crashes                                         | 1. _exception_message<br>2. _exception_stack                 |
-| _app_update        | when the app is updated to a new version and launched again  | 1. _previous_app_version                                     |
-| _os_update         | when device operating system is updated to a new version     | 1. _previous_os_version                                      |
-| _clickstream_error | event_name is invalid or user attribute is invalid           | 1. _error_code <br>2. _error_message                         |
+| Event name         | Triggered                                                                                                                                  | Event Attributes                                                                                                                                                                                                           |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _first_open        | when the user launches an app the first time after installation                                                                            |                                                                                                                                                                                                                            |
+| _session_start     | when a user first open the app or a user returns to the app after 30 minutes of inactivity period, [Learn more](#session-definition)       | 1. _session_id <br>2. _session_start_timestamp                                                                                                                                                                             |
+| _screen_view       | when new screen is opens, [Learn more](#screen-view-definition)                                                                            | 1. _screen_name <br>2. _screen_id <br>3. _screen_unique_id <br>4. _previous_screen_name<br>5. _previous_screen_id<br>6. _previous_screen_unique_id<br/>7. _entrances<br>8. _previous_timestamp<br>9. _engagement_time_msec |
+| _user_engagement   | when user navigates away from current screen and the screen is in focus for at least one second, [Learn more](#user-engagement-definition) | 1. _engagement_time_msec<br>                                                                                                                                                                                               |
+| _app_start         | every time the app goes to visible                                                                                                         | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`)                                                                                                               |
+| _app_end           | every time the app goes to invisible                                                                                                       |                                                                                                                                                                                                                            |
+| _profile_set       | when the `addUserAttributes()` or `setUserId()` API is called                                                                              |                                                                                                                                                                                                                            |
+| _app_exception     | when the app crashes                                                                                                                       | 1. _exception_message<br>2. _exception_stack                                                                                                                                                                               |
+| _app_update        | when the app is updated to a new version and launched again                                                                                | 1. _previous_app_version                                                                                                                                                                                                   |
+| _os_update         | when device operating system is updated to a new version                                                                                   | 1. _previous_os_version                                                                                                                                                                                                    |
+| _clickstream_error | event_name is invalid or user attribute is invalid                                                                                         | 1. _error_code <br>2. _error_message                                                                                                                                                                                       |
 
 ### Session definition
 
@@ -299,12 +296,12 @@ The `_session_start` event triggered when the app open for the first time, or th
 
 1. _session_id: We calculate the session id by concatenating the last 8 characters of uniqueId and the current millisecond, for example: dc7a7a18-20230905-131926703.
 2. _session_duration : We calculate the session duration by minus the current event create timestamp and the session's `_session_start_timestamp`, this attribute will be added in every event during the session.
-3. _session_number : The auto increment number of session in current browser, the initial value is 1
+3. _session_number : The auto increment number of session in current device, the initial value is 1
 4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) api.
 
 ### Screen view definition
 
-In Clickstream Andorid SDK, we define the `_screen_view` as an event that records a user's browsing path of screen, when a screen transition started, the `_screen_view` event will be recorded when meet any of the following conditions:
+In Clickstream Android SDK, we define the `_screen_view` as an event that records a user's browsing path of screen, when a screen transition started, the `_screen_view` event will be recorded when meet any of the following conditions:
 
 1. No screen was previously set.
 2. The new screen name differs from the previous screen title.
@@ -361,12 +358,6 @@ We define that users leave the screen in the following situations.
 	"app_package_name": "com.notepad.app",
 	"app_title": "Notepad",
 	"app_id": "notepad-4a929eb9",
-	"items": [{
-		"id": "123",
-		"name": "Nike",
-		"category": "shoes",
-		"price": 279.9
-	}],
 	"user": {
 		"_user_id": {
 			"value": "312121",
@@ -398,77 +389,57 @@ All user attributes will be stored in `user` object, and all custom and global a
 
 ### Common attribute
 
-| Attribute name   | Data type | Description                                                  | How to generate                                              | Usage and purpose                                            |
-| ---------------- | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| hashCode         | String    | the event object's hash code                                 | generated from `Integer.toHexString(AnalyticsEvent.hashCode())` | distinguish different events                                 |
-| app_id           | String    | the app_id for your app                                      | app_id was generated by clickstream solution when you register an app to a data pipeline | identify the events for your apps                            |
-| unique_id        | String    | the unique id for user                                       | generated from `UUID.randomUUID().toString()` during the SDK first initialization<br>it will be changed if user logout and then login to a new user. When user re-login to the previous user in same device, the unique_id will be reset to the same previous unique_id | the unique id to identity different users and associating the behavior of logged-in and not logged-in |
-| device_id        | String    | the unique id for device                                     | generated from `Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)`, <br>if Android ID is null or "", we will use UUID instead. | distinguish different devices                                |
-| event_type       | String    | event name                                                   | set by developer or SDK                                      | distinguish different events type                            |
-| event_id         | String    | the unique id for event                                      | generated from `UUID.randomUUID().toString()` when the event create | distinguish different events                                 |
-| timestamp        | long      | event create timestamp                                       | generated from `System.currentTimeMillis()` when event create | data analysis needs                                          |
-| platform         | String    | the platform name                                            | for Android device is always "Android"                       | data analysis needs                                          |
-| os_version       | String    | the platform version code                                    | generated from `Build.VERSION.RELEASE`                       | data analysis needs                                          |
-| make             | String    | manufacturer of the device                                   | generated from `Build.MANUFACTURER`                          | data analysis needs                                          |
-| brand            | String    | brand of the device                                          | generated from `Build.BRAND`                                 | data analysis needs                                          |
-| model            | String    | model of the device                                          | generated from `Build.MODEL`                                 | data analysis needs                                          |
-| carrier          | String    | the device network operator name                             | `TelephonyManager.getNetworkOperatorName()`<br>default is: "UNKNOWN" | data analysis needs                                          |
-| network_type     | String    | the current device network type                              | "Mobile", "WIFI" or "UNKNOWN"<br>generated from `android.netConnectivityManager` | data analysis needs                                          |
-| screen_height    | int       | the absolute height of the available display size in pixels  | generated from `applicationContext.resources.displayMetrics.heightPixels` | data analysis needs                                          |
-| screen_width     | int       | the absolute width of the available display size in pixels   | generated from `applicationContext.resources.displayMetrics.widthPixels` | data analysis needs                                          |
-| zone_offset      | int       | the device raw offset from GMT in milliseconds.              | generated from `java.util.Calendar.get(Calendar.ZONE_OFFSET)` | data analysis needs                                          |
-| locale           | String    | the default locale(language, country and variant) for this device of the Java Virtual Machine | generated from `java.util.Local.getDefault()`                | data analysis needs                                          |
-| system_language  | String    | the device language code                                     | generated from `java.util.Local.getLanguage()`<br>default is: "UNKNOWN" | data analysis needs                                          |
-| country_code     | String    | country/region code for this device                          | generated from `java.util.Local.getCountry()`<br>default is: "UNKNOWN" | data analysis needs                                          |
-| sdk_version      | String    | clickstream sdk version                                      | generated from `BuildConfig.VERSION_NAME`                    | data analysis needs                                          |
-| sdk_name         | String    | clickstream sdk name                                         | this will always be "aws-solution-clickstream-sdk"           | data analysis needs                                          |
-| app_version      | String    | the app version name of user's app                           | generated from `android.content.pm.PackageInfo.versionName`<br>default is: "UNKNOWN" | data analysis needs                                          |
-| app_package_name | String    | the app package name of user's app                           | generated from `android.content.pm.PackageInfo.packageName`<br>default is: "UNKNOWN" | data analysis needs                                          |
-| app_title        | String    | the app's display name                                       | generated from `android.content.pm.getApplicationLabel(appInfo)` | data analysis needs                                          |
+| Attribute name   | Data type | Description                                                                                   | How to generate                                                                                                                                                                                                                                                         | Usage and purpose                                                                                     |
+|------------------|-----------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| hashCode         | String    | the event object's hash code                                                                  | generated from `Integer.toHexString(AnalyticsEvent.hashCode())`                                                                                                                                                                                                         | distinguish different events                                                                          |
+| app_id           | String    | the app_id for your app                                                                       | app_id was generated by clickstream solution when you register an app to a data pipeline                                                                                                                                                                                | identify the events for your apps                                                                     |
+| unique_id        | String    | the unique id for user                                                                        | generated from `UUID.randomUUID().toString()` during the SDK first initialization<br>it will be changed if user logout and then login to a new user. When user re-login to the previous user in same device, the unique_id will be reset to the same previous unique_id | the unique id to identity different users and associating the behavior of logged-in and not logged-in |
+| device_id        | String    | the unique id for device                                                                      | generated from `Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)`, <br>if Android ID is null or "", we will use UUID instead.                                                                                                        | distinguish different devices                                                                         |
+| event_type       | String    | event name                                                                                    | set by developer or SDK                                                                                                                                                                                                                                                 | distinguish different events type                                                                     |
+| event_id         | String    | the unique id for event                                                                       | generated from `UUID.randomUUID().toString()` when the event create                                                                                                                                                                                                     | distinguish different events                                                                          |
+| timestamp        | long      | event create timestamp                                                                        | generated from `System.currentTimeMillis()` when event create                                                                                                                                                                                                           | data analysis needs                                                                                   |
+| platform         | String    | the platform name                                                                             | for Android device is always "Android"                                                                                                                                                                                                                                  | data analysis needs                                                                                   |
+| os_version       | String    | the platform version code                                                                     | generated from `Build.VERSION.RELEASE`                                                                                                                                                                                                                                  | data analysis needs                                                                                   |
+| make             | String    | manufacturer of the device                                                                    | generated from `Build.MANUFACTURER`                                                                                                                                                                                                                                     | data analysis needs                                                                                   |
+| brand            | String    | brand of the device                                                                           | generated from `Build.BRAND`                                                                                                                                                                                                                                            | data analysis needs                                                                                   |
+| model            | String    | model of the device                                                                           | generated from `Build.MODEL`                                                                                                                                                                                                                                            | data analysis needs                                                                                   |
+| carrier          | String    | the device network operator name                                                              | `TelephonyManager.getNetworkOperatorName()`<br>default is: "UNKNOWN"                                                                                                                                                                                                    | data analysis needs                                                                                   |
+| network_type     | String    | the current device network type                                                               | "Mobile", "WIFI" or "UNKNOWN"<br>generated from `android.netConnectivityManager`                                                                                                                                                                                        | data analysis needs                                                                                   |
+| screen_height    | int       | the absolute height of the available display size in pixels                                   | generated from `applicationContext.resources.displayMetrics.heightPixels`                                                                                                                                                                                               | data analysis needs                                                                                   |
+| screen_width     | int       | the absolute width of the available display size in pixels                                    | generated from `applicationContext.resources.displayMetrics.widthPixels`                                                                                                                                                                                                | data analysis needs                                                                                   |
+| zone_offset      | int       | the device raw offset from GMT in milliseconds.                                               | generated from `java.util.Calendar.get(Calendar.ZONE_OFFSET)`                                                                                                                                                                                                           | data analysis needs                                                                                   |
+| locale           | String    | the default locale(language, country and variant) for this device of the Java Virtual Machine | generated from `java.util.Local.getDefault()`                                                                                                                                                                                                                           | data analysis needs                                                                                   |
+| system_language  | String    | the device language code                                                                      | generated from `java.util.Local.getLanguage()`<br>default is: "UNKNOWN"                                                                                                                                                                                                 | data analysis needs                                                                                   |
+| country_code     | String    | country/region code for this device                                                           | generated from `java.util.Local.getCountry()`<br>default is: "UNKNOWN"                                                                                                                                                                                                  | data analysis needs                                                                                   |
+| sdk_version      | String    | clickstream sdk version                                                                       | generated from `BuildConfig.VERSION_NAME`                                                                                                                                                                                                                               | data analysis needs                                                                                   |
+| sdk_name         | String    | clickstream sdk name                                                                          | this will always be "aws-solution-clickstream-sdk"                                                                                                                                                                                                                      | data analysis needs                                                                                   |
+| app_version      | String    | the app version name of user's app                                                            | generated from `android.content.pm.PackageInfo.versionName`<br>default is: "UNKNOWN"                                                                                                                                                                                    | data analysis needs                                                                                   |
+| app_package_name | String    | the app package name of user's app                                                            | generated from `android.content.pm.PackageInfo.packageName`<br>default is: "UNKNOWN"                                                                                                                                                                                    | data analysis needs                                                                                   |
+| app_title        | String    | the app's display name                                                                        | generated from `android.content.pm.getApplicationLabel(appInfo)`                                                                                                                                                                                                        | data analysis needs                                                                                   |
 
 ### User attributes
 
-| Attribute name              | Description                                                  |
-| --------------------------- | ------------------------------------------------------------ |
-| _user_id                    | Reserved for user id that is assigned by app                 |
-| _user_ltv_revenue           | Reserved for user lifetime value                             |
-| _user_ltv_currency          | Reserved for user lifetime value currency                    |
+| Attribute name              | Description                                                                                            |
+|-----------------------------|--------------------------------------------------------------------------------------------------------|
+| _user_id                    | Reserved for user id that is assigned by app                                                           |
+| _user_ltv_revenue           | Reserved for user lifetime value                                                                       |
+| _user_ltv_currency          | Reserved for user lifetime value currency                                                              |
 | _user_first_touch_timestamp | Added to the user object for all events. The time (in microseconds) when the user first opened the app |
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto track | Description                                                  |
-| ------------------------ | --------- | ---------- | ------------------------------------------------------------ |
+| Attribute name           | Data type | Auto track | Description                                                                                                                                                |
+|--------------------------|-----------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | _traffic_source_medium   | String    | false      | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
-| _traffic_source_name     | String    | false      | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion |
-| _traffic_source_source   | String    | false      | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu |
-| _channel                 | String    | false      | Reserved for install source, it is the channel for app was downloaded |
-| _session_id              | String    | true       | Added in all events.                                         |
-| _session_start_timestamp | long      | true       | Added in all events.                                         |
-| _session_duration        | long      | true       | Added in all events.                                         |
-| _session_number          | int       | true       | Added in all events.                                         |
-| _screen_name             | String    | true       | Added in all events.                                         |
-| _screen_unique_id        | String    | true       | Added in all events.                                         |
-
-### Item attributes
-
-| Attribute name | Data type | Required | Description                   |
-| -------------- | --------- | -------- | ----------------------------- |
-| id             | String    | false    | The id of the item            |
-| name           | String    | false    | The name of the item          |
-| brand          | String    | false    | The brand of the item         |
-| price          | String    | false    | The price of the item         |
-| quantity       | String    | false    | The quantity of the item      |
-| creative_name  | String    | false    | The creative name of the item |
-| creative_slot  | String    | false    | The creative slot of the item |
-| location_id    | String    | false    | The location id of the item   |
-| category       | String    | false    | The category of the item      |
-| category2      | String    | false    | The category2 of the item     |
-| category3      | String    | false    | The category3 of the item     |
-| category4      | String    | false    | The category4 of the item     |
-| category5      | String    | false    | The category5 of the item     |
-
-All attributes in item can only be the attributes in the above table, customization is not supported. Instead, you can use `category2` to `category5` to represent the custom attributes.
+| _traffic_source_name     | String    | false      | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion        |
+| _traffic_source_source   | String    | false      | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _channel                 | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                      |
+| _session_id              | String    | true       | Added in all events.                                                                                                                                       |
+| _session_start_timestamp | long      | true       | Added in all events.                                                                                                                                       |
+| _session_duration        | long      | true       | Added in all events.                                                                                                                                       |
+| _session_number          | int       | true       | Added in all events.                                                                                                                                       |
+| _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
+| _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
 
 ## Change log
 
