@@ -28,7 +28,7 @@ declare global {
     readonly hasData: boolean;
     readonly platform: MetadataPlatform[];
     readonly dataVolumeLastDay: number;
-    readonly associatedParameters?: IMetadataRelation[];
+    readonly associatedParameters?: IMetadataEventParameter[];
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -42,6 +42,10 @@ declare global {
     readonly projectId: string;
     readonly appId: string;
 
+    readonly eventName: string;
+    readonly eventDisplayName: string;
+    readonly eventDescription: string;
+
     readonly parameterId: string;
     readonly name: string;
     readonly displayName: string;
@@ -52,7 +56,7 @@ declare global {
     readonly parameterType: MetadataParameterType;
     readonly valueType: MetadataValueType;
     readonly valueEnum: IMetadataAttributeValue[];
-    readonly associatedEvents?: IMetadataRelation[];
+    readonly associatedEvents?: IMetadataEvent[];
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -84,33 +88,8 @@ declare global {
     readonly displayValue: string;
   }
 
-  interface IMetadataRelation {
-    readonly id: string;
-    readonly type: string;
-    readonly prefix: string;
-
-    readonly projectId: string;
-    readonly appId: string;
-
-    readonly eventName: string;
-    readonly eventDisplayName: string;
-    readonly eventDescription: string;
-
-    readonly parameterId: string;
-    readonly parameterName: string;
-    readonly parameterDisplayName: string;
-    readonly parameterDescription: string;
-    readonly parameterValueType: MetadataValueType;
-    readonly parameterMetadataSource: MetadataSource;
-
-    readonly createAt: number;
-    readonly updateAt: number;
-    readonly operator: string;
-    readonly deleted: boolean;
-  }
-
-  interface IFunnelRequest {
-    readonly action: FunnelRequestAction;
+  interface IExploreRequest {
+    readonly action: ExploreRequestAction;
     readonly projectId: string;
     readonly appId: string;
     readonly pipelineId: string;
@@ -138,6 +117,9 @@ declare global {
     readonly lastN?: number;
     readonly timeUnit?: ExploreRelativeTimeUnit;
     readonly groupColumn: ExploreGroupColumn;
+    readonly maxStep?: number;
+    readonly pathAnalysis?: IPathAnalysisParameter;
+    readonly pairEventAndConditions?: IPairEventAndCondition[];
   }
   interface ICondition {
     readonly category:
@@ -201,8 +183,19 @@ declare global {
     readonly deleted: boolean;
   }
 
-  export interface IAnalyticsDashboardSheet {
+  interface IAnalyticsDashboardSheet {
     readonly id: string;
     readonly name: string;
+  }
+  interface IPathAnalysisParameter {
+    readonly platform?: MetadataPlatform;
+    readonly sessionType: ExplorePathSessionDef;
+    readonly nodeType: ExplorePathNodeType;
+    readonly lagSeconds?: number;
+    readonly nodes?: string[];
+  }
+  interface IPairEventAndCondition {
+    readonly startEvent: IEventAndCondition;
+    readonly backEvent: IEventAndCondition;
   }
 }

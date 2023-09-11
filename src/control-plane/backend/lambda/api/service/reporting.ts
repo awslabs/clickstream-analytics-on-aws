@@ -762,6 +762,7 @@ export class ReportingServ {
         const embed = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
           dashboardCreateParameters.allowedDomain,
+          false,
           result.dashboardId,
           result.sheetId,
           visualProps.visualId,

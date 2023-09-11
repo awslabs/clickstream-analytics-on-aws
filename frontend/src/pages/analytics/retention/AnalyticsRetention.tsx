@@ -24,8 +24,6 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
-import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
-import { fetchEmbeddingUrl } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
@@ -53,32 +51,8 @@ const AnalyticsRetention: React.FC = () => {
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
 
-  const getEmbeddingUrl = async () => {
-    try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        'ap-southeast-1',
-        'clickstream_dashboard_uat_test5_umxq_uat5_app1_a949088f',
-        '82142fbb-8f89-4cbd-bb1f-83851730adec',
-        '56833f26-3a60-49da-a402-8a2e4488be2e'
-      );
-      if (success) {
-        const embedDashboard = async () => {
-          const embeddingContext = await createEmbeddingContext();
-          await embeddingContext.embedVisual({
-            url: data.EmbedUrl,
-            container: '#qs-funnel-container',
-          });
-        };
-        embedDashboard();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     setLoadingData(true);
-    getEmbeddingUrl();
     setLoadingData(false);
   }, []);
 

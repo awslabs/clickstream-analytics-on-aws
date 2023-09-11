@@ -20,6 +20,7 @@ import {
 import { deleteAnalyticsDashboard } from 'apis/analytics';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 interface DashboardHeaderProps {
   totalNum: number;
@@ -40,6 +41,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
     setSelectItemEmpty,
     refreshPage,
   } = props;
+  const { projectId, appId } = useParams();
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -47,8 +49,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteAnalyticsDashboard(
-        dashboard?.projectId || '',
-        dashboard?.id || ''
+        projectId ?? '',
+        appId ?? '',
+        dashboard?.id ?? ''
       );
       if (resData.success) {
         refreshPage();

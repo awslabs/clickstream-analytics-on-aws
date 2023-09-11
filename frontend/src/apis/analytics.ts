@@ -15,12 +15,13 @@ import { apiRequest } from 'ts/request';
 
 export const getAnalyticsDashboardList = async (params: {
   projectId: string;
+  appId: string;
   pageNumber: number;
   pageSize: number;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${params.projectId}/dashboard?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
+    `/project/${params.projectId}/${params.appId}/dashboard?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
   );
   return result;
 };
@@ -30,7 +31,7 @@ export const createAnalyticsDashboard = async (
 ) => {
   const result: any = await apiRequest(
     'post',
-    `/project/${dashboard.projectId}/dashboard`,
+    `/project/${dashboard.projectId}/${dashboard.appId}/dashboard`,
     dashboard
   );
   return result;
@@ -38,33 +39,45 @@ export const createAnalyticsDashboard = async (
 
 export const deleteAnalyticsDashboard = async (
   projectId: string,
+  appId: string,
   dashboardId: string
 ) => {
   const result: any = await apiRequest(
     'delete',
-    `/project/${projectId}/dashboard/${dashboardId}`
+    `/project/${projectId}/${appId}/dashboard/${dashboardId}`
   );
   return result;
 };
 
 export const getAnalyticsDashboard = async (
   projectId: string,
+  appId: string,
   dashboardId: string
 ) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${projectId}/dashboard/${dashboardId}`
+    `/project/${projectId}/${appId}/dashboard/${dashboardId}`
   );
   return result;
 };
 
 export const getMetadataEventsList = async (params: {
-  projectId: string;
-  appId: string;
+  projectId: string | undefined;
+  appId: string | undefined;
+  attribute?: boolean;
 }) => {
+  if (!params.projectId || !params.appId) {
+    return;
+  }
+  const searchParams = new URLSearchParams({
+    projectId: params.projectId,
+    appId: params.appId,
+    attribute: params.attribute ? params.attribute.toString() : 'false',
+  });
+
   const result: any = await apiRequest(
     'get',
-    `/metadata/events?projectId=${params.projectId}&appId=${params.appId}`
+    `/metadata/events?${searchParams.toString()}`
   );
   return result;
 };
@@ -100,11 +113,11 @@ export const getMetadataParametersList = async (params: {
 export const getMetadataParametersDetails = async (params: {
   projectId: string;
   appId: string;
-  parameterId: string;
+  parameterName: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameter/${params.parameterId}?projectId=${params.projectId}&appId=${params.appId}`
+    `/metadata/event_parameter/${params.parameterName}?projectId=${params.projectId}&appId=${params.appId}`
   );
   return result;
 };
@@ -142,19 +155,23 @@ export const updateMetadataUserAttribute = async (
   return result;
 };
 
-export const fetchEmbeddingUrl = async (
-  region: string,
-  allowedDomain: string,
-  dashboardId: string,
-  sheetId?: string,
-  visualId?: string
-) => {
-  let reqParams = `region=${region}&allowedDomain=${allowedDomain}&dashboardId=${dashboardId}`;
-  if (sheetId) {
-    reqParams = reqParams.concat(`&sheetId=${sheetId}`);
+export const fetchEmbeddingUrl = async (param: {
+  permission: boolean;
+  region: string;
+  allowedDomain: string;
+  dashboardId: string;
+  sheetId?: string;
+  visualId?: string;
+}) => {
+  let reqParams = `region=${param.region}&allowedDomain=${param.allowedDomain}&dashboardId=${param.dashboardId}`;
+  if (param.sheetId) {
+    reqParams = reqParams.concat(`&sheetId=${param.sheetId}`);
   }
-  if (visualId) {
-    reqParams = reqParams.concat(`&visualId=${visualId}`);
+  if (param.visualId) {
+    reqParams = reqParams.concat(`&visualId=${param.visualId}`);
+  }
+  if (param.permission) {
+    reqParams = reqParams.concat(`&permission=${param.permission}`);
   }
   const result: any = await apiRequest(
     'get',
@@ -163,20 +180,35 @@ export const fetchEmbeddingUrl = async (
   return result;
 };
 
-export const previewFunnel = async (data: IFunnelRequest) => {
+export const previewFunnel = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/funnel`, data);
   return result;
 };
 
-export const previewEvent = async (data: IFunnelRequest) => {
+export const previewEvent = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/event`, data);
   return result;
 };
 
-export const getPipelineDetailByProjectId = async (projectId: string) => {
+export const previewPath = async (data: IExploreRequest) => {
+  const result: any = await apiRequest('post', `/reporting/path`, data);
+  return result;
+};
+
+export const getPipelineDetailByProjectId = async (
+  projectId: string | undefined
+) => {
   const result: any = await apiRequest(
     'get',
     `/pipeline/${projectId}?pid=${projectId}`
+  );
+  return result;
+};
+
+export const getPathNodes = async (projectId: string, appId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/pathNodes?projectId=${projectId}&appId=${appId}`
   );
   return result;
 };

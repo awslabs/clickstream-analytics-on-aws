@@ -27,8 +27,8 @@ import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshi
 import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { GetCommand, GetCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, userTableName } from '../../common/constants';
+import { GetCommand, GetCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName, userTableName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
 
@@ -44,9 +44,7 @@ const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
 const MOCK_NEW_TEMPLATE_VERSION = '1.0.0-main-sdjes12';
 const MOCK_SOLUTION_VERSION = 'v1.0.0';
 const MOCK_EVENT_NAME = 'event-mock';
-const MOCK_EVENT_PARAMETER_ID = '1111-1111';
 const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
-const MOCK_USER_ATTRIBUTE_ID = '2222-2222';
 const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
 const MOCK_USER_ID = 'user-0000';
@@ -173,33 +171,42 @@ function metadataEventExistedMock(ddbMock: any, projectId:string, appId: string,
   const tokenInput: GetCommandInput = {
     TableName: analyticsMetadataTable,
     Key: {
-      id: `EVENT#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
+      id: `${projectId}#${appId}#${MOCK_EVENT_NAME}`,
+      type: `EVENT#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
     },
   };
-  return ddbMock.on(GetCommand, tokenInput).resolves({
+  return ddbMock.on(GetCommand, tokenInput).resolvesOnce({
     Item: {
-      id: `EVENT#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
+      id: `${projectId}#${appId}#${MOCK_EVENT_NAME}#${MOCK_EVENT_NAME}`,
+      type: `EVENT#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
       deleted: !existed,
     },
   });
 }
 
 function metadataEventAttributeExistedMock(ddbMock: any, projectId:string, appId: string, existed: boolean): any {
-  const tokenInput: GetCommandInput = {
+  const tokenInput: QueryCommandInput = {
     TableName: analyticsMetadataTable,
-    Key: {
-      id: `EVENT_PARAMETER#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
+    IndexName: prefixTimeGSIName,
+    KeyConditionExpression: '#prefix = :prefix',
+    FilterExpression: 'deleted = :d AND #name = :name',
+    ExpressionAttributeNames: {
+      '#prefix': 'prefix',
+      '#name': 'name',
+    },
+    ExpressionAttributeValues: {
+      ':d': false,
+      ':prefix': `EVENT_PARAMETER#${projectId}#${appId}`,
+      ':name': MOCK_EVENT_PARAMETER_NAME,
     },
   };
-  return ddbMock.on(GetCommand, tokenInput).resolves({
-    Item: {
-      id: `EVENT_PARAMETER#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_EVENT_PARAMETER_ID}`,
+  return ddbMock.on(QueryCommand, tokenInput).resolvesOnce({
+    Items: [{
+      id: `${projectId}#${appId}#${MOCK_EVENT_NAME}`,
+      type: `EVENT#${projectId}#${appId}#${MOCK_EVENT_NAME}`,
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
       deleted: !existed,
-    },
+    }],
   });
 }
 
@@ -207,14 +214,14 @@ function metadataUserAttributeExistedMock(ddbMock: any, projectId:string, appId:
   const tokenInput: GetCommandInput = {
     TableName: analyticsMetadataTable,
     Key: {
-      id: `USER_ATTRIBUTE#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_ID}`,
+      id: `${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_NAME}`,
+      type: `USER_ATTRIBUTE#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_NAME}`,
     },
   };
-  return ddbMock.on(GetCommand, tokenInput).resolves({
+  return ddbMock.on(GetCommand, tokenInput).resolvesOnce({
     Item: {
-      id: `USER_ATTRIBUTE#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_ID}`,
-      type: `#METADATA#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_ID}`,
+      id: `${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_NAME}`,
+      type: `USER_ATTRIBUTE#${projectId}#${appId}#${MOCK_USER_ATTRIBUTE_NAME}`,
       deleted: !existed,
     },
   });
@@ -392,7 +399,7 @@ function createPipelineMock(
       [':p', MOCK_PROJECT_ID],
     ]),
     FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
-    IndexName: undefined,
+    IndexName: prefixTimeGSIName,
     KeyConditionExpression: '#prefix= :prefix',
     Limit: undefined,
     ScanIndexForward: true,
@@ -422,7 +429,7 @@ function createPipelineMock(
       ':prefix': 'APP',
     },
     FilterExpression: 'projectId = :p AND deleted = :d',
-    IndexName: undefined,
+    IndexName: prefixTimeGSIName,
     KeyConditionExpression: '#prefix= :prefix',
     Limit: undefined,
     ScanIndexForward: true,
@@ -445,7 +452,7 @@ function createPipelineMock(
       [':prefix', 'PLUGIN'],
     ]),
     FilterExpression: 'deleted = :d',
-    IndexName: undefined,
+    IndexName: prefixTimeGSIName,
     KeyConditionExpression: '#prefix= :prefix',
     Limit: undefined,
     ScanIndexForward: true,
@@ -857,9 +864,7 @@ export {
   MOCK_NEW_TEMPLATE_VERSION,
   MOCK_SOLUTION_VERSION,
   MOCK_EVENT_NAME,
-  MOCK_EVENT_PARAMETER_ID,
   MOCK_EVENT_PARAMETER_NAME,
-  MOCK_USER_ATTRIBUTE_ID,
   MOCK_USER_ATTRIBUTE_NAME,
   MOCK_DASHBOARD_ID,
   MOCK_USER_ID,

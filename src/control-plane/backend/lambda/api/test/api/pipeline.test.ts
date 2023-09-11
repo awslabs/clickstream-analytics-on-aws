@@ -69,7 +69,7 @@ import {
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE,
 } from './pipeline-mock';
-import { clickStreamTableName, dictionaryTableName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -1022,12 +1022,12 @@ describe('Pipeline test', () => {
         [':prefix', 'PLUGIN'],
       ]),
       FilterExpression: 'deleted = :d',
-      IndexName: undefined,
       KeyConditionExpression:
     '#prefix= :prefix',
       Limit: undefined,
       ScanIndexForward: true,
-      TableName: undefined,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
     }).resolves({
       Items: [
         { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
@@ -1167,12 +1167,12 @@ describe('Pipeline test', () => {
         [':prefix', 'PLUGIN'],
       ]),
       FilterExpression: 'deleted = :d',
-      IndexName: undefined,
       KeyConditionExpression:
         '#prefix= :prefix',
       Limit: undefined,
       ScanIndexForward: true,
-      TableName: undefined,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
     }).resolves({
       Items: [
         { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
@@ -1284,11 +1284,11 @@ describe('Pipeline test', () => {
         [':p', MOCK_PROJECT_ID],
       ]),
       FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
-      IndexName: undefined,
       KeyConditionExpression: '#prefix= :prefix',
       Limit: undefined,
       ScanIndexForward: true,
-      TableName: undefined,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
     }).resolves({
       Items: [S3_INGESTION_PIPELINE],
     });
@@ -1302,12 +1302,12 @@ describe('Pipeline test', () => {
         [':prefix', 'PLUGIN'],
       ]),
       FilterExpression: 'deleted = :d',
-      IndexName: undefined,
       KeyConditionExpression:
         '#prefix= :prefix',
       Limit: undefined,
       ScanIndexForward: true,
-      TableName: undefined,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
     }).resolves({
       Items: [
         { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
@@ -1392,11 +1392,11 @@ describe('Pipeline test', () => {
         [':p', MOCK_PROJECT_ID],
       ]),
       FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
-      IndexName: undefined,
       KeyConditionExpression: '#prefix= :prefix',
       Limit: undefined,
       ScanIndexForward: true,
-      TableName: undefined,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
     }).resolves({
       Items: [],
     });

@@ -20,16 +20,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const AnalyticsDashboardDetail: React.FC = () => {
-  const { projectId, dashboardId } = useParams();
+  const { dashboardId, projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
 
   const getEmbeddingUrl = async (dashboard: IAnalyticsDashboard) => {
     try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        dashboard.region,
-        window.location.origin,
-        dashboard.id
-      );
+      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl({
+        permission: dashboard.operator === 'Clickstream',
+        region: dashboard.region,
+        allowedDomain: window.location.origin,
+        dashboardId: dashboard.id,
+        sheetId: undefined,
+        visualId: undefined,
+      });
       if (success) {
         const embedDashboard = async () => {
           const embeddingContext = await createEmbeddingContext();
@@ -49,7 +52,11 @@ const AnalyticsDashboardDetail: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IAnalyticsDashboard> =
-        await getAnalyticsDashboard(projectId ?? '', dashboardId ?? '');
+        await getAnalyticsDashboard(
+          projectId ?? '',
+          appId ?? '',
+          dashboardId ?? ''
+        );
       if (success) {
         getEmbeddingUrl(data);
         setLoadingData(false);

@@ -33,6 +33,7 @@ import {
 import {
   ExploreAnalyticsOperators,
   ExploreConversionIntervalType,
+  ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
   MetadataSource,
@@ -78,10 +79,28 @@ export const metadataEventsConvertToCategoryItemType = (
   return categoryItems;
 };
 
+export const pathNodesConvertToCategoryItemType = (
+  pathNodes: IMetadataAttributeValue[]
+) => {
+  const categoryItems: CategoryItemType[] = [];
+  const categoryNodeItems: CategoryItemType = {
+    categoryName: i18n.t('analytics:labels.pathNode'),
+    categoryType: 'node',
+    itemList: [],
+  };
+  pathNodes.forEach((item) => {
+    categoryNodeItems.itemList.push({
+      label: item.displayValue,
+      value: item.value,
+    });
+  });
+  categoryItems.push(categoryNodeItems);
+  return categoryItems;
+};
+
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
-  parameterItems?: IMetadataEventParameter[],
-  relationItems?: IMetadataRelation[]
+  parameterItems?: IMetadataEventParameter[]
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryEventItems: CategoryItemType = {
@@ -102,17 +121,6 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
-    });
-  } else if (relationItems) {
-    relationItems.forEach((item) => {
-      categoryEventItems.itemList.push({
-        label: item.parameterDisplayName,
-        value: item.parameterName,
-        description: item.parameterDescription,
-        metadataSource: item.parameterMetadataSource,
-        valueType: item.parameterValueType,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     });
@@ -223,12 +231,15 @@ export const getFirstEventAndConditions = (
   return firstEventAndCondition;
 };
 
-export const getConversionIntervalInSeconds = (
-  selectedWindowType: SelectProps.Option | null,
+export const getIntervalInSeconds = (
+  windowType: SelectProps.Option | null,
   selectedWindowUnit: SelectProps.Option | null,
   windowValue: string
 ) => {
-  if (selectedWindowType?.value === ExploreConversionIntervalType.CUSTOMIZE) {
+  if (
+    windowType?.value === ExploreConversionIntervalType.CUSTOMIZE ||
+    windowType?.value === ExplorePathSessionDef.CUSTOMIZE
+  ) {
     switch (selectedWindowUnit?.value) {
       case 'second':
         return Number(windowValue);
@@ -276,7 +287,10 @@ export const getDateRange = (dateRangeValue: DateRangePickerProps.Value) => {
   }
 };
 
-export const getDashboardCreateParameters = (pipeline: IPipeline, allowedDomain: string) => {
+export const getDashboardCreateParameters = (
+  pipeline: IPipeline,
+  allowedDomain: string
+) => {
   const redshiftOutputs = getValueFromStackOutputs(
     pipeline,
     'DataModelingRedshift',

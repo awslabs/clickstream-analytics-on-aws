@@ -27,7 +27,6 @@ import {
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import {
-  getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
@@ -54,7 +53,7 @@ import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,
-  ExploreFunnelRequestAction,
+  ExploreRequestAction,
   ExploreGroupColumn,
   MetadataSource,
   MetadataValueType,
@@ -65,10 +64,10 @@ import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
   getDateRange,
-  getConversionIntervalInSeconds,
   getEventAndConditions,
   getFirstEventAndConditions,
   getDashboardCreateParameters,
+  getIntervalInSeconds,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -87,6 +86,10 @@ const AnalyticsFunnel: React.FC = () => {
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
   );
+  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
+  const [userAttributes, setUserAttributes] = useState<
+    IMetadataUserAttribute[]
+  >([]);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_CNT,
@@ -141,6 +144,7 @@ const AnalyticsFunnel: React.FC = () => {
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({ projectId, appId });
       if (success) {
+        setUserAttributes(data.items);
         return data.items;
       }
       return [];
@@ -168,24 +172,12 @@ const AnalyticsFunnel: React.FC = () => {
     }
   };
 
-  const getEventParameters = async (eventName: string | undefined) => {
-    if (!projectId || !appId || !eventName) {
-      return [];
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
     }
-    try {
-      const { success, data }: ApiResponse<IMetadataEvent> =
-        await getMetadataEventDetails({
-          projectId: projectId,
-          appId: appId,
-          eventName: eventName,
-        });
-      if (success) {
-        return data.associatedParameters ?? [];
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
+    return [];
   };
 
   const listMetadataEvents = async () => {
@@ -194,9 +186,10 @@ const AnalyticsFunnel: React.FC = () => {
     }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId });
+        await getMetadataEventsList({ projectId, appId, attribute: true });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
+        setOriginEvents(data.items);
         setMetadataEvents(events);
       }
     } catch (error) {
@@ -234,8 +227,7 @@ const AnalyticsFunnel: React.FC = () => {
       );
       const conditionOptions = parametersConvertToCategoryItemType(
         presetUserAttributes,
-        presetParameters,
-        []
+        presetParameters
       );
       setSegmentationOptionData((prev) => {
         const dataObj = cloneDeep(prev);
@@ -265,10 +257,10 @@ const AnalyticsFunnel: React.FC = () => {
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
-
-  const [windowValue, setWindowValue] = useState<string>('5');
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
+
+  const [windowValue, setWindowValue] = useState<string>('5');
 
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
@@ -292,7 +284,7 @@ const AnalyticsFunnel: React.FC = () => {
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
 
   const getFunnelRequest = (
-    action: ExploreFunnelRequestAction,
+    action: ExploreRequestAction,
     dashboardId?: string,
     dashboardName?: string,
     sheetId?: string,
@@ -308,7 +300,7 @@ const AnalyticsFunnel: React.FC = () => {
     }
     const dateRangeParams = getDateRange(dateRangeValue);
     let saveParams = {};
-    if (action === ExploreFunnelRequestAction.PUBLISH) {
+    if (action === ExploreRequestAction.PUBLISH) {
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
@@ -316,7 +308,7 @@ const AnalyticsFunnel: React.FC = () => {
         sheetName: sheetName,
       };
     }
-    const body: IFunnelRequest = {
+    const body: IExploreRequest = {
       action: action,
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -329,7 +321,7 @@ const AnalyticsFunnel: React.FC = () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType:
         selectedWindowType?.value ?? ExploreConversionIntervalType.CURRENT_DAY,
-      conversionIntervalInSeconds: getConversionIntervalInSeconds(
+      conversionIntervalInSeconds: getIntervalInSeconds(
         selectedWindowType,
         selectedWindowUnit,
         windowValue
@@ -355,7 +347,7 @@ const AnalyticsFunnel: React.FC = () => {
       return;
     }
     try {
-      const body = getFunnelRequest(ExploreFunnelRequestAction.PREVIEW);
+      const body = getFunnelRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
         alertMsg(
           t('analytics:valid.funnelPipelineVersionError'),
@@ -369,7 +361,11 @@ const AnalyticsFunnel: React.FC = () => {
       setLoadingData(false);
       setLoadingChart(false);
       if (success) {
-        if (data.visualIds.length === 2 && data.visualIds[0].embedUrl && data.visualIds[1].embedUrl) {
+        if (
+          data.visualIds.length === 2 &&
+          data.visualIds[0].embedUrl &&
+          data.visualIds[1].embedUrl
+        ) {
           setChartEmbedUrl(data.visualIds[0].embedUrl);
           setTableEmbedUrl(data.visualIds[1].embedUrl);
         }
@@ -403,6 +399,10 @@ const AnalyticsFunnel: React.FC = () => {
       amount: 7,
       unit: 'day',
     });
+    setTimeGranularity({
+      value: ExploreGroupColumn.DAY,
+      label: t('analytics:options.dayTimeGranularity') ?? '',
+    });
     await listMetadataEvents();
     await listAllAttributes();
     setLoadingData(false);
@@ -422,7 +422,7 @@ const AnalyticsFunnel: React.FC = () => {
     }
     try {
       const body = getFunnelRequest(
-        ExploreFunnelRequestAction.PUBLISH,
+        ExploreRequestAction.PUBLISH,
         dashboardId,
         dashboardName,
         sheetId,
@@ -686,14 +686,10 @@ const AnalyticsFunnel: React.FC = () => {
                           category
                         ) => {
                           const eventName = category?.value;
-                          const eventParameters = await getEventParameters(
-                            eventName
-                          );
-                          const userAttributes = await getUserAttributes();
+                          const eventParameters = getEventParameters(eventName);
                           const parameterOption =
                             parametersConvertToCategoryItemType(
                               userAttributes,
-                              [],
                               eventParameters
                             );
                           setEventOptionData((prev) => {

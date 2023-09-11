@@ -14,10 +14,11 @@
 import { CreateDashboardCommandInput, DataSetImportMode, QuickSight, SheetDefinition } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { createDataSet } from './quicksight/reporting-utils';
+import { DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess } from '../common/types';
-import { isEmpty, paginateData } from '../common/utils';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
 import { createDashboard, getClickstreamUserArn } from '../store/aws/quicksight';
@@ -27,11 +28,49 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const store: ClickStreamStore = new DynamoDbStore();
 
 export class ProjectServ {
+  private async getPresetAppDashboard(projectId: string, appId: string) {
+    const pipelines = await store.listPipeline(projectId, 'latest', 'asc');
+    if (pipelines.length === 0) {
+      return undefined;
+    }
+    const pipeline = pipelines[0];
+    const stackDashboards = getReportingDashboardsUrl(pipeline?.status!, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
+    if (stackDashboards.length === 0) {
+      return undefined;
+    }
+    const appDashboard = stackDashboards.find((item: any) => item.appId === appId);
+    if (appDashboard) {
+      const presetDashboard: IDashboard = {
+        id: appDashboard.dashboardId,
+        name: 'Preset Dashboard',
+        description: 'Preset Dashboard',
+        region: pipeline.region,
+        sheets: [],
+        ownerPrincipal: '',
+        defaultDataSourceArn: '',
+        createAt: pipeline.createAt,
+        updateAt: pipeline.updateAt,
+        operator: DEFAULT_SOLUTION_OPERATOR,
+        type: '',
+        prefix: '',
+        projectId: projectId,
+        appId: appId,
+        dashboardId: appDashboard.dashboardId,
+        deleted: false,
+      };
+      return presetDashboard;
+    }
+    return undefined;
+  }
   public async listDashboards(req: any, res: any, next: any) {
     try {
       const { order, pageNumber, pageSize } = req.query;
-      const { id } = req.params;
-      const result = await store.listDashboards(id, order);
+      const { projectId, appId } = req.params;
+      let result = await store.listDashboards(projectId, order);
+      const presetAppDashboard = await this.getPresetAppDashboard(projectId, appId);
+      if (presetAppDashboard) {
+        result = [presetAppDashboard, ...result];
+      }
       const items = paginateData(result, true, pageSize, pageNumber);
       return res.json(new ApiSuccess({
         totalCount: result.length,
@@ -133,7 +172,11 @@ export class ProjectServ {
 
   public async getDashboard(req: any, res: any, next: any) {
     try {
-      const { dashboardId } = req.params;
+      const { dashboardId, projectId, appId } = req.params;
+      const presetAppDashboard = await this.getPresetAppDashboard(projectId, appId);
+      if (presetAppDashboard?.dashboardId === dashboardId) {
+        return res.json(new ApiSuccess(presetAppDashboard));
+      }
       const dashboard = await store.getDashboard(dashboardId);
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found'));
@@ -146,8 +189,12 @@ export class ProjectServ {
 
   public async deleteDashboard(req: any, res: any, next: any) {
     try {
-      const { dashboardId } = req.params;
+      const { dashboardId, projectId, appId } = req.params;
       const operator = res.get('X-Click-Stream-Operator');
+      const presetAppDashboard = await this.getPresetAppDashboard(projectId, appId);
+      if (presetAppDashboard?.dashboardId === dashboardId) {
+        return res.status(400).json(new ApiFail('Preset Dashboard not allowed to delete.'));
+      }
       const dashboard = await store.getDashboard(dashboardId);
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found'));

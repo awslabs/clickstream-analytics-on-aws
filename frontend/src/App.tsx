@@ -30,6 +30,7 @@ import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
 import MetadataParameters from 'pages/analytics/metadata/event-parameters/MetadataParameters';
 import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
 import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
+import AnalyticsPath from 'pages/analytics/path/AnalyticsPath';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
@@ -277,6 +278,14 @@ const SignedInPage: React.FC = () => {
                     }
                   />
                   <Route
+                  path="/analytics/:projectId/app/:appId/path"
+                  element={
+                    <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>
+                      <AnalyticsPath />
+                    </RoleRoute>
+                  }
+                />
+                <Route
                     path="/analytics/:projectId/app/:appId/retention"
                     element={
                       <RoleRoute roles={[IUserRole.ADMIN, IUserRole.ANALYST]}>

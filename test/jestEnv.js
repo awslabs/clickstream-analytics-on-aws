@@ -22,6 +22,11 @@ process.env.STACK_WORKFLOW_S3_BUCKET = 'TEST_EXAMPLE_BUCKET'
 process.env.API_ROLE_NAME = 'api-role-name'
 process.env.WITH_AUTH_MIDDLEWARE = 'false'
 process.env.WITH_VALIDATE_ROLE = 'false'
+process.env.PREFIX_TIME_GSI_NAME = 'prefix-time-gsi-name'
+process.env.CLICK_STREAM_TABLE_NAME = 'click-stream-table-name'
+process.env.ANALYTICS_METADATA_TABLE_NAME = 'analytics-metadata-table-name'
+process.env.DICTIONARY_TABLE_NAME = 'dictionary-table-name'
+process.env.USER_TABLE_NAME = 'user-table-name'
 
 // controlplane bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'
