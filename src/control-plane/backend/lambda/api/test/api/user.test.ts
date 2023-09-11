@@ -22,6 +22,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
 import { amznRequestContextHeader } from '../../common/constants';
+import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
 import { app, server } from '../../index';
@@ -123,7 +124,7 @@ describe('User test', () => {
         uid: MOCK_USER_ID,
         name: 'name-02',
         role: IUserRole.OPERATOR,
-        operator: 'Clickstream',
+        operator: DEFAULT_SOLUTION_OPERATOR,
         deleted: false,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

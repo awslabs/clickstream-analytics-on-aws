@@ -312,9 +312,6 @@ const AnalyticsPath: React.FC = () => {
   };
 
   const listMetadataEvents = async () => {
-    if (!projectId || !appId) {
-      return;
-    }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({ projectId, appId, attribute: true });
@@ -330,9 +327,6 @@ const AnalyticsPath: React.FC = () => {
   };
 
   const loadPipeline = async () => {
-    if (!projectId) {
-      return;
-    }
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
@@ -371,10 +365,12 @@ const AnalyticsPath: React.FC = () => {
   };
 
   useEffect(() => {
-    loadPipeline();
-    listMetadataEvents();
-    listAllAttributes();
-    getAllPathNodes();
+    if (projectId || appId) {
+      loadPipeline();
+      listMetadataEvents();
+      listAllAttributes();
+      getAllPathNodes();
+    }
   }, [projectId]);
 
   const [dateRangeValue, setDateRangeValue] =
@@ -560,7 +556,7 @@ const AnalyticsPath: React.FC = () => {
       setEmptyData(false);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewPath(body);
-      if (success) {
+      if (success && data.visualIds.length === 1) {
         getEmbeddingUrl(
           data.dashboardId,
           data.sheetId,

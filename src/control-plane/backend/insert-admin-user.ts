@@ -17,6 +17,7 @@ import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
+import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constant';
 
 export interface AddAdminUserProps {
   readonly uid: string;
@@ -40,7 +41,7 @@ export class AddAdminUser extends Construct {
           role: { S: 'Admin' },
           createAt: { N: Date.now().toString() },
           updateAt: { N: Date.now().toString() },
-          operator: { S: 'Clickstream' },
+          operator: { S: DEFAULT_SOLUTION_OPERATOR },
           deleted: { BOOL: false },
         },
         ConditionExpression: 'attribute_not_exists(uid)',
@@ -68,7 +69,7 @@ export class AddAdminUser extends Construct {
           ':role': { S: 'Admin' },
           ':createAt': { N: Date.now().toString() },
           ':updateAt': { N: Date.now().toString() },
-          ':operator': { S: 'Clickstream' },
+          ':operator': { S: DEFAULT_SOLUTION_OPERATOR },
           ':deleted': { BOOL: false },
         },
       },

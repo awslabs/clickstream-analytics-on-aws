@@ -14,7 +14,7 @@
 import { CreateDashboardCommandInput, DataSetImportMode, QuickSight, SheetDefinition } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { createDataSet } from './quicksight/reporting-utils';
-import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
+import { DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
@@ -50,7 +50,7 @@ export class ProjectServ {
         defaultDataSourceArn: '',
         createAt: pipeline.createAt,
         updateAt: pipeline.updateAt,
-        operator: 'Clickstream',
+        operator: DEFAULT_SOLUTION_OPERATOR,
         type: '',
         prefix: '',
         projectId: projectId,

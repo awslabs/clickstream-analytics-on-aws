@@ -309,3 +309,5 @@ export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
 export const ALARM_NAME_PREFIX = 'Clickstream';
+
+export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';

@@ -62,16 +62,23 @@ export const getAnalyticsDashboard = async (
 };
 
 export const getMetadataEventsList = async (params: {
-  projectId: string;
-  appId: string;
+  projectId: string | undefined;
+  appId: string | undefined;
   attribute?: boolean;
 }) => {
-  const { attribute } = params;
-  let path = `/metadata/events?projectId=${params.projectId}&appId=${params.appId}`;
-  if (attribute) {
-    path = path.concat(`&attribute=${attribute}`);
+  if (!params.projectId || !params.appId) {
+    return;
   }
-  const result: any = await apiRequest('get', path);
+  const searchParams = new URLSearchParams({
+    projectId: params.projectId,
+    appId: params.appId,
+    attribute: params.attribute ? params.attribute.toString() : 'false',
+  });
+
+  const result: any = await apiRequest(
+    'get',
+    `/metadata/events?${searchParams.toString()}`
+  );
   return result;
 };
 
@@ -188,7 +195,9 @@ export const previewPath = async (data: IExploreRequest) => {
   return result;
 };
 
-export const getPipelineDetailByProjectId = async (projectId: string) => {
+export const getPipelineDetailByProjectId = async (
+  projectId: string | undefined
+) => {
   const result: any = await apiRequest(
     'get',
     `/pipeline/${projectId}?pid=${projectId}`
