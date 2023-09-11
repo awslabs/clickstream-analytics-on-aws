@@ -107,7 +107,7 @@ import software.aws.solution.clickstream.ClickstreamAttribute;
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 ClickstreamAttribute globalAttribute=ClickstreamAttribute.builder()
-        .add("channel","Google Play")
+        .add("channel","Play Store")
         .add("level",5.1)
         .add("class",6)
         .add("isOpenNotification",true)
