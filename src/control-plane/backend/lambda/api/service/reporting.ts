@@ -848,6 +848,11 @@ export class ReportingServ {
       logger.info('start to clean QuickSight temp resources');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
+
+      const deletedDashBoards: string[] = [];
+      const deletedAnalyses: string[] = [];
+      const deletedDatasets: string[] = [];
+
       const region = req.body.region;
       const quickSight = sdkClient.QuickSight({ region: region });
 
@@ -858,11 +863,12 @@ export class ReportingServ {
       if (dashBoards.DashboardSummaryList) {
         for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
           if (dashboard.Name?.startsWith('_tmp_') && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60*60*1000) {
-            await quickSight.deleteDashboard({
+            const deletedRes = await quickSight.deleteDashboard({
               AwsAccountId: awsAccountId,
               DashboardId: dashboard.DashboardId,
             });
-            logger.info(`dashboard ${dashboard.DashboardId} removed`);
+            deletedDashBoards.push(deletedRes.DashboardId!);
+            logger.info(`dashboard ${dashboard.Name} removed`);
           }
         }
       }
@@ -874,11 +880,12 @@ export class ReportingServ {
       if (analyses.AnalysisSummaryList) {
         for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
           if (analysis.Name?.startsWith('_tmp_') && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60*60*1000) {
-            await quickSight.deleteDashboard({
+            const deletedRes = await quickSight.deleteAnalysis({
               AwsAccountId: awsAccountId,
-              DashboardId: analysis.AnalysisId,
+              AnalysisId: analysis.AnalysisId,
             });
-            logger.info(`analysis ${analysis.AnalysisId} removed`);
+            deletedAnalyses.push(deletedRes.AnalysisId!);
+            logger.info(`analysis ${analysis.Name} removed`);
           }
         }
       }
@@ -890,17 +897,23 @@ export class ReportingServ {
       if (datasets.DataSetSummaries) {
         for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
           if (dataset.Name?.startsWith('_tmp_') && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60*60*1000) {
-            await quickSight.deleteDashboard({
+            const deletedRes = await quickSight.deleteDataSet({
               AwsAccountId: awsAccountId,
-              DashboardId: dataset.DataSetId,
+              DataSetId: dataset.DataSetId,
             });
-            logger.info(`dataset ${dataset.DataSetId} removed`);
+            deletedDatasets.push(deletedRes.DataSetId!);
+            logger.info(`dataset ${dataset.Name} removed`);
           }
         }
       }
 
+      const result = {
+        deletedDashBoards,
+        deletedAnalyses,
+        deletedDatasets,
+      };
       logger.info('end of clean QuickSight temp resources');
-      return res.status(201).json(new ApiSuccess({}));
+      return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       logger.warn(`Clean QuickSight temp resources with warning: ${error}`);
       next(`Clean QuickSight temp resources with warning: ${error}`);
