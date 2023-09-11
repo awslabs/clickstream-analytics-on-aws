@@ -790,9 +790,9 @@ export class ReportingServ {
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
-      const region = req.body.region;
-      const dataApiRole = req.body.dataApiRole;
       const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
+      const region = dashboardCreateParameters.region;
+      const dataApiRole = dashboardCreateParameters.redshift.dataApiRole;
       const redshiftDataClient = sdkClient.RedshiftDataClient(
         {
           region: region,
