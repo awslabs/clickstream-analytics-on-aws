@@ -424,7 +424,7 @@ All user attributes will be stored in `user` object, and all custom and global a
 | _user_id                    | Reserved for user id that is assigned by app                                                           |
 | _user_ltv_revenue           | Reserved for user lifetime value                                                                       |
 | _user_ltv_currency          | Reserved for user lifetime value currency                                                              |
-| _user_first_touch_timestamp | Added to the user object for all events. The time (in microseconds) when the user first opened the app |
+| _user_first_touch_timestamp | Added to the user object for all events. The time (in milliseconds) when the user first opened the app |
 
 ### Event attributes
 
