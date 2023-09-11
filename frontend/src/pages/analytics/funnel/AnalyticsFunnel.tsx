@@ -26,9 +26,7 @@ import {
   Toggle,
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
-import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
-  fetchEmbeddingUrl,
   getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
@@ -73,6 +71,7 @@ import {
   getDashboardCreateParameters,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 const AnalyticsFunnel: React.FC = () => {
@@ -82,7 +81,8 @@ const AnalyticsFunnel: React.FC = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [emptyData, setEmptyData] = useState(true);
+  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
+  const [tableEmbedUrl, setTableEmbedUrl] = useState('');
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
@@ -129,35 +129,6 @@ const AnalyticsFunnel: React.FC = () => {
     { value: 'hour', label: t('analytics:options.hourWindowUnit') },
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
-
-  const getEmbeddingUrl = async (
-    dashboardId: string,
-    sheetId: string | undefined,
-    visualId: string | undefined,
-    containerId: string
-  ) => {
-    try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        pipeline.region,
-        window.location.origin,
-        dashboardId,
-        sheetId,
-        visualId
-      );
-      if (success) {
-        const embedDashboard = async () => {
-          const embeddingContext = await createEmbeddingContext();
-          await embeddingContext.embedVisual({
-            url: data.EmbedUrl,
-            container: containerId,
-          });
-        };
-        embedDashboard();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const getUserAttributes = async () => {
     try {
@@ -328,7 +299,10 @@ const AnalyticsFunnel: React.FC = () => {
     sheetName?: string
   ) => {
     const funnelId = generateStr(6);
-    const parameters = getDashboardCreateParameters(pipeline);
+    const parameters = getDashboardCreateParameters(
+      pipeline,
+      window.location.origin
+    );
     if (!parameters) {
       return;
     }
@@ -390,28 +364,19 @@ const AnalyticsFunnel: React.FC = () => {
         return;
       }
       setLoadingData(true);
-      setEmptyData(false);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewFunnel(body);
+      setLoadingData(false);
+      setLoadingChart(false);
       if (success) {
-        getEmbeddingUrl(
-          data.dashboardId,
-          data.sheetId,
-          data.visualIds[0],
-          '#qs-funnel-container'
-        );
-        getEmbeddingUrl(
-          data.dashboardId,
-          data.sheetId,
-          data.visualIds[1],
-          '#qs-funnel-table-container'
-        );
+        if (data.visualIds.length === 2 && data.visualIds[0].embedUrl && data.visualIds[1].embedUrl) {
+          setChartEmbedUrl(data.visualIds[0].embedUrl);
+          setTableEmbedUrl(data.visualIds[1].embedUrl);
+        }
       }
     } catch (error) {
       console.log(error);
     }
-    setLoadingData(false);
-    setLoadingChart(false);
   };
 
   const resetConfig = async () => {
@@ -827,41 +792,22 @@ const AnalyticsFunnel: React.FC = () => {
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <div id={'qs-funnel-container'} className="iframe-explore">
-                    {emptyData ? (
-                      <Box
-                        margin={{ vertical: 'xs' }}
-                        textAlign="center"
-                        color="inherit"
-                      >
-                        <SpaceBetween size="m">
-                          <b>{t('analytics:emptyData')}</b>
-                        </SpaceBetween>
-                      </Box>
-                    ) : null}
-                  </div>
+                  <ExploreEmbedFrame
+                    embedType="visual"
+                    embedUrl={chartEmbedUrl}
+                    embedId={`event_chart_${generateStr(6)}`}
+                  />
                 )}
               </Container>
               <Container>
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <div
-                    id={'qs-funnel-table-container'}
-                    className="iframe-explore"
-                  >
-                    {emptyData ? (
-                      <Box
-                        margin={{ vertical: 'xs' }}
-                        textAlign="center"
-                        color="inherit"
-                      >
-                        <SpaceBetween size="m">
-                          <b>{t('analytics:emptyData')}</b>
-                        </SpaceBetween>
-                      </Box>
-                    ) : null}
-                  </div>
+                  <ExploreEmbedFrame
+                    embedType="visual"
+                    embedUrl={tableEmbedUrl}
+                    embedId={`event_table_${generateStr(6)}`}
+                  />
                 )}
               </Container>
             </SpaceBetween>

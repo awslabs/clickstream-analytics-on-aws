@@ -184,5 +184,6 @@
     "conditionValueInputPlaceholder": "输入值",
     "eventsSelect": "选择事件"
   },
-  "emptyData": "无数据"
+  "emptyData": "无数据",
+  "emptyDataMessage": "请先配置分析指标"
 }

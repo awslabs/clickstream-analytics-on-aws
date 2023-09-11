@@ -24,9 +24,7 @@ import {
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import {
-  fetchEmbeddingUrl,
   getMetadataEventDetails,
   getMetadataEventsList,
   getMetadataParametersList,
@@ -70,6 +68,7 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 const AnalyticsEvent: React.FC = () => {
@@ -79,7 +78,8 @@ const AnalyticsEvent: React.FC = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [emptyData, setEmptyData] = useState(true);
+  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
+  const [tableEmbedUrl, setTableEmbedUrl] = useState('');
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
@@ -115,35 +115,6 @@ const AnalyticsEvent: React.FC = () => {
 
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
-
-  const getEmbeddingUrl = async (
-    dashboardId: string,
-    sheetId: string | undefined,
-    visualId: string | undefined,
-    containerId: string
-  ) => {
-    try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl(
-        pipeline.region,
-        window.location.origin,
-        dashboardId,
-        sheetId,
-        visualId
-      );
-      if (success) {
-        const embedDashboard = async () => {
-          const embeddingContext = await createEmbeddingContext();
-          await embeddingContext.embedVisual({
-            url: data.EmbedUrl,
-            container: containerId,
-          });
-        };
-        embedDashboard();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const getUserAttributes = async () => {
     try {
@@ -299,6 +270,8 @@ const AnalyticsEvent: React.FC = () => {
       amount: 7,
       unit: 'day',
     });
+    setChartEmbedUrl('');
+    setTableEmbedUrl('');
     await listMetadataEvents();
     await listAllAttributes();
     setLoadingData(false);
@@ -350,7 +323,10 @@ const AnalyticsEvent: React.FC = () => {
     sheetName?: string
   ) => {
     const eventId = generateStr(6);
-    const parameters = getDashboardCreateParameters(pipeline);
+    const parameters = getDashboardCreateParameters(
+      pipeline,
+      window.location.origin
+    );
     if (!parameters) {
       return;
     }
@@ -406,28 +382,19 @@ const AnalyticsEvent: React.FC = () => {
         return;
       }
       setLoadingData(true);
-      setEmptyData(false);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewEvent(body);
+      setLoadingData(false);
+      setLoadingChart(false);
       if (success) {
-        getEmbeddingUrl(
-          data.dashboardId,
-          data.sheetId,
-          data.visualIds[0].id,
-          '#qs-event-container'
-        );
-        getEmbeddingUrl(
-          data.dashboardId,
-          data.sheetId,
-          data.visualIds[1].id,
-          '#qs-event-table-container'
-        );
+        if (data.visualIds.length === 2 && data.visualIds[0].embedUrl && data.visualIds[1].embedUrl) {
+          setChartEmbedUrl(data.visualIds[0].embedUrl);
+          setTableEmbedUrl(data.visualIds[1].embedUrl);
+        }
       }
     } catch (error) {
       console.log(error);
     }
-    setLoadingData(false);
-    setLoadingChart(false);
   };
 
   return (
@@ -720,41 +687,22 @@ const AnalyticsEvent: React.FC = () => {
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <div id={'qs-event-container'} className="iframe-explore">
-                    {emptyData ? (
-                      <Box
-                        margin={{ vertical: 'xs' }}
-                        textAlign="center"
-                        color="inherit"
-                      >
-                        <SpaceBetween size="m">
-                          <b>{t('analytics:emptyData')}</b>
-                        </SpaceBetween>
-                      </Box>
-                    ) : null}
-                  </div>
+                  <ExploreEmbedFrame
+                    embedType="visual"
+                    embedUrl={chartEmbedUrl}
+                    embedId={`chart_${generateStr(6)}`}
+                  />
                 )}
               </Container>
               <Container>
                 {loadingChart ? (
                   <Loading />
                 ) : (
-                  <div
-                    id={'qs-event-table-container'}
-                    className="iframe-explore"
-                  >
-                    {emptyData ? (
-                      <Box
-                        margin={{ vertical: 'xs' }}
-                        textAlign="center"
-                        color="inherit"
-                      >
-                        <SpaceBetween size="m">
-                          <b>{t('analytics:emptyData')}</b>
-                        </SpaceBetween>
-                      </Box>
-                    ) : null}
-                  </div>
+                  <ExploreEmbedFrame
+                    embedType="visual"
+                    embedUrl={tableEmbedUrl}
+                    embedId={`table_${generateStr(6)}`}
+                  />
                 )}
               </Container>
             </SpaceBetween>

@@ -12,7 +12,6 @@
  */
 
 import {
-  QuickSightClient,
   ListUsersCommand,
   User,
   DescribeAccountSubscriptionCommand,
@@ -20,7 +19,6 @@ import {
   IdentityType,
   UserRole,
   DescribeAccountSubscriptionCommandOutput,
-  AccessDeniedException,
   GenerateEmbedUrlForRegisteredUserCommand,
   GenerateEmbedUrlForRegisteredUserCommandOutput,
   UpdateDashboardPermissionsCommand,
@@ -31,10 +29,9 @@ import {
   CreateDashboardCommandInput,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { REGION_PATTERN } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils';
 
@@ -44,40 +41,16 @@ const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8
 const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
 
-const getIdentityRegionFromMessage = (message: string) => {
-  const regexp = new RegExp(REGION_PATTERN, 'g');
-  const matchValues = [...message.matchAll(regexp)];
-  let identityRegion = '';
-  for (let v of matchValues) {
-    if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
-      identityRegion = v[0];
-      break;
-    }
-  }
-  return identityRegion;
-};
-
-export const getIdentityRegion = async () => {
-  try {
-    await listQuickSightUsersByRegion(QUICKSIGHT_CONTROL_PLANE_REGION);
-  } catch (err) {
-    if (err instanceof AccessDeniedException) {
-      const message = (err as AccessDeniedException).message;
-      return getIdentityRegionFromMessage(message);
-    }
-  }
-  return QUICKSIGHT_CONTROL_PLANE_REGION;
-};
+const sdkClient: SDKClient = new SDKClient();
 
 export const listQuickSightUsers = async () => {
-  const identityRegion = await getIdentityRegion();
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
   return listQuickSightUsersByRegion(identityRegion);
 };
 
 export const listQuickSightUsersByRegion = async (region: string) => {
   const users: QuickSightUser[] = [];
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
+  const quickSightClient = sdkClient.QuickSightClient({
     region: region,
   });
   const records = await getPaginatedResults(async (NextToken: any) => {
@@ -108,20 +81,19 @@ export const listQuickSightUsersByRegion = async (region: string) => {
 
 // Creates an Amazon QuickSight user
 export const registerQuickSightUser = async (email: string, username?: string) => {
-  const identityRegion = await getIdentityRegion();
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
   return registerQuickSightUserByRegion(identityRegion, email, username);
 };
 
 export const registerClickstreamUser = async () => {
-  const identityRegion = await getIdentityRegion();
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
   await registerEmbeddingUserByRegion(identityRegion);
   await registerQuickSightUserByRegion(identityRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QUICKSIGHT_DASHBOARD_USER_NAME);
 };
 
 export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
   try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
+    const quickSightClient = sdkClient.QuickSightClient({
       region: region,
     });
     const command: RegisterUserCommand = new RegisterUserCommand({
@@ -144,8 +116,7 @@ export const registerQuickSightUserByRegion = async (region: string, email: stri
 
 export const registerEmbeddingUserByRegion = async (region: string) => {
   try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
+    const quickSightClient = sdkClient.QuickSightClient({
       region: region,
     });
     const command: RegisterUserCommand = new RegisterUserCommand({
@@ -175,8 +146,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   sheetId?: string,
   visualId?: string,
 ): Promise<GenerateEmbedUrlForRegisteredUserCommandOutput> => {
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
+  const quickSightClient = sdkClient.QuickSightClient({
     region: region,
   });
   const arns = await getClickstreamUserArn();
@@ -218,8 +188,7 @@ export const updateDashboardPermissionsCommand = async (
   dashboardId: string,
   userArn: string,
 ): Promise<void> => {
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
+  const quickSightClient = sdkClient.QuickSightClient({
     region: region,
   });
   const command: UpdateDashboardPermissionsCommand = new UpdateDashboardPermissionsCommand({
@@ -235,8 +204,7 @@ export const updateDashboardPermissionsCommand = async (
 
 // Determine if QuickSight has already subscribed
 export const quickSightIsSubscribed = async (): Promise<boolean> => {
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
+  const quickSightClient = sdkClient.QuickSightClient({
     region: QUICKSIGHT_CONTROL_PLANE_REGION,
   });
   const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
@@ -258,8 +226,7 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
 
 export const quickSightPing = async (region: string): Promise<boolean> => {
   try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
+    const quickSightClient = sdkClient.QuickSightClient({
       maxAttempts: 1,
       region: region,
     });
@@ -279,8 +246,7 @@ export const quickSightPing = async (region: string): Promise<boolean> => {
 };
 
 export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {
-  const quickSightClient = new QuickSightClient({
-    ...aws_sdk_client_common_config,
+  const quickSightClient = sdkClient.QuickSightClient({
     region: QUICKSIGHT_CONTROL_PLANE_REGION,
   });
   const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
@@ -316,7 +282,7 @@ export interface QuickSightUserArns {
 }
 
 export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
-  const identityRegion = await getIdentityRegion();
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
   const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
@@ -329,8 +295,7 @@ export const createDashboard = async (
   input: CreateDashboardCommandInput,
 ): Promise<CreateDashboardCommandOutput> => {
   try {
-    const quickSightClient = new QuickSightClient({
-      ...aws_sdk_client_common_config,
+    const quickSightClient = sdkClient.QuickSightClient({
       region: region,
     });
     const command: CreateDashboardCommand = new CreateDashboardCommand(input);

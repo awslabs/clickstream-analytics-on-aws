@@ -180,5 +180,6 @@
     "conditionValueInputPlaceholder": "Input value",
     "eventsSelect": "Select events"
   },
-  "emptyData": "No Data"
+  "emptyData": "No Data",
+  "emptyDataMessage": "Please configure analysis indicators first"
 }

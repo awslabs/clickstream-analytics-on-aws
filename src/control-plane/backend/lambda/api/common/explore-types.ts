@@ -83,3 +83,8 @@ export enum ExplorePathNodeType {
   SCREEN_NAME = '_screen_name',
   SCREEN_ID = '_screen_id',
 }
+
+export enum ExploreVisualName {
+  CHART = 'CHART',
+  TABLE = 'TABLE',
+}
