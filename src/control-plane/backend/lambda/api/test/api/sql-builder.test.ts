@@ -21,7 +21,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - user_cnt', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -48,8 +48,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -382,7 +381,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - event_cnt', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -409,8 +408,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -743,7 +741,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - conversionIntervalType', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -770,8 +768,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -1114,7 +1111,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - specifyJoinColumn', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
@@ -1140,8 +1137,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -1484,7 +1480,7 @@ describe('SQL Builder test', () => {
 
   test('funnel table visual sql - conditions', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql( {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -1543,8 +1539,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -1889,7 +1884,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - first event extra conditions', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -1948,8 +1943,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -2294,7 +2288,7 @@ describe('SQL Builder test', () => {
 
   test('funnel chart visual sql - conditions', () => {
 
-    const sql = buildFunnelView('app1', 'testview', {
+    const sql = buildFunnelView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -2353,8 +2347,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -2739,7 +2732,7 @@ describe('SQL Builder test', () => {
 
   test('event analysis sql', () => {
 
-    const sql = buildEventAnalysisView('app1', 'testview', {
+    const sql = buildEventAnalysisView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: false,
@@ -2760,8 +2753,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     base_data as (
       select
@@ -3110,7 +3102,7 @@ describe('SQL Builder test', () => {
 
   test('event path analysis view', () => {
 
-    const sql = buildEventPathAnalysisView('app1', 'testview', {
+    const sql = buildEventPathAnalysisView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -3174,8 +3166,7 @@ describe('SQL Builder test', () => {
       },
     });
 
-    const expectResult = `CREATE OR REPLACE VIEW
-    app1.testview AS
+    const expectResult = `
   with
     tmp_data as (
       select
@@ -3382,7 +3373,7 @@ describe('SQL Builder test', () => {
 
   test('node path analysis view', () => {
 
-    const sql = buildNodePathAnalysisView('app1', 'testview', {
+    const sql = buildNodePathAnalysisView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -3402,8 +3393,7 @@ describe('SQL Builder test', () => {
       },
     });
 
-    const expectResult = `CREATE OR REPLACE VIEW
-    app1.testview AS
+    const expectResult = `
   with
     base_data as (
       select
@@ -3595,7 +3585,7 @@ describe('SQL Builder test', () => {
 
   test('node path analysis view - sessionType=customize ', () => {
 
-    const sql = buildNodePathAnalysisView('app1', 'testview', {
+    const sql = buildNodePathAnalysisView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: false,
@@ -3612,8 +3602,7 @@ describe('SQL Builder test', () => {
       },
     });
 
-    const expectResult = `CREATE OR REPLACE VIEW
-    app1.testview AS
+    const expectResult = `
   with
     base_data as (
       select
@@ -3857,7 +3846,7 @@ describe('SQL Builder test', () => {
 
   test('retention view', () => {
 
-    const sql = buildRetentionAnalysisView('app1', 'testview', {
+    const sql = buildRetentionAnalysisView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -3900,8 +3889,7 @@ describe('SQL Builder test', () => {
 
     });
 
-    const expectResult = `CREATE OR REPLACE VIEW
-    app1.testview AS
+    const expectResult = `
     with
     tmp_data as (
       select
@@ -4129,7 +4117,7 @@ describe('SQL Builder test', () => {
 
   test('global condition and custom attribute', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -4220,8 +4208,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select
@@ -4595,7 +4582,7 @@ describe('SQL Builder test', () => {
 
   test('compute method - real user id', () => {
 
-    const sql = buildFunnelDataSql('app1', 'testview', {
+    const sql = buildFunnelDataSql( {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -4721,8 +4708,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    expect(sql.trim().replace(/ /g, '')).toEqual(`CREATE OR REPLACE VIEW
-    app1.testview AS
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
   with
     tmp_data as (
       select

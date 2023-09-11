@@ -60,11 +60,10 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-      const sql = buildFunnelView(query.appId, viewName, {
+      const sql = buildFunnelView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -83,7 +82,7 @@ export class ReportingServ {
       logger.debug(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
-      const sqlTable = buildFunnelDataSql(query.appId, tableVisualViewName, {
+      const sqlTable = buildFunnelDataSql({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -101,11 +100,6 @@ export class ReportingServ {
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
 
-      const sqls = [sql, sqlTable];
-      for ( const viewNm of [viewName, tableVisualViewName]) {
-        sqls.push(`grant select on ${query.appId}.${viewNm} to ${dashboardCreateParameters.redshift.user}`);
-      }
-
       //create quicksight dataset
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -113,7 +107,7 @@ export class ReportingServ {
         tableName: viewName,
         columns: funnelVisualColumns,
         importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${viewName}`,
+        customSql: sql,
         projectedColumns: [
           'event_date',
           'event_name',
@@ -153,7 +147,7 @@ export class ReportingServ {
         tableName: tableVisualViewName,
         columns: tableViewCols,
         importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${tableVisualViewName}`,
+        customSql: sqlTable,
         projectedColumns: ['event_date'].concat(projectedColumns),
       });
 
@@ -215,8 +209,7 @@ export class ReportingServ {
         ColumnConfigurations: columnConfigurations,
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
-
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
 
@@ -231,12 +224,10 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;;
-
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
-      const sql = buildEventAnalysisView(query.appId, viewName, {
+      const sql = buildEventAnalysisView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -253,16 +244,13 @@ export class ReportingServ {
       });
       logger.debug(`event analysis sql: ${sql}`);
 
-      const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
-
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
         columns: funnelVisualColumns,
         importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${viewName}`,
+        customSql: sql,
         projectedColumns: [
           'event_date',
           'event_name',
@@ -317,7 +305,7 @@ export class ReportingServ {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -331,13 +319,11 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       let sql = '';
       if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
-        sql = buildEventPathAnalysisView(query.appId, viewName, {
+        sql = buildEventPathAnalysisView({
           schemaName: query.appId,
           computeMethod: query.computeMethod,
           specifyJoinColumn: query.specifyJoinColumn,
@@ -359,7 +345,7 @@ export class ReportingServ {
           },
         });
       } else {
-        sql = buildNodePathAnalysisView(query.appId, viewName, {
+        sql = buildNodePathAnalysisView({
           schemaName: query.appId,
           computeMethod: query.computeMethod,
           specifyJoinColumn: query.specifyJoinColumn,
@@ -383,16 +369,13 @@ export class ReportingServ {
       }
       logger.debug(`path analysis sql: ${sql}`);
 
-      const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
-
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
         columns: pathAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${viewName}`,
+        customSql: sql,
         projectedColumns: [
           'event_date',
           'source',
@@ -437,7 +420,7 @@ export class ReportingServ {
         rowSpan: 12,
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -451,11 +434,9 @@ export class ReportingServ {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
-      const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-      const sql = buildRetentionAnalysisView(query.appId, viewName, {
+      const sql = buildRetentionAnalysisView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -473,16 +454,13 @@ export class ReportingServ {
       });
       logger.debug(`retention analysis sql: ${sql}`);
 
-      const sqls = [sql];
-      sqls.push(`grant select on ${query.appId}.${viewName} to ${dashboardCreateParameters.redshift.user}`);
-
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
         columns: retentionAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
-        customSql: `select * from ${query.appId}.${viewName}`,
+        customSql: sql,
         projectedColumns: [
           'grouping',
           'start_event_date',
@@ -539,7 +517,7 @@ export class ReportingServ {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, sqls, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -547,53 +525,12 @@ export class ReportingServ {
     }
   };
 
-  private async create(sheetId: string, resourceName: string, query: any, sqls: string[],
+  private async create(sheetId: string, resourceName: string, query: any,
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
-    const redshiftDataClient = sdkClient.RedshiftDataClient(
-      {
-        region: dashboardCreateParameters.region,
-      },
-      dashboardCreateParameters.redshift.dataApiRole,
-    );
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
     const principals = await getClickstreamUserArn();
-
-    //create view in redshift
-    const input = {
-      Sqls: sqls,
-      WorkgroupName: dashboardCreateParameters.redshift.newServerless?.workgroupName ?? undefined,
-      Database: query.projectId,
-      WithEvent: false,
-      ClusterIdentifier: dashboardCreateParameters.redshift.provisioned?.clusterIdentifier ?? undefined,
-      DbUser: dashboardCreateParameters.redshift.provisioned?.dbUser ?? undefined,
-    };
-
-    const params = new BatchExecuteStatementCommand(input);
-    redshiftDataClient.send(params).then( executeResponse => {
-      const checkParams = new DescribeStatementCommand({
-        Id: executeResponse.Id,
-      });
-      redshiftDataClient.send(checkParams).then (async(res) => {
-        logger.info(`Get statement status: ${res.Status}`);
-        let count = 0;
-        while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
-          await sleep(100);
-          count++;
-          res = await redshiftDataClient.send(checkParams);
-          logger.info(`Get statement status: ${res.Status}`);
-        }
-        if (res.Status == StatusString.FAILED) {
-          logger.error('Error: '+ res.Status, JSON.stringify(res));
-          throw new Error('failed to run sql of create redshift view');
-        }
-      }).catch(error => {
-        logger.error(error);
-      });
-    }).catch(error => {
-      logger.error(error);
-    });
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
@@ -793,6 +730,7 @@ export class ReportingServ {
       const projectId = req.body.projectId;
       const appId = req.body.appId;
       const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
+<<<<<<< HEAD
       const region = dashboardCreateParameters.region;
       const dataApiRole = dashboardCreateParameters.redshift.dataApiRole;
       const redshiftDataClient = sdkClient.RedshiftDataClient(
@@ -802,6 +740,28 @@ export class ReportingServ {
         dataApiRole,
       );
       const quickSight = sdkClient.QuickSight({ region: region });
+=======
+
+      const stsClient = new STSClient({
+        region,
+        ...aws_sdk_client_common_config,
+      });
+      const credentials = await getCredentialsFromRole(stsClient, dataApiRole);
+      const redshiftDataClient = new RedshiftDataClient({
+        region,
+        credentials: {
+          accessKeyId: credentials?.AccessKeyId!,
+          secretAccessKey: credentials?.SecretAccessKey!,
+          sessionToken: credentials?.SessionToken,
+        },
+      });
+
+
+      if (cachedContents === undefined) {
+        cachedContents = new CachedContents();
+      }
+      const cachedObjs = await cachedContents.getCachedObjects(projectId, region);
+>>>>>>> bb6e5699 (create quicksight dataset useing cutom sql)
 
       //warm up redshift serverless
       if (dashboardCreateParameters.redshift.newServerless) {
