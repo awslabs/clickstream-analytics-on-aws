@@ -12,21 +12,21 @@
  */
 
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
-import { 
-  CreateAnalysisCommand, 
-  CreateDashboardCommand, 
-  DeleteAnalysisCommand, 
+import {
+  CreateAnalysisCommand,
+  CreateDashboardCommand,
+  DeleteAnalysisCommand,
   DeleteDashboardCommand,
-  DeleteDataSetCommand, 
-  DescribeDashboardDefinitionCommand, 
-  ListAnalysesCommand, 
-  ListDashboardsCommand, 
-  ListDataSetsCommand, 
-  QuickSightClient, 
-  UpdateAnalysisCommand, 
-  UpdateDashboardCommand, 
+  DeleteDataSetCommand,
+  DescribeDashboardDefinitionCommand,
+  ListAnalysesCommand,
+  ListDashboardsCommand,
+  ListDataSetsCommand,
+  QuickSightClient,
+  UpdateAnalysisCommand,
+  UpdateDashboardCommand,
   UpdateDashboardPublishedVersionCommand,
-  GenerateEmbedUrlForRegisteredUserCommand
+  GenerateEmbedUrlForRegisteredUserCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
