@@ -569,17 +569,17 @@ export class ReportingServ {
     };
 
     const params = new BatchExecuteStatementCommand(input);
-    redshiftDataClient!.send(params).then( executeResponse => {
+    redshiftDataClient.send(params).then( executeResponse => {
       const checkParams = new DescribeStatementCommand({
         Id: executeResponse.Id,
       });
-      redshiftDataClient!.send(checkParams).then (async(res) => {
+      redshiftDataClient.send(checkParams).then (async(res) => {
         logger.info(`Get statement status: ${res.Status}`);
         let count = 0;
         while (res.Status != StatusString.FINISHED && res.Status != StatusString.FAILED && count < 60) {
           await sleep(100);
           count++;
-          res = await redshiftDataClient!.send(checkParams);
+          res = await redshiftDataClient.send(checkParams);
           logger.info(`Get statement status: ${res.Status}`);
         }
         if (res.Status == StatusString.FAILED) {
@@ -792,11 +792,13 @@ export class ReportingServ {
       const region = req.body.region;
       const dataApiRole = req.body.dataApiRole;
       const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
-
-      if (cachedContents === undefined) {
-        cachedContents = new CachedContents();
-      }
-      const cachedObjs = await cachedContents.getCachedObjects(projectId, appId, region, dataApiRole);
+      const redshiftDataClient = sdkClient.RedshiftDataClient(
+        {
+          region: region,
+        },
+        dataApiRole,
+      );
+      const quickSight = sdkClient.QuickSight({ region: region });
 
       //warm up redshift serverless
       if (dashboardCreateParameters.redshift.newServerless) {
@@ -808,18 +810,18 @@ export class ReportingServ {
         };
 
         const params = new BatchExecuteStatementCommand(input);
-        const executeResponse = await cachedObjs.redshiftDataClient!.send(params);
+        const executeResponse = await redshiftDataClient.send(params);
 
         const checkParams = new DescribeStatementCommand({
           Id: executeResponse.Id,
         });
-        let resp = await cachedObjs.redshiftDataClient!.send(checkParams);
+        let resp = await redshiftDataClient.send(checkParams);
         logger.info(`Get statement status: ${resp.Status}`);
         let count = 0;
         while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
           await sleep(500);
           count++;
-          resp = await cachedObjs.redshiftDataClient!.send(checkParams);
+          resp = await redshiftDataClient.send(checkParams);
           logger.info(`Get statement status: ${resp.Status}`);
         }
         if (resp.Status == StatusString.FAILED) {
@@ -828,7 +830,7 @@ export class ReportingServ {
       }
 
       //warm up quicksight
-      const dashBoards = await cachedObjs.quickSight.listDashboards({
+      const dashBoards = await quickSight.listDashboards({
         AwsAccountId: awsAccountId,
       });
 

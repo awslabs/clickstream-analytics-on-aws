@@ -12,7 +12,7 @@
  */
 
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
-import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, GenerateEmbedUrlForRegisteredUserCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, GenerateEmbedUrlForRegisteredUserCommand, ListDashboardsCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
