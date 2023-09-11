@@ -50,7 +50,7 @@ Download your `amplifyconfiguration.json` file from your clickstream web console
 
 In the file, your `appId` and `endpoint` are already set up in it. The explanation for each property is as follows:
 
-- **appId (Required)**: the app id of your project in control plane.
+- **appId (Required)**: the app id of your project in web console.
 - **endpoint (Required)**: the endpoint url you will upload the event to AWS server.
 - **isCompressEvents**: whether to compress event content when uploading events, and the default value is `true`
 - **autoFlushEventsInterval**: event sending interval, and the default value is `10s`
@@ -105,7 +105,7 @@ import software.aws.solution.clickstream.ClickstreamAttribute;
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
-    .add("channel", "HUAWEI")
+    .add("channel", "Google Play")
     .add("level", 5.1)
     .add("class", 6)
     .add("isOpenNotification", true)
@@ -185,21 +185,21 @@ Here is an explanation of each method.
 
 | Method name                     | Parameter type | Required | Default value | Description                                                                                 |
 |---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| withAppId()                     | String         | true     | --            | the app id of your application in control plane                                             |
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
 | withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
 | withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| withSendEventsInterval()        | long           | false    | 100000        | event sending interval millisecond                                                          |
-| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration for session timeout milliseconds                                               |
-| withTrackScreenViewEvents()     | boolean        | false    | true          | whether auto record screen view events                                                      |
-| withTrackUserEngagementEvents() | boolean        | false    | true          | whether auto record user engagement events in App                                           |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether auto record app exception events                                                    |
-| withLogEvents()                 | boolean        | false    | true          | whether to automatically print event json for debugging events, [Learn more](#debug-events) |
-| withCustomDns()                 | String         | false    | --            | the method for setting your custom dns, [Learn more](#configure-custom-dns)                 |
+| withSendEventsInterval()        | long           | false    | 100000        | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| withLogEvents()                 | boolean        | false    | true          | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
 | withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
 
 #### Debug events
 
-You can follow the steps below to view the event raw json and debug your events.
+You can follow the steps below to view the event raw JSON and debug your events.
 
 1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` api and set the `withLogEvents()` method with true in debug mode, for example:
     ```java
@@ -210,14 +210,14 @@ You can follow the steps below to view the event raw json and debug your events.
                 .withLogEvents(BuildConfig.DEBUG);
     ```
 2. Integrate the SDK and launch your app by Android Studio, then open the  **Logcat** window.
-3. Input `EventRecorder` to the filter, and you will see the json content of all events recorded by Clickstream Android SDK.
+3. Input `EventRecorder` to the filter, and you will see the JSON content of all events recorded by Clickstream Android SDK.
 
 #### Configure custom DNS
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-// config custom dns.
+// config custom DNS.
 ClickstreamAnalytics.getClickStreamConfiguration()
             .withCustomDns(CustomOkhttpDns.getInstance());
 ```
@@ -341,8 +341,8 @@ We define that users leave the screen in the following situations.
 	"device_id": "f24bec657ea8eff7",
 	"platform": "Android",
 	"os_version": "10",
-	"make": "HUAWEI",
-	"brand": "HUAWEI",
+	"make": "Samsung",
+	"brand": "Samsung",
 	"model": "TAS-AN00",
 	"locale": "zh_CN_#Hans",
 	"carrier": "CDMA",

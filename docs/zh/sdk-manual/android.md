@@ -2,9 +2,11 @@
 
 ## 简介
 
-Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和报告应用内事件到 AWS。作为解决方案 {{ solution_name }} 的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
+Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和报告应用内事件到 AWS。作为解决方案 {{ solution_name }}
+的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
 
-该 SDK 基于 Amplify for Android SDK 核心库开发，并根据 Amplify Android SDK 插件规范进行了扩展。此外，该 SDK 还具有自动收集常见用户事件和属性（例如，屏幕查看和首次打开）的功能，以简化用户的数据收集过程。
+该 SDK 基于 Amplify for Android SDK 核心库开发，并根据 Amplify Android SDK 插件规范进行了扩展。此外，该 SDK
+还具有自动收集常见用户事件和属性（例如，屏幕查看和首次打开）的功能，以简化用户的数据收集过程。
 
 ### 平台支持
 
@@ -63,16 +65,16 @@ dependencies {
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-public void onCreate() {
-    super.onCreate();
+public void onCreate(){
+        super.onCreate();
 
-    try {
+        try{
         ClickstreamAnalytics.init(getApplicationContext());
-        Log.i("MyApp", "Initialized ClickstreamAnalytics");
-    } catch (AmplifyException error) {
-        Log.e("MyApp", "Could not initialize ClickstreamAnalytics", error);
-    } 
-}
+        Log.i("MyApp","Initialized ClickstreamAnalytics");
+        }catch(AmplifyException error){
+        Log.e("MyApp","Could not initialize ClickstreamAnalytics",error);
+        }
+        }
 ```
 
 ### 4. 开始使用
@@ -86,16 +88,16 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 import software.aws.solution.clickstream.ClickstreamEvent;
 
 // 记录带有自定义参数的事件
-ClickstreamEvent event = ClickstreamEvent.builder()
-    .name("button_click")
-    .add("category", "shoes")
-    .add("currency", "CNY")
-    .add("value", 279.9)
-    .build();
-ClickstreamAnalytics.recordEvent(event);
+ClickstreamEvent event=ClickstreamEvent.builder()
+        .name("button_click")
+        .add("category","shoes")
+        .add("currency","CNY")
+        .add("value",279.9)
+        .build();
+        ClickstreamAnalytics.recordEvent(event);
 
 // 直接记录事件名
-ClickstreamAnalytics.recordEvent("button_click");
+        ClickstreamAnalytics.recordEvent("button_click");
 ```
 
 #### 添加全局属性
@@ -104,16 +106,16 @@ ClickstreamAnalytics.recordEvent("button_click");
 import software.aws.solution.clickstream.ClickstreamAttribute;
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
-    .add("channel", "HUAWEI")
-    .add("level", 5.1)
-    .add("class", 6)
-    .add("isOpenNotification", true)
-    .build();
-ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+ClickstreamAttribute globalAttribute=ClickstreamAttribute.builder()
+        .add("channel","Google Play")
+        .add("level",5.1)
+        .add("class",6)
+        .add("isOpenNotification",true)
+        .build();
+        ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
 
 // 删除全局属性
-ClickstreamAnalytics.deleteGlobalAttributes("level");
+        ClickstreamAnalytics.deleteGlobalAttributes("level");
 ```
 
 请在SDK初始化完成后添加全局属性，全局属性将添加到所有事件的属性对象中。
@@ -127,7 +129,7 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 ClickstreamAnalytics.setUserId("UserId");
 
 // 当用户退出登录时设置
-ClickstreamAnalytics.setUserId(null);
+        ClickstreamAnalytics.setUserId(null);
 ```
 
 #### 添加用户属性
@@ -136,14 +138,15 @@ ClickstreamAnalytics.setUserId(null);
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
 import software.aws.solution.clickstream.ClickstreamUserAttribute;
 
-ClickstreamUserAttribute clickstreamUserAttribute = ClickstreamUserAttribute.builder()
-    .add("_user_age", 21)
-    .add("_user_name", "carl")
-    .build();
-ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
+ClickstreamUserAttribute clickstreamUserAttribute=ClickstreamUserAttribute.builder()
+        .add("_user_age",21)
+        .add("_user_name","carl")
+        .build();
+        ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
-当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
+api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 !!! info "重要提示"
 
@@ -161,24 +164,24 @@ ClickstreamAnalytics.flushEvent();
 在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
 
 !!! info "重要提示"
-    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
+此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 // 在初始化后更新SDK配置
 ClickstreamAnalytics.getClickStreamConfiguration()
-            .withAppId("your appId")
-            .withEndpoint("https://example.com/collect")
-            .withAuthCookie("your authentication cookie")
-            .withSendEventsInterval(10000)
-            .withSessionTimeoutDuration(1800000)
-            .withTrackScreenViewEvents(false)
-            .withTrackUserEngagementEvents(false)
-            .withTrackAppExceptionEvents(false)
-            .withLogEvents(true)
-            .withCustomDns(CustomOkhttpDns.getInstance())
-            .withCompressEvents(true);
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withAuthCookie("your authentication cookie")
+        .withSendEventsInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(false)
+        .withTrackUserEngagementEvents(false)
+        .withTrackAppExceptionEvents(false)
+        .withLogEvents(true)
+        .withCustomDns(CustomOkhttpDns.getInstance())
+        .withCompressEvents(true);
 ```
 
 以下是每个方法的说明
@@ -205,10 +208,10 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
    ```java
    import software.aws.solution.clickstream.ClickstreamAnalytics;
-   
-   // 在调试模式下打开事件json内容的打印
+
+// 在调试模式下打开事件json内容的打印
    ClickstreamAnalytics.getClickStreamConfiguration()
-               .withLogEvents(BuildConfig.DEBUG);
+           .withLogEvents(BuildConfig.DEBUG);
    ```
 
 2.集成 SDK 并通过 Android Studio 启动您的应用程序，然后打开 **Logcat** 窗口。
@@ -222,10 +225,13 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 // 配置自定义DNS
 ClickstreamAnalytics.getClickStreamConfiguration()
-            .withCustomDns(CustomOkhttpDns.getInstance());
+        .withCustomDns(CustomOkhttpDns.getInstance());
 ```
 
-如果你想使用自定义DNS进行网络请求，你可以创建你的 `CustomOkhttpDns`并继承`okhttp3.Dns`，然后配置 `.withCustomDns(CustomOkhttpDns.getInstance())` 使其工作，您可以参考 [示例代码](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516) 。
+如果你想使用自定义DNS进行网络请求，你可以创建你的 `CustomOkhttpDns`并继承`okhttp3.Dns`
+，然后配置 `.withCustomDns(CustomOkhttpDns.getInstance())`
+使其工作，您可以参考 [示例代码](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516)
+。
 
 ## 数据格式定义
 
@@ -243,7 +249,9 @@ Clickstream Android SDK 支持以下数据类型：
 
 ### 命名规则
 
-1. 事件名称和属性名称不能以数字开头，只能包含大写字母、小写字母、数字和下划线。如果事件名称无效，将抛出 `IllegalArgumentException`。如果属性名称或用户属性名称无效，将丢弃该属性并记录错误。
+1.
+事件名称和属性名称不能以数字开头，只能包含大写字母、小写字母、数字和下划线。如果事件名称无效，将抛出 `IllegalArgumentException`
+。如果属性名称或用户属性名称无效，将丢弃该属性并记录错误。
 
 2. 不要在事件名称或属性名称前使用 `_` 作为前缀，因为 `_` 前缀保留给解决方案使用。
 
@@ -295,7 +303,8 @@ Clickstream Android SDK 支持以下数据类型：
 
 在 Clickstream Android SDK 中，我们不限制会话的总时间，只要App下次进入和最后一次退出之间的时间在允许的超时时间内，我们就认为当前会话是连续的。
 
-当App第一次打开，或者App打开到前台并且最后一次退出之间的时间超过了 `session_time_out` 的时长时，会触发 `_session_start` 事件。 以下是与session相关的属性。
+当App第一次打开，或者App打开到前台并且最后一次退出之间的时间超过了 `session_time_out` 的时长时，会触发 `_session_start`
+事件。 以下是与session相关的属性。
 
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如: dc7a7a18-20230905-131926703
 2. _session_duration： 我们通过 `_session_start_timestamp` 减去当前事件创建时间戳来计算会话持续时间，该属性将添加到会话期间的每个事件中。
@@ -304,14 +313,16 @@ Clickstream Android SDK 支持以下数据类型：
 
 ### 屏幕浏览定义
 
-在Clickstream Android SDK中，我们将 `_screen_view` 定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
+在Clickstream Android SDK中，我们将 `_screen_view`
+定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
 
 1. 之前没有设置过屏幕。
 2. 新的屏幕类名与之前的屏幕类名不同。
 3. 新的屏幕的路径与之前的屏幕的路径不同。
 4. 新的屏幕唯一id与之前的屏幕唯一id不同。
 
-该事件监听Activity的 `onResume` 生命周期方法来判断屏幕切换。 为了跟踪屏幕浏览路径，我们使用 `_previous_screen_name` 、 `_previous_screen_id` 和 `_previous_screen_unique_id` 来关联前一个屏幕。 此外，屏幕浏览事件中还有一些其他属性。
+该事件监听Activity的 `onResume` 生命周期方法来判断屏幕切换。 为了跟踪屏幕浏览路径，我们使用 `_previous_screen_name`
+、 `_previous_screen_id` 和 `_previous_screen_unique_id` 来关联前一个屏幕。 此外，屏幕浏览事件中还有一些其他属性。
 
 1. _screen_unique_id：我们通过获取当前屏幕的哈希值来计算屏幕唯一id，例如："126861252"。
 2. _entrances： 会话中的第一个屏幕浏览事件该值为 1，其他则为 0
@@ -336,55 +347,55 @@ Clickstream Android SDK 支持以下数据类型：
 
 ```json
 {
-	"hashCode": "80452b0",
-	"unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
-	"event_type": "add_to_cart",
-	"event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
-	"timestamp": 1667877566697,
-	"device_id": "f24bec657ea8eff7",
-	"platform": "Android",
-	"os_version": "10",
-	"make": "HUAWEI",
-	"brand": "HUAWEI",
-	"model": "TAS-AN00",
-	"locale": "zh_CN_#Hans",
-	"carrier": "CDMA",
-	"network_type": "Mobile",
-	"screen_height": 2259,
-	"screen_width": 1080,
-	"zone_offset": 28800000,
-	"system_language": "zh",
-	"country_code": "CN",
-	"sdk_version": "0.7.1",
-	"sdk_name": "aws-solution-clickstream-sdk",
-	"app_version": "1.0",
-	"app_package_name": "com.notepad.app",
-	"app_title": "Notepad",
-	"app_id": "notepad-4a929eb9",
-	"user": {
-		"_user_id": {
-			"value": "312121",
-			"set_timestamp": 1667877566697
-		},
-		"_user_name": {
-			"value": "carl",
-			"set_timestamp": 1667877566697
-		},
-		"_user_first_touch_timestamp": {
-			"value": 1667877267895,
-			"set_timestamp": 1667877566697
-		}
-	},
-	"attributes": {
-		"event_category": "recommended",
-		"currency": "CNY",
-		"_session_id": "dc7a7a18-20221108-031926703",
-		"_session_start_timestamp": 1667877566703,
-		"_session_duration": 391809,
-		"_session_number": 1,
-		"_screen_name": "ProductDetailActivity",
-		"_screen_unique_id": "126861252"
-	}
+  "hashCode": "80452b0",
+  "unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
+  "event_type": "add_to_cart",
+  "event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
+  "timestamp": 1667877566697,
+  "device_id": "f24bec657ea8eff7",
+  "platform": "Android",
+  "os_version": "10",
+  "make": "Samsung",
+  "brand": "Samsung",
+  "model": "TAS-AN00",
+  "locale": "zh_CN_#Hans",
+  "carrier": "CDMA",
+  "network_type": "Mobile",
+  "screen_height": 2259,
+  "screen_width": 1080,
+  "zone_offset": 28800000,
+  "system_language": "zh",
+  "country_code": "CN",
+  "sdk_version": "0.7.1",
+  "sdk_name": "aws-solution-clickstream-sdk",
+  "app_version": "1.0",
+  "app_package_name": "com.notepad.app",
+  "app_title": "Notepad",
+  "app_id": "notepad-4a929eb9",
+  "user": {
+    "_user_id": {
+      "value": "312121",
+      "set_timestamp": 1667877566697
+    },
+    "_user_name": {
+      "value": "carl",
+      "set_timestamp": 1667877566697
+    },
+    "_user_first_touch_timestamp": {
+      "value": 1667877267895,
+      "set_timestamp": 1667877566697
+    }
+  },
+  "attributes": {
+    "event_category": "recommended",
+    "currency": "CNY",
+    "_session_id": "dc7a7a18-20221108-031926703",
+    "_session_start_timestamp": 1667877566703,
+    "_session_duration": 391809,
+    "_session_number": 1,
+    "_screen_name": "ProductDetailActivity",
+    "_screen_unique_id": "126861252"
+  }
 }
 ```
 
@@ -427,7 +438,7 @@ Clickstream Android SDK 支持以下数据类型：
 | _user_id                    | 保留用于分配给应用程序的用户 ID                                  |
 | _user_ltv_revenue           | 保留用于用户终身价值                                         |
 | _user_ltv_currency          | 保留用于用户终身价值货币                                       |
-| _user_first_touch_timestamp | 用户首次打开应用程序或访问站点的时间（以微秒为单位），在 `user` 对象的每个事件中都包含此属性 |
+| _user_first_touch_timestamp | 用户首次打开应用程序或访问站点的时间（以毫秒为单位），在 `user` 对象的每个事件中都包含此属性 |
 
 ### 事件属性
 
