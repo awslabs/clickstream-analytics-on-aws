@@ -36,7 +36,7 @@ Download your `amplifyconfiguration.json` file from your Clickstream solution we
 
 ![](../images/sdk-manual/swift_add_amplify_config_json_file.png)
 
-the json file will be as follows:
+the JSON file will be as follows:
 
 ```json
 {
@@ -56,7 +56,7 @@ the json file will be as follows:
 
 Your `appId` and `endpoint` are already set up in it, here's an explanation of each property:
 
-- **appId (Required)**: the app id of your project in control plane.
+- **appId (Required)**: the app id of your project in web console.
 - **endpoint (Required)**: the endpoint url you will upload the event to AWS server.
 - **isCompressEvents**: whether to compress event content when uploading events, default is `true`
 - **autoFlushEventsInterval**: event sending interval, the default is `10s`
@@ -70,6 +70,8 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
     ```swift
     import Clickstream
     
+    ```
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         do {
             try ClickstreamAnalytics.initSDK()
@@ -107,7 +109,7 @@ struct YourApp: App {
 }
 ```
 
-For SwiftUI, we do not yet support automatic collection of screen view events, you need to disable screen view event by setting `configuration.isTrackScreenViewEvents = false`, see the next configuration steps.
+For SwiftUI, we do not yet support automatic collection of screen view events, you need to disable screen view event by setting `configuration.isTrackScreenViewEvents = false`, see the [configuration](#configuration-update) steps.
 
 ### 4.Start  using
 
@@ -306,22 +308,22 @@ Here is an explanation of each option.
 
 | Method name                 | Parameter type | Required | Default value | Description                                                                                 |
 |-----------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| appId                       | String         | true     | --            | the app id of your application in control plane                                             |
+| appId                       | String         | true     | --            | the app id of your application in web console                                               |
 | endpoint                    | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
 | authCookie                  | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| sessionTimeoutDuration      | Int64          | false    | 1800000       | the duration for session timeout milliseconds                                               |
-| isTrackScreenViewEvents     | Bool           | false    | true          | whether auto record screen view events                                                      |
-| isTrackUserEngagementEvents | Bool           | false    | true          | whether auto record user engagement events in App                                           |
-| isLogEvents                 | Bool           | false    | false         | whether to automatically print event json for debugging events, [Learn more](#debug-events) |
+| sessionTimeoutDuration      | Int64          | false    | 1800000       | the duration for session timeout in milliseconds                                            |
+| isTrackScreenViewEvents     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
+| isTrackUserEngagementEvents | Bool           | false    | true          | whether to auto-record user engagement events                                               |
+| isLogEvents                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
 | isCompressEvents            | Bool           | false    | true          | whether to compress event content by gzip when uploading events                             |
 
 #### Debug events
 
-You can follow the steps below to view the event raw json and debug your events.
+You can follow the steps below to view the event raw JSON and debug your events.
 
 1. set the `isLogEvents` option with true in debug mode.
 2. Integrate the SDK and launch your app by Xcode, then open the log panel.
-3. Input `EventRecorder` to the filter, and you will see the json content of all events recorded by Clickstream Swift SDK.
+3. Input `EventRecorder` to the filter, and you will see the JSON content of all events recorded by Clickstream Swift SDK.
 
 ## Data format definition
 
@@ -525,7 +527,7 @@ All user attributes will be included in `user` object, and all custom and global
 | _user_id                    | Reserved for user id that is assigned by app                                                               |
 | _user_ltv_revenue           | Reserved for user lifetime value                                                                           |
 | _user_ltv_currency          | Reserved for user lifetime value currency                                                                  |
-| _user_first_touch_timestamp | Added to the user object for all events. The time (in microseconds) at which the user first opened the app |
+| _user_first_touch_timestamp | Added to the user object for all events. The time (in milliseconds) at which the user first opened the app |
 
 ### Event attributes
 
