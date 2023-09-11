@@ -12,7 +12,7 @@
  */
 
 import { ApiFail, ApiSuccess } from '../common/types';
-import { isEmpty } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupAssociatedEventsByName, groupEventByName, groupEventParameterByName, groupUserAttributeByName, isEmpty } from '../common/utils';
 import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
@@ -55,37 +55,18 @@ export class MetadataEventServ {
     }
   };
 
-  private gourpByEventName = (events: IMetadataEvent[]) => {
-    const groupEvents: IMetadataEvent[] = [];
-    for (let event of events) {
-      const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
-      if (!existedEvent) {
-        groupEvents.push(event);
-      } else {
-        if (event.associatedParameters && event.associatedParameters.length > 0) {
-          for (let parameter of event.associatedParameters) {
-            if (!existedEvent?.associatedParameters?.find((p: IMetadataEventParameter) => p.name === parameter.name)) {
-              existedEvent?.associatedParameters?.push(parameter);
-            }
-          }
-        }
-      }
-    }
-    return groupEvents;
-  };
-
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, order, attribute } = req.query;
-      let results: IMetadataEvent[] = [];
+      let events = await metadataStore.listEvents(projectId, appId, order);
+      events = groupEventByName(events);
       if (attribute && attribute === 'true') {
-        results = await metadataStore.listEventWithAttribute(projectId, appId);
-      } else {
-        results = await metadataStore.listEvents(projectId, appId, order);
+        const eventParameters = await metadataStore.listEventParameters(projectId, appId, order);
+        events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       return res.json(new ApiSuccess({
-        totalCount: results.length,
-        items: results,
+        totalCount: events.length,
+        items: events,
       }));
     } catch (error) {
       next(error);
@@ -111,45 +92,15 @@ export class MetadataEventServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      const event = results.filter((r: any) => r.prefix.startsWith('EVENT#'))[0] as IMetadataEvent;
-      event.associatedParameters = results.filter((r: any) => r.prefix.startsWith('EVENT_PARAMETER#')) as IMetadataEventParameter[];
+      const events = results.filter((r: any) => r.prefix.startsWith('EVENT#')) as IMetadataEvent[];
+      const parameters = results.filter((r: any) => r.prefix.startsWith('EVENT_PARAMETER#')) as IMetadataEventParameter[];
+      let event = groupEventByName(events)[0];
+      event = groupAssociatedEventParametersByName([event], parameters)[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
       next(error);
     }
   };
-
-  public async update(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const event: IMetadataEvent = req.body as IMetadataEvent;
-      const isEventExisted = await metadataStore.isEventExisted(event.projectId, event.appId, event.name);
-      if (!isEventExisted) {
-        return res.status(404).json(new ApiFail('Event not found'));
-      }
-      await metadataStore.updateEvent(event);
-      return res.status(201).json(new ApiSuccess(null, 'Event updated.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public async delete(req: any, res: any, next: any) {
-    try {
-      const { name } = req.params;
-      const { projectId, appId } = req.query;
-      const operator = res.get('X-Click-Stream-Operator');
-      const isEventExisted = await metadataStore.isEventExisted(projectId, appId, name);
-      if (!isEventExisted) {
-        return res.status(404).json(new ApiFail('Event not found'));
-      }
-      await metadataStore.deleteEvent(projectId, appId, name, operator);
-      return res.json(new ApiSuccess(null, 'Event deleted.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
 }
 
 export class MetadataEventParameterServ {
@@ -157,16 +108,11 @@ export class MetadataEventParameterServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, order } = req.query;
-      const results = await metadataStore.listEventParameters(projectId, appId, order);
-      const groupParameters:IMetadataEventParameter[]= [];
-      for (let result of results) {
-        if (groupParameters.filter((p:IMetadataEventParameter) => p.name === result.name).length === 0) {
-          groupParameters.push(result);
-        }
-      }
+      let results = await metadataStore.listEventParameters(projectId, appId, order);
+      results = groupEventParameterByName(results);
       return res.json(new ApiSuccess({
-        totalCount: groupParameters.length,
-        items: groupParameters,
+        totalCount: results.length,
+        items: results,
       }));
     } catch (error) {
       next(error);
@@ -192,63 +138,24 @@ export class MetadataEventParameterServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      const parameter = results.filter((r: any) => r.prefix.startsWith('EVENT_PARAMETER#'))[0] as IMetadataEventParameter;
-      const associatedEvents: IMetadataEvent[] = [];
-      for (let result of results) {
-        associatedEvents.push({
-          name: result.eventName,
-          displayName: result.eventDisplayName,
-          description: result.eventDescription,
-        } as IMetadataEvent);
-      }
-      parameter.associatedEvents = associatedEvents;
+      const parameter = groupEventParameterByName(results)[0];
+      parameter.associatedEvents = groupAssociatedEventsByName(results);
       return res.json(new ApiSuccess(parameter));
     } catch (error) {
       next(error);
     }
   };
-
-  public async update(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const eventParameter: IMetadataEventParameter = req.body as IMetadataEventParameter;
-      const isExisted = await metadataStore.isEventParameterExisted(eventParameter.projectId, eventParameter.appId, eventParameter.name);
-      if (!isExisted) {
-        return res.status(404).json(new ApiFail('Event attribute not found'));
-      }
-      await metadataStore.updateEventParameter(eventParameter);
-      return res.status(201).json(new ApiSuccess(null, 'Event attribute updated.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public async delete(req: any, res: any, next: any) {
-    try {
-      const { parameterName } = req.params;
-      const { projectId, appId } = req.query;
-      const operator = res.get('X-Click-Stream-Operator');
-      const isEventExisted = await metadataStore.isEventParameterExisted(projectId, appId, parameterName);
-      if (!isEventExisted) {
-        return res.status(404).json(new ApiFail('Event attribute not found'));
-      }
-      await metadataStore.deleteEventParameter(projectId, appId, parameterName, operator);
-      return res.json(new ApiSuccess(null, 'Event attribute deleted.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
 }
 
 export class MetadataUserAttributeServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, order } = req.query;
-      const result = await metadataStore.listUserAttributes(projectId, appId, order);
+      const results = await metadataStore.listUserAttributes(projectId, appId, order);
+      const attributes = groupUserAttributeByName(results);
       return res.json(new ApiSuccess({
-        totalCount: result.length,
-        items: result,
+        totalCount: attributes.length,
+        items: attributes,
       }));
     } catch (error) {
       next(error);
@@ -270,42 +177,12 @@ export class MetadataUserAttributeServ {
     try {
       const { name } = req.params;
       const { projectId, appId } = req.query;
-      const result = await metadataStore.getUserAttribute(projectId, appId, name);
-      if (isEmpty(result)) {
+      const results = await metadataStore.getUserAttribute(projectId, appId, name);
+      if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('User attribute not found'));
       }
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public async update(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const userAttribute: IMetadataUserAttribute = req.body as IMetadataUserAttribute;
-      const isEventExisted = await metadataStore.isUserAttributeExisted(userAttribute.projectId, userAttribute.appId, userAttribute.name);
-      if (!isEventExisted) {
-        return res.status(404).json(new ApiFail('User attribute not found'));
-      }
-      await metadataStore.updateUserAttribute(userAttribute);
-      return res.status(201).json(new ApiSuccess(null, 'User attribute updated.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public async delete(req: any, res: any, next: any) {
-    try {
-      const { name } = req.params;
-      const { projectId, appId } = req.query;
-      const operator = res.get('X-Click-Stream-Operator');
-      const isEventExisted = await metadataStore.isUserAttributeExisted(projectId, appId, name);
-      if (!isEventExisted) {
-        return res.status(404).json(new ApiFail('User attribute not found'));
-      }
-      await metadataStore.deleteUserAttribute(projectId, appId, name, operator);
-      return res.json(new ApiSuccess(null, 'User attribute deleted.'));
+      const attribute = groupUserAttributeByName(results)[0];
+      return res.json(new ApiSuccess(attribute));
     } catch (error) {
       next(error);
     }

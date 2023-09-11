@@ -16,22 +16,18 @@ import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUse
 export interface MetadataStore {
   createEvent: (event: IMetadataEvent) => Promise<string>;
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<any>;
-  updateEvent: (event: IMetadataEvent) => Promise<void>;
   listEvents: (projectId: string, appId: string, order: string) => Promise<IMetadataEvent[]>;
-  listEventWithAttribute: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
   deleteEvent: (projectId: string, appId: string, eventName: string, operator: string) => Promise<void>;
   isEventExisted: (projectId: string, appId: string, eventName: string) => Promise<boolean>;
 
   createEventParameter: (eventParameter: IMetadataEventParameter) => Promise<string>;
-  getEventParameter: (projectId: string, appId: string, parameterName: string) => Promise<any>;
-  updateEventParameter: (eventParameter: IMetadataEventParameter) => Promise<void>;
+  getEventParameter: (projectId: string, appId: string, parameterName: string) => Promise<IMetadataEventParameter[]>;
   listEventParameters: (projectId: string, appId: string, order: string, source?: string) => Promise<IMetadataEventParameter[]>;
   deleteEventParameter: (projectId: string, appId: string, eventParameterName: string, operator: string) => Promise<void>;
   isEventParameterExisted: (projectId: string, appId: string, eventParameterName: string) => Promise<boolean>;
 
   createUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<string>;
-  getUserAttribute: (projectId: string, appId: string, userAttributeName: string) => Promise<IMetadataUserAttribute | undefined>;
-  updateUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<void>;
+  getUserAttribute: (projectId: string, appId: string, userAttributeName: string) => Promise<IMetadataUserAttribute[]>;
   listUserAttributes: (projectId: string, appId: string, order: string) => Promise<IMetadataUserAttribute[]>;
   deleteUserAttribute: (projectId: string, appId: string, userAttributeName: string, operator: string) => Promise<void>;
   isUserAttributeExisted: (projectId: string, appId: string, userAttributeName: string) => Promise<boolean>;
