@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
   createEvent: (event: IMetadataEvent) => Promise<string>;
@@ -35,4 +35,7 @@ export interface MetadataStore {
   listUserAttributes: (projectId: string, appId: string, order: string) => Promise<IMetadataUserAttribute[]>;
   deleteUserAttribute: (projectId: string, appId: string, userAttributeName: string, operator: string) => Promise<void>;
   isUserAttributeExisted: (projectId: string, appId: string, userAttributeName: string) => Promise<boolean>;
+
+  getDisplay: (projectId: string, appId: string) => Promise<IMetadataDisplay[]>;
+  updateDisplay: (id: string, projectId: string, appId: string, description: string, displayName: string) => Promise<void>;
 }

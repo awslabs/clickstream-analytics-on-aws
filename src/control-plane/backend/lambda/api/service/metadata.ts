@@ -21,6 +21,16 @@ const metadataStore: MetadataStore = new DynamoDbMetadataStore();
 
 export class MetadataEventServ {
 
+  public async updateDisplay(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId, id, displayName, description } = req.body;
+      await metadataStore.updateDisplay(id, projectId, appId, description, displayName);
+      return res.json(new ApiSuccess(null, 'Updated success.'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async listPathNodes(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
@@ -43,6 +53,25 @@ export class MetadataEventServ {
     } catch (error) {
       next(error);
     }
+  };
+
+  private gourpByEventName = (events: IMetadataEvent[]) => {
+    const groupEvents: IMetadataEvent[] = [];
+    for (let event of events) {
+      const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
+      if (!existedEvent) {
+        groupEvents.push(event);
+      } else {
+        if (event.associatedParameters && event.associatedParameters.length > 0) {
+          for (let parameter of event.associatedParameters) {
+            if (!existedEvent?.associatedParameters?.find((p: IMetadataEventParameter) => p.name === parameter.name)) {
+              existedEvent?.associatedParameters?.push(parameter);
+            }
+          }
+        }
+      }
+    }
+    return groupEvents;
   };
 
   public async list(req: any, res: any, next: any) {

@@ -93,3 +93,13 @@ export interface IMetadataUserAttribute {
   readonly operator: string;
   readonly deleted: boolean;
 }
+
+export interface IMetadataDisplay {
+  readonly id: string;
+  readonly projectId: string;
+  readonly appId: string;
+
+  readonly displayName: string;
+  readonly description: string;
+  readonly updateAt: number;
+}

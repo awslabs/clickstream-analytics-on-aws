@@ -19,11 +19,11 @@ import {
   QueryCommandInput,
   ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
+import { analyticsDisplayTable, analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, query, scan } from '../../common/dynamodb-client';
 import { MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
+import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
 export class DynamoDbMetadataStore implements MetadataStore {
@@ -559,5 +559,49 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     const records = await query(input);
     return records as IMetadataUserAttribute[];
+  };
+
+  public async getDisplay(projectId: string, appId: string): Promise<IMetadataDisplay[]> {
+    const input: ScanCommandInput = {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeValues: {
+        ':projectId': projectId,
+        ':appId': appId,
+      },
+    };
+    const records = await scan(input);
+    return records as IMetadataDisplay[];
+  };
+
+  public async updateDisplay(id: string, projectId: string, appId: string, description: string, displayName: string): Promise<void> {
+    let updateExpression = 'SET #updateAt= :u, projectId= :projectId, appId= :appId';
+    let expressionAttributeValues = new Map();
+    let expressionAttributeNames = {} as KeyVal<string>;
+    expressionAttributeValues.set(':u', Date.now());
+    expressionAttributeValues.set(':projectId', projectId);
+    expressionAttributeValues.set(':appId', appId);
+    expressionAttributeNames['#updateAt'] = 'updateAt';
+    if (displayName) {
+      updateExpression = `${updateExpression}, #displayName= :n`;
+      expressionAttributeValues.set(':n', displayName);
+      expressionAttributeNames['#displayName'] = 'displayName';
+    }
+    if (description) {
+      updateExpression = `${updateExpression}, description= :d`;
+      expressionAttributeValues.set(':d', description);
+    }
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: analyticsDisplayTable,
+      Key: {
+        id: id,
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
   };
 }

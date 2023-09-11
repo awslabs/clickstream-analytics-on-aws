@@ -16,6 +16,7 @@ const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
 const userTableName = process.env.USER_TABLE_NAME;
 const analyticsMetadataTable = process.env.ANALYTICS_METADATA_TABLE_NAME;
+const analyticsDisplayTable = process.env.ANALYTICS_DISPLAY_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
 const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_SATE_MACHINE;
 const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
@@ -70,6 +71,7 @@ export {
   dictionaryTableName,
   userTableName,
   analyticsMetadataTable,
+  analyticsDisplayTable,
   stackActionStateMachineArn,
   stackWorkflowStateMachineArn,
   stackWorkflowS3Bucket,
