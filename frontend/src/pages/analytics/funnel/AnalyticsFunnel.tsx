@@ -27,8 +27,6 @@ import {
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import {
-  getMetadataEventDetails,
-  fetchEmbeddingUrl,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
@@ -363,7 +361,11 @@ const AnalyticsFunnel: React.FC = () => {
       setLoadingData(false);
       setLoadingChart(false);
       if (success) {
-        if (data.visualIds.length === 2 && data.visualIds[0].embedUrl && data.visualIds[1].embedUrl) {
+        if (
+          data.visualIds.length === 2 &&
+          data.visualIds[0].embedUrl &&
+          data.visualIds[1].embedUrl
+        ) {
           setChartEmbedUrl(data.visualIds[0].embedUrl);
           setTableEmbedUrl(data.visualIds[1].embedUrl);
         }

@@ -287,7 +287,10 @@ export const getDateRange = (dateRangeValue: DateRangePickerProps.Value) => {
   }
 };
 
-export const getDashboardCreateParameters = (pipeline: IPipeline, allowedDomain: string) => {
+export const getDashboardCreateParameters = (
+  pipeline: IPipeline,
+  allowedDomain: string
+) => {
   const redshiftOutputs = getValueFromStackOutputs(
     pipeline,
     'DataModelingRedshift',
