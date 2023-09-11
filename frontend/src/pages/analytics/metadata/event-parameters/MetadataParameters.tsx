@@ -18,7 +18,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   getMetadataParametersList,
-  updateMetadataParameter,
+  updateMetadataDisplay,
 } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
@@ -241,7 +241,13 @@ const MetadataParameters: React.FC = () => {
   ) => {
     try {
       const { success, message }: ApiResponse<null> =
-        await updateMetadataParameter(newItem as IMetadataEventParameter);
+        await updateMetadataDisplay({
+          id: `${newItem.prefix}#${newItem.name}`,
+          projectId: newItem.projectId,
+          appId: newItem.appId,
+          displayName: newItem.displayName,
+          description: newItem.description,
+        });
       if (!success) {
         throw new Error(message);
       }

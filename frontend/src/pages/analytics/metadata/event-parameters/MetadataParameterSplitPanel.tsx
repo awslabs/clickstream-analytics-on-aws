@@ -25,7 +25,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   getMetadataParametersDetails,
-  updateMetadataParameter,
+  updateMetadataDisplay,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
@@ -113,9 +113,13 @@ const MetadataParameterSplitPanel: React.FC<
     }
 
     try {
-      const { success }: ApiResponse<null> = await updateMetadataParameter(
-        parameterDetails
-      );
+      const { success }: ApiResponse<null> = await updateMetadataDisplay({
+        id: `${parameterDetails.prefix}#${parameterDetails.name}`,
+        projectId: parameterDetails.projectId,
+        appId: parameterDetails.appId,
+        displayName: parameterDetails.displayName,
+        description: parameterDetails.description,
+      });
       if (success) {
         if (type === 'displayName') {
           setPrevDisplayName(parameterDetails.displayName);

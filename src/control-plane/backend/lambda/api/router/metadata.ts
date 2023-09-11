@@ -21,6 +21,19 @@ const metadataEventServ: MetadataEventServ = new MetadataEventServ();
 const metadataEventParameterServ: MetadataEventParameterServ = new MetadataEventParameterServ();
 const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
 
+router_metadata.put(
+  '/display',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
+    body('id').custom(isValidEmpty),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataEventServ.updateDisplay(req, res, next);
+  });
+
 router_metadata.get(
   '/pathNodes',
   validate([

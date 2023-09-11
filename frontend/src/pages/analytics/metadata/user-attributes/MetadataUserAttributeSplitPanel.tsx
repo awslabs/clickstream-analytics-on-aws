@@ -22,7 +22,7 @@ import {
   TextContent,
   Textarea,
 } from '@cloudscape-design/components';
-import { updateMetadataUserAttribute } from 'apis/analytics';
+import { updateMetadataDisplay } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,9 +71,13 @@ const MetadataUserAttributeSplitPanel: React.FC<
     }
 
     try {
-      const { success }: ApiResponse<null> = await updateMetadataUserAttribute(
-        attributeDetails
-      );
+      const { success }: ApiResponse<null> = await updateMetadataDisplay({
+        id: `${attributeDetails.prefix}#${attributeDetails.name}`,
+        projectId: attributeDetails.projectId,
+        appId: attributeDetails.appId,
+        displayName: attributeDetails.displayName,
+        description: attributeDetails.description,
+      });
       if (success) {
         if (type === 'displayName') {
           setPrevDisplayName(attributeDetails.displayName);

@@ -18,7 +18,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
-  updateMetadataUserAttribute,
+  updateMetadataDisplay,
 } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
 import { t } from 'i18next';
@@ -228,7 +228,13 @@ const MetadataUserAttributes: React.FC = () => {
   ) => {
     try {
       const { success, message }: ApiResponse<null> =
-        await updateMetadataUserAttribute(newItem as IMetadataUserAttribute);
+        await updateMetadataDisplay({
+          id: `${newItem.prefix}#${newItem.name}`,
+          projectId: newItem.projectId,
+          appId: newItem.appId,
+          displayName: newItem.displayName,
+          description: newItem.description,
+        });
       if (!success) {
         throw new Error(message);
       }

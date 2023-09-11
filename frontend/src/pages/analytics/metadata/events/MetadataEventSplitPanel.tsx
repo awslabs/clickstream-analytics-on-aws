@@ -23,7 +23,7 @@ import {
   TextContent,
   Textarea,
 } from '@cloudscape-design/components';
-import { getMetadataEventDetails, updateMetadataEvent } from 'apis/analytics';
+import { getMetadataEventDetails, updateMetadataDisplay } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -116,9 +116,13 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
     }
 
     try {
-      const { success }: ApiResponse<null> = await updateMetadataEvent(
-        eventDetails
-      );
+      const { success }: ApiResponse<null> = await updateMetadataDisplay({
+        id: `${eventDetails.prefix}#${eventDetails.name}`,
+        projectId: eventDetails.projectId,
+        appId: eventDetails.appId,
+        displayName: eventDetails.displayName,
+        description: eventDetails.description,
+      });
       if (success) {
         if (type === 'displayName') {
           setPrevDisplayName(eventDetails.displayName);

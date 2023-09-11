@@ -16,7 +16,7 @@ import {
   Input,
   StatusIndicator,
 } from '@cloudscape-design/components';
-import { getMetadataEventsList, updateMetadataEvent } from 'apis/analytics';
+import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -202,9 +202,14 @@ const MetadataEvents: React.FC = () => {
     newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
   ) => {
     try {
-      const { success, message }: ApiResponse<null> = await updateMetadataEvent(
-        newItem as IMetadataEvent
-      );
+      const { success, message }: ApiResponse<null> =
+        await updateMetadataDisplay({
+          id: `${newItem.prefix}#${newItem.name}`,
+          projectId: newItem.projectId,
+          appId: newItem.appId,
+          displayName: newItem.displayName,
+          description: newItem.description,
+        });
       if (!success) {
         throw new Error(message);
       }
