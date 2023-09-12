@@ -521,6 +521,7 @@ function groupAssociatedEventsByName(parameters: IMetadataEventParameter[]): IMe
         projectId: parameter.projectId,
         appId: parameter.appId,
         name: parameter.eventName,
+        prefix: `EVENT#${parameter.projectId}#${parameter.appId}`,
       } as IMetadataEvent);
     }
   }
@@ -549,12 +550,15 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
 function groupEventByName(events: IMetadataEvent[]): IMetadataEvent[] {
   const groupEvents: IMetadataEvent[] = [];
   for (let event of events) {
-    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
+    let existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
     if (!existedEvent) {
       groupEvents.push(event);
     } else {
-      existedEvent.hasData = existedEvent.hasData || event.hasData;
-      existedEvent.platform = [...new Set(existedEvent.platform.concat(event.platform))];
+      existedEvent = {
+        ...existedEvent,
+        hasData: existedEvent.hasData || event.hasData,
+        platform: [...new Set(existedEvent.platform.concat(event.platform))],
+      };
       if (event.associatedParameters || existedEvent.associatedParameters) {
         existedEvent.associatedParameters = concatEventParameter(existedEvent.associatedParameters, event.associatedParameters);
       }
@@ -566,13 +570,16 @@ function groupEventByName(events: IMetadataEvent[]): IMetadataEvent[] {
 function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMetadataEventParameter[] {
   const groupEventParameters: IMetadataEventParameter[] = [];
   for (let parameter of parameters) {
-    const existedParameter = groupEventParameters.find((e: IMetadataEventParameter) => e.name === parameter.name);
+    let existedParameter = groupEventParameters.find((e: IMetadataEventParameter) => e.name === parameter.name);
     if (!existedParameter) {
       groupEventParameters.push(parameter);
     } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum));
+      existedParameter = {
+        ...existedParameter,
+        hasData: existedParameter.hasData || parameter.hasData,
+        platform: [...new Set(existedParameter.platform.concat(parameter.platform))],
+        valueEnum: uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum)),
+      };
     }
   }
   return groupEventParameters;
@@ -581,12 +588,15 @@ function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMeta
 function groupUserAttributeByName(attributes: IMetadataUserAttribute[]): IMetadataUserAttribute[] {
   const groupAttributes: IMetadataUserAttribute[] = [];
   for (let attribute of attributes) {
-    const existedAttribute = groupAttributes.find((e: IMetadataUserAttribute) => e.name === attribute.name);
+    let existedAttribute = groupAttributes.find((e: IMetadataUserAttribute) => e.name === attribute.name);
     if (!existedAttribute) {
       groupAttributes.push(attribute);
     } else {
-      existedAttribute.hasData = existedAttribute.hasData || attribute.hasData;
-      existedAttribute.valueEnum = uniqueParameterValues(existedAttribute.valueEnum.concat(attribute.valueEnum));
+      existedAttribute = {
+        ...existedAttribute,
+        hasData: existedAttribute.hasData || attribute.hasData,
+        valueEnum: uniqueParameterValues(existedAttribute.valueEnum.concat(attribute.valueEnum)),
+      };
     }
   }
   return groupAttributes;
@@ -599,13 +609,16 @@ function concatEventParameter(
     return concatEventParameters;
   }
   for (let parameter of parameters) {
-    const existedParameter = concatEventParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
+    let existedParameter = concatEventParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
     if (!existedParameter) {
       concatEventParameters.push(parameter);
     } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum));
+      existedParameter = {
+        ...existedParameter,
+        hasData: existedParameter.hasData || parameter.hasData,
+        platform: [...new Set(existedParameter.platform.concat(parameter.platform))],
+        valueEnum: uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum)),
+      };
     }
   }
   return concatEventParameters;

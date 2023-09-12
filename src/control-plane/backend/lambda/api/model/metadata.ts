@@ -22,12 +22,12 @@ export interface IMetadataEvent {
   readonly appId: string;
 
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
   readonly dataVolumeLastDay: number;
-  hasData: boolean;
-  platform: MetadataPlatform[];
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
   associatedParameters? : IMetadataEventParameter[];
 
   readonly createAt: number;
@@ -50,19 +50,17 @@ export interface IMetadataEventParameter {
   readonly appId: string;
 
   readonly eventName: string;
-  readonly eventDisplayName: string;
-  readonly eventDescription: string;
 
   readonly parameterId: string;
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
-  hasData: boolean;
-  platform: MetadataPlatform[];
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  valueEnum: IMetadataAttributeValue[];
+  readonly valueEnum: IMetadataAttributeValue[];
   associatedEvents? : IMetadataEvent[];
 
   readonly createAt: number;
@@ -81,12 +79,12 @@ export interface IMetadataUserAttribute {
 
   readonly attributeId: string;
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
-  hasData: boolean;
+  readonly hasData: boolean;
   readonly valueType: MetadataValueType;
-  valueEnum: IMetadataAttributeValue[];
+  readonly valueEnum: IMetadataAttributeValue[];
 
   readonly createAt: number;
   readonly updateAt: number;

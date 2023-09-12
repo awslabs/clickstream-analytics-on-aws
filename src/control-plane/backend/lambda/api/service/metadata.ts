@@ -11,20 +11,25 @@
  *  and limitations under the License.
  */
 
+import { CMetadataDisplay } from './display';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { groupAssociatedEventParametersByName, groupAssociatedEventsByName, groupEventByName, groupEventParameterByName, groupUserAttributeByName, isEmpty } from '../common/utils';
-import { IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
 const metadataStore: MetadataStore = new DynamoDbMetadataStore();
+const metadataDisplay: CMetadataDisplay = new CMetadataDisplay();
 
 export class MetadataEventServ {
 
   public async updateDisplay(req: any, res: any, next: any) {
     try {
       const { projectId, appId, id, displayName, description } = req.body;
-      await metadataStore.updateDisplay(id, projectId, appId, description, displayName);
+      const result = await metadataDisplay.update({ id, projectId, appId, description, displayName } as IMetadataDisplay);
+      if (!result) {
+        res.json(new ApiSuccess(null, 'Updated failed.'));
+      }
       return res.json(new ApiSuccess(null, 'Updated success.'));
     } catch (error) {
       next(error);
@@ -64,6 +69,7 @@ export class MetadataEventServ {
         const eventParameters = await metadataStore.listEventParameters(projectId, appId, order);
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
+      events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
       return res.json(new ApiSuccess({
         totalCount: events.length,
         items: events,
@@ -96,6 +102,7 @@ export class MetadataEventServ {
       const parameters = results.filter((r: any) => r.prefix.startsWith('EVENT_PARAMETER#')) as IMetadataEventParameter[];
       let event = groupEventByName(events)[0];
       event = groupAssociatedEventParametersByName([event], parameters)[0];
+      event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
       next(error);
@@ -110,6 +117,7 @@ export class MetadataEventParameterServ {
       const { projectId, appId, order } = req.query;
       let results = await metadataStore.listEventParameters(projectId, appId, order);
       results = groupEventParameterByName(results);
+      results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,
         items: results,
@@ -138,8 +146,9 @@ export class MetadataEventParameterServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      const parameter = groupEventParameterByName(results)[0];
+      let parameter = groupEventParameterByName(results)[0];
       parameter.associatedEvents = groupAssociatedEventsByName(results);
+      parameter = (await metadataDisplay.patch(projectId, appId, [parameter]) as IMetadataEventParameter[])[0];
       return res.json(new ApiSuccess(parameter));
     } catch (error) {
       next(error);
@@ -152,7 +161,8 @@ export class MetadataUserAttributeServ {
     try {
       const { projectId, appId, order } = req.query;
       const results = await metadataStore.listUserAttributes(projectId, appId, order);
-      const attributes = groupUserAttributeByName(results);
+      let attributes = groupUserAttributeByName(results);
+      attributes = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
         items: attributes,
@@ -181,7 +191,8 @@ export class MetadataUserAttributeServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('User attribute not found'));
       }
-      const attribute = groupUserAttributeByName(results)[0];
+      let attribute = groupUserAttributeByName(results)[0];
+      attribute = (await metadataDisplay.patch(projectId, appId, [attribute]) as IMetadataUserAttribute[])[0];
       return res.json(new ApiSuccess(attribute));
     } catch (error) {
       next(error);

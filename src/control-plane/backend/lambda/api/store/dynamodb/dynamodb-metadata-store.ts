@@ -176,8 +176,6 @@ export class DynamoDbMetadataStore implements MetadataStore {
         projectId: eventParameter.projectId,
         appId: eventParameter.appId,
         eventName: eventParameter.eventName,
-        eventDisplayName: eventParameter.eventDisplayName ?? '',
-        eventDescription: eventParameter.eventDescription ?? '',
         parameterId: parameterId,
         name: eventParameter.name,
         displayName: eventParameter.displayName ?? '',
@@ -389,8 +387,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
 
   public async getDisplay(projectId: string, appId: string): Promise<IMetadataDisplay[]> {
     const input: ScanCommandInput = {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      TableName: analyticsDisplayTable,
       FilterExpression: 'projectId = :projectId AND appId = :appId',
       ExpressionAttributeValues: {
         ':projectId': projectId,
