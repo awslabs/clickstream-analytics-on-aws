@@ -10,7 +10,7 @@ The SDK is based on the Amplify for Swift SDK Core Library and developed accordi
 
 Clickstream Swift SDK supports iOS 13+.
 
-Clickstream requires Xcode 13.4 or higher to build.
+Clickstream Swift SDK requires Xcode 13.4 or higher to build.
 
 ## Integrate SDK
 
@@ -70,8 +70,6 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
     ```swift
     import Clickstream
     
-    ```
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         do {
             try ClickstreamAnalytics.initSDK()
@@ -345,7 +343,7 @@ Clickstream Swift SDK supports the following data types:
 
 2. Do not use `_` as prefix to naming event name and attribute name, `_` prefix is the reserved from Clickstream Analytics.
 
-3. The event name and attribute name are in case-sensitive, So the event `Add_to_cart` and `add_to_cart` will be Recognized as two different event.
+3. The event name and attribute name are in case-sensitive, So the event `Add_to_cart` and `add_to_cart` will be recognized as two different event.
 
 ### Event and Attribute Limitation
 
@@ -476,13 +474,13 @@ We define that users leave the screen in the following situations.
     },
     "attributes": {
         "event_category": "recommended",
-		    "currency": "CNY",
+        "currency": "CNY",
         "_session_duration": 15349,
         "_session_id": "0E6614B7-20230526-062238846",
         "_session_number": 3,
         "_session_start_timestamp": 1685082158847,
         "_screen_name": "ProductDetailViewController",
-		    "_screen_unique_id": "5260751568"
+        "_screen_unique_id": "5260751568"
     }
 }
 ```
