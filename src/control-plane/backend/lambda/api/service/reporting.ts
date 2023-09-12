@@ -730,7 +730,6 @@ export class ReportingServ {
       const projectId = req.body.projectId;
       const appId = req.body.appId;
       const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
-<<<<<<< HEAD
       const region = dashboardCreateParameters.region;
       const dataApiRole = dashboardCreateParameters.redshift.dataApiRole;
       const redshiftDataClient = sdkClient.RedshiftDataClient(
@@ -740,28 +739,9 @@ export class ReportingServ {
         dataApiRole,
       );
       const quickSight = sdkClient.QuickSight({ region: region });
-=======
 
-      const stsClient = new STSClient({
-        region,
-        ...aws_sdk_client_common_config,
-      });
-      const credentials = await getCredentialsFromRole(stsClient, dataApiRole);
-      const redshiftDataClient = new RedshiftDataClient({
-        region,
-        credentials: {
-          accessKeyId: credentials?.AccessKeyId!,
-          secretAccessKey: credentials?.SecretAccessKey!,
-          sessionToken: credentials?.SessionToken,
-        },
-      });
-
-
-      if (cachedContents === undefined) {
-        cachedContents = new CachedContents();
-      }
-      const cachedObjs = await cachedContents.getCachedObjects(projectId, region);
->>>>>>> bb6e5699 (create quicksight dataset useing cutom sql)
+      //warmup principal
+      await getClickstreamUserArn();
 
       //warm up redshift serverless
       if (dashboardCreateParameters.redshift.newServerless) {
@@ -808,7 +788,6 @@ export class ReportingServ {
     try {
       logger.info('start to clean QuickSight temp resources');
       logger.info(`request: ${JSON.stringify(req.body)}`);
-
 
       const deletedDashBoards: string[] = [];
       const deletedAnalyses: string[] = [];
