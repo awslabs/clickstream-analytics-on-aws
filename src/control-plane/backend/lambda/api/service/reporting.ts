@@ -567,6 +567,7 @@ export class ReportingServ {
 
     const dashboard = applyChangeToDashboard({
       action: 'ADD',
+      requestAction: query.action,
       visuals: visualPropsArray,
       dashboardDef: dashboardDef as DashboardVersionDefinition,
     });

@@ -47,6 +47,7 @@ export interface VisualProps {
 
 export interface DashboardAction {
   readonly action: 'ADD' | 'UPDATE' | 'DELETE';
+  readonly requestAction: ExploreRequestAction;
   readonly visuals: VisualProps[];
   readonly dashboardDef: DashboardVersionDefinition;
 }
@@ -334,7 +335,7 @@ export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsA
 export function applyChangeToDashboard(dashboardAction: DashboardAction) : DashboardVersionDefinition {
   try {
     if (dashboardAction.action === 'ADD') {
-      return addVisuals(dashboardAction.visuals, dashboardAction.dashboardDef);
+      return addVisuals(dashboardAction.visuals, dashboardAction.dashboardDef, dashboardAction.requestAction);
     }
     return dashboardAction.dashboardDef;
   } catch (err) {
@@ -343,7 +344,7 @@ export function applyChangeToDashboard(dashboardAction: DashboardAction) : Dashb
   }
 };
 
-function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefinition) : DashboardVersionDefinition {
+function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefinition, requestAction: string) : DashboardVersionDefinition {
 
   // add visuals to sheet
   for (const visual of visuals) {
@@ -363,7 +364,7 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
 
       //add filter
       const controls = sheet.FilterControls!;
-      if (visual.filterControl) {
+      if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
         controls.push(visual.filterControl);
       }
 
@@ -375,7 +376,7 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
 
       //add dataset configuration
       const filterGroups = dashboardDef.FilterGroups!;
-      if (visual.filterGroup) {
+      if (visual.filterGroup && requestAction === ExploreRequestAction.PUBLISH) {
         filterGroups.push(visual.filterGroup);
       }
 
@@ -400,7 +401,7 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
         visualControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan + layoutControl.RowSpan;
       }
 
-      if (visual.filterControl) {
+      if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
         const firstObj = findFirstChild(visual.filterControl);
         layoutControl.ElementId = firstObj.FilterControlId;
         elements.push(layoutControl);
