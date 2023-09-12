@@ -524,10 +524,6 @@ export function buildFunnelDataSql(sqlParameters: SQLParameters) : string {
       ${sqlParameters.groupColumn}
   `);
 
-  sql = `
-   ${sql}
-   `;
-
   return format(sql, {
     language: 'postgresql',
   });
