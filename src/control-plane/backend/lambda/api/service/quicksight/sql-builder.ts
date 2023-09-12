@@ -490,7 +490,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
-export function buildFunnelDataSql(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildFunnelDataSql(sqlParameters: SQLParameters) : string {
 
   let eventNames: string[] = [];
   for (const e of sqlParameters.eventAndConditions!) {
@@ -524,16 +524,12 @@ export function buildFunnelDataSql(schema: string, name: string, sqlParameters: 
       ${sqlParameters.groupColumn}
   `);
 
-  sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
-   ${sql}
-   `;
-
   return format(sql, {
     language: 'postgresql',
   });
 };
 
-export function buildFunnelView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildFunnelView(sqlParameters: SQLParameters) : string {
 
   let resultSql = '';
   let eventNames: string[] = [];
@@ -594,7 +590,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
     index += 1;
   }
 
-  let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+  let sql = `
    ${baseSQL}
    ${resultSql}
    `;
@@ -603,7 +599,7 @@ export function buildFunnelView(schema: string, name: string, sqlParameters: SQL
   });
 }
 
-export function buildEventAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
 
   let resultSql = '';
   let eventNames: string[] = [];
@@ -652,7 +648,7 @@ export function buildEventAnalysisView(schema: string, name: string, sqlParamete
   from final_table where ${prefix}_id is not null
   `);
 
-  let sql = `CREATE OR REPLACE VIEW ${schema}.${name} AS
+  let sql = `
    ${baseSQL}
    ${resultSql}
    `;
@@ -661,7 +657,7 @@ export function buildEventAnalysisView(schema: string, name: string, sqlParamete
   });
 }
 
-export function buildEventPathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames: string[] = [];
   for (const e of sqlParameters.eventAndConditions!) {
@@ -844,7 +840,6 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
   }
 
   const sql = `
-  CREATE OR REPLACE VIEW ${schema}.${name} AS
     ${_buildBaseTableSql(eventNames, sqlParameters)}
     ${midTableSql}
     ${dataTableSql}
@@ -854,7 +849,7 @@ export function buildEventPathAnalysisView(schema: string, name: string, sqlPara
   });
 }
 
-export function buildNodePathAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string {
 
   let midTableSql = '';
   let dataTableSql = '';
@@ -1047,7 +1042,6 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
   }
 
   const sql = `
-  CREATE OR REPLACE VIEW ${schema}.${name} AS
     ${_buildBaseTableSqlForPathAnalysis(sqlParameters)}
     ${midTableSql}
     ${dataTableSql}
@@ -1058,7 +1052,7 @@ export function buildNodePathAnalysisView(schema: string, name: string, sqlParam
   });
 }
 
-export function buildRetentionAnalysisView(schema: string, name: string, sqlParameters: SQLParameters) : string {
+export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames: string[] = [];
   for (const e of sqlParameters.eventAndConditions!) {
@@ -1164,7 +1158,6 @@ export function buildRetentionAnalysisView(schema: string, name: string, sqlPara
   )`);
 
   const sql = `
-  CREATE OR REPLACE VIEW ${schema}.${name} AS
     ${_buildBaseTableSql(eventNames, sqlParameters)}
     data as (
       select 
